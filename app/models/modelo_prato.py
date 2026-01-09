@@ -23,6 +23,9 @@ class Prato(db.Model):
     data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
     data_atualizacao = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
+    # Multi-Tenancy
+    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurante.id'), nullable=False)
+    
     # Relações
     insumos = db.relationship('PratoInsumo', back_populates='prato', cascade='all, delete-orphan')
     registros_desperdicio = db.relationship('RegistroDesperdicio', back_populates='prato')

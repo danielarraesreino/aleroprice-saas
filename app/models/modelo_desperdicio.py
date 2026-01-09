@@ -14,6 +14,9 @@ class CategoriaDesperdicio(db.Model):
     cor = db.Column(db.String(7))  # Para uso em gráficos (ex: #FF0000)
     ativo = db.Column(db.Boolean, default=True)
     
+    # Multi-Tenancy
+    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurante.id'), nullable=False)
+    
     # Relações
     registros = db.relationship('RegistroDesperdicio', back_populates='categoria')
     metas = db.relationship('MetaDesperdicio', back_populates='categoria')
@@ -48,6 +51,9 @@ class RegistroDesperdicio(db.Model):
     local = db.Column(db.String(100))  # Local onde ocorreu (cozinha, salão, estoque, etc)
     descricao = db.Column(db.Text)  # Detalhes adicionais
     acoes_corretivas = db.Column(db.Text)  # Ações tomadas para evitar recorrência
+    
+    # Multi-Tenancy
+    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurante.id'), nullable=False)
     
     # Restrições
     __table_args__ = (
@@ -120,6 +126,9 @@ class MetaDesperdicio(db.Model):
     ativo = db.Column(db.Boolean, default=True)
     acoes_propostas = db.Column(db.Text)  # Ações a serem implementadas
     responsavel = db.Column(db.String(100))  # Pessoa responsavel pela meta
+    
+    # Multi-Tenancy
+    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurante.id'), nullable=False)
     
     # Relações
     categoria = db.relationship('CategoriaDesperdicio', back_populates='metas')

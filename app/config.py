@@ -36,6 +36,11 @@ class ProductionConfig(Config):
     # Use variáveis de ambiente em produção
     SECRET_KEY = os.environ.get('SECRET_KEY')
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+    # Prevent SQLite in production to avoid Read-Only FS errors
+    if not SQLALCHEMY_DATABASE_URI:
+        # Fallback to in-memory SQLite if no DB provided (just to allow boot, data will be lost)
+        # Or better: don't set a default that writes to disk
+        SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     if SQLALCHEMY_DATABASE_URI and SQLALCHEMY_DATABASE_URI.startswith('postgres://'):
         SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace('postgres://', 'postgresql://', 1)
 

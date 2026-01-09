@@ -17,6 +17,9 @@ class EstoqueMovimentacao(db.Model):
     valor_unitario = db.Column(db.Numeric(10, 2))  # Valor unitário na movimentação
     observacao = db.Column(db.Text)
     
+    # Multi-Tenancy
+    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurante.id'), nullable=False)
+    
     # Relações
     produto = db.relationship('Produto', back_populates='movimentacoes')
     
@@ -42,6 +45,10 @@ class EstoqueMovimentacao(db.Model):
         """Método de classe para registrar uma entrada de estoque"""
         from app.models.modelo_produto import Produto
         
+        produto = Produto.query.get(produto_id)
+        if not produto:
+             raise ValueError(f'Produto com ID {produto_id} não encontrado') # Deveria filtrar por tenant? O caller já filtra.
+        
         movimento = cls(
             produto_id=produto_id,
             quantidade=quantidade,
@@ -50,15 +57,14 @@ class EstoqueMovimentacao(db.Model):
             referencia=referencia,
             ref_id=ref_id,
             valor_unitario=valor_unitario,
-            observacao=observacao
+            observacao=observacao,
+            restaurant_id=produto.restaurant_id # HERANÇA DE TENANT
         )
         
         # Atualiza o estoque atual do produto
-        produto = Produto.query.get(produto_id)
-        if produto:
-            produto.estoque_atual += float(quantidade)
-            if valor_unitario is not None:
-                produto.preco_unitario = valor_unitario
+        produto.estoque_atual += float(quantidade)
+        if valor_unitario is not None:
+            produto.preco_unitario = valor_unitario
         
         db.session.add(movimento)
         db.session.commit()
@@ -84,7 +90,8 @@ class EstoqueMovimentacao(db.Model):
             referencia=referencia,
             ref_id=ref_id,
             valor_unitario=produto.preco_unitario,  # Usa o preço atual do produto
-            observacao=observacao
+            observacao=observacao,
+            restaurant_id=produto.restaurant_id # HERANÇA DE TENANT
         )
         
         # Atualiza o estoque atual do produto

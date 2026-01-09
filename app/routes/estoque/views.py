@@ -1,27 +1,33 @@
-from flask import render_template, redirect, url_for, flash, request, jsonify, current_app
+from flask import render_template, redirect, url_for, flash, request, jsonify, current_app, abort
 from app.extensions import db
 from app.models.modelo_estoque import EstoqueMovimentacao
 from app.models.modelo_produto import Produto
 from app.models.modelo_fornecedor import Fornecedor
 from app.routes.estoque import bp
 from datetime import datetime, timedelta
+from app.utils.tenant import get_current_restaurant_id
 import pandas as pd
 import io
 
 @bp.route('/')
 @bp.route('/index')
 def index():
-    """Lista movimentau00e7u00f5es de estoque"""
+    """Lista movimentações de estoque"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        flash('Erro: Restaurante não identificado.', 'danger')
+        return redirect(url_for('main.index'))
+        
     page = request.args.get('page', 1, type=int)
     
-    # Paru00e2metros de filtro
+    # Parâmetros de filtro
     produto_id = request.args.get('produto_id', type=int)
-    tipo = request.args.get('tipo')  # 'entrada' ou 'sau00edda'
+    tipo = request.args.get('tipo')  # 'entrada' ou 'saída'
     data_inicio = request.args.get('data_inicio')
     data_fim = request.args.get('data_fim')
     
-    # Construir a query base
-    query = EstoqueMovimentacao.query
+    # Construir a query base com filtro de tenant
+    query = EstoqueMovimentacao.query.filter_by(restaurant_id=restaurant_id)
     
     # Aplicar filtros
     if produto_id:
@@ -41,7 +47,7 @@ def index():
         page=page, per_page=20, error_out=False)
     
     # Obter lista de produtos para filtro
-    produtos = Produto.query.order_by(Produto.nome).all()
+    produtos = Produto.query.filter_by(restaurant_id=restaurant_id).order_by(Produto.nome).all()
     
     return render_template('estoque/index.html', 
                           movimentacoes=movimentacoes, 
@@ -50,6 +56,10 @@ def index():
 @bp.route('/entrada', methods=['GET', 'POST'])
 def entrada():
     """Registra entrada manual de estoque"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        abort(403)
+
     if request.method == 'POST':
         produto_id = request.form.get('produto_id', type=int)
         quantidade = request.form.get('quantidade', type=float)
@@ -58,10 +68,16 @@ def entrada():
         observacao = request.form.get('observacao')
         
         if not produto_id or not quantidade or quantidade <= 0:
-            flash('Produto e quantidade vu00e1lida su00e3o obrigatu00f3rios!', 'danger')
-            produtos = Produto.query.order_by(Produto.nome).all()
+            flash('Produto e quantidade válida são obrigatórios!', 'danger')
+            produtos = Produto.query.filter_by(restaurant_id=restaurant_id).order_by(Produto.nome).all()
             return render_template('estoque/entrada.html', produtos=produtos)
         
+        # Verificar se produto pertence ao tenant (defesa em profundidade)
+        produto_check = Produto.query.filter_by(id=produto_id, restaurant_id=restaurant_id).first()
+        if not produto_check:
+             flash('Produto inválido.', 'danger')
+             return redirect(url_for('estoque.index'))
+
         # Registrar movimento de entrada
         try:
             movimento = EstoqueMovimentacao.registrar_entrada(
@@ -72,21 +88,25 @@ def entrada():
                 observacao=observacao
             )
             
-            produto = Produto.query.get(produto_id)
+            produto = Produto.query.get(produto_id) # Já validado tenant acima
             flash(f'Entrada registrada com sucesso! Novo estoque: {produto.estoque_atual} {produto.unidade_medida}', 'success')
             return redirect(url_for('estoque.index'))
             
         except ValueError as e:
             flash(f'Erro ao registrar entrada: {str(e)}', 'danger')
-            produtos = Produto.query.order_by(Produto.nome).all()
+            produtos = Produto.query.filter_by(restaurant_id=restaurant_id).order_by(Produto.nome).all()
             return render_template('estoque/entrada.html', produtos=produtos)
     
-    produtos = Produto.query.order_by(Produto.nome).all()
+    produtos = Produto.query.filter_by(restaurant_id=restaurant_id).order_by(Produto.nome).all()
     return render_template('estoque/entrada.html', produtos=produtos)
 
 @bp.route('/saida', methods=['GET', 'POST'])
 def saida():
-    """Registra sau00edda manual de estoque"""
+    """Registra saída manual de estoque"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        abort(403)
+
     if request.method == 'POST':
         produto_id = request.form.get('produto_id', type=int)
         quantidade = request.form.get('quantidade', type=float)
@@ -94,39 +114,50 @@ def saida():
         observacao = request.form.get('observacao')
         
         if not produto_id or not quantidade or quantidade <= 0:
-            flash('Produto e quantidade vu00e1lida su00e3o obrigatu00f3rios!', 'danger')
-            produtos = Produto.query.order_by(Produto.nome).all()
+            flash('Produto e quantidade válida são obrigatórios!', 'danger')
+            produtos = Produto.query.filter_by(restaurant_id=restaurant_id).order_by(Produto.nome).all()
             return render_template('estoque/saida.html', produtos=produtos)
         
-        # Registrar movimento de sau00edda
+        # Verificar se produto pertence ao tenant
+        produto_check = Produto.query.filter_by(id=produto_id, restaurant_id=restaurant_id).first()
+        if not produto_check:
+             flash('Produto inválido.', 'danger')
+             return redirect(url_for('estoque.index'))
+
+        # Registrar movimento de saída
         try:
             movimento = EstoqueMovimentacao.registrar_saida(
                 produto_id=produto_id,
                 quantidade=quantidade,
-                referencia=referencia or 'Sau00edda Manual',
+                referencia=referencia or 'Saída Manual',
                 observacao=observacao
             )
             
             produto = Produto.query.get(produto_id)
-            flash(f'Sau00edda registrada com sucesso! Novo estoque: {produto.estoque_atual} {produto.unidade_medida}', 'success')
+            flash(f'Saída registrada com sucesso! Novo estoque: {produto.estoque_atual} {produto.unidade_medida}', 'success')
             return redirect(url_for('estoque.index'))
             
         except ValueError as e:
-            flash(f'Erro ao registrar sau00edda: {str(e)}', 'danger')
-            produtos = Produto.query.order_by(Produto.nome).all()
+            flash(f'Erro ao registrar saída: {str(e)}', 'danger')
+            produtos = Produto.query.filter_by(restaurant_id=restaurant_id).order_by(Produto.nome).all()
             return render_template('estoque/saida.html', produtos=produtos)
     
-    produtos = Produto.query.order_by(Produto.nome).all()
+    produtos = Produto.query.filter_by(restaurant_id=restaurant_id).order_by(Produto.nome).all()
     return render_template('estoque/saida.html', produtos=produtos)
 
 @bp.route('/detalhe_produto/<int:id>')
 def detalhe_produto(id):
     """Mostra detalhes do estoque de um produto"""
-    produto = Produto.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    produto = Produto.query.filter_by(id=id, restaurant_id=restaurant_id).first_or_404()
     
-    # Buscar movimentau00e7u00f5es deste produto
+    # Buscar movimentações deste produto (garantindo tenant através do produto, mas filtro explicito também é bom)
     page = request.args.get('page', 1, type=int)
-    movimentacoes = EstoqueMovimentacao.query.filter_by(produto_id=id).order_by(
+    # Movimentações devem ter restaurant_id igual ao do produto
+    movimentacoes = EstoqueMovimentacao.query.filter_by(
+        produto_id=id, 
+        restaurant_id=restaurant_id
+    ).order_by(
         EstoqueMovimentacao.data_movimentacao.desc()
     ).paginate(page=page, per_page=10, error_out=False)
     
@@ -136,9 +167,13 @@ def detalhe_produto(id):
 
 @bp.route('/relatorio')
 def relatorio():
-    """Relatu00f3rio de estoque atual"""
+    """Relatório de estoque atual"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        abort(403)
+        
     # Obter todos os produtos com seu valor em estoque
-    produtos = Produto.query.order_by(Produto.categoria, Produto.nome).all()
+    produtos = Produto.query.filter_by(restaurant_id=restaurant_id).order_by(Produto.categoria, Produto.nome).all()
     
     # Calcular totais
     total_valor_estoque = sum(p.calcular_valor_em_estoque() for p in produtos)
@@ -168,23 +203,27 @@ def relatorio():
 
 @bp.route('/exportar_relatorio')
 def exportar_relatorio():
-    """Exporta relatu00f3rio de estoque para CSV"""
+    """Exporta relatório de estoque para CSV"""
     from flask import Response
     
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        abort(403)
+    
     # Obter todos os produtos
-    produtos = Produto.query.order_by(Produto.categoria, Produto.nome).all()
+    produtos = Produto.query.filter_by(restaurant_id=restaurant_id).order_by(Produto.categoria, Produto.nome).all()
     
     # Criar DataFrame
     data = [
         {
             'ID': p.id,
-            'Cu00f3digo': p.codigo,
+            'Código': p.codigo,
             'Nome': p.nome,
             'Categoria': p.categoria,
-            'Unidade': p.unidade,
+            'Unidade': p.unidade_medida if hasattr(p, 'unidade_medida') else p.unidade, # Verificar nome do campo
             'Estoque Atual': p.estoque_atual,
-            'Estoque Mu00ednimo': p.estoque_minimo,
-            'Preu00e7o Unitu00e1rio': float(p.preco_unitario),
+            'Estoque Mínimo': p.estoque_minimo,
+            'Preço Unitário': float(p.preco_unitario),
             'Valor em Estoque': p.calcular_valor_em_estoque(),
             'Fornecedor': p.fornecedor.razao_social if p.fornecedor else 'N/A',
             'Status': 'Em Falta' if p.esta_em_falta() else 'Normal'
@@ -208,12 +247,22 @@ def exportar_relatorio():
 # API Endpoints
 @bp.route('/api/movimentacoes/<int:produto_id>')
 def api_movimentacoes(produto_id):
-    """API para obter movimentau00e7u00f5es de um produto (JSON)"""
+    """API para obter movimentações de um produto (JSON)"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        return jsonify([])
+        
+    # Verificar se produto pertence ao tenant
+    produto_check = Produto.query.filter_by(id=produto_id, restaurant_id=restaurant_id).first()
+    if not produto_check:
+        return jsonify([])
+
     # Limite opcional
     limite = request.args.get('limite', type=int, default=100)
     
     movimentacoes = EstoqueMovimentacao.query.filter_by(
-        produto_id=produto_id
+        produto_id=produto_id,
+        restaurant_id=restaurant_id
     ).order_by(
         EstoqueMovimentacao.data_movimentacao.desc()
     ).limit(limite).all()
@@ -232,8 +281,13 @@ def api_movimentacoes(produto_id):
 
 @bp.route('/api/em_falta')
 def api_em_falta():
-    """API para listar produtos com estoque abaixo do mu00ednimo (JSON)"""
+    """API para listar produtos com estoque abaixo do mínimo (JSON)"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        return jsonify([])
+        
     produtos = Produto.query.filter(
+        Produto.restaurant_id == restaurant_id,
         Produto.estoque_atual < Produto.estoque_minimo
     ).all()
     
@@ -243,7 +297,7 @@ def api_em_falta():
             'nome': p.nome,
             'estoque_atual': p.estoque_atual,
             'estoque_minimo': p.estoque_minimo,
-            'unidade': p.unidade_medida,
+            'unidade': p.unidade_medida if hasattr(p, 'unidade_medida') else p.unidade,
             'percentual': (p.estoque_atual / p.estoque_minimo * 100) if p.estoque_minimo > 0 else 0
         } for p in produtos
     ])
@@ -251,6 +305,10 @@ def api_em_falta():
 @bp.route('/novo_produto', methods=['GET', 'POST'])
 def novo_produto():
     """Cria um novo produto no estoque"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        abort(403)
+        
     if request.method == 'POST':
         # Obter dados do formulário
         nome = request.form.get('nome')
@@ -269,8 +327,8 @@ def novo_produto():
             flash('Nome e Unidade são obrigatórios!', 'danger')
             return redirect(url_for('estoque.novo_produto'))
         
-        # Verificar se código já existe (se informado)
-        if codigo and Produto.query.filter_by(codigo=codigo).first():
+        # Verificar se código já existe (se informado) e pertence ao tenant
+        if codigo and Produto.query.filter_by(codigo=codigo, restaurant_id=restaurant_id).first():
             flash('Código de produto já cadastrado!', 'danger')
             return redirect(url_for('estoque.novo_produto'))
         
@@ -279,13 +337,14 @@ def novo_produto():
             nome=nome,
             codigo=codigo,
             descricao=descricao,
-            unidade=unidade,
+            unidade_medida=unidade, # Ajustado nome do campo
             preco_unitario=preco_unitario,
             estoque_minimo=estoque_minimo,
             estoque_atual=estoque_atual,
             categoria=categoria,
             marca=marca,
-            fornecedor_id=fornecedor_id
+            fornecedor_id=fornecedor_id,
+            restaurant_id=restaurant_id
         )
         
         db.session.add(produto)
@@ -295,5 +354,5 @@ def novo_produto():
         return redirect(url_for('estoque.index'))
     
     # Obter lista de fornecedores para o formulário
-    fornecedores = Fornecedor.query.order_by(Fornecedor.razao_social).all()
+    fornecedores = Fornecedor.query.filter_by(restaurant_id=restaurant_id).order_by(Fornecedor.razao_social).all()
     return render_template('estoque/novo_produto.html', fornecedores=fornecedores)

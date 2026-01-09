@@ -1,7 +1,11 @@
 from app import create_app, db
 from flask_migrate import upgrade
 
-app = create_app()
+import os
+
+# Detect Vercel environment
+config_name = 'production' if os.environ.get('VERCEL') or os.environ.get('RAILWAY_ENVIRONMENT') else 'default'
+app = create_app(config_name)
 
 if __name__ == '__main__':
     with app.app_context():

@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, request, jsonify, current_app, Response
+from flask import render_template, redirect, url_for, flash, request, jsonify, current_app, Response, abort
 from app.extensions import db
 from sqlalchemy import func, and_, or_
 from app.models.modelo_previsao import HistoricoVendas, PrevisaoDemanda, FatorSazonalidade
@@ -6,6 +6,7 @@ from app.models.modelo_cardapio import CardapioItem, Cardapio, CardapioSecao
 from app.models.modelo_prato import Prato
 from app.routes.previsao import bp
 from datetime import datetime, date, timedelta
+from app.utils.tenant import get_current_restaurant_id
 import pandas as pd
 import numpy as np
 import io
@@ -75,21 +76,30 @@ def calcular_regressao_linear(dados, dias_projecao=7):
 @bp.route('/index')
 def index():
     """Página principal do módulo de previsão de demanda"""
-    # Obter estatísticas básicas
-    total_registros = HistoricoVendas.query.count()
-    total_previsoes = PrevisaoDemanda.query.count()
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        flash('Erro: Restaurante não identificado.', 'danger')
+        return redirect(url_for('main.index'))
+
+    # Obter estatísticas básicas (filtradas por tenant)
+    total_registros = HistoricoVendas.query.filter_by(restaurant_id=restaurant_id).count()
+    total_previsoes = PrevisaoDemanda.query.filter_by(restaurant_id=restaurant_id).count()
     
     # Verificar se há registros suficientes para previsões
     hoje = date.today()
     um_mes_atras = hoje - timedelta(days=30)
-    registros_recentes = HistoricoVendas.query.filter(HistoricoVendas.data >= um_mes_atras).count()
+    registros_recentes = HistoricoVendas.query.filter(
+        HistoricoVendas.data >= um_mes_atras,
+        HistoricoVendas.restaurant_id == restaurant_id
+    ).count()
     
     # Dados para gráfico de vendas recentes
     vendas_ultimos_dias = db.session.query(
         HistoricoVendas.data, 
         func.sum(HistoricoVendas.quantidade).label('total_vendas')
     ).filter(
-        HistoricoVendas.data >= hoje - timedelta(days=30)
+        HistoricoVendas.data >= hoje - timedelta(days=30),
+        HistoricoVendas.restaurant_id == restaurant_id
     ).group_by(HistoricoVendas.data).order_by(HistoricoVendas.data).all()
     
     dados_grafico = {
@@ -97,16 +107,21 @@ def index():
         'valores': [float(venda.total_vendas) for venda in vendas_ultimos_dias]
     }
     
-    # Itens mais vendidos
+    # Itens mais vendidos (Top Pratos)
     top_pratos = db.session.query(
         Prato.nome,
         func.sum(HistoricoVendas.quantidade).label('total')
     ).join(
         HistoricoVendas, HistoricoVendas.prato_id == Prato.id
     ).filter(
-        HistoricoVendas.data >= um_mes_atras
+        HistoricoVendas.data >= um_mes_atras,
+        HistoricoVendas.restaurant_id == restaurant_id
     ).group_by(Prato.id).order_by(func.sum(HistoricoVendas.quantidade).desc()).limit(5).all()
     
+    # Top Itens de Cardápio
+    # Nota: Precisamos filtrar também CardapioItem e Prato pelo restaurant_id para garantir consistência, 
+    # embora o HistoricoVendas.restaurant_id já devesse ser suficiente.
+    # Mas como o join é feito, é bom garantir.
     top_itens_cardapio = db.session.query(
         Prato.nome,
         func.sum(HistoricoVendas.quantidade).label('total')
@@ -115,11 +130,14 @@ def index():
     ).join(
         Prato, CardapioItem.prato_id == Prato.id
     ).filter(
-        HistoricoVendas.data >= um_mes_atras
+        HistoricoVendas.data >= um_mes_atras,
+        HistoricoVendas.restaurant_id == restaurant_id
     ).group_by(Prato.id).order_by(func.sum(HistoricoVendas.quantidade).desc()).limit(5).all()
     
     # Últimas previsões geradas
-    ultimas_previsoes = PrevisaoDemanda.query.order_by(PrevisaoDemanda.data_criacao.desc()).limit(5).all()
+    ultimas_previsoes = PrevisaoDemanda.query.filter_by(restaurant_id=restaurant_id).order_by(
+        PrevisaoDemanda.data_criacao.desc()
+    ).limit(5).all()
     
     return render_template('previsao/index.html',
                           total_registros=total_registros,
@@ -134,6 +152,10 @@ def index():
 @bp.route('/historico')
 def listar_historico():
     """Lista o histórico de vendas com opções de filtro"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        return redirect(url_for('main.index'))
+
     page = request.args.get('page', 1, type=int)
     
     # Filtros opcionais
@@ -142,8 +164,8 @@ def listar_historico():
     tipo_item = request.args.get('tipo_item')  # 'cardapio_item' ou 'prato'
     item_id = request.args.get('item_id', type=int)
     
-    # Construir query
-    query = HistoricoVendas.query
+    # Construir query tenant-aware
+    query = HistoricoVendas.query.filter_by(restaurant_id=restaurant_id)
     
     # Aplicar filtros
     if data_inicio:
@@ -167,10 +189,13 @@ def listar_historico():
     registros = query.order_by(HistoricoVendas.data.desc()).paginate(
         page=page, per_page=20, error_out=False)
     
-    # Obter listas para os filtros
-    pratos = Prato.query.order_by(Prato.nome).all()
+    # Obter listas para os filtros (do tenant)
+    pratos = Prato.query.filter_by(restaurant_id=restaurant_id).order_by(Prato.nome).all()
+    
+    # Complex join filter for tenant items
     itens_cardapio = CardapioItem.query.join(CardapioSecao).join(Cardapio).join(Prato).filter(
-        Cardapio.ativo == True
+        Cardapio.ativo == True,
+        Cardapio.restaurant_id == restaurant_id
     ).order_by(Prato.nome).all()
     
     return render_template('previsao/historico.html',
@@ -182,6 +207,10 @@ def listar_historico():
 @bp.route('/historico/registrar', methods=['GET', 'POST'])
 def registrar_venda():
     """Registra uma nova venda no histórico"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        abort(403)
+
     if request.method == 'POST':
         data = request.form.get('data')
         tipo_item = request.form.get('tipo_item')  # 'cardapio_item' ou 'prato'
@@ -196,19 +225,27 @@ def registrar_venda():
         # Validações básicas
         if not data or not tipo_item or not item_id or not quantidade or not valor_unitario:
             flash('Data, tipo de item, item, quantidade e valor unitário são obrigatórios!', 'danger')
-            pratos = Prato.query.order_by(Prato.nome).all()
+            pratos = Prato.query.filter_by(restaurant_id=restaurant_id).order_by(Prato.nome).all()
             itens_cardapio = CardapioItem.query.join(CardapioSecao).join(Cardapio).join(Prato).filter(
-                Cardapio.ativo == True
+                Cardapio.ativo == True,
+                Cardapio.restaurant_id == restaurant_id
             ).order_by(Prato.nome).all()
             return render_template('previsao/registrar_venda.html', pratos=pratos, itens_cardapio=itens_cardapio)
         
-        # Verificar se o item existe
-        if tipo_item == 'cardapio_item' and not CardapioItem.query.get(item_id):
-            flash('Item de cardápio não encontrado!', 'danger')
-            return redirect(url_for('previsao.registrar_venda'))
-        elif tipo_item == 'prato' and not Prato.query.get(item_id):
-            flash('Prato não encontrado!', 'danger')
-            return redirect(url_for('previsao.registrar_venda'))
+        # Verificar se o item existe e pertence ao tenant
+        if tipo_item == 'cardapio_item':
+            item = CardapioItem.query.join(CardapioSecao).join(Cardapio).filter(
+                CardapioItem.id == item_id,
+                Cardapio.restaurant_id == restaurant_id
+            ).first()
+            if not item:
+                flash('Item de cardápio não encontrado ou inválido!', 'danger')
+                return redirect(url_for('previsao.registrar_venda'))
+        elif tipo_item == 'prato':
+            p = Prato.query.filter_by(id=item_id, restaurant_id=restaurant_id).first()
+            if not p:
+                flash('Prato não encontrado ou inválido!', 'danger')
+                return redirect(url_for('previsao.registrar_venda'))
         
         # Registrar a venda
         venda = HistoricoVendas.registrar_venda(
@@ -220,16 +257,18 @@ def registrar_venda():
             periodo_dia=periodo_dia,
             evento_especial=evento_especial,
             clima=clima,
-            temperatura=temperatura
+            temperatura=temperatura,
+            restaurant_id=restaurant_id # Passar tenant ID
         )
         
         flash('Venda registrada com sucesso no histórico!', 'success')
         return redirect(url_for('previsao.listar_historico'))
     
     # GET: formulario para registrar venda
-    pratos = Prato.query.order_by(Prato.nome).all()
+    pratos = Prato.query.filter_by(restaurant_id=restaurant_id).order_by(Prato.nome).all()
     itens_cardapio = CardapioItem.query.join(CardapioSecao).join(Cardapio).join(Prato).filter(
-        Cardapio.ativo == True
+        Cardapio.ativo == True,
+        Cardapio.restaurant_id == restaurant_id
     ).order_by(Prato.nome).all()
     
     return render_template('previsao/registrar_venda.html',
@@ -241,6 +280,10 @@ def registrar_venda():
 @bp.route('/historico/importar', methods=['GET', 'POST'])
 def importar_historico():
     """Importa histórico de vendas a partir de um arquivo CSV"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        abort(403)
+
     if request.method == 'POST':
         if 'arquivo_csv' not in request.files:
             flash('Nenhum arquivo enviado!', 'danger')
@@ -283,13 +326,21 @@ def importar_historico():
                         total_ignorados += 1
                         continue
                     
-                    # Verificar se o item existe
-                    if tipo_item == 'cardapio_item' and not CardapioItem.query.get(item_id):
-                        total_ignorados += 1
-                        continue
-                    elif tipo_item == 'prato' and not Prato.query.get(item_id):
-                        total_ignorados += 1
-                        continue
+                    # Verificar se o item existe e é do tenant
+                    if tipo_item == 'cardapio_item':
+                        # Validar via join check
+                        check = CardapioItem.query.join(CardapioSecao).join(Cardapio).filter(
+                            CardapioItem.id == item_id,
+                            Cardapio.restaurant_id == restaurant_id
+                        ).first()
+                        if not check:
+                            total_ignorados += 1
+                            continue
+                    elif tipo_item == 'prato':
+                        check = Prato.query.filter_by(id=item_id, restaurant_id=restaurant_id).first()
+                        if not check:
+                            total_ignorados += 1
+                            continue
                     
                     # Registrar a venda
                     HistoricoVendas.registrar_venda(
@@ -301,7 +352,8 @@ def importar_historico():
                         periodo_dia=periodo_dia,
                         evento_especial=evento_especial,
                         clima=clima,
-                        temperatura=temperatura
+                        temperatura=temperatura,
+                        restaurant_id=restaurant_id
                     )
                     
                     total_importados += 1
@@ -322,14 +374,18 @@ def importar_historico():
 @bp.route('/historico/exportar')
 def exportar_historico():
     """Exporta histórico de vendas para CSV"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        abort(403)
+
     # Filtros opcionais
     data_inicio = request.args.get('data_inicio')
     data_fim = request.args.get('data_fim')
     tipo_item = request.args.get('tipo_item')
     item_id = request.args.get('item_id', type=int)
     
-    # Construir query
-    query = HistoricoVendas.query
+    # Construir query tenant-aware
+    query = HistoricoVendas.query.filter_by(restaurant_id=restaurant_id)
     
     # Aplicar filtros
     if data_inicio:
@@ -404,6 +460,10 @@ def exportar_historico():
 @bp.route('/previsoes')
 def listar_previsoes():
     """Lista todas as previsões de demanda"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        return redirect(url_for('main.index'))
+
     page = request.args.get('page', 1, type=int)
     
     # Filtros opcionais
@@ -411,8 +471,8 @@ def listar_previsoes():
     item_id = request.args.get('item_id', type=int)
     metodo = request.args.get('metodo')  # método de previsão
     
-    # Construir query
-    query = PrevisaoDemanda.query
+    # Construir query tenant-aware
+    query = PrevisaoDemanda.query.filter_by(restaurant_id=restaurant_id)
     
     # Aplicar filtros
     if tipo_item == 'cardapio_item':
@@ -432,9 +492,10 @@ def listar_previsoes():
         page=page, per_page=20, error_out=False)
     
     # Obter listas para os filtros
-    pratos = Prato.query.order_by(Prato.nome).all()
+    pratos = Prato.query.filter_by(restaurant_id=restaurant_id).order_by(Prato.nome).all()
     itens_cardapio = CardapioItem.query.join(CardapioSecao).join(Cardapio).join(Prato).filter(
-        Cardapio.ativo == True
+        Cardapio.ativo == True,
+        Cardapio.restaurant_id == restaurant_id
     ).order_by(Prato.nome).all()
     
     # Listar métodos disponíveis de previsão
@@ -454,6 +515,10 @@ def listar_previsoes():
 @bp.route('/previsao/gerar', methods=['GET', 'POST'])
 def gerar_previsao():
     """Gera uma nova previsão de demanda com base no histórico"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        abort(403)
+
     if request.method == 'POST':
         tipo_item = request.form.get('tipo_item')  # 'cardapio_item' ou 'prato'
         item_id = request.form.get('item_id', type=int)
@@ -466,19 +531,25 @@ def gerar_previsao():
         # Validações básicas
         if not tipo_item or not item_id or not data_inicio or not data_fim or not metodo:
             flash('Tipo de item, item, período de previsão e método são obrigatórios!', 'danger')
-            pratos = Prato.query.order_by(Prato.nome).all()
+            pratos = Prato.query.filter_by(restaurant_id=restaurant_id).order_by(Prato.nome).all()
             itens_cardapio = CardapioItem.query.join(CardapioSecao).join(Cardapio).join(Prato).filter(
-                Cardapio.ativo == True
+                Cardapio.ativo == True,
+                Cardapio.restaurant_id == restaurant_id
             ).order_by(Prato.nome).all()
             return render_template('previsao/gerar_previsao.html', pratos=pratos, itens_cardapio=itens_cardapio)
         
-        # Verificar se o item existe
-        if tipo_item == 'cardapio_item' and not CardapioItem.query.get(item_id):
-            flash('Item de cardápio não encontrado!', 'danger')
-            return redirect(url_for('previsao.gerar_previsao'))
-        elif tipo_item == 'prato' and not Prato.query.get(item_id):
-            flash('Prato não encontrado!', 'danger')
-            return redirect(url_for('previsao.gerar_previsao'))
+        # Verificar se o item existe e é do tenant
+        if tipo_item == 'cardapio_item':
+            if not CardapioItem.query.join(CardapioSecao).join(Cardapio).filter(
+                CardapioItem.id == item_id,
+                Cardapio.restaurant_id == restaurant_id
+            ).first():
+                flash('Item de cardápio não encontrado!', 'danger')
+                return redirect(url_for('previsao.gerar_previsao'))
+        elif tipo_item == 'prato':
+            if not Prato.query.filter_by(id=item_id, restaurant_id=restaurant_id).first():
+                flash('Prato não encontrado!', 'danger')
+                return redirect(url_for('previsao.gerar_previsao'))
         
         # Converter datas
         try:
@@ -494,21 +565,25 @@ def gerar_previsao():
         
         # Obter histórico de vendas para gerar previsão
         hoje = date.today()
+        # lógica melhorada: usar dados com mesmo dia da semana ou similar se possível, mas aqui estamos fazendo projeção simplificada
+        # Pega dados de um período equivalente no passado para treinar o modelo
         data_passado_inicio = hoje - (data_fim_dt - data_inicio_dt) - timedelta(days=dias_projecao)
         data_passado_fim = hoje - timedelta(days=1)  # até ontem
         
-        # Construir query do histórico
+        # Construir query do histórico tenant-aware
         if tipo_item == 'cardapio_item':
             query = HistoricoVendas.query.filter(
                 HistoricoVendas.cardapio_item_id == item_id,
                 HistoricoVendas.data >= data_passado_inicio,
-                HistoricoVendas.data <= data_passado_fim
+                HistoricoVendas.data <= data_passado_fim,
+                HistoricoVendas.restaurant_id == restaurant_id
             )
         else:  # prato
             query = HistoricoVendas.query.filter(
                 HistoricoVendas.prato_id == item_id,
                 HistoricoVendas.data >= data_passado_inicio,
-                HistoricoVendas.data <= data_passado_fim
+                HistoricoVendas.data <= data_passado_fim,
+                HistoricoVendas.restaurant_id == restaurant_id
             )
         
         historico = query.order_by(HistoricoVendas.data).all()
@@ -537,9 +612,10 @@ def gerar_previsao():
         
         # Aplicar fatores de sazonalidade se solicitado
         if usar_sazonalidade:
-            # Obter fatores de sazonalidade aplicaveis ao item
+            # Obter fatores de sazonalidade aplicaveis ao item E ao tenant
             if tipo_item == 'cardapio_item':
                 fatores = FatorSazonalidade.query.filter(
+                    FatorSazonalidade.restaurant_id == restaurant_id,
                     or_(
                         FatorSazonalidade.cardapio_item_id == item_id,
                         and_(
@@ -550,6 +626,7 @@ def gerar_previsao():
                 ).all()
             else:  # prato
                 fatores = FatorSazonalidade.query.filter(
+                    FatorSazonalidade.restaurant_id == restaurant_id,
                     or_(
                         FatorSazonalidade.prato_id == item_id,
                         and_(
@@ -630,7 +707,8 @@ def gerar_previsao():
                 'dias_projecao': dias_projecao,
                 'usar_sazonalidade': usar_sazonalidade
             }),
-            confiabilidade=confiabilidade
+            confiabilidade=confiabilidade,
+            restaurant_id=restaurant_id
         )
         
         # Definir item da previsão
@@ -649,9 +727,10 @@ def gerar_previsao():
         return redirect(url_for('previsao.visualizar_previsao', id=previsao_obj.id))
     
     # GET: formulario para gerar previsão
-    pratos = Prato.query.order_by(Prato.nome).all()
+    pratos = Prato.query.filter_by(restaurant_id=restaurant_id).order_by(Prato.nome).all()
     itens_cardapio = CardapioItem.query.join(CardapioSecao).join(Cardapio).join(Prato).filter(
-        Cardapio.ativo == True
+        Cardapio.ativo == True,
+        Cardapio.restaurant_id == restaurant_id
     ).order_by(Prato.nome).all()
     
     # Data padrão para previsão (próximos 7 dias)
@@ -669,7 +748,8 @@ def gerar_previsao():
 @bp.route('/previsao/visualizar/<int:id>')
 def visualizar_previsao(id):
     """Visualiza detalhes de uma previsão de demanda"""
-    previsao = PrevisaoDemanda.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    previsao = PrevisaoDemanda.query.filter_by(id=id, restaurant_id=restaurant_id).first_or_404()
     
     # Obter nome do item
     item_nome = ''
@@ -727,12 +807,16 @@ def visualizar_previsao(id):
 @bp.route('/sazonalidade')
 def listar_fatores_sazonalidade():
     """Lista todos os fatores de sazonalidade"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        return redirect(url_for('main.index'))
+
     # Filtros opcionais
     tipo_item = request.args.get('tipo_item')  # 'cardapio_item', 'prato' ou 'geral'
     item_id = request.args.get('item_id', type=int)
     
-    # Construir query
-    query = FatorSazonalidade.query
+    # Construir query tenant-aware
+    query = FatorSazonalidade.query.filter_by(restaurant_id=restaurant_id)
     
     # Aplicar filtros
     if tipo_item == 'cardapio_item':
@@ -753,9 +837,10 @@ def listar_fatores_sazonalidade():
     fatores = query.all()
     
     # Obter listas para os filtros
-    pratos = Prato.query.order_by(Prato.nome).all()
+    pratos = Prato.query.filter_by(restaurant_id=restaurant_id).order_by(Prato.nome).all()
     itens_cardapio = CardapioItem.query.join(CardapioSecao).join(Cardapio).join(Prato).filter(
-        Cardapio.ativo == True
+        Cardapio.ativo == True,
+        Cardapio.restaurant_id == restaurant_id
     ).order_by(Prato.nome).all()
     
     return render_template('previsao/fatores_sazonalidade.html',
@@ -767,6 +852,10 @@ def listar_fatores_sazonalidade():
 @bp.route('/sazonalidade/criar', methods=['GET', 'POST'])
 def criar_fator_sazonalidade():
     """Cria um novo fator de sazonalidade"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        abort(403)
+
     if request.method == 'POST':
         tipo_item = request.form.get('tipo_item')  # 'cardapio_item', 'prato' ou 'geral'
         item_id = request.form.get('item_id', type=int)
@@ -780,9 +869,10 @@ def criar_fator_sazonalidade():
         # Validações básicas
         if not tipo_sazonalidade or not fator:
             flash('Tipo de sazonalidade e fator são obrigatórios!', 'danger')
-            pratos = Prato.query.order_by(Prato.nome).all()
+            pratos = Prato.query.filter_by(restaurant_id=restaurant_id).order_by(Prato.nome).all()
             itens_cardapio = CardapioItem.query.join(CardapioSecao).join(Cardapio).join(Prato).filter(
-                Cardapio.ativo == True
+                Cardapio.ativo == True,
+                Cardapio.restaurant_id == restaurant_id
             ).order_by(Prato.nome).all()
             return render_template('previsao/criar_fator_sazonalidade.html', pratos=pratos, itens_cardapio=itens_cardapio)
         
@@ -797,36 +887,54 @@ def criar_fator_sazonalidade():
             flash('O nome do evento é obrigatório para sazonalidade por evento!', 'danger')
             return redirect(url_for('previsao.criar_fator_sazonalidade'))
         
-        # Verificar item se não for geral
-        if tipo_item != 'geral' and not item_id:
-            flash('Selecione um item válido!', 'danger')
-            return redirect(url_for('previsao.criar_fator_sazonalidade'))
+        # Verificar item se não for geral E SE PERTENCE AO TENANT
+        cardapio_item_id = None
+        prato_id = None
         
-        # Criar o fator de sazonalidade
-        fator_obj = FatorSazonalidade(
+        if tipo_item == 'cardapio_item':
+            if not item_id:
+                flash('Item de cardápio é obrigatório!', 'danger')
+                return redirect(url_for('previsao.criar_fator_sazonalidade'))
+            if not CardapioItem.query.join(CardapioSecao).join(Cardapio).filter(
+                CardapioItem.id == item_id,
+                Cardapio.restaurant_id == restaurant_id
+            ).first():
+                flash('Item inválido!', 'danger')
+                return redirect(url_for('previsao.criar_fator_sazonalidade'))
+            cardapio_item_id = item_id
+        elif tipo_item == 'prato':
+            if not item_id:
+                flash('Prato é obrigatório!', 'danger')
+                return redirect(url_for('previsao.criar_fator_sazonalidade'))
+            if not Prato.query.filter_by(id=item_id, restaurant_id=restaurant_id).first():
+                flash('Prato inválido!', 'danger')
+                return redirect(url_for('previsao.criar_fator_sazonalidade'))
+            prato_id = item_id
+            
+        # Criar o fator
+        novo_fator = FatorSazonalidade(
             mes=mes if tipo_sazonalidade == 'mes' else None,
             dia_semana=dia_semana if tipo_sazonalidade == 'dia_semana' else None,
             evento=evento if tipo_sazonalidade == 'evento' else None,
+            cardapio_item_id=cardapio_item_id,
+            prato_id=prato_id,
+            categoria_id=None, # Não implementado na UI ainda
             fator=fator,
-            descricao=descricao
+            descricao=descricao,
+            restaurant_id=restaurant_id
         )
         
-        # Definir item relacionado
-        if tipo_item == 'cardapio_item':
-            fator_obj.cardapio_item_id = item_id
-        elif tipo_item == 'prato':
-            fator_obj.prato_id = item_id
-        
-        db.session.add(fator_obj)
+        db.session.add(novo_fator)
         db.session.commit()
         
         flash('Fator de sazonalidade criado com sucesso!', 'success')
         return redirect(url_for('previsao.listar_fatores_sazonalidade'))
     
-    # GET: formulario para criar fator
-    pratos = Prato.query.order_by(Prato.nome).all()
+    # GET: formulario
+    pratos = Prato.query.filter_by(restaurant_id=restaurant_id).order_by(Prato.nome).all()
     itens_cardapio = CardapioItem.query.join(CardapioSecao).join(Cardapio).join(Prato).filter(
-        Cardapio.ativo == True
+        Cardapio.ativo == True,
+        Cardapio.restaurant_id == restaurant_id
     ).order_by(Prato.nome).all()
     
     return render_template('previsao/criar_fator_sazonalidade.html',
@@ -834,54 +942,11 @@ def criar_fator_sazonalidade():
                           itens_cardapio=itens_cardapio)
 
 
-@bp.route('/sazonalidade/editar/<int:id>', methods=['GET', 'POST'])
-def editar_fator_sazonalidade(id):
-    """Edita um fator de sazonalidade existente"""
-    fator = FatorSazonalidade.query.get_or_404(id)
-    
-    if request.method == 'POST':
-        tipo_sazonalidade = request.form.get('tipo_sazonalidade')  # 'mes', 'dia_semana' ou 'evento'
-        mes = request.form.get('mes', type=int)
-        dia_semana = request.form.get('dia_semana', type=int)
-        evento = request.form.get('evento')
-        fator_valor = request.form.get('fator', type=float)
-        descricao = request.form.get('descricao')
-        
-        # Validações básicas
-        if not tipo_sazonalidade or not fator_valor:
-            flash('Tipo de sazonalidade e fator são obrigatórios!', 'danger')
-            return render_template('previsao/editar_fator_sazonalidade.html', fator=fator)
-        
-        # Verificar tipo de sazonalidade
-        if tipo_sazonalidade == 'mes' and not mes:
-            flash('O mês é obrigatório para sazonalidade mensal!', 'danger')
-            return render_template('previsao/editar_fator_sazonalidade.html', fator=fator)
-        elif tipo_sazonalidade == 'dia_semana' and dia_semana is None:
-            flash('O dia da semana é obrigatório para sazonalidade semanal!', 'danger')
-            return render_template('previsao/editar_fator_sazonalidade.html', fator=fator)
-        elif tipo_sazonalidade == 'evento' and not evento:
-            flash('O nome do evento é obrigatório para sazonalidade por evento!', 'danger')
-            return render_template('previsao/editar_fator_sazonalidade.html', fator=fator)
-        
-        # Atualizar o fator
-        fator.mes = mes if tipo_sazonalidade == 'mes' else None
-        fator.dia_semana = dia_semana if tipo_sazonalidade == 'dia_semana' else None
-        fator.evento = evento if tipo_sazonalidade == 'evento' else None
-        fator.fator = fator_valor
-        fator.descricao = descricao
-        
-        db.session.commit()
-        
-        flash('Fator de sazonalidade atualizado com sucesso!', 'success')
-        return redirect(url_for('previsao.listar_fatores_sazonalidade'))
-    
-    return render_template('previsao/editar_fator_sazonalidade.html', fator=fator)
-
-
-@bp.route('/sazonalidade/excluir/<int:id>', methods=['POST'])
+@bp.route('/sazonalidade/excluir/<int:id>')
 def excluir_fator_sazonalidade(id):
     """Exclui um fator de sazonalidade"""
-    fator = FatorSazonalidade.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    fator = FatorSazonalidade.query.filter_by(id=id, restaurant_id=restaurant_id).first_or_404()
     
     db.session.delete(fator)
     db.session.commit()

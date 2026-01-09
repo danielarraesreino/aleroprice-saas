@@ -1,9 +1,10 @@
-from flask import render_template, redirect, url_for, flash, request, jsonify, current_app
+from flask import render_template, redirect, url_for, flash, request, jsonify, current_app, abort
 from app.extensions import db
 from app.models.modelo_cardapio import Cardapio, CardapioSecao, CardapioItem
 from app.models.modelo_prato import Prato
 from app.routes.cardapios import bp
 from datetime import datetime, date
+from app.utils.tenant import get_current_restaurant_id
 import pandas as pd
 import io
 
@@ -11,15 +12,20 @@ import io
 @bp.route('/index')
 def index():
     """Lista todos os cardápios"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        flash('Erro: Restaurante não identificado.', 'danger')
+        return redirect(url_for('main.index'))
+
     page = request.args.get('page', 1, type=int)
     
     # Filtros opcionais
     tipo = request.args.get('tipo')
     temporada = request.args.get('temporada')
-    ativos = request.args.get('ativos', default=True, type=lambda v: v.lower() == 'true')
+    ativos = request.args.get('ativos', default=True, type=lambda v: str(v).lower() == 'true')
     
     # Construir query base
-    query = Cardapio.query
+    query = Cardapio.query.filter_by(restaurant_id=restaurant_id)
     
     # Aplicar filtros
     if tipo:
@@ -27,20 +33,17 @@ def index():
     if temporada:
         query = query.filter_by(temporada=temporada)
     if ativos is not None:
-        # Fix: Se ativos for False (que pode ser resultado de 'Todos' ou 'Inativo'),
-        # precisamos ajustar a lógica. 
-        # Mas vamos manter simples por enquanto e apenas capturar erros.
         query = query.filter_by(ativo=ativos)
     
     # Ordenar e paginar
     cardapios = query.order_by(Cardapio.data_inicio.desc()).paginate(
         page=page, per_page=20, error_out=False)
     
-    # Obter lista de tipos e temporadas para filtros
-    tipos = db.session.query(Cardapio.tipo).distinct().all()
+    # Obter lista de tipos e temporadas para filtros (do tenant)
+    tipos = db.session.query(Cardapio.tipo).filter_by(restaurant_id=restaurant_id).distinct().all()
     tipos = [t[0] for t in tipos if t[0]]
     
-    temporadas = db.session.query(Cardapio.temporada).distinct().all()
+    temporadas = db.session.query(Cardapio.temporada).filter_by(restaurant_id=restaurant_id).distinct().all()
     temporadas = [t[0] for t in temporadas if t[0]]
     
     return render_template('cardapios/index.html', 
@@ -51,6 +54,10 @@ def index():
 @bp.route('/criar', methods=['GET', 'POST'])
 def criar():
     """Cria um novo cardápio"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        abort(403)
+
     if request.method == 'POST':
         # Obter dados do formulário
         nome = request.form.get('nome')
@@ -85,7 +92,8 @@ def criar():
             temporada=temporada,
             data_inicio=data_inicio,
             data_fim=data_fim,
-            ativo=True
+            ativo=True,
+            restaurant_id=restaurant_id
         )
         
         db.session.add(cardapio)
@@ -99,7 +107,8 @@ def criar():
 @bp.route('/editar/<int:id>', methods=['GET', 'POST'])
 def editar(id):
     """Edita um cardápio existente"""
-    cardapio = Cardapio.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    cardapio = Cardapio.query.filter_by(id=id, restaurant_id=restaurant_id).first_or_404()
     
     if request.method == 'POST':
         # Obter dados do formulário
@@ -147,7 +156,8 @@ def editar(id):
 @bp.route('/visualizar/<int:id>')
 def visualizar(id):
     """Visualiza detalhes de um cardápio"""
-    cardapio = Cardapio.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    cardapio = Cardapio.query.filter_by(id=id, restaurant_id=restaurant_id).first_or_404()
     
     # Ordenar seções pela ordem
     secoes = sorted(cardapio.secoes, key=lambda s: s.ordem)
@@ -159,7 +169,8 @@ def visualizar(id):
 @bp.route('/adicionar_secao/<int:id>', methods=['GET', 'POST'])
 def adicionar_secao(id):
     """Adiciona uma seção ao cardápio"""
-    cardapio = Cardapio.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    cardapio = Cardapio.query.filter_by(id=id, restaurant_id=restaurant_id).first_or_404()
     
     if request.method == 'POST':
         nome = request.form.get('nome')
@@ -194,7 +205,14 @@ def adicionar_secao(id):
 @bp.route('/editar_secao/<int:id>', methods=['GET', 'POST'])
 def editar_secao(id):
     """Edita uma seção do cardápio"""
-    secao = CardapioSecao.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    
+    # Join manual para garantir tenant
+    secao = CardapioSecao.query.join(Cardapio).filter(
+        CardapioSecao.id == id, 
+        Cardapio.restaurant_id == restaurant_id
+    ).first_or_404()
+    
     cardapio = secao.cardapio
     
     if request.method == 'POST':
@@ -221,7 +239,11 @@ def editar_secao(id):
 @bp.route('/remover_secao/<int:id>', methods=['POST'])
 def remover_secao(id):
     """Remove uma seção do cardápio"""
-    secao = CardapioSecao.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    secao = CardapioSecao.query.join(Cardapio).filter(
+        CardapioSecao.id == id, 
+        Cardapio.restaurant_id == restaurant_id
+    ).first_or_404()
     cardapio_id = secao.cardapio_id
     
     db.session.delete(secao)
@@ -233,7 +255,12 @@ def remover_secao(id):
 @bp.route('/adicionar_item/<int:secao_id>', methods=['GET', 'POST'])
 def adicionar_item(secao_id):
     """Adiciona um item/prato a uma seção do cardápio"""
-    secao = CardapioSecao.query.get_or_404(secao_id)
+    restaurant_id = get_current_restaurant_id()
+    # Verificar tenant via secao -> cardapio
+    secao = CardapioSecao.query.join(Cardapio).filter(
+        CardapioSecao.id == secao_id, 
+        Cardapio.restaurant_id == restaurant_id
+    ).first_or_404()
     cardapio = secao.cardapio
     
     if request.method == 'POST':
@@ -246,12 +273,18 @@ def adicionar_item(secao_id):
         
         if not prato_id:
             flash('Selecione um prato!', 'danger')
-            pratos = Prato.query.filter_by(ativo=True).order_by(Prato.nome).all()
+            pratos = Prato.query.filter_by(ativo=True, restaurant_id=restaurant_id).order_by(Prato.nome).all()
             return render_template('cardapios/adicionar_item.html', 
                                 secao=secao, 
                                 cardapio=cardapio,
                                 pratos=pratos)
         
+        # Validar prato tenant
+        prato = Prato.query.filter_by(id=prato_id, restaurant_id=restaurant_id).first()
+        if not prato:
+            flash('Prato inválido.', 'danger')
+            return redirect(url_for('cardapios.visualizar', id=cardapio.id))
+
         # Verificar se o prato já existe nesta seção
         item_existente = CardapioItem.query.filter_by(
             secao_id=secao_id, prato_id=prato_id
@@ -259,7 +292,7 @@ def adicionar_item(secao_id):
         
         if item_existente:
             flash('Este prato já está cadastrado nesta seção do cardápio!', 'warning')
-            pratos = Prato.query.filter_by(ativo=True).order_by(Prato.nome).all()
+            pratos = Prato.query.filter_by(ativo=True, restaurant_id=restaurant_id).order_by(Prato.nome).all()
             return render_template('cardapios/adicionar_item.html', 
                                 secao=secao, 
                                 cardapio=cardapio,
@@ -287,8 +320,8 @@ def adicionar_item(secao_id):
         else:
             return redirect(url_for('cardapios.visualizar', id=cardapio.id))
     
-    # Obter lista de pratos disponíveis
-    pratos = Prato.query.filter_by(ativo=True).order_by(Prato.nome).all()
+    # Obter lista de pratos disponíveis (do tenant)
+    pratos = Prato.query.filter_by(ativo=True, restaurant_id=restaurant_id).order_by(Prato.nome).all()
     
     return render_template('cardapios/adicionar_item.html', 
                           secao=secao, 
@@ -298,7 +331,13 @@ def adicionar_item(secao_id):
 @bp.route('/editar_item/<int:id>', methods=['GET', 'POST'])
 def editar_item(id):
     """Edita um item do cardápio"""
-    item = CardapioItem.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    # Complex join check
+    item = CardapioItem.query.join(CardapioSecao).join(Cardapio).filter(
+        CardapioItem.id == id,
+        Cardapio.restaurant_id == restaurant_id
+    ).first_or_404()
+    
     secao = item.secao
     cardapio = secao.cardapio
     
@@ -329,7 +368,11 @@ def editar_item(id):
 @bp.route('/remover_item/<int:id>', methods=['POST'])
 def remover_item(id):
     """Remove um item do cardápio"""
-    item = CardapioItem.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    item = CardapioItem.query.join(CardapioSecao).join(Cardapio).filter(
+        CardapioItem.id == id,
+        Cardapio.restaurant_id == restaurant_id
+    ).first_or_404()
     secao = item.secao
     cardapio_id = secao.cardapio_id
     
@@ -344,7 +387,8 @@ def exportar(id):
     """Exporta o cardápio para um arquivo CSV"""
     from flask import Response
     
-    cardapio = Cardapio.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    cardapio = Cardapio.query.filter_by(id=id, restaurant_id=restaurant_id).first_or_404()
     
     # Dados do cardápio
     dados_cardapio = {
@@ -399,7 +443,8 @@ def exportar(id):
 @bp.route('/imprimir/<int:id>')
 def imprimir(id):
     """Exibe versão para impressão do cardápio"""
-    cardapio = Cardapio.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    cardapio = Cardapio.query.filter_by(id=id, restaurant_id=restaurant_id).first_or_404()
     
     # Ordenar seções e itens
     secoes = sorted(cardapio.secoes, key=lambda s: s.ordem)
@@ -414,8 +459,12 @@ def imprimir(id):
 @bp.route('/sugestao')
 def sugestao():
     """Sugere um cardápio com base em rentabilidade"""
-    # Obter pratos ativos ordenados por margem de lucro
-    pratos_alta_margem = Prato.query.filter_by(ativo=True).all()
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        abort(403)
+        
+    # Obter pratos ativos ordenados por margem de lucro (do tenant)
+    pratos_alta_margem = Prato.query.filter_by(ativo=True, restaurant_id=restaurant_id).all()
     
     # Ordenar por margem de lucro (em valor, não percentual)
     pratos_alta_margem.sort(
@@ -464,7 +513,11 @@ def sugestao():
 @bp.route('/api/listar')
 def api_listar():
     """API para listar cardápios (JSON)"""
-    cardapios = Cardapio.query.filter_by(ativo=True).all()
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        return jsonify([])
+
+    cardapios = Cardapio.query.filter_by(ativo=True, restaurant_id=restaurant_id).all()
     return jsonify([
         {
             'id': c.id,
@@ -481,7 +534,8 @@ def api_listar():
 @bp.route('/api/cardapio/<int:id>')
 def api_cardapio(id):
     """API para obter detalhes de um cardápio (JSON)"""
-    cardapio = Cardapio.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    cardapio = Cardapio.query.filter_by(id=id, restaurant_id=restaurant_id).first_or_404()
     
     # Organizar por seções
     secoes_data = []

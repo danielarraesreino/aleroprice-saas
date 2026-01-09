@@ -18,6 +18,9 @@ class Cardapio(db.Model):
     data_criacao = db.Column(db.DateTime, default=func.now())
     data_atualizacao = db.Column(db.DateTime, default=func.now(), onupdate=func.now())
     
+    # Multi-Tenancy
+    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurante.id'), nullable=False)
+    
     # Relações
     secoes = db.relationship('CardapioSecao', back_populates='cardapio', cascade='all, delete-orphan')
     

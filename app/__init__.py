@@ -3,6 +3,8 @@
 from flask import Flask
 from app.config import config
 from app.extensions import db, migrate
+from app.extensions import db, migrate
+import app.models # Importar todos os modelos para registro
 import locale
 
 def create_app(config_name='default'):
@@ -11,12 +13,26 @@ def create_app(config_name='default'):
     :param config_name: Nome da configuração a ser usada
     :return: Instância da aplicação Flask
     """
-    app = Flask(__name__)
+    :return: Instância da aplicação Flask
+    """
+    import os
+    
+    # Hack for Vercel Read-Only File System
+    # Flask-SQLAlchemy tries to create the instance folder if it doesn't exist.
+    # On Vercel, only /tmp is writable.
+    params = {}
+    if os.environ.get('VERCEL'):
+        params['instance_path'] = '/tmp'
+        
+    app = Flask(__name__, **params)
     app.config.from_object(config[config_name])
     
     # Inicializa as extensões
     db.init_app(app)
     migrate.init_app(app, db)
+    
+    from app.extensions import login_manager
+    login_manager.init_app(app)
     
     # Configura a localização brasileira
     try:
@@ -62,6 +78,15 @@ def create_app(config_name='default'):
     app.register_blueprint(custos_bp, url_prefix='/custos')
     app.register_blueprint(dashboard_bp, url_prefix='/')
     
+    from app.routes.billing import bp as billing_bp
+    app.register_blueprint(billing_bp, url_prefix='/billing')
+    
+    from app.routes.auth import bp as auth_bp
+    app.register_blueprint(auth_bp, url_prefix='/auth')
+
+    from app.routes.public import bp as public_bp
+    app.register_blueprint(public_bp, url_prefix='/')
+    
     # Registra o blueprint de erro (opcional)
     # from app.errors import bp as errors_bp
     # app.register_blueprint(errors_bp)
@@ -70,5 +95,11 @@ def create_app(config_name='default'):
     @app.shell_context_processor
     def make_shell_context():
         return {'db': db, 'migrate': migrate}
+        
+    # Setup user loader
+    from app.models.usuario import Usuario
+    @login_manager.user_loader
+    def load_user(user_id):
+        return Usuario.query.get(int(user_id))
     
     return app

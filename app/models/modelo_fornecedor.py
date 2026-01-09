@@ -6,7 +6,7 @@ class Fornecedor(db.Model):
     __tablename__ = 'fornecedor'
     
     id = db.Column(db.Integer, primary_key=True)
-    cnpj = db.Column(db.String(14), unique=True, nullable=False, index=True)
+    cnpj = db.Column(db.String(14), nullable=False, index=True)
     razao_social = db.Column(db.String(100), nullable=False)
     nome_fantasia = db.Column(db.String(100))
     endereco = db.Column(db.String(200))
@@ -19,6 +19,13 @@ class Fornecedor(db.Model):
     ativo = db.Column(db.Boolean, default=True)
     data_cadastro = db.Column(db.DateTime, default=func.now())
     data_atualizacao = db.Column(db.DateTime, default=func.now(), onupdate=func.now())
+    
+    # Multi-Tenancy
+    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurante.id'), nullable=False)
+    
+    __table_args__ = (
+        db.UniqueConstraint('cnpj', 'restaurant_id', name='uq_fornecedor_cnpj_restaurant'),
+    )
     
     # Relações
     produtos = db.relationship('Produto', back_populates='fornecedor', lazy='dynamic')

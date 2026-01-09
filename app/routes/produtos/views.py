@@ -1,13 +1,19 @@
-from flask import render_template, redirect, url_for, flash, request, jsonify
+from flask import render_template, redirect, url_for, flash, request, jsonify, abort
 from app.extensions import db
 from app.models.modelo_produto import Produto
 from app.models.modelo_fornecedor import Fornecedor
 from app.routes.produtos import bp
+from app.utils.tenant import get_current_restaurant_id
 
 @bp.route('/')
 @bp.route('/index')
 def index():
     """Lista todos os produtos/insumos"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        flash('Erro: Restaurante não identificado.', 'danger')
+        return redirect(url_for('main.index')) # Ajustar redirecionamento se necessário
+        
     page = request.args.get('page', 1, type=int)
     
     # Filtros opcionais
@@ -16,7 +22,7 @@ def index():
     filtro_estoque_baixo = request.args.get('estoque_baixo', type=bool, default=False)
     
     # Construir a query base
-    query = Produto.query
+    query = Produto.query.filter_by(restaurant_id=restaurant_id)
     
     # Aplicar filtros se existirem
     if filtro_categoria:
@@ -31,11 +37,11 @@ def index():
         page=page, per_page=20, error_out=False)
     
     # Obter lista de categorias para filtro
-    categorias = db.session.query(Produto.categoria).distinct().all()
+    categorias = db.session.query(Produto.categoria).filter_by(restaurant_id=restaurant_id).distinct().all()
     categorias = [c[0] for c in categorias if c[0]]  # Remover categorias nulas
     
     # Obter lista de fornecedores para filtro
-    fornecedores = Fornecedor.query.order_by(Fornecedor.razao_social).all()
+    fornecedores = Fornecedor.query.filter_by(restaurant_id=restaurant_id).order_by(Fornecedor.razao_social).all()
     
     return render_template('produtos/index.html', 
                            produtos=produtos, 
@@ -45,8 +51,12 @@ def index():
 @bp.route('/criar', methods=['GET', 'POST'])
 def criar():
     """Cria um novo produto/insumo"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        abort(403)
+        
     if request.method == 'POST':
-        # Obter dados do formulu00e1rio
+        # Obter dados do formulário
         nome = request.form.get('nome')
         codigo = request.form.get('codigo')
         descricao = request.form.get('descricao')
@@ -58,14 +68,14 @@ def criar():
         marca = request.form.get('marca')
         fornecedor_id = request.form.get('fornecedor_id', type=int)
         
-        # Validau00e7u00f5es bu00e1sicas
+        # Validações básicas
         if not nome or not unidade_medida:
-            flash('Nome e Unidade de Medida su00e3o obrigatu00f3rios!', 'danger')
+            flash('Nome e Unidade de Medida são obrigatórios!', 'danger')
             return redirect(url_for('produtos.criar'))
         
-        # Verificar se cu00f3digo ju00e1 existe (se informado)
-        if codigo and Produto.query.filter_by(codigo=codigo).first():
-            flash('Cu00f3digo de produto ju00e1 cadastrado!', 'danger')
+        # Verificar se código já existe (se informado) e pertence ao mesmo restaurante
+        if codigo and Produto.query.filter_by(codigo=codigo, restaurant_id=restaurant_id).first():
+            flash('Código de produto já cadastrado!', 'danger')
             return redirect(url_for('produtos.criar'))
         
         # Criar novo produto
@@ -79,7 +89,8 @@ def criar():
             estoque_atual=estoque_atual,
             categoria=categoria,
             marca=marca,
-            fornecedor_id=fornecedor_id
+            fornecedor_id=fornecedor_id,
+            restaurant_id=restaurant_id
         )
         
         db.session.add(produto)
@@ -88,24 +99,25 @@ def criar():
         flash('Produto cadastrado com sucesso!', 'success')
         return redirect(url_for('produtos.index'))
     
-    # Obter lista de fornecedores para o formulu00e1rio
-    fornecedores = Fornecedor.query.order_by(Fornecedor.razao_social).all()
+    # Obter lista de fornecedores para o formulário
+    fornecedores = Fornecedor.query.filter_by(restaurant_id=restaurant_id).order_by(Fornecedor.razao_social).all()
     return render_template('produtos/criar.html', fornecedores=fornecedores)
 
 @bp.route('/editar/<int:id>', methods=['GET', 'POST'])
 def editar(id):
     """Edita um produto existente"""
-    produto = Produto.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    produto = Produto.query.filter_by(id=id, restaurant_id=restaurant_id).first_or_404()
     
     if request.method == 'POST':
-        # Obter dados do formulu00e1rio
+        # Obter dados do formulário
         nome = request.form.get('nome')
         codigo = request.form.get('codigo')
         
-        # Verificar se cu00f3digo ju00e1 existe (se for diferente do atual)
-        if codigo and codigo != produto.codigo and Produto.query.filter_by(codigo=codigo).first():
-            flash('Cu00f3digo de produto ju00e1 cadastrado em outro produto!', 'danger')
-            fornecedores = Fornecedor.query.order_by(Fornecedor.razao_social).all()
+        # Verificar se código já existe (se for diferente do atual)
+        if codigo and codigo != produto.codigo and Produto.query.filter_by(codigo=codigo, restaurant_id=restaurant_id).first():
+            flash('Código de produto já cadastrado em outro produto!', 'danger')
+            fornecedores = Fornecedor.query.filter_by(restaurant_id=restaurant_id).order_by(Fornecedor.razao_social).all()
             return render_template('produtos/editar.html', produto=produto, fornecedores=fornecedores)
         
         # Atualizar dados
@@ -124,14 +136,15 @@ def editar(id):
         flash('Produto atualizado com sucesso!', 'success')
         return redirect(url_for('produtos.index'))
     
-    # Obter lista de fornecedores para o formulu00e1rio
-    fornecedores = Fornecedor.query.order_by(Fornecedor.razao_social).all()
+    # Obter lista de fornecedores para o formulário
+    fornecedores = Fornecedor.query.filter_by(restaurant_id=restaurant_id).order_by(Fornecedor.razao_social).all()
     return render_template('produtos/editar.html', produto=produto, fornecedores=fornecedores)
 
 @bp.route('/visualizar/<int:id>')
 def visualizar(id):
     """Visualiza detalhes de um produto"""
-    produto = Produto.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    produto = Produto.query.filter_by(id=id, restaurant_id=restaurant_id).first_or_404()
     return render_template('produtos/visualizar.html', produto=produto)
 
 @bp.route('/ajustar-estoque/<int:id>', methods=['GET', 'POST'])
@@ -139,7 +152,8 @@ def ajustar_estoque(id):
     """Ajusta manualmente o estoque de um produto"""
     from app.models.modelo_estoque import EstoqueMovimentacao
     
-    produto = Produto.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    produto = Produto.query.filter_by(id=id, restaurant_id=restaurant_id).first_or_404()
     
     if request.method == 'POST':
         tipo = request.form.get('tipo')  # 'entrada' ou 'saida'
@@ -147,15 +161,15 @@ def ajustar_estoque(id):
         observacao = request.form.get('observacao')
         
         if not tipo or not quantidade or quantidade <= 0:
-            flash('Tipo e quantidade vu00e1lida su00e3o obrigatu00f3rios!', 'danger')
+            flash('Tipo e quantidade válida são obrigatórios!', 'danger')
             return redirect(url_for('produtos.ajustar_estoque', id=id))
         
-        # Verificar se hu00e1 estoque suficiente para sau00edda
+        # Verificar se há estoque suficiente para saída
         if tipo == 'saida' and produto.estoque_atual < quantidade:
             flash(f'Estoque insuficiente! Atual: {produto.estoque_atual} {produto.unidade_medida}', 'danger')
             return redirect(url_for('produtos.ajustar_estoque', id=id))
         
-        # Registrar movimentau00e7u00e3o
+        # Registrar movimentação
         try:
             if tipo == 'entrada':
                 movimento = EstoqueMovimentacao.registrar_entrada(
@@ -164,7 +178,7 @@ def ajustar_estoque(id):
                     referencia='Ajuste Manual',
                     observacao=observacao
                 )
-            else:  # sau00edda
+            else:  # saída
                 movimento = EstoqueMovimentacao.registrar_saida(
                     produto_id=produto.id,
                     quantidade=quantidade,
@@ -183,8 +197,13 @@ def ajustar_estoque(id):
 
 @bp.route('/em-falta')
 def em_falta():
-    """Lista produtos com estoque abaixo do mu00ednimo"""
+    """Lista produtos com estoque abaixo do mínimo"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        abort(403)
+
     produtos = Produto.query.filter(
+        Produto.restaurant_id == restaurant_id,
         Produto.estoque_atual < Produto.estoque_minimo
     ).order_by(
         # Ordenar por percentual de falta (quanto menor, mais em falta)
@@ -197,7 +216,11 @@ def em_falta():
 @bp.route('/api/listar')
 def api_listar():
     """API para listar produtos (JSON)"""
-    produtos = Produto.query.order_by(Produto.nome).all()
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        return jsonify([])
+        
+    produtos = Produto.query.filter_by(restaurant_id=restaurant_id).order_by(Produto.nome).all()
     return jsonify([
         {
             'id': p.id,
@@ -213,8 +236,13 @@ def api_listar():
 @bp.route('/api/buscar/<string:termo>')
 def api_buscar(termo):
     """API para buscar produtos por termo (JSON)"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        return jsonify([])
+
     termo = f'%{termo}%'
     produtos = Produto.query.filter(
+        Produto.restaurant_id == restaurant_id,
         (Produto.nome.ilike(termo)) | 
         (Produto.codigo.ilike(termo)) | 
         (Produto.categoria.ilike(termo))

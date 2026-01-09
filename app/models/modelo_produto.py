@@ -22,6 +22,14 @@ class Produto(db.Model):
     marca = db.Column(db.String(50))
     fornecedor_id = db.Column(db.Integer, db.ForeignKey('fornecedor.id'))
     
+    # Validação de Preço / Inflação (Intelligence)
+    ultimo_custo_anterior = db.Column(db.Numeric(10, 2)) # Preço antes da última atualização
+    variacao_preco_pct = db.Column(db.Float) # % de variação no último update
+    data_alerta_inflacao = db.Column(db.DateTime) # Data do último alerta significativo
+    
+    # Multi-Tenancy
+    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurante.id'), nullable=False)
+    
     # Relações
     fornecedor = db.relationship('Fornecedor', back_populates='produtos')
     movimentacoes = db.relationship('EstoqueMovimentacao', back_populates='produto', lazy='dynamic')

@@ -1,27 +1,33 @@
-from flask import render_template, redirect, url_for, flash, request, jsonify, current_app
+from flask import render_template, redirect, url_for, flash, request, jsonify, current_app, abort
 from app.extensions import db
 from app.models.modelo_prato import Prato, PratoInsumo
 from app.models.modelo_produto import Produto
 from app.models.modelo_custo import CustoIndireto
 from app.routes.pratos import bp
 from datetime import datetime, date
+from app.utils.tenant import get_current_restaurant_id
 import pandas as pd
 import io
 from sqlalchemy import func
+from sqlalchemy.orm import joinedload
 
 @bp.route('/')
 @bp.route('/index')
 def index():
     """Lista todos os pratos"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        flash('Erro: Restaurante não identificado.', 'danger')
+        return redirect(url_for('main.index'))
+
     page = request.args.get('page', 1, type=int)
     
     # Filtros opcionais
     categoria = request.args.get('categoria')
     ordenar_por = request.args.get('ordenar_por', 'nome')
     
-    # Construir query base
-    from sqlalchemy.orm import joinedload
-    query = Prato.query.options(
+    # Construir query base com filtro de tenant
+    query = Prato.query.filter_by(restaurant_id=restaurant_id).options(
         joinedload(Prato.insumos).joinedload(PratoInsumo.produto)
     )
     
@@ -63,7 +69,7 @@ def index():
     
     # Obter lista de categorias para filtro
     # Usa query separada limpa (sem joins desnecessários) para categorias
-    categorias = db.session.query(Prato.categoria).distinct().all()
+    categorias = db.session.query(Prato.categoria).filter_by(restaurant_id=restaurant_id).distinct().all()
     categorias = [c[0] for c in categorias if c[0]]
     
     return render_template('pratos/index.html', 
@@ -74,6 +80,10 @@ def index():
 @bp.route('/criar', methods=['GET', 'POST'])
 def criar():
     """Cria um novo prato"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        abort(403)
+
     if request.method == 'POST':
         # Obter dados do formulário
         nome = request.form.get('nome')
@@ -90,8 +100,8 @@ def criar():
             flash('Nome, rendimento, unidade de rendimento e porções são obrigatórios!', 'danger')
             return redirect(url_for('pratos.criar'))
         
-        # Verificar se nome já existe
-        if Prato.query.filter_by(nome=nome).first():
+        # Verificar se nome já existe (dentro do tenant)
+        if Prato.query.filter_by(nome=nome, restaurant_id=restaurant_id).first():
             flash('Já existe um prato com este nome!', 'danger')
             return redirect(url_for('pratos.criar'))
         
@@ -104,12 +114,14 @@ def criar():
             unidade_rendimento=unidade_rendimento,
             porcoes_rendimento=porcoes_rendimento,
             tempo_preparo=tempo_preparo,
-            margem=margem
+            margem=margem,
+            restaurant_id=restaurant_id
         )
         
-        # Obter o valor de rateio dos custos indiretos (média)
+        # Obter o valor de rateio dos custos indiretos (média) do tenant
         primeiro_dia_mes = date.today().replace(day=1)
         valor_rateio = CustoIndireto.query.filter(
+            CustoIndireto.restaurant_id == restaurant_id,
             CustoIndireto.data_referencia >= primeiro_dia_mes
         ).with_entities(func.avg(CustoIndireto.valor)).scalar() or 0
         
@@ -125,13 +137,18 @@ def criar():
             produto = None
             # Se for número, buscar por ID
             if ingrediente.isdigit():
-                produto = Produto.query.get(int(ingrediente))
+                produto = Produto.query.filter_by(id=int(ingrediente), restaurant_id=restaurant_id).first()
             else:
-                # Buscar por nome
-                produto = Produto.query.filter_by(nome=ingrediente).first()
+                # Buscar por nome no tenant
+                produto = Produto.query.filter_by(nome=ingrediente, restaurant_id=restaurant_id).first()
                 if not produto:
                     # Criar novo produto com unidade padrão 'un' e preço 0
-                    produto = Produto(nome=ingrediente, unidade='un', preco_unitario=0)
+                    produto = Produto(
+                        nome=ingrediente, 
+                        unidade='un', 
+                        preco_unitario=0, 
+                        restaurant_id=restaurant_id
+                    )
                     db.session.add(produto)
                     db.session.flush()  # Para obter o ID
             if produto and quantidade and quantidade > 0:
@@ -153,14 +170,15 @@ def criar():
 @bp.route('/editar/<int:id>', methods=['GET', 'POST'])
 def editar(id):
     """Edita um prato existente"""
-    prato = Prato.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    prato = Prato.query.filter_by(id=id, restaurant_id=restaurant_id).first_or_404()
     
     if request.method == 'POST':
         # Obter dados do formulário
         nome = request.form.get('nome')
         
-        # Verificar se nome já existe (se for diferente do atual)
-        if nome != prato.nome and Prato.query.filter_by(nome=nome).first():
+        # Verificar se nome já existe (se for diferente do atual) no tenant
+        if nome != prato.nome and Prato.query.filter_by(nome=nome, restaurant_id=restaurant_id).first():
             flash('Já existe um prato com este nome!', 'danger')
             return render_template('pratos/editar.html', prato=prato)
         
@@ -187,7 +205,8 @@ def editar(id):
 @bp.route('/visualizar/<int:id>')
 def visualizar(id):
     """Visualiza detalhes de um prato"""
-    prato = Prato.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    prato = Prato.query.filter_by(id=id, restaurant_id=restaurant_id).first_or_404()
     
     # Calcular informações adicionais
     custo_direto_total = prato.custo_direto_total
@@ -211,7 +230,8 @@ def visualizar(id):
 @bp.route('/adicionar_insumo/<int:id>', methods=['GET', 'POST'])
 def adicionar_insumo(id):
     """Adiciona insumos a um prato"""
-    prato = Prato.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    prato = Prato.query.filter_by(id=id, restaurant_id=restaurant_id).first_or_404()
     
     if request.method == 'POST':
         produto_id = request.form.get('produto_id', type=int)
@@ -222,9 +242,15 @@ def adicionar_insumo(id):
         
         if not produto_id or not quantidade or quantidade <= 0:
             flash('Produto e quantidade válida são obrigatórios!', 'danger')
-            produtos = Produto.query.order_by(Produto.nome).all()
+            produtos = Produto.query.filter_by(restaurant_id=restaurant_id).order_by(Produto.nome).all()
             return render_template('pratos/adicionar_insumo.html', prato=prato, produtos=produtos)
         
+        # Validar se produto pertence ao tenant
+        produto = Produto.query.filter_by(id=produto_id, restaurant_id=restaurant_id).first()
+        if not produto:
+            flash('Produto inválido.', 'danger')
+            return redirect(url_for('pratos.visualizar', id=id))
+
         # Verificar se o insumo já existe neste prato
         insumo_existente = PratoInsumo.query.filter_by(
             prato_id=prato.id, produto_id=produto_id
@@ -259,13 +285,15 @@ def adicionar_insumo(id):
         else:
             return redirect(url_for('pratos.visualizar', id=id))
     
-    produtos = Produto.query.order_by(Produto.nome).all()
+    produtos = Produto.query.filter_by(restaurant_id=restaurant_id).order_by(Produto.nome).all()
     return render_template('pratos/adicionar_insumo.html', prato=prato, produtos=produtos)
 
 @bp.route('/editar_insumo/<int:id>', methods=['GET', 'POST'])
 def editar_insumo(id):
     """Edita um insumo de um prato"""
-    insumo = PratoInsumo.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    # Garantir que o insumo pertence a um prato do tenant
+    insumo = PratoInsumo.query.join(Prato).filter(PratoInsumo.id == id, Prato.restaurant_id == restaurant_id).first_or_404()
     prato = insumo.prato
     
     if request.method == 'POST':
@@ -298,7 +326,8 @@ def editar_insumo(id):
 @bp.route('/remover_insumo/<int:id>', methods=['POST'])
 def remover_insumo(id):
     """Remove um insumo de um prato"""
-    insumo = PratoInsumo.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    insumo = PratoInsumo.query.join(Prato).filter(PratoInsumo.id == id, Prato.restaurant_id == restaurant_id).first_or_404()
     prato_id = insumo.prato_id
     
     db.session.delete(insumo)
@@ -315,7 +344,8 @@ def remover_insumo(id):
 @bp.route('/atualizar_preco/<int:id>', methods=['POST'])
 def atualizar_preco(id):
     """Atualiza o preço de venda de um prato com base no preço sugerido"""
-    prato = Prato.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    prato = Prato.query.filter_by(id=id, restaurant_id=restaurant_id).first_or_404()
     
     # Atualizar o preço sugerido
     preco_sugerido = prato.atualizar_preco_sugerido()
@@ -326,7 +356,8 @@ def atualizar_preco(id):
 @bp.route('/definir_preco/<int:id>', methods=['POST'])
 def definir_preco(id):
     """Define manualmente o preço de venda"""
-    prato = Prato.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    prato = Prato.query.filter_by(id=id, restaurant_id=restaurant_id).first_or_404()
     
     preco_manual = request.form.get('preco_manual', type=float)
     if not preco_manual or preco_manual < 0:
@@ -342,7 +373,8 @@ def definir_preco(id):
 @bp.route('/ficha_tecnica/<int:id>')
 def ficha_tecnica(id):
     """Exibe a ficha técnica completa de um prato"""
-    prato = Prato.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    prato = Prato.query.filter_by(id=id, restaurant_id=restaurant_id).first_or_404()
     
     # Ordenar insumos por ordem
     insumos = sorted(prato.insumos, key=lambda i: i.ordem)
@@ -354,7 +386,8 @@ def exportar_ficha(id):
     """Exporta a ficha técnica para CSV"""
     from flask import Response
     
-    prato = Prato.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    prato = Prato.query.filter_by(id=id, restaurant_id=restaurant_id).first_or_404()
     
     # Ordenar insumos por ordem
     insumos = sorted(prato.insumos, key=lambda i: i.ordem)
@@ -414,8 +447,12 @@ def exportar_ficha(id):
 @bp.route('/relatorio_custos')
 def relatorio_custos():
     """Relatório de custos de todos os pratos"""
-    # Obter todos os pratos
-    pratos = Prato.query.filter_by(ativo=True).all()
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        abort(403)
+        
+    # Obter todos os pratos do tenant
+    pratos = Prato.query.filter_by(ativo=True, restaurant_id=restaurant_id).all()
     
     # Ordenar por custo total (do mais caro para o mais barato)
     pratos.sort(key=lambda p: p.custo_total_por_porcao, reverse=True)
@@ -450,7 +487,11 @@ def relatorio_custos():
 @bp.route('/api/listar')
 def api_listar():
     """API para listar pratos (JSON)"""
-    pratos = Prato.query.filter_by(ativo=True).order_by(Prato.nome).all()
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        return jsonify([])
+        
+    pratos = Prato.query.filter_by(ativo=True, restaurant_id=restaurant_id).order_by(Prato.nome).all()
     return jsonify([
         {
             'id': p.id,
@@ -466,7 +507,8 @@ def api_listar():
 @bp.route('/api/ficha_tecnica/<int:id>')
 def api_ficha_tecnica(id):
     """API para obter ficha técnica de um prato (JSON)"""
-    prato = Prato.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    prato = Prato.query.filter_by(id=id, restaurant_id=restaurant_id).first_or_404()
     
     return jsonify({
         'id': prato.id,
@@ -503,8 +545,15 @@ def api_ficha_tecnica(id):
 
 @bp.route('/api/sugerir_ingredientes')
 def sugerir_ingredientes():
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        return jsonify([])
+        
     termo = request.args.get('termo', '')
-    ingredientes = Produto.query.filter(Produto.nome.ilike(f'%{termo}%')).all()
+    ingredientes = Produto.query.filter(
+        Produto.restaurant_id == restaurant_id,
+        Produto.nome.ilike(f'%{termo}%')
+    ).all()
     sugestoes = [{'id': i.id, 'nome': i.nome} for i in ingredientes]
     if not sugestoes and termo:
         sugestoes.append({'id': termo, 'nome': f'Adicionar novo ingrediente: {termo}'})
@@ -513,17 +562,20 @@ def sugerir_ingredientes():
 @bp.route('/api/verificar_estoque', methods=['GET'])
 def verificar_estoque():
     """Verifica se há estoque suficiente para os ingredientes"""
+    restaurant_id = get_current_restaurant_id()
+    
     ingredientes = request.args.getlist('ingredientes[]')
     quantidades = request.args.getlist('quantidades[]')
     
-    if not ingredientes or not quantidades:
+    if not ingredientes or not quantidades or not restaurant_id:
         return jsonify([])
     
     resultado = []
     for i, ingrediente_id in enumerate(ingredientes):
         try:
             quantidade = float(quantidades[i])
-            produto = Produto.query.get(ingrediente_id)
+            # Validar e buscar produto do tenant
+            produto = Produto.query.filter_by(id=ingrediente_id, restaurant_id=restaurant_id).first()
             
             if produto:
                 estoque_atual = produto.estoque_atual or 0

@@ -1,10 +1,11 @@
-from flask import render_template, redirect, url_for, flash, request, jsonify, current_app, Response
+from flask import render_template, redirect, url_for, flash, request, jsonify, current_app, Response, abort
 from app.extensions import db
 from app.models.modelo_desperdicio import CategoriaDesperdicio, RegistroDesperdicio, MetaDesperdicio
 from app.models.modelo_produto import Produto
 from app.models.modelo_prato import Prato
 from app.routes.desperdicio import bp
 from datetime import datetime, date, timedelta
+from app.utils.tenant import get_current_restaurant_id
 import pandas as pd
 import io
 import json
@@ -13,13 +14,19 @@ import json
 @bp.route('/index')
 def index():
     """Página principal do módulo de monitoramento de desperdício"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        flash('Erro: Restaurante não identificado.', 'danger')
+        return redirect(url_for('main.index'))
+
     # Obter estatísticas gerais
     hoje = date.today()
     inicio_mes = date(hoje.year, hoje.month, 1)
     
-    # Registros do mês atual
+    # Registros do mês atual do tenant
     registros_mes = RegistroDesperdicio.query.filter(
-        RegistroDesperdicio.data_registro >= inicio_mes
+        RegistroDesperdicio.data_registro >= inicio_mes,
+        RegistroDesperdicio.restaurant_id == restaurant_id
     ).all()
     
     # Calcular valores gerais
@@ -29,15 +36,16 @@ def index():
     # Agrupar por categoria
     por_categoria = {}
     for registro in registros_mes:
-        categoria = registro.categoria.nome
-        if categoria not in por_categoria:
-            por_categoria[categoria] = {
-                'quantidade': 0,
-                'valor': 0,
-                'cor': registro.categoria.cor or '#CCCCCC'
-            }
-        por_categoria[categoria]['quantidade'] += 1
-        por_categoria[categoria]['valor'] += float(registro.valor_estimado or 0)
+        if registro.categoria:
+            categoria = registro.categoria.nome
+            if categoria not in por_categoria:
+                por_categoria[categoria] = {
+                    'quantidade': 0,
+                    'valor': 0,
+                    'cor': registro.categoria.cor or '#CCCCCC'
+                }
+            por_categoria[categoria]['quantidade'] += 1
+            por_categoria[categoria]['valor'] += float(registro.valor_estimado or 0)
     
     # Agrupar por tipo de item
     por_tipo = {
@@ -52,8 +60,8 @@ def index():
             por_tipo['Pratos']['quantidade'] += 1
             por_tipo['Pratos']['valor'] += float(registro.valor_estimado or 0)
     
-    # Metas ativas
-    metas_ativas = MetaDesperdicio.query.filter_by(ativo=True).all()
+    # Metas ativas do tenant
+    metas_ativas = MetaDesperdicio.query.filter_by(ativo=True, restaurant_id=restaurant_id).all()
     
     # Dados para gráficos (JSON)
     dados_categorias = []
@@ -64,8 +72,8 @@ def index():
             'cor': dados['cor']
         })
     
-    # Últimos registros
-    ultimos_registros = RegistroDesperdicio.query.order_by(
+    # Últimos registros do tenant
+    ultimos_registros = RegistroDesperdicio.query.filter_by(restaurant_id=restaurant_id).order_by(
         RegistroDesperdicio.data_registro.desc()
     ).limit(10).all()
     
@@ -83,13 +91,21 @@ def index():
 @bp.route('/categorias')
 def listar_categorias():
     """Lista todas as categorias de desperdício"""
-    categorias = CategoriaDesperdicio.query.all()
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+         abort(403)
+    
+    categorias = CategoriaDesperdicio.query.filter_by(restaurant_id=restaurant_id).all()
     return render_template('desperdicio/categorias.html', categorias=categorias)
 
 
 @bp.route('/categoria/criar', methods=['GET', 'POST'])
 def criar_categoria():
     """Cria uma nova categoria de desperdício"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        abort(403)
+
     if request.method == 'POST':
         nome = request.form.get('nome')
         descricao = request.form.get('descricao')
@@ -99,8 +115,8 @@ def criar_categoria():
             flash('Nome da categoria é obrigatório!', 'danger')
             return redirect(url_for('desperdicio.criar_categoria'))
         
-        # Verificar se já existe categoria com este nome
-        if CategoriaDesperdicio.query.filter_by(nome=nome).first():
+        # Verificar se já existe categoria com este nome no tenant
+        if CategoriaDesperdicio.query.filter_by(nome=nome, restaurant_id=restaurant_id).first():
             flash('Já existe uma categoria com este nome!', 'danger')
             return redirect(url_for('desperdicio.criar_categoria'))
         
@@ -108,7 +124,8 @@ def criar_categoria():
             nome=nome,
             descricao=descricao,
             cor=cor,
-            ativo=True
+            ativo=True,
+            restaurant_id=restaurant_id
         )
         
         db.session.add(categoria)
@@ -123,7 +140,8 @@ def criar_categoria():
 @bp.route('/categoria/editar/<int:id>', methods=['GET', 'POST'])
 def editar_categoria(id):
     """Edita uma categoria de desperdício"""
-    categoria = CategoriaDesperdicio.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    categoria = CategoriaDesperdicio.query.filter_by(id=id, restaurant_id=restaurant_id).first_or_404()
     
     if request.method == 'POST':
         nome = request.form.get('nome')
@@ -135,8 +153,8 @@ def editar_categoria(id):
             flash('Nome da categoria é obrigatório!', 'danger')
             return render_template('desperdicio/editar_categoria.html', categoria=categoria)
         
-        # Verificar se já existe outra categoria com este nome
-        categoria_existente = CategoriaDesperdicio.query.filter_by(nome=nome).first()
+        # Verificar se já existe outra categoria com este nome no tenant
+        categoria_existente = CategoriaDesperdicio.query.filter_by(nome=nome, restaurant_id=restaurant_id).first()
         if categoria_existente and categoria_existente.id != id:
             flash('Já existe outra categoria com este nome!', 'danger')
             return render_template('desperdicio/editar_categoria.html', categoria=categoria)
@@ -158,6 +176,10 @@ def editar_categoria(id):
 @bp.route('/registros')
 def listar_registros():
     """Lista todos os registros de desperdício"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        return redirect(url_for('main.index'))
+
     page = request.args.get('page', 1, type=int)
     
     # Filtros opcionais
@@ -166,8 +188,8 @@ def listar_registros():
     data_fim = request.args.get('data_fim')
     tipo_item = request.args.get('tipo_item')  # 'produto' ou 'prato'
     
-    # Construir query
-    query = RegistroDesperdicio.query
+    # Construir query tenant-aware
+    query = RegistroDesperdicio.query.filter_by(restaurant_id=restaurant_id)
     
     # Aplicar filtros
     if categoria_id:
@@ -191,8 +213,8 @@ def listar_registros():
     registros = query.order_by(RegistroDesperdicio.data_registro.desc()).paginate(
         page=page, per_page=20, error_out=False)
     
-    # Obter categorias para filtro
-    categorias = CategoriaDesperdicio.query.order_by(CategoriaDesperdicio.nome).all()
+    # Obter categorias para filtro (do tenant)
+    categorias = CategoriaDesperdicio.query.filter_by(restaurant_id=restaurant_id).order_by(CategoriaDesperdicio.nome).all()
     
     return render_template('desperdicio/registros.html',
                           registros=registros,
@@ -202,6 +224,10 @@ def listar_registros():
 @bp.route('/registro/criar', methods=['GET', 'POST'])
 def criar_registro():
     """Cria um novo registro de desperdício"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        abort(403)
+
     if request.method == 'POST':
         categoria_id = request.form.get('categoria_id', type=int)
         tipo_item = request.form.get('tipo_item')  # 'produto' ou 'prato'
@@ -218,11 +244,17 @@ def criar_registro():
         # Validações básicas
         if not categoria_id or not tipo_item or not item_id or not quantidade or not unidade_medida:
             flash('Categoria, tipo de item, item, quantidade e unidade de medida são obrigatórios!', 'danger')
-            categorias = CategoriaDesperdicio.query.filter_by(ativo=True).all()
-            produtos = Produto.query.filter_by(ativo=True).order_by(Produto.nome).all()
-            pratos = Prato.query.filter_by(ativo=True).order_by(Prato.nome).all()
+            categorias = CategoriaDesperdicio.query.filter_by(ativo=True, restaurant_id=restaurant_id).all()
+            produtos = Produto.query.filter_by(ativo=True, restaurant_id=restaurant_id).order_by(Produto.nome).all()
+            pratos = Prato.query.filter_by(ativo=True, restaurant_id=restaurant_id).order_by(Prato.nome).all()
             return render_template('desperdicio/criar_registro.html', categorias=categorias, produtos=produtos, pratos=pratos)
         
+        # Verificar tenant da categoria
+        cat = CategoriaDesperdicio.query.filter_by(id=categoria_id, restaurant_id=restaurant_id).first()
+        if not cat:
+             flash('Categoria inválida!', 'danger')
+             return redirect(url_for('desperdicio.criar_registro'))
+             
         # Criar o registro
         registro = RegistroDesperdicio(
             categoria_id=categoria_id,
@@ -233,13 +265,22 @@ def criar_registro():
             responsavel=responsavel,
             local=local,
             descricao=descricao,
-            acoes_corretivas=acoes_corretivas
+            acoes_corretivas=acoes_corretivas,
+            restaurant_id=restaurant_id
         )
         
-        # Definir produto ou prato conforme o tipo selecionado
+        # Definir produto ou prato conforme o tipo selecionado e VALIDAR tenant
         if tipo_item == 'produto':
+            prod = Produto.query.filter_by(id=item_id, restaurant_id=restaurant_id).first()
+            if not prod:
+                flash('Produto inválido!', 'danger')
+                return redirect(url_for('desperdicio.criar_registro'))
             registro.produto_id = item_id
         else:  # prato
+            prato = Prato.query.filter_by(id=item_id, restaurant_id=restaurant_id).first()
+            if not prato:
+                flash('Prato inválido!', 'danger')
+                return redirect(url_for('desperdicio.criar_registro'))
             registro.prato_id = item_id
         
         db.session.add(registro)
@@ -248,10 +289,10 @@ def criar_registro():
         flash('Registro de desperdício criado com sucesso!', 'success')
         return redirect(url_for('desperdicio.listar_registros'))
     
-    # Obter listas para os selectboxes
-    categorias = CategoriaDesperdicio.query.filter_by(ativo=True).all()
-    produtos = Produto.query.filter_by(ativo=True).order_by(Produto.nome).all()
-    pratos = Prato.query.filter_by(ativo=True).order_by(Prato.nome).all()
+    # Obter listas para os selectboxes (do tenant)
+    categorias = CategoriaDesperdicio.query.filter_by(ativo=True, restaurant_id=restaurant_id).all()
+    produtos = Produto.query.filter_by(ativo=True, restaurant_id=restaurant_id).order_by(Produto.nome).all()
+    pratos = Prato.query.filter_by(ativo=True, restaurant_id=restaurant_id).order_by(Prato.nome).all()
     
     return render_template('desperdicio/criar_registro.html',
                           categorias=categorias,
@@ -262,20 +303,29 @@ def criar_registro():
 @bp.route('/registro/visualizar/<int:id>')
 def visualizar_registro(id):
     """Visualiza detalhes de um registro de desperdício"""
-    registro = RegistroDesperdicio.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    registro = RegistroDesperdicio.query.filter_by(id=id, restaurant_id=restaurant_id).first_or_404()
     return render_template('desperdicio/visualizar_registro.html', registro=registro)
 
 
 @bp.route('/metas')
 def listar_metas():
     """Lista todas as metas de redução de desperdício"""
-    metas = MetaDesperdicio.query.all()
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        return redirect(url_for('main.index'))
+        
+    metas = MetaDesperdicio.query.filter_by(restaurant_id=restaurant_id).all()
     return render_template('desperdicio/metas.html', metas=metas)
 
 
 @bp.route('/meta/criar', methods=['GET', 'POST'])
 def criar_meta():
     """Cria uma nova meta de redução de desperdício"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        abort(403)
+
     if request.method == 'POST':
         descricao = request.form.get('descricao')
         data_inicio = request.form.get('data_inicio')
@@ -290,8 +340,8 @@ def criar_meta():
         # Validações básicas
         if not descricao or not data_inicio or not data_fim or not valor_inicial or not meta_reducao_percentual:
             flash('Descrição, período, valor inicial e percentual de redução são obrigatórios!', 'danger')
-            categorias = CategoriaDesperdicio.query.filter_by(ativo=True).all()
-            produtos = Produto.query.filter_by(ativo=True).order_by(Produto.nome).all()
+            categorias = CategoriaDesperdicio.query.filter_by(ativo=True, restaurant_id=restaurant_id).all()
+            produtos = Produto.query.filter_by(ativo=True, restaurant_id=restaurant_id).order_by(Produto.nome).all()
             return render_template('desperdicio/criar_meta.html', categorias=categorias, produtos=produtos)
         
         # Converter datas
@@ -301,13 +351,13 @@ def criar_meta():
             
             if data_fim <= data_inicio:
                 flash('A data final deve ser posterior à data inicial!', 'danger')
-                categorias = CategoriaDesperdicio.query.filter_by(ativo=True).all()
-                produtos = Produto.query.filter_by(ativo=True).order_by(Produto.nome).all()
+                categorias = CategoriaDesperdicio.query.filter_by(ativo=True, restaurant_id=restaurant_id).all()
+                produtos = Produto.query.filter_by(ativo=True, restaurant_id=restaurant_id).order_by(Produto.nome).all()
                 return render_template('desperdicio/criar_meta.html', categorias=categorias, produtos=produtos)
         except ValueError:
             flash('Formato de data inválido!', 'danger')
-            categorias = CategoriaDesperdicio.query.filter_by(ativo=True).all()
-            produtos = Produto.query.filter_by(ativo=True).order_by(Produto.nome).all()
+            categorias = CategoriaDesperdicio.query.filter_by(ativo=True, restaurant_id=restaurant_id).all()
+            produtos = Produto.query.filter_by(ativo=True, restaurant_id=restaurant_id).order_by(Produto.nome).all()
             return render_template('desperdicio/criar_meta.html', categorias=categorias, produtos=produtos)
         
         # Criar a meta
@@ -321,7 +371,8 @@ def criar_meta():
             meta_reducao_percentual=meta_reducao_percentual,
             acoes_propostas=acoes_propostas,
             responsavel=responsavel,
-            ativo=True
+            ativo=True,
+            restaurant_id=restaurant_id
         )
         
         db.session.add(meta)
@@ -331,8 +382,8 @@ def criar_meta():
         return redirect(url_for('desperdicio.listar_metas'))
     
     # Obter listas para os selectboxes
-    categorias = CategoriaDesperdicio.query.filter_by(ativo=True).all()
-    produtos = Produto.query.filter_by(ativo=True).order_by(Produto.nome).all()
+    categorias = CategoriaDesperdicio.query.filter_by(ativo=True, restaurant_id=restaurant_id).all()
+    produtos = Produto.query.filter_by(ativo=True, restaurant_id=restaurant_id).order_by(Produto.nome).all()
     
     return render_template('desperdicio/criar_meta.html',
                           categorias=categorias,
@@ -342,7 +393,8 @@ def criar_meta():
 @bp.route('/meta/editar/<int:id>', methods=['GET', 'POST'])
 def editar_meta(id):
     """Edita uma meta de redução de desperdício"""
-    meta = MetaDesperdicio.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    meta = MetaDesperdicio.query.filter_by(id=id, restaurant_id=restaurant_id).first_or_404()
     
     if request.method == 'POST':
         descricao = request.form.get('descricao')
@@ -361,8 +413,8 @@ def editar_meta(id):
         # Validações básicas
         if not descricao or not data_inicio or not data_fim or not valor_inicial or not meta_reducao_percentual:
             flash('Descrição, período, valor inicial e percentual de redução são obrigatórios!', 'danger')
-            categorias = CategoriaDesperdicio.query.filter_by(ativo=True).all()
-            produtos = Produto.query.filter_by(ativo=True).order_by(Produto.nome).all()
+            categorias = CategoriaDesperdicio.query.filter_by(ativo=True, restaurant_id=restaurant_id).all()
+            produtos = Produto.query.filter_by(ativo=True, restaurant_id=restaurant_id).order_by(Produto.nome).all()
             return render_template('desperdicio/editar_meta.html', meta=meta, categorias=categorias, produtos=produtos)
         
         # Converter datas
@@ -372,13 +424,13 @@ def editar_meta(id):
             
             if data_fim <= data_inicio:
                 flash('A data final deve ser posterior à data inicial!', 'danger')
-                categorias = CategoriaDesperdicio.query.filter_by(ativo=True).all()
-                produtos = Produto.query.filter_by(ativo=True).order_by(Produto.nome).all()
+                categorias = CategoriaDesperdicio.query.filter_by(ativo=True, restaurant_id=restaurant_id).all()
+                produtos = Produto.query.filter_by(ativo=True, restaurant_id=restaurant_id).order_by(Produto.nome).all()
                 return render_template('desperdicio/editar_meta.html', meta=meta, categorias=categorias, produtos=produtos)
         except ValueError:
             flash('Formato de data inválido!', 'danger')
-            categorias = CategoriaDesperdicio.query.filter_by(ativo=True).all()
-            produtos = Produto.query.filter_by(ativo=True).order_by(Produto.nome).all()
+            categorias = CategoriaDesperdicio.query.filter_by(ativo=True, restaurant_id=restaurant_id).all()
+            produtos = Produto.query.filter_by(ativo=True, restaurant_id=restaurant_id).order_by(Produto.nome).all()
             return render_template('desperdicio/editar_meta.html', meta=meta, categorias=categorias, produtos=produtos)
         
         # Atualizar a meta
@@ -401,8 +453,8 @@ def editar_meta(id):
         return redirect(url_for('desperdicio.listar_metas'))
     
     # Obter listas para os selectboxes
-    categorias = CategoriaDesperdicio.query.filter_by(ativo=True).all()
-    produtos = Produto.query.filter_by(ativo=True).order_by(Produto.nome).all()
+    categorias = CategoriaDesperdicio.query.filter_by(ativo=True, restaurant_id=restaurant_id).all()
+    produtos = Produto.query.filter_by(ativo=True, restaurant_id=restaurant_id).order_by(Produto.nome).all()
     
     return render_template('desperdicio/editar_meta.html',
                           meta=meta,
@@ -413,7 +465,8 @@ def editar_meta(id):
 @bp.route('/meta/visualizar/<int:id>')
 def visualizar_meta(id):
     """Visualiza detalhes de uma meta de redução de desperdício"""
-    meta = MetaDesperdicio.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    meta = MetaDesperdicio.query.filter_by(id=id, restaurant_id=restaurant_id).first_or_404()
     
     # Calcular progresso
     progresso = 0
@@ -429,6 +482,10 @@ def visualizar_meta(id):
 @bp.route('/relatorios')
 def relatorios():
     """Página de relatórios de desperdício"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        return redirect(url_for('main.index'))
+
     try:
         # Obter parâmetros para filtros
         periodo = request.args.get('periodo', 'mensal')
@@ -462,20 +519,21 @@ def relatorios():
             data_fim = date(ano, 12, 31)
             titulo_periodo = str(ano)
         
-        # Query base filtrada por data com Eager Loading
+        # Query base filtrada por data e tenant com Eager Loading
         from sqlalchemy.orm import joinedload
         query = RegistroDesperdicio.query.options(
             joinedload(RegistroDesperdicio.categoria),
             joinedload(RegistroDesperdicio.produto),
             joinedload(RegistroDesperdicio.prato)
         ).filter(
+            RegistroDesperdicio.restaurant_id == restaurant_id,
             RegistroDesperdicio.data_registro >= data_inicio,
             RegistroDesperdicio.data_registro <= data_fim
         )
         
         if categoria_id:
             query = query.filter_by(categoria_id=categoria_id)
-            cat_obj = CategoriaDesperdicio.query.get(categoria_id)
+            cat_obj = CategoriaDesperdicio.query.filter_by(id=categoria_id, restaurant_id=restaurant_id).first()
             if cat_obj:
                 titulo_periodo += f' - Categoria: {cat_obj.nome}'
         
@@ -529,9 +587,6 @@ def relatorios():
         }
         
         # 3. Dias da Semana (Barra)
-        dias_semana_map = {0: 'Dom', 1: 'Seg', 2: 'Ter', 3: 'Qua', 4: 'Qui', 5: 'Sex', 6: 'Sáb'}
-        # Nota: Python weekday() 0=Monday. JS 0=Sunday usually? 
-        # Validar: Python 0=Segunda, 6=Domingo. Ajustar map.
         dias_semana_lbl = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
         dias_valores = [0] * 7
         
@@ -570,18 +625,12 @@ def relatorios():
         top_itens = top_itens[:10]
         for item in top_itens:
             item['percentual'] = (item['valor'] / total_valor * 100) if total_valor > 0 else 0
-            # Template espera item.prato.nome? Não, vamos passar dict
-            # Hack para template: ele acessa item.prato.nome. Vamos simular estrutura se precisar
-            # O template usa {{ item.prato.nome }} ??
-            # Vamos checar o template na próxima verificação se falhar, mas vou criar um objeto fake wrapper se precisar.
-            # Template line 219: {{ item.prato.nome }}. ISSO É UM PROBLEMA.
-            # Vou passar um objeto Mock ou dict com acesso via ponto se precisar, 
-            # mas Jinja acessa dict via ponto também? Sim.
-            # Então item.prato.nome precisa funcionar.
-            # Vou criar item['prato'] = {'nome': nome} dentro do dict.
+            # Adiciona dicionário 'prato' para compatibilidade com template se este esperar item.prato.nome
+            # O template pode estar usando {{ item.nome }} se foi ajustado, ou {{ item.prato.nome }} se originalmente era objeto.
+            # Verificado anteriormente: código tentava mitigar.
             item['prato'] = {'nome': item['nome']}
             
-        # Calcular tendência (placeholder ou simples comparação com período anterior)
+        # Calcular tendência
         tendencia = 0
         media_diaria = 0
         if total_registros > 0:
@@ -608,7 +657,7 @@ def relatorios():
                             ano=ano,
                             mes=mes,
                             categoria_id=categoria_id,
-                            todas_categorias=CategoriaDesperdicio.query.all(),
+                            todas_categorias=CategoriaDesperdicio.query.filter_by(restaurant_id=restaurant_id).all(),
                             data_inicio=data_inicio.strftime('%d/%m/%Y'),
                             data_fim=data_fim.strftime('%d/%m/%Y'))
     except Exception as e:
@@ -620,14 +669,18 @@ def relatorios():
 @bp.route('/exportar/registros')
 def exportar_registros():
     """Exporta registros de desperdício para CSV"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        abort(403)
+
     # Obter parâmetros para filtros
     data_inicio = request.args.get('data_inicio')
     data_fim = request.args.get('data_fim')
     categoria_id = request.args.get('categoria_id', type=int)
     tipo_item = request.args.get('tipo_item')  # 'produto' ou 'prato'
     
-    # Construir query
-    query = RegistroDesperdicio.query
+    # Construir query tenant-aware
+    query = RegistroDesperdicio.query.filter_by(restaurant_id=restaurant_id)
     
     # Aplicar filtros
     if categoria_id:
@@ -696,6 +749,10 @@ def exportar_registros():
 @bp.route('/registrar', methods=['GET', 'POST'])
 def registrar_desperdicio():
     """Registra um novo desperdício"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        abort(403)
+
     if request.method == 'POST':
         categoria_id = request.form.get('categoria_id', type=int)
         tipo_item = request.form.get('tipo_item')  # 'produto' ou 'prato'
@@ -714,22 +771,30 @@ def registrar_desperdicio():
         # Validações básicas
         if not categoria_id or not tipo_item or not quantidade or not unidade:
             flash('Categoria, tipo de item, quantidade e unidade são obrigatórios!', 'danger')
-            categorias = CategoriaDesperdicio.query.filter_by(ativo=True).all()
-            produtos = Produto.query.filter_by(ativo=True).order_by(Produto.nome).all()
-            pratos = Prato.query.filter_by(ativo=True).order_by(Prato.nome).all()
+            categorias = CategoriaDesperdicio.query.filter_by(ativo=True, restaurant_id=restaurant_id).all()
+            produtos = Produto.query.filter_by(ativo=True, restaurant_id=restaurant_id).order_by(Produto.nome).all()
+            pratos = Prato.query.filter_by(ativo=True, restaurant_id=restaurant_id).order_by(Prato.nome).all()
             return render_template('desperdicio/registrar_desperdicio.html', 
                                 categorias=categorias, 
                                 produtos=produtos, 
                                 pratos=pratos,
                                 hoje=datetime.now().strftime('%Y-%m-%d'))
         
-        # Validar produto ou prato conforme o tipo
-        if tipo_item == 'produto' and not produto_id:
-            flash('Selecione um produto!', 'danger')
-            return redirect(url_for('desperdicio.registrar_desperdicio'))
-        elif tipo_item == 'prato' and not prato_id:
-            flash('Selecione um prato!', 'danger')
-            return redirect(url_for('desperdicio.registrar_desperdicio'))
+        # Validar produto ou prato conforme o tipo e tenant
+        if tipo_item == 'produto':
+            if not produto_id:
+                flash('Selecione um produto!', 'danger')
+                return redirect(url_for('desperdicio.registrar_desperdicio'))
+            if not Produto.query.filter_by(id=produto_id, restaurant_id=restaurant_id).first():
+                flash('Produto inválido!', 'danger')
+                return redirect(url_for('desperdicio.registrar_desperdicio'))
+        elif tipo_item == 'prato':
+            if not prato_id:
+                flash('Selecione um prato!', 'danger')
+                return redirect(url_for('desperdicio.registrar_desperdicio'))
+            if not Prato.query.filter_by(id=prato_id, restaurant_id=restaurant_id).first():
+                flash('Prato inválido!', 'danger')
+                return redirect(url_for('desperdicio.registrar_desperdicio'))
         
         # Criar o registro
         registro = RegistroDesperdicio(
@@ -741,7 +806,8 @@ def registrar_desperdicio():
             responsavel=responsavel,
             local=local,
             descricao=descricao,
-            acoes_corretivas=acoes_corretivas
+            acoes_corretivas=acoes_corretivas,
+            restaurant_id=restaurant_id
         )
         
         # Definir produto ou prato conforme o tipo selecionado
@@ -761,13 +827,12 @@ def registrar_desperdicio():
         return redirect(url_for('desperdicio.listar_registros'))
     
     # Obter listas para os selectboxes
-    categorias = CategoriaDesperdicio.query.filter_by(ativo=True).all()
-    produtos = Produto.query.filter_by(ativo=True).order_by(Produto.nome).all()
-    pratos = Prato.query.filter_by(ativo=True).order_by(Prato.nome).all()
+    categorias = CategoriaDesperdicio.query.filter_by(ativo=True, restaurant_id=restaurant_id).all()
+    produtos = Produto.query.filter_by(ativo=True, restaurant_id=restaurant_id).order_by(Produto.nome).all()
+    pratos = Prato.query.filter_by(ativo=True, restaurant_id=restaurant_id).order_by(Prato.nome).all()
     
     return render_template('desperdicio/registrar_desperdicio.html',
                           categorias=categorias,
                           produtos=produtos,
                           pratos=pratos,
                           hoje=datetime.now().strftime('%Y-%m-%d'))
-

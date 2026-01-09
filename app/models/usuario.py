@@ -1,8 +1,9 @@
 from app import db
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
 
-class Usuario(db.Model):
+class Usuario(UserMixin, db.Model):
     """Modelo de usuário do sistema"""
     __tablename__ = 'usuario'
     
@@ -14,6 +15,10 @@ class Usuario(db.Model):
     ativo = db.Column(db.Boolean, default=True)
     data_cadastro = db.Column(db.DateTime, default=datetime.utcnow)
     data_atualizacao = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Multi-Tenancy
+    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurante.id'), nullable=False) # Enforce tenant
+    restaurante = db.relationship('Restaurante', back_populates='usuarios')
     
     def __init__(self, **kwargs):
         super(Usuario, self).__init__(**kwargs)

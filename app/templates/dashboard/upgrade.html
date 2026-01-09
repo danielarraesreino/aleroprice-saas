@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Upgrade para Pro - AleroPrice{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold text-primary">Desbloqueie o Poder Total 🚀</h1>
+        <p class="lead text-muted">Escolha o plano ideal para transformar seu restaurante em uma máquina de lucros.</p>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 mb-3 text-center justify-content-center">
+        <!-- Plano Free -->
+        <div class="col">
+            <div class="card mb-4 rounded-3 shadow-sm">
+                <div class="card-header py-3">
+                    <h4 class="my-0 fw-normal">Free</h4>
+                </div>
+                <div class="card-body">
+                    <h1 class="card-title pricing-card-title">R$ 0<small class="text-muted fw-light">/mês</small></h1>
+                    <ul class="list-unstyled mt-3 mb-4">
+                        <li><i class="fas fa-check text-success me-2"></i> Importação de NFE</li>
+                        <li><i class="fas fa-check text-success me-2"></i> Cadastro Automático</li>
+                        <li><i class="fas fa-times text-danger me-2"></i> Indicadores de Lucro</li>
+                        <li><i class="fas fa-times text-danger me-2"></i> Alertas de Inflação</li>
+                    </ul>
+                    <button type="button" class="w-100 btn btn-lg btn-outline-primary" disabled>Plano Atual</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Plano Pro -->
+        <div class="col">
+            <div class="card mb-4 rounded-3 shadow-lg border-primary">
+                <div class="card-header py-3 text-white bg-primary border-primary">
+                    <h4 class="my-0 fw-normal">Pro <span class="badge bg-warning text-dark ms-2"
+                            style="font-size: 0.6em;">RECOMENDADO</span></h4>
+                </div>
+                <div class="card-body">
+                    <h1 class="card-title pricing-card-title">R$ 97<small class="text-muted fw-light">/mês</small></h1>
+                    <ul class="list-unstyled mt-3 mb-4">
+                        <li><i class="fas fa-check text-success me-2"></i> <strong>Tudo do Free</strong></li>
+                        <li><i class="fas fa-check text-success me-2"></i> <strong>Lucro Real em Tempo Real</strong>
+                        </li>
+                        <li><i class="fas fa-check text-success me-2"></i> Alertas de Estoque Crítico</li>
+                        <li><i class="fas fa-check text-success me-2"></i> Matriz de Cardápio (BCG)</li>
+                        <li><i class="fas fa-check text-success me-2"></i> Suporte Prioritário</li>
+                    </ul>
+                    <!-- Formulário de Checkout Stripe -->
+                    <form action="{{ url_for('billing.create_checkout_session') }}" method="POST">
+                        <button type="submit"
+                            class="w-100 btn btn-lg btn-primary shadow animate__animated animate__pulse animate__infinite">
+                            <i class="fas fa-credit-card me-2"></i> Assinar Agora
+                        </button>
+                    </form>
+                    <div class="text-center mt-2">
+                        <small class="text-muted"><i class="fas fa-lock"></i> Pagamento Seguro via Stripe</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <p class="text-muted"><small>Sem fidelidade. Cancele quando quiser.</small></p>
+    </div>
+</div>
+{% endblock %}

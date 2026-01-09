@@ -9,3 +9,5 @@ from app.models.modelo_custo import CustoIndireto
 from app.models.modelo_cardapio import Cardapio, CardapioSecao, CardapioItem
 from app.models.modelo_desperdicio import CategoriaDesperdicio, RegistroDesperdicio, MetaDesperdicio
 from app.models.modelo_previsao import HistoricoVendas, PrevisaoDemanda, FatorSazonalidade
+from app.models.modelo_restaurante import Restaurante
+from app.models.usuario import Usuario

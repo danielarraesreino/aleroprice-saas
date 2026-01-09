@@ -27,6 +27,9 @@ class HistoricoVendas(db.Model):
     clima = db.Column(db.String(50))  # ex: "chuvoso", "ensolarado"
     temperatura = db.Column(db.Float)  # temperatura média do dia
     
+    # Multi-Tenancy
+    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurante.id'), nullable=False)
+    
     # Relacionamentos
     cardapio_item = db.relationship('CardapioItem', backref='historico_vendas')
     prato = db.relationship('Prato', backref='historico_vendas')
@@ -34,7 +37,7 @@ class HistoricoVendas(db.Model):
     # Método para facilitar a criação de registros
     @classmethod
     def registrar_venda(cls, data, item_id, tipo_item, quantidade, valor_unitario, 
-                      periodo_dia=None, evento_especial=None, clima=None, temperatura=None):
+                      periodo_dia=None, evento_especial=None, clima=None, temperatura=None, restaurant_id=None):
         """Registra uma venda no histórico"""
         # Calcula informações derivadas da data
         if isinstance(data, str):
@@ -62,7 +65,8 @@ class HistoricoVendas(db.Model):
             mes=mes,
             evento_especial=evento_especial,
             clima=clima,
-            temperatura=temperatura
+            temperatura=temperatura,
+            restaurant_id=restaurant_id
         )
         
         db.session.add(venda)
@@ -116,6 +120,9 @@ class PrevisaoDemanda(db.Model):
     # Resultado da previsão
     valores_previstos = db.Column(db.Text, nullable=False)  # JSON com as previsões para cada dia
     confiabilidade = db.Column(db.Float)  # 0-1, quanto maior, mais confiável
+    
+    # Multi-Tenancy
+    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurante.id'), nullable=False)
     
     # Relacionamentos
     cardapio_item = db.relationship('CardapioItem', backref='previsoes_demanda')
@@ -181,6 +188,9 @@ class FatorSazonalidade(db.Model):
     # Fator de multiplicação e descrição
     fator = db.Column(db.Float, nullable=False, default=1.0)  # Ex: 1.2 = aumento de 20%
     descricao = db.Column(db.String(200))
+    
+    # Multi-Tenancy
+    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurante.id'), nullable=False)
     
     # Relacionamentos
     cardapio_item = db.relationship('CardapioItem', backref='fatores_sazonalidade')

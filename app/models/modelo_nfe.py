@@ -22,6 +22,9 @@ class NFNota(db.Model):
     fornecedor_id = db.Column(db.Integer, db.ForeignKey('fornecedor.id'), nullable=False)
     xml_data = db.Column(db.Text)  # Armazena o XML original para referência
     
+    # Multi-Tenancy
+    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurante.id'), nullable=False)
+    
     # Relações
     fornecedor = db.relationship('Fornecedor', back_populates='notas_fiscais')
     itens = db.relationship('NFItem', back_populates='nota', cascade='all, delete-orphan')
@@ -73,7 +76,8 @@ class NFNota(db.Model):
                 data_movimentacao=datetime.now(),
                 referencia=f'NF {self.numero}/{self.serie}',
                 ref_id=item.id,
-                valor_unitario=item.valor_unitario
+                valor_unitario=item.valor_unitario,
+                restaurant_id=self.restaurant_id
             )
             db.session.add(movimento)
             

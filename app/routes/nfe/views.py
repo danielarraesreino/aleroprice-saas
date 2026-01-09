@@ -1,9 +1,11 @@
-from flask import render_template, redirect, url_for, flash, request, jsonify, current_app
+from flask import render_template, redirect, url_for, flash, request, jsonify, current_app, abort
 from app.extensions import db
 from app.models.modelo_nfe import NFNota, NFItem
 from app.models.modelo_fornecedor import Fornecedor
 from app.models.modelo_produto import Produto
+from app.models.modelo_restaurante import Restaurante
 from app.routes.nfe import bp
+from app.utils.tenant import get_current_restaurant_id
 import xmltodict
 from datetime import datetime
 from pydantic import BaseModel, Field, validator
@@ -29,6 +31,14 @@ class NFeItemModel(BaseModel):
     class Config:
         extra = 'ignore'  # Ignora campos não mapeados
 
+class NFeDestinatarioModel(BaseModel):
+    cnpj: Optional[str] = None
+    cpf: Optional[str] = None
+    razao_social: str = Field(..., alias='xNome')
+    
+    class Config:
+        extra = 'ignore'
+
 class NFeFornecedorModel(BaseModel):
     cnpj: str
     razao_social: str = Field(..., alias='xNome')
@@ -52,6 +62,7 @@ class NFeModel(BaseModel):
     valor_desconto: Optional[float] = Field(0, alias='vDesc')
     valor_impostos: Optional[float] = Field(0, alias='vImp')
     fornecedor: NFeFornecedorModel
+    destinatario: NFeDestinatarioModel
     itens: List[NFeItemModel]
     
     class Config:
@@ -61,6 +72,11 @@ class NFeModel(BaseModel):
 @bp.route('/index')
 def index():
     """Lista notas fiscais importadas"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        flash('Erro: Restaurante não identificado.', 'danger')
+        return redirect(url_for('main.index'))
+
     page = request.args.get('page', 1, type=int)
     
     # Filtros opcionais
@@ -68,8 +84,8 @@ def index():
     data_inicio = request.args.get('data_inicio')
     data_fim = request.args.get('data_fim')
     
-    # Construir query base
-    query = NFNota.query
+    # Construir query base com filtro de tenant
+    query = NFNota.query.filter_by(restaurant_id=restaurant_id)
     
     # Aplicar filtros
     if fornecedor_id:
@@ -85,8 +101,8 @@ def index():
     notas = query.order_by(NFNota.data_emissao.desc()).paginate(
         page=page, per_page=20, error_out=False)
     
-    # Obter lista de fornecedores para filtro
-    fornecedores = Fornecedor.query.order_by(Fornecedor.razao_social).all()
+    # Obter lista de fornecedores para filtro (apenas do tenant)
+    fornecedores = Fornecedor.query.filter_by(restaurant_id=restaurant_id).order_by(Fornecedor.razao_social).all()
     
     return render_template('nfe/index.html', 
                           notas=notas, 
@@ -95,6 +111,10 @@ def index():
 @bp.route('/importar', methods=['GET', 'POST'])
 def importar():
     """Importa nota fiscal eletrônica via XML"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        abort(403)
+
     if request.method == 'POST':
         # Verificar se um arquivo foi enviado
         if 'xml_file' not in request.files:
@@ -119,14 +139,40 @@ def importar():
             # Processar o XML
             nfe_data = processar_xml_nfe(xml_content)
             
-            # Verificar se a NF-e já existe no sistema
-            nota_existente = NFNota.query.filter_by(chave_acesso=nfe_data.chave_acesso).first()
+            # Validar CNPJ do Destinatário (Blindagem)
+            restaurante = Restaurante.query.get(restaurant_id)
+            if restaurante and restaurante.cnpj:
+                dest_cnpj = nfe_data.destinatario.cnpj
+                # Remover pontuação para comparação
+                if dest_cnpj:
+                    dest_cnpj_limpo = re.sub(r'\D', '', dest_cnpj)
+                    rest_cnpj_limpo = re.sub(r'\D', '', restaurante.cnpj)
+                    
+                    if dest_cnpj_limpo != rest_cnpj_limpo:
+                        flash(f'Bloqueio de Segurança: Esta nota fiscal é destinada ao CNPJ {dest_cnpj}, mas o seu restaurante é {restaurante.cnpj}.', 'danger')
+                        return render_template('nfe/importar.html')
+            
+            # Verificar se a NF-e já existe no sistema (para este tenant ou globalmente? Chave é unica globalmente normaly, mas vamos filtrar por tenant por segurança)
+            # Na verdade, a chave deve ser única. Se outro tenant importou a mesma nota, algo está errado (mesma nota em dois restaurantes?).
+            # Vamos assumir que se existe, bloqueia. Mas para evitar colisão entre tenants se houver dados compartilhados errados, filtrar por tenant é bom, 
+            # mas chave de acesso é única no mundo. Se já existe no DB, não importa o tenant, já foi importada?
+            # Se for multi-tenancy real em SCHEMA compartilhado, a chave deve ser unique PER TENANT?
+            # Não, uma nota fiscal é destinada a UM CNPJ destinatário. Se os tenants tem CNPJs diferentes, nunca colidirá.
+            # Se tenants compartilham CNPJ (filiais), a nota é a mesma.
+            # Vamos filtrar por existencia.
+            nota_existente = NFNota.query.filter_by(chave_acesso=nfe_data.chave_acesso).first() # Check global ou tenant?
+            # Se filtrar por tenant:
+            # nota_existente = NFNota.query.filter_by(chave_acesso=nfe_data.chave_acesso, restaurant_id=restaurant_id).first()
+            # Se já existir em OUTRO tenant, permitimos importar de novo? Talvez sim, se for um sistema multi-loja.
+            # Vamos filtrar por tenant para isolamento.
+            nota_existente = NFNota.query.filter_by(chave_acesso=nfe_data.chave_acesso, restaurant_id=restaurant_id).first()
+            
             if nota_existente:
                 flash(f'Nota fiscal {nfe_data.numero}/{nfe_data.serie} já importada anteriormente!', 'warning')
                 return redirect(url_for('nfe.visualizar', id=nota_existente.id))
             
             # Importar a NF-e
-            nova_nota = importar_nfe(nfe_data, xml_content)
+            nova_nota = importar_nfe(nfe_data, xml_content, restaurant_id)
             
             # Atualizar estoque com base nos itens da NF-e
             nova_nota.atualizar_estoque()
@@ -134,8 +180,14 @@ def importar():
             flash(f'Nota fiscal {nfe_data.numero}/{nfe_data.serie} importada com sucesso!', 'success')
             return redirect(url_for('nfe.visualizar', id=nova_nota.id))
             
+        except ValueError as ve:
+             flash(f'Erro de Validação: {str(ve)}', 'warning')
+             return render_template('nfe/importar.html')
         except Exception as e:
-            flash(f'Erro ao processar o XML: {str(e)}', 'danger')
+            # Logar erro real no console para debug
+            import traceback
+            traceback.print_exc()
+            flash(f'Não conseguimos ler esta nota. Verifique se é um XML de NFE válido (Erro: {str(e)})', 'danger')
             return render_template('nfe/importar.html')
     
     return render_template('nfe/importar.html')
@@ -143,13 +195,16 @@ def importar():
 @bp.route('/visualizar/<int:id>')
 def visualizar(id):
     """Visualiza detalhes de uma nota fiscal"""
-    nota = NFNota.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    nota = NFNota.query.filter_by(id=id, restaurant_id=restaurant_id).first_or_404()
     return render_template('nfe/visualizar.html', nota=nota)
 
 @bp.route('/item/<int:id>')
 def visualizar_item(id):
     """Visualiza detalhes de um item da nota fiscal"""
-    item = NFItem.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    # NFItem não tem restaurant_id direto, mas NFNota tem. Join para verificar.
+    item = NFItem.query.join(NFNota).filter(NFItem.id == id, NFNota.restaurant_id == restaurant_id).first_or_404()
     return render_template('nfe/item.html', item=item)
 
 def processar_xml_nfe(xml_content):
@@ -181,8 +236,6 @@ def processar_xml_nfe(xml_content):
         
         if not inf_nfe:
              # Tentar encontrar com maiúsculas/minúsculas diferentes ou namespaces residuais
-             # Mas assumindo que xmltodict com process_namespaces=True resolve a maioria
-             # Vamos tentar iterar manualmente o primeiro nível para casos extremos
              for key in xml_dict:
                  if 'infNFe' in str(key):
                      # Se a chave contem infNFe (ex: ns:infNFe)
@@ -227,6 +280,18 @@ def processar_xml_nfe(xml_content):
         cnpj = emit.get('CNPJ', emit.get('CPF', ''))
         razao_social = emit['xNome']
         inscricao_estadual = emit.get('IE')
+        
+        # Informações do Destinatário (Comprador)
+        dest = inf_nfe['dest']
+        dest_cnpj = dest.get('CNPJ')
+        dest_cpf = dest.get('CPF')
+        dest_nome = dest.get('xNome')
+        
+        destinatario_model = NFeDestinatarioModel(
+            cnpj=dest_cnpj,
+            cpf=dest_cpf,
+            xNome=dest_nome or "Consumidor"
+        )
         
         # Endereço do Fornecedor
         endereco = None
@@ -329,6 +394,7 @@ def processar_xml_nfe(xml_content):
             vDesc=valor_desconto,
             vImp=valor_impostos,
             fornecedor=fornecedor_model,
+            destinatario=destinatario_model,
             itens=itens_model
         )
         
@@ -339,20 +405,22 @@ def processar_xml_nfe(xml_content):
         traceback.print_exc()
         raise ValueError(f"Erro ao processar XML: {str(e)}")
 
-def importar_nfe(nfe_data, xml_content):
+def importar_nfe(nfe_data, xml_content, restaurant_id):
     """Importa os dados da NF-e para o banco de dados"""
-    # Verificar/criar fornecedor
-    fornecedor = Fornecedor.query.filter_by(cnpj=nfe_data.fornecedor.cnpj).first()
+    # Verificar/criar fornecedor (no contexto do tenant)
+    # Primeiro busca fornecedor pelo CNPJ dentro do tenant
+    fornecedor = Fornecedor.query.filter_by(cnpj=nfe_data.fornecedor.cnpj, restaurant_id=restaurant_id).first()
     
     if not fornecedor:
-        # Criar novo fornecedor
+        # Criar novo fornecedor para este tenant
         fornecedor = Fornecedor(
             cnpj=nfe_data.fornecedor.cnpj,
             razao_social=nfe_data.fornecedor.razao_social,
             inscricao_estadual=nfe_data.fornecedor.inscricao_estadual,
             endereco=nfe_data.fornecedor.endereco,
             cidade=nfe_data.fornecedor.cidade,
-            estado=nfe_data.fornecedor.estado
+            estado=nfe_data.fornecedor.estado,
+            restaurant_id=restaurant_id
         )
         db.session.add(fornecedor)
         db.session.flush()  # Para obter o ID sem commitar ainda
@@ -370,25 +438,48 @@ def importar_nfe(nfe_data, xml_content):
         valor_desconto=nfe_data.valor_desconto,
         valor_impostos=nfe_data.valor_impostos,
         fornecedor_id=fornecedor.id,
-        xml_data=xml_content
+        xml_data=xml_content,
+        restaurant_id=restaurant_id
     )
     
     db.session.add(nota)
     db.session.flush()  # Para obter o ID da nota sem commitar ainda
     
+    alertas_inflacao = []
+
     # Processar os itens da nota
     for item_data in nfe_data.itens:
-        # Verificar/criar produto
-        produto = Produto.query.filter_by(codigo=item_data.codigo).first()
+        # Verificar/criar produto pelo código E tenant
+        produto = Produto.query.filter_by(codigo=item_data.codigo, restaurant_id=restaurant_id).first()
         
-        if not produto:
+        if produto:
+            # Produto já existe: Verificar Inflação
+            preco_antigo = float(produto.preco_unitario or 0)
+            novo_preco = float(item_data.valor_unitario)
+            
+            if preco_antigo > 0:
+                variacao = ((novo_preco - preco_antigo) / preco_antigo) * 100
+                
+                # Se variação > 10%, registrar alerta
+                if variacao > 10.0:
+                    produto.ultimo_custo_anterior = preco_antigo
+                    produto.variacao_preco_pct = variacao
+                    produto.data_alerta_inflacao = datetime.now()
+                    alertas_inflacao.append(f"{produto.nome} (+{variacao:.0f}%)")
+            
+            # Atualizar preço de custo (sempre atualiza para o mais recente)
+            produto.preco_unitario = novo_preco
+            produto.nome = item_data.descricao # Atualiza nome também caso mude
+            
+        else:
             # Criar novo produto
             produto = Produto(
                 codigo=item_data.codigo,
                 nome=item_data.descricao,
                 unidade=item_data.unidade,
                 preco_unitario=item_data.valor_unitario,
-                fornecedor_id=fornecedor.id
+                fornecedor_id=fornecedor.id,
+                restaurant_id=restaurant_id
             )
             db.session.add(produto)
             db.session.flush()  # Para obter o ID sem commitar ainda
@@ -405,15 +496,26 @@ def importar_nfe(nfe_data, xml_content):
             cfop=item_data.cfop,
             ncm=item_data.ncm,
             percentual_icms=item_data.icms_aliquota,
-            valor_icms=item_data.icms_valor,
+            valor_icms=item_data.icms_aliquota, # Corrigido mapeamento (era icms_valor? não, percentual e valor são separados no modelo, verificar correspondencia)
+            # No código anterior: valor_icms=item_data.icms_valor
+            # Aqui estava item_data.icms_aliquota. Vou corrigir para valor.
             percentual_ipi=item_data.ipi_aliquota,
             valor_ipi=item_data.ipi_valor
         )
+        # Correção do campo valor_icms
+        item.valor_icms = item_data.icms_valor
         
         db.session.add(item)
     
     # Commit todas as alterações
     db.session.commit()
+    
+    # Notificar sobre Inflação
+    if alertas_inflacao:
+        msg = f"⚠️ Alerta de Inflação: {len(alertas_inflacao)} itens subiram >10%: " + ", ".join(alertas_inflacao[:3])
+        if len(alertas_inflacao) > 3:
+            msg += "..."
+        flash(msg, 'warning')
     
     return nota
 
@@ -421,7 +523,11 @@ def importar_nfe(nfe_data, xml_content):
 @bp.route('/api/notas')
 def api_listar_notas():
     """API para listar notas fiscais (JSON)"""
-    notas = NFNota.query.order_by(NFNota.data_emissao.desc()).limit(100).all()
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        return jsonify([])
+
+    notas = NFNota.query.filter_by(restaurant_id=restaurant_id).order_by(NFNota.data_emissao.desc()).limit(100).all()
     return jsonify([
         {
             'id': n.id,
@@ -436,7 +542,8 @@ def api_listar_notas():
 @bp.route('/api/nota/<int:id>')
 def api_detalhes_nota(id):
     """API para obter detalhes de uma nota fiscal (JSON)"""
-    nota = NFNota.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    nota = NFNota.query.filter_by(id=id, restaurant_id=restaurant_id).first_or_404()
     
     return jsonify({
         'id': nota.id,

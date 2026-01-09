@@ -4,6 +4,8 @@
 
 {% block extra_css %}
 <style>
+    @import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
+
     .card-dashboard {
         transition: transform 0.3s;
         margin-bottom: 20px;
@@ -107,6 +109,66 @@
 {% endblock %}
 
 {% block content %}
+{% if show_onboarding %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-5 text-center">
+                    <h1 class="display-4 text-primary fw-bold mb-4">Bem-vindo ao AleroPrice! 🚀</h1>
+                    <p class="lead mb-5">Siga os passos abaixo para destravar o poder da sua gestão financeira.</p>
+
+                    <div class="position-relative m-4">
+                        <div class="progress" style="height: 4px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: 50%;"
+                                aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="position-absolute top-0 start-0 translate-middle btn btn-sm btn-success rounded-pill"
+                            style="width: 2rem; height:2rem;">1</div>
+                        <div class="position-absolute top-0 start-50 translate-middle btn btn-sm btn-primary rounded-pill"
+                            style="width: 2rem; height:2rem;">2</div>
+                        <div class="position-absolute top-0 start-100 translate-middle btn btn-sm btn-secondary rounded-pill"
+                            style="width: 2rem; height:2rem;">3</div>
+                    </div>
+
+                    <div class="row mt-3 text-start">
+                        <div class="col-4 text-center">
+                            <h6 class="text-success fw-bold"><i class="fas fa-check-circle"></i> Cadastro</h6>
+                            <small class="text-muted">Concluído</small>
+                        </div>
+                        <div class="col-4 text-center">
+                            <h6 class="text-primary fw-bold">Importar XML</h6>
+                            <small class="text-primary animate__animated animate__flash animate__infinite">Ação
+                                Necessária</small>
+                        </div>
+                        <div class="col-4 text-center">
+                            <a href="{{ url_for('dashboard.upgrade') }}" class="text-decoration-none">
+                                <h6 class="text-secondary"><i class="fas fa-lock"></i> Lucro Real</h6>
+                                <small class="text-muted">Bloqueado (Clique)</small>
+                            </a>
+                        </div>
+                    </div>
+
+                    <hr class="my-5">
+
+                    <div class="alert alert-info border-info animate__animated animate__fadeInUp">
+                        <i class="fas fa-lightbulb text-warning me-2"></i>
+                        <strong>Dica de ROI:</strong> Importe uma nota para descobrir imediatamente se você pagou mais
+                        caro no tomate esta semana.
+                    </div>
+
+                    <a href="{{ url_for('nfe.importar') }}"
+                        class="btn btn-primary btn-lg px-5 py-3 fs-4 shadow animate__animated animate__pulse animate__infinite mt-3">
+                        <i class="fas fa-file-upload me-2"></i> Importar Primeira Nota Fiscal
+                    </a>
+
+                    <p class="text-muted mt-3 mb-0"><small>Zero digitação manual. Deixe a IA ler suas notas.</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
 <div class="row align-items-center mb-4">
     <div class="col-md-8">
         <h1 class="mb-0">Dashboard de Lucratividade</h1>
@@ -128,230 +190,475 @@
     </div>
 </div>
 
-<!-- Métricas Principais -->
-<div class="row">
-    <div class="col-md-3">
-        <div class="card card-dashboard card-revenue">
-            <div class="card-body text-center">
-                <div class="metric-title">Receita Total</div>
-                <div class="metric-value">R$ {{ "%.2f"|format(receita_total) }}</div>
+<!-- Cockpit Financeiro (Vibe: Lucro Real & Alertas) -->
+<div class="row mb-4">
+    <!-- Card 1: Lucro Hoje (O mais importante) -->
+    <div class="col-md-4">
+        <div class="card card-dashboard h-100 {% if lucro_hoje >= 0 %}bg-success text-white{% else %}bg-danger text-white{% endif %}"
+            style="border: none;">
+            <div class="card-body text-center d-flex flex-column justify-content-center">
+                <div class="mb-2"><i class="fas fa-cash-register fa-2x"></i></div>
+                <div class="metric-title opacity-75">LUCRO REAL (HOJE)</div>
+                <div class="metric-value display-4 fw-bold">R$ {{ "%.2f"|format(lucro_hoje) }}</div>
+                <small class="opacity-75">Receita: R$ {{ "%.2f"|format(receita_hoje or 0) }} | Custo: R$ {{
+                    "%.2f"|format(custo_hoje or 0) }}</small>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card card-dashboard card-cost">
-            <div class="card-body text-center">
-                <div class="metric-title">Custo Total</div>
-                <div class="metric-value">R$ {{ "%.2f"|format(custo_total) }}</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card card-dashboard card-profit">
-            <div class="card-body text-center">
-                <div class="metric-title">Lucro Total</div>
-                <div class="metric-value">R$ {{ "%.2f"|format(lucro_total) }}</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card card-dashboard card-margin">
-            <div class="card-body text-center">
-                <div class="metric-title">Margem Média</div>
-                <div class="metric-value">{{ "%.1f"|format(margem_media) }}%</div>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Relatórios Detalhados -->
-<div class="row mt-4 mb-2">
-    <div class="col-12">
-        <h3 class="dashboard-subtitle">Relatórios Detalhados</h3>
-    </div>
-</div>
-<div class="row">
-    <div class="col-md-6">
-        <div class="card card-dashboard">
-            <div class="card-body">
-                <h5 class="card-title">Análise por Pratos</h5>
-                <p>Verifique a lucratividade detalhada de cada prato, incluindo custos diretos, indiretos e margens.</p>
-                <a href="{{ url_for('dashboard.relatorio_pratos', data_inicio=inicio_periodo.strftime('%Y-%m-%d'), data_fim=fim_periodo.strftime('%Y-%m-%d')) }}"
-                    class="btn btn-primary">Ver Relatório</a>
+    <!-- Card 2: Estoque Crítico (Alerta Vermelho) -->
+    <div class="col-md-4">
+        <div
+            class="card card-dashboard h-100 {% if estoque_critico > 0 %}border-danger{% else %}border-success{% endif %}">
+            <div class="card-body text-center d-flex flex-column justify-content-center">
+                <div class="mb-2">
+                    {% if estoque_critico > 0 %}
+                    <i
+                        class="fas fa-exclamation-triangle fa-2x text-danger animate__animated animate__pulse animate__infinite"></i>
+                    {% else %}
+                    <i class="fas fa-check-circle fa-2x text-success"></i>
+                    {% endif %}
+                </div>
+                <div class="metric-title text-muted" data-bs-toggle="tooltip" data-bs-placement="top"
+                    title="Itens que acabarão em menos de 3 dias com base no seu consumo médio.">
+                    ESTOQUE CRÍTICO <i class="fas fa-question-circle small"></i>
+                </div>
+                <div
+                    class="metric-value fw-bold {% if estoque_critico > 0 %}text-danger{% else %}text-success{% endif %}">
+                    {{ estoque_critico }} ITENS
+                </div>
+                {% if estoque_critico > 0 %}
+                <a href="{{ url_for('estoque.relatorio') }}" class="btn btn-sm btn-outline-danger mt-2">Ver Itens em
+                    Falta</a>
+                {% else %}
+                <small class="text-success">Estoque saudável</small>
+                {% endif %}
             </div>
         </div>
     </div>
-    <div class="col-md-6">
-        <div class="card card-dashboard">
-            <div class="card-body">
-                <h5 class="card-title">Análise por Categorias</h5>
-                <p>Visualize o desempenho financeiro agrupado por categorias de produtos e seções do cardápio.</p>
-                <a href="{{ url_for('dashboard.relatorio_categorias', data_inicio=inicio_periodo.strftime('%Y-%m-%d'), data_fim=fim_periodo.strftime('%Y-%m-%d')) }}"
-                    class="btn btn-primary">Ver Relatório</a>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Gráficos de Desempenho -->
-<div class="row mt-4">
-    <div class="col-md-6">
-        <div class="card card-dashboard">
-            <div class="card-header bg-light">
-                <h5 class="mb-0">Evolução da Receita</h5>
+    <!-- Card 3: Engenharia de Cardápio (Alertas de Custo) -->
+    <div class="col-md-4">
+        <div
+            class="card card-dashboard h-100 {% if alertas_custo > 0 %}border-warning{% else %}border-success{% endif %}">
+            <div class="card-body text-center d-flex flex-column justify-content-center">
+                <div class="mb-2">
+                    {% if alertas_custo > 0 %}
+                    <i class="fas fa-utensils fa-2x text-warning"></i>
+                    {% else %}
+                    <i class="fas fa-award fa-2x text-success"></i>
+                    {% endif %}
+                </div>
+                <div class="metric-title text-muted">ALERTAS DE MARGEM</div>
+                <div
+                    class="metric-value fw-bold {% if alertas_custo > 0 %}text-warning{% else %}text-success{% endif %}">
+                    {{ alertas_custo }} PRATOS
+                </div>
+                <small class="text-muted mb-2">Pratos com margem < 15%</small>
+                        {% if alertas_custo > 0 %}
+                        <a href="{{ url_for('pratos.index') }}" class="btn btn-sm btn-outline-warning mt-2">Ajustar
+                            Preços</a>
+                        {% endif %}
             </div>
-            <div class="card-body">
-                <div class="chart-container">
-                    <canvas id="receitaChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Seção de Inteligência (Inflação) -->
+    {% if alertas_inflacao_count > 0 %}
+    <div class="row mb-4 animate__animated animate__fadeIn">
+        <div class="col-12">
+            <div class="card border-warning shadow-sm">
+                <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i> Alerta de Inflação Detectado</h5>
+                    <span class="badge bg-dark">{{ alertas_inflacao_count }} Produtos</span>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">O sistema detectou um aumento significativo (>10%) no preço de custo dos
+                        seguintes itens recentes:</p>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Produto</th>
+                                    <th>Preço Anterior</th>
+                                    <th>Novo Preço</th>
+                                    <th>Variação</th>
+                                    <th>Data Alerta</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for prod in produtos_inflacao[:5] %}
+                                <tr>
+                                    <td>{{ prod.nome }}</td>
+                                    <td class="text-muted">R$ {{ "%.2f"|format(prod.ultimo_custo_anterior or 0) }}</td>
+                                    <td class="fw-bold">R$ {{ "%.2f"|format(prod.preco_unitario) }}</td>
+                                    <td class="text-danger fw-bold">+{{ "%.1f"|format(prod.variacao_preco_pct) }}%</td>
+                                    <td>{{ prod.data_alerta_inflacao.strftime('%d/%m') }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% if alertas_inflacao_count > 5 %}
+                    <div class="text-center mt-2">
+                        <small class="text-muted">E mais {{ alertas_inflacao_count - 5 }} itens...</small>
+                    </div>
+                    {% endif %}
+                    <div class="alert alert-light mt-3 mb-0 border">
+                        <i class="fas fa-lightbulb text-warning me-2"></i>
+                        <strong>Sugestão:</strong> Considere renegociar com o fornecedor ou ajustar o preço de venda dos
+                        pratos que utilizam estes insumos.
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-6">
-        <div class="card card-dashboard">
-            <div class="card-header bg-light">
-                <h5 class="mb-0">Composição dos Custos</h5>
+    {% endif %}
+
+    <!-- Métricas Secundárias (Resumo do Período) -->
+    <div class="row text-center mb-4">
+        <div class="col-md-3">
+            <div class="p-3 border rounded bg-light">
+                <small class="text-muted d-block uppercase">RECEITA (PERÍODO)</small>
+                <span class="h5 fw-bold text-dark">R$ {{ "%.2f"|format(receita_total) }}</span>
             </div>
-            <div class="card-body">
-                <div class="chart-container">
-                    <canvas id="custosChart"></canvas>
+        </div>
+        <div class="col-md-3">
+            <div class="p-3 border rounded bg-light">
+                <small class="text-muted d-block uppercase">CUSTO (PERÍODO)</small>
+                <span class="h5 fw-bold text-dark">R$ {{ "%.2f"|format(custo_total) }}</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div
+                class="p-3 border rounded {% if lucro_total >= 0 %}bg-success-subtle{% else %}bg-danger-subtle{% endif %}">
+                <small class="text-muted d-block uppercase">LUCRO (PERÍODO)</small>
+                <span class="h5 fw-bold {% if lucro_total >= 0 %}text-success{% else %}text-danger{% endif %}">R$ {{
+                    "%.2f"|format(lucro_total) }}</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="p-3 border rounded bg-light">
+                <small class="text-muted d-block uppercase">MARGEM MÉDIA</small>
+                <span class="h5 fw-bold text-dark">{{ "%.1f"|format(margem_media) }}%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Relatórios Detalhados -->
+    <div class="row mt-4 mb-2">
+        <div class="col-12">
+            <h3 class="dashboard-subtitle">Relatórios Detalhados</h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card card-dashboard">
+                <div class="card-body">
+                    <h5 class="card-title">Análise por Pratos</h5>
+                    <p>Verifique a lucratividade detalhada de cada prato, incluindo custos diretos, indiretos e margens.
+                    </p>
+                    <a href="{{ url_for('dashboard.relatorio_pratos', data_inicio=inicio_periodo.strftime('%Y-%m-%d'), data_fim=fim_periodo.strftime('%Y-%m-%d')) }}"
+                        class="btn btn-primary">Ver Relatório</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card card-dashboard">
+                <div class="card-body">
+                    <h5 class="card-title">Análise por Categorias</h5>
+                    <p>Visualize o desempenho financeiro agrupado por categorias de produtos e seções do cardápio.</p>
+                    <a href="{{ url_for('dashboard.relatorio_categorias', data_inicio=inicio_periodo.strftime('%Y-%m-%d'), data_fim=fim_periodo.strftime('%Y-%m-%d')) }}"
+                        class="btn btn-primary">Ver Relatório</a>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Análise de Desperdício -->
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="card card-dashboard">
-            <div class="card-header bg-light">
-                <h5 class="mb-0">Análise de Desperdício</h5>
+    <!-- Gráficos de Desempenho -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card card-dashboard">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Tendência Financeira (Receita vs Custo)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="receitaChart"></canvas>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6>Nível de Desperdício</h6>
-                        <div
-                            class="waste-indicator {% if nivel_desperdicio == 'alto' %}waste-high{% elif nivel_desperdicio == 'medio' %}waste-medium{% else %}waste-low{% endif %}">
-                            {{ nivel_desperdicio|title }}
+        </div>
+        <div class="col-md-6">
+            <div class="card card-dashboard">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Composição dos Custos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="custosChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Matriz BCG (Engenharia de Cardápio) -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card card-dashboard">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Matriz de Engenharia de Cardápio (BCG)</h5>
+                    <small class="text-muted">Análise Estratégica de Pratos</small>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">
+                        <i class="fas fa-info-circle"></i>
+                        Eixo X: Popularidade (Vendas) | Eixo Y: Lucratividade (Margem de Contribuição).
+                    </p>
+                    <div class="chart-container" style="height: 500px;">
+                        <canvas id="bcgChart"></canvas>
+                    </div>
+                    <div class="mt-3 text-center">
+                        <span class="badge bg-success me-2 p-2"><i class="fas fa-star"></i> Estrela (Alta/Alto)</span>
+                        <span class="badge bg-warning text-dark me-2 p-2"><i class="fas fa-horse"></i> Burro de Carga
+                            (Alto/Baixo)</span>
+                        <span class="badge bg-info text-dark me-2 p-2"><i class="fas fa-puzzle-piece"></i> Quebra-Cabeça
+                            (Baixo/Alto)</span>
+                        <span class="badge bg-danger p-2"><i class="fas fa-dog"></i> Cão (Baixo/Baixo)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Análise de Desperdício -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card card-dashboard">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Análise de Desperdício</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Nível de Desperdício</h6>
+                            <div
+                                class="waste-indicator {% if nivel_desperdicio == 'alto' %}waste-high{% elif nivel_desperdicio == 'medio' %}waste-medium{% else %}waste-low{% endif %}">
+                                {{ nivel_desperdicio|title }}
+                            </div>
+                            <p class="mt-2">Valor total do desperdício: R$ {{ "%.2f"|format(valor_desperdicio) }}</p>
                         </div>
-                        <p class="mt-2">Valor total do desperdício: R$ {{ "%.2f"|format(valor_desperdicio) }}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <h6>Impacto na Lucratividade</h6>
-                        <p>O desperdício representa {{ "%.1f"|format(impacto_desperdicio) }}% do custo total</p>
-                        <a href="{{ url_for('desperdicio.index') }}" class="btn btn-sm btn-outline-primary">Ver
-                            Detalhes</a>
+                        <div class="col-md-6">
+                            <h6>Impacto na Lucratividade</h6>
+                            <p>O desperdício representa {{ "%.1f"|format(impacto_desperdicio) }}% do custo total</p>
+                            <a href="{{ url_for('desperdicio.index') }}" class="btn btn-sm btn-outline-primary">Ver
+                                Detalhes</a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Análise de Cardápio -->
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="card card-dashboard">
-            <div class="card-header bg-light">
-                <h5 class="mb-0">Análise de Cardápio</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    {% for categoria in categorias_cardapio %}
-                    <div class="col-md-4">
-                        <div class="menu-category">{{ categoria.nome }}</div>
-                        <ul class="list-unstyled">
-                            {% for prato in categoria.pratos %}
-                            <li>
-                                <a href="{{ url_for('cardapios.analise_rentabilidade', id=prato.id) }}"
-                                    class="report-link">
-                                    {{ prato.nome }}
-                                </a>
-                                <span class="text-muted">({{ "%.1f"|format(prato.margem) }}%)</span>
-                            </li>
-                            {% endfor %}
-                        </ul>
+    <!-- Análise de Cardápio -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card card-dashboard">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Análise de Cardápio</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for categoria in categorias_cardapio %}
+                        <div class="col-md-4">
+                            <div class="menu-category">{{ categoria.nome }}</div>
+                            <ul class="list-unstyled">
+                                {% for prato in categoria.pratos %}
+                                <li>
+                                    <a href="{{ url_for('cardapios.analise_rentabilidade', id=prato.id) }}"
+                                        class="report-link">
+                                        {{ prato.nome }}
+                                    </a>
+                                    <span class="text-muted">({{ "%.1f"|format(prato.margem) }}%)</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
                 </div>
             </div>
         </div>
     </div>
-</div>
-{% endblock %}
+    {% endif %}
+    {% endblock %}
 
-{% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    // Dados para os gráficos
-    const dadosDiarios = {{ dados_diarios| tojson }};
-    const dadosCategorias = {{ distribuicao_categorias| tojson }};
+    {% block extra_js %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {% if not show_onboarding %}
+    <script>
+        // Dados para os gráficos
+        const dadosDiarios = {{ dados_diarios| tojson }};
+        const dadosCategorias = {{ distribuicao_categorias| tojson }};
+        const dadosBcg = {{ dados_bcg|default ({}) | tojson }};
 
-    // Configurar gráfico de receita
-    const ctxReceita = document.getElementById('receitaChart').getContext('2d');
-    new Chart(ctxReceita, {
-        type: 'line',
-        data: {
-            labels: dadosDiarios.datas,
-            datasets: [{
-                label: 'Receita',
-                data: dadosDiarios.receitas,
-                borderColor: '#007bff',
-                backgroundColor: 'rgba(0, 123, 255, 0.1)',
-                borderWidth: 2,
-                fill: true,
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                }
+        // Configurar gráfico de receita
+        const ctxReceita = document.getElementById('receitaChart').getContext('2d');
+        new Chart(ctxReceita, {
+            type: 'line',
+            data: {
+                labels: dadosDiarios.datas,
+                datasets: [{
+                    label: 'Receita',
+                    data: dadosDiarios.receitas,
+                    borderColor: '#28a745', // Verde
+                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }, {
+                    label: 'Custo',
+                    data: dadosDiarios.custos,
+                    borderColor: '#dc3545', // Vermelho
+                    backgroundColor: 'rgba(220, 53, 69, 0.05)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
             },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function (value) {
-                            return 'R$ ' + value.toLocaleString('pt-BR');
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (value) {
+                                return 'R$ ' + value.toLocaleString('pt-BR');
+                            }
                         }
                     }
                 }
             }
-        }
-    });
+        });
 
-    // Configurar gráfico de custos
-    const ctxCustos = document.getElementById('custosChart').getContext('2d');
-    new Chart(ctxCustos, {
-        type: 'doughnut',
-        data: {
-            labels: dadosCategorias.categorias,
-            datasets: [{
-                data: dadosCategorias.valores,
-                backgroundColor: dadosCategorias.cores || [
-                    '#007bff',
-                    '#28a745',
-                    '#ffc107',
-                    '#dc3545',
-                    '#17a2b8'
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'right'
+        // Configurar gráfico de custos
+        const ctxCustos = document.getElementById('custosChart').getContext('2d');
+        new Chart(ctxCustos, {
+            type: 'doughnut',
+            data: {
+                labels: dadosCategorias.categorias,
+                datasets: [{
+                    data: dadosCategorias.valores,
+                    backgroundColor: dadosCategorias.cores || [
+                        '#007bff',
+                        '#28a745',
+                        '#ffc107',
+                        '#dc3545',
+                        '#17a2b8'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
                 }
             }
+        });
+
+        // Configurar Matriz BCG
+        if (dadosBcg && dadosBcg.datasets && dadosBcg.datasets.length > 0) {
+            const ctxBcg = document.getElementById('bcgChart').getContext('2d');
+
+            // Plugin customizado para desenhar linhas de média
+            const linesPlugin = {
+                id: 'linesPlugin',
+                beforeDraw: (chart) => {
+                    if (!chart.scales.x || !chart.scales.y) return;
+                    const ctx = chart.ctx;
+                    const xAxis = chart.scales.x;
+                    const yAxis = chart.scales.y;
+
+                    const xVal = dadosBcg.media_popularidade;
+                    const yVal = dadosBcg.media_lucratividade;
+
+                    // Desenhar linha vertical (Média Popularidade)
+                    if (xVal >= xAxis.min && xVal <= xAxis.max) {
+                        const xPixel = xAxis.getPixelForValue(xVal);
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.strokeStyle = '#666';
+                        ctx.lineWidth = 1;
+                        ctx.setLineDash([5, 5]);
+                        ctx.moveTo(xPixel, yAxis.top);
+                        ctx.lineTo(xPixel, yAxis.bottom);
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+
+                    // Desenhar linha horizontal (Média Lucratividade)
+                    if (yVal >= yAxis.min && yVal <= yAxis.max) {
+                        const yPixel = yAxis.getPixelForValue(yVal);
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.strokeStyle = '#666';
+                        ctx.lineWidth = 1;
+                        ctx.setLineDash([5, 5]);
+                        ctx.moveTo(xAxis.left, yPixel);
+                        ctx.lineTo(xAxis.right, yPixel);
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                }
+            };
+
+            new Chart(ctxBcg, {
+                type: 'scatter',
+                data: dadosBcg,
+                plugins: [linesPlugin],
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    let label = context.raw.label || '';
+                                    return label + ': (Vendas: ' + context.raw.x + ', Margem: R$ ' + context.raw.y.toFixed(2) + ')';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: { display: true, text: 'Popularidade (Qtde Vendas)' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Lucratividade (Margem Unit.)' }
+                        }
+                    }
+                }
+            });
         }
-    });
-</script>
-{% endblock %}
+
+        // Inicializar Tooltips do Bootstrap
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    </script>
+    {% endif %}
+    {% endblock %}

@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, request
+from flask import render_template, redirect, url_for, flash, request, abort
 from app.extensions import db
 from app.models.modelo_custo import CustoIndireto
 from app.routes.custos import bp
@@ -6,11 +6,17 @@ from datetime import date, datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from app.models.modelo_prato import Prato
 from app.models.modelo_estoque import EstoqueMovimentacao # Para estimar vendas se precisar
+from app.utils.tenant import get_current_restaurant_id
 
 @bp.route('/')
 @bp.route('/index')
 def index():
     """Lista custos indiretos"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        flash('Erro: Restaurante não identificado.', 'danger')
+        return redirect(url_for('main.index'))
+
     mes = request.args.get('mes', date.today().month, type=int)
     ano = request.args.get('ano', date.today().year, type=int)
     tipo = request.args.get('tipo', '')
@@ -23,7 +29,8 @@ def index():
     
     query = CustoIndireto.query.filter(
         CustoIndireto.data_referencia >= data_inicio,
-        CustoIndireto.data_referencia <= data_fim
+        CustoIndireto.data_referencia <= data_fim,
+        CustoIndireto.restaurant_id == restaurant_id
     )
     
     if tipo:
@@ -42,6 +49,10 @@ def index():
 @bp.route('/criar', methods=['GET', 'POST'])
 def criar():
     """Cria novo custo"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        abort(403)
+
     if request.method == 'POST':
         descricao = request.form.get('descricao')
         valor = request.form.get('valor', type=float)
@@ -54,7 +65,11 @@ def criar():
             flash('Campos obrigatórios faltando!', 'danger')
             return redirect(url_for('custos.criar'))
             
-        data_ref = datetime.strptime(data_ref_str, '%Y-%m-%d').date()
+        try:
+            data_ref = datetime.strptime(data_ref_str, '%Y-%m-%d').date()
+        except ValueError:
+            flash('Data inválida.', 'danger')
+            return redirect(url_for('custos.criar'))
         
         # Se for investimento parcelado
         if parcelas > 1:
@@ -67,7 +82,8 @@ def criar():
                     data_referencia=data_p,
                     tipo=tipo,
                     recorrente=False,
-                    observacao=f"Parcela de investimento. Total: {valor}"
+                    observacao=f"Parcela de investimento. Total: {valor}",
+                    restaurant_id=restaurant_id
                 )
                 db.session.add(novo)
         else:
@@ -76,7 +92,8 @@ def criar():
                 valor=valor,
                 data_referencia=data_ref,
                 tipo=tipo,
-                recorrente=recorrente
+                recorrente=recorrente,
+                restaurant_id=restaurant_id
             )
             db.session.add(custo)
             
@@ -88,7 +105,8 @@ def criar():
 
 @bp.route('/excluir/<int:id>')
 def excluir(id):
-    custo = CustoIndireto.query.get_or_404(id)
+    restaurant_id = get_current_restaurant_id()
+    custo = CustoIndireto.query.filter_by(id=id, restaurant_id=restaurant_id).first_or_404()
     db.session.delete(custo)
     db.session.commit()
     flash('Custo removido.', 'success')
@@ -97,6 +115,10 @@ def excluir(id):
 @bp.route('/rateio', methods=['GET', 'POST'])
 def rateio():
     """Calcula e aplica rateio aos pratos"""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        abort(403)
+
     if request.method == 'POST':
         mes = request.form.get('mes', type=int)
         ano = request.form.get('ano', type=int)
@@ -107,7 +129,8 @@ def rateio():
             return redirect(url_for('custos.rateio'))
             
         data_base = date(ano, mes, 1)
-        qtd, valor_por_prato = CustoIndireto.atualizar_rateio_pratos(data_base, vendas_estimadas)
+        # Passar restaurant_id para o método atualizado
+        qtd, valor_por_prato = CustoIndireto.atualizar_rateio_pratos(data_base, vendas_estimadas, restaurant_id)
         
         flash(f'Rateio aplicado! Valor adicionado por prato: R$ {valor_por_prato:.2f}', 'success')
         return redirect(url_for('pratos.index'))
