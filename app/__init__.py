@@ -112,7 +112,7 @@ def create_app(config_name='default'):
     from app.routes.auth import bp as auth_bp
     app.register_blueprint(auth_bp, url_prefix='/auth')
 
-    from app.routes.public import bp as public_bp
+    from app.routes.publico import bp as public_bp
     app.register_blueprint(public_bp, url_prefix='/')
     
     # Enforcement global de login.
