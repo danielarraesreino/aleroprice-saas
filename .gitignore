@@ -14,3 +14,7 @@ htmlcov/
 .benchmarks/
 reports/
 temp_nfe.xml
+# Symlink para o projeto irmão — não versionar (recursão)
+AleroPrice
+# Dados de teste soltos
+vendas_teste.csv
