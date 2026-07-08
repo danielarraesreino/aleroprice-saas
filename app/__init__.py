@@ -25,7 +25,26 @@ def create_app(config_name='default'):
         
     app = Flask(__name__, **params)
     app.config.from_object(config[config_name])
-    
+
+    # Monitoramento de erros (Sentry) — opcional.
+    # Só ativa se SENTRY_DSN estiver definido; ausência = no-op silencioso.
+    # Import protegido para não quebrar caso o pacote não esteja instalado.
+    import os as _os
+    _sentry_dsn = _os.environ.get('SENTRY_DSN')
+    if _sentry_dsn:
+        try:
+            import sentry_sdk
+            from sentry_sdk.integrations.flask import FlaskIntegration
+            sentry_sdk.init(
+                dsn=_sentry_dsn,
+                integrations=[FlaskIntegration()],
+                environment=config_name,
+                traces_sample_rate=float(_os.environ.get('SENTRY_TRACES_SAMPLE_RATE', '0.0')),
+                send_default_pii=False,
+            )
+        except Exception as exc:  # pacote ausente ou DSN inválido: não derruba o app
+            print(f'Sentry não inicializado: {exc}')
+
     # Logging Configuration
     import logging
     if not app.debug and not app.testing:
