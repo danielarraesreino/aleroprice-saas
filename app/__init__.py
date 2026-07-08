@@ -104,7 +104,8 @@ def create_app(config_name='default'):
     app.register_blueprint(desperdicio_bp, url_prefix='/desperdicio')
     app.register_blueprint(previsao_bp, url_prefix='/previsao')
     app.register_blueprint(custos_bp, url_prefix='/custos')
-    app.register_blueprint(dashboard_bp, url_prefix='/')
+    # Sistema/dashboard fica ATRÁS do login, em /app. A landing pública ocupa '/'.
+    app.register_blueprint(dashboard_bp, url_prefix='/app')
     
     from app.routes.billing import bp as billing_bp
     app.register_blueprint(billing_bp, url_prefix='/billing')

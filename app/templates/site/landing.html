@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bar da Vila — Buteco de família em Campinas · Samba, costelinha e comida de vó</title>
+<meta name="description" content="Bar da Vila, Vila Lemos - Campinas. Buteco de família 4,9★. Croquete da Dona Marisa, costelinha com ora-pro-nóbis, carbonara, pastéis e samba ao vivo. Refeição no local e drive-through.">
+<meta property="og:title" content="Bar da Vila — Buteco de família em Campinas">
+<meta property="og:description" content="Comida de vó, samba ao vivo e o famoso Croquete da Dona Marisa. 4,9★ no Google.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Monoton&family=Anton&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#100a06;          /* quase preto quente */
+    --ink-2:#1c120b;
+    --wood:#2a170d;
+    --cream:#f6e9d2;
+    --cream-dim:#cdb69a;
+    --amber:#ffb43d;        /* âmbar principal */
+    --ember:#ff6a2b;        /* brasa */
+    --gold:#e8a33d;
+    --neon:#ffca57;
+    --green:#7ea850;        /* ora-pro-nóbis */
+    --maxw:1180px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--ink);
+    color:var(--cream);
+    font-family:"Fraunces",Georgia,serif;
+    font-optical-sizing:auto;
+    line-height:1.6;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* ambiente: brasa/luz quente + grão */
+  body::before{
+    content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(120% 80% at 50% -10%, rgba(255,120,40,.20), transparent 60%),
+      radial-gradient(80% 60% at 85% 20%, rgba(255,180,60,.10), transparent 60%),
+      radial-gradient(90% 70% at 10% 90%, rgba(255,90,30,.10), transparent 60%);
+  }
+  body::after{
+    content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode:overlay;
+  }
+  .wrap{position:relative;z-index:2;max-width:var(--maxw);margin:0 auto;padding:0 24px}
+  a{color:inherit;text-decoration:none}
+  section{position:relative;z-index:2}
+
+  /* ---------- NAV ---------- */
+  nav{
+    position:fixed;top:0;left:0;right:0;z-index:50;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px clamp(16px,4vw,40px);
+    background:linear-gradient(180deg, rgba(16,10,6,.85), rgba(16,10,6,0));
+    backdrop-filter:blur(6px);
+  }
+  .nav-logo{font-family:"Bebas Neue",sans-serif;letter-spacing:2px;font-size:1.4rem;color:var(--amber)}
+  .nav-links{display:flex;gap:26px;align-items:center;font-family:"Bebas Neue",sans-serif;letter-spacing:1.5px;font-size:1.02rem}
+  .nav-links a{color:var(--cream-dim);transition:color .25s}
+  .nav-links a:hover{color:var(--amber)}
+  .nav-cta{
+    border:1px solid rgba(255,180,60,.45);border-radius:999px;padding:7px 16px;color:var(--amber)!important;
+    transition:all .25s;
+  }
+  .nav-cta:hover{background:var(--amber);color:var(--ink)!important;box-shadow:0 0 24px rgba(255,180,60,.5)}
+  @media(max-width:760px){.nav-links a:not(.nav-cta){display:none}}
+
+  /* ---------- HERO ---------- */
+  header{
+    min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:120px 24px 60px;position:relative;
+  }
+  .kicker{
+    font-family:"Bebas Neue",sans-serif;letter-spacing:6px;font-size:clamp(.8rem,2vw,1rem);
+    color:var(--ember);margin-bottom:18px;opacity:0;animation:rise .9s .1s forwards;
+  }
+  .neon{
+    font-family:"Monoton",cursive;
+    font-size:clamp(3.1rem,13vw,9.5rem);
+    line-height:.95;color:#fff4d8;letter-spacing:2px;
+    text-shadow:
+      0 0 8px #ffbf57, 0 0 22px #ff9a3c, 0 0 44px #ff6a2b,
+      0 0 90px rgba(255,106,43,.6);
+    animation:flicker 5.2s infinite;
+  }
+  .neon .b{display:block}
+  @keyframes flicker{
+    0%,19%,21%,23%,25%,54%,56%,100%{opacity:1;text-shadow:0 0 8px #ffbf57,0 0 22px #ff9a3c,0 0 44px #ff6a2b,0 0 90px rgba(255,106,43,.6)}
+    20%,24%,55%{opacity:.72;text-shadow:0 0 6px #ffbf57,0 0 12px #ff9a3c}
+  }
+  .tagline{
+    font-family:"Fraunces",serif;font-style:italic;font-size:clamp(1.05rem,3vw,1.55rem);
+    color:var(--cream);margin:26px auto 8px;max-width:620px;opacity:0;animation:rise .9s .5s forwards;
+  }
+  .subline{
+    font-family:"Bebas Neue",sans-serif;letter-spacing:3px;color:var(--cream-dim);
+    font-size:clamp(.85rem,2.2vw,1.1rem);opacity:0;animation:rise .9s .65s forwards;
+  }
+  .subline span{color:var(--amber)}
+  .stars-badge{
+    display:inline-flex;align-items:center;gap:10px;margin-top:26px;padding:9px 18px;border-radius:999px;
+    background:rgba(255,180,60,.08);border:1px solid rgba(255,180,60,.28);
+    font-family:"Bebas Neue",sans-serif;letter-spacing:1.5px;opacity:0;animation:rise .9s .8s forwards;
+  }
+  .stars-badge .st{color:var(--amber);letter-spacing:2px;font-size:1.15rem}
+  .cta-row{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:34px;opacity:0;animation:rise .9s .95s forwards}
+  .btn{
+    font-family:"Bebas Neue",sans-serif;letter-spacing:2px;font-size:1.1rem;
+    padding:14px 28px;border-radius:999px;transition:transform .2s, box-shadow .2s, background .2s;cursor:pointer;border:none;
+  }
+  .btn-primary{background:linear-gradient(135deg,var(--amber),var(--ember));color:#231206;box-shadow:0 10px 30px rgba(255,106,43,.35)}
+  .btn-primary:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 16px 44px rgba(255,106,43,.55)}
+  .btn-ghost{background:transparent;border:1px solid rgba(246,233,210,.35);color:var(--cream)}
+  .btn-ghost:hover{border-color:var(--amber);color:var(--amber);transform:translateY(-3px)}
+  .scroll-hint{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);color:var(--cream-dim);font-family:"Bebas Neue",sans-serif;letter-spacing:3px;font-size:.8rem;opacity:.7;animation:bob 2.2s infinite}
+  @keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+  /* brasas flutuando */
+  .embers{position:absolute;inset:0;overflow:hidden;z-index:1;pointer-events:none}
+  .ember{position:absolute;bottom:-10px;width:6px;height:6px;border-radius:50%;
+    background:radial-gradient(circle,#ffcf6b,#ff6a2b);filter:blur(.5px);opacity:0;animation:float linear infinite}
+  @keyframes float{0%{transform:translateY(0) scale(1);opacity:0}10%{opacity:.9}100%{transform:translateY(-108svh) scale(.3);opacity:0}}
+
+  /* ---------- MARQUEE ---------- */
+  .marquee{
+    border-top:1px solid rgba(255,180,60,.18);border-bottom:1px solid rgba(255,180,60,.18);
+    background:linear-gradient(90deg,rgba(42,23,13,.6),rgba(28,18,11,.6));
+    overflow:hidden;white-space:nowrap;padding:16px 0;
+  }
+  .marquee .track{display:inline-block;animation:scroll 26s linear infinite;font-family:"Anton",sans-serif;
+    text-transform:uppercase;letter-spacing:2px;font-size:clamp(1.1rem,3vw,1.7rem);color:var(--cream)}
+  .marquee .track span{color:var(--amber);margin:0 6px}
+  @keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+  /* ---------- SECTIONS ---------- */
+  .sec{padding:clamp(70px,10vw,120px) 0}
+  .eyebrow{font-family:"Bebas Neue",sans-serif;letter-spacing:5px;color:var(--ember);font-size:.95rem;margin-bottom:10px}
+  .h2{font-family:"Anton",sans-serif;text-transform:uppercase;font-size:clamp(2rem,6vw,4rem);line-height:.98;letter-spacing:1px;color:var(--cream)}
+  .h2 em{font-family:"Fraunces",serif;font-style:italic;text-transform:none;color:var(--amber);font-weight:400}
+  .lead{color:var(--cream-dim);font-size:1.12rem;max-width:640px;margin-top:16px}
+
+  /* cardápio */
+  .menu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-top:44px}
+  .dish{
+    position:relative;background:linear-gradient(160deg,rgba(42,23,13,.8),rgba(20,12,7,.9));
+    border:1px solid rgba(255,180,60,.16);border-radius:18px;padding:28px 24px;overflow:hidden;
+    transition:transform .3s, border-color .3s, box-shadow .3s;
+  }
+  .dish:hover{transform:translateY(-8px);border-color:rgba(255,180,60,.5);box-shadow:0 20px 50px rgba(0,0,0,.5)}
+  .dish .em{font-size:2.4rem;display:block;margin-bottom:12px;filter:drop-shadow(0 4px 12px rgba(255,106,43,.4))}
+  .dish h3{font-family:"Anton",sans-serif;text-transform:uppercase;letter-spacing:.5px;font-size:1.4rem;color:var(--cream)}
+  .dish p{color:var(--cream-dim);font-size:.98rem;margin-top:8px}
+  .dish .star-tag{position:absolute;top:16px;right:16px;font-family:"Bebas Neue",sans-serif;letter-spacing:1px;
+    font-size:.72rem;color:var(--ink);background:var(--amber);padding:3px 10px;border-radius:999px}
+  .dish.hot{border-color:rgba(255,106,43,.5);box-shadow:0 0 0 1px rgba(255,106,43,.25),0 20px 50px rgba(255,106,43,.15)}
+
+  /* história — 2 col */
+  .story{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center;margin-top:20px}
+  @media(max-width:820px){.story{grid-template-columns:1fr;gap:32px}}
+  .story p{color:var(--cream);font-size:1.14rem;margin-top:18px}
+  .story p .hl{color:var(--amber);font-style:italic}
+  .family{display:flex;flex-direction:column;gap:14px}
+  .fam-card{display:flex;gap:16px;align-items:center;background:rgba(42,23,13,.5);border:1px solid rgba(255,180,60,.14);
+    border-radius:16px;padding:16px 20px}
+  .fam-card .av{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-size:1.6rem;
+    background:radial-gradient(circle at 30% 30%,var(--amber),var(--ember));flex-shrink:0}
+  .fam-card b{font-family:"Bebas Neue",sans-serif;letter-spacing:1.5px;font-size:1.25rem;color:var(--cream)}
+  .fam-card small{color:var(--cream-dim)}
+
+  /* avaliações */
+  .rev-head{display:flex;align-items:end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+  .rev-score{text-align:right}
+  .rev-score .big{font-family:"Anton",sans-serif;font-size:clamp(3rem,9vw,5.4rem);color:var(--amber);line-height:1}
+  .rev-score small{color:var(--cream-dim);font-family:"Bebas Neue",sans-serif;letter-spacing:2px}
+  .reviews{columns:3 260px;column-gap:20px;margin-top:40px}
+  .review{break-inside:avoid;margin-bottom:20px;background:linear-gradient(160deg,rgba(42,23,13,.7),rgba(20,12,7,.85));
+    border:1px solid rgba(255,180,60,.14);border-radius:16px;padding:22px}
+  .review .st{color:var(--amber);letter-spacing:2px}
+  .review p{font-style:italic;color:var(--cream);margin:10px 0}
+  .review .who{font-family:"Bebas Neue",sans-serif;letter-spacing:1.5px;color:var(--cream-dim);font-size:.95rem}
+
+  /* ao vivo / faixa dupla */
+  .live{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:40px}
+  @media(max-width:720px){.live{grid-template-columns:1fr}}
+  .live .card{background:rgba(42,23,13,.5);border:1px solid rgba(255,180,60,.14);border-radius:16px;padding:26px;text-align:center}
+  .live .card .em{font-size:2rem;display:block;margin-bottom:10px}
+  .live .card b{font-family:"Bebas Neue",sans-serif;letter-spacing:1.5px;font-size:1.2rem;color:var(--cream);display:block}
+  .live .card small{color:var(--cream-dim)}
+
+  /* contato */
+  .contact{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:20px}
+  @media(max-width:820px){.contact{grid-template-columns:1fr}}
+  .info-list{list-style:none;margin-top:20px}
+  .info-list li{display:flex;gap:14px;align-items:flex-start;padding:14px 0;border-bottom:1px solid rgba(255,180,60,.12)}
+  .info-list .em{font-size:1.3rem;width:34px;text-align:center}
+  .info-list b{font-family:"Bebas Neue",sans-serif;letter-spacing:1.5px;color:var(--amber);display:block}
+  .info-list span{color:var(--cream)}
+  .map-cta{background:linear-gradient(160deg,rgba(42,23,13,.8),rgba(20,12,7,.9));border:1px solid rgba(255,180,60,.18);
+    border-radius:20px;padding:34px;display:flex;flex-direction:column;justify-content:center;gap:16px}
+  .map-cta h3{font-family:"Anton",sans-serif;text-transform:uppercase;font-size:1.8rem;color:var(--cream)}
+
+  /* footer */
+  footer{border-top:1px solid rgba(255,180,60,.16);padding:44px 0 60px;margin-top:40px;text-align:center}
+  footer .fneon{font-family:"Monoton",cursive;font-size:1.8rem;color:#fff4d8;text-shadow:0 0 10px #ff9a3c,0 0 26px #ff6a2b}
+  footer small{color:var(--cream-dim);display:block;margin-top:14px}
+  .lojista{display:inline-block;margin-top:20px;font-family:"Bebas Neue",sans-serif;letter-spacing:2px;
+    color:var(--cream-dim);border:1px solid rgba(246,233,210,.2);border-radius:999px;padding:8px 18px;transition:all .25s}
+  .lojista:hover{color:var(--amber);border-color:var(--amber)}
+
+  /* whatsapp float */
+  .wa{position:fixed;right:20px;bottom:20px;z-index:60;width:60px;height:60px;border-radius:50%;
+    background:#25d366;display:grid;place-items:center;box-shadow:0 10px 30px rgba(37,211,102,.45);
+    transition:transform .2s;animation:pulse 2.6s infinite}
+  .wa:hover{transform:scale(1.08)}
+  .wa svg{width:32px;height:32px;fill:#fff}
+  @keyframes pulse{0%,100%{box-shadow:0 10px 30px rgba(37,211,102,.45)}50%{box-shadow:0 10px 40px rgba(37,211,102,.8)}}
+
+  /* reveal on scroll */
+  .reveal{opacity:0;transform:translateY(30px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+  @keyframes rise{to{opacity:1;transform:none}}
+  .kicker,.tagline,.subline,.stars-badge,.cta-row{transform:translateY(20px)}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#topo" class="nav-logo">BAR DA VILA</a>
+  <div class="nav-links">
+    <a href="#cardapio">Cardápio</a>
+    <a href="#historia">História</a>
+    <a href="#avaliacoes">Avaliações</a>
+    <a href="#contato">Contato</a>
+    <a class="nav-cta" href="{{ url_for('auth.login') }}">Entrar no sistema</a>
+  </div>
+</nav>
+
+<header id="topo">
+  <div class="embers" id="embers"></div>
+  <div class="kicker">VILA LEMOS · CAMPINAS–SP · DESDE SEMPRE</div>
+  <h1 class="neon"><span class="b">Bar da</span><span class="b">Vila</span></h1>
+  <p class="tagline">Buteco de família de verdade — comida de vó, cerveja gelada e samba pra ninguém botar defeito.</p>
+  <p class="subline">COSTELINHA <span>·</span> CROQUETE DA DONA MARISA <span>·</span> SAMBA AO VIVO</p>
+  <div class="stars-badge"><span class="st">★★★★★</span> 4,9 no Google · 39 avaliações</div>
+  <div class="cta-row">
+    <a class="btn btn-primary" href="https://wa.me/5519999779942?text=Ol%C3%A1!%20Vim%20pelo%20site%20do%20Bar%20da%20Vila" target="_blank" rel="noopener">Chamar no WhatsApp</a>
+    <a class="btn btn-ghost" href="https://www.google.com/maps/search/?api=1&query=Bar+da+Vila+R.+Madalena+Barbosa+Ferreira+178+Vila+Lemos+Campinas" target="_blank" rel="noopener">Como chegar</a>
+  </div>
+  <div class="scroll-hint">↓ role e sente o cheiro</div>
+</header>
+
+<div class="marquee">
+  <div class="track">
+    COSTELINHA <span>◆</span> CROQUETE DA DONA MARISA <span>◆</span> CARBONARA <span>◆</span> PASTÉIS <span>◆</span> ORA-PRO-NÓBIS <span>◆</span> SAMBA AO VIVO <span>◆</span> CERVEJA GELADA <span>◆</span>
+    COSTELINHA <span>◆</span> CROQUETE DA DONA MARISA <span>◆</span> CARBONARA <span>◆</span> PASTÉIS <span>◆</span> ORA-PRO-NÓBIS <span>◆</span> SAMBA AO VIVO <span>◆</span> CERVEJA GELADA <span>◆</span>
+  </div>
+</div>
+
+<!-- CARDÁPIO -->
+<section class="sec" id="cardapio">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="eyebrow">O QUE SAI DA COZINHA</div>
+      <div class="h2">Comida de <em>buteco</em>, feita com amor</div>
+      <p class="lead">Receita de família, tempero de vó. Porções generosas pra dividir na mesa — de R$ 20 a R$ 40 por pessoa.</p>
+    </div>
+    <div class="menu-grid">
+      <div class="dish hot reveal">
+        <span class="star-tag">★ O MAIS PEDIDO</span>
+        <span class="em">🧆</span>
+        <h3>Croquete da Dona Marisa</h3>
+        <p>Crocante por fora, macio por dentro, bem temperado — com aquela pimenta saborosa da casa. O xodó do bar.</p>
+      </div>
+      <div class="dish reveal">
+        <span class="em">🍖</span>
+        <h3>Costelinha</h3>
+        <p>Costelinha com maionese, farofa e ora-pro-nóbis refogadinha. Prato que faz gente voltar.</p>
+      </div>
+      <div class="dish reveal">
+        <span class="em">🍝</span>
+        <h3>Carbonara</h3>
+        <p>Cremosa, na medida. Comida de boteco típica de vó — lembrança de infância no prato.</p>
+      </div>
+      <div class="dish reveal">
+        <span class="em">🥟</span>
+        <h3>Pastéis &amp; Petiscos</h3>
+        <p>Pastel gostoso, porção pra dividir e cerveja estupidamente gelada. O combo perfeito do fim de tarde.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HISTÓRIA -->
+<section class="sec" id="historia" style="background:linear-gradient(180deg,transparent,rgba(42,23,13,.35),transparent)">
+  <div class="wrap">
+    <div class="story">
+      <div class="reveal">
+        <div class="eyebrow">A FAMÍLIA</div>
+        <div class="h2">Cada um numa<br><em>posição do time</em></div>
+        <p>No Bar da Vila cada membro da família trabalha junto, em equipe — e isso é lindo de ver. É buteco raiz, extremamente acolhedor, onde você chega cliente e sai da família.</p>
+        <p>Na cozinha, <span class="hl">a Dona Marisa</span> — cozinheira de mão cheia, comida que é abraço. No salão, <span class="hl">Gustavo e Juliana</span>, anfitriões que fazem todo mundo se sentir em casa.</p>
+      </div>
+      <div class="family reveal">
+        <div class="fam-card"><div class="av">👩‍🍳</div><div><b>Dona Marisa</b><small>A cozinha e o tempero de vó</small></div></div>
+        <div class="fam-card"><div class="av">🍺</div><div><b>Gustavo</b><small>Anfitrião · o samba e a resenha</small></div></div>
+        <div class="fam-card"><div class="av">💛</div><div><b>Juliana</b><small>Anfitriã · o acolhimento da casa</small></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AVALIAÇÕES -->
+<section class="sec" id="avaliacoes">
+  <div class="wrap">
+    <div class="rev-head reveal">
+      <div>
+        <div class="eyebrow">QUEM VEM, VOLTA</div>
+        <div class="h2">Nota <em>quase perfeita</em></div>
+      </div>
+      <div class="rev-score">
+        <div class="big">4,9<span style="font-size:.4em;color:var(--amber)">★</span></div>
+        <small>39 AVALIAÇÕES · GOOGLE</small>
+      </div>
+    </div>
+    <div class="reviews">
+      <div class="review reveal"><div class="st">★★★★★</div><p>"Buteco de família, extremamente acolhedor. A costelinha com farofa e ora-pro-nóbis estava maravilhosa."</p><div class="who">— Gerzio Vieira Junior</div></div>
+      <div class="review reveal"><div class="st">★★★★★</div><p>"Autêntico bar raiz. Dona Marisa, Gustavo e Juliana são excelentes anfitriões. Comida de buteco típica de vó."</p><div class="who">— Rony Nunes</div></div>
+      <div class="review reveal"><div class="st">★★★★★</div><p>"Croquete delicioso, crocante e bem temperado, pimenta muito saborosa! A carbonara é maravilhosa."</p><div class="who">— Aline Fernandes</div></div>
+      <div class="review reveal"><div class="st">★★★★★</div><p>"O grupo de samba que se apresenta torna o ambiente muito agradável. Cerveja, boa música e amigos."</p><div class="who">— Antonio Ribeiro</div></div>
+      <div class="review reveal"><div class="st">★★★★★</div><p>"A melhor comida de boteco de Campinas e Região."</p><div class="who">— Jairo Castro</div></div>
+      <div class="review reveal"><div class="st">★★★★★</div><p>"Lugar familiar, comida e música boa. Dna Marisa é uma cozinheira de mão cheia, família abençoada!"</p><div class="who">— Tia Andreia</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- AO VIVO -->
+<section class="sec" id="aovivo" style="background:linear-gradient(180deg,transparent,rgba(42,23,13,.35),transparent)">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="eyebrow">O CLIMA DA CASA</div>
+      <div class="h2">Tem samba, tem <em>resenha</em></div>
+    </div>
+    <div class="live">
+      <div class="card reveal"><span class="em">🎶</span><b>Samba ao vivo</b><small>Fim de semana tem festa rolando</small></div>
+      <div class="card reveal"><span class="em">🍺</span><b>Cerveja gelada</b><small>Do jeito que buteco bom exige</small></div>
+      <div class="card reveal"><span class="em">🚗</span><b>Drive-through</b><small>Refeição no local ou pega e leva</small></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTATO -->
+<section class="sec" id="contato">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="eyebrow">VEM PRA VILA</div>
+      <div class="h2">Onde a gente <em>te espera</em></div>
+    </div>
+    <div class="contact">
+      <ul class="info-list reveal">
+        <li><span class="em">📍</span><span><b>Endereço</b>R. Madalena Barbosa Ferreira, 178 — Vila Lemos, Campinas–SP · 13100-486</span></li>
+        <li><span class="em">🕐</span><span><b>Horário</b>Aberto até as 21:00 · Quarta é o dia de pico</span></li>
+        <li><span class="em">📞</span><span><b>Telefone / WhatsApp</b>(19) 99977-9942</span></li>
+        <li><span class="em">🍴</span><span><b>Serviços</b>Refeição no local · Drive-through</span></li>
+      </ul>
+      <div class="map-cta reveal">
+        <h3>Bateu a fome?</h3>
+        <p style="color:var(--cream-dim)">Chama no zap, reserva a mesa ou já vem chegando. A cerveja tá gelando.</p>
+        <a class="btn btn-primary" href="https://wa.me/5519999779942?text=Ol%C3%A1!%20Quero%20reservar%20uma%20mesa%20no%20Bar%20da%20Vila" target="_blank" rel="noopener" style="text-align:center">Falar no WhatsApp</a>
+        <a class="btn btn-ghost" href="https://www.google.com/maps/search/?api=1&query=Bar+da+Vila+R.+Madalena+Barbosa+Ferreira+178+Vila+Lemos+Campinas" target="_blank" rel="noopener" style="text-align:center">Abrir no mapa</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="fneon">Bar da Vila</div>
+    <small>Buteco de família · Vila Lemos, Campinas–SP · Feito com samba e ora-pro-nóbis 💛</small>
+    <div><a class="lojista" href="{{ url_for('auth.login') }}">Área do lojista · entrar no sistema →</a></div>
+  </div>
+</footer>
+
+<a class="wa" href="https://wa.me/5519999779942?text=Ol%C3%A1!%20Vim%20pelo%20site%20do%20Bar%20da%20Vila" target="_blank" rel="noopener" aria-label="WhatsApp">
+  <svg viewBox="0 0 24 24"><path d="M.06 24l1.68-6.13A11.9 11.9 0 0 1 .16 11.9C.16 5.34 5.5.02 12.06.02a11.8 11.8 0 0 1 8.4 3.49 11.8 11.8 0 0 1 3.48 8.4c0 6.56-5.34 11.89-11.9 11.89a11.9 11.9 0 0 1-5.7-1.45L.06 24zM6.6 20.15c1.68.998 3.28 1.6 5.44 1.6 5.45 0 9.89-4.43 9.89-9.88 0-5.46-4.43-9.89-9.88-9.89-5.46 0-9.89 4.43-9.89 9.89 0 2.27.6 3.98 1.7 5.7l-1 3.65 3.65-.97zM17.5 14.3c-.07-.12-.27-.2-.57-.35-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.08.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2-1.41.25-.7.25-1.29.17-1.42z"/></svg>
+</a>
+
+<script>
+(function(){
+  // reveal on scroll
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+  },{threshold:.14});
+  document.querySelectorAll('.reveal').forEach(function(el,i){ el.style.transitionDelay=(i%4*70)+'ms'; io.observe(el); });
+
+  // embers
+  var host=document.getElementById('embers');
+  if(host){
+    for(var i=0;i<26;i++){
+      var e=document.createElement('span'); e.className='ember';
+      var l=Math.random()*100, s=4+Math.random()*7, d=Math.random()*8, sz=3+Math.random()*5;
+      e.style.left=l+'%'; e.style.animationDuration=s+'s'; e.style.animationDelay=d+'s';
+      e.style.width=sz+'px'; e.style.height=sz+'px';
+      host.appendChild(e);
+    }
+  }
+})();
+</script>
+</body>
+</html>

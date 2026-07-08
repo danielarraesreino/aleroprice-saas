@@ -2,6 +2,13 @@ from flask import Blueprint, render_template, request, jsonify
 
 from . import bp
 
+
+@bp.route('/')
+def landing():
+    """Landing page pública do Bar da Vila (na frente do sistema)."""
+    return render_template('site/landing.html')
+
+
 @bp.route('/calculadora-roi', methods=['GET', 'POST'])
 def calculadora_roi():
     """Calculadora de ROI pública (Lead Magnet)"""
