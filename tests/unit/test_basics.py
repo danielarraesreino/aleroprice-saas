@@ -24,13 +24,14 @@ def test_db_connection(app):
         result = db.session.execute(text("SELECT 1")).scalar()
         assert result == 1
 
-def test_categoria_desperdicio_create(session):
+def test_categoria_desperdicio_create(session, restaurant):
     """Testa a criau00e7u00e3o de uma categoria de desperdu00edcio"""
     # Criar uma categoria de teste
     categoria = CategoriaDesperdicio(
         nome="Categoria de Teste", 
         descricao="Categoria criada para teste", 
-        cor="#FF5733"
+        cor="#FF5733",
+        restaurant_id=restaurant.id
     )
     session.add(categoria)
     session.commit()
@@ -46,7 +47,7 @@ def test_categoria_desperdicio_create(session):
     assert categoria_db is not None
     assert categoria_db.nome == categoria.nome
 
-def test_produto_create(session):
+def test_produto_create(session, restaurant, fornecedor):
     """Testa a criau00e7u00e3o de um produto"""
     # Criar um produto de teste
     produto = Produto(
@@ -56,7 +57,9 @@ def test_produto_create(session):
         preco_unitario=10.50,
         estoque_minimo=5.0,
         estoque_atual=15.0,
-        categoria="Testes"
+        categoria="Testes",
+        fornecedor_id=fornecedor.id,
+        restaurant_id=restaurant.id
     )
     session.add(produto)
     session.commit()

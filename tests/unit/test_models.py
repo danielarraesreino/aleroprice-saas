@@ -2,12 +2,13 @@ from app.models.modelo_produto import Produto
 from app.models.modelo_prato import Prato, PratoInsumo
 from app.models.modelo_cardapio import CardapioItem
 
-def test_produto_creation(session):
+def test_produto_creation(session, restaurant):
     """Testa criação básica de produto"""
     p = Produto(
         nome="Teste Produto",
         unidade="kg",
-        preco_unitario=10.00
+        preco_unitario=10.00,
+        restaurant_id=restaurant.id
     )
     session.add(p)
     session.commit()
@@ -16,11 +17,11 @@ def test_produto_creation(session):
     assert p.estoque_atual == 0
     assert p.ativo is True
 
-def test_prato_custo_calculo(session):
+def test_prato_custo_calculo(session, restaurant):
     """Testa cálculo automático de custo do prato baseado nos insumos"""
     # Criar ingredientes
-    ing1 = Produto(nome="Ing1", unidade="kg", preco_unitario=10.00)
-    ing2 = Produto(nome="Ing2", unidade="kg", preco_unitario=20.00)
+    ing1 = Produto(nome="Ing1", unidade="kg", preco_unitario=10.00, restaurant_id=restaurant.id)
+    ing2 = Produto(nome="Ing2", unidade="kg", preco_unitario=20.00, restaurant_id=restaurant.id)
     session.add_all([ing1, ing2])
     session.commit()
     
@@ -29,7 +30,8 @@ def test_prato_custo_calculo(session):
         nome="Prato Teste",
         rendimento=1,
         unidade_rendimento="porção",
-        porcoes_rendimento=1
+        porcoes_rendimento=1,
+        restaurant_id=restaurant.id
     )
     session.add(prato)
     session.commit()
@@ -50,12 +52,12 @@ def test_prato_custo_calculo(session):
     session.commit()
     assert prato.custo_direto_por_porcao == 4.50
 
-def test_cardapio_item_constraints(session):
+def test_cardapio_item_constraints(session, restaurant):
     """Testa restrições e relacionamentos do Item de Cardápio"""
     from app.models.modelo_cardapio import Cardapio, CardapioSecao
     
     # Setup
-    c = Cardapio(nome="Cardápio Teste")
+    c = Cardapio(nome="Cardápio Teste", restaurant_id=restaurant.id)
     session.add(c)
     session.commit()
     
@@ -63,7 +65,7 @@ def test_cardapio_item_constraints(session):
     session.add(s)
     session.commit()
     
-    p = Prato(nome="Prato Cardapio", unidade_rendimento="cj", porcoes_rendimento=1, rendimento=1)
+    p = Prato(nome="Prato Cardapio", unidade_rendimento="cj", porcoes_rendimento=1, rendimento=1, restaurant_id=restaurant.id)
     session.add(p)
     session.commit()
     

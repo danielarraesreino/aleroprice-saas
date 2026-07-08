@@ -64,3 +64,65 @@ def session(app):
         session.close()
         transaction.rollback()
         connection.close()
+
+@pytest.fixture
+def restaurant(session):
+    """Create a test restaurant"""
+    from app.models.modelo_restaurante import Restaurante
+    restaurant = Restaurante(
+        nome="Restaurante Teste",
+        cnpj="12345678000190",
+        telefone="19999999999"
+    )
+    session.add(restaurant)
+    session.commit()
+    return restaurant
+
+@pytest.fixture
+def fornecedor(session, restaurant):
+    """Create a test supplier"""
+    from app.models.modelo_fornecedor import Fornecedor
+    fornecedor = Fornecedor(
+        razao_social="Fornecedor Teste LTDA",
+        cnpj="98765432000100",
+        telefone="19888888888",
+        restaurant_id=restaurant.id
+    )
+    session.add(fornecedor)
+    session.commit()
+    return fornecedor
+
+@pytest.fixture
+def produto(session, restaurant, fornecedor):
+    """Create a test product with correct field names"""
+    from app.models.modelo_produto import Produto
+    produto = Produto(
+        nome="Arroz",
+        descricao="Arroz branco tipo 1",
+        unidade="kg",
+        preco_unitario=5.50,  # Correct field name
+        estoque_minimo=10.0,
+        estoque_atual=50.0,
+        categoria="Grãos",
+        fornecedor_id=fornecedor.id,
+        restaurant_id=restaurant.id
+    )
+    session.add(produto)
+    session.commit()
+    return produto
+
+@pytest.fixture
+def prato(session, restaurant):
+    """Create a test dish"""
+    from app.models.modelo_prato import Prato
+    prato = Prato(
+        nome="Arroz com Feijão",
+        descricao="Prato tradicional brasileiro",
+        categoria="Pratos Principais",
+        rendimento=1,  # Required field
+        preco_venda=15.00,
+        restaurant_id=restaurant.id
+    )
+    session.add(prato)
+    session.commit()
+    return prato

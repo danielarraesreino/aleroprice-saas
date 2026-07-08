@@ -5,36 +5,38 @@ from app.models.modelo_desperdicio import CategoriaDesperdicio, RegistroDesperdi
 from app.models.modelo_produto import Produto
 
 @pytest.fixture
-def setup_dados_base(session):
+def setup_dados_base(session, restaurant):
     """Cria dados bu00e1sicos para testes de integrau00e7u00e3o"""
     # Criar categorias de desperdu00edcio
     categorias = [
-        CategoriaDesperdicio(nome="Vencido", descricao="Alimentos vencidos", cor="#FF0000"),
-        CategoriaDesperdicio(nome="Sobra", descricao="Sobras de produu00e7u00e3o", cor="#FFA500"),
+        CategoriaDesperdicio(nome="Vencido", descricao="Alimentos vencidos", cor="#FF0000", restaurant_id=restaurant.id),
+        CategoriaDesperdicio(nome="Sobra", descricao="Sobras de produu00e7u00e3o", cor="#FFA500", restaurant_id=restaurant.id),
     ]
-    
+
     for categoria in categorias:
         session.add(categoria)
-    
+
     # Criar produtos
     produtos = [
         Produto(
             nome="Arroz",
             descricao="Arroz branco tipo 1",
-            unidade_medida="kg",
+            unidade="kg",
             preco_unitario=5.0,
             estoque_minimo=10.0,
             estoque_atual=50.0,
-            categoria="Alimentos"
+            categoria="Alimentos",
+            restaurant_id=restaurant.id
         ),
         Produto(
             nome="Feiju00e3o",
             descricao="Feiju00e3o carioca",
-            unidade_medida="kg",
+            unidade="kg",
             preco_unitario=8.0,
             estoque_minimo=8.0,
             estoque_atual=30.0,
-            categoria="Alimentos"
+            categoria="Alimentos",
+            restaurant_id=restaurant.id
         ),
     ]
     
@@ -48,7 +50,7 @@ def setup_dados_base(session):
         "produtos": produtos
     }
 
-def test_fluxo_registro_desperdicio(session, setup_dados_base):
+def test_fluxo_registro_desperdicio(session, restaurant, setup_dados_base):
     """Testa o fluxo completo de registro e consulta de desperdu00edcio"""
     dados = setup_dados_base
     
@@ -60,8 +62,9 @@ def test_fluxo_registro_desperdicio(session, setup_dados_base):
     desperdicio = RegistroDesperdicio(
         categoria_id=categoria_vencido.id,
         produto_id=produto_arroz.id,
+        restaurant_id=restaurant.id,
         quantidade=5.0,
-        unidade_medida="kg",
+        unidade="kg",
         valor_estimado=25.0,  # 5kg a R$5,00/kg
         data_registro=datetime.now(),
         motivo="Produto vencido",

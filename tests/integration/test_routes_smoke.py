@@ -14,15 +14,13 @@ def test_pratos_index(client):
     assert b"<html" in response.data
 
 def test_dashboard_index(client):
-    """Testa se o dashboard carrega"""
-    response = client.get('/dashboard/', follow_redirects=True)
+    """Testa se o dashboard carrega (montado em '/')."""
+    response = client.get('/', follow_redirects=True)
     assert response.status_code == 200
 
-def test_seed_vegan_route(client):
-    """Testa se a rota de seeding existe (não executa o seed inteiro aqui para ser rápido)"""
-    # Apenas verifica se a rota não dá 404
-    # Note: Chamar essa rota dispara o seed, o que pode ser lento. 
-    # Em teste de unidade, o DB é :memory:, então é seguro rodar.
+def test_seed_vegan_route_gated(client):
+    """A rota /seed-vegan é perigosa (dispara seed) e agora fica atrás de
+    ENABLE_ADMIN_ENDPOINTS. Sem a flag (padrão, inclusive em produção) ela
+    NÃO deve estar registrada — 404 é o comportamento seguro esperado."""
     response = client.get('/seed-vegan', follow_redirects=True)
-    assert response.status_code == 200
-    assert b"Dados Veganos Preenchidos com Sucesso" in response.data
+    assert response.status_code == 404

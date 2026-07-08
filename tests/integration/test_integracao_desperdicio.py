@@ -5,40 +5,42 @@ from app.models.modelo_desperdicio import CategoriaDesperdicio, RegistroDesperdi
 from app.models.modelo_produto import Produto
 
 @pytest.fixture
-def setup_categoria_e_produtos(session):
+def setup_categoria_e_produtos(session, restaurant):
     """Fixture para criar categorias de desperdu00edcio e produtos para testes"""
     # Criar categorias de desperdu00edcio
     categorias = [
-        CategoriaDesperdicio(nome="Expirado", descricao="Produtos vencidos", cor="#FF0000"),
-        CategoriaDesperdicio(nome="Sobra", descricao="Sobra de produu00e7u00e3o", cor="#FFA500"),
-        CategoriaDesperdicio(nome="Dano", descricao="Produtos danificados", cor="#FFFF00")
+        CategoriaDesperdicio(nome="Expirado", descricao="Produtos vencidos", cor="#FF0000", restaurant_id=restaurant.id),
+        CategoriaDesperdicio(nome="Sobra", descricao="Sobra de produu00e7u00e3o", cor="#FFA500", restaurant_id=restaurant.id),
+        CategoriaDesperdicio(nome="Dano", descricao="Produtos danificados", cor="#FFFF00", restaurant_id=restaurant.id)
     ]
-    
+
     for categoria in categorias:
         session.add(categoria)
     session.commit()
-    
+
     # Criar produtos de teste
     produtos = [
         Produto(
             nome="Produto A",
             descricao="Produto A para testes",
             unidade="kg",
-            preco_custo=20.0,
+            preco_unitario=20.0,
             preco_venda=40.0,
             codigo_barras="111222333",
             estoque_minimo=10,
-            estoque_atual=30
+            estoque_atual=30,
+            restaurant_id=restaurant.id
         ),
         Produto(
             nome="Produto B",
             descricao="Produto B para testes",
             unidade="un",
-            preco_custo=5.0,
+            preco_unitario=5.0,
             preco_venda=10.0,
             codigo_barras="444555666",
             estoque_minimo=5,
-            estoque_atual=15
+            estoque_atual=15,
+            restaurant_id=restaurant.id
         )
     ]
     
@@ -49,7 +51,7 @@ def setup_categoria_e_produtos(session):
     return {"categorias": categorias, "produtos": produtos}
 
 @pytest.fixture
-def setup_registros_desperdicio(session, setup_categoria_e_produtos):
+def setup_registros_desperdicio(session, restaurant, setup_categoria_e_produtos):
     """Fixture para criar registros de desperdu00edcio para testes"""
     dados = setup_categoria_e_produtos
     categorias = dados["categorias"]
@@ -63,9 +65,10 @@ def setup_registros_desperdicio(session, setup_categoria_e_produtos):
                 registro = RegistroDesperdicio(
                     categoria_id=categoria.id,
                     produto_id=produto.id,
+                    restaurant_id=restaurant.id,
                     quantidade=float(1 + (i + j) % 5),  # Variar a quantidade
                     unidade=produto.unidade,
-                    valor=produto.preco_custo * float(1 + (i + j) % 5),
+                    valor=produto.preco_unitario * float(1 + (i + j) % 5),
                     data_registro=datetime.now().date() - timedelta(days=dia),
                     observacao=f"Registro de teste para {categoria.nome} e {produto.nome}"
                 )
@@ -75,6 +78,7 @@ def setup_registros_desperdicio(session, setup_categoria_e_produtos):
     # Criar uma meta de reduu00e7u00e3o de desperdu00edcio
     meta = MetaDesperdicio(
         categoria_id=categorias[0].id,  # Meta para a primeira categoria
+        restaurant_id=restaurant.id,
         valor_inicial=1000.0,
         valor_meta=800.0,
         percentual_reducao=20.0,
@@ -120,7 +124,7 @@ def test_fluxo_desperdicio_completo(client, session, setup_registros_desperdicio
         'produto_id': produto.id,
         'quantidade': 3.5,
         'unidade': produto.unidade,
-        'valor': produto.preco_custo * 3.5,
+        'valor': produto.preco_unitario * 3.5,
         'data_registro': datetime.now().strftime('%Y-%m-%d'),
         'observacao': 'Registro criado pelo teste de integrau00e7u00e3o'
     }
