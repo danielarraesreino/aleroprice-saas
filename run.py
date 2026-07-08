@@ -3,8 +3,16 @@ from flask_migrate import upgrade
 
 import os
 
-# Detect Vercel environment
-config_name = 'production' if os.environ.get('VERCEL') or os.environ.get('RAILWAY_ENVIRONMENT') else 'default'
+# Seleção de configuração.
+# Prioridade: APP_ENV explícito > detecção de plataforma (Vercel/Railway) > default (dev).
+# Em qualquer host de container, basta setar APP_ENV=production.
+_app_env = os.environ.get('APP_ENV')
+if _app_env:
+    config_name = _app_env
+elif os.environ.get('VERCEL') or os.environ.get('RAILWAY_ENVIRONMENT'):
+    config_name = 'production'
+else:
+    config_name = 'default'
 app = create_app(config_name)
 
 if __name__ == '__main__':
