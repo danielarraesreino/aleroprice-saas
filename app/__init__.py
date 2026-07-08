@@ -123,6 +123,10 @@ def create_app(config_name='default'):
     # from app.errors import bp as errors_bp
     # app.register_blueprint(errors_bp)
     
+    # Registra comandos CLI (ex.: create-tenant para provisionar clientes)
+    from app.cli import register_cli
+    register_cli(app)
+
     # Registra shell context
     @app.shell_context_processor
     def make_shell_context():
