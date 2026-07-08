@@ -1,8 +1,15 @@
 {
-    "rewrites": [
-        {
-            "source": "/(.*)",
-            "destination": "api/index.py"
-        }
-    ]
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "api/index.py"
+    }
+  ],
+  "experimentalServices": {
+    "aleroprice-bardavila": {
+      "type": "web",
+      "routePrefix": "/",
+      "buildCommand": "pip install -r requirements.txt"
+    }
+  }
 }
