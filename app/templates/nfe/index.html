@@ -67,7 +67,7 @@
                         <td>{{ nota.numero }} / {{ nota.serie }}</td>
                         <td>{{ nota.data_emissao.strftime('%d/%m/%Y') }}</td>
                         <td>{{ nota.fornecedor.razao_social }}</td>
-                        <td>R$ {{ "%.2f"|format(nota.valor_total) }}</td>
+                        <td>{{ nota.valor_total|moeda_br }}</td>
                         <td>
                             <a href="{{ url_for('nfe.visualizar', id=nota.id) }}" class="btn btn-sm btn-info"
                                 title="Ver Detalhes">

@@ -19,6 +19,9 @@ class Restaurante(db.Model):
     stripe_customer_id = db.Column(db.String(100))
     stripe_subscription_id = db.Column(db.String(100))
     
+    # A/B Testing
+    pricing_strategy = db.Column(db.String(50), default='standard') # 'standard' (97/mo) vs 'volume_based' (flex)
+    
     # Relações
     usuarios = db.relationship('Usuario', back_populates='restaurante')
     

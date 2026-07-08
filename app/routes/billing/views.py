@@ -27,18 +27,30 @@ def create_checkout_session():
             flash('Modo de Teste: Redirecionando para sucesso simulado...', 'info')
             return redirect(url_for('billing.success', session_id='evt_test_mock_session'))
 
+        price_id = STRIPE_PRICE_ID_PRO
+        
+        # A/B Testing Logic
+        if restaurante.pricing_strategy == 'volume_based':
+            # Placeholder for Volume Based Price ID
+            # In production, this would be a different Price ID from Stripe
+            price_id = os.environ.get('STRIPE_PRICE_ID_VOLUME', 'price_fake_volume_test')
+
         checkout_session = stripe.checkout.Session.create(
             customer_email=current_user.email,
             client_reference_id=str(restaurante.id),
             line_items=[
                 {
-                    'price': STRIPE_PRICE_ID_PRO,
+                    'price': price_id,
                     'quantity': 1,
                 },
             ],
             mode='subscription',
             success_url=url_for('billing.success', _external=True) + '?session_id={CHECKOUT_SESSION_ID}',
             cancel_url=url_for('billing.cancel', _external=True),
+            metadata={
+                'pricing_strategy': restaurante.pricing_strategy,
+                'restaurant_id': restaurante.id
+            }
         )
         return redirect(checkout_session.url, code=303)
     except Exception as e:

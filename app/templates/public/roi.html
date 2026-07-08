@@ -17,16 +17,16 @@
                     <div class="text-center animate__animated animate__fadeIn">
                         <div class="alert alert-danger shadow-sm">
                             <h4 class="alert-heading fw-bold">Alerta Financeiro! 💸</h4>
-                            <p class="lead">Com base no faturamento de R$ {{ "%.2f"|format(resultado.faturamento) }},
+                            <p class="lead">Com base no faturamento de {{ resultado.faturamento|moeda_br }},
                                 estimamos que:</p>
                             <hr>
-                            <h1 class="display-4 fw-bold text-danger mb-3">R$ {{ "%.2f"|format(resultado.desperdicio) }}
+                            <h1 class="display-4 fw-bold text-danger mb-3">{{ resultado.desperdicio|moeda_br }}
                             </h1>
                             <p class="mb-0">Estão indo para o lixo <strong>todos os meses</strong>.</p>
                         </div>
 
-                        <p class="text-muted mt-4">Isso equivale a <strong>R$ {{ "%.2f"|format(resultado.desperdicio *
-                                12) }}</strong> por ano!</p>
+                        <p class="text-muted mt-4">Isso equivale a <strong>{{ resultado.desperdicio *
+                                12|moeda_br }}</strong> por ano!</p>
 
                         <div class="d-grid gap-2 mt-4">
                             <a href="{{ url_for('auth.login') }}"
@@ -50,6 +50,11 @@
                                 <span class="input-group-text bg-light border-0">R$</span>
                                 <input type="text" class="form-control border-primary" id="faturamento_estimado"
                                     name="faturamento_estimado" placeholder="Ex: 50000,00" required autofocus>
+                            </div>
+                            <div class="mt-3">
+                                <label for="email" class="form-label h5 text-muted">Seu E-mail (Opcional)</label>
+                                <input type="email" class="form-control form-control-lg border-primary" id="email"
+                                    name="email" placeholder="Para receber dicas de economia">
                             </div>
                             <div class="form-text mt-2 text-muted">Usamos dados de mercado da Abrasel para estimar suas
                                 perdas ocultas.</div>

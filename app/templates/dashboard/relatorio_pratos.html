@@ -145,25 +145,25 @@
     <div class="col-md-3">
         <div class="metric-card revenue-card">
             <div class="title">Receita Total</div>
-            <div class="value">R$ {{ "%.2f"|format(total_receita) }}</div>
+            <div class="value">{{ total_receita|moeda_br }}</div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="metric-card cost-card">
             <div class="title">Custo Total</div>
-            <div class="value">R$ {{ "%.2f"|format(total_custo) }}</div>
+            <div class="value">{{ total_custo|moeda_br }}</div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="metric-card profit-card">
             <div class="title">Lucro Total</div>
-            <div class="value">R$ {{ "%.2f"|format(total_lucro) }}</div>
+            <div class="value">{{ total_lucro|moeda_br }}</div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="metric-card margin-card">
             <div class="title">Margem Média</div>
-            <div class="value">{{ "%.1f"|format(margem_media) }}%</div>
+            <div class="value">{{ margem_media|percentual_br }}</div>
         </div>
     </div>
 </div>
@@ -179,9 +179,9 @@
                 <div class="categoria-header">
                     <div class="row">
                         <div class="col-md-6">{{ categoria }}</div>
-                        <div class="col-md-2 text-end">Receita: R$ {{ "%.2f"|format(dados.receita) }}</div>
-                        <div class="col-md-2 text-end">Lucro: R$ {{ "%.2f"|format(dados.lucro) }}</div>
-                        <div class="col-md-2 text-end">Margem: {{ "%.1f"|format(dados.margem) }}%</div>
+                        <div class="col-md-2 text-end">Receita: {{ dados.receita|moeda_br }}</div>
+                        <div class="col-md-2 text-end">Lucro: {{ dados.lucro|moeda_br }}</div>
+                        <div class="col-md-2 text-end">Margem: {{ dados.margem|percentual_br }}</div>
                     </div>
                 </div>
 
@@ -206,14 +206,14 @@
                                 class="{% if prato.margem >= 30 %}bg-high-margin{% elif prato.margem >= 15 %}bg-medium-margin{% elif prato.margem < 0 %}bg-low-margin{% endif %}">
                                 <td>{{ prato.nome }}</td>
                                 <td class="text-end">{{ prato.quantidade_vendida }}</td>
-                                <td class="text-end">R$ {{ "%.2f"|format(prato.preco_venda) }}</td>
-                                <td class="text-end">R$ {{ "%.2f"|format(prato.receita_total) }}</td>
-                                <td class="text-end">R$ {{ "%.2f"|format(prato.custo_direto_total) }}</td>
-                                <td class="text-end">R$ {{ "%.2f"|format(prato.custo_indireto_estimado) }}</td>
-                                <td class="text-end">R$ {{ "%.2f"|format(prato.custo_total) }}</td>
+                                <td class="text-end">{{ prato.preco_venda|moeda_br }}</td>
+                                <td class="text-end">{{ prato.receita_total|moeda_br }}</td>
+                                <td class="text-end">{{ prato.custo_direto_total|moeda_br }}</td>
+                                <td class="text-end">{{ prato.custo_indireto_estimado|moeda_br }}</td>
+                                <td class="text-end">{{ prato.custo_total|moeda_br }}</td>
                                 <td class="text-end {% if prato.lucro > 0 %}text-profit{% else %}text-loss{% endif %}">
-                                    R$ {{ "%.2f"|format(prato.lucro) }}</td>
-                                <td class="text-end">{{ "%.1f"|format(prato.margem) }}%</td>
+                                    {{ prato.lucro|moeda_br }}</td>
+                                <td class="text-end">{{ prato.margem|percentual_br }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -252,12 +252,12 @@
                                 <td>{{ prato.nome }}</td>
                                 <td>{{ prato.categoria or 'Sem Categoria' }}</td>
                                 <td class="text-end">{{ prato.quantidade_vendida }}</td>
-                                <td class="text-end">R$ {{ "%.2f"|format(prato.preco_venda) }}</td>
-                                <td class="text-end">R$ {{ "%.2f"|format(prato.receita_total) }}</td>
-                                <td class="text-end">R$ {{ "%.2f"|format(prato.custo_total) }}</td>
+                                <td class="text-end">{{ prato.preco_venda|moeda_br }}</td>
+                                <td class="text-end">{{ prato.receita_total|moeda_br }}</td>
+                                <td class="text-end">{{ prato.custo_total|moeda_br }}</td>
                                 <td class="text-end {% if prato.lucro > 0 %}text-profit{% else %}text-loss{% endif %}">
-                                    R$ {{ "%.2f"|format(prato.lucro) }}</td>
-                                <td class="text-end">{{ "%.1f"|format(prato.margem) }}%</td>
+                                    {{ prato.lucro|moeda_br }}</td>
+                                <td class="text-end">{{ prato.margem|percentual_br }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>

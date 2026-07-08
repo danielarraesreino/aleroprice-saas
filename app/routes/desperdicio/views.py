@@ -17,7 +17,7 @@ def index():
     restaurant_id = get_current_restaurant_id()
     if not restaurant_id:
         flash('Erro: Restaurante não identificado.', 'danger')
-        return redirect(url_for('main.index'))
+        return redirect(url_for('auth.login'))
 
     # Obter estatísticas gerais
     hoje = date.today()
@@ -178,7 +178,7 @@ def listar_registros():
     """Lista todos os registros de desperdício"""
     restaurant_id = get_current_restaurant_id()
     if not restaurant_id:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('auth.login'))
 
     page = request.args.get('page', 1, type=int)
     
@@ -233,7 +233,7 @@ def criar_registro():
         tipo_item = request.form.get('tipo_item')  # 'produto' ou 'prato'
         item_id = request.form.get('item_id', type=int)
         quantidade = request.form.get('quantidade', type=float)
-        unidade_medida = request.form.get('unidade_medida')
+        unidade = request.form.get('unidade')
         valor_estimado = request.form.get('valor_estimado', type=float)
         motivo = request.form.get('motivo')
         responsavel = request.form.get('responsavel')
@@ -242,7 +242,7 @@ def criar_registro():
         acoes_corretivas = request.form.get('acoes_corretivas')
         
         # Validações básicas
-        if not categoria_id or not tipo_item or not item_id or not quantidade or not unidade_medida:
+        if not categoria_id or not tipo_item or not item_id or not quantidade or not unidade:
             flash('Categoria, tipo de item, item, quantidade e unidade de medida são obrigatórios!', 'danger')
             categorias = CategoriaDesperdicio.query.filter_by(ativo=True, restaurant_id=restaurant_id).all()
             produtos = Produto.query.filter_by(ativo=True, restaurant_id=restaurant_id).order_by(Produto.nome).all()
@@ -259,7 +259,7 @@ def criar_registro():
         registro = RegistroDesperdicio(
             categoria_id=categoria_id,
             quantidade=quantidade,
-            unidade_medida=unidade_medida,
+            unidade=unidade,
             valor_estimado=valor_estimado,
             motivo=motivo,
             responsavel=responsavel,
@@ -313,7 +313,7 @@ def listar_metas():
     """Lista todas as metas de redução de desperdício"""
     restaurant_id = get_current_restaurant_id()
     if not restaurant_id:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('auth.login'))
         
     metas = MetaDesperdicio.query.filter_by(restaurant_id=restaurant_id).all()
     return render_template('desperdicio/metas.html', metas=metas)
@@ -484,7 +484,7 @@ def relatorios():
     """Página de relatórios de desperdício"""
     restaurant_id = get_current_restaurant_id()
     if not restaurant_id:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('auth.login'))
 
     try:
         # Obter parâmetros para filtros
@@ -604,7 +604,7 @@ def relatorios():
         for r in registros:
             key = None
             nome = "Desconhecido"
-            unidade = r.unidade_medida
+            unidade = r.unidade
             if r.produto: 
                 key = f"prod_{r.produto_id}"
                 nome = r.produto.nome
@@ -722,7 +722,7 @@ def exportar_registros():
             'Tipo': tipo,
             'Item': item,
             'Quantidade': registro.quantidade,
-            'Unidade': registro.unidade_medida,
+            'Unidade': registro.unidade,
             'Valor Estimado': float(registro.valor_estimado or 0),
             'Motivo': registro.motivo or '',
             'Responsável': registro.responsavel or '',

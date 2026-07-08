@@ -251,11 +251,11 @@
                                                 </div>
                                                 <div class="d-flex justify-content-between mb-3">
                                                     <span><strong>Preço:</strong></span>
-                                                    <span>R$ {{ "%.2f"|format(item.preco) }}</span>
+                                                    <span>{{ item.preco|moeda_br }}</span>
                                                 </div>
                                                 <div class="d-flex justify-content-between">
                                                     <span><strong>Margem:</strong></span>
-                                                    <span>{{ "%.1f"|format(item.margem) }}%</span>
+                                                    <span>{{ item.margem|percentual_br }}</span>
                                                 </div>
                                                 
                                                 <div class="progress mt-3" style="height: 10px;">
@@ -363,8 +363,8 @@
                                                     <i class="fas fa-list"></i> Ver ingredientes
                                                 </button>
                                             </td>
-                                            <td>R$ {{ "%.2f"|format(recomendacao.custo_total) }}</td>
-                                            <td>R$ {{ "%.2f"|format(recomendacao.receita_estimada) }}</td>
+                                            <td>{{ recomendacao.custo_total|moeda_br }}</td>
+                                            <td>{{ recomendacao.receita_estimada|moeda_br }}</td>
                                         </tr>
                                         
                                         <!-- Modal de Ingredientes -->
@@ -396,7 +396,7 @@
                                                                         <td>{{ ingrediente.nome }}</td>
                                                                         <td>{{ "%.2f"|format(ingrediente.quantidade) }}</td>
                                                                         <td>{{ ingrediente.unidade }}</td>
-                                                                        <td>R$ {{ "%.2f"|format(ingrediente.custo) }}</td>
+                                                                        <td>{{ ingrediente.custo|moeda_br }}</td>
                                                                         <td>
                                                                             {% if ingrediente.disponivel %}
                                                                                 <span class="text-success"><i class="fas fa-check"></i> Sim</span>
@@ -410,7 +410,7 @@
                                                             <tfoot>
                                                                 <tr>
                                                                     <th colspan="3">Total</th>
-                                                                    <th>R$ {{ "%.2f"|format(recomendacao.custo_total) }}</th>
+                                                                    <th>{{ recomendacao.custo_total|moeda_br }}</th>
                                                                     <th></th>
                                                                 </tr>
                                                             </tfoot>
@@ -430,8 +430,8 @@
                                 <tfoot>
                                     <tr>
                                         <th colspan="4">Total</th>
-                                        <th>R$ {{ "%.2f"|format(custo_total) }}</th>
-                                        <th>R$ {{ "%.2f"|format(receita_total) }}</th>
+                                        <th>{{ custo_total|moeda_br }}</th>
+                                        <th>{{ receita_total|moeda_br }}</th>
                                     </tr>
                                 </tfoot>
                             </table>

@@ -218,7 +218,7 @@
                                         <tr>
                                             <td>{{ item.nome }}</td>
                                             <td>{{ item.quantidade }} {{ item.unidade }}</td>
-                                            <td>R$ {{ "%.2f"|format(item.valor) }}</td>
+                                            <td>{{ item.valor|moeda_br }}</td>
                                             <td>
                                                 <div class="progress" style="height: 10px;">
                                                     <div class="progress-bar bg-danger" role="progressbar" 
@@ -226,7 +226,7 @@
                                                         aria-valuenow="{{ item.percentual }}" aria-valuemin="0" aria-valuemax="100">
                                                     </div>
                                                 </div>
-                                                <small>{{ "%.1f"|format(item.percentual) }}%</small>
+                                                <small>{{ item.percentual|percentual_br }}</small>
                                             </td>
                                         </tr>
                                     {% endfor %}
@@ -274,7 +274,7 @@
                                 <div class="card bg-light">
                                     <div class="card-body text-center">
                                         <h3 class="{% if tendencia > 0 %}text-danger{% elif tendencia < 0 %}text-success{% else %}text-muted{% endif %}">
-                                            {% if tendencia > 0 %}+{% endif %}{{ "%.1f"|format(tendencia) }}%
+                                            {% if tendencia > 0 %}+{% endif %}{{ tendencia|percentual_br }}
                                             <small><i class="fas fa-{% if tendencia > 0 %}arrow-up{% elif tendencia < 0 %}arrow-down{% else %}minus{% endif %}"></i></small>
                                         </h3>
                                         <p class="text-muted mb-0">Tendência</p>
@@ -302,17 +302,17 @@
                                                 {{ categoria.nome }}
                                             </td>
                                             <td>{{ categoria.quantidade }}</td>
-                                            <td>R$ {{ "%.2f"|format(categoria.valor) }}</td>
+                                            <td>{{ categoria.valor|moeda_br }}</td>
                                             <td>
                                                 <div class="progress" style="height: 10px;">
                                                     <div class="progress-bar" style="width: {{ categoria.percentual }}%; background-color: {{ categoria.cor }}" role="progressbar" 
                                                         aria-valuenow="{{ categoria.percentual }}" aria-valuemin="0" aria-valuemax="100">
                                                     </div>
                                                 </div>
-                                                <small>{{ "%.1f"|format(categoria.percentual) }}%</small>
+                                                <small>{{ categoria.percentual|percentual_br }}</small>
                                             </td>
                                             <td class="{% if categoria.tendencia > 0 %}trend-up{% elif categoria.tendencia < 0 %}trend-down{% else %}trend-stable{% endif %}">
-                                                {% if categoria.tendencia > 0 %}+{% endif %}{{ "%.1f"|format(categoria.tendencia) }}%
+                                                {% if categoria.tendencia > 0 %}+{% endif %}{{ categoria.tendencia|percentual_br }}
                                                 <i class="fas fa-{% if categoria.tendencia > 0 %}arrow-up{% elif categoria.tendencia < 0 %}arrow-down{% else %}minus{% endif %}"></i>
                                             </td>
                                         </tr>

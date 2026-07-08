@@ -247,7 +247,7 @@
                                                         <span class="badge badge-pendente">Pendente</span>
                                                     {% endif %}
                                                 </td>
-                                                <td>R$ {{ "%.2f"|format(ingrediente.valor_estimado) }}</td>
+                                                <td>{{ ingrediente.valor_estimado|moeda_br }}</td>
                                                 <td>
                                                     <div class="btn-group">
                                                         <a href="{{ url_for('estoque.adicionar_item', ingrediente_id=ingrediente.id) }}" class="btn btn-sm btn-success" title="Adicionar ao Estoque">
@@ -267,7 +267,7 @@
                                     <tfoot>
                                         <tr>
                                             <th colspan="5">Total</th>
-                                            <th>R$ {{ "%.2f"|format(valor_total) }}</th>
+                                            <th>{{ valor_total|moeda_br }}</th>
                                             <th></th>
                                         </tr>
                                     </tfoot>
@@ -335,7 +335,7 @@
                                             <h5 class="card-title">{{ dica.titulo }}</h5>
                                             <p class="card-text">{{ dica.descricao }}</p>
                                             {% if dica.economia %}
-                                                <p class="card-text"><small class="text-success"><i class="fas fa-coins"></i> Economia estimada: R$ {{ "%.2f"|format(dica.economia) }}</small></p>
+                                                <p class="card-text"><small class="text-success"><i class="fas fa-coins"></i> Economia estimada: {{ dica.economia|moeda_br }}</small></p>
                                             {% endif %}
                                         </div>
                                     </div>

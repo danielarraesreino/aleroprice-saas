@@ -116,7 +116,7 @@
                             <div>{{ meta.progresso }}% concluído</div>
                             <div>
                                 {% if meta.tipo == 'valor' %}
-                                    Meta: R$ {{ "%.2f"|format(meta.valor_meta) }} | Atual: R$ {{ "%.2f"|format(meta.valor_atual) }}
+                                    Meta: {{ meta.valor_meta|moeda_br }} | Atual: {{ meta.valor_atual|moeda_br }}
                                 {% elif meta.tipo == 'quantidade' %}
                                     Meta: {{ meta.valor_meta }} ocorrências | Atual: {{ meta.valor_atual }} ocorrências
                                 {% elif meta.tipo == 'percentual' %}

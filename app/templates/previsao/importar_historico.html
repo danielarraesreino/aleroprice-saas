@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,11 +14,13 @@
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+
         .form-title {
             border-bottom: 2px solid #e9ecef;
             padding-bottom: 15px;
             margin-bottom: 25px;
         }
+
         .upload-area {
             border: 2px dashed #dee2e6;
             border-radius: 5px;
@@ -27,15 +30,18 @@
             cursor: pointer;
             transition: all 0.3s;
         }
+
         .upload-area:hover {
             border-color: #adb5bd;
             background-color: #e9ecef;
         }
+
         .upload-icon {
             font-size: 48px;
             color: #6c757d;
             margin-bottom: 15px;
         }
+
         .csv-example {
             font-family: monospace;
             background-color: #f8f9fa;
@@ -48,6 +54,7 @@
         }
     </style>
 </head>
+
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
@@ -86,7 +93,8 @@
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="{{ url_for('previsao.index') }}">Previsão</a></li>
-                        <li class="breadcrumb-item"><a href="{{ url_for('previsao.listar_historico') }}">Histórico de Vendas</a></li>
+                        <li class="breadcrumb-item"><a href="{{ url_for('previsao.listar_historico') }}">Histórico de
+                                Vendas</a></li>
                         <li class="breadcrumb-item active" aria-current="page">Importar Histórico</li>
                     </ol>
                 </nav>
@@ -97,66 +105,50 @@
             <div class="col-md-8 offset-md-2">
                 <div class="form-container">
                     <h2 class="form-title">Importar Histórico de Vendas</h2>
-                    <p class="text-muted">Importe dados de vendas a partir de um arquivo CSV para alimentar o sistema de previsão</p>
+                    <p class="text-muted">Importe dados de vendas a partir de um arquivo CSV para alimentar o sistema de
+                        previsão</p>
 
-                    <form method="post" action="{{ url_for('previsao.importar_historico') }}" enctype="multipart/form-data">
+                    <form method="post" action="{{ url_for('previsao.importar_historico') }}"
+                        enctype="multipart/form-data">
                         <div class="form-group">
-                            <label>Arquivo CSV</label>
-                            <div class="upload-area" id="upload-area" onclick="document.getElementById('arquivo_csv').click();">
+                            <label>Arquivo CSV ou Excel</label>
+                            <div class="upload-area" id="upload-area"
+                                onclick="document.getElementById('arquivo_csv').click();">
                                 <div class="upload-icon">
                                     <i class="fas fa-file-csv"></i>
                                 </div>
                                 <h5>Clique para selecionar ou arraste o arquivo aqui</h5>
-                                <p class="text-muted mb-0">Formato: CSV (valores separados por vírgula)</p>
-                                <input type="file" id="arquivo_csv" name="arquivo_csv" accept=".csv" style="display: none;" required>
+                                <p class="text-muted mb-0">Formatos aceitos: CSV, Excel (.xlsx, .xls)</p>
+                                <input type="file" id="arquivo_csv" name="arquivo_csv" accept=".csv,.xlsx,.xls"
+                                    style="display: none;" required>
                                 <p id="arquivo-selecionado" class="mt-3 mb-0" style="display: none;"></p>
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="cabecalho" name="cabecalho" checked>
-                                <label class="custom-control-label" for="cabecalho">O arquivo contém linha de cabeçalho</label>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <div class="custom-control custom-radio">
-                                <input type="radio" id="tipo_prato" name="tipo_item" value="prato" class="custom-control-input" checked>
-                                <label class="custom-control-label" for="tipo_prato">Importar como Pratos</label>
-                            </div>
-                            <div class="custom-control custom-radio">
-                                <input type="radio" id="tipo_cardapio" name="tipo_item" value="cardapio_item" class="custom-control-input">
-                                <label class="custom-control-label" for="tipo_cardapio">Importar como Itens de Cardápio</label>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="delimitador">Delimitador</label>
-                            <select class="form-control" id="delimitador" name="delimitador">
-                                <option value="," selected>Vírgula (,)</option>
-                                <option value=";">Ponto e vírgula (;)</option>
-                                <option value="\t">Tab</option>
-                            </select>
-                        </div>
-
                         <div class="alert alert-info">
                             <h5><i class="fas fa-info-circle"></i> Formato esperado do arquivo</h5>
-                            <p>O arquivo CSV deve conter as seguintes colunas (na ordem):</p>
+                            <p>O arquivo deve conter as seguintes colunas (os nomes podem variar):</p>
                             <div class="csv-example">
-                                data,nome_item,quantidade,valor_unitario,periodo_dia,clima,temperatura,evento_especial
+                                data,produto,quantidade,valor_unitario
                                 <br>
-                                2025-05-10,Filé à Parmegiana,5,45.90,Almoço,Ensolarado,28.5,
+                                2025-01-10,Pastel de Carne,15,5.00
                                 <br>
-                                2025-05-10,Risoto de Camarão,3,59.90,Jantar,Chuvoso,22.0,
+                                2025-01-10,Pastel de Queijo,12,6.00
                                 <br>
-                                2025-05-11,Feijoada,8,39.90,Almoço,Ensolarado,30.0,Final de Semana
+                                2025-01-11,Coxinha,20,4.50
                             </div>
-                            <p class="mt-3 mb-0">Observações:</p>
+                            <p class="mt-3 mb-0"><strong>✨ Recursos Inteligentes:</strong></p>
                             <ul class="mb-0">
-                                <li>A data deve estar no formato AAAA-MM-DD</li>
-                                <li>O nome do item deve corresponder exatamente ao nome do prato ou item de cardápio no sistema</li>
-                                <li>Os campos período_dia, clima, temperatura e evento_especial são opcionais</li>
+                                <li><strong>Detecção Automática:</strong> O sistema detecta automaticamente as colunas
+                                    (data, produto, quantidade, valor)</li>
+                                <li><strong>Fuzzy Matching:</strong> Nomes aproximados são reconhecidos (ex: "Pastel
+                                    Carne" → "Pastel de Carne")</li>
+                                <li><strong>Agregação Diária:</strong> Múltiplas vendas do mesmo produto no mesmo dia
+                                    são somadas automaticamente</li>
+                                <li><strong>Baixa de Estoque:</strong> O estoque é atualizado automaticamente baseado
+                                    nas fichas técnicas</li>
+                                <li><strong>Formatos Aceitos:</strong> CSV (vírgula ou ponto-e-vírgula) e Excel (.xlsx,
+                                    .xls)</li>
                             </ul>
                         </div>
 
@@ -178,9 +170,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             // Mostrar nome do arquivo quando selecionado
-            $('#arquivo_csv').change(function() {
+            $('#arquivo_csv').change(function () {
                 var fileName = $(this).val().split('\\').pop();
                 if (fileName) {
                     $('#arquivo-selecionado').html('<strong>Arquivo selecionado:</strong> ' + fileName).show();
@@ -190,27 +182,27 @@
                     $('#upload-area').css('border-color', '#dee2e6');
                 }
             });
-            
+
             // Suporte para drag and drop
             var uploadArea = document.getElementById('upload-area');
-            
-            uploadArea.addEventListener('dragover', function(e) {
+
+            uploadArea.addEventListener('dragover', function (e) {
                 e.preventDefault();
                 uploadArea.style.borderColor = '#007bff';
                 uploadArea.style.backgroundColor = '#e9ecef';
             });
-            
-            uploadArea.addEventListener('dragleave', function(e) {
+
+            uploadArea.addEventListener('dragleave', function (e) {
                 e.preventDefault();
                 uploadArea.style.borderColor = '#dee2e6';
                 uploadArea.style.backgroundColor = '#f8f9fa';
             });
-            
-            uploadArea.addEventListener('drop', function(e) {
+
+            uploadArea.addEventListener('drop', function (e) {
                 e.preventDefault();
                 uploadArea.style.borderColor = '#28a745';
                 uploadArea.style.backgroundColor = '#f8f9fa';
-                
+
                 var files = e.dataTransfer.files;
                 if (files.length > 0) {
                     document.getElementById('arquivo_csv').files = files;
@@ -221,4 +213,5 @@
         });
     </script>
 </body>
+
 </html>

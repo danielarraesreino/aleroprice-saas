@@ -58,15 +58,17 @@
                             <td>{{ produto.codigo }}</td>
                             <td>{{ produto.nome }}</td>
                             <td>{{ produto.categoria }}</td>
-                            <td>{{ produto.estoque_atual }}</td>
-                            <td>{{ produto.estoque_minimo }}</td>
+                            <td>{{ produto.estoque_atual|numero_br(2) }}</td>
+                            <td>{{ produto.estoque_minimo|numero_br(0) }}</td>
                             <td>{{ produto.unidade }}</td>
-                            <td>R$ {{ "%.2f"|format(produto.preco_unitario) }}</td>
+                            <td>{{ produto.preco_unitario|moeda_br }}</td>
                             <td>
-                                <a href="{{ url_for('estoque.detalhe_produto', id=produto.id) }}" class="btn btn-info btn-sm">
+                                <a href="{{ url_for('estoque.detalhe_produto', id=produto.id) }}"
+                                    class="btn btn-info btn-sm">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <a href="{{ url_for('estoque.entrada', produto_id=produto.id) }}" class="btn btn-warning btn-sm">
+                                <a href="{{ url_for('estoque.entrada', produto_id=produto.id) }}"
+                                    class="btn btn-warning btn-sm">
                                     <i class="fas fa-exchange-alt"></i>
                                 </a>
                             </td>
@@ -102,8 +104,8 @@
                             <td>{{ mov.data_movimentacao.strftime('%d/%m/%Y %H:%M') }}</td>
                             <td>{{ mov.produto.nome }}</td>
                             <td>{{ mov.tipo }}</td>
-                            <td>{{ mov.quantidade }}</td>
-                            <td>R$ {{ "%.2f"|format(mov.valor_unitario) }}</td>
+                            <td>{{ mov.quantidade|numero_br(2) }}</td>
+                            <td>{{ mov.valor_unitario|moeda_br if mov.valor_unitario else "-" }}</td>
                             <td>{{ mov.referencia }}</td>
                         </tr>
                         {% endfor %}
@@ -117,7 +119,7 @@
 
 {% block scripts %}
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         $('#dataTable').DataTable({
             language: {
                 url: '//cdn.datatables.net/plug-ins/1.10.24/i18n/Portuguese-Brasil.json'
@@ -125,4 +127,4 @@
         });
     });
 </script>
-{% endblock %} 
+{% endblock %}

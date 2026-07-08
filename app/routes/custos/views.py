@@ -15,7 +15,7 @@ def index():
     restaurant_id = get_current_restaurant_id()
     if not restaurant_id:
         flash('Erro: Restaurante não identificado.', 'danger')
-        return redirect(url_for('main.index'))
+        return redirect(url_for('auth.login'))
 
     mes = request.args.get('mes', date.today().month, type=int)
     ano = request.args.get('ano', date.today().year, type=int)

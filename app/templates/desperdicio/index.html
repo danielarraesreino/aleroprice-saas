@@ -87,7 +87,7 @@
                         <div class="stat-label">Ocorrências</div>
                     </div>
                     <div class="col-md-6 text-center mb-3">
-                        <div class="stat-value text-danger">R$ {{ "%.2f"|format(total_valor) }}</div>
+                        <div class="stat-value text-danger">{{ total_valor|moeda_br }}</div>
                         <div class="stat-label">Valor Total</div>
                     </div>
                 </div>
@@ -114,7 +114,7 @@
                             <div class="stat-label">Ocorrências</div>
                         </div>
                         <div class="text-danger font-weight-bold">
-                            R$ {{ "%.2f"|format(por_tipo['Produtos']['valor']) }}
+                            {{ por_tipo['Produtos']['valor']|moeda_br }}
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -124,7 +124,7 @@
                             <div class="stat-label">Ocorrências</div>
                         </div>
                         <div class="text-danger font-weight-bold">
-                            R$ {{ "%.2f"|format(por_tipo['Pratos']['valor']) }}
+                            {{ por_tipo['Pratos']['valor']|moeda_br }}
                         </div>
                     </div>
                 </div>
@@ -201,7 +201,7 @@
                                             {{ categoria }}
                                         </td>
                                         <td class="text-center">{{ dados.quantidade }}</td>
-                                        <td class="text-right text-danger">R$ {{ "%.2f"|format(dados.valor) }}</td>
+                                        <td class="text-right text-danger">{{ dados.valor|moeda_br }}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -232,7 +232,7 @@
                                             <span class="text-muted">{{ registro.prato.nome }}</span>
                                         {% endif %}
                                     </div>
-                                    <div class="text-danger">R$ {{ "%.2f"|format(registro.valor_estimado) }}</div>
+                                    <div class="text-danger">{{ registro.valor_estimado|moeda_br }}</div>
                                 </div>
                                 <div class="d-flex justify-content-between mt-1">
                                     <small class="text-muted">{{ registro.data_registro.strftime('%d/%m/%Y') }}</small>

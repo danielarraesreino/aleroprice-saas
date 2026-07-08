@@ -37,6 +37,18 @@
                             style="font-size: 0.6em;">RECOMENDADO</span></h4>
                 </div>
                 <div class="card-body">
+                    {% if current_user.restaurante.pricing_strategy == 'volume_based' %}
+                    <h1 class="card-title pricing-card-title">R$ 49<small class="text-muted fw-light">/mês</small></h1>
+                    <p class="text-muted">+ R$ 0,50 por NFE importada</p>
+                    <ul class="list-unstyled mt-3 mb-4">
+                        <li><i class="fas fa-check text-success me-2"></i> <strong>Pague pelo que usar</strong></li>
+                        <li><i class="fas fa-check text-success me-2"></i> <strong>Tudo do Free</strong></li>
+                        <li><i class="fas fa-check text-success me-2"></i> <strong>Lucro Real em Tempo Real</strong>
+                        </li>
+                        <li><i class="fas fa-check text-success me-2"></i> Alertas de Estoque Crítico</li>
+                        <li><i class="fas fa-check text-success me-2"></i> Matriz de Cardápio (BCG)</li>
+                    </ul>
+                    {% else %}
                     <h1 class="card-title pricing-card-title">R$ 97<small class="text-muted fw-light">/mês</small></h1>
                     <ul class="list-unstyled mt-3 mb-4">
                         <li><i class="fas fa-check text-success me-2"></i> <strong>Tudo do Free</strong></li>
@@ -46,6 +58,7 @@
                         <li><i class="fas fa-check text-success me-2"></i> Matriz de Cardápio (BCG)</li>
                         <li><i class="fas fa-check text-success me-2"></i> Suporte Prioritário</li>
                     </ul>
+                    {% endif %}
                     <!-- Formulário de Checkout Stripe -->
                     <form action="{{ url_for('billing.create_checkout_session') }}" method="POST">
                         <button type="submit"

@@ -15,6 +15,14 @@ def calculadora_roi():
             faturamento_str = faturamento_str.replace('R$', '').replace('.', '').replace(',', '.')
             faturamento = float(faturamento_str)
             
+            # Retention / Lead Capture
+            email = request.form.get('email')
+            if email:
+                # Log for backend processing (Concierge / Marketing)
+                # In production, this goes to Vercel Logs -> Datadog/Splunk or manually extracted
+                from flask import current_app
+                current_app.logger.info(f"Context: LEAD_CALCULADORA_ROI | Email: {email} | Faturamento: {faturamento}")
+            
             # Estimativa de desperdício (10% - Dado de mercado Abrasel)
             desperdicio = faturamento * 0.10
             

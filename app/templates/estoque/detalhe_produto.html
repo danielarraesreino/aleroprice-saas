@@ -67,7 +67,7 @@
                                 Valor Unitário (Médio)
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                R$ {{ "%.2f"|format(produto.preco_unitario) }}
+                                {{ produto.preco_unitario|moeda_br }}
                             </div>
                         </div>
                         <div class="col-auto">
@@ -107,7 +107,7 @@
                                 </span>
                             </td>
                             <td>{{ mov.quantidade }}</td>
-                            <td>R$ {{ "%.2f"|format(mov.valor_unitario) }}</td>
+                            <td>{{ mov.valor_unitario|moeda_br }}</td>
                             <td>{{ mov.referencia }}</td>
                             <td>{{ mov.observacao or '-' }}</td>
                         </tr>

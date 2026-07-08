@@ -51,7 +51,7 @@
                 <td>{{ custo.descricao }}</td>
                 <td>{{ custo.tipo }}</td>
                 <td>{{ custo.data_referencia.strftime('%m/%Y') }}</td>
-                <td>R$ {{ "%.2f"|format(custo.valor) }}</td>
+                <td>{{ custo.valor|moeda_br }}</td>
                 <td>
                     <a href="{{ url_for('custos.excluir', id=custo.id) }}" class="btn btn-sm btn-danger"
                         onclick="return confirm('Tem certeza?')">
@@ -62,7 +62,7 @@
             {% endfor %}
             <tr class="font-weight-bold">
                 <td colspan="3" class="text-right">Total:</td>
-                <td colspan="2">R$ {{ "%.2f"|format(total) }}</td>
+                <td colspan="2">{{ total|moeda_br }}</td>
             </tr>
         </tbody>
     </table>

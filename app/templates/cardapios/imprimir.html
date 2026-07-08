@@ -140,7 +140,7 @@
                         {% endif %}
                     </div>
                     <div class="col-3">
-                        <div class="item-preco">R$ {{ "%.2f"|format(item.preco) }}</div>
+                        <div class="item-preco">{{ item.preco|moeda_br }}</div>
                     </div>
                 </div>
             </div>

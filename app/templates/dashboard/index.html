@@ -4,7 +4,7 @@
 
 {% block extra_css %}
 <style>
-    @import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
+    /* @import moved to base.html for performance */
 
     .card-dashboard {
         transition: transform 0.3s;
@@ -170,21 +170,65 @@
 </div>
 {% else %}
 <div class="row align-items-center mb-4">
-    <div class="col-md-8">
+    <div class="col-md-6">
         <h1 class="mb-0">Dashboard de Lucratividade</h1>
         <p class="text-muted">{{ titulo_periodo }}</p>
     </div>
-    <div class="col-md-4 text-right">
-        <div class="periodo-selector">
-            <form method="get" action="" class="form-inline justify-content-end">
-                <select name="periodo" class="form-control form-control-sm me-2">
-                    <option value="mensal" {% if periodo=='mensal' %}selected{% endif %}>Mensal</option>
-                    <option value="trimestral" {% if periodo=='trimestral' %}selected{% endif %}>Trimestral</option>
-                    <option value="anual" {% if periodo=='anual' %}selected{% endif %}>Anual</option>
-                    <option value="personalizado" {% if periodo=='personalizado' %}selected{% endif %}>Personalizado
-                    </option>
-                </select>
-                <button type="submit" class="btn btn-sm btn-primary">Filtrar</button>
+    <div class="col-md-6">
+        <!-- Botões Rápidos de Período (Mobile-Friendly) -->
+        <div class="d-flex flex-wrap gap-2 justify-content-md-end">
+            <a href="?periodo=hoje"
+                class="btn btn-sm {% if periodo == 'hoje' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                <i class="fas fa-calendar-day"></i> Hoje
+            </a>
+            <a href="?periodo=ontem"
+                class="btn btn-sm {% if periodo == 'ontem' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                <i class="fas fa-history"></i> Ontem
+            </a>
+            <a href="?periodo=7dias"
+                class="btn btn-sm {% if periodo == '7dias' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                <i class="fas fa-calendar-week"></i> 7 Dias
+            </a>
+            <a href="?periodo=30dias"
+                class="btn btn-sm {% if periodo == '30dias' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                <i class="fas fa-calendar-alt"></i> 30 Dias
+            </a>
+            <a href="?periodo=mes_anterior"
+                class="btn btn-sm {% if periodo == 'mes_anterior' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                <i class="fas fa-calendar-minus"></i> Mês Anterior
+            </a>
+            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
+                data-bs-target="#periodoModal">
+                <i class="fas fa-calendar"></i> Personalizado
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Período Personalizado -->
+<div class="modal fade" id="periodoModal" tabindex="-1" aria-labelledby="periodoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="periodoModalLabel">Período Personalizado</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="get" action="">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="data_inicio" class="form-label">Data Início</label>
+                        <input type="date" class="form-control" id="data_inicio" name="data_inicio" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="data_fim" class="form-label">Data Fim</label>
+                        <input type="date" class="form-control" id="data_fim" name="data_fim" required>
+                    </div>
+                    <input type="hidden" name="periodo" value="personalizado">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Aplicar</button>
+                </div>
             </form>
         </div>
     </div>
@@ -199,9 +243,9 @@
             <div class="card-body text-center d-flex flex-column justify-content-center">
                 <div class="mb-2"><i class="fas fa-cash-register fa-2x"></i></div>
                 <div class="metric-title opacity-75">LUCRO REAL (HOJE)</div>
-                <div class="metric-value display-4 fw-bold">R$ {{ "%.2f"|format(lucro_hoje) }}</div>
-                <small class="opacity-75">Receita: R$ {{ "%.2f"|format(receita_hoje or 0) }} | Custo: R$ {{
-                    "%.2f"|format(custo_hoje or 0) }}</small>
+                <div class="metric-value display-4 fw-bold">{{ lucro_hoje|moeda_br }}</div>
+                <small class="opacity-75">Receita: {{ receita_hoje or 0|moeda_br }} | Custo: {{ custo_hoje or 0|moeda_br
+                    }}</small>
             </div>
         </div>
     </div>
@@ -290,9 +334,9 @@
                                 {% for prod in produtos_inflacao[:5] %}
                                 <tr>
                                     <td>{{ prod.nome }}</td>
-                                    <td class="text-muted">R$ {{ "%.2f"|format(prod.ultimo_custo_anterior or 0) }}</td>
-                                    <td class="fw-bold">R$ {{ "%.2f"|format(prod.preco_unitario) }}</td>
-                                    <td class="text-danger fw-bold">+{{ "%.1f"|format(prod.variacao_preco_pct) }}%</td>
+                                    <td class="text-muted">{{ prod.ultimo_custo_anterior or 0|moeda_br }}</td>
+                                    <td class="fw-bold">{{ prod.preco_unitario|moeda_br }}</td>
+                                    <td class="text-danger fw-bold">+{{ prod.variacao_preco_pct|percentual_br }}</td>
                                     <td>{{ prod.data_alerta_inflacao.strftime('%d/%m') }}</td>
                                 </tr>
                                 {% endfor %}
@@ -320,27 +364,27 @@
         <div class="col-md-3">
             <div class="p-3 border rounded bg-light">
                 <small class="text-muted d-block uppercase">RECEITA (PERÍODO)</small>
-                <span class="h5 fw-bold text-dark">R$ {{ "%.2f"|format(receita_total) }}</span>
+                <span class="h5 fw-bold text-dark">{{ receita_total|moeda_br }}</span>
             </div>
         </div>
         <div class="col-md-3">
             <div class="p-3 border rounded bg-light">
                 <small class="text-muted d-block uppercase">CUSTO (PERÍODO)</small>
-                <span class="h5 fw-bold text-dark">R$ {{ "%.2f"|format(custo_total) }}</span>
+                <span class="h5 fw-bold text-dark">{{ custo_total|moeda_br }}</span>
             </div>
         </div>
         <div class="col-md-3">
             <div
                 class="p-3 border rounded {% if lucro_total >= 0 %}bg-success-subtle{% else %}bg-danger-subtle{% endif %}">
                 <small class="text-muted d-block uppercase">LUCRO (PERÍODO)</small>
-                <span class="h5 fw-bold {% if lucro_total >= 0 %}text-success{% else %}text-danger{% endif %}">R$ {{
-                    "%.2f"|format(lucro_total) }}</span>
+                <span class="h5 fw-bold {% if lucro_total >= 0 %}text-success{% else %}text-danger{% endif %}">{{
+                    lucro_total|moeda_br }}</span>
             </div>
         </div>
         <div class="col-md-3">
             <div class="p-3 border rounded bg-light">
                 <small class="text-muted d-block uppercase">MARGEM MÉDIA</small>
-                <span class="h5 fw-bold text-dark">{{ "%.1f"|format(margem_media) }}%</span>
+                <span class="h5 fw-bold text-dark">{{ margem_media|percentual_br }}</span>
             </div>
         </div>
     </div>
@@ -447,11 +491,11 @@
                                 class="waste-indicator {% if nivel_desperdicio == 'alto' %}waste-high{% elif nivel_desperdicio == 'medio' %}waste-medium{% else %}waste-low{% endif %}">
                                 {{ nivel_desperdicio|title }}
                             </div>
-                            <p class="mt-2">Valor total do desperdício: R$ {{ "%.2f"|format(valor_desperdicio) }}</p>
+                            <p class="mt-2">Valor total do desperdício: {{ valor_desperdicio|moeda_br }}</p>
                         </div>
                         <div class="col-md-6">
                             <h6>Impacto na Lucratividade</h6>
-                            <p>O desperdício representa {{ "%.1f"|format(impacto_desperdicio) }}% do custo total</p>
+                            <p>O desperdício representa {{ impacto_desperdicio|percentual_br }} do custo total</p>
                             <a href="{{ url_for('desperdicio.index') }}" class="btn btn-sm btn-outline-primary">Ver
                                 Detalhes</a>
                         </div>
@@ -476,11 +520,10 @@
                             <ul class="list-unstyled">
                                 {% for prato in categoria.pratos %}
                                 <li>
-                                    <a href="{{ url_for('cardapios.analise_rentabilidade', id=prato.id) }}"
-                                        class="report-link">
+                                    <a href="{{ url_for('pratos.visualizar', id=prato.id) }}" class="report-link">
                                         {{ prato.nome }}
                                     </a>
-                                    <span class="text-muted">({{ "%.1f"|format(prato.margem) }}%)</span>
+                                    <span class="text-muted">({{ prato.margem|percentual_br }})</span>
                                 </li>
                                 {% endfor %}
                             </ul>
@@ -629,25 +672,69 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    elements: {
+                        point: {
+                            radius: 8,              // Tamanho padrão dos pontos (maior para mobile)
+                            hoverRadius: 12,        // Tamanho ao passar o mouse
+                            hitRadius: 15,          // Área de clique (facilita toque em mobile)
+                            borderWidth: 2          // Borda dos pontos
+                        }
+                    },
                     plugins: {
-                        legend: { position: 'bottom' },
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    size: 14        // Texto da legenda maior
+                                },
+                                padding: 15
+                            }
+                        },
                         tooltip: {
                             callbacks: {
                                 label: function (context) {
                                     let label = context.raw.label || '';
                                     return label + ': (Vendas: ' + context.raw.x + ', Margem: R$ ' + context.raw.y.toFixed(2) + ')';
                                 }
-                            }
+                            },
+                            bodyFont: {
+                                size: 14            // Texto do tooltip maior
+                            },
+                            padding: 12
                         }
                     },
                     scales: {
                         x: {
                             type: 'linear',
                             position: 'bottom',
-                            title: { display: true, text: 'Popularidade (Qtde Vendas)' }
+                            title: {
+                                display: true,
+                                text: 'Popularidade (Qtde Vendas)',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            ticks: {
+                                font: {
+                                    size: 12
+                                }
+                            }
                         },
                         y: {
-                            title: { display: true, text: 'Lucratividade (Margem Unit.)' }
+                            title: {
+                                display: true,
+                                text: 'Lucratividade (Margem Unit.)',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            ticks: {
+                                font: {
+                                    size: 12
+                                }
+                            }
                         }
                     }
                 }

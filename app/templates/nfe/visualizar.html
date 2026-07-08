@@ -20,10 +20,9 @@
             <div class="card-header bg-primary text-white">Dados da Emissão</div>
             <div class="card-body">
                 <p><strong>Data de Emissão:</strong> {{ nota.data_emissao.strftime('%d/%m/%Y') }}</p>
-                <p><strong>Valor Produtos:</strong> R$ {{ "%.2f"|format(nota.valor_produtos) }}</p>
-                <p><strong>Valor Frete:</strong> R$ {{ "%.2f"|format(nota.valor_frete or 0) }}</p>
-                <p><strong>Valor Total:</strong> <span class="h5 text-success">R$ {{ "%.2f"|format(nota.valor_total)
-                        }}</span></p>
+                <p><strong>Valor Produtos:</strong> {{ nota.valor_produtos|moeda_br }}</p>
+                <p><strong>Valor Frete:</strong> {{ nota.valor_frete or 0|moeda_br }}</p>
+                <p><strong>Valor Total:</strong> <span class="h5 text-success">{{ nota.valor_total|moeda_br }}</span></p>
             </div>
         </div>
     </div>
@@ -65,8 +64,8 @@
                         <td>{{ item.produto.nome }}</td>
                         <td>{{ item.unidade_medida }}</td>
                         <td>{{ item.quantidade }}</td>
-                        <td>R$ {{ "%.2f"|format(item.valor_unitario) }}</td>
-                        <td>R$ {{ "%.2f"|format(item.valor_total) }}</td>
+                        <td>{{ item.valor_unitario|moeda_br }}</td>
+                        <td>{{ item.valor_total|moeda_br }}</td>
                         <td>
                             <a href="{{ url_for('nfe.visualizar_item', id=item.id) }}"
                                 class="btn btn-sm btn-outline-info">
