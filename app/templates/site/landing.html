@@ -7,7 +7,9 @@
 <meta name="description" content="{{ site.nome }} — {{ site.tagline }}">
 {# URL absoluta https pro card de compartilhamento (WhatsApp/Facebook/Instagram exigem) #}
 {% set og_base = 'https://' ~ request.host %}
-{% set og_img = og_base ~ url_for('static', filename='img/og-bardavila.jpg') %}
+{# Card de compartilhamento: a foto de capa DESTE bar. Antes era sempre a do Bar
+   da Vila — ou seja, todo bar compartilhava a foto de outro no WhatsApp. #}
+{% set og_img = og_base ~ url_for('static', filename=(site.hero_foto or 'img/og-bardavila.jpg')) %}
 <meta property="og:site_name" content="{{ site.nome }}">
 <meta property="og:title" content="{{ site.nome }} — Buteco de família em Campinas">
 <meta property="og:description" content="{{ site.tagline }}">
@@ -452,6 +454,9 @@
   .kicker,.tagline,.subline,.stars-badge,.cta-row{transform:translateY(20px)}
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
 </style>
+{# Paleta do bar. Vazio no tema padrão (boteco-ambar) — o :root acima já é ele.
+   Qualquer outro preset sobrescreve as variáveis. Ver app/utils/temas.py. #}
+{% if tema_css %}<style>{{ tema_css|safe }}</style>{% endif %}
 </head>
 <body>
 
@@ -489,7 +494,9 @@
 </div>
 
 <header id="topo">
-  <div class="hero-bg" style="background-image:url('{{ url_for('static', filename=site.hero_foto) }}')"></div>
+  {# Bar recém-criado ainda não tem foto de capa: sem o guard, url_for(filename=None)
+     estoura BuildError e o site do cliente novo devolve 500. #}
+  <div class="hero-bg"{% if site.hero_foto %} style="background-image:url('{{ url_for('static', filename=site.hero_foto) }}')"{% endif %}></div>
   <div class="embers" id="embers"></div>
   <div class="kicker">{{ site.kicker }}</div>
   <h1 class="neon"><span class="b">{{ site.hero_linha1 }}</span><span class="b">{{ site.hero_linha2 }}</span></h1>
@@ -664,6 +671,9 @@
         <p class="lead">Fim de semana com samba lota rápido. Reserva sua mesa em 30 segundos — a gente confirma no seu WhatsApp e deixa a cerveja gelando.</p>
       </div>
       <form class="reserva-form reveal" id="reservaForm" onsubmit="return enviarReserva(event)" novalidate>
+        {# Quando o site é servido pelo domínio do bar, o backend resolve o tenant
+           pelo Host. Em /bar/<slug> (demos) o Host é o do produto — daí este campo. #}
+        <input type="hidden" name="slug" value="{{ tenant.slug if tenant else '' }}">
         <div class="field">
           <label for="rf-nome">Seu nome</label>
           <input id="rf-nome" name="nome" type="text" autocomplete="name" placeholder="Como te chamamos?" required>
@@ -744,7 +754,7 @@
 </footer>
 
 <div class="lightbox" id="lightbox" onclick="this.classList.remove('on')">
-  <span class="x">✕</span><img id="lightbox-img" src="" alt="Foto do Bar da Vila">
+  <span class="x">✕</span><img id="lightbox-img" src="" alt="Foto do {{ site.nome }}">
 </div>
 
 <a class="wa" href="https://wa.me/{{ site.whatsapp }}?text=Ol%C3%A1!%20Vim%20pelo%20site%20do%20Bar%20da%20Vila" target="_blank" rel="noopener" aria-label="WhatsApp">

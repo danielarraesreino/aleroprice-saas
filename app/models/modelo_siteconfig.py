@@ -36,6 +36,10 @@ class SiteConfig(db.Model):
     instagram_url = db.Column(db.String(200))
     facebook_url = db.Column(db.String(200))
 
+    # Aparência: nome de um preset em app/utils/temas.py (não é CSS livre —
+    # cliente escolhe entre paletas fechadas para não conseguir feiar o site).
+    tema = db.Column(db.String(30), default='boteco-ambar')
+
     data_atualizacao = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
     restaurante = db.relationship('Restaurante', backref=db.backref('site_config', uselist=False))
