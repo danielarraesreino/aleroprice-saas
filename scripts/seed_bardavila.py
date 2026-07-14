@@ -285,34 +285,33 @@ def seed(slug, escala=ESCALA_PADRAO):
         print('  histórico de vendas: já existe, mantido')
 
     # --- promoções ---
-    if Promocao.query.filter_by(restaurant_id=rid).count() == 0:
-        db.session.add(Promocao(
-            titulo='Lanche de Quarta',
-            descricao='Lanche da Vila + chopp por R$ 29. Toda quarta, das 18h até acabar. '
-                      'É o dia mais cheio da casa — vem cedo.',
-            dia_semana=2,          # quarta
-            ativo=True,
-            restaurant_id=rid,
-        ))
-        db.session.add(Promocao(
-            titulo='Sexta do Chopp em Dobro',
-            descricao='Pediu um chopp, leva dois. Das 17h às 20h.',
-            dia_semana=4,          # sexta
-            ativo=True,
-            restaurant_id=rid,
-        ))
-        db.session.add(Promocao(
-            titulo='Feijoada de Aniversário',
-            descricao='A casa faz 8 anos. Feijoada completa com samba a tarde toda.',
-            data_inicio=date.today() + timedelta(days=20),
-            validade=date.today() + timedelta(days=21),
-            ativo=True,
-            restaurant_id=rid,
-        ))
-        db.session.commit()
-        print('  promoções: 3 (Lanche de Quarta, Chopp de Sexta, Feijoada agendada)')
-    else:
-        print('  promoções: já existem, mantidas')
+    # Checa título a título: uma promoção antiga qualquer no tenant não pode
+    # impedir o seed das outras (era o que acontecia com `count() == 0`).
+    promocoes = [
+        dict(titulo='Lanche de Quarta',
+             descricao='Lanche da Vila + chopp por R$ 29. Toda quarta, das 18h até acabar. '
+                       'É o dia mais cheio da casa — vem cedo.',
+             dia_semana=2),          # quarta
+        dict(titulo='Sexta do Chopp em Dobro',
+             descricao='Pediu um chopp, leva dois. Das 17h às 20h.',
+             dia_semana=4),          # sexta
+        dict(titulo='Feijoada de Aniversário',
+             descricao='A casa faz 8 anos. Feijoada completa com samba a tarde toda.',
+             data_inicio=date.today() + timedelta(days=20),
+             validade=date.today() + timedelta(days=21)),
+    ]
+
+    n_promo = 0
+    for dados in promocoes:
+        existe = Promocao.query.filter_by(
+            titulo=dados['titulo'], restaurant_id=rid).first()
+        if existe:
+            continue
+        db.session.add(Promocao(ativo=True, restaurant_id=rid, **dados))
+        n_promo += 1
+
+    db.session.commit()
+    print(f'  promoções: {n_promo} novas, {len(promocoes) - n_promo} já existiam')
 
     print('\nPronto. Abra /app pra ver o dashboard do bar.')
     return 0
