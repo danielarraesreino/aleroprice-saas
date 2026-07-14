@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Editar' if promo else 'Nova' }} promoção · AleroPrice{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-tags text-warning"></i> {{ 'Editar' if promo else 'Nova' }} promoção</h2>
+
+<form method="post" class="col-lg-7">
+  <div class="mb-3">
+    <label class="form-label">Título *</label>
+    <input class="form-control" name="titulo" required value="{{ promo.titulo if promo else '' }}" placeholder="Ex.: Chopp em dobro na quinta">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Descrição</label>
+    <textarea class="form-control" name="descricao" rows="3" placeholder="Detalhes da promoção (opcional)">{{ promo.descricao if promo and promo.descricao else '' }}</textarea>
+  </div>
+  <div class="mb-3 col-md-6">
+    <label class="form-label">Validade</label>
+    <input type="date" class="form-control" name="validade" value="{{ promo.validade.isoformat() if promo and promo.validade else '' }}">
+    <div class="form-text">Deixe em branco para promoção sem prazo.</div>
+  </div>
+  <div class="form-check form-switch mb-4">
+    <input class="form-check-input" type="checkbox" role="switch" id="ativo" name="ativo" {{ 'checked' if (not promo) or promo.ativo }}>
+    <label class="form-check-label" for="ativo">Publicar no site</label>
+  </div>
+  <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Salvar</button>
+  <a class="btn btn-outline-secondary" href="{{ url_for('promocoes.index') }}">Cancelar</a>
+</form>
+{% endblock %}

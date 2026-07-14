@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Reservas · AleroPrice{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <h2 class="mb-0"><i class="fas fa-calendar-check text-warning"></i> Reservas de mesa</h2>
+  <div>
+    {% if contagem.pendente %}
+    <span class="badge bg-warning text-dark me-1">{{ contagem.pendente }} pendente{{ 's' if contagem.pendente != 1 }}</span>
+    {% endif %}
+    {% if contagem.confirmada %}
+    <span class="badge bg-success">{{ contagem.confirmada }} confirmada{{ 's' if contagem.confirmada != 1 }}</span>
+    {% endif %}
+  </div>
+</div>
+
+<ul class="nav nav-pills mb-3">
+  {% set filtros = [('ativas','Ativas'),('pendente','Pendentes'),('confirmada','Confirmadas'),('cancelada','Canceladas'),('todas','Todas')] %}
+  {% for val, rotulo in filtros %}
+  <li class="nav-item">
+    <a class="nav-link {{ 'active' if filtro == val }}" href="{{ url_for('reservas.index', status=val) }}">{{ rotulo }}</a>
+  </li>
+  {% endfor %}
+</ul>
+
+{% if reservas %}
+<div class="table-responsive">
+  <table class="table table-hover align-middle">
+    <thead class="table-light">
+      <tr>
+        <th>Data</th><th>Hora</th><th>Cliente</th><th>WhatsApp</th>
+        <th class="text-center">Pessoas</th><th>Observação</th><th>Status</th><th class="text-end">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in reservas %}
+      <tr class="{{ 'table-warning' if r.status == 'pendente' }}">
+        <td>
+          {{ r.data.strftime('%d/%m/%Y') }}
+          {% if r.data == hoje %}<span class="badge bg-danger ms-1">hoje</span>{% endif %}
+        </td>
+        <td>{{ r.hora }}</td>
+        <td><strong>{{ r.nome }}</strong></td>
+        <td>
+          {% set tel = r.telefone | replace('(', '') | replace(')', '') | replace('-', '') | replace(' ', '') %}
+          <a href="https://wa.me/55{{ tel }}" target="_blank" rel="noopener">
+            <i class="fab fa-whatsapp text-success"></i> {{ r.telefone }}
+          </a>
+        </td>
+        <td class="text-center">{{ r.num_pessoas }}</td>
+        <td><small class="text-muted">{{ r.observacao or '—' }}</small></td>
+        <td><span class="badge bg-{{ r.badge }}">{{ r.status_label }}</span></td>
+        <td class="text-end text-nowrap">
+          {% if r.status != 'confirmada' %}
+          <form method="post" action="{{ url_for('reservas.confirmar', reserva_id=r.id) }}" class="d-inline">
+            <button class="btn btn-sm btn-success" title="Confirmar"><i class="fas fa-check"></i></button>
+          </form>
+          {% endif %}
+          {% if r.status != 'cancelada' %}
+          <form method="post" action="{{ url_for('reservas.cancelar', reserva_id=r.id) }}" class="d-inline"
+                onsubmit="return confirm('Cancelar a reserva de {{ r.nome }}?');">
+            <button class="btn btn-sm btn-outline-secondary" title="Cancelar"><i class="fas fa-times"></i></button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="text-center text-muted py-5">
+  <i class="fas fa-calendar-day fa-2x mb-3"></i>
+  <p>Nenhuma reserva {{ 'ativa' if filtro == 'ativas' else 'nesse filtro' }} por enquanto.</p>
+</div>
+{% endif %}
+{% endblock %}

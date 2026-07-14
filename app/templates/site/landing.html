@@ -3,11 +3,36 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bar da Vila — Buteco de família em Campinas · Samba, costelinha e comida de vó</title>
-<meta name="description" content="Bar da Vila, Vila Lemos - Campinas. Buteco de família 4,9★. Croquete da Dona Marisa, costelinha com ora-pro-nóbis, carbonara, pastéis e samba ao vivo. Refeição no local e drive-through.">
-<meta property="og:title" content="Bar da Vila — Buteco de família em Campinas">
-<meta property="og:description" content="Comida de vó, samba ao vivo e o famoso Croquete da Dona Marisa. 4,9★ no Google.">
+<title>{{ site.nome }} — Buteco de família em Campinas · Samba, costelinha e comida de vó</title>
+<meta name="description" content="{{ site.nome }} — {{ site.tagline }}">
+{# URL absoluta https pro card de compartilhamento (WhatsApp/Facebook/Instagram exigem) #}
+{% set og_base = 'https://' ~ request.host %}
+{% set og_img = og_base ~ url_for('static', filename='img/og-bardavila.jpg') %}
+<meta property="og:site_name" content="{{ site.nome }}">
+<meta property="og:title" content="{{ site.nome }} — Buteco de família em Campinas">
+<meta property="og:description" content="{{ site.tagline }}">
 <meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:url" content="{{ og_base ~ request.path }}">
+<meta property="og:image" content="{{ og_img }}">
+<meta property="og:image:secure_url" content="{{ og_img }}">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{{ site.nome }} — buteco de família em Campinas">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ site.nome }} — Buteco de família em Campinas">
+<meta name="twitter:description" content="{{ site.tagline }}">
+<meta name="twitter:image" content="{{ og_img }}">
+<meta name="theme-color" content="#100a06">
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon-32.png') }}">
+<link rel="icon" type="image/png" sizes="64x64" href="{{ url_for('static', filename='img/favicon-64.png') }}">
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
+<script>
+  // aplica tema salvo antes de pintar (evita flash)
+  (function(){var t=localStorage.getItem('bdv-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Monoton&family=Anton&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Bebas+Neue&display=swap" rel="stylesheet">
@@ -25,6 +50,59 @@
     --green:#7ea850;        /* ora-pro-nóbis */
     --maxw:1180px;
   }
+  /* ---------- TEMA CLARO ---------- */
+  :root[data-theme="light"]{
+    --ink:#f6e9d2;          /* fundo creme */
+    --ink-2:#efe0c4;
+    --wood:#e6d2ad;
+    --cream:#2a170d;        /* texto vira marrom escuro */
+    --cream-dim:#6b4a2c;
+    --amber:#b3660f;
+    --ember:#c8431a;
+    --gold:#a86f1c;
+    --neon:#8a4b12;
+    --green:#5d7d34;
+  }
+  :root[data-theme="light"] body::before{
+    background:
+      radial-gradient(120% 80% at 50% -10%, rgba(200,90,20,.14), transparent 60%),
+      radial-gradient(80% 60% at 85% 20%, rgba(180,110,30,.10), transparent 60%);
+  }
+  /* nav sólido no claro: links marrom sempre legíveis, mesmo sobre o hero escuro */
+  :root[data-theme="light"] nav{
+    background:rgba(247,235,214,.94);
+    border-bottom:1px solid rgba(120,70,20,.18);
+    box-shadow:0 6px 24px rgba(90,50,10,.08);
+  }
+  :root[data-theme="light"] .nav-links a{color:#4a3016}
+  :root[data-theme="light"] .nav-links a:hover{color:var(--amber)}
+  /* boxes: no claro viram superfície clara (senão texto escuro some no fundo escuro) */
+  :root[data-theme="light"] .dish,
+  :root[data-theme="light"] .review,
+  :root[data-theme="light"] .map-cta{
+    background:linear-gradient(160deg,#fffaf0,#f3e2c2);
+    border-color:rgba(150,90,25,.24);
+  }
+  :root[data-theme="light"] .dish:hover{box-shadow:0 20px 50px rgba(120,60,10,.18)}
+  :root[data-theme="light"] .fam-card,
+  :root[data-theme="light"] .live .card{
+    background:#fbf2dd;
+    border-color:rgba(150,90,25,.22);
+  }
+  :root[data-theme="light"] .marquee{
+    background:linear-gradient(90deg,#f0dfbc,#e8d3a9);
+    border-color:rgba(150,90,25,.28);
+  }
+  :root[data-theme="light"] .info-list li{border-bottom-color:rgba(150,90,25,.2)}
+  :root[data-theme="light"] .btn-ghost{border-color:rgba(90,50,15,.4);color:#4a3016}
+  /* hero é sempre escuro (foto+overlay) nos 2 temas — no claro o botão do hero fica claro, senão some */
+  :root[data-theme="light"] header .btn-ghost{color:#f6e9d2;border-color:rgba(246,233,210,.5)}
+  :root[data-theme="light"] header .btn-ghost:hover{color:var(--amber);border-color:var(--amber)}
+  :root[data-theme="light"] .lojista{border-color:rgba(90,50,15,.3);color:#5a3d20}
+  :root[data-theme="light"] .dish .star-tag{color:#fff}
+  :root[data-theme="light"] .stars-badge{background:rgba(179,102,15,.1);border-color:rgba(179,102,15,.35)}
+  :root[data-theme="light"] .story{--fold:0}
+  :root[data-theme="light"] .story p{color:#2a170d}
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
   body{
@@ -61,7 +139,14 @@
     background:linear-gradient(180deg, rgba(16,10,6,.85), rgba(16,10,6,0));
     backdrop-filter:blur(6px);
   }
-  .nav-logo{font-family:"Bebas Neue",sans-serif;letter-spacing:2px;font-size:1.4rem;color:var(--amber)}
+  .nav-logo{display:inline-flex;align-items:center;gap:9px;font-family:"Bebas Neue",sans-serif;letter-spacing:2px;font-size:1.4rem;color:var(--amber)}
+  .nav-logo img{width:30px;height:30px;border-radius:7px;box-shadow:0 0 14px rgba(255,180,60,.35)}
+  .theme-toggle{
+    display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;
+    border:1px solid rgba(255,180,60,.4);border-radius:999px;background:transparent;cursor:pointer;
+    color:var(--amber);font-size:1.05rem;line-height:1;transition:all .25s;
+  }
+  .theme-toggle:hover{background:var(--amber);color:var(--ink);box-shadow:0 0 20px rgba(255,180,60,.5)}
   .nav-links{display:flex;gap:26px;align-items:center;font-family:"Bebas Neue",sans-serif;letter-spacing:1.5px;font-size:1.02rem}
   .nav-links a{color:var(--cream-dim);transition:color .25s}
   .nav-links a:hover{color:var(--amber)}
@@ -70,13 +155,76 @@
     transition:all .25s;
   }
   .nav-cta:hover{background:var(--amber);color:var(--ink)!important;box-shadow:0 0 24px rgba(255,180,60,.5)}
-  @media(max-width:760px){.nav-links a:not(.nav-cta){display:none}}
+  .nav-ctrls{display:flex;align-items:center;gap:10px}
+
+  /* ---------- MENU CANECA (mobile) ---------- */
+  .mug-btn{display:none;position:relative;width:46px;height:46px;padding:0;border:none;background:transparent;cursor:pointer}
+  .mug-btn img{width:40px;height:40px;border-radius:9px;box-shadow:0 0 14px rgba(255,180,60,.4);
+    transform-origin:60% 100%;transition:transform .5s cubic-bezier(.5,1.7,.5,1)}
+  .mug-btn.open img{transform:rotate(-26deg) translateY(-2px)}       /* caneca inclina p/ despejar */
+  /* pingo caindo da caneca ao abrir */
+  .mug-btn.open::after{content:"";position:absolute;left:20px;top:38px;width:6px;height:6px;border-radius:50%;
+    background:radial-gradient(circle,#ffcf6b,#ff8a2b);animation:drip .55s ease-in forwards}
+  @keyframes drip{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(60px) scale(.4);opacity:0}}
+
+  .menu-scrim{position:fixed;inset:0;z-index:44;background:rgba(8,5,3,.5);opacity:0;visibility:hidden;
+    transition:opacity .4s;backdrop-filter:blur(2px)}
+  .menu-scrim.open{opacity:1;visibility:visible}
+
+  .mobile-menu{
+    position:fixed;left:0;right:0;top:0;z-index:45;padding:84px 24px 30px;
+    background:linear-gradient(180deg,#ffbf4d 0%,#ff9a2f 52%,#e8631a 100%);   /* chopp */
+    border-radius:0 0 28px 28px;box-shadow:0 26px 60px rgba(0,0,0,.45);
+    transform:translateY(-101%);transition:transform .6s cubic-bezier(.55,0,.2,1);
+    display:block!important;                 /* nunca herdar flex do seletor nav{} */
+  }
+  .mobile-menu.open{transform:translateY(0)}
+  /* espuma na frente do líquido (borda de baixo) */
+  .mobile-menu::after{content:"";position:absolute;left:0;right:0;bottom:-11px;height:22px;
+    background:
+      radial-gradient(circle at 8% 40%,#fffaf0 9px,transparent 10px),
+      radial-gradient(circle at 24% 60%,#fffaf0 11px,transparent 12px),
+      radial-gradient(circle at 42% 45%,#fffaf0 10px,transparent 11px),
+      radial-gradient(circle at 60% 62%,#fffaf0 12px,transparent 13px),
+      radial-gradient(circle at 78% 45%,#fffaf0 10px,transparent 11px),
+      radial-gradient(circle at 93% 58%,#fffaf0 9px,transparent 10px);
+    filter:drop-shadow(0 3px 2px rgba(120,60,10,.25))}
+  .mobile-menu a{display:block!important;width:100%;text-align:left;
+    font-family:"Bebas Neue",sans-serif;letter-spacing:2px;font-size:1.55rem;
+    color:#2a170d;padding:14px 6px;border-bottom:1px solid rgba(42,23,13,.16);
+    opacity:0;transform:translateY(-12px)}
+  .mobile-menu a:last-child{border-bottom:none}
+  .mobile-menu .mm-cta{margin-top:16px;text-align:center;background:#2a170d;color:#ffcf6b;
+    border-radius:999px;border-bottom:none;font-size:1.3rem;padding:14px}
+  .mobile-menu.open a{opacity:1;transform:none;transition:opacity .45s ease,transform .5s cubic-bezier(.2,.8,.2,1)}
+  .mobile-menu.open a:nth-child(1){transition-delay:.18s}
+  .mobile-menu.open a:nth-child(2){transition-delay:.26s}
+  .mobile-menu.open a:nth-child(3){transition-delay:.34s}
+  .mobile-menu.open a:nth-child(4){transition-delay:.42s}
+  .mobile-menu.open a:nth-child(5){transition-delay:.50s}
+  .mobile-menu.open a:nth-child(6){transition-delay:.58s}
+  .mobile-menu.open a:nth-child(7){transition-delay:.66s}
+  .mobile-menu.open a:nth-child(8){transition-delay:.74s}
+
+  @media(max-width:760px){
+    .nav-links{display:none}
+    .mug-btn{display:inline-block}
+  }
+  @media(min-width:761px){
+    .mobile-menu,.menu-scrim{display:none}
+  }
 
   /* ---------- HERO ---------- */
   header{
     min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    text-align:center;padding:120px 24px 60px;position:relative;
+    text-align:center;padding:120px 24px 60px;position:relative;overflow:hidden;
   }
+  .hero-bg{position:absolute;inset:0;z-index:0;background-size:cover;background-position:center;
+    filter:saturate(1.05) brightness(.55);transform:scale(1.05);animation:kenburns 22s ease-in-out infinite alternate}
+  .hero-bg::after{content:"";position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(16,10,6,.72),rgba(16,10,6,.5) 40%,rgba(16,10,6,.92))}
+  @keyframes kenburns{from{transform:scale(1.05)}to{transform:scale(1.16) translateY(-2%)}}
+  header>*:not(.hero-bg):not(.embers){position:relative;z-index:3}
   .kicker{
     font-family:"Bebas Neue",sans-serif;letter-spacing:6px;font-size:clamp(.8rem,2vw,1rem);
     color:var(--ember);margin-bottom:18px;opacity:0;animation:rise .9s .1s forwards;
@@ -150,15 +298,17 @@
   .menu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-top:44px}
   .dish{
     position:relative;background:linear-gradient(160deg,rgba(42,23,13,.8),rgba(20,12,7,.9));
-    border:1px solid rgba(255,180,60,.16);border-radius:18px;padding:28px 24px;overflow:hidden;
+    border:1px solid rgba(255,180,60,.16);border-radius:18px;overflow:hidden;
     transition:transform .3s, border-color .3s, box-shadow .3s;
   }
   .dish:hover{transform:translateY(-8px);border-color:rgba(255,180,60,.5);box-shadow:0 20px 50px rgba(0,0,0,.5)}
-  .dish .em{font-size:2.4rem;display:block;margin-bottom:12px;filter:drop-shadow(0 4px 12px rgba(255,106,43,.4))}
-  .dish h3{font-family:"Anton",sans-serif;text-transform:uppercase;letter-spacing:.5px;font-size:1.4rem;color:var(--cream)}
-  .dish p{color:var(--cream-dim);font-size:.98rem;margin-top:8px}
-  .dish .star-tag{position:absolute;top:16px;right:16px;font-family:"Bebas Neue",sans-serif;letter-spacing:1px;
-    font-size:.72rem;color:var(--ink);background:var(--amber);padding:3px 10px;border-radius:999px}
+  .dish .photo{height:190px;background-size:cover;background-position:center;transition:transform .5s}
+  .dish:hover .photo{transform:scale(1.07)}
+  .dish .body{padding:22px 22px 26px}
+  .dish h3{font-family:"Anton",sans-serif;text-transform:uppercase;letter-spacing:.5px;font-size:1.35rem;color:var(--cream)}
+  .dish p{color:var(--cream-dim);font-size:.96rem;margin-top:8px}
+  .dish .star-tag{position:absolute;top:14px;right:14px;z-index:2;font-family:"Bebas Neue",sans-serif;letter-spacing:1px;
+    font-size:.72rem;color:var(--ink);background:var(--amber);padding:4px 11px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.4)}
   .dish.hot{border-color:rgba(255,106,43,.5);box-shadow:0 0 0 1px rgba(255,106,43,.25),0 20px 50px rgba(255,106,43,.15)}
 
   /* história — 2 col */
@@ -173,6 +323,20 @@
     background:radial-gradient(circle at 30% 30%,var(--amber),var(--ember));flex-shrink:0}
   .fam-card b{font-family:"Bebas Neue",sans-serif;letter-spacing:1.5px;font-size:1.25rem;color:var(--cream)}
   .fam-card small{color:var(--cream-dim)}
+  .fam-photo{width:100%;border-radius:16px;border:1px solid rgba(255,180,60,.2);margin-bottom:6px;
+    box-shadow:0 16px 40px rgba(0,0,0,.5);object-fit:cover;aspect-ratio:4/3}
+
+  /* galeria */
+  .gallery{columns:4 220px;column-gap:14px;margin-top:44px}
+  .gallery figure{break-inside:avoid;margin:0 0 14px;border-radius:14px;overflow:hidden;cursor:pointer;
+    border:1px solid rgba(255,180,60,.12);position:relative}
+  .gallery img{width:100%;display:block;transition:transform .5s, filter .4s;filter:saturate(.98)}
+  .gallery figure:hover img{transform:scale(1.06);filter:saturate(1.15) brightness(1.05)}
+  .lightbox{position:fixed;inset:0;z-index:100;background:rgba(8,5,3,.94);display:none;
+    align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px)}
+  .lightbox.on{display:flex}
+  .lightbox img{max-width:94vw;max-height:88vh;border-radius:12px;box-shadow:0 30px 80px rgba(0,0,0,.7)}
+  .lightbox .x{position:absolute;top:20px;right:26px;color:var(--cream);font-size:2.4rem;cursor:pointer;font-family:"Bebas Neue"}
 
   /* avaliações */
   .rev-head{display:flex;align-items:end;justify-content:space-between;gap:20px;flex-wrap:wrap}
@@ -206,10 +370,69 @@
     border-radius:20px;padding:34px;display:flex;flex-direction:column;justify-content:center;gap:16px}
   .map-cta h3{font-family:"Anton",sans-serif;text-transform:uppercase;font-size:1.8rem;color:var(--cream)}
 
+  /* reserva de mesa */
+  .reserva-wrap{display:grid;grid-template-columns:.9fr 1.1fr;gap:44px;margin-top:20px;align-items:start}
+  @media(max-width:820px){.reserva-wrap{grid-template-columns:1fr;gap:28px}}
+  .reserva-form{background:linear-gradient(160deg,rgba(42,23,13,.8),rgba(20,12,7,.9));
+    border:1px solid rgba(255,180,60,.18);border-radius:20px;padding:clamp(22px,4vw,32px)}
+  .reserva-form .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:420px){.reserva-form .row2{grid-template-columns:1fr}}
+  .field{margin-bottom:15px}
+  .field label{display:block;font-family:"Bebas Neue",sans-serif;letter-spacing:1.5px;color:var(--amber);font-size:.95rem;margin-bottom:6px}
+  .field input,.field textarea{width:100%;background:rgba(0,0,0,.28);border:1px solid rgba(255,180,60,.25);
+    border-radius:12px;padding:12px 14px;color:var(--cream);font-family:"Fraunces",Georgia,serif;font-size:1rem}
+  .field input:focus,.field textarea:focus{outline:none;border-color:var(--amber);box-shadow:0 0 0 3px rgba(255,180,60,.18)}
+  .field textarea{resize:vertical;min-height:64px}
+  .field input::-webkit-calendar-picker-indicator{filter:invert(.7) sepia(1) saturate(4) hue-rotate(-10deg)}
+  .reserva-msg{margin-top:4px;font-family:"Bebas Neue",sans-serif;letter-spacing:1px;padding:12px 14px;border-radius:12px;display:none;font-size:1.05rem}
+  .reserva-msg.ok{display:block;background:rgba(126,168,80,.16);border:1px solid rgba(126,168,80,.55);color:#bfe08a}
+  .reserva-msg.err{display:block;background:rgba(255,106,43,.12);border:1px solid rgba(255,106,43,.55);color:#ffb08a}
+  :root[data-theme="light"] .reserva-form{background:linear-gradient(160deg,#fffaf0,#f3e2c2);border-color:rgba(150,90,25,.24)}
+  :root[data-theme="light"] .field input,:root[data-theme="light"] .field textarea{background:#fff;border-color:rgba(150,90,25,.3);color:#2a170d}
+  :root[data-theme="light"] .field input::-webkit-calendar-picker-indicator{filter:none}
+  :root[data-theme="light"] .reserva-msg.ok{color:#3f5e1c}
+  :root[data-theme="light"] .reserva-msg.err{color:#a8391a}
+  .reserva-wa{display:none;align-items:center;justify-content:center;gap:10px;margin-top:12px;width:100%;
+    background:#25d366;color:#fff;font-family:"Bebas Neue",sans-serif;letter-spacing:1.5px;font-size:1.2rem;
+    padding:14px;border-radius:999px;transition:transform .2s,box-shadow .2s;box-shadow:0 8px 24px rgba(37,211,102,.4)}
+  .reserva-wa.show{display:flex}
+  .reserva-wa:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(37,211,102,.6)}
+
+  /* promoções (público) */
+  .promo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px;margin-top:34px}
+  .promo-card{position:relative;background:linear-gradient(135deg,var(--amber),var(--ember));color:#231206;
+    border-radius:18px;padding:26px;box-shadow:0 14px 40px rgba(255,106,43,.28);overflow:hidden}
+  .promo-card::after{content:"🍺";position:absolute;right:-8px;bottom:-14px;font-size:4.6rem;opacity:.18}
+  .promo-card .tag{font-family:"Bebas Neue",sans-serif;letter-spacing:2px;font-size:.8rem;opacity:.85}
+  .promo-card h3{font-family:"Anton",sans-serif;text-transform:uppercase;font-size:1.55rem;margin:6px 0 8px;line-height:1}
+  .promo-card p{font-size:.98rem;line-height:1.5;position:relative;z-index:1}
+  .promo-card .val{margin-top:12px;font-family:"Bebas Neue",sans-serif;letter-spacing:1px;font-size:.85rem;opacity:.85}
+
+  /* agenda (público) */
+  .agenda-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-top:34px}
+  .event-card{display:flex;gap:16px;align-items:flex-start;
+    background:linear-gradient(160deg,rgba(42,23,13,.8),rgba(20,12,7,.9));
+    border:1px solid rgba(255,180,60,.18);border-radius:16px;padding:20px;transition:transform .3s,border-color .3s}
+  .event-card:hover{transform:translateY(-5px);border-color:rgba(255,180,60,.5)}
+  .event-date{flex-shrink:0;width:64px;text-align:center;background:rgba(255,180,60,.12);
+    border:1px solid rgba(255,180,60,.3);border-radius:12px;padding:9px 0;font-family:"Bebas Neue",sans-serif;color:var(--amber);line-height:1}
+  .event-date .d{font-size:1.8rem;display:block}
+  .event-date .m{font-size:.8rem;letter-spacing:1px}
+  .event-card h3{font-family:"Anton",sans-serif;text-transform:uppercase;font-size:1.2rem;color:var(--cream)}
+  .event-card .when{font-family:"Bebas Neue",sans-serif;letter-spacing:1px;color:var(--ember);font-size:.9rem;margin:2px 0 6px}
+  .event-card .desc{color:var(--cream-dim);font-size:.95rem}
+  :root[data-theme="light"] .event-card{background:linear-gradient(160deg,#fffaf0,#f3e2c2);border-color:rgba(150,90,25,.24)}
+
   /* footer */
   footer{border-top:1px solid rgba(255,180,60,.16);padding:44px 0 60px;margin-top:40px;text-align:center}
   footer .fneon{font-family:"Monoton",cursive;font-size:1.8rem;color:#fff4d8;text-shadow:0 0 10px #ff9a3c,0 0 26px #ff6a2b}
   footer small{color:var(--cream-dim);display:block;margin-top:14px}
+  .socials{display:flex;gap:14px;justify-content:center;margin-top:22px}
+  .socials a{display:grid;place-items:center;width:46px;height:46px;border-radius:50%;
+    border:1px solid rgba(255,180,60,.35);color:var(--amber);transition:all .25s}
+  .socials a:hover{background:var(--amber);color:var(--ink);box-shadow:0 0 22px rgba(255,180,60,.5);transform:translateY(-3px)}
+  .socials svg{width:22px;height:22px;fill:currentColor}
+  :root[data-theme="light"] .socials a{border-color:rgba(150,90,25,.4)}
   .lojista{display:inline-block;margin-top:20px;font-family:"Bebas Neue",sans-serif;letter-spacing:2px;
     color:var(--cream-dim);border:1px solid rgba(246,233,210,.2);border-radius:999px;padding:8px 18px;transition:all .25s}
   .lojista:hover{color:var(--amber);border-color:var(--amber)}
@@ -233,36 +456,81 @@
 <body>
 
 <nav>
-  <a href="#topo" class="nav-logo">BAR DA VILA</a>
+  <a href="#topo" class="nav-logo"><img src="{{ url_for('static', filename='img/favicon-64.png') }}" alt="Logo {{ site.nome }}">{{ site.nome|upper }}</a>
   <div class="nav-links">
     <a href="#cardapio">Cardápio</a>
     <a href="#historia">História</a>
     <a href="#avaliacoes">Avaliações</a>
+    <a href="#galeria">Galeria</a>
+    {% if eventos %}<a href="#agenda">Agenda</a>{% endif %}
+    <a href="#reservar">Reservar</a>
     <a href="#contato">Contato</a>
     <a class="nav-cta" href="{{ url_for('auth.login') }}">Entrar no sistema</a>
   </div>
+  <div class="nav-ctrls">
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema claro/escuro" title="Alternar tema"><span id="theme-ic">☀</span></button>
+    <button class="mug-btn" id="mugBtn" onclick="toggleMenu()" aria-label="Abrir menu" aria-expanded="false">
+      <img src="{{ url_for('static', filename='img/favicon-64.png') }}" alt="Menu">
+    </button>
+  </div>
 </nav>
 
+<!-- MENU CANECA (mobile): a caneca derrama o chopp e revela os itens -->
+<div class="menu-scrim" id="menuScrim" onclick="toggleMenu()"></div>
+<div class="mobile-menu" id="mobileMenu" role="navigation" aria-label="Menu principal">
+  <a href="#cardapio" onclick="toggleMenu()">Cardápio</a>
+  <a href="#historia" onclick="toggleMenu()">História</a>
+  <a href="#avaliacoes" onclick="toggleMenu()">Avaliações</a>
+  <a href="#galeria" onclick="toggleMenu()">Galeria</a>
+  {% if eventos %}<a href="#agenda" onclick="toggleMenu()">Agenda</a>{% endif %}
+  <a href="#reservar" onclick="toggleMenu()">Reservar</a>
+  <a href="#contato" onclick="toggleMenu()">Contato</a>
+  <a class="mm-cta" href="{{ url_for('auth.login') }}">Entrar no sistema</a>
+</div>
+
 <header id="topo">
+  <div class="hero-bg" style="background-image:url('{{ url_for('static', filename=site.hero_foto) }}')"></div>
   <div class="embers" id="embers"></div>
-  <div class="kicker">VILA LEMOS · CAMPINAS–SP · DESDE SEMPRE</div>
-  <h1 class="neon"><span class="b">Bar da</span><span class="b">Vila</span></h1>
-  <p class="tagline">Buteco de família de verdade — comida de vó, cerveja gelada e samba pra ninguém botar defeito.</p>
-  <p class="subline">COSTELINHA <span>·</span> CROQUETE DA DONA MARISA <span>·</span> SAMBA AO VIVO</p>
-  <div class="stars-badge"><span class="st">★★★★★</span> 4,9 no Google · 39 avaliações</div>
+  <div class="kicker">{{ site.kicker }}</div>
+  <h1 class="neon"><span class="b">{{ site.hero_linha1 }}</span><span class="b">{{ site.hero_linha2 }}</span></h1>
+  <p class="tagline">{{ site.tagline }}</p>
+  <p class="subline">{{ site.subline }}</p>
+  <div class="stars-badge"><span class="st">★★★★★</span> {{ site.selo_estrelas }}</div>
   <div class="cta-row">
-    <a class="btn btn-primary" href="https://wa.me/5519999779942?text=Ol%C3%A1!%20Vim%20pelo%20site%20do%20Bar%20da%20Vila" target="_blank" rel="noopener">Chamar no WhatsApp</a>
-    <a class="btn btn-ghost" href="https://www.google.com/maps/search/?api=1&query=Bar+da+Vila+R.+Madalena+Barbosa+Ferreira+178+Vila+Lemos+Campinas" target="_blank" rel="noopener">Como chegar</a>
+    <a class="btn btn-primary" href="https://wa.me/{{ site.whatsapp }}?text=Ol%C3%A1!%20Vim%20pelo%20site%20do%20Bar%20da%20Vila" target="_blank" rel="noopener">Chamar no WhatsApp</a>
+    <a class="btn btn-ghost" href="https://www.google.com/maps/search/?api=1&query={{ site.maps_query }}" target="_blank" rel="noopener">Como chegar</a>
   </div>
   <div class="scroll-hint">↓ role e sente o cheiro</div>
 </header>
 
 <div class="marquee">
   <div class="track">
-    COSTELINHA <span>◆</span> CROQUETE DA DONA MARISA <span>◆</span> CARBONARA <span>◆</span> PASTÉIS <span>◆</span> ORA-PRO-NÓBIS <span>◆</span> SAMBA AO VIVO <span>◆</span> CERVEJA GELADA <span>◆</span>
-    COSTELINHA <span>◆</span> CROQUETE DA DONA MARISA <span>◆</span> CARBONARA <span>◆</span> PASTÉIS <span>◆</span> ORA-PRO-NÓBIS <span>◆</span> SAMBA AO VIVO <span>◆</span> CERVEJA GELADA <span>◆</span>
+    COSTELINHA <span>◆</span> CROQUETE DA BRUNA <span>◆</span> CARBONARA <span>◆</span> PASTÉIS <span>◆</span> ORA-PRO-NÓBIS <span>◆</span> SAMBA AO VIVO <span>◆</span> CERVEJA GELADA <span>◆</span>
+    COSTELINHA <span>◆</span> CROQUETE DA BRUNA <span>◆</span> CARBONARA <span>◆</span> PASTÉIS <span>◆</span> ORA-PRO-NÓBIS <span>◆</span> SAMBA AO VIVO <span>◆</span> CERVEJA GELADA <span>◆</span>
   </div>
 </div>
+
+{% if promocoes %}
+<!-- PROMOÇÕES -->
+<section class="sec" id="promocoes" style="padding-top:clamp(50px,7vw,80px)">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="eyebrow">TÁ ROLANDO AGORA</div>
+      <div class="h2">Promoções da <em>casa</em></div>
+    </div>
+    <div class="promo-grid reveal">
+      {% for p in promocoes %}
+      <div class="promo-card">
+        <div class="tag">OFERTA</div>
+        <h3>{{ p.titulo }}</h3>
+        {% if p.descricao %}<p>{{ p.descricao }}</p>{% endif %}
+        {% if p.validade %}<div class="val">Válida até {{ p.validade.strftime('%d/%m/%Y') }}</div>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
 
 <!-- CARDÁPIO -->
 <section class="sec" id="cardapio">
@@ -273,27 +541,16 @@
       <p class="lead">Receita de família, tempero de vó. Porções generosas pra dividir na mesa — de R$ 20 a R$ 40 por pessoa.</p>
     </div>
     <div class="menu-grid">
-      <div class="dish hot reveal">
-        <span class="star-tag">★ O MAIS PEDIDO</span>
-        <span class="em">🧆</span>
-        <h3>Croquete da Dona Marisa</h3>
-        <p>Crocante por fora, macio por dentro, bem temperado — com aquela pimenta saborosa da casa. O xodó do bar.</p>
+      {% for d in dishes %}
+      <div class="dish reveal{% if d.destaque %} hot{% endif %}">
+        {% if d.tag %}<span class="star-tag">{{ d.tag }}</span>{% endif %}
+        {% if d.img %}<div class="photo" style="background-image:url('{{ d.img }}')"></div>{% endif %}
+        <div class="body">
+          <h3>{{ d.nome }}</h3>
+          {% if d.descricao %}<p>{{ d.descricao }}</p>{% endif %}
+        </div>
       </div>
-      <div class="dish reveal">
-        <span class="em">🍖</span>
-        <h3>Costelinha</h3>
-        <p>Costelinha com maionese, farofa e ora-pro-nóbis refogadinha. Prato que faz gente voltar.</p>
-      </div>
-      <div class="dish reveal">
-        <span class="em">🍝</span>
-        <h3>Carbonara</h3>
-        <p>Cremosa, na medida. Comida de boteco típica de vó — lembrança de infância no prato.</p>
-      </div>
-      <div class="dish reveal">
-        <span class="em">🥟</span>
-        <h3>Pastéis &amp; Petiscos</h3>
-        <p>Pastel gostoso, porção pra dividir e cerveja estupidamente gelada. O combo perfeito do fim de tarde.</p>
-      </div>
+      {% endfor %}
     </div>
   </div>
 </section>
@@ -305,13 +562,13 @@
       <div class="reveal">
         <div class="eyebrow">A FAMÍLIA</div>
         <div class="h2">Cada um numa<br><em>posição do time</em></div>
-        <p>No Bar da Vila cada membro da família trabalha junto, em equipe — e isso é lindo de ver. É buteco raiz, extremamente acolhedor, onde você chega cliente e sai da família.</p>
-        <p>Na cozinha, <span class="hl">a Dona Marisa</span> — cozinheira de mão cheia, comida que é abraço. No salão, <span class="hl">Gustavo e Juliana</span>, anfitriões que fazem todo mundo se sentir em casa.</p>
+        <p>No {{ site.nome }} cada pessoa da equipe trabalha junto, em time — e isso é lindo de ver. É buteco raiz, acolhedor, onde você chega cliente e sai da família.</p>
       </div>
       <div class="family reveal">
-        <div class="fam-card"><div class="av">👩‍🍳</div><div><b>Dona Marisa</b><small>A cozinha e o tempero de vó</small></div></div>
-        <div class="fam-card"><div class="av">🍺</div><div><b>Gustavo</b><small>Anfitrião · o samba e a resenha</small></div></div>
-        <div class="fam-card"><div class="av">💛</div><div><b>Juliana</b><small>Anfitriã · o acolhimento da casa</small></div></div>
+        {% if gallery %}<img class="fam-photo" src="{{ gallery[0].img }}" alt="A equipe do {{ site.nome }}" loading="lazy">{% endif %}
+        {% for m in team %}
+        <div class="fam-card"><div class="av">{{ m.emoji }}</div><div><b>{{ m.nome }}</b>{% if m.papel %}<small>{{ m.papel }}</small>{% endif %}</div></div>
+        {% endfor %}
       </div>
     </div>
   </div>
@@ -331,12 +588,9 @@
       </div>
     </div>
     <div class="reviews">
-      <div class="review reveal"><div class="st">★★★★★</div><p>"Buteco de família, extremamente acolhedor. A costelinha com farofa e ora-pro-nóbis estava maravilhosa."</p><div class="who">— Gerzio Vieira Junior</div></div>
-      <div class="review reveal"><div class="st">★★★★★</div><p>"Autêntico bar raiz. Dona Marisa, Gustavo e Juliana são excelentes anfitriões. Comida de buteco típica de vó."</p><div class="who">— Rony Nunes</div></div>
-      <div class="review reveal"><div class="st">★★★★★</div><p>"Croquete delicioso, crocante e bem temperado, pimenta muito saborosa! A carbonara é maravilhosa."</p><div class="who">— Aline Fernandes</div></div>
-      <div class="review reveal"><div class="st">★★★★★</div><p>"O grupo de samba que se apresenta torna o ambiente muito agradável. Cerveja, boa música e amigos."</p><div class="who">— Antonio Ribeiro</div></div>
-      <div class="review reveal"><div class="st">★★★★★</div><p>"A melhor comida de boteco de Campinas e Região."</p><div class="who">— Jairo Castro</div></div>
-      <div class="review reveal"><div class="st">★★★★★</div><p>"Lugar familiar, comida e música boa. Dna Marisa é uma cozinheira de mão cheia, família abençoada!"</p><div class="who">— Tia Andreia</div></div>
+      {% for r in reviews %}
+      <div class="review reveal"><div class="st">{{ '★' * r.estrelas }}</div><p>"{{ r.texto }}"</p><div class="who">— {{ r.autor }}</div></div>
+      {% endfor %}
     </div>
   </div>
 </section>
@@ -356,6 +610,99 @@
   </div>
 </section>
 
+{% if eventos %}
+<!-- AGENDA -->
+<section class="sec" id="agenda" style="background:linear-gradient(180deg,transparent,rgba(42,23,13,.35),transparent)">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="eyebrow">MARCA NA AGENDA</div>
+      <div class="h2">Próximos <em>eventos</em></div>
+      <p class="lead">Samba, roda e festa na Vila. Vem que tem sempre coisa boa rolando.</p>
+    </div>
+    {% set meses = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'] %}
+    <div class="agenda-list reveal">
+      {% for e in eventos %}
+      <div class="event-card">
+        <div class="event-date"><span class="d">{{ '%02d' % e.data.day }}</span><span class="m">{{ meses[e.data.month-1] }}</span></div>
+        <div>
+          <h3>{{ e.titulo }}</h3>
+          <div class="when">{{ ['DOM','SEG','TER','QUA','QUI','SEX','SÁB'][(e.data.weekday()+1)%7] }}{% if e.hora %} · {{ e.hora }}{% endif %}</div>
+          {% if e.descricao %}<div class="desc">{{ e.descricao }}</div>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- GALERIA -->
+<section class="sec" id="galeria">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="eyebrow">DÁ UMA OLHADA</div>
+      <div class="h2">Momentos da <em>Vila</em></div>
+      <p class="lead">Da chapa ao samba, da mesa cheia à cerveja gelada. É assim que é por aqui.</p>
+    </div>
+    <div class="gallery reveal">
+      {% for g in gallery %}
+      <figure onclick="lb('{{ g.img }}')">
+        <img src="{{ g.img }}" alt="{{ g.legenda or (site.nome ~ ' — momento') }}" loading="lazy">
+      </figure>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- RESERVA -->
+<section class="sec" id="reservar" style="background:linear-gradient(180deg,transparent,rgba(42,23,13,.35),transparent)">
+  <div class="wrap">
+    <div class="reserva-wrap">
+      <div class="reserva-side reveal">
+        <div class="eyebrow">GARANTA SUA MESA</div>
+        <div class="h2">Reserve sua <em>mesa</em></div>
+        <p class="lead">Fim de semana com samba lota rápido. Reserva sua mesa em 30 segundos — a gente confirma no seu WhatsApp e deixa a cerveja gelando.</p>
+      </div>
+      <form class="reserva-form reveal" id="reservaForm" onsubmit="return enviarReserva(event)" novalidate>
+        <div class="field">
+          <label for="rf-nome">Seu nome</label>
+          <input id="rf-nome" name="nome" type="text" autocomplete="name" placeholder="Como te chamamos?" required>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="rf-tel">WhatsApp</label>
+            <input id="rf-tel" name="telefone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(19) 99999-9999" required>
+          </div>
+          <div class="field">
+            <label for="rf-pessoas">Pessoas</label>
+            <input id="rf-pessoas" name="num_pessoas" type="number" min="1" max="50" value="2" required>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="rf-data">Data</label>
+            <input id="rf-data" name="data" type="date" required>
+          </div>
+          <div class="field">
+            <label for="rf-hora">Horário</label>
+            <input id="rf-hora" name="hora" type="time" value="19:00" required>
+          </div>
+        </div>
+        <div class="field">
+          <label for="rf-obs">Observação (opcional)</label>
+          <textarea id="rf-obs" name="observacao" placeholder="Aniversário? Cadeira de bebê? Conta pra gente."></textarea>
+        </div>
+        <button class="btn btn-primary" type="submit" style="width:100%">Reservar mesa 🍺</button>
+        <div class="reserva-msg" id="reservaMsg" role="status" aria-live="polite"></div>
+        <a class="reserva-wa" id="reservaWa" href="#" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M.06 24l1.68-6.13A11.9 11.9 0 0 1 .16 11.9C.16 5.34 5.5.02 12.06.02a11.8 11.8 0 0 1 8.4 3.49 11.8 11.8 0 0 1 3.48 8.4c0 6.56-5.34 11.89-11.9 11.89a11.9 11.9 0 0 1-5.7-1.45L.06 24zM6.6 20.15c1.68.998 3.28 1.6 5.44 1.6 5.45 0 9.89-4.43 9.89-9.88 0-5.46-4.43-9.89-9.88-9.89-5.46 0-9.89 4.43-9.89 9.89 0 2.27.6 3.98 1.7 5.7l-1 3.65 3.65-.97zM17.5 14.3c-.07-.12-.27-.2-.57-.35-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.08.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2-1.41.25-.7.25-1.29.17-1.42z"/></svg>
+          Avisar o bar no WhatsApp
+        </a>
+      </form>
+    </div>
+  </div>
+</section>
+
 <!-- CONTATO -->
 <section class="sec" id="contato">
   <div class="wrap">
@@ -365,16 +712,16 @@
     </div>
     <div class="contact">
       <ul class="info-list reveal">
-        <li><span class="em">📍</span><span><b>Endereço</b>R. Madalena Barbosa Ferreira, 178 — Vila Lemos, Campinas–SP · 13100-486</span></li>
-        <li><span class="em">🕐</span><span><b>Horário</b>Aberto até as 21:00 · Quarta é o dia de pico</span></li>
-        <li><span class="em">📞</span><span><b>Telefone / WhatsApp</b>(19) 99977-9942</span></li>
+        <li><span class="em">📍</span><span><b>Endereço</b>{{ site.endereco }}</span></li>
+        <li><span class="em">🕐</span><span><b>Horário</b>{{ site.horario }}</span></li>
+        <li><span class="em">📞</span><span><b>Telefone / WhatsApp</b>{{ site.telefone_exibicao }}</span></li>
         <li><span class="em">🍴</span><span><b>Serviços</b>Refeição no local · Drive-through</span></li>
       </ul>
       <div class="map-cta reveal">
         <h3>Bateu a fome?</h3>
         <p style="color:var(--cream-dim)">Chama no zap, reserva a mesa ou já vem chegando. A cerveja tá gelando.</p>
-        <a class="btn btn-primary" href="https://wa.me/5519999779942?text=Ol%C3%A1!%20Quero%20reservar%20uma%20mesa%20no%20Bar%20da%20Vila" target="_blank" rel="noopener" style="text-align:center">Falar no WhatsApp</a>
-        <a class="btn btn-ghost" href="https://www.google.com/maps/search/?api=1&query=Bar+da+Vila+R.+Madalena+Barbosa+Ferreira+178+Vila+Lemos+Campinas" target="_blank" rel="noopener" style="text-align:center">Abrir no mapa</a>
+        <a class="btn btn-primary" href="https://wa.me/{{ site.whatsapp }}?text=Ol%C3%A1!%20Quero%20reservar%20uma%20mesa%20no%20Bar%20da%20Vila" target="_blank" rel="noopener" style="text-align:center">Falar no WhatsApp</a>
+        <a class="btn btn-ghost" href="https://www.google.com/maps/search/?api=1&query={{ site.maps_query }}" target="_blank" rel="noopener" style="text-align:center">Abrir no mapa</a>
       </div>
     </div>
   </div>
@@ -382,17 +729,85 @@
 
 <footer>
   <div class="wrap">
-    <div class="fneon">Bar da Vila</div>
-    <small>Buteco de família · Vila Lemos, Campinas–SP · Feito com samba e ora-pro-nóbis 💛</small>
+    <div class="fneon">{{ site.nome }}</div>
+    <small>Buteco de família · {{ site.cidade_uf }} · Feito com samba e ora-pro-nóbis 💛</small>
+    <div class="socials">
+      <a href="{{ site.instagram_url }}" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram">
+        <svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.9.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.86s0 3.6-.07 4.86c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.86.07s-3.6 0-4.86-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23C2.2 15.6 2.2 15.2 2.2 12s0-3.6.07-4.86c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.4 2.2 8.8 2.2 12 2.2zm0 1.98c-3.15 0-3.52.01-4.76.07-.9.04-1.39.2-1.71.32-.43.17-.74.37-1.06.69-.32.32-.52.63-.69 1.06-.12.32-.28.81-.32 1.71-.06 1.24-.07 1.61-.07 4.76s.01 3.52.07 4.76c.04.9.2 1.39.32 1.71.17.43.37.74.69 1.06.32.32.63.52 1.06.69.32.12.81.28 1.71.32 1.24.06 1.61.07 4.76.07s3.52-.01 4.76-.07c.9-.04 1.39-.2 1.71-.32.43-.17.74-.37 1.06-.69.32-.32.52-.63.69-1.06.12-.32.28-.81.32-1.71.06-1.24.07-1.61.07-4.76s-.01-3.52-.07-4.76c-.04-.9-.2-1.39-.32-1.71-.17-.43-.37-.74-.69-1.06-.32-.32-.63-.52-1.06-.69-.32-.12-.81-.28-1.71-.32-1.24-.06-1.61-.07-4.76-.07zm0 3.38a4.44 4.44 0 1 1 0 8.88 4.44 4.44 0 0 1 0-8.88zm0 7.32a2.88 2.88 0 1 0 0-5.76 2.88 2.88 0 0 0 0 5.76zm5.65-7.52a1.04 1.04 0 1 1-2.08 0 1.04 1.04 0 0 1 2.08 0z"/></svg>
+      </a>
+      <a href="{{ site.facebook_url }}" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook">
+        <svg viewBox="0 0 24 24"><path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z"/></svg>
+      </a>
+    </div>
     <div><a class="lojista" href="{{ url_for('auth.login') }}">Área do lojista · entrar no sistema →</a></div>
   </div>
 </footer>
 
-<a class="wa" href="https://wa.me/5519999779942?text=Ol%C3%A1!%20Vim%20pelo%20site%20do%20Bar%20da%20Vila" target="_blank" rel="noopener" aria-label="WhatsApp">
+<div class="lightbox" id="lightbox" onclick="this.classList.remove('on')">
+  <span class="x">✕</span><img id="lightbox-img" src="" alt="Foto do Bar da Vila">
+</div>
+
+<a class="wa" href="https://wa.me/{{ site.whatsapp }}?text=Ol%C3%A1!%20Vim%20pelo%20site%20do%20Bar%20da%20Vila" target="_blank" rel="noopener" aria-label="WhatsApp">
   <svg viewBox="0 0 24 24"><path d="M.06 24l1.68-6.13A11.9 11.9 0 0 1 .16 11.9C.16 5.34 5.5.02 12.06.02a11.8 11.8 0 0 1 8.4 3.49 11.8 11.8 0 0 1 3.48 8.4c0 6.56-5.34 11.89-11.9 11.89a11.9 11.9 0 0 1-5.7-1.45L.06 24zM6.6 20.15c1.68.998 3.28 1.6 5.44 1.6 5.45 0 9.89-4.43 9.89-9.88 0-5.46-4.43-9.89-9.88-9.89-5.46 0-9.89 4.43-9.89 9.89 0 2.27.6 3.98 1.7 5.7l-1 3.65 3.65-.97zM17.5 14.3c-.07-.12-.27-.2-.57-.35-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.08.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2-1.41.25-.7.25-1.29.17-1.42z"/></svg>
 </a>
 
 <script>
+  function toggleTheme(){
+    var root=document.documentElement;
+    var light=root.getAttribute('data-theme')!=='light';
+    if(light){root.setAttribute('data-theme','light');localStorage.setItem('bdv-theme','light');}
+    else{root.removeAttribute('data-theme');localStorage.setItem('bdv-theme','dark');}
+    document.getElementById('theme-ic').textContent=light?'☾':'☀';
+    document.querySelector('meta[name=theme-color]').setAttribute('content',light?'#f6e9d2':'#100a06');
+  }
+  // sincroniza ícone com tema salvo no load
+  document.addEventListener('DOMContentLoaded',function(){
+    if(document.documentElement.getAttribute('data-theme')==='light')document.getElementById('theme-ic').textContent='☾';
+  });
+  function toggleMenu(){
+    var open=document.getElementById('mobileMenu').classList.toggle('open');
+    document.getElementById('menuScrim').classList.toggle('open',open);
+    var mug=document.getElementById('mugBtn');
+    mug.classList.toggle('open',open);
+    mug.setAttribute('aria-expanded',open?'true':'false');
+    // re-dispara o pingo a cada abertura
+    if(open){mug.classList.remove('open');void mug.offsetWidth;mug.classList.add('open');}
+    document.body.style.overflow=open?'hidden':'';
+  }
+  // data mínima = hoje no seletor de reserva
+  (function(){
+    var d=document.getElementById('rf-data');
+    if(d){var t=new Date();t.setMinutes(t.getMinutes()-t.getTimezoneOffset());var iso=t.toISOString().slice(0,10);d.min=iso;if(!d.value)d.value=iso;}
+  })();
+  function enviarReserva(ev){
+    ev.preventDefault();
+    var form=ev.target, btn=form.querySelector('button[type=submit]'), msg=document.getElementById('reservaMsg');
+    btn.disabled=true; var txt=btn.textContent; btn.textContent='Enviando…';
+    msg.className='reserva-msg';
+    fetch('{{ url_for("public.reservar") }}',{method:'POST',body:new FormData(form),headers:{'Accept':'application/json'}})
+      .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
+      .then(function(res){
+        if(res.ok && res.j.ok){
+          msg.className='reserva-msg ok'; msg.textContent=res.j.mensagem;
+          var wa=document.getElementById('reservaWa');
+          if(res.j.wa_url){
+            wa.href=res.j.wa_url; wa.classList.add('show');
+            wa.scrollIntoView({block:'center',behavior:'smooth'});
+          }
+          form.reset();
+          var d=document.getElementById('rf-data'); if(d)d.value=d.min;
+          document.getElementById('rf-hora').value='19:00';
+        } else {
+          msg.className='reserva-msg err';
+          msg.textContent=(res.j.erros&&res.j.erros.join(' '))||'Não deu pra enviar. Tenta pelo WhatsApp?';
+        }
+      })
+      .catch(function(){msg.className='reserva-msg err';msg.textContent='Sem conexão. Chama a gente no WhatsApp!';})
+      .finally(function(){btn.disabled=false;btn.textContent=txt;});
+    return false;
+  }
+  function lb(src){var b=document.getElementById('lightbox');document.getElementById('lightbox-img').src=src;b.classList.add('on');}
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')document.getElementById('lightbox').classList.remove('on');});
 (function(){
   // reveal on scroll
   var io=new IntersectionObserver(function(es){

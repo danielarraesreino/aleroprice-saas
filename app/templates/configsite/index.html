@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Site · AleroPrice{% endblock %}
+
+{% set rotulos = {
+  'nome':'Nome do bar (marca)',
+  'hero_linha1':'Título grande — linha 1',
+  'hero_linha2':'Título grande — linha 2',
+  'kicker':'Chamada de topo (kicker)',
+  'tagline':'Frase principal (tagline)',
+  'subline':'Subfrase (itens/destaques)',
+  'selo_estrelas':'Selo de avaliações',
+  'hero_foto':'Foto do topo (caminho em static, ex: img/bar/foto-18.jpg)',
+  'whatsapp':'WhatsApp (só números, com 55 e DDD)',
+  'telefone_exibicao':'Telefone exibido',
+  'endereco':'Endereço completo',
+  'cidade_uf':'Cidade/UF (rodapé)',
+  'horario':'Horário de funcionamento',
+  'maps_query':'Busca do Google Maps (endereço com + no lugar de espaço)',
+  'instagram_url':'Link do Instagram',
+  'facebook_url':'Link do Facebook',
+} %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <h2 class="mb-0"><i class="fas fa-globe text-warning"></i> Identidade do site</h2>
+  <a class="btn btn-outline-secondary" href="{{ url_for('public.landing') }}" target="_blank"><i class="fas fa-external-link-alt"></i> Ver site</a>
+</div>
+<p class="text-muted">Deixe em branco pra usar o padrão (mostrado como dica no campo). Cada restaurante tem sua própria identidade.</p>
+
+<form method="post" class="col-lg-9">
+  {% for campo in defaults.keys() %}
+  <div class="mb-3">
+    <label class="form-label">{{ rotulos.get(campo, campo) }}</label>
+    <input class="form-control" name="{{ campo }}"
+           value="{{ (cfg[campo] if cfg and cfg[campo] else '') }}"
+           placeholder="{{ defaults[campo] }}">
+  </div>
+  {% endfor %}
+  <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Salvar identidade</button>
+</form>
+{% endblock %}

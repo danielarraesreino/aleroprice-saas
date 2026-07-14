@@ -19,3 +19,20 @@ AleroPrice
 # Dados de teste soltos
 vendas_teste.csv
 .vercel
+
+# --- ruflo / claude-flow (gerado por `ruflo init`) ---
+# Runtime: logs, sessions, banco vetorial, métricas. Nada disso é fonte.
+.claude-flow/
+.agent/
+# Memória semântica em texto puro (encryption-at-rest está OFF) — nunca versionar.
+# v3.28 usa .swarm/; versões <=3.10 usavam .claude/memory.db.
+.swarm/
+.claude/memory.db*
+# Catálogos gerados (89 agentes, 34 skills, 21 comandos, helpers) — recriáveis com `ruflo init`.
+.claude/agents/
+.claude/skills/
+.claude/commands/
+.claude/helpers/
+# Config local da máquina + temporários que o upgrade deixa pra trás.
+.claude/settings.local.json
+.claude/*.tmp.*
