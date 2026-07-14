@@ -17,6 +17,7 @@ import click
 from app import db
 from app.models.modelo_restaurante import Restaurante
 from app.models.usuario import Usuario
+from app.utils.site_router import slug_unico
 
 
 def _gerar_senha(tamanho=14):
@@ -48,7 +49,10 @@ def register_cli(app):
             senha = _gerar_senha()
             senha_gerada = senha
 
-        restaurante_obj = Restaurante(nome=restaurante, cnpj=cnpj)
+        # Sem slug o bar não tem endereço em /bar/<slug> e o site dele nasce
+        # inacessível.
+        restaurante_obj = Restaurante(
+            nome=restaurante, cnpj=cnpj, slug=slug_unico(restaurante))
         db.session.add(restaurante_obj)
         db.session.commit()
 
@@ -64,6 +68,7 @@ def register_cli(app):
 
         click.echo('Tenant provisionado com sucesso.')
         click.echo(f'  Restaurante : {restaurante} (id={restaurante_obj.id})')
+        click.echo(f'  Site        : /bar/{restaurante_obj.slug}')
         click.echo(f'  Admin       : {email}')
         if senha_gerada:
             click.echo(f'  Senha       : {senha_gerada}   (anote — não será mostrada de novo)')

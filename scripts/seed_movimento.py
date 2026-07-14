@@ -1,4 +1,4 @@
-"""Um mês de operação do Bar da Vila.
+"""Um mês de operação de um bar.
 
 Gera movimento coerente de ponta a ponta, na ordem em que a coisa acontece no
 bar de verdade:
@@ -9,12 +9,16 @@ O saldo de estoque no fim é o resultado do razão (entradas - saídas), não um
 número chutado: as compras são dimensionadas a partir do consumo real do
 período, com folga de segurança.
 
-Uso:
-    python scripts/seed_bardavila_movimento.py                 # últimos 30 dias
-    python scripts/seed_bardavila_movimento.py --dias 60
-    python scripts/seed_bardavila_movimento.py --reset         # limpa o período antes
+Cada bar tem seu PERFIL (mix de venda, ritmo da semana, seções do cardápio,
+promoções). Dois tenants com o mesmo motor e perfis diferentes produzem dois
+negócios diferentes — que é o ponto de ter uma segunda demo.
 
-Assume que `scripts/seed_bardavila.py` já rodou (pratos, insumos, fornecedores).
+Uso:
+    python scripts/seed_movimento.py                        # bar-da-vila, 30 dias
+    python scripts/seed_movimento.py --slug bar-do-ze
+    python scripts/seed_movimento.py --dias 60 --reset
+
+Assume o catálogo já semeado (`seed_bardavila.py` / `seed_bardoze.py`).
 """
 import argparse
 import random
@@ -39,43 +43,88 @@ from app.models.modelo_restaurante import Restaurante
 SEED = 20260714
 DIAS_PADRAO = 30
 
-# Fecha segunda. Pico quinta-sábado, domingo de almoço em família.
-# 0=seg ... 6=dom
-FATOR_DIA = {0: 0.0, 1: 0.70, 2: 0.85, 3: 1.05, 4: 1.50, 5: 1.70, 6: 1.15}
-
-# Movimento típico de um dia normal (unidades vendidas), por nome de prato.
-# É o que sustenta o bar: bebida em volume, petisco em margem, almoço em giro.
-MIX_BASE = {
-    'Croquete da Bruna (6 un)': 12,
-    'Costelinha com farofa e ora-pro-nóbis': 8,
-    'Frango a passarinho': 10,
-    'Porção de batata frita': 14,
-    'Mandioca frita com bacon': 7,
-    'Carbonara da casa': 5,
-    'Calabresa acebolada': 9,
-    'Prato do dia': 22,
-    'Lanche da Vila': 11,
-    'Cerveja long neck': 60,
-    'Chopp (500ml)': 40,
-    'Refrigerante lata': 18,
+# Perfil de cada bar. `fator_dia`: 0=seg ... 6=dom (0.0 = fechado).
+# `mix`: unidades vendidas num dia normal. `promos`: (dia_semana, prato, fator).
+PERFIS = {
+    'bar-da-vila': {
+        'cardapio': 'Cardápio do Bar da Vila',
+        # Fecha segunda. Pico quinta-sábado, domingo de almoço em família.
+        'fator_dia': {0: 0.0, 1: 0.70, 2: 0.85, 3: 1.05, 4: 1.50, 5: 1.70, 6: 1.15},
+        # Bebida em volume, petisco em margem, almoço em giro.
+        'mix': {
+            'Croquete da Bruna (6 un)': 12,
+            'Costelinha com farofa e ora-pro-nóbis': 8,
+            'Frango a passarinho': 10,
+            'Porção de batata frita': 14,
+            'Mandioca frita com bacon': 7,
+            'Carbonara da casa': 5,
+            'Calabresa acebolada': 9,
+            'Prato do dia': 22,
+            'Lanche da Vila': 11,
+            'Cerveja long neck': 60,
+            'Chopp (500ml)': 40,
+            'Refrigerante lata': 18,
+        },
+        # Prato do dia é almoço; o resto é bar à noite.
+        'periodo': {'Prato do dia': 'tarde'},
+        'secoes': [
+            ('Petiscos e Porções', 1, [
+                'Croquete da Bruna (6 un)', 'Frango a passarinho',
+                'Porção de batata frita', 'Mandioca frita com bacon',
+                'Calabresa acebolada',
+            ]),
+            ('Pratos', 2, [
+                'Costelinha com farofa e ora-pro-nóbis', 'Carbonara da casa',
+                'Prato do dia',
+            ]),
+            ('Lanches', 3, ['Lanche da Vila']),
+            ('Bebidas', 4, ['Cerveja long neck', 'Chopp (500ml)', 'Refrigerante lata']),
+        ],
+        'destaques': {'Croquete da Bruna (6 un)',
+                      'Costelinha com farofa e ora-pro-nóbis'},
+        # Lanche de Quarta e Sexta do Chopp em Dobro (as promoções do tenant).
+        'promos': [(2, 'Lanche da Vila', 1.8), (4, 'Chopp (500ml)', 1.6)],
+    },
+    'bar-do-ze': {
+        'cardapio': 'Cardápio do Bar do Zé',
+        # Boteco de esquina: abre terça, vive de fim de semana, sem almoço.
+        'fator_dia': {0: 0.0, 1: 0.60, 2: 0.75, 3: 0.95, 4: 1.60, 5: 1.90, 6: 1.30},
+        # Ticket baixo, giro alto: espetinho aos montes e cerveja em lata.
+        'mix': {
+            'Espetinho de carne': 40,
+            'Espetinho de frango': 34,
+            'Espetinho de queijo coalho': 26,
+            'Espetinho de linguiça': 22,
+            'Torresmo do Zé': 12,
+            'Caldo de mocotó': 8,
+            'Pastel de feira (carne)': 16,
+            'Fritas do Zé': 11,
+            'Mandioca na manteiga': 7,
+            'Cerveja lata': 95,
+            'Cerveja garrafa 600': 38,
+            'Refri do Zé': 20,
+            'Dose de pinga': 24,
+        },
+        'periodo': {},  # não serve almoço
+        'secoes': [
+            ('Espetinhos', 1, [
+                'Espetinho de carne', 'Espetinho de frango',
+                'Espetinho de queijo coalho', 'Espetinho de linguiça',
+            ]),
+            ('Porções', 2, [
+                'Torresmo do Zé', 'Fritas do Zé', 'Mandioca na manteiga',
+                'Pastel de feira (carne)',
+            ]),
+            ('Caldos', 3, ['Caldo de mocotó']),
+            ('Bebidas', 4, [
+                'Cerveja lata', 'Cerveja garrafa 600', 'Refri do Zé', 'Dose de pinga',
+            ]),
+        ],
+        'destaques': {'Espetinho de carne', 'Torresmo do Zé'},
+        # Terça do espeto (dia fraco puxado na promoção) e caldo no domingo frio.
+        'promos': [(1, 'Espetinho de carne', 2.0), (6, 'Caldo de mocotó', 1.7)],
+    },
 }
-
-# Prato do dia é almoço; o resto é bar à noite.
-PERIODO = {'Prato do dia': 'tarde'}
-
-SECOES = [
-    ('Petiscos e Porções', 1, [
-        'Croquete da Bruna (6 un)', 'Frango a passarinho', 'Porção de batata frita',
-        'Mandioca frita com bacon', 'Calabresa acebolada',
-    ]),
-    ('Pratos', 2, [
-        'Costelinha com farofa e ora-pro-nóbis', 'Carbonara da casa', 'Prato do dia',
-    ]),
-    ('Lanches', 3, ['Lanche da Vila']),
-    ('Bebidas', 4, ['Cerveja long neck', 'Chopp (500ml)', 'Refrigerante lata']),
-]
-
-DESTAQUES = {'Croquete da Bruna (6 un)', 'Costelinha com farofa e ora-pro-nóbis'}
 
 CATEGORIAS_DESPERDICIO = [
     ('Sobras de Preparo', 'Aparas e sobras da mise en place', '#F59E0B'),
@@ -107,9 +156,9 @@ def _dec(v):
     return Decimal(str(round(float(v), 2)))
 
 
-def _quantidade_do_dia(base, dia, rnd):
-    """Vendas de um prato num dia: sazonalidade + promoção + clima + ruído."""
-    fator = FATOR_DIA[dia.weekday()]
+def _quantidade_do_dia(base, dia, fator_dia, rnd):
+    """Vendas de um prato num dia: sazonalidade da semana + ruído."""
+    fator = fator_dia[dia.weekday()]
     if fator == 0:
         return 0
     return max(0, int(round(base * fator * rnd.uniform(0.88, 1.12))))
@@ -150,20 +199,20 @@ def limpar_periodo(rid, inicio, fim):
     db.session.flush()
 
 
-def montar_cardapio(rid, pratos, inicio):
+def montar_cardapio(rid, pratos, inicio, perfil):
     """Cardápio ativo com as seções do bar. Devolve {nome_prato: CardapioItem}."""
     cardapio = Cardapio.query.filter_by(restaurant_id=rid, ativo=True).first()
     if cardapio is None:
         cardapio = Cardapio(
-            nome='Cardápio do Bar da Vila',
-            descricao='Cardápio da casa: petiscos, pratos, lanches e bebidas.',
+            nome=perfil['cardapio'],
+            descricao='Cardápio da casa.',
             data_inicio=inicio, ativo=True, tipo='diário', restaurant_id=rid,
         )
         db.session.add(cardapio)
         db.session.flush()
 
     itens = {}
-    for nome_secao, ordem, nomes in SECOES:
+    for nome_secao, ordem, nomes in perfil['secoes']:
         secao = CardapioSecao.query.filter_by(
             cardapio_id=cardapio.id, nome=nome_secao).first()
         if secao is None:
@@ -181,7 +230,7 @@ def montar_cardapio(rid, pratos, inicio):
                 item = CardapioItem(
                     secao_id=secao.id, prato_id=prato.id, ordem=i,
                     preco_venda=prato.preco_venda,
-                    destaque=nome in DESTAQUES, disponivel=True,
+                    destaque=nome in perfil['destaques'], disponivel=True,
                 )
                 db.session.add(item)
                 db.session.flush()
@@ -205,12 +254,32 @@ def garantir_categorias_desperdicio(rid):
     return cats
 
 
+def _chave_nfe_unica(rnd):
+    """Chave de acesso de 44 dígitos livre. `chave_acesso` é unique GLOBAL, e
+    dois tenants semeados no mesmo dia colidiriam sem essa checagem."""
+    while True:
+        chave = ''.join(str(rnd.randint(0, 9)) for _ in range(44))
+        if NFNota.query.filter_by(chave_acesso=chave).first() is None:
+            return chave
+
+
 def seed(slug, dias, reset):
-    rnd = random.Random(SEED)
+    # Semente derivada do slug: mesma janela, mesmo bar, mesmo resultado — mas
+    # bares diferentes não repetem a mesma sequência (e as chaves de NF-e não
+    # nascem iguais).
+    rnd = random.Random(f'{SEED}:{slug}')
+
+    perfil = PERFIS.get(slug)
+    if perfil is None:
+        print(f'ERRO: sem perfil de movimento para "{slug}". '
+              f'Perfis disponíveis: {", ".join(sorted(PERFIS))}.')
+        return 1
+    mix = perfil['mix']
+    fator_dia = perfil['fator_dia']
 
     rest = Restaurante.query.filter_by(slug=slug).first()
     if rest is None:
-        print(f'ERRO: nenhum restaurante com slug "{slug}". Rode scripts/seed_bardavila.py antes.')
+        print(f'ERRO: nenhum restaurante com slug "{slug}". Rode o seed de catálogo antes.')
         return 1
     rid = rest.id
     print(f'Tenant: {rest.nome} (id={rid})')
@@ -220,9 +289,9 @@ def seed(slug, dias, reset):
     print(f'Janela: {inicio:%d/%m/%Y} a {hoje:%d/%m/%Y} ({dias} dias)')
 
     pratos = {p.nome: p for p in Prato.query.filter_by(restaurant_id=rid).all()
-              if p.nome in MIX_BASE}
-    if len(pratos) < len(MIX_BASE):
-        faltando = set(MIX_BASE) - set(pratos)
+              if p.nome in mix}
+    if len(pratos) < len(mix):
+        faltando = set(mix) - set(pratos)
         print(f'ERRO: pratos faltando no tenant: {sorted(faltando)}')
         return 1
 
@@ -240,8 +309,9 @@ def seed(slug, dias, reset):
         limpar_periodo(rid, inicio, hoje)
         print('  período limpo (vendas, estoque, NF-e, desperdício)')
 
-    cardapio, itens = montar_cardapio(rid, pratos, inicio)
-    print(f'  cardápio: "{cardapio.nome}" com {len(itens)} itens em {len(SECOES)} seções')
+    cardapio, itens = montar_cardapio(rid, pratos, inicio, perfil)
+    print(f'  cardápio: "{cardapio.nome}" com {len(itens)} itens '
+          f'em {len(perfil["secoes"])} seções')
 
     # ---- 1. Vendas do dia + consumo da ficha técnica --------------------
     consumo = {}       # data -> {produto_id: quantidade}
@@ -251,24 +321,25 @@ def seed(slug, dias, reset):
 
     for i in range(dias):
         dia = inicio + timedelta(days=i)
-        if FATOR_DIA[dia.weekday()] == 0:
-            continue  # segunda: bar fechado
+        if fator_dia[dia.weekday()] == 0:
+            continue  # dia de folga: bar fechado
 
         chuva = rnd.random() < 0.20
         clima = 'chuvoso' if chuva else rnd.choice(['ensolarado', 'nublado'])
         temperatura = round(rnd.uniform(14, 24) if chuva else rnd.uniform(18, 31), 1)
 
         do_dia = {}
-        for nome, base in MIX_BASE.items():
-            qtd = _quantidade_do_dia(base, dia, rnd)
+        for nome, base in mix.items():
+            qtd = _quantidade_do_dia(base, dia, fator_dia, rnd)
 
             # Promoções da casa mexem no mix, não só no preço.
-            if dia.weekday() == 2 and nome == 'Lanche da Vila':
-                qtd = int(qtd * 1.8)            # Lanche de Quarta
-            if dia.weekday() == 4 and nome == 'Chopp (500ml)':
-                qtd = int(qtd * 1.6)            # Chopp de Sexta
-            if chuva and nome != 'Prato do dia':
-                qtd = int(qtd * 0.85)           # chuva esvazia o salão à noite
+            for dia_promo, prato_promo, fator_promo in perfil['promos']:
+                if dia.weekday() == dia_promo and nome == prato_promo:
+                    qtd = int(qtd * fator_promo)
+
+            # Chuva esvazia o salão à noite; quem serve almoço sente menos.
+            if chuva and perfil['periodo'].get(nome) != 'tarde':
+                qtd = int(qtd * 0.85)
 
             if qtd <= 0:
                 continue
@@ -284,7 +355,7 @@ def seed(slug, dias, reset):
                 quantidade=qtd,
                 valor_unitario=preco,
                 valor_total=total,
-                periodo_dia=PERIODO.get(nome, 'noite'),
+                periodo_dia=perfil['periodo'].get(nome, 'noite'),
                 dia_semana=dia.weekday(),
                 semana_mes=min(5, (dia.day - 1) // 7 + 1),
                 mes=dia.month,
@@ -371,7 +442,7 @@ def seed(slug, dias, reset):
     for (data_compra, fid), linhas in sorted(entregas.items()):
         emissao = datetime.combine(data_compra, time(rnd.randint(7, 10), rnd.randint(0, 59)))
         numero = f'{rnd.randint(10000, 99999)}'
-        chave = f'{rnd.randint(10**43, 10**44 - 1)}'
+        chave = _chave_nfe_unica(rnd)
 
         valor_produtos = sum(_dec(qtd * custo) for _, qtd, custo in linhas)
         nota = NFNota(
@@ -433,6 +504,8 @@ def seed(slug, dias, reset):
     }
     perecíveis = [p for p in produtos.values()
                   if p.categoria in ('Carnes', 'Hortifruti', 'Frios', 'Padaria')]
+    # Quebra/perda é do bar, não da cozinha: cai numa bebida do próprio tenant.
+    bebidas = [p for p in produtos.values() if p.categoria == 'Bebidas']
 
     n_desp = 0
     valor_desp = Decimal('0')
@@ -443,13 +516,12 @@ def seed(slug, dias, reset):
             cat = cats[nome_cat]
 
             if nome_cat == 'Quebra e Perda':
-                produto = produtos.get(52)  # chopp barril
-                if produto is None:
+                if not bebidas:
                     continue
-            elif nome_cat == 'Estragado':
-                # Perda de estoque: some a peça inteira, não um percentual da venda.
-                produto = rnd.choice(perecíveis)
+                produto = rnd.choice(bebidas)
             else:
+                if not perecíveis:
+                    continue
                 produto = rnd.choice(perecíveis)
 
             consumido = consumo.get(dia, {}).get(produto.id, 0.0)

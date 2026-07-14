@@ -11,7 +11,7 @@ from app.models.modelo_restaurante import Restaurante
 
 from . import bp
 from app.utils.site_router import (
-    eh_dominio_do_produto, tenant_por_host, tenant_por_slug,
+    eh_dominio_do_produto, slug_unico, tenant_por_host, tenant_por_slug,
 )
 from app.utils.temas import css_do_tema
 
@@ -146,7 +146,9 @@ def cadastro():
                 flash(e, 'danger')
             return render_template('site/cadastro.html', **dados)
 
-        rest = Restaurante(nome=nome_bar)
+        # Slug já no cadastro: é o endereço do site do bar (/bar/<slug>) antes
+        # de ele ter domínio próprio. Sem isso o cliente sai do signup sem site.
+        rest = Restaurante(nome=nome_bar, slug=slug_unico(nome_bar))
         db.session.add(rest)
         db.session.commit()
         db.session.add(SiteConfig(restaurant_id=rest.id, nome=nome_bar))

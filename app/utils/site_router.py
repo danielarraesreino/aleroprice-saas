@@ -68,3 +68,21 @@ def gerar_slug(nome):
     texto = texto.encode('ascii', 'ignore').decode('ascii').lower()
     texto = re.sub(r'[^a-z0-9]+', '-', texto).strip('-')
     return texto[:60] or 'bar'
+
+
+def slug_unico(nome):
+    """Slug livre para gravar em `Restaurante.slug` (unique no banco).
+
+    Todo tenant precisa de um: sem slug o bar não tem endereço em /bar/<slug>,
+    e o site dele fica inacessível até comprar domínio próprio. Colisão de nome
+    entre bares é esperada ("Bar do Zé" tem em toda cidade), então desempata com
+    sufixo numérico.
+    """
+    base = gerar_slug(nome)
+    slug = base
+    n = 2
+    while Restaurante.query.filter(Restaurante.slug == slug).first() is not None:
+        sufixo = f'-{n}'
+        slug = f'{base[:60 - len(sufixo)]}{sufixo}'
+        n += 1
+    return slug
