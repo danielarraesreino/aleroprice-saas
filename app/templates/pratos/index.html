@@ -34,7 +34,7 @@
                             <td>{{ prato.categoria }}</td>
                             <td>
                                 {% if prato.preco_venda is not none %}
-                                    R$ {{ "%.2f"|format(prato.preco_venda) }}
+                                    {{ prato.preco_venda|moeda_br }}
                                 {% else %}
                                     -
                                 {% endif %}

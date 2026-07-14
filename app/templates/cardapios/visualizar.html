@@ -176,7 +176,7 @@
                                         {% endif %}
                                     </div>
                                     <div class="col-md-2 text-right">
-                                        <span class="preco-item">R$ {{ "%.2f"|format(item.get_preco_venda) }}</span>
+                                        <span class="preco-item">{{ item.get_preco_venda|moeda_br }}</span>
                                     </div>
                                     <div class="col-md-2 text-right">
                                         <a href="{{ url_for('cardapios.editar_item', id=item.id) }}" class="btn btn-sm btn-outline-info btn-acao">

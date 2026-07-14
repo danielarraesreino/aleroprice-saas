@@ -3,8 +3,16 @@ from flask_migrate import upgrade
 
 import os
 
-# Detect Vercel environment
-config_name = 'production' if os.environ.get('VERCEL') or os.environ.get('RAILWAY_ENVIRONMENT') else 'default'
+# Seleção de configuração.
+# Prioridade: APP_ENV explícito > detecção de plataforma (Vercel/Railway) > default (dev).
+# Em qualquer host de container, basta setar APP_ENV=production.
+_app_env = os.environ.get('APP_ENV')
+if _app_env:
+    config_name = _app_env
+elif os.environ.get('VERCEL') or os.environ.get('RAILWAY_ENVIRONMENT'):
+    config_name = 'production'
+else:
+    config_name = 'default'
 app = create_app(config_name)
 
 if __name__ == '__main__':
@@ -35,51 +43,61 @@ with app.app_context():
     except Exception as e:
         print(f"Database initialization failed: {e}")
 
-@app.route('/debug-db', strict_slashes=False)
-def debug_db():
-    try:
-        from sqlalchemy import inspect, text
-        inspector = inspect(db.engine)
-        tables = inspector.get_table_names()
-        
-        # Check alembic version
+# Dangerous admin/debug endpoints (/debug-db, /seed-vegan, /reset-db).
+# These are only registered when ENABLE_ADMIN_ENDPOINTS=1 is explicitly set,
+# and never when running in the Vercel/Railway production environment.
+# /reset-db in particular calls db.drop_all() and would wipe all tenant data.
+_admin_endpoints_enabled = (
+    os.environ.get('ENABLE_ADMIN_ENDPOINTS') == '1'
+    and config_name != 'production'
+)
+
+if _admin_endpoints_enabled:
+    @app.route('/debug-db', strict_slashes=False)
+    def debug_db():
         try:
-            version = db.session.execute(text("SELECT * FROM alembic_version")).fetchall()
-        except:
-            version = "Table alembic_version not found"
+            from sqlalchemy import inspect, text
+            inspector = inspect(db.engine)
+            tables = inspector.get_table_names()
 
-        return {
-            "status": "online",
-            "tables": tables,
-            "alembic_version": str(version),
-            "db_url_masked": app.config['SQLALCHEMY_DATABASE_URI'].split('@')[-1] if app.config['SQLALCHEMY_DATABASE_URI'] else "None"
-        }
-    except Exception as e:
-        return {"error": str(e)}
+            # Check alembic version
+            try:
+                version = db.session.execute(text("SELECT * FROM alembic_version")).fetchall()
+            except:
+                version = "Table alembic_version not found"
 
-@app.route('/seed-vegan', strict_slashes=False)
-def seed_vegan_route():
-    try:
-        from app.scripts.seed_vegan import seed_vegan_data
-        msg = seed_vegan_data()
-        return {
-            "status": "success",
-            "message": msg,
-            "info": "Refresh the Dashboard to see data."
-        }
-    except Exception as e:
-        return {"status": "error", "error": str(e)}
+            return {
+                "status": "online",
+                "tables": tables,
+                "alembic_version": str(version),
+                "db_url_masked": app.config['SQLALCHEMY_DATABASE_URI'].split('@')[-1] if app.config['SQLALCHEMY_DATABASE_URI'] else "None"
+            }
+        except Exception as e:
+            return {"error": str(e)}
 
-@app.route('/reset-db', strict_slashes=False)
-def reset_db_route():
-    try:
-        # Nuclear option: Recreate schema
-        db.drop_all()
-        db.create_all()
-        return {
-            "status": "success",
-            "message": "Database reset successfully. Schema is now clean.",
-            "next_step": "Go to /seed-vegan to populate data."
-        }
-    except Exception as e:
-        return {"status": "error", "error": str(e)}
+    @app.route('/seed-vegan', strict_slashes=False)
+    def seed_vegan_route():
+        try:
+            from app.scripts.seed_vegan import seed_vegan_data
+            msg = seed_vegan_data()
+            return {
+                "status": "success",
+                "message": msg,
+                "info": "Refresh the Dashboard to see data."
+            }
+        except Exception as e:
+            return {"status": "error", "error": str(e)}
+
+    @app.route('/reset-db', strict_slashes=False)
+    def reset_db_route():
+        try:
+            # Nuclear option: Recreate schema
+            db.drop_all()
+            db.create_all()
+            return {
+                "status": "success",
+                "message": "Database reset successfully. Schema is now clean.",
+                "next_step": "Go to /seed-vegan to populate data."
+            }
+        except Exception as e:
+            return {"status": "error", "error": str(e)}

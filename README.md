@@ -12,6 +12,21 @@ O AleroPrice é um sistema modularizado para gestão de custos, estoque e precif
 - **Controle de Custos Indiretos**: Rateio de custos fixos e indiretos
 - **Precificação Automática**: Sugestão de preços baseados em custos e margem de lucro
 
+## Camada SaaS
+
+Esta versão adiciona, sobre o núcleo de gestão, os recursos que a tornam um SaaS multi-cliente:
+
+- **Autenticação**: login de usuários via Flask-Login (modelo `Usuario`, senha com hash).
+  O acesso é forçado globalmente por um `before_request` no factory (`app/__init__.py`):
+  toda rota exige login, exceto `static`, `auth.login`/`auth.logout`, o webhook do
+  Stripe (`billing.webhook`) e o blueprint `public` (landing / calculadora de ROI).
+- **Multi-tenancy**: cada cliente é um `Restaurante` (tenant). Todos os modelos de negócio
+  carregam `restaurant_id` (NOT NULL) e as queries filtram por
+  `get_current_restaurant_id()` (`app/utils/tenant.py`). O isolamento depende de disciplina
+  nas queries — ainda não há teste automatizado garantindo isolamento entre tenants.
+- **Billing (Stripe)**: assinatura com planos free/pro, checkout, webhook e um A/B de
+  estratégia de preço (`standard` vs `volume_based`) em `app/routes/billing/`.
+
 ## Estrutura do Projeto
 
 ```
@@ -59,7 +74,7 @@ O sistema utiliza um banco de dados relacional normalizado com as seguintes tabe
 
 ### Pré-requisitos
 
-- Python 3.8+
+- Python 3.9+
 - pip (gerenciador de pacotes Python)
 
 ### Instalação
@@ -71,20 +86,41 @@ O sistema utiliza um banco de dados relacional normalizado com as seguintes tabe
    pip install -r requirements.txt
    ```
 
-3. Configure o banco de dados:
+3. Configure as variáveis de ambiente:
    ```
-   python -m app.scripts.create_db
+   cp .env.example .env
+   # edite .env: SECRET_KEY, DATABASE_URL (opcional em dev) e chaves Stripe
    ```
+   Veja [`.env.example`](.env.example) para a lista completa e o que cada variável faz.
+   Sem `DATABASE_URL` o app usa SQLite local (`instance/alerodb.sqlite`) em dev.
 
-4. (Opcional) Carregue dados de exemplo:
-   ```
-   python -m app.scripts.seed_data
-   ```
-
-5. Execute a aplicação:
+4. Execute a aplicação:
    ```
    python run.py
    ```
+   Ao rodar via `python run.py`, as migrações Alembic são aplicadas automaticamente
+   (`upgrade()` no início). Para aplicar manualmente: `FLASK_APP=run.py flask db upgrade`.
+
+### Dados de exemplo (dev)
+
+O seed cria um `Restaurante` (tenant) e popula fornecedores, insumos, 30 pratos,
+cardápio e histórico de vendas. Habilite os endpoints administrativos e chame `/seed-vegan`:
+
+```
+ENABLE_ADMIN_ENDPOINTS=1 python run.py
+# depois acesse http://localhost:5000/seed-vegan
+```
+
+> ⚠️ **Endpoints perigosos**: `/debug-db`, `/seed-vegan` e `/reset-db` (este faz
+> `db.drop_all()` e apaga tudo) só são registrados quando `ENABLE_ADMIN_ENDPOINTS=1`
+> **e** o ambiente não é produção. Nunca defina essa variável em ambiente compartilhado.
+
+### Testes
+
+```
+python -m pytest tests/unit          # unitários (rápidos, SQLite in-memory)
+python -m pytest tests                # suíte completa
+```
 
 ## Funcionalidades Principais
 
@@ -150,8 +186,6 @@ Calculado com base nos custos e na margem desejada:
 ```
 preco_venda = (custo_direto_por_porcao + custo_indireto_por_porcao) * (1 + margem/100)
 ```
-
-## Extensões Futuras
 
 ## Extensões Futuras
 

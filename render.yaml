@@ -1,0 +1,21 @@
+# Deploy no Render (host de container — recomendado para esta stack Flask+pandas).
+# Cria o serviço web via "Blueprint" apontando para este repo.
+services:
+  - type: web
+    name: aleroprice-bardavila
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn run:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    healthCheckPath: /auth/login
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      # Definir no dashboard (secrets — NÃO commitar):
+      - key: SECRET_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      # Endpoints admin ficam DESLIGADOS em produção (não setar ENABLE_ADMIN_ENDPOINTS).

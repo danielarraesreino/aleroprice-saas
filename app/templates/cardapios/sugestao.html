@@ -181,11 +181,11 @@
                                         <div class="prato-descricao">{{ prato.descricao|truncate(100) }}</div>
                                     </div>
                                     <div class="col-md-2">
-                                        <div class="prato-preco">R$ {{ "%.2f"|format(prato.preco_venda) }}</div>
+                                        <div class="prato-preco">{{ prato.preco_venda|moeda_br }}</div>
                                     </div>
                                     <div class="col-md-2">
                                         <div class="prato-margem {% if prato.margem >= 60 %}margem-alta{% elif prato.margem >= 40 %}margem-media{% else %}margem-baixa{% endif %}">
-                                            Margem: {{ "%.1f"|format(prato.margem) }}%
+                                            Margem: {{ prato.margem|percentual_br }}
                                         </div>
                                     </div>
                                     <div class="col-md-2">
@@ -213,11 +213,11 @@
                         <div class="row">
                             <div class="col-md-4 text-center">
                                 <h5>Margem Média</h5>
-                                <h2 class="text-success">{{ "%.1f"|format(estatisticas.margem_media) }}%</h2>
+                                <h2 class="text-success">{{ estatisticas.margem_media|percentual_br }}</h2>
                             </div>
                             <div class="col-md-4 text-center">
                                 <h5>Preço Médio</h5>
-                                <h2>R$ {{ "%.2f"|format(estatisticas.preco_medio) }}</h2>
+                                <h2>{{ estatisticas.preco_medio|moeda_br }}</h2>
                             </div>
                             <div class="col-md-4 text-center">
                                 <h5>Popularidade Média</h5>

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Editar' if promo else 'Nova' }} promoção · AleroPrice{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-tags text-warning"></i> {{ 'Editar' if promo else 'Nova' }} promoção</h2>
+
+<form method="post" class="col-lg-8">
+  <div class="mb-3">
+    <label class="form-label">Título *</label>
+    <input class="form-control" name="titulo" required value="{{ promo.titulo if promo else '' }}" placeholder="Ex.: Lanche de Quarta">
+  </div>
+
+  <div class="mb-4">
+    <label class="form-label">Descrição</label>
+    <textarea class="form-control" name="descricao" rows="3" placeholder="Detalhes da promoção (opcional)">{{ promo.descricao if promo and promo.descricao else '' }}</textarea>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header bg-light">
+      <strong><i class="fas fa-repeat text-warning"></i> Quando ela acontece</strong>
+    </div>
+    <div class="card-body">
+
+      <div class="mb-3">
+        <label class="form-label">Se repete toda semana?</label>
+        <select class="form-select" name="dia_semana">
+          <option value="" {{ 'selected' if not promo or promo.dia_semana is none }}>
+            Não — é uma promoção pontual
+          </option>
+          {% for valor, nome in dias %}
+            <option value="{{ valor }}" {{ 'selected' if promo and promo.dia_semana == valor }}>
+              Sim — toda {{ nome.lower() }}
+            </option>
+          {% endfor %}
+        </select>
+        <div class="form-text">
+          Promoção que se repete (o "Lanche de Quarta") fica no site a semana toda
+          anunciando o dia, e ganha destaque quando chega o dia.
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Começa em</label>
+          <input type="date" class="form-control" name="data_inicio"
+                 value="{{ promo.data_inicio.isoformat() if promo and promo.data_inicio else '' }}">
+          <div class="form-text">Em branco = já está valendo. Preencha para agendar.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Termina em</label>
+          <input type="date" class="form-control" name="validade"
+                 value="{{ promo.validade.isoformat() if promo and promo.validade else '' }}">
+          <div class="form-text">Em branco = sem prazo pra acabar.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="form-check form-switch mb-4">
+    <input class="form-check-input" type="checkbox" role="switch" id="ativo" name="ativo" {{ 'checked' if (not promo) or promo.ativo }}>
+    <label class="form-check-label" for="ativo">Publicar no site</label>
+  </div>
+
+  <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Salvar</button>
+  <a class="btn btn-outline-secondary" href="{{ url_for('promocoes.index') }}">Cancelar</a>
+</form>
+{% endblock %}

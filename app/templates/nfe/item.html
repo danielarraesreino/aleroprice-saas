@@ -58,16 +58,16 @@
                         </tr>
                         <tr>
                             <th>Valor Total:</th>
-                            <td>R$ {{ "%.2f"|format(item.valor_total) }}</td>
+                            <td>{{ item.valor_total|moeda_br }}</td>
                         </tr>
                         <tr>
                             <th class="text-muted border-top pt-2">ICMS:</th>
-                            <td class="border-top pt-2">R$ {{ "%.2f"|format(item.valor_icms or 0) }} ({{
+                            <td class="border-top pt-2">{{ item.valor_icms or 0|moeda_br }} ({{
                                 item.percentual_icms or 0 }}%)</td>
                         </tr>
                         <tr>
                             <th class="text-muted">IPI:</th>
-                            <td>R$ {{ "%.2f"|format(item.valor_ipi or 0) }} ({{ item.percentual_ipi or 0 }}%)</td>
+                            <td>{{ item.valor_ipi or 0|moeda_br }} ({{ item.percentual_ipi or 0 }}%)</td>
                         </tr>
                     </table>
                 </div>

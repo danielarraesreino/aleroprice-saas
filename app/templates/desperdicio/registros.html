@@ -200,7 +200,7 @@
                                 </div>
                                 <div class="col-md-4 text-right">
                                     <div class="text-danger font-weight-bold mb-2">
-                                        R$ {{ "%.2f"|format(registro.valor_estimado) }}
+                                        {{ registro.valor_estimado|moeda_br }}
                                     </div>
                                     <div>
                                         <a href="{{ url_for('desperdicio.visualizar_registro', id=registro.id) }}" class="btn btn-sm btn-outline-primary">

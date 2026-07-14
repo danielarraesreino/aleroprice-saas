@@ -148,7 +148,7 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <div class="detail-label">Valor Estimado</div>
-                                <div class="detail-value text-danger">R$ {{ "%.2f"|format(registro.valor_estimado) }}</div>
+                                <div class="detail-value text-danger">{{ registro.valor_estimado|moeda_br }}</div>
                             </div>
                         </div>
                     </div>

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Editar' if item else 'Novo' }} {{ t.singular }} · AleroPrice{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-store text-warning"></i> {{ 'Editar' if item else 'Adicionar' }} {{ t.singular }} <span class="text-muted">· {{ t.label }}</span></h2>
+
+<form method="post" class="col-lg-7">
+  {% for campo, label, widget, obrig in t.campos %}
+  <div class="mb-3 {{ 'form-check form-switch' if widget == 'check' }}">
+    {% if widget == 'check' %}
+      <input class="form-check-input" type="checkbox" role="switch" id="{{ campo }}" name="{{ campo }}" {{ 'checked' if item and item[campo] }}>
+      <label class="form-check-label" for="{{ campo }}">{{ label }}</label>
+    {% elif widget == 'textarea' %}
+      <label class="form-label">{{ label }}{{ ' *' if obrig }}</label>
+      <textarea class="form-control" name="{{ campo }}" rows="3" {{ 'required' if obrig }}>{{ item[campo] if item and item[campo] else '' }}</textarea>
+    {% else %}
+      <label class="form-label">{{ label }}{{ ' *' if obrig }}</label>
+      <input class="form-control" type="{{ 'number' if widget == 'number' else 'text' }}" name="{{ campo }}"
+             value="{{ item[campo] if item and item[campo] is not none else '' }}" {{ 'required' if obrig }}>
+    {% endif %}
+  </div>
+  {% endfor %}
+  <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Salvar</button>
+  <a class="btn btn-outline-secondary" href="{{ url_for('conteudo.index', tipo=tipo) }}">Cancelar</a>
+</form>
+{% endblock %}

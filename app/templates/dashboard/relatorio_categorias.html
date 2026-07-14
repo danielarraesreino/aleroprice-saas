@@ -153,25 +153,25 @@
     <div class="col-md-3">
         <div class="metric-card revenue-card">
             <div class="title">Receita Total</div>
-            <div class="value">R$ {{ "%.2f"|format(total_receita) }}</div>
+            <div class="value">{{ total_receita|moeda_br }}</div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="metric-card cost-card">
             <div class="title">Custo Total</div>
-            <div class="value">R$ {{ "%.2f"|format(total_custo) }}</div>
+            <div class="value">{{ total_custo|moeda_br }}</div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="metric-card profit-card">
             <div class="title">Lucro Total</div>
-            <div class="value">R$ {{ "%.2f"|format(total_lucro) }}</div>
+            <div class="value">{{ total_lucro|moeda_br }}</div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="metric-card margin-card">
             <div class="title">Margem Média</div>
-            <div class="value">{{ "%.1f"|format(margem_media) }}%</div>
+            <div class="value">{{ margem_media|percentual_br }}</div>
         </div>
     </div>
 </div>
@@ -231,12 +231,12 @@
                                     </span>
                                 </td>
                                 <td class="text-end">{{ categoria.quantidade }}</td>
-                                <td class="text-end">R$ {{ "%.2f"|format(categoria.receita) }}</td>
-                                <td class="text-end">R$ {{ "%.2f"|format(categoria.custo) }}</td>
+                                <td class="text-end">{{ categoria.receita|moeda_br }}</td>
+                                <td class="text-end">{{ categoria.custo|moeda_br }}</td>
                                 <td
                                     class="text-end {% if categoria.lucro > 0 %}text-profit{% else %}text-loss{% endif %}">
-                                    R$ {{ "%.2f"|format(categoria.lucro) }}</td>
-                                <td class="text-end">{{ "%.1f"|format(categoria.margem) }}%</td>
+                                    {{ categoria.lucro|moeda_br }}</td>
+                                <td class="text-end">{{ categoria.margem|percentual_br }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -259,7 +259,7 @@
                     {% for categoria in categorias[:3] if categoria.margem > 0 %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         {{ categoria.categoria }} ({{ categoria.tipo }})
-                        <span class="badge bg-success rounded-pill">{{ "%.1f"|format(categoria.margem) }}%</span>
+                        <span class="badge bg-success rounded-pill">{{ categoria.margem|percentual_br }}</span>
                     </li>
                     {% endfor %}
                 </ul>
@@ -270,8 +270,7 @@
                         class="list-group-item d-flex justify-content-between align-items-center">
                         {{ categoria.categoria }} ({{ categoria.tipo }})
                         <span
-                            class="badge {% if categoria.margem < 0 %}bg-danger{% else %}bg-warning{% endif %} rounded-pill">{{
-                            "%.1f"|format(categoria.margem) }}%</span>
+                            class="badge {% if categoria.margem < 0 %}bg-danger{% else %}bg-warning{% endif %} rounded-pill">{{ categoria.margem|percentual_br }}</span>
                         </li>
                         {% endif %}{% endfor %}
                 </ul>

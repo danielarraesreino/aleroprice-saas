@@ -79,7 +79,7 @@ def index():
     restaurant_id = get_current_restaurant_id()
     if not restaurant_id:
         flash('Erro: Restaurante não identificado.', 'danger')
-        return redirect(url_for('main.index'))
+        return redirect(url_for('auth.login'))
 
     # Obter estatísticas básicas (filtradas por tenant)
     total_registros = HistoricoVendas.query.filter_by(restaurant_id=restaurant_id).count()
@@ -154,7 +154,7 @@ def listar_historico():
     """Lista o histórico de vendas com opções de filtro"""
     restaurant_id = get_current_restaurant_id()
     if not restaurant_id:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('auth.login'))
 
     page = request.args.get('page', 1, type=int)
     
@@ -279,7 +279,7 @@ def registrar_venda():
 
 @bp.route('/historico/importar', methods=['GET', 'POST'])
 def importar_historico():
-    """Importa histórico de vendas a partir de um arquivo CSV"""
+    """Importa histórico de vendas a partir de um arquivo CSV ou Excel com fuzzy matching"""
     restaurant_id = get_current_restaurant_id()
     if not restaurant_id:
         abort(403)
@@ -294,78 +294,131 @@ def importar_historico():
             flash('Nenhum arquivo selecionado!', 'danger')
             return redirect(url_for('previsao.importar_historico'))
         
-        if not arquivo.filename.endswith('.csv'):
-            flash('Por favor, envie um arquivo CSV válido!', 'danger')
+        # Verificar extensão do arquivo
+        extensao = arquivo.filename.rsplit('.', 1)[-1].lower()
+        if extensao not in ['csv', 'xlsx', 'xls']:
+            flash('Por favor, envie um arquivo CSV ou Excel válido!', 'danger')
             return redirect(url_for('previsao.importar_historico'))
         
         # Processar o arquivo
         try:
-            # Ler o CSV
-            stream = io.StringIO(arquivo.stream.read().decode('utf-8'))
-            csv_reader = csv.DictReader(stream, delimiter=';')
+            from app.utils.importacao import ImportadorVendas
+            
+            # Ler arquivo baseado na extensão
+            if extensao == 'csv':
+                # Tentar diferentes delimitadores
+                try:
+                    df = pd.read_csv(arquivo, delimiter=';', encoding='utf-8')
+                except:
+                    arquivo.seek(0)
+                    try:
+                        df = pd.read_csv(arquivo, delimiter=',', encoding='utf-8')
+                    except:
+                        arquivo.seek(0)
+                        df = pd.read_csv(arquivo, delimiter=';', encoding='latin-1')
+            else:  # Excel
+                df = pd.read_excel(arquivo)
+            
+            # Verificar se o DataFrame não está vazio
+            if df.empty:
+                flash('O arquivo está vazio!', 'warning')
+                return redirect(url_for('previsao.importar_historico'))
+            
+            # Inicializar importador
+            importador = ImportadorVendas(restaurant_id)
+            
+            # Detectar colunas automaticamente
+            mapeamento = importador.detectar_colunas(df)
+            
+            # Verificar se todas as colunas necessárias foram detectadas
+            colunas_necessarias = ['data', 'produto', 'quantidade', 'valor']
+            colunas_faltantes = [col for col in colunas_necessarias if col not in mapeamento]
+            
+            if colunas_faltantes:
+                flash(f'Não foi possível detectar as seguintes colunas: {", ".join(colunas_faltantes)}. '
+                      f'Certifique-se de que o arquivo contém colunas com nomes como: data, produto/item, quantidade, valor.', 
+                      'danger')
+                return redirect(url_for('previsao.importar_historico'))
+            
+            # Agregar vendas por data e produto
+            df_agregado = importador.agregar_vendas(df, mapeamento)
             
             # Contadores para feedback
+            total_linhas_originais = len(df)
+            total_registros_agregados = len(df_agregado)
             total_importados = 0
             total_ignorados = 0
+            produtos_nao_encontrados = []
             
-            for row in csv_reader:
+            # Processar cada linha agregada
+            for _, row in df_agregado.iterrows():
                 try:
-                    # Extrair dados
-                    data = row.get('data')
-                    tipo_item = row.get('tipo_item')
-                    item_id = int(row.get('item_id', 0))
-                    quantidade = int(row.get('quantidade', 0))
-                    valor_unitario = float(row.get('valor_unitario', 0).replace(',', '.'))
-                    periodo_dia = row.get('periodo_dia')
-                    clima = row.get('clima')
-                    temperatura = float(row.get('temperatura', 0).replace(',', '.')) if row.get('temperatura') else None
-                    evento_especial = row.get('evento_especial')
+                    data = row['data']
+                    nome_produto = row['produto']
+                    quantidade = int(row['quantidade'])
+                    valor_unitario = float(row['valor_unitario'])
                     
-                    # Validar dados mínimos
-                    if not data or not tipo_item or not item_id or not quantidade or not valor_unitario:
+                    # Usar fuzzy matching para encontrar o prato
+                    prato_id, score = importador.encontrar_prato_por_nome(nome_produto)
+                    
+                    if prato_id is None:
                         total_ignorados += 1
+                        if nome_produto not in produtos_nao_encontrados:
+                            produtos_nao_encontrados.append(nome_produto)
                         continue
                     
-                    # Verificar se o item existe e é do tenant
-                    if tipo_item == 'cardapio_item':
-                        # Validar via join check
-                        check = CardapioItem.query.join(CardapioSecao).join(Cardapio).filter(
-                            CardapioItem.id == item_id,
-                            Cardapio.restaurant_id == restaurant_id
-                        ).first()
-                        if not check:
-                            total_ignorados += 1
-                            continue
-                    elif tipo_item == 'prato':
-                        check = Prato.query.filter_by(id=item_id, restaurant_id=restaurant_id).first()
-                        if not check:
-                            total_ignorados += 1
-                            continue
-                    
-                    # Registrar a venda
-                    HistoricoVendas.registrar_venda(
+                    # Verificar se já existe registro para esta data e prato
+                    registro_existente = HistoricoVendas.query.filter_by(
                         data=data,
-                        item_id=item_id,
-                        tipo_item=tipo_item,
-                        quantidade=quantidade,
-                        valor_unitario=valor_unitario,
-                        periodo_dia=periodo_dia,
-                        evento_especial=evento_especial,
-                        clima=clima,
-                        temperatura=temperatura,
+                        prato_id=prato_id,
                         restaurant_id=restaurant_id
-                    )
+                    ).first()
+                    
+                    if registro_existente:
+                        # Atualizar registro existente
+                        registro_existente.quantidade += quantidade
+                        registro_existente.valor_total = registro_existente.quantidade * valor_unitario
+                    else:
+                        # Criar novo registro
+                        HistoricoVendas.registrar_venda(
+                            data=data,
+                            item_id=prato_id,
+                            tipo_item='prato',
+                            quantidade=quantidade,
+                            valor_unitario=valor_unitario,
+                            restaurant_id=restaurant_id
+                        )
+                    
+                    # Processar baixa de estoque
+                    importador.processar_baixa_estoque(prato_id, quantidade)
                     
                     total_importados += 1
+                    
                 except Exception as e:
                     total_ignorados += 1
                     current_app.logger.error(f'Erro ao importar linha: {str(e)}')
             
-            flash(f'{total_importados} registros importados com sucesso! {total_ignorados} registros ignorados.', 'success')
+            # Commit final
+            db.session.commit()
+            
+            # Mensagem de sucesso com estatísticas
+            mensagem = f'✅ Importação concluída! {total_linhas_originais} linhas → {total_registros_agregados} registros agregados → {total_importados} importados com sucesso.'
+            
+            if total_ignorados > 0:
+                mensagem += f' {total_ignorados} registros ignorados.'
+            
+            if produtos_nao_encontrados:
+                mensagem += f' Produtos não encontrados: {", ".join(produtos_nao_encontrados[:5])}'
+                if len(produtos_nao_encontrados) > 5:
+                    mensagem += f' e mais {len(produtos_nao_encontrados) - 5}...'
+            
+            flash(mensagem, 'success' if total_ignorados == 0 else 'warning')
             return redirect(url_for('previsao.listar_historico'))
             
         except Exception as e:
+            db.session.rollback()
             flash(f'Erro ao processar o arquivo: {str(e)}', 'danger')
+            current_app.logger.error(f'Erro na importação: {str(e)}', exc_info=True)
             return redirect(url_for('previsao.importar_historico'))
     
     return render_template('previsao/importar_historico.html')
@@ -462,7 +515,7 @@ def listar_previsoes():
     """Lista todas as previsões de demanda"""
     restaurant_id = get_current_restaurant_id()
     if not restaurant_id:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('auth.login'))
 
     page = request.args.get('page', 1, type=int)
     
@@ -809,7 +862,7 @@ def listar_fatores_sazonalidade():
     """Lista todos os fatores de sazonalidade"""
     restaurant_id = get_current_restaurant_id()
     if not restaurant_id:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('auth.login'))
 
     # Filtros opcionais
     tipo_item = request.args.get('tipo_item')  # 'cardapio_item', 'prato' ou 'geral'

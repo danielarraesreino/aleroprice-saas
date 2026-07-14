@@ -204,7 +204,7 @@
                                 
                                 <div class="small text-muted">
                                     {% if meta.tipo == 'valor' %}
-                                        Meta: Reduzir R$ {{ "%.2f"|format(meta.valor_meta) }} | Atual: R$ {{ "%.2f"|format(meta.valor_atual) }}
+                                        Meta: Reduzir {{ meta.valor_meta|moeda_br }} | Atual: {{ meta.valor_atual|moeda_br }}
                                     {% elif meta.tipo == 'quantidade' %}
                                         Meta: Reduzir {{ meta.valor_meta }} ocorrências | Atual: {{ meta.valor_atual }} ocorrências
                                     {% elif meta.tipo == 'percentual' %}

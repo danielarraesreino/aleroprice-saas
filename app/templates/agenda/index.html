@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Agenda · AleroPrice{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <h2 class="mb-0"><i class="fas fa-music text-warning"></i> Agenda de eventos</h2>
+  <a class="btn btn-primary" href="{{ url_for('agenda.novo') }}"><i class="fas fa-plus"></i> Novo evento</a>
+</div>
+<p class="text-muted">Eventos ativos com data de hoje em diante aparecem no site.</p>
+
+{% if eventos %}
+<div class="table-responsive">
+  <table class="table table-hover align-middle">
+    <thead class="table-light">
+      <tr><th>Data</th><th>Hora</th><th>Evento</th><th>Status</th><th class="text-end">Ações</th></tr>
+    </thead>
+    <tbody>
+      {% for e in eventos %}
+      <tr class="{{ 'text-muted' if e.data < hoje }}">
+        <td>
+          {{ e.data.strftime('%d/%m/%Y') }}
+          {% if e.data < hoje %}<span class="badge bg-secondary ms-1">passado</span>{% endif %}
+        </td>
+        <td>{{ e.hora or '—' }}</td>
+        <td>
+          <strong>{{ e.titulo }}</strong>
+          {% if e.descricao %}<br><small class="text-muted">{{ e.descricao }}</small>{% endif %}
+        </td>
+        <td>
+          {% if e.ativo %}<span class="badge bg-success">No ar</span>
+          {% else %}<span class="badge bg-secondary">Oculto</span>{% endif %}
+        </td>
+        <td class="text-end text-nowrap">
+          <a class="btn btn-sm btn-outline-primary" href="{{ url_for('agenda.editar', evento_id=e.id) }}" title="Editar"><i class="fas fa-pen"></i></a>
+          <form method="post" action="{{ url_for('agenda.toggle', evento_id=e.id) }}" class="d-inline">
+            <button class="btn btn-sm btn-outline-secondary" title="{{ 'Ocultar' if e.ativo else 'Publicar' }}">
+              <i class="fas fa-{{ 'eye-slash' if e.ativo else 'eye' }}"></i>
+            </button>
+          </form>
+          <form method="post" action="{{ url_for('agenda.excluir', evento_id=e.id) }}" class="d-inline"
+                onsubmit="return confirm('Excluir o evento {{ e.titulo }}?');">
+            <button class="btn btn-sm btn-outline-danger" title="Excluir"><i class="fas fa-trash"></i></button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="text-center text-muted py-5">
+  <i class="fas fa-calendar-plus fa-2x mb-3"></i>
+  <p>Nenhum evento ainda. Crie o primeiro samba da semana!</p>
+</div>
+{% endif %}
+{% endblock %}

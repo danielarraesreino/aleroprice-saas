@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Editar' if evento else 'Novo' }} evento · AleroPrice{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-music text-warning"></i> {{ 'Editar' if evento else 'Novo' }} evento</h2>
+
+<form method="post" class="col-lg-7">
+  <div class="mb-3">
+    <label class="form-label">Título *</label>
+    <input class="form-control" name="titulo" required value="{{ evento.titulo if evento else '' }}" placeholder="Ex.: Samba do Gustavo">
+  </div>
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label class="form-label">Data *</label>
+      <input type="date" class="form-control" name="data" required value="{{ evento.data.isoformat() if evento and evento.data else '' }}">
+    </div>
+    <div class="col-md-6 mb-3">
+      <label class="form-label">Hora</label>
+      <input type="time" class="form-control" name="hora" value="{{ evento.hora if evento else '' }}">
+    </div>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Descrição</label>
+    <textarea class="form-control" name="descricao" rows="3" placeholder="Detalhes do evento (opcional)">{{ evento.descricao if evento and evento.descricao else '' }}</textarea>
+  </div>
+  <div class="form-check form-switch mb-4">
+    <input class="form-check-input" type="checkbox" role="switch" id="ativo" name="ativo" {{ 'checked' if (not evento) or evento.ativo }}>
+    <label class="form-check-label" for="ativo">Publicar no site</label>
+  </div>
+  <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Salvar</button>
+  <a class="btn btn-outline-secondary" href="{{ url_for('agenda.index') }}">Cancelar</a>
+</form>
+{% endblock %}

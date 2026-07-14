@@ -1,4 +1,5 @@
 from app import db
+from app.models.modelo_restaurante import Restaurante
 from app.models.modelo_produto import Produto
 from app.models.modelo_prato import Prato, PratoInsumo
 from app.models.modelo_fornecedor import Fornecedor
@@ -26,7 +27,16 @@ def random_phone():
 
 def seed_vegan_data():
     print("Iniciando seed de dados Veganos...")
-    
+
+    # 0. Criar o Restaurante (tenant). Todos os dados abaixo pertencem a ele.
+    # O modelo é multi-tenant: Fornecedor/Produto/Prato/Cardapio/HistoricoVendas
+    # exigem restaurant_id (NOT NULL).
+    restaurante = Restaurante(nome="Restaurante Vegano (Seed)")
+    db.session.add(restaurante)
+    db.session.commit()
+    restaurant_id = restaurante.id
+    print(f"Restaurante seed criado (id={restaurant_id}).")
+
     # 1. Limpar dados existentes (opcional, pode comentar se quiser manter)
     # db.session.query(HistoricoVendas).delete()
     # db.session.query(CardapioItem).delete()
@@ -55,7 +65,8 @@ def seed_vegan_data():
             nome_fantasia=nome_empresa,
             email=random_email(contato),
             telefone=random_phone(),
-            cnpj=fake_cnpj
+            cnpj=fake_cnpj,
+            restaurant_id=restaurant_id
         )
         db.session.add(f)
         fornecedores.append(f)
@@ -86,7 +97,8 @@ def seed_vegan_data():
             estoque_atual=random.uniform(5, 50),
             estoque_minimo=5,
             fornecedor_id=random.choice(fornecedores).id,
-            ativo=True
+            ativo=True,
+            restaurant_id=restaurant_id
         )
         db.session.add(p)
         objs_produtos.append(p)
@@ -94,7 +106,7 @@ def seed_vegan_data():
     print("Ingredientes criados.")
 
     # 4. Criar Pratos (30 Itens)
-    cardapio_vegan = Cardapio(nome="Menu Vegano Especial", ativo=True)
+    cardapio_vegan = Cardapio(nome="Menu Vegano Especial", ativo=True, restaurant_id=restaurant_id)
     db.session.add(cardapio_vegan)
     db.session.commit()
 
@@ -156,7 +168,8 @@ def seed_vegan_data():
             porcoes_rendimento=1, # Required field
             # custo_total removed (it's a property based on ingredients)
             categoria=categ,
-            preco_venda=venda # Explicitly setting selling price
+            preco_venda=venda, # Explicitly setting selling price
+            restaurant_id=restaurant_id
         )
         db.session.add(p)
         db.session.commit() # Commit to get ID
@@ -215,8 +228,9 @@ def seed_vegan_data():
                 periodo_dia=random.choice(['Almoço', 'Jantar']),
                 dia_semana=data_venda.weekday(), # Integer 0-6
                 mes=data_venda.month,
-                semana_mes=(data_venda.day - 1) // 7 + 1
+                semana_mes=(data_venda.day - 1) // 7 + 1,
                 # ano removed (not in model)
+                restaurant_id=restaurant_id
             )
             vendas_buffer.append(venda)
             # Commit em lotes para não sobrecarregar

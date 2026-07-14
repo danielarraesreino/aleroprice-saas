@@ -226,7 +226,7 @@
                                 </div>
                                 <div class="stat-value">
                                     {% if meta.tipo == 'valor' %}
-                                        R$ {{ "%.2f"|format(meta.valor_meta) }}
+                                        {{ meta.valor_meta|moeda_br }}
                                     {% elif meta.tipo == 'quantidade' %}
                                         {{ meta.valor_meta }}
                                     {% elif meta.tipo == 'percentual' %}
@@ -263,7 +263,7 @@
                                                 <tr>
                                                     <td>{{ registro.data.strftime('%d/%m/%Y') }}</td>
                                                     <td class="text-center">{{ registro.quantidade }}</td>
-                                                    <td class="text-right">R$ {{ "%.2f"|format(registro.valor) }}</td>
+                                                    <td class="text-right">{{ registro.valor|moeda_br }}</td>
                                                     <td class="text-right">{{ registro.progresso }}%</td>
                                                 </tr>
                                                 {% endfor %}
@@ -286,7 +286,7 @@
                                         <div class="detail-label">Valor de Referência</div>
                                         <div class="detail-value">
                                             {% if meta.tipo == 'valor' or meta.tipo == 'percentual' %}
-                                                R$ {{ "%.2f"|format(meta.valor_referencia) }}
+                                                {{ meta.valor_referencia|moeda_br }}
                                             {% elif meta.tipo == 'quantidade' %}
                                                 {{ meta.valor_referencia }} ocorrências
                                             {% endif %}
@@ -297,7 +297,7 @@
                                         <div class="detail-label">Valor Atual</div>
                                         <div class="detail-value">
                                             {% if meta.tipo == 'valor' %}
-                                                R$ {{ "%.2f"|format(meta.valor_atual) }}
+                                                {{ meta.valor_atual|moeda_br }}
                                             {% elif meta.tipo == 'quantidade' %}
                                                 {{ meta.valor_atual }} ocorrências
                                             {% elif meta.tipo == 'percentual' %}

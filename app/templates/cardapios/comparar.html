@@ -253,32 +253,32 @@
                                     </tr>
                                     <tr>
                                         <td>Preço Médio</td>
-                                        <td>R$ {{ "%.2f"|format(cardapio1.preco_medio) }}</td>
-                                        <td>R$ {{ "%.2f"|format(cardapio2.preco_medio) }}</td>
+                                        <td>{{ cardapio1.preco_medio|moeda_br }}</td>
+                                        <td>{{ cardapio2.preco_medio|moeda_br }}</td>
                                         <td class="{% if cardapio1.preco_medio > cardapio2.preco_medio %}valor-maior{% elif cardapio1.preco_medio < cardapio2.preco_medio %}valor-menor{% else %}valor-igual{% endif %}">
-                                            R$ {{ "%.2f"|format(cardapio1.preco_medio - cardapio2.preco_medio) }}
+                                            {{ cardapio1.preco_medio - cardapio2.preco_medio|moeda_br }}
                                         </td>
                                     </tr>
                                     <tr>
                                         <td>Margem Média</td>
-                                        <td>{{ "%.1f"|format(cardapio1.margem_media) }}%</td>
-                                        <td>{{ "%.1f"|format(cardapio2.margem_media) }}%</td>
+                                        <td>{{ cardapio1.margem_media|percentual_br }}</td>
+                                        <td>{{ cardapio2.margem_media|percentual_br }}</td>
                                         <td class="{% if cardapio1.margem_media > cardapio2.margem_media %}valor-maior{% elif cardapio1.margem_media < cardapio2.margem_media %}valor-menor{% else %}valor-igual{% endif %}">
-                                            {{ "%.1f"|format(cardapio1.margem_media - cardapio2.margem_media) }}%
+                                            {{ cardapio1.margem_media - cardapio2.margem_media|percentual_br }}
                                         </td>
                                     </tr>
                                     <tr>
                                         <td>Itens de Alta Rentabilidade</td>
-                                        <td>{{ cardapio1.itens_alta_rentabilidade }} ({{ "%.1f"|format(cardapio1.percentual_alta_rentabilidade) }}%)</td>
-                                        <td>{{ cardapio2.itens_alta_rentabilidade }} ({{ "%.1f"|format(cardapio2.percentual_alta_rentabilidade) }}%)</td>
+                                        <td>{{ cardapio1.itens_alta_rentabilidade }} ({{ cardapio1.percentual_alta_rentabilidade|percentual_br }})</td>
+                                        <td>{{ cardapio2.itens_alta_rentabilidade }} ({{ cardapio2.percentual_alta_rentabilidade|percentual_br }})</td>
                                         <td class="{% if cardapio1.itens_alta_rentabilidade > cardapio2.itens_alta_rentabilidade %}valor-maior{% elif cardapio1.itens_alta_rentabilidade < cardapio2.itens_alta_rentabilidade %}valor-menor{% else %}valor-igual{% endif %}">
                                             {{ cardapio1.itens_alta_rentabilidade - cardapio2.itens_alta_rentabilidade }}
                                         </td>
                                     </tr>
                                     <tr>
                                         <td>Itens de Baixa Rentabilidade</td>
-                                        <td>{{ cardapio1.itens_baixa_rentabilidade }} ({{ "%.1f"|format(cardapio1.percentual_baixa_rentabilidade) }}%)</td>
-                                        <td>{{ cardapio2.itens_baixa_rentabilidade }} ({{ "%.1f"|format(cardapio2.percentual_baixa_rentabilidade) }}%)</td>
+                                        <td>{{ cardapio1.itens_baixa_rentabilidade }} ({{ cardapio1.percentual_baixa_rentabilidade|percentual_br }})</td>
+                                        <td>{{ cardapio2.itens_baixa_rentabilidade }} ({{ cardapio2.percentual_baixa_rentabilidade|percentual_br }})</td>
                                         <td class="{% if cardapio1.itens_baixa_rentabilidade < cardapio2.itens_baixa_rentabilidade %}valor-maior{% elif cardapio1.itens_baixa_rentabilidade > cardapio2.itens_baixa_rentabilidade %}valor-menor{% else %}valor-igual{% endif %}">
                                             {{ cardapio1.itens_baixa_rentabilidade - cardapio2.itens_baixa_rentabilidade }}
                                         </td>

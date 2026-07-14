@@ -174,8 +174,8 @@
                                     {% endif %}
                                 </td>
                                 <td>{{ registro.quantidade }}</td>
-                                <td>R$ {{ "%.2f"|format(registro.valor_unitario) }}</td>
-                                <td>R$ {{ "%.2f"|format(registro.quantidade * registro.valor_unitario) }}</td>
+                                <td>{{ registro.valor_unitario|moeda_br }}</td>
+                                <td>{{ registro.quantidade * registro.valor_unitario|moeda_br }}</td>
                                 <td>
                                     {% if registro.periodo_dia %}
                                         <span class="badge badge-periodo">{{ registro.periodo_dia }}</span>

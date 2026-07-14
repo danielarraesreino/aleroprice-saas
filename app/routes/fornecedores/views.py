@@ -11,7 +11,7 @@ def index():
     restaurant_id = get_current_restaurant_id()
     if not restaurant_id:
         flash('Erro: Restaurante não identificado.', 'danger')
-        return redirect(url_for('main.index'))
+        return redirect(url_for('auth.login'))
 
     page = request.args.get('page', 1, type=int)
     fornecedores = Fornecedor.query.filter_by(restaurant_id=restaurant_id).order_by(Fornecedor.razao_social).paginate(

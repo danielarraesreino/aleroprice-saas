@@ -295,11 +295,11 @@
                                                 </div>
                                                 <div class="d-flex justify-content-between mb-3">
                                                     <span><strong>Valor:</strong></span>
-                                                    <span>R$ {{ "%.2f"|format(item.valor) }}</span>
+                                                    <span>{{ item.valor|moeda_br }}</span>
                                                 </div>
                                                 <div class="d-flex justify-content-between mb-3">
                                                     <span><strong>Percentual:</strong></span>
-                                                    <span>{{ "%.1f"|format(item.percentual) }}% da produção</span>
+                                                    <span>{{ item.percentual|percentual_br }} da produção</span>
                                                 </div>
                                                 <div class="d-flex justify-content-between mb-3">
                                                     <span><strong>Tendência:</strong></span>
@@ -419,7 +419,7 @@
                                             </div>
                                             <div class="d-flex justify-content-between">
                                                 <span><strong>Economia Potencial:</strong></span>
-                                                <span>R$ {{ "%.2f"|format(recomendacao.economia) }}</span>
+                                                <span>{{ recomendacao.economia|moeda_br }}</span>
                                             </div>
                                         </div>
                                         <div class="card-footer">

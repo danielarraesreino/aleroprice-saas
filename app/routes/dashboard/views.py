@@ -36,28 +36,28 @@ def calcular_metricas_principais(data_inicio, data_fim, restaurant_id):
     # Calcular receita total
     receita_total = sum(float(v.valor_total or 0) for v in vendas)
     
-    # Calcular custos totais
-    custo_total = 0
+    # Calcular custos diretos (apenas insumos)
+    custo_direto_total = 0
     for venda in vendas:
-        # Custo do item vendido
+        # Custo do item vendido (apenas insumos, sem custos indiretos)
         if venda.cardapio_item:
             # Já carregado via eager load
             item = venda.cardapio_item
             if item.prato:
-                custo_total += float(item.prato.custo_total_por_porcao or 0) * venda.quantidade
+                custo_direto_total += float(item.prato.custo_direto_por_porcao or 0) * venda.quantidade
         elif venda.prato:
             # Já carregado via eager load
             prato = venda.prato
-            custo_total += float(prato.custo_total_por_porcao or 0) * venda.quantidade
+            custo_direto_total += float(prato.custo_direto_por_porcao or 0) * venda.quantidade
     
-    # Adicionar custos indiretos do período (Query única, ok)
+    # Adicionar custos indiretos do período
     custos_indiretos = CustoIndireto.query.filter(
         CustoIndireto.data_referencia >= data_inicio,
         CustoIndireto.data_referencia <= data_fim,
         CustoIndireto.restaurant_id == restaurant_id
     ).all()
     custo_indireto_total = sum(float(c.valor or 0) for c in custos_indiretos)
-    custo_total += custo_indireto_total
+    custo_total = custo_direto_total + custo_indireto_total
     
     # Calcular lucro e margem
     lucro_total = receita_total - custo_total
@@ -178,7 +178,7 @@ def obter_top_pratos(data_inicio, data_fim, restaurant_id, limite=5):
     for p in vendas_pratos:
         prato = Prato.query.filter_by(id=p.id, restaurant_id=restaurant_id).first()
         if prato:
-            custo_unitario = float(prato.custo_total_por_porcao or 0)
+            custo_unitario = float(prato.custo_direto_por_porcao or 0)
             custo_total = custo_unitario * p.quantidade_vendida
             lucro = float(p.receita_total or 0) - custo_total
             margem = (lucro / float(p.receita_total)) * 100 if float(p.receita_total) > 0 else 0
@@ -197,25 +197,21 @@ def obter_top_pratos(data_inicio, data_fim, restaurant_id, limite=5):
 
 
 def obter_distribuicao_categorias(data_inicio, data_fim, restaurant_id):
-    """Obtém a distribuição de vendas por categoria"""
-    # Consultar vendas de itens de cardápio agrupadas por seção
-    # Nota: Devemos garantir que estamos filtrando por restaurant_id.
-    # HistoricoVendas tem restaurant_id, que é nossa fonte de verdade.
-    vendas_por_secao = db.session.query(
-        CardapioSecao.nome,
+    """Obtém a distribuição de vendas por categoria de prato"""
+    # Consultar vendas agrupadas por categoria de prato
+    vendas_por_categoria = db.session.query(
+        Prato.categoria,
         func.sum(HistoricoVendas.valor_total).label('receita_total')
     ).join(
-        CardapioItem,
-        CardapioItem.secao_id == CardapioSecao.id
-    ).join(
         HistoricoVendas,
-        HistoricoVendas.cardapio_item_id == CardapioItem.id
+        HistoricoVendas.prato_id == Prato.id
     ).filter(
         HistoricoVendas.data >= data_inicio,
         HistoricoVendas.data <= data_fim,
-        HistoricoVendas.restaurant_id == restaurant_id
+        HistoricoVendas.restaurant_id == restaurant_id,
+        Prato.categoria.isnot(None)  # Filtrar pratos sem categoria
     ).group_by(
-        CardapioSecao.nome
+        Prato.categoria
     ).all()
     
     # Preparar dados para o gráfico de pizza
@@ -229,8 +225,8 @@ def obter_distribuicao_categorias(data_inicio, data_fim, restaurant_id):
         '#FF9F40', '#8AC249', '#EA5F89', '#00B8D4', '#6D4C41'
     ]
     
-    for i, (secao, receita) in enumerate(vendas_por_secao):
-        categorias.append(secao)
+    for i, (categoria, receita) in enumerate(vendas_por_categoria):
+        categorias.append(categoria or 'Sem Categoria')
         valores.append(float(receita or 0))
         cores.append(cores_padrao[i % len(cores_padrao)])
     
@@ -262,7 +258,7 @@ def obter_tendencia_lucratividade(restaurant_id, meses=6):
     ).filter_by(restaurant_id=restaurant_id).all()
     
     # Mapa de custos: prato_id -> custo_unitario
-    custo_prato_map = {p.id: float(p.custo_total_por_porcao or 0) for p in todos_pratos}
+    custo_prato_map = {p.id: float(p.custo_direto_por_porcao or 0) for p in todos_pratos}
     
     # 2. Consultar vendas agregadas por Mês e por Item/Prato
     # Detectar dialeto para função de data correta
@@ -478,7 +474,7 @@ def obter_dados_matriz_bcg(data_inicio, data_fim, restaurant_id):
         prato = pratos_map.get(v.id)
         if not prato: continue
         
-        custo = float(prato.custo_total_por_porcao or 0)
+        custo = float(prato.custo_direto_por_porcao or 0)
         receita_item = float(v.receita or 0)
         qtde = float(v.qtde or 0)
         
@@ -552,7 +548,7 @@ def index():
     """Página principal do dashboard de lucratividade"""
     restaurant_id = get_current_restaurant_id()
     if not restaurant_id:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('auth.login'))
 
     try:
         # --- EMPTY STATE CHECK (ONBOARDING) ---
@@ -568,10 +564,38 @@ def index():
         # --------------------------------------
 
         # Obter período selecionado
-        periodo = request.args.get('periodo', 'mensal')
+        periodo = request.args.get('periodo', '30dias')  # Padrão: últimos 30 dias
         hoje = date.today()
         
-        if periodo == 'mensal':
+        if periodo == 'hoje':
+            inicio_periodo = hoje
+            fim_periodo = hoje
+            titulo_periodo = f"Hoje - {hoje.strftime('%d/%m/%Y')}"
+        elif periodo == 'ontem':
+            ontem = hoje - timedelta(days=1)
+            inicio_periodo = ontem
+            fim_periodo = ontem
+            titulo_periodo = f"Ontem - {ontem.strftime('%d/%m/%Y')}"
+        elif periodo == '7dias':
+            inicio_periodo = hoje - timedelta(days=6)  # Últimos 7 dias incluindo hoje
+            fim_periodo = hoje
+            titulo_periodo = f"Últimos 7 Dias ({inicio_periodo.strftime('%d/%m')} a {fim_periodo.strftime('%d/%m')})"
+        elif periodo == '30dias':
+            inicio_periodo = hoje - timedelta(days=29)  # Últimos 30 dias incluindo hoje
+            fim_periodo = hoje
+            titulo_periodo = f"Últimos 30 Dias ({inicio_periodo.strftime('%d/%m')} a {fim_periodo.strftime('%d/%m')})"
+        elif periodo == 'mes_anterior':
+            # Mês anterior completo
+            if hoje.month == 1:
+                mes_anterior = 12
+                ano_anterior = hoje.year - 1
+            else:
+                mes_anterior = hoje.month - 1
+                ano_anterior = hoje.year
+            inicio_periodo = date(ano_anterior, mes_anterior, 1)
+            fim_periodo = date(ano_anterior, mes_anterior, calendar.monthrange(ano_anterior, mes_anterior)[1])
+            titulo_periodo = f"Mês Anterior ({inicio_periodo.strftime('%B/%Y')})"
+        elif periodo == 'mensal':
             inicio_periodo = date(hoje.year, hoje.month, 1)
             fim_periodo = date(hoje.year, hoje.month, calendar.monthrange(hoje.year, hoje.month)[1])
             titulo_periodo = f"Mês de {inicio_periodo.strftime('%B/%Y')}"
@@ -585,9 +609,17 @@ def index():
             fim_periodo = date(hoje.year, 12, 31)
             titulo_periodo = f"Ano de {hoje.year}"
         else:  # personalizado
-            inicio_periodo = request.args.get('data_inicio', date(hoje.year, hoje.month, 1))
-            fim_periodo = request.args.get('data_fim', date(hoje.year, hoje.month, calendar.monthrange(hoje.year, hoje.month)[1]))
-            titulo_periodo = f"Período de {inicio_periodo} a {fim_periodo}"
+            data_inicio_str = request.args.get('data_inicio')
+            data_fim_str = request.args.get('data_fim')
+            if data_inicio_str and data_fim_str:
+                inicio_periodo = datetime.strptime(data_inicio_str, '%Y-%m-%d').date()
+                fim_periodo = datetime.strptime(data_fim_str, '%Y-%m-%d').date()
+                titulo_periodo = f"Período de {inicio_periodo.strftime('%d/%m/%Y')} a {fim_periodo.strftime('%d/%m/%Y')}"
+            else:
+                # Fallback para mês atual
+                inicio_periodo = date(hoje.year, hoje.month, 1)
+                fim_periodo = date(hoje.year, hoje.month, calendar.monthrange(hoje.year, hoje.month)[1])
+                titulo_periodo = f"Mês de {inicio_periodo.strftime('%B/%Y')}"
         
         # Calcular métricas principais
         receita_total, custo_total, lucro_total, margem_media = calcular_metricas_principais(inicio_periodo, fim_periodo, restaurant_id)
@@ -646,6 +678,41 @@ def index():
         # Calcular impacto do desperdício em relação ao custo total
         impacto_desperdicio = (valor_desperdicio / custo_total * 100) if custo_total > 0 else 0
         
+        # Determinar nível de desperdício
+        if impacto_desperdicio > 5:
+            nivel_desperdicio = 'alto'
+        elif impacto_desperdicio > 2:
+            nivel_desperdicio = 'medio'
+        else:
+            nivel_desperdicio = 'baixo'
+        
+        # Obter categorias de cardápio com pratos
+        categorias_cardapio = []
+        try:
+            categorias = db.session.query(Prato.categoria).filter(
+                Prato.restaurant_id == restaurant_id,
+                Prato.ativo == True
+            ).distinct().all()
+            
+            for (categoria_nome,) in categorias:
+                if not categoria_nome:
+                    continue
+                    
+                pratos_categoria = Prato.query.filter(
+                    Prato.restaurant_id == restaurant_id,
+                    Prato.categoria == categoria_nome,
+                    Prato.ativo == True
+                ).limit(5).all()
+                
+                if pratos_categoria:
+                    categorias_cardapio.append({
+                        'nome': categoria_nome,
+                        'pratos': pratos_categoria
+                    })
+        except Exception as e:
+            print(f"Erro ao buscar categorias de cardápio: {e}")
+            categorias_cardapio = []
+        
         return render_template('dashboard/index.html',
                             titulo_periodo=titulo_periodo,
                             periodo=periodo,
@@ -661,12 +728,16 @@ def index():
                             tendencia_lucratividade=tendencia_lucratividade,
                             valor_desperdicio=valor_desperdicio,
                             impacto_desperdicio=impacto_desperdicio,
+                            nivel_desperdicio=nivel_desperdicio,
                             lucro_hoje=lucro_hoje,
+                            receita_hoje=receita_hoje,
+                            custo_hoje=custo_hoje,
                             estoque_critico=estoque_critico,
                             alertas_custo=alertas_custo,
                             alertas_inflacao_count=alertas_inflacao_count,
                             produtos_inflacao=produtos_inflacao,
                             dados_bcg=dados_bcg,
+                            categorias_cardapio=categorias_cardapio,
                             show_onboarding=False)
     except Exception as e:
         import traceback
@@ -681,7 +752,7 @@ def relatorio_pratos():
     """Relatório detalhado de lucratividade por prato - OTIMIZADO"""
     restaurant_id = get_current_restaurant_id()
     if not restaurant_id:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('auth.login'))
 
     # Obter período para análise
     hoje = date.today()
@@ -700,7 +771,6 @@ def relatorio_pratos():
         Prato.id,
         Prato.nome,
         Prato.categoria,
-        Prato.custo_total_por_porcao, # Assumindo que isso pode ser obtido ou deve ser pré-carregado
         func.sum(HistoricoVendas.quantidade).label('quantidade_vendida'),
         func.sum(HistoricoVendas.valor_total).label('receita_total')
     ).join(
@@ -751,11 +821,11 @@ def relatorio_pratos():
         prato_obj = objetos_pratos.get(p.id)
         
         if prato_obj:
-            # Custos diretos (agora rápido devido ao eager loading)
-            custo_unitario = float(prato_obj.custo_total_por_porcao or 0)
+            # Custos diretos (apenas insumos, sem custos indiretos)
+            custo_unitario = float(prato_obj.custo_direto_por_porcao or 0)
             custo_direto_total = custo_unitario * p.quantidade_vendida
             
-            # Rateio de custos indiretos
+            # Rateio de custos indiretos (proporcionalmente à receita)
             proporcao_receita = float(p.receita_total) / receita_total_periodo if receita_total_periodo > 0 else 0
             custo_indireto_estimado = float(total_indiretos) * proporcao_receita
             
@@ -831,7 +901,7 @@ def relatorio_categorias():
     """Relatório de lucratividade por categoria"""
     restaurant_id = get_current_restaurant_id()
     if not restaurant_id:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('auth.login'))
 
     # Obter período para análise
     hoje = date.today()

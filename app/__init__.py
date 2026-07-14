@@ -3,7 +3,7 @@
 from flask import Flask
 from app.config import config
 from app.extensions import db, migrate
-from app.extensions import db, migrate
+
 import app.models # Importar todos os modelos para registro
 import locale
 
@@ -13,8 +13,7 @@ def create_app(config_name='default'):
     :param config_name: Nome da configuração a ser usada
     :return: Instância da aplicação Flask
     """
-    :return: Instância da aplicação Flask
-    """
+
     import os
     
     # Hack for Vercel Read-Only File System
@@ -26,6 +25,38 @@ def create_app(config_name='default'):
         
     app = Flask(__name__, **params)
     app.config.from_object(config[config_name])
+    # Guardado para gates que dependem do ambiente (ex.: billing recusa o modo
+    # mock em produção). Sem isso, não há como distinguir prod de dev em runtime.
+    app.config['CONFIG_NAME'] = config_name
+
+    # Monitoramento de erros (Sentry) — opcional.
+    # Só ativa se SENTRY_DSN estiver definido; ausência = no-op silencioso.
+    # Import protegido para não quebrar caso o pacote não esteja instalado.
+    import os as _os
+    _sentry_dsn = _os.environ.get('SENTRY_DSN')
+    if _sentry_dsn:
+        try:
+            import sentry_sdk
+            from sentry_sdk.integrations.flask import FlaskIntegration
+            sentry_sdk.init(
+                dsn=_sentry_dsn,
+                integrations=[FlaskIntegration()],
+                environment=config_name,
+                traces_sample_rate=float(_os.environ.get('SENTRY_TRACES_SAMPLE_RATE', '0.0')),
+                send_default_pii=False,
+            )
+        except Exception as exc:  # pacote ausente ou DSN inválido: não derruba o app
+            print(f'Sentry não inicializado: {exc}')
+
+    # Logging Configuration
+    import logging
+    if not app.debug and not app.testing:
+        # StreamHandler for Vercel/Production logs
+        stream_handler = logging.StreamHandler()
+        stream_handler.setLevel(logging.INFO)
+        app.logger.addHandler(stream_handler)
+        app.logger.setLevel(logging.INFO)
+        app.logger.info('AleroPriceSaaS Startup')
     
     # Inicializa as extensões
     db.init_app(app)
@@ -66,7 +97,12 @@ def create_app(config_name='default'):
     from app.routes.previsao import bp as previsao_bp
     from app.routes.dashboard import bp as dashboard_bp
     from app.routes.custos import bp as custos_bp
-    
+    from app.routes.reservas import bp as reservas_bp
+    from app.routes.agenda import bp as agenda_bp
+    from app.routes.promocoes import bp as promocoes_bp
+    from app.routes.configsite import bp as configsite_bp
+    from app.routes.conteudo import bp as conteudo_bp
+
     app.register_blueprint(estoque_bp, url_prefix='/estoque')
     app.register_blueprint(fornecedores_bp, url_prefix='/fornecedores')
     app.register_blueprint(nfe_bp, url_prefix='/nfe')
@@ -76,7 +112,13 @@ def create_app(config_name='default'):
     app.register_blueprint(desperdicio_bp, url_prefix='/desperdicio')
     app.register_blueprint(previsao_bp, url_prefix='/previsao')
     app.register_blueprint(custos_bp, url_prefix='/custos')
-    app.register_blueprint(dashboard_bp, url_prefix='/')
+    app.register_blueprint(reservas_bp, url_prefix='/reservas')
+    app.register_blueprint(agenda_bp, url_prefix='/agenda')
+    app.register_blueprint(promocoes_bp, url_prefix='/promocoes')
+    app.register_blueprint(configsite_bp, url_prefix='/config-site')
+    app.register_blueprint(conteudo_bp, url_prefix='/conteudo')
+    # Sistema/dashboard fica ATRÁS do login, em /app. A landing pública ocupa '/'.
+    app.register_blueprint(dashboard_bp, url_prefix='/app')
     
     from app.routes.billing import bp as billing_bp
     app.register_blueprint(billing_bp, url_prefix='/billing')
@@ -84,13 +126,40 @@ def create_app(config_name='default'):
     from app.routes.auth import bp as auth_bp
     app.register_blueprint(auth_bp, url_prefix='/auth')
 
-    from app.routes.public import bp as public_bp
+    from app.routes.publico import bp as public_bp
     app.register_blueprint(public_bp, url_prefix='/')
     
+    # Enforcement global de login.
+    # Toda rota exige usuário autenticado, EXCETO os endpoints públicos abaixo:
+    # - static: assets
+    # - auth.login / auth.logout: fluxo de autenticação
+    # - billing.webhook: chamado pelo Stripe sem sessão de usuário
+    # - blueprint 'public': landing / calculadora de ROI (marketing)
+    # Substitui a necessidade de @login_required rota a rota e evita que
+    # produtos/estoque/nfe/custos/etc. fiquem acessíveis sem login.
+    from flask import request, redirect, url_for
+    from flask_login import current_user
+
+    PUBLIC_ENDPOINTS = {'static', 'auth.login', 'auth.logout', 'billing.webhook'}
+
+    @app.before_request
+    def require_login():
+        endpoint = request.endpoint
+        if endpoint is None:
+            return  # deixa o 404 seguir o fluxo normal
+        if endpoint in PUBLIC_ENDPOINTS or endpoint.startswith('public.'):
+            return
+        if not current_user.is_authenticated:
+            return redirect(url_for('auth.login', next=request.path))
+
     # Registra o blueprint de erro (opcional)
     # from app.errors import bp as errors_bp
     # app.register_blueprint(errors_bp)
     
+    # Registra comandos CLI (ex.: create-tenant para provisionar clientes)
+    from app.cli import register_cli
+    register_cli(app)
+
     # Registra shell context
     @app.shell_context_processor
     def make_shell_context():

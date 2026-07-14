@@ -201,7 +201,7 @@
                     <div class="stat-icon text-success">
                         <i class="fas fa-chart-line"></i>
                     </div>
-                    <div class="stat-value">{{ "%.1f"|format(margem_media) }}%</div>
+                    <div class="stat-value">{{ margem_media|percentual_br }}</div>
                     <div class="stat-label">Margem Média</div>
                 </div>
             </div>
@@ -210,7 +210,7 @@
                     <div class="stat-icon text-warning">
                         <i class="fas fa-dollar-sign"></i>
                     </div>
-                    <div class="stat-value">R$ {{ "%.2f"|format(ticket_medio) }}</div>
+                    <div class="stat-value">{{ ticket_medio|moeda_br }}</div>
                     <div class="stat-label">Ticket Médio</div>
                 </div>
             </div>
@@ -278,16 +278,16 @@
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <h5 class="mb-0">{{ item.prato.nome }}</h5>
                                         <span class="badge badge-pill badge-{{ 'success' if item.margem > 30 else 'warning' if item.margem > 15 else 'danger' }}">
-                                            {{ "%.1f"|format(item.margem) }}% margem
+                                            {{ item.margem|percentual_br }} margem
                                         </span>
                                     </div>
                                     <div class="text-muted small mb-2">{{ item.secao }}</div>
                                     <div class="d-flex justify-content-between">
                                         <div>
-                                            <span class="font-weight-bold">Preço:</span> R$ {{ "%.2f"|format(item.preco_venda) }}
+                                            <span class="font-weight-bold">Preço:</span> {{ item.preco_venda|moeda_br }}
                                         </div>
                                         <div>
-                                            <span class="font-weight-bold">Custo:</span> R$ {{ "%.2f"|format(item.custo) }}
+                                            <span class="font-weight-bold">Custo:</span> {{ item.custo|moeda_br }}
                                         </div>
                                     </div>
                                     <div class="progress mt-2" style="height: 5px;">
