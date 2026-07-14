@@ -402,6 +402,16 @@
 
   /* promoções (público) */
   .promo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px;margin-top:34px}
+  /* Promoção recorrente no seu dia: pulsa pra chamar atenção ("É HOJE!"). */
+  .promo-hoje{
+    outline:2px solid var(--cream);
+    animation:promo-pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes promo-pulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(255,180,60,.55)}
+    50%{box-shadow:0 0 0 14px rgba(255,180,60,0)}
+  }
+  @media(prefers-reduced-motion:reduce){.promo-hoje{animation:none}}
   .promo-card{position:relative;background:linear-gradient(135deg,var(--amber),var(--ember));color:#231206;
     border-radius:18px;padding:26px;box-shadow:0 14px 40px rgba(255,106,43,.28);overflow:hidden}
   .promo-card::after{content:"🍺";position:absolute;right:-8px;bottom:-14px;font-size:4.6rem;opacity:.18}
@@ -527,11 +537,16 @@
     </div>
     <div class="promo-grid reveal">
       {% for p in promocoes %}
-      <div class="promo-card">
-        <div class="tag">OFERTA</div>
+      {# Recorrente (ex.: Lanche de Quarta) mostra "TODA QUARTA" e acende no dia. #}
+      <div class="promo-card{% if p.acontece_hoje %} promo-hoje{% endif %}">
+        <div class="tag">{% if p.acontece_hoje %}É HOJE!{% else %}{{ p.rotulo or 'OFERTA' }}{% endif %}</div>
         <h3>{{ p.titulo }}</h3>
         {% if p.descricao %}<p>{{ p.descricao }}</p>{% endif %}
-        {% if p.validade %}<div class="val">Válida até {{ p.validade.strftime('%d/%m/%Y') }}</div>{% endif %}
+        {% if p.dia_semana is not none %}
+          <div class="val">Toda {{ p.rotulo.replace('TODA ', '')|lower }}{% if p.validade %} · até {{ p.validade.strftime('%d/%m/%Y') }}{% endif %}</div>
+        {% elif p.validade %}
+          <div class="val">Válida até {{ p.validade.strftime('%d/%m/%Y') }}</div>
+        {% endif %}
       </div>
       {% endfor %}
     </div>
