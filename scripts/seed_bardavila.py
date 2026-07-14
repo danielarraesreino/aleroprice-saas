@@ -168,12 +168,21 @@ def _dec(v):
     return Decimal(str(v))
 
 
-def seed(slug, escala=ESCALA_PADRAO):
+def seed(slug, escala=ESCALA_PADRAO, force=False):
     rest = Restaurante.query.filter_by(slug=slug).first()
-    if rest is None:
+    if rest is None and force:
+        # Só com --force: escrever no primeiro tenant pode poluir o restaurante
+        # errado se o banco tiver mais de um.
         rest = Restaurante.query.order_by(Restaurante.id).first()
     if rest is None:
-        print('ERRO: nenhum restaurante no banco. Rode `flask create-tenant` antes.')
+        if Restaurante.query.count() == 0:
+            print('ERRO: nenhum restaurante no banco. Rode `flask create-tenant` antes.')
+        else:
+            print(
+                f"ERRO: nenhum restaurante com slug '{slug}'. "
+                'Defina o slug do tenant (`flask create-tenant --slug`) ou passe '
+                '--force para gravar no primeiro tenant do banco.'
+            )
         return 1
     rid = rest.id
     print(f'Tenant: {rest.nome} (id={rid}, slug={rest.slug})')
@@ -323,8 +332,10 @@ if __name__ == '__main__':
     ap.add_argument('--slug', default='bar-da-vila')
     ap.add_argument('--escala', type=float, default=ESCALA_PADRAO,
                     help='Multiplicador do volume de vendas. Ajuste ao movimento real da casa.')
+    ap.add_argument('--force', action='store_true',
+                    help='Se o slug não existir, grava no primeiro tenant do banco.')
     args = ap.parse_args()
 
     app = create_app(os.environ.get('APP_ENV', 'development'))
     with app.app_context():
-        sys.exit(seed(args.slug, args.escala))
+        sys.exit(seed(args.slug, args.escala, args.force))
