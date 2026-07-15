@@ -21,7 +21,7 @@ import sys
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from app import create_app, db
 from app.models.modelo_custo import CustoIndireto

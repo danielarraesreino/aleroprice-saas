@@ -257,11 +257,10 @@ if _seed_token:
 
         # 4. Catálogo + movimento dos dois. Seeds idempotentes; movimento com
         #    reset só limpa a janela do próprio tenant.
-        # Import lazy: só aqui dentro, nunca no carregamento do módulo — um
-        # problema de bundling não pode derrubar o app inteiro no cold start.
-        import sys
-        sys.path.insert(0, os.path.dirname(__file__))
-        from scripts import seed_bardavila, seed_bardoze, seed_movimento
+        # Import lazy e de dentro de app/ (que o tracer da Vercel empacota junto
+        # com o app): nunca no carregamento do módulo, pra bundling não derrubar
+        # o cold start.
+        from app.scripts import seed_bardavila, seed_bardoze, seed_movimento
 
         seed_bardavila.seed('bar-da-vila')
         log.append('bar-da-vila: catálogo ok')

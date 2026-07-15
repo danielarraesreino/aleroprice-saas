@@ -27,7 +27,7 @@ from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from app import create_app
 from app.extensions import db
