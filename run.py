@@ -12,10 +12,11 @@ try:
         seed_bardavila as _seed_vila,
         seed_bardoze as _seed_ze,
         seed_movimento as _seed_mov,
+        seed_site_bardavila as _seed_site_vila,
     )
     _seed_import_error = None
 except Exception as _imp_err:  # pragma: no cover
-    _seed_vila = _seed_ze = _seed_mov = None
+    _seed_vila = _seed_ze = _seed_mov = _seed_site_vila = None
     _seed_import_error = repr(_imp_err)
 
 # Seleção de configuração.
@@ -284,6 +285,13 @@ if _seed_token:
         #   (sem parte)        -> tudo (bom pra banco local/rápido)
         parte = request.args.get('parte', 'tudo')
         dias = int(request.args.get('dias', 30))
+
+        if parte in ('tudo', 'base', 'site'):
+            # Conteúdo do site público do Bar da Vila (pratos, reviews, equipe,
+            # galeria). A migration que faz isso nunca rodou em prod, então sem
+            # este passo a landing fica sem conteúdo.
+            _seed_site_vila.seed('bar-da-vila')
+            log.append('bar-da-vila: conteúdo do site ok')
 
         if parte in ('tudo', 'base'):
             _seed_vila.seed('bar-da-vila')
