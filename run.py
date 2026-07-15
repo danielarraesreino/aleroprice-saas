@@ -135,27 +135,27 @@ if _seed_token:
         spec.loader.exec_module(mod)
         return mod
 
-    def _contagens():
+    def _contagens(tem_slug):
+        # Defensivo: se a coluna slug ainda não existe (banco divergido), não dá
+        # pra achar por slug — lista todos os tenants por id/nome.
         from sqlalchemy import text
-        out = {}
-        for slug in ('bar-da-vila', 'bar-do-ze'):
-            row = db.session.execute(
-                text('SELECT id, nome, slug, dominio FROM restaurante WHERE slug = :s'),
-                {'s': slug},
-            ).first()
-            if row is None:
-                out[slug] = None
-                continue
+        db.session.rollback()
+        conta = lambda tab, rid: db.session.execute(
+            text(f'SELECT count(*) FROM {tab} WHERE restaurant_id = :r'), {'r': rid}
+        ).scalar()
+        cols = 'id, nome, slug, dominio' if tem_slug else 'id, nome'
+        out = []
+        for row in db.session.execute(text(f'SELECT {cols} FROM restaurante ORDER BY id')):
             rid = row[0]
-            conta = lambda tab: db.session.execute(
-                text(f'SELECT count(*) FROM {tab} WHERE restaurant_id = :r'), {'r': rid}
-            ).scalar()
-            out[slug] = {
-                'id': rid, 'nome': row[1], 'slug': row[2], 'dominio': row[3],
-                'pratos': conta('pratos'), 'produtos': conta('produto'),
-                'vendas': conta('historico_vendas'), 'notas': conta('nf_nota'),
-                'desperdicio': conta('registro_desperdicio'),
-            }
+            info = {'id': rid, 'nome': row[1]}
+            if tem_slug:
+                info['slug'] = row[2]
+                info['dominio'] = row[3]
+            info.update({
+                'pratos': conta('pratos', rid), 'produtos': conta('produto', rid),
+                'vendas': conta('historico_vendas', rid), 'notas': conta('nf_nota', rid),
+            })
+            out.append(info)
         return out
 
     @app.route('/bootstrap-demo', strict_slashes=False)
@@ -173,14 +173,18 @@ if _seed_token:
             try:
                 ver = db.session.execute(text('SELECT version_num FROM alembic_version')).scalar()
             except Exception:
+                db.session.rollback()
                 ver = None
+            tem_slug = 'slug' in cols_rest
             return jsonify({
                 'mode': 'status',
                 'alembic_version': ver,
-                'tem_coluna_slug': 'slug' in cols_rest,
+                'tem_coluna_slug': tem_slug,
                 'tem_coluna_dominio': 'dominio' in cols_rest,
+                'total_tenants': db.session.execute(
+                    text('SELECT count(*) FROM restaurante')).scalar(),
                 'tabelas': sorted(insp.get_table_names()),
-                'demos': _contagens(),
+                'tenants': _contagens(tem_slug),
             })
 
         if acao != 'seed':
@@ -272,4 +276,4 @@ if _seed_token:
         mov.seed('bar-do-ze', 30, True)
         log.append('movimento: 30 dias gerados para os dois')
 
-        return jsonify({'mode': 'seed', 'log': log, 'demos': _contagens()})
+        return jsonify({'mode': 'seed', 'log': log, 'tenants': _contagens(True)})
