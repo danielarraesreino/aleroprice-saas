@@ -232,6 +232,12 @@ if _seed_token:
         from app.models.usuario import Usuario
         from app.utils.site_router import slug_unico
 
+        # Demos com acesso total: os relatórios avançados são @pro_required, e um
+        # bar de demonstração precisa mostrar tudo.
+        def _tornar_pro(rest):
+            rest.subscription_tier = 'pro'
+            rest.subscription_status = 'active'
+
         # 2. Bar da Vila. Em produção o tenant já existe (o site é dele): só
         #    garante slug/domínio/nome. Se o banco estiver vazio, cria do zero.
         vila = Restaurante.query.filter_by(slug='bar-da-vila').first()
@@ -251,6 +257,8 @@ if _seed_token:
                 db.session.add(vila)
                 db.session.commit()
                 log.append(f'bar-da-vila: tenant criado id={vila.id}')
+        _tornar_pro(vila)
+        db.session.commit()
         if Usuario.query.filter_by(email='admin@teste.com').first() is None:
             db.session.add(Usuario(nome='Gustavo', email='admin@teste.com',
                                    senha='bardavila123', tipo='admin',
@@ -265,6 +273,8 @@ if _seed_token:
             db.session.add(ze)
             db.session.commit()
             log.append(f'bar-do-ze: tenant criado id={ze.id}')
+        _tornar_pro(ze)
+        db.session.commit()
         if Usuario.query.filter_by(email='ze@bardoze.com').first() is None:
             db.session.add(Usuario(nome='José', email='ze@bardoze.com',
                                    senha='bardoze123', tipo='admin', restaurant_id=ze.id))

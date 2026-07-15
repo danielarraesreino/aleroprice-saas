@@ -178,7 +178,7 @@
                                 <div class="row align-items-center">
                                     <div class="col-md-6">
                                         <div class="prato-nome">{{ prato.nome }}</div>
-                                        <div class="prato-descricao">{{ prato.descricao|truncate(100) }}</div>
+                                        <div class="prato-descricao">{{ (prato.descricao or '')|truncate(100) }}</div>
                                     </div>
                                     <div class="col-md-2">
                                         <div class="prato-preco">{{ prato.preco_venda|moeda_br }}</div>
