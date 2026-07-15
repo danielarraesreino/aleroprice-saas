@@ -123,17 +123,11 @@ _seed_token = os.environ.get('SEED_TOKEN')
 
 if _seed_token:
     import hmac
-    import importlib.util
     from flask import request, abort, jsonify
 
-    _SCRIPTS = os.path.join(os.path.dirname(__file__), 'scripts')
-
-    def _carregar_script(nome):
-        caminho = os.path.join(_SCRIPTS, f'{nome}.py')
-        spec = importlib.util.spec_from_file_location(nome, caminho)
-        mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
-        return mod
+    # Import estático (não por caminho de arquivo): é assim que o tracer da
+    # Vercel enxerga os scripts e os inclui no bundle. `scripts/` é pacote.
+    from scripts import seed_bardavila, seed_bardoze, seed_movimento
 
     def _contagens(tem_slug):
         # Defensivo: se a coluna slug ainda não existe (banco divergido), não dá
@@ -267,13 +261,12 @@ if _seed_token:
 
         # 4. Catálogo + movimento dos dois. Seeds idempotentes; movimento com
         #    reset só limpa a janela do próprio tenant.
-        _carregar_script('seed_bardavila').seed('bar-da-vila')
+        seed_bardavila.seed('bar-da-vila')
         log.append('bar-da-vila: catálogo ok')
-        _carregar_script('seed_bardoze').seed()
+        seed_bardoze.seed()
         log.append('bar-do-ze: catálogo ok')
-        mov = _carregar_script('seed_movimento')
-        mov.seed('bar-da-vila', 30, True)
-        mov.seed('bar-do-ze', 30, True)
+        seed_movimento.seed('bar-da-vila', 30, True)
+        seed_movimento.seed('bar-do-ze', 30, True)
         log.append('movimento: 30 dias gerados para os dois')
 
         return jsonify({'mode': 'seed', 'log': log, 'tenants': _contagens(True)})
