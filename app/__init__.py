@@ -140,7 +140,10 @@ def create_app(config_name='default'):
     from flask import request, redirect, url_for
     from flask_login import current_user
 
-    PUBLIC_ENDPOINTS = {'static', 'auth.login', 'auth.logout', 'billing.webhook'}
+    # 'bootstrap_demo' (run.py) é gated por SEED_TOKEN — só existe quando a env
+    # var está setada, e valida o token em tempo constante antes de escrever.
+    PUBLIC_ENDPOINTS = {'static', 'auth.login', 'auth.logout', 'billing.webhook',
+                        'bootstrap_demo'}
 
     @app.before_request
     def require_login():
@@ -152,10 +155,19 @@ def create_app(config_name='default'):
         if not current_user.is_authenticated:
             return redirect(url_for('auth.login', next=request.path))
 
-    # Registra o blueprint de erro (opcional)
-    # from app.errors import bp as errors_bp
-    # app.register_blueprint(errors_bp)
-    
+    # 404 próprio. /bar/<slug> é rota pública quente (é o endereço do site de
+    # todo bar que ainda não tem domínio próprio), e um slug errado caía na
+    # página branca do Werkzeug, que não diz o que fazer em seguida.
+    from flask import render_template
+
+    @app.errorhandler(404)
+    def pagina_nao_encontrada(_erro):
+        partes = request.path.strip('/').split('/')
+        slug = partes[1] if len(partes) == 2 and partes[0] == 'bar' else None
+        titulo = 'Esse bar não está aqui' if slug else 'Página não encontrada'
+        return render_template('site/404.html', slug=slug, titulo=titulo), 404
+
+
     # Registra comandos CLI (ex.: create-tenant para provisionar clientes)
     from app.cli import register_cli
     register_cli(app)

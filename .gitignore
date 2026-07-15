@@ -7,6 +7,7 @@ instance/
 .coverage
 htmlcov/
 .env
+.env.*
 *.db
 *.sqlite
 *.sqlite3
