@@ -37,3 +37,6 @@ vendas_teste.csv
 # Config local da máquina + temporários que o upgrade deixa pra trás.
 .claude/settings.local.json
 .claude/*.tmp.*
+
+# worktrees locais (não versionar)
+.claude/worktrees/

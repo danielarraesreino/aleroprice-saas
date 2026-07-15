@@ -3,6 +3,21 @@ from flask_migrate import upgrade
 
 import os
 
+# Import INCONDICIONAL e no topo: o builder da Vercel traça os imports rodando o
+# entrypoint no build (quando SEED_TOKEN não existe), então um import dentro de
+# `if _seed_token:` nunca é empacotado. Aqui fora, o tracer sempre o inclui.
+# try/except pra não derrubar o cold start se o bundling falhar mesmo assim.
+try:
+    from app.scripts import (
+        seed_bardavila as _seed_vila,
+        seed_bardoze as _seed_ze,
+        seed_movimento as _seed_mov,
+    )
+    _seed_import_error = None
+except Exception as _imp_err:  # pragma: no cover
+    _seed_vila = _seed_ze = _seed_mov = None
+    _seed_import_error = repr(_imp_err)
+
 # Seleção de configuração.
 # Prioridade: APP_ENV explícito > detecção de plataforma (Vercel/Railway) > default (dev).
 # Em qualquer host de container, basta setar APP_ENV=production.
@@ -124,19 +139,6 @@ _seed_token = os.environ.get('SEED_TOKEN')
 if _seed_token:
     import hmac
     from flask import request, abort, jsonify
-
-    # Import no TOPO do módulo (não lazy dentro da função): é a única forma do
-    # tracer da Vercel enxergar os seeds e empacotá-los. O try/except garante que,
-    # se o bundling falhar, o app ainda sobe — só o /bootstrap-demo é que dá erro.
-    try:
-        from app.scripts import (
-            seed_bardavila as _seed_vila,
-            seed_bardoze as _seed_ze,
-            seed_movimento as _seed_mov,
-        )
-    except Exception as _imp_err:
-        _seed_vila = _seed_ze = _seed_mov = None
-        _seed_import_error = repr(_imp_err)
 
     def _contagens(tem_slug):
         # Defensivo: se a coluna slug ainda não existe (banco divergido), não dá
