@@ -188,28 +188,35 @@ if _seed_token:
 
         log = []
 
-        # 1. Schema. Tenta alembic; se o banco divergiu (create_all sem stamp),
-        #    cai pra create_all + colunas defensivas, sem quebrar.
-        try:
-            upgrade()
-            log.append('schema: alembic upgrade ok')
-        except Exception as e:
-            log.append(f'schema: alembic falhou ({type(e).__name__}), usando create_all')
-            db.create_all()
-            if db.engine.dialect.name == 'postgresql':
-                for ddl in (
-                    'ALTER TABLE restaurante ADD COLUMN IF NOT EXISTS slug VARCHAR(60)',
-                    'ALTER TABLE restaurante ADD COLUMN IF NOT EXISTS dominio VARCHAR(120)',
-                    'ALTER TABLE site_config ADD COLUMN IF NOT EXISTS tema VARCHAR(30)',
-                    'ALTER TABLE promocao ADD COLUMN IF NOT EXISTS data_inicio DATE',
-                    'ALTER TABLE promocao ADD COLUMN IF NOT EXISTS dia_semana INTEGER',
-                ):
-                    try:
-                        db.session.execute(text(ddl))
-                    except Exception as ddl_e:
-                        log.append(f'  ddl ignorado: {ddl_e}')
-                db.session.commit()
-            log.append('schema: create_all + colunas ok')
+        # 1. Schema. Prod foi construído por create_all sobre um modelo antigo,
+        #    então tabelas velhas (restaurante, promocao, site_config...) não têm
+        #    as colunas adicionadas depois. Ao invés de caçar coluna a coluna,
+        #    reflete o banco e adiciona TODA coluna do modelo que estiver
+        #    faltando. Idempotente e não destrutivo (só ADD COLUMN).
+        db.create_all()  # cria tabelas que faltam inteiras
+        insp = inspect(db.engine)
+        add_col = db.engine.dialect.type_compiler.process
+        n_cols = 0
+        for tabela in db.metadata.sorted_tables:
+            if not insp.has_table(tabela.name):
+                continue
+            existentes = {c['name'] for c in insp.get_columns(tabela.name)}
+            for coluna in tabela.columns:
+                if coluna.name in existentes:
+                    continue
+                # Adiciona sempre como NULL (sem default/constraint): seguro pra
+                # dado que já está na tabela; os seeds preenchem o valor certo.
+                tipo = add_col(coluna.type)
+                try:
+                    db.session.execute(text(
+                        f'ALTER TABLE "{tabela.name}" ADD COLUMN "{coluna.name}" {tipo}'))
+                    db.session.commit()
+                    n_cols += 1
+                    log.append(f'  + {tabela.name}.{coluna.name} {tipo}')
+                except Exception as ddl_e:
+                    db.session.rollback()
+                    log.append(f'  ! {tabela.name}.{coluna.name}: {type(ddl_e).__name__}')
+        log.append(f'schema: {n_cols} colunas adicionadas (reflexão model vs banco)')
 
         from app.models.modelo_restaurante import Restaurante
         from app.models.usuario import Usuario
