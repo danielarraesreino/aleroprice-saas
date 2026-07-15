@@ -255,12 +255,11 @@ def garantir_categorias_desperdicio(rid):
 
 
 def _chave_nfe_unica(rnd):
-    """Chave de acesso de 44 dígitos livre. `chave_acesso` é unique GLOBAL, e
-    dois tenants semeados no mesmo dia colidiriam sem essa checagem."""
-    while True:
-        chave = ''.join(str(rnd.randint(0, 9)) for _ in range(44))
-        if NFNota.query.filter_by(chave_acesso=chave).first() is None:
-            return chave
+    """Chave de acesso de 44 dígitos. `chave_acesso` é unique GLOBAL, mas a
+    semente é derivada do slug (sequência distinta por bar), então 44 dígitos
+    aleatórios não colidem entre tenants nem dentro do mês — sem consultar o
+    banco (cada consulta é um round-trip, caro em Postgres remoto)."""
+    return ''.join(str(rnd.randint(0, 9)) for _ in range(44))
 
 
 def seed(slug, dias, reset):
@@ -456,20 +455,21 @@ def seed(slug, dias, reset):
         total_compras += valor_produtos
 
         for num, (produto, qtd, custo) in enumerate(linhas, start=1):
-            item = NFItem(
+            db.session.add(NFItem(
                 nf_nota_id=nota.id, produto_id=produto.id, num_item=num,
                 quantidade=qtd, valor_unitario=_dec(custo),
                 valor_total=_dec(qtd * custo), unidade_medida=produto.unidade,
                 cfop='5102',
-            )
-            db.session.add(item)
-            db.session.flush()
+            ))
             n_itens += 1
 
+            # Sem flush por item: ref_id (ligação frouxa ao NFItem) fica nulo pra
+            # não pagar um round-trip por item. A movimentação já traz a NF na
+            # `referencia`, que é o que os relatórios usam.
             db.session.add(EstoqueMovimentacao(
                 produto_id=produto.id, quantidade=qtd, tipo='entrada',
                 data_movimentacao=emissao, referencia=f'NF {numero}',
-                ref_id=item.id, valor_unitario=_dec(custo), restaurant_id=rid,
+                valor_unitario=_dec(custo), restaurant_id=rid,
             ))
 
     print(f'  compras: {n_notas} notas / {n_itens} itens, R$ {total_compras:,.2f}')

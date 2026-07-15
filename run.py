@@ -276,12 +276,32 @@ if _seed_token:
             return jsonify({'log': log,
                             'error': f'seeds não empacotados: {_seed_import_error}'}), 500
 
-        _seed_vila.seed('bar-da-vila')
-        log.append('bar-da-vila: catálogo ok')
-        _seed_ze.seed()
-        log.append('bar-do-ze: catálogo ok')
-        _seed_mov.seed('bar-da-vila', 30, True)
-        _seed_mov.seed('bar-do-ze', 30, True)
-        log.append('movimento: 30 dias gerados para os dois')
+        # Granularidade: o movimento (centenas de inserts) pode estourar o tempo
+        # de UMA função serverless contra o Postgres remoto. `?parte=` deixa
+        # rodar em pedaços que cabem no limite:
+        #   parte=base         -> só schema + tenants + catálogo (rápido)
+        #   parte=mov&slug=X   -> só o movimento de um bar
+        #   (sem parte)        -> tudo (bom pra banco local/rápido)
+        parte = request.args.get('parte', 'tudo')
+        dias = int(request.args.get('dias', 30))
 
-        return jsonify({'mode': 'seed', 'log': log, 'tenants': _contagens(True)})
+        if parte in ('tudo', 'base'):
+            _seed_vila.seed('bar-da-vila')
+            log.append('bar-da-vila: catálogo ok')
+            _seed_ze.seed()
+            log.append('bar-do-ze: catálogo ok')
+
+        if parte == 'mov':
+            slug = request.args.get('slug')
+            if slug not in ('bar-da-vila', 'bar-do-ze'):
+                return jsonify({'log': log,
+                                'error': "mov exige ?slug=bar-da-vila|bar-do-ze"}), 400
+            _seed_mov.seed(slug, dias, True)
+            log.append(f'{slug}: movimento de {dias} dias gerado')
+        elif parte == 'tudo':
+            _seed_mov.seed('bar-da-vila', dias, True)
+            _seed_mov.seed('bar-do-ze', dias, True)
+            log.append(f'movimento: {dias} dias gerados para os dois')
+
+        return jsonify({'mode': 'seed', 'parte': parte, 'log': log,
+                        'tenants': _contagens(True)})
