@@ -273,23 +273,8 @@ if _seed_token:
         # 4. Catálogo + movimento dos dois. Seeds idempotentes; movimento com
         #    reset só limpa a janela do próprio tenant.
         if _seed_vila is None:
-            # Diagnóstico do bundle: o que a Vercel realmente empacotou.
-            base = os.path.dirname(__file__)
-            def _ls(p):
-                try:
-                    return sorted(os.listdir(p))
-                except Exception as e:
-                    return f'<{type(e).__name__}>'
-            return jsonify({
-                'log': log,
-                'error': f'seeds não empacotados: {_seed_import_error}',
-                'debug': {
-                    'run_dir': base,
-                    'ls_run_dir': _ls(base),
-                    'ls_app': _ls(os.path.join(base, 'app')),
-                    'ls_app_scripts': _ls(os.path.join(base, 'app', 'scripts')),
-                },
-            }), 500
+            return jsonify({'log': log,
+                            'error': f'seeds não empacotados: {_seed_import_error}'}), 500
 
         _seed_vila.seed('bar-da-vila')
         log.append('bar-da-vila: catálogo ok')

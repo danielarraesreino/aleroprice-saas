@@ -28,4 +28,4 @@ test_e2e_selenium.py
 .agent
 AleroPrice
 vendas_teste.csv
-scripts
+/scripts
