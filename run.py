@@ -125,10 +125,6 @@ if _seed_token:
     import hmac
     from flask import request, abort, jsonify
 
-    # Import estático (não por caminho de arquivo): é assim que o tracer da
-    # Vercel enxerga os scripts e os inclui no bundle. `scripts/` é pacote.
-    from scripts import seed_bardavila, seed_bardoze, seed_movimento
-
     def _contagens(tem_slug):
         # Defensivo: se a coluna slug ainda não existe (banco divergido), não dá
         # pra achar por slug — lista todos os tenants por id/nome.
@@ -261,6 +257,12 @@ if _seed_token:
 
         # 4. Catálogo + movimento dos dois. Seeds idempotentes; movimento com
         #    reset só limpa a janela do próprio tenant.
+        # Import lazy: só aqui dentro, nunca no carregamento do módulo — um
+        # problema de bundling não pode derrubar o app inteiro no cold start.
+        import sys
+        sys.path.insert(0, os.path.dirname(__file__))
+        from scripts import seed_bardavila, seed_bardoze, seed_movimento
+
         seed_bardavila.seed('bar-da-vila')
         log.append('bar-da-vila: catálogo ok')
         seed_bardoze.seed()
