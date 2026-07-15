@@ -125,6 +125,19 @@ if _seed_token:
     import hmac
     from flask import request, abort, jsonify
 
+    # Import no TOPO do módulo (não lazy dentro da função): é a única forma do
+    # tracer da Vercel enxergar os seeds e empacotá-los. O try/except garante que,
+    # se o bundling falhar, o app ainda sobe — só o /bootstrap-demo é que dá erro.
+    try:
+        from app.scripts import (
+            seed_bardavila as _seed_vila,
+            seed_bardoze as _seed_ze,
+            seed_movimento as _seed_mov,
+        )
+    except Exception as _imp_err:
+        _seed_vila = _seed_ze = _seed_mov = None
+        _seed_import_error = repr(_imp_err)
+
     def _contagens(tem_slug):
         # Defensivo: se a coluna slug ainda não existe (banco divergido), não dá
         # pra achar por slug — lista todos os tenants por id/nome.
@@ -257,17 +270,16 @@ if _seed_token:
 
         # 4. Catálogo + movimento dos dois. Seeds idempotentes; movimento com
         #    reset só limpa a janela do próprio tenant.
-        # Import lazy e de dentro de app/ (que o tracer da Vercel empacota junto
-        # com o app): nunca no carregamento do módulo, pra bundling não derrubar
-        # o cold start.
-        from app.scripts import seed_bardavila, seed_bardoze, seed_movimento
+        if _seed_vila is None:
+            return jsonify({'log': log,
+                            'error': f'seeds não empacotados: {_seed_import_error}'}), 500
 
-        seed_bardavila.seed('bar-da-vila')
+        _seed_vila.seed('bar-da-vila')
         log.append('bar-da-vila: catálogo ok')
-        seed_bardoze.seed()
+        _seed_ze.seed()
         log.append('bar-do-ze: catálogo ok')
-        seed_movimento.seed('bar-da-vila', 30, True)
-        seed_movimento.seed('bar-do-ze', 30, True)
+        _seed_mov.seed('bar-da-vila', 30, True)
+        _seed_mov.seed('bar-do-ze', 30, True)
         log.append('movimento: 30 dias gerados para os dois')
 
         return jsonify({'mode': 'seed', 'log': log, 'tenants': _contagens(True)})
