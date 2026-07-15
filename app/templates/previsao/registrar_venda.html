@@ -141,14 +141,14 @@
                                 <div class="card-body p-0" style="max-height: 250px; overflow-y: auto;">
                                     <div class="list-group list-group-flush" id="lista-cardapio">
                                         {% for item in itens_cardapio %}
-                                        <div class="prato-item" data-id="{{ item.id }}" data-preco="{{ item.preco }}">
+                                        <div class="prato-item" data-id="{{ item.id }}" data-preco="{{ item.preco_venda or 0 }}">
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <div>
                                                     <h6 class="mb-1">{{ item.prato.nome }}</h6>
                                                     <p class="item-info mb-0">{{ item.secao.cardapio.nome }} - {{ item.secao.nome }}</p>
                                                 </div>
                                                 <div class="text-right">
-                                                    <span class="badge badge-primary">{{ item.preco|moeda_br }}</span>
+                                                    <span class="badge badge-primary">{{ item.preco_venda|moeda_br }}</span>
                                                 </div>
                                             </div>
                                         </div>

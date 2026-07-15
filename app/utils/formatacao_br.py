@@ -35,8 +35,13 @@ def formatar_moeda(valor):
     
     try:
         return f'R$ {valor:,.2f}'.replace(',', 'X').replace('.', ',').replace('X', '.')
-    except:
-        return f'R$ {float(valor):,.2f}'.replace(',', 'X').replace('.', ',').replace('X', '.')
+    except Exception:
+        try:
+            return f'R$ {float(valor):,.2f}'.replace(',', 'X').replace('.', ',').replace('X', '.')
+        except Exception:
+            # valor não numérico (ex.: atributo Jinja Undefined): não derruba a
+            # página inteira por causa de um campo — mostra zero.
+            return 'R$ 0,00'
 
 def formatar_peso(valor, unidade='kg'):
     """
