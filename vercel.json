@@ -3,18 +3,6 @@
     {
       "source": "/(.*)",
       "destination": "api/index.py"
-    },
-    {
-      "source": "/(.*)",
-      "destination": {
-        "type": "service",
-        "service": "aleroprice-bardavila"
-      }
     }
-  ],
-  "services": {
-    "aleroprice-bardavila": {
-      "root": "."
-    }
-  }
+  ]
 }
