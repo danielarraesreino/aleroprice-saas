@@ -1,0 +1,38 @@
+# Metropoly Bar — Barão Geraldo, Campinas–SP
+# Lead da varredura de Barão (14/08/2026). Foto: coloque os arquivos em
+# app/static/img/demo/metropoly/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# JÁ TEM site próprio (metropolybar.com.br) — NÃO vender presença.
+# A dor é operacional: mesa + jogo é reserva por natureza (grupo chega e não
+# tem mesa = frustração). Gancho: reserva online com alerta no WhatsApp e
+# agenda de torneios/eventos. Pitch de upgrade, não de site novo.
+
+nome: "Metropoly Bar"
+tema: neon-noite
+
+site:
+  vibe: pub
+  descritor: "Game bar com 1000+ jogos de tabuleiro"
+  kicker: "BARÃO GERALDO · CAMPINAS–SP"
+  hero_linha1: "Metropoly"
+  hero_linha2: "Bar"
+  tagline: "Mais de mil jogos de tabuleiro, comidinha boa e cerveja gelada."
+  subline: "1000+ JOGOS · TORNEIOS · CERVEJA GELADA"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+  endereco: "Av. Prof. Atílio Martini, 469 — Cidade Universitária"
+  horario: "Qua–Sex a partir das 18h · Sáb e Dom a partir das 16h"
+  maps_query: "Metropoly Bar Campinas"
+  instagram_url: "https://www.instagram.com/metropolybar/"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/metropoly/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram @metropolybar confirmado em 14/08/2026 (morandoembarao.com).
+# Site institucional existente: metropolybar.com.br — ver POR QUE LIGAR acima.
+demo:
+  fonte: varredura-barao

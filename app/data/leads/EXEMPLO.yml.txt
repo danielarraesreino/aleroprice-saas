@@ -1,0 +1,68 @@
+# Modelo de arquivo de lead — copie para <slug>.yml e preencha.
+#
+# O nome do arquivo vira o endereço do site: `tatu-bola.yml` publica em
+# /bar/tatu-bola. Escolha antes de mandar o link pra alguém, porque mudar
+# depois quebra o link.
+#
+# Este arquivo tem extensão .txt de propósito: `listar_leads()` só carrega
+# .yml/.yaml, então o modelo não vira uma demo publicada por engano.
+#
+# Aplicar:  GET /bootstrap-demo?token=$SEED_TOKEN&action=demos
+#           GET /bootstrap-demo?token=$SEED_TOKEN&action=demos&slug=tatu-bola
+# Em dev:   flask aplicar-demos --slug tatu-bola
+#
+# Reaplicar é seguro: atualiza a demo existente em vez de duplicar. As listas
+# (cardapio, avaliacoes, equipe, galeria) são substituídas por inteiro — este
+# arquivo é a fonte da verdade.
+
+nome: Tatu Bola Bar          # obrigatório. Nome como o bar se chama.
+tema: boteco-ambar           # boteco-ambar | neon-noite | pub-escuro | praia-claro
+
+site:
+  # Texto do topo. Sem inventar: o que está no Instagram/Google do bar.
+  descritor: Bar de esquina no Cambuí          # vai na aba e no card de compartilhar
+  kicker: CAMBUÍ · CAMPINAS–SP
+  hero_linha1: Tatu
+  hero_linha2: Bola
+  tagline: Mesa na calçada, chope gelado e aquele fim de tarde que vira noite.
+  subline: CHOPE · PORÇÕES · FIM DE TARDE
+  selo_estrelas: 4,8 no Google
+  hero_foto: img/demo/tatu-bola/capa.jpg      # precisa estar commitada
+
+  # Contato — confira antes: WhatsApp errado manda cliente pro lugar errado.
+  whatsapp: '5519999999999'                    # com 55 e DDD, só números
+  telefone_exibicao: (19) 99999-9999
+  endereco: R. Exemplo, 123 — Cambuí, Campinas–SP
+  cidade_uf: Cambuí, Campinas–SP
+  horario: Seg a sáb, 17h às 00h
+  maps_query: Tatu+Bola+Bar+Cambui+Campinas
+  instagram_url: https://www.instagram.com/tatubola.campinas/
+
+# 3 a 6 pratos. Fotos boas importam mais que texto bonito.
+cardapio:
+  - nome: Porção de calabresa
+    descricao: Acebolada, na chapa, do jeito que pede a mesa da calçada.
+    imagem: img/demo/tatu-bola/calabresa.jpg
+    tag: ★ O MAIS PEDIDO
+    destaque: true
+  - nome: Chope gelado
+    descricao: Tirado na pressão certa, colarinho na medida.
+    imagem: img/demo/tatu-bola/chope.jpg
+
+# Avaliações reais do Google, texto literal. Não invente depoimento.
+avaliacoes:
+  - autor: Nome do cliente
+    texto: Melhor fim de tarde do Cambuí, atendimento nota mil.
+    estrelas: 5
+
+# Só se souber os nomes de verdade. Na dúvida, deixe vazio.
+equipe: []
+
+# Lista simples de caminhos. Some do site se vazia.
+galeria:
+  - img/demo/tatu-bola/ambiente-1.jpg
+  - img/demo/tatu-bola/ambiente-2.jpg
+
+demo:
+  fonte: relatorio-rmc            # de onde veio o lead
+  # expira_em: 2026-09-30         # padrão: 30 dias a partir da aplicação

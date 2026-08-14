@@ -1,0 +1,29 @@
+# Hamburgueria do Super — Ponte Preta, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/hamburgueria-do-super/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Tem linha vegana forte e pouca gente sabe. Gancho: selo de vegano/vegetariano no cardápio digital, achável por quem procura exatamente isso.
+
+nome: "Hamburgueria do Super"
+tema: neon-noite
+
+site:
+  vibe: hamburgueria
+  descritor: "Hambúrguer e opção vegana"
+  kicker: "PONTE PRETA · CAMPINAS–SP"
+  hero_linha1: "Hamburgueria"
+  hero_linha2: "do Super"
+  tagline: "Espaço pequeno, lanche grande — e a melhor versão vegetariana da região."
+  subline: "ARTESANAL · VEGANO · PONTE PRETA"
+  cidade_uf: "Ponte Preta, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/hamburgueria-do-super/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

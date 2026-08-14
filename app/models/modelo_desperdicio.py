@@ -9,13 +9,18 @@ class CategoriaDesperdicio(db.Model):
     __tablename__ = 'categoria_desperdicio'
     
     id = db.Column(db.Integer, primary_key=True)
-    nome = db.Column(db.String(100), nullable=False, unique=True)
+    # Por restaurante: 'Vencimento' e 'Quebra' aparecem em todo bar.
+    nome = db.Column(db.String(100), nullable=False)
     descricao = db.Column(db.Text)
     cor = db.Column(db.String(7))  # Para uso em gráficos (ex: #FF0000)
     ativo = db.Column(db.Boolean, default=True)
     
     # Multi-Tenancy
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurante.id'), nullable=False)
+
+    __table_args__ = (
+        db.UniqueConstraint('nome', 'restaurant_id', name='uq_categoria_desp_nome_restaurant'),
+    )
     
     # Relações
     registros = db.relationship('RegistroDesperdicio', back_populates='categoria')

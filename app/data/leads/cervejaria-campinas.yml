@@ -1,0 +1,31 @@
+# Cervejaria Campinas — Barão Geraldo, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/cervejaria-campinas/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# 20 torneiras girando: o cliente não sabe o que está em cada uma. Gancho: cardápio que ele atualiza em segundos quando o barril acaba.
+
+nome: "Cervejaria Campinas"
+tema: pub-escuro
+
+site:
+  vibe: pub
+  descritor: "Tap house em Barão Geraldo"
+  kicker: "BARÃO GERALDO · CAMPINAS–SP"
+  hero_linha1: "Cervejaria"
+  hero_linha2: "Campinas"
+  tagline: "Vinte torneiras, chope tirado na hora."
+  subline: "20 TORNEIRAS · CHOPE · TAP HOUSE"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/cervejaria-campinas/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram não confirmado (o relatório sugeria @cervejariacampinas).
+# Confirme o perfil e adicione instagram_url em site:.
+demo:
+  fonte: relatorio-rmc

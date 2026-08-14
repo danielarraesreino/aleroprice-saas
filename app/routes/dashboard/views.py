@@ -11,6 +11,7 @@ from app.models.modelo_custo import CustoIndireto
 from app.routes.dashboard import bp
 from datetime import datetime, date, timedelta
 from app.utils.tenant import get_current_restaurant_id
+import os
 import pandas as pd
 import numpy as np
 import json
@@ -540,7 +541,18 @@ def obter_dados_matriz_bcg(data_inicio, data_fim, restaurant_id):
 @bp.route('/upgrade')
 def upgrade():
     """Página de Upgrade/Planos"""
-    return render_template('dashboard/upgrade.html')
+    from app.utils.planos import (
+        precos, plano_efetivo, dias_de_trial_restantes,
+    )
+    rest = current_user.restaurante
+    return render_template(
+        'dashboard/upgrade.html',
+        precos=precos(),
+        plano=plano_efetivo(rest),
+        dias_restantes=dias_de_trial_restantes(rest),
+        slug=getattr(rest, 'slug', None),
+        zap_vendas=os.environ.get('FEIRA_WHATSAPP', ''),
+    )
 
 @bp.route('/')
 @bp.route('/index')

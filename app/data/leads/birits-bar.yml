@@ -1,0 +1,31 @@
+# Birits Bar — Barão Geraldo, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/birits-bar/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Área aberta dificulta o garçom enxergar quem precisa. Gancho: o cliente chama e pede pelo celular, e o time foca em atender bem.
+
+nome: "Birits Bar"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Bar aconchegante em Barão"
+  kicker: "BARÃO GERALDO · CAMPINAS–SP"
+  hero_linha1: "Birits"
+  hero_linha2: "Bar"
+  tagline: "Luz pendente, mesa na calçada e clima ameno."
+  subline: "CERVEJA · PETISCOS · CALÇADA"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/birits-bar/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram não confirmado (o relatório sugeria @birits.bar).
+# Confirme o perfil e adicione instagram_url em site:.
+demo:
+  fonte: relatorio-rmc

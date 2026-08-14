@@ -22,7 +22,9 @@ class SiteConfig(db.Model):
     tagline = db.Column(db.String(300))
     subline = db.Column(db.String(200))
     selo_estrelas = db.Column(db.String(120))    # "4,9 no Google · 39 avaliações"
-    hero_foto = db.Column(db.String(120))        # caminho static, ex.: "img/bar/foto-18.jpg"
+    # Caminho em static ("img/bar/foto-18.jpg") ou URL absoluta. 300 porque URL
+    # de Vercel Blob passa fácil de 120 — mesmo tamanho de DishCard.imagem.
+    hero_foto = db.Column(db.String(300))
 
     # Contato
     whatsapp = db.Column(db.String(20))          # só dígitos c/ DDI, ex.: 5519999779942
@@ -32,6 +34,10 @@ class SiteConfig(db.Model):
     horario = db.Column(db.String(120))
     maps_query = db.Column(db.String(200))
 
+    # Subtítulo da marca: vai no <title> e no card de compartilhamento.
+    # Ex.: "Hamburgueria artesanal em Vinhedo". Nulo cai em cidade_uf.
+    descritor = db.Column(db.String(80))
+
     # Redes
     instagram_url = db.Column(db.String(200))
     facebook_url = db.Column(db.String(200))
@@ -39,6 +45,16 @@ class SiteConfig(db.Model):
     # Aparência: nome de um preset em app/utils/temas.py (não é CSS livre —
     # cliente escolhe entre paletas fechadas para não conseguir feiar o site).
     tema = db.Column(db.String(30), default='boteco-ambar')
+
+    # Tom do texto: preset em app/utils/copy_site.py. Define títulos de seção,
+    # faixa rolante e mensagem do WhatsApp. Um campo em vez de vinte.
+    vibe = db.Column(db.String(30), default='boteco')
+
+    # Prova social. Vazios = o bloco de nota some (melhor do que exibir a nota
+    # de outro bar, que era o que acontecia com o 4,9/39 fixo no template).
+    nota_google = db.Column(db.String(10))
+    qtd_avaliacoes = db.Column(db.Integer)
+    servicos = db.Column(db.String(200))
 
     data_atualizacao = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 

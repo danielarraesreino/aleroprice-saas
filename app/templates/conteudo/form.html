@@ -1,6 +1,13 @@
 {% extends "base.html" %}
 {% block title %}{{ 'Editar' if item else 'Novo' }} {{ t.singular }} · AleroPrice{% endblock %}
 
+{# imagem guarda caminho em static OU URL absoluta (Vercel Blob).
+   Mesma regra de publico.views._img() e do macro img() de campo/editar.html. #}
+{% macro img(caminho) -%}
+  {%- if caminho.startswith('http') -%}{{ caminho }}
+  {%- else -%}{{ url_for('static', filename=caminho) }}{%- endif -%}
+{%- endmacro %}
+
 {% block content %}
 <h2 class="mb-4"><i class="fas fa-store text-warning"></i> {{ 'Editar' if item else 'Adicionar' }} {{ t.singular }} <span class="text-muted">· {{ t.label }}</span></h2>
 
@@ -15,6 +22,12 @@
       <textarea class="form-control" name="{{ campo }}" rows="3" {{ 'required' if obrig }}>{{ item[campo] if item and item[campo] else '' }}</textarea>
     {% else %}
       <label class="form-label">{{ label }}{{ ' *' if obrig }}</label>
+      {% if campo == 'imagem' and item and item.imagem %}
+      <div class="mb-2">
+        <img src="{{ img(item.imagem) }}" alt="Imagem atual" loading="lazy"
+             style="width:72px;height:72px;object-fit:cover;border-radius:8px">
+      </div>
+      {% endif %}
       <input class="form-control" type="{{ 'number' if widget == 'number' else 'text' }}" name="{{ campo }}"
              value="{{ item[campo] if item and item[campo] is not none else '' }}" {{ 'required' if obrig }}>
     {% endif %}

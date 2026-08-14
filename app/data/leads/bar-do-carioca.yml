@@ -1,0 +1,31 @@
+# Bar do Carioca — Jardim Chapadão, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/bar-do-carioca/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Happy hour intenso e fechamento de conta tumultuado. Gancho: reserva antecipada e promoção do dia no site, sem fila no caixa.
+
+nome: "Bar do Carioca"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Boteco de bairro em Campinas"
+  kicker: "JD. CHAPADÃO · CAMPINAS–SP"
+  hero_linha1: "Bar"
+  hero_linha2: "do Carioca"
+  tagline: "Porção farta, chopp gelado e happy hour cheio."
+  subline: "PORÇÕES · CHOPP · HAPPY HOUR"
+  cidade_uf: "Jardim Chapadão, Campinas–SP"
+  nota_google: "4,7"
+  selo_estrelas: "4,7 no Google"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/bar-do-carioca/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

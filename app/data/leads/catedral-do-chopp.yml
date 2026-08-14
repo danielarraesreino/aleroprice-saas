@@ -1,0 +1,29 @@
+# Catedral do Chopp — Cambuí, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/catedral-do-chopp/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Salão grande vive de grupo e comemoração. Gancho: reserva online pra mesa de aniversário chegar organizada, não por telefone no meio do movimento.
+
+nome: "Catedral do Chopp"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Chopp e comemorações no Cambuí"
+  kicker: "CAMBUÍ · CAMPINAS–SP"
+  hero_linha1: "Catedral"
+  hero_linha2: "do Chopp"
+  tagline: "Salão grande, mesa comprida e chopp que não para."
+  subline: "CHOPP · GRUPOS · COMEMORAÇÕES"
+  cidade_uf: "Cambuí, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/catedral-do-chopp/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

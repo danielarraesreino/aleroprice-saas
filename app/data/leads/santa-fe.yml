@@ -1,0 +1,31 @@
+# Santa Fé Microcervejaria — Vinhedo–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/santa-fe/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Elogiada pelo custo-benefício. Gancho: mostrar o cardápio e o preço no site atrai quem pesquisa antes de sair de casa.
+
+nome: "Santa Fé Microcervejaria"
+tema: pub-escuro
+
+site:
+  vibe: pub
+  descritor: "Microcervejaria em Vinhedo"
+  kicker: "VISTA ALEGRE · VINHEDO–SP"
+  hero_linha1: "Santa"
+  hero_linha2: "Fé Microcervejaria"
+  tagline: "Cerveja própria e preço que o cliente elogia."
+  subline: "ARTESANAL · CUSTO-BENEFÍCIO · VINHEDO"
+  cidade_uf: "Vinhedo–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/santa-fe/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram não confirmado (o relatório sugeria @santafe.vistaalegre).
+# Confirme o perfil e adicione instagram_url em site:.
+demo:
+  fonte: relatorio-rmc

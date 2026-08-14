@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bares de Barão — seu bar merece mais que um story de 24 horas</title>
+<meta name="description" content="Site pra bar de Barão Geraldo: reserva com alerta no WhatsApp, agenda de eventos, promoções e cardápio com foto. Montado na mesa, no ar no mesmo dia. Já rodando no Bar da Vila.">
+<meta property="og:title" content="Bares de Barão — seu bar no ar hoje">
+<meta property="og:description" content="Reserva no WhatsApp, agenda, promoções e cardápio com foto. Montado na mesa do seu bar, no ar no mesmo dia.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Archivo:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --noite:#0c120e;          /* verde-noite quase preto: mata + madrugada */
+    --noite-2:#101a14;
+    --carvao:#151f18;         /* superfície de card */
+    --linha:rgba(242,234,219,.10);
+    --giz:#f2eadb;            /* texto principal */
+    --giz-2:#a9b4a4;          /* texto secundário */
+    --ambar:#ffb454;          /* luz de poste / cerveja */
+    --ambar-2:#e08f1f;
+    --zap:#25d366;            /* verde WhatsApp */
+    --zap-escuro:#062b18;
+    --maxw:1040px;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} }
+  body{
+    background:var(--noite);
+    color:var(--giz);
+    font-family:'Archivo',system-ui,sans-serif;
+    font-size:17px;
+    line-height:1.65;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* Luz de poste sobre a rua escura */
+  body::before{
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(85% 55% at 18% -8%, rgba(255,180,84,.13), transparent 62%),
+      radial-gradient(70% 45% at 95% 4%, rgba(37,211,102,.06), transparent 60%),
+      radial-gradient(70% 40% at 50% 108%, rgba(255,180,84,.05), transparent 60%);
+  }
+  header,main,footer{position:relative;z-index:1}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+  section{padding:68px 0}
+  @media(min-width:760px){section{padding:96px 0}}
+
+  h1,h2,.num-grande,.preco-valor{font-family:'Alfa Slab One',serif;font-weight:400;line-height:1.12}
+  h2{font-size:clamp(26px,5.4vw,40px);margin-bottom:14px;letter-spacing:.01em}
+  .eyebrow{
+    display:inline-block;font-size:12px;font-weight:800;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--ambar);margin-bottom:14px;
+  }
+  p.secao-p{color:var(--giz-2);max-width:56ch}
+  a{color:var(--ambar)}
+  ::selection{background:var(--ambar);color:var(--noite)}
+  :focus-visible{outline:3px solid var(--ambar);outline-offset:3px;border-radius:4px}
+
+  /* ---------------- topo ---------------- */
+  .topo{
+    position:sticky;top:0;z-index:40;
+    background:rgba(12,18,14,.86);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--linha);
+  }
+  .topo-in{
+    max-width:var(--maxw);margin:0 auto;padding:13px 22px;
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+  }
+  .marca{
+    font-family:'Alfa Slab One',serif;font-size:17px;color:var(--giz);
+    text-decoration:none;letter-spacing:.02em;
+  }
+  .marca b{color:var(--ambar);font-weight:400}
+  .topo-zap{
+    font-size:13px;font-weight:800;color:var(--zap);text-decoration:none;
+    border:1px solid rgba(37,211,102,.4);border-radius:999px;padding:7px 14px;
+    white-space:nowrap;
+  }
+
+  /* ---------------- botões ---------------- */
+  .btn-zap{
+    display:inline-flex;align-items:center;justify-content:center;gap:10px;
+    background:var(--zap);color:var(--zap-escuro);
+    font-weight:800;font-size:17px;text-decoration:none;
+    padding:16px 28px;border-radius:14px;
+    box-shadow:0 10px 30px rgba(37,211,102,.22);
+    will-change:transform;
+  }
+  .btn-zap svg{flex:none}
+  .btn-zap--grande{width:100%;max-width:420px;padding:19px 28px;font-size:18px}
+  .btn-fantasma{
+    display:inline-flex;align-items:center;gap:8px;
+    color:var(--giz);font-weight:600;font-size:15px;text-decoration:none;
+    border:1px solid var(--linha);border-radius:14px;padding:15px 22px;
+  }
+  .micro{margin-top:12px;font-size:13.5px;color:var(--giz-2)}
+
+  /* ---------------- 1. hero ---------------- */
+  .hero{padding:64px 0 72px}
+  @media(min-width:760px){.hero{padding:104px 0 110px}}
+  .hero h1{
+    font-size:clamp(31px,8.6vw,58px);
+    letter-spacing:.005em;margin:14px 0 18px;max-width:15ch;
+  }
+  .some{
+    color:var(--ambar);
+    background:linear-gradient(90deg,var(--ambar) 55%,rgba(255,180,84,.45));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  }
+  .hero-sub{color:var(--giz-2);font-size:18px;max-width:44ch;margin-bottom:28px}
+  .hero-sub b{color:var(--giz);font-weight:600}
+
+  /* ---------------- 2. prova viva ---------------- */
+  .prova{border-top:1px solid var(--linha);background:var(--noite-2)}
+  .prova-grid{display:grid;gap:40px;align-items:center}
+  @media(min-width:760px){.prova-grid{grid-template-columns:1fr auto;gap:64px}}
+
+  /* moldura de celular em CSS puro */
+  .fone{
+    width:248px;margin:0 auto;
+    border:3px solid #2b372e;border-radius:38px;
+    background:#0a0f0c;padding:10px;
+    box-shadow:0 24px 60px rgba(0,0,0,.5), 0 0 0 1px rgba(255,180,84,.08);
+  }
+  .fone-notch{width:86px;height:18px;background:#2b372e;border-radius:999px;margin:2px auto 8px}
+  .fone-tela{border-radius:24px;overflow:hidden;background:#11150f;border:1px solid rgba(242,234,219,.07)}
+  .fone-url{
+    display:flex;align-items:center;gap:6px;
+    background:#1a2019;padding:8px 12px;font-size:11px;color:var(--giz-2);
+  }
+  .fone-url .cadeado{width:8px;height:8px;border:1.5px solid var(--zap);border-radius:2px;border-top-width:3px}
+  .fone-hero{padding:20px 14px 16px;background:linear-gradient(160deg,#232d1e,#141a11)}
+  .fone-kicker{font-size:8px;letter-spacing:.2em;color:var(--ambar);font-weight:800;text-transform:uppercase}
+  .fone-nome{font-family:'Alfa Slab One',serif;font-size:19px;margin:4px 0 10px;color:var(--giz)}
+  .fone-chips{display:flex;gap:6px}
+  .fone-chip{font-size:9px;font-weight:800;padding:5px 9px;border-radius:999px}
+  .fone-chip--cheio{background:var(--zap);color:var(--zap-escuro)}
+  .fone-chip--vazio{border:1px solid var(--linha);color:var(--giz-2)}
+  .fone-bloco{padding:12px 14px;border-top:1px solid rgba(242,234,219,.06)}
+  .fone-rotulo{font-size:8px;letter-spacing:.18em;color:var(--giz-2);font-weight:800;text-transform:uppercase;margin-bottom:8px}
+  .fone-linha{height:7px;border-radius:4px;background:#243024;margin-bottom:6px}
+  .fone-linha--c{width:70%}
+  .fone-linha--m{width:52%}
+  .fone-legenda{text-align:center;margin-top:16px;font-size:14px;color:var(--giz-2)}
+  .fone-legenda a{font-weight:800;color:var(--ambar);text-decoration:none;border-bottom:2px solid rgba(255,180,84,.4)}
+
+  .contador{margin-top:36px;padding-top:28px;border-top:1px dashed var(--linha)}
+  .num-grande{font-size:clamp(52px,13vw,84px);color:var(--ambar);line-height:1;display:block}
+  .contador-rotulo{font-size:16px;color:var(--giz);font-weight:600;margin-top:6px}
+  .contador-sub{font-size:14px;color:var(--giz-2);margin-top:4px}
+
+  /* ---------------- 3. google ---------------- */
+  .google-mock{
+    background:#fff;color:#202124;border-radius:16px;
+    max-width:400px;margin:36px auto 0;padding:16px;
+    font-family:'Archivo',Arial,sans-serif;
+    box-shadow:0 22px 55px rgba(0,0,0,.45);
+  }
+  .g-busca{
+    display:flex;align-items:center;gap:10px;
+    border:1px solid #dadce0;border-radius:999px;padding:10px 16px;
+    font-size:14.5px;color:#202124;
+  }
+  .g-busca svg{flex:none}
+  .g-card{margin-top:14px;padding:14px 6px 4px;border-top:1px solid #e8eaed}
+  .g-nome{font-size:19px;font-weight:600}
+  .g-aval{display:flex;align-items:center;gap:6px;font-size:13.5px;color:#5f6368;margin-top:3px}
+  .g-nota{color:#202124;font-weight:600}
+  .g-estrelas{color:#fbbc04;letter-spacing:1px;font-size:13px}
+  .g-meta{font-size:13.5px;color:#5f6368;margin-top:2px}
+  .g-aberto{color:#188038;font-weight:600}
+  .g-chips{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .g-chip{
+    display:inline-flex;align-items:center;gap:6px;
+    border:1px solid #dadce0;border-radius:999px;padding:7px 14px;
+    font-size:13.5px;color:#1a73e8;font-weight:600;background:#fff;
+  }
+  .g-chip--site{background:#1a73e8;color:#fff;border-color:#1a73e8}
+  .g-caption{text-align:center;font-size:13px;color:var(--giz-2);margin-top:14px}
+
+  /* ---------------- 4. entregas ---------------- */
+  .entregas{border-top:1px solid var(--linha);background:var(--noite-2)}
+  .cards{display:grid;gap:16px;margin-top:34px}
+  @media(min-width:640px){.cards{grid-template-columns:1fr 1fr}}
+  .card{
+    background:var(--carvao);border:1px solid var(--linha);border-radius:18px;
+    padding:24px 22px;
+  }
+  .card-icone{
+    width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+    background:rgba(255,180,84,.12);margin-bottom:14px;
+  }
+  .card h3{font-size:18.5px;font-weight:800;margin-bottom:8px;letter-spacing:.01em}
+  .card p{font-size:15.5px;color:var(--giz-2)}
+
+  /* ---------------- 5. preços ---------------- */
+  .planos{display:grid;gap:18px;margin-top:36px}
+  @media(min-width:640px){.planos{grid-template-columns:1fr 1fr;align-items:start}}
+  .plano{
+    background:var(--carvao);border:1px solid var(--linha);border-radius:20px;
+    padding:28px 24px;
+  }
+  .plano--pro{border-color:rgba(255,180,84,.55);position:relative;background:linear-gradient(175deg,#1c2318,var(--carvao))}
+  .plano-selo{
+    position:absolute;top:-12px;left:22px;
+    background:var(--ambar);color:#231603;font-size:11.5px;font-weight:800;
+    letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border-radius:999px;
+  }
+  .plano-nome{font-size:14px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--giz-2)}
+  .preco-valor{font-size:clamp(36px,8vw,46px);color:var(--giz);margin-top:8px}
+  .plano--pro .preco-valor{color:var(--ambar)}
+  .preco-periodo{font-family:'Archivo',sans-serif;font-size:15px;color:var(--giz-2);font-weight:600}
+  .plano ul{list-style:none;margin:18px 0 24px}
+  .plano li{
+    font-size:15.5px;color:var(--giz-2);padding:7px 0 7px 28px;position:relative;
+  }
+  .plano li::before{
+    content:'';position:absolute;left:2px;top:14px;width:14px;height:8px;
+    border-left:2.5px solid var(--zap);border-bottom:2.5px solid var(--zap);
+    transform:rotate(-45deg);
+  }
+  .plano li b{color:var(--giz);font-weight:600}
+  .acordo{
+    margin-top:22px;text-align:center;font-size:14.5px;color:var(--giz-2);
+    max-width:46ch;margin-left:auto;margin-right:auto;
+  }
+
+  /* ---------------- 6. barão / marquee ---------------- */
+  .barao{border-top:1px solid var(--linha);background:var(--noite-2);overflow:hidden}
+  .marquee-titulo{
+    font-size:14px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--giz-2);margin:38px 0 18px;
+  }
+  .marquee{overflow:hidden;position:relative;
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+    mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+  }
+  .marquee-track{display:inline-flex;white-space:nowrap;will-change:transform}
+  .marquee-lista{display:inline-flex;align-items:center;padding-right:8px}
+  .marquee-lista span{
+    font-family:'Alfa Slab One',serif;font-size:clamp(19px,4.6vw,27px);
+    color:var(--giz);opacity:.85;padding:0 8px;
+  }
+  .marquee-lista i{font-style:normal;color:var(--ambar);padding:0 4px;font-size:14px}
+
+  /* ---------------- 7. cta final ---------------- */
+  .final{text-align:center}
+  .final h2{max-width:19ch;margin:0 auto 26px}
+  .passos{
+    display:flex;flex-direction:column;gap:10px;align-items:center;
+    margin:0 auto 30px;max-width:420px;counter-reset:passo;
+  }
+  @media(min-width:760px){.passos{flex-direction:row;max-width:none;justify-content:center;gap:22px}}
+  .passo{
+    display:flex;align-items:center;gap:12px;font-size:15.5px;color:var(--giz-2);
+    counter-increment:passo;text-align:left;
+  }
+  .passo::before{
+    content:counter(passo);flex:none;
+    width:30px;height:30px;border-radius:999px;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(255,180,84,.14);color:var(--ambar);
+    font-weight:800;font-size:14px;
+  }
+  .stakes{font-size:15px;color:var(--giz-2);max-width:44ch;margin:26px auto 0}
+
+  footer{
+    border-top:1px solid var(--linha);padding:34px 0 46px;
+    font-size:13.5px;color:var(--giz-2);
+  }
+  footer p{margin-bottom:6px}
+  footer a{color:var(--giz-2)}
+
+  /* ---------------- barra fixa mobile ---------------- */
+  .barra-zap{
+    position:fixed;left:0;right:0;bottom:0;z-index:50;
+    padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+    background:rgba(12,18,14,.92);backdrop-filter:blur(10px);
+    border-top:1px solid var(--linha);
+  }
+  .barra-zap .btn-zap{width:100%;max-width:none;padding:14px;font-size:16px;box-shadow:none}
+  body{padding-bottom:76px}
+  @media(min-width:760px){
+    .barra-zap{display:none}
+    body{padding-bottom:0}
+  }
+
+  /* ---------------- animação (gate .js-anim) ----------------
+     Estado inicial escondido SÓ quando a lib Motion carregou e o usuário
+     aceita movimento. CDN fora do ar ou reduced-motion => tudo visível. */
+  .js-anim [data-hero]{opacity:0;transform:translateY(22px)}
+  .js-anim [data-reveal]{opacity:0;transform:translateY(30px)}
+</style>
+</head>
+<body>
+
+<div class="topo">
+  <div class="topo-in">
+    <a class="marca" href="#topo">Bares <b>de Barão</b></a>
+    <a class="topo-zap" href="{{ zap_url }}">Chamar no zap</a>
+  </div>
+</div>
+
+<header class="hero" id="topo">
+  <div class="wrap">
+    <span class="eyebrow" data-hero>Bares de Barão · Barão Geraldo, Campinas</span>
+    <h1 data-hero>Seu bar em Barão merece mais que um <span class="some">story de 24 horas</span>.</h1>
+    <p class="hero-sub" data-hero>O story some à meia-noite. O seu site fica: <b>reserva, agenda de eventos e cardápio com foto</b>, num endereço que é seu.</p>
+    <div data-hero>
+      <a class="btn-zap" href="{{ zap_url }}">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.2 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.4-.7-2.9-1.1-4.7-4-4.9-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5s.8 1.9.8 2c.1.1.1.3 0 .5l-.3.5c-.2.2-.3.4-.1.7.1.3.7 1.2 1.5 1.9 1.1.9 2 1.2 2.2 1.4.3.1.5.1.6-.1.2-.2.7-.8.9-1.1.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.2 1.3Z"/></svg>
+        Chamar no WhatsApp
+      </a>
+      <p class="micro">Resposta na hora · sem compromisso</p>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- 2. prova viva -->
+  <section class="prova">
+    <div class="wrap prova-grid">
+      <div data-reveal>
+        <span class="eyebrow">Prova viva</span>
+        <h2>Não é promessa. Já está no ar.</h2>
+        <p class="secao-p">A gente sabe o trabalho que dá segurar o balcão e ainda alimentar rede social todo dia. O <b>Bar da Vila</b>, aqui em Campinas, foi o primeiro a sair dessa: site próprio, reserva caindo no WhatsApp do balcão e cardápio com foto. Entra e confere — está no ar agora.</p>
+        <div class="contador">
+          <span class="num-grande"><span data-counter data-target="24">24</span></span>
+          <p class="contador-rotulo">bares de Barão já mapeados</p>
+          <p class="contador-sub">A campanha é aqui do bairro — a gente já conhece a sua rua.</p>
+        </div>
+      </div>
+      <div data-reveal>
+        <div class="fone" role="img" aria-label="Celular mostrando o site bardavila.bar: nome do bar, botões de reservar mesa e ver cardápio, e a agenda da semana.">
+          <div class="fone-notch"></div>
+          <div class="fone-tela" aria-hidden="true">
+            <div class="fone-url"><span class="cadeado"></span> bardavila.bar</div>
+            <div class="fone-hero">
+              <span class="fone-kicker">Campinas · SP</span>
+              <p class="fone-nome">Bar da Vila</p>
+              <div class="fone-chips">
+                <span class="fone-chip fone-chip--cheio">Reservar mesa</span>
+                <span class="fone-chip fone-chip--vazio">Cardápio</span>
+              </div>
+            </div>
+            <div class="fone-bloco">
+              <p class="fone-rotulo">Agenda da semana</p>
+              <div class="fone-linha"></div>
+              <div class="fone-linha fone-linha--c"></div>
+              <div class="fone-linha fone-linha--m"></div>
+            </div>
+          </div>
+        </div>
+        <p class="fone-legenda">Cliente de verdade, na mesma cidade:<br><a href="https://bardavila.bar" target="_blank" rel="noopener">bardavila.bar</a></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. google -->
+  <section class="google">
+    <div class="wrap" data-reveal>
+      <span class="eyebrow">Onde a decisão fecha</span>
+      <h2>Quem busca “bar em Barão Geraldo” decide no Google</h2>
+      <p class="secao-p">Nota, foto, rota — a escolha acontece ali, em segundos. E quando a pessoa toca em <b style="color:var(--giz)">Site</b>, ela precisa cair num lugar que feche a decisão: cardápio de dar fome, reserva na hora, endereço certo. É esse lugar que a gente monta. Seu perfil no Google continua sendo seu — nós cuidamos do destino do clique.</p>
+      <div class="google-mock" role="img" aria-label="Ilustração de uma busca no Google por “bar em barão geraldo”, com um resultado de bar mostrando nota 4,8, avaliações e os botões Rota, Ligar e Site.">
+        <div class="g-busca" aria-hidden="true">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" stroke-width="2.4" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+          bar em barão geraldo
+        </div>
+        <div class="g-card" aria-hidden="true">
+          <p class="g-nome">O seu bar</p>
+          <p class="g-aval"><span class="g-nota">4,8</span> <span class="g-estrelas">★★★★★</span> (326)</p>
+          <p class="g-meta">Bar · Barão Geraldo · <span class="g-aberto">Aberto agora</span></p>
+          <div class="g-chips">
+            <span class="g-chip">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.7 11.3 12.7 2.3a1 1 0 0 0-1.4 0l-9 9a1 1 0 0 0 0 1.4l9 9a1 1 0 0 0 1.4 0l9-9a1 1 0 0 0 0-1.4ZM13 14.5V12h-3v3H8v-4a1 1 0 0 1 1-1h4V7.5l3.5 3.5Z"/></svg>
+              Rota
+            </span>
+            <span class="g-chip">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.6 10.8a15.6 15.6 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.2 11 11 0 0 0 3.6.6 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.4a1 1 0 0 1 1 1 11 11 0 0 0 .6 3.6 1 1 0 0 1-.2 1Z"/></svg>
+              Ligar
+            </span>
+            <span class="g-chip g-chip--site">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18Z"/></svg>
+              Site
+            </span>
+          </div>
+        </div>
+      </div>
+      <p class="g-caption">Ilustração: o caminho do cliente até a sua mesa.</p>
+    </div>
+  </section>
+
+  <!-- 4. o que entrega -->
+  <section class="entregas">
+    <div class="wrap">
+      <div data-reveal>
+        <span class="eyebrow">O que chega pro seu bar</span>
+        <h2>Quatro coisas, bem feitas</h2>
+      </div>
+      <div class="cards">
+        <article class="card" data-reveal>
+          <div class="card-icone" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ambar)" stroke-width="1.8" aria-hidden="true"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M13.7 20a2 2 0 0 1-3.4 0"/></svg>
+          </div>
+          <h3>Reserva com alerta no WhatsApp</h3>
+          <p>O cliente reserva no site e o aviso toca no seu celular na hora. Sem aplicativo novo, sem tablet no balcão.</p>
+        </article>
+        <article class="card" data-reveal>
+          <div class="card-icone" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ambar)" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 9h18"/></svg>
+          </div>
+          <h3>Agenda de eventos</h3>
+          <p>Quinta de música ao vivo, feijoada de sábado: sua programação inteira num lugar que não desaparece.</p>
+        </article>
+        <article class="card" data-reveal>
+          <div class="card-icone" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ambar)" stroke-width="1.8" aria-hidden="true"><path d="M12 2 2 12l10 10L22 12 12 2Z" transform="rotate(45 12 12)" opacity="0"/><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>
+          </div>
+          <h3>Promoções</h3>
+          <p>Dose dupla, happy hour, prato do dia: você publica e troca direto do celular, sem depender de ninguém.</p>
+        </article>
+        <article class="card" data-reveal>
+          <div class="card-icone" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ambar)" stroke-width="1.8" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z"/><circle cx="12" cy="13" r="4"/></svg>
+          </div>
+          <h3>Cardápio-vitrine com foto</h3>
+          <p>Seus carros-chefes em destaque, com foto de dar fome. O cliente escolhe antes mesmo de sentar.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. preços -->
+  <section class="preco" id="preco">
+    <div class="wrap">
+      <div data-reveal>
+        <span class="eyebrow">Planos</span>
+        <h2>Dois planos, zero pegadinha</h2>
+      </div>
+      <div class="planos">
+        <article class="plano" data-reveal>
+          <p class="plano-nome">Site</p>
+          <p class="preco-valor">{{ preco_site }} <span class="preco-periodo">{{ preco_periodo }}</span></p>
+          <ul>
+            <li><b>Site com domínio próprio</b> — seu endereço, não um perfil</li>
+            <li>Reserva com alerta no WhatsApp</li>
+            <li>Agenda de eventos e promoções</li>
+            <li>Cardápio com foto</li>
+            <li>Você edita tudo do celular</li>
+          </ul>
+          <a class="btn-fantasma" href="{{ zap_url }}">Começar pelo Site</a>
+        </article>
+        <article class="plano plano--pro" data-reveal>
+          <span class="plano-selo">Site + gestão</span>
+          <p class="plano-nome">Pro</p>
+          <p class="preco-valor">{{ preco_pro }} <span class="preco-periodo">{{ preco_periodo }}</span></p>
+          <ul>
+            <li><b>Tudo do plano Site</b></li>
+            <li>Custo real de cada prato (ficha técnica)</li>
+            <li>Estoque e notas de compra (NF-e) organizados</li>
+            <li>Relatório de lucro sem precisar de planilha</li>
+          </ul>
+          <a class="btn-zap" href="{{ zap_url }}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.2 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.4-.7-2.9-1.1-4.7-4-4.9-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5s.8 1.9.8 2c.1.1.1.3 0 .5l-.3.5c-.2.2-.3.4-.1.7.1.3.7 1.2 1.5 1.9 1.1.9 2 1.2 2.2 1.4.3.1.5.1.6-.1.2-.2.7-.8.9-1.1.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.2 1.3Z"/></svg>
+            Quero o Pro
+          </a>
+        </article>
+      </div>
+      <p class="acordo" data-reveal>Sem taxa de instalação e sem fidelidade: se não servir, você cancela e pronto.</p>
+    </div>
+  </section>
+
+  <!-- 6. contexto barão -->
+  <section class="barao">
+    <div class="wrap" data-reveal>
+      <span class="eyebrow">Daqui</span>
+      <h2>Feito pra noite de Barão</h2>
+      <p class="secao-p">Todo mundo conhece o fim de semana em que Barão se encontra na Praça do Coco. A Feira de Barão é o ponto alto do bairro — e, que fique claro, <b style="color:var(--giz)">nós não somos a feira</b>: somos vizinhos dela. O nosso trabalho é o resto da semana: seu bar visível, e reservável, de segunda a segunda.</p>
+      <p class="marquee-titulo">Barão tem bar demais pra qualquer um ficar invisível</p>
+    </div>
+    <div class="marquee" data-reveal>
+      <div class="marquee-track" data-marquee>
+        <div class="marquee-lista">
+          <span>Tábuas</span><i>●</i><span>Tap House</span><i>●</i><span>Metropoly</span><i>●</i><span>Estação Barão</span><i>●</i><span>Embrev</span><i>●</i><span>Maria Bonjour</span><i>●</i><span>Salsa con Ají</span><i>●</i><span>Toca do Tatu</span><i>●</i><span>Stout</span><i>●</i><span>Vidottinho</span><i>●</i><span>Seo Bartô</span><i>●</i><span>Bar do Frango</span><i>●</i><span>Buteco do Jair</span><i>●</i><span>Ponto 1</span><i>●</i><span>Eskina</span><i>●</i><span>Botequim de Barão</span><i>●</i><span>Garimpero</span><i>●</i><span>Confra</span><i>●</i><span>Empório do Nono</span><i>●</i><span>Birits</span><i>●</i><span>Barbieri</span><i>●</i><span>Bar do Ademir</span><i>●</i><span>Barão do Espeto</span><i>●</i><span>Santa Genebra</span><i>●</i>
+        </div>
+        <div class="marquee-lista" aria-hidden="true">
+          <span>Tábuas</span><i>●</i><span>Tap House</span><i>●</i><span>Metropoly</span><i>●</i><span>Estação Barão</span><i>●</i><span>Embrev</span><i>●</i><span>Maria Bonjour</span><i>●</i><span>Salsa con Ají</span><i>●</i><span>Toca do Tatu</span><i>●</i><span>Stout</span><i>●</i><span>Vidottinho</span><i>●</i><span>Seo Bartô</span><i>●</i><span>Bar do Frango</span><i>●</i><span>Buteco do Jair</span><i>●</i><span>Ponto 1</span><i>●</i><span>Eskina</span><i>●</i><span>Botequim de Barão</span><i>●</i><span>Garimpero</span><i>●</i><span>Confra</span><i>●</i><span>Empório do Nono</span><i>●</i><span>Birits</span><i>●</i><span>Barbieri</span><i>●</i><span>Bar do Ademir</span><i>●</i><span>Barão do Espeto</span><i>●</i><span>Santa Genebra</span><i>●</i>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. cta final -->
+  <section class="final">
+    <div class="wrap" data-reveal>
+      <span class="eyebrow">Sem burocracia</span>
+      <h2>Chama no zap que eu monto o seu na mesa, na hora.</h2>
+      <div class="passos">
+        <p class="passo">Você chama no WhatsApp</p>
+        <p class="passo">A gente monta o site junto, na mesa</p>
+        <p class="passo">Hoje mesmo ele está no ar</p>
+      </div>
+      <a class="btn-zap btn-zap--grande" href="{{ zap_url }}">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.2 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.4-.7-2.9-1.1-4.7-4-4.9-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5s.8 1.9.8 2c.1.1.1.3 0 .5l-.3.5c-.2.2-.3.4-.1.7.1.3.7 1.2 1.5 1.9 1.1.9 2 1.2 2.2 1.4.3.1.5.1.6-.1.2-.2.7-.8.9-1.1.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.2 1.3Z"/></svg>
+        Chamar no WhatsApp agora
+      </a>
+      <p class="stakes">Cada fim de semana sem site é cliente decidindo no Google — e fechando no bar do lado.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><b style="color:var(--giz)">Bares de Barão</b> · Barão Geraldo, Campinas/SP</p>
+    <p>Projeto independente: não temos vínculo com a Feira de Barão nem com o Google.</p>
+    <p>Já no ar: <a href="https://bardavila.bar" target="_blank" rel="noopener">bardavila.bar</a></p>
+  </div>
+</footer>
+
+<div class="barra-zap" aria-hidden="false">
+  <a class="btn-zap" href="{{ zap_url }}">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.2 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.4-.7-2.9-1.1-4.7-4-4.9-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5s.8 1.9.8 2c.1.1.1.3 0 .5l-.3.5c-.2.2-.3.4-.1.7.1.3.7 1.2 1.5 1.9 1.1.9 2 1.2 2.2 1.4.3.1.5.1.6-.1.2-.2.7-.8.9-1.1.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.2 1.3Z"/></svg>
+    Chamar no WhatsApp
+  </a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/motion@13.1.0/dist/motion.js"></script>
+<script>
+(function () {
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Sem lib ou com reduced-motion: nenhuma classe entra, nada fica escondido.
+  if (!window.Motion || !window.Motion.animate || reduce) return;
+  document.documentElement.classList.add('js-anim');
+
+  try {
+    var animate = Motion.animate, inView = Motion.inView,
+        stagger = Motion.stagger, spring = Motion.spring, hover = Motion.hover;
+
+    // 1. Hero: entrada orquestrada
+    animate('[data-hero]',
+      { opacity: [0, 1], y: [22, 0] },
+      { duration: 0.65, delay: stagger(0.11), ease: [0.25, 0.1, 0.25, 1] });
+
+    // 2. Scroll-reveal das seções/cards
+    inView('[data-reveal]', function (el) {
+      animate(el, { opacity: [0, 1], y: [30, 0] }, { duration: 0.7, ease: 'easeOut' });
+    }, { amount: 0.25 });
+
+    // 3. Contador dos bares mapeados (o valor real já está no HTML)
+    inView('[data-counter]', function (el) {
+      var alvo = Number(el.dataset.target) || 24;
+      animate(0, alvo, {
+        duration: 1.3,
+        ease: 'easeOut',
+        onUpdate: function (v) { el.textContent = Math.round(v); }
+      });
+    }, { amount: 1 });
+
+    // 4. Marquee infinito (decorativo; já bloqueado pelo gate de reduced-motion)
+    animate('[data-marquee]', { x: ['0%', '-50%'] },
+      { duration: 42, ease: 'linear', repeat: Infinity });
+
+    // 5. Spring leve no hover dos CTAs
+    if (typeof hover === 'function') {
+      hover('.btn-zap', function (el) {
+        animate(el, { scale: 1.05 }, { type: spring, stiffness: 300, damping: 15 });
+        return function () {
+          animate(el, { scale: 1 }, { type: spring, stiffness: 300, damping: 20 });
+        };
+      });
+    }
+  } catch (e) {
+    // Qualquer falha na animação não pode custar a leitura da página.
+    document.documentElement.classList.remove('js-anim');
+  }
+})();
+</script>
+</body>
+</html>

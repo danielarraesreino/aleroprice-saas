@@ -1,0 +1,29 @@
+# Restaurante da Lagoa — Hortolândia–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/restaurante-da-lagoa/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Mesas espalhadas ao redor da lagoa. Gancho: pedido pelo celular economiza quilômetros de caminhada por turno.
+
+nome: "Restaurante da Lagoa"
+tema: praia-claro
+
+site:
+  vibe: praia
+  descritor: "Vista pra lagoa em Hortolândia"
+  kicker: "HORTOLÂNDIA–SP"
+  hero_linha1: "Restaurante"
+  hero_linha2: "da Lagoa"
+  tagline: "Mesa com vista, peixe fresco e tarde que passa devagar."
+  subline: "PEIXES · VISTA · AO AR LIVRE"
+  cidade_uf: "Hortolândia–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/restaurante-da-lagoa/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

@@ -1,0 +1,57 @@
+{% extends "campo/base.html" %}
+{% block titulo %}Modo Campo{% endblock %}
+
+{% block topo %}
+  <h1>Modo Campo</h1>
+  <a class="voltar" href="{{ url_for('dashboard.index') }}" aria-label="Sair para o painel">×</a>
+{% endblock %}
+
+{% block conteudo %}
+<div class="bloco">
+  <h2>Qual bar</h2>
+  <input type="search" id="busca" placeholder="Digitar nome do bar"
+         autocomplete="off" aria-label="Buscar bar"
+         style="width:100%;padding:13px 14px;background:var(--ink);color:var(--creme);
+                border:1px solid var(--linha);border-radius:10px;font-size:16px">
+  <p class="nota">{{ linhas|length }} bares. Quem já tem foto aparece marcado.</p>
+</div>
+
+<ul id="lista" style="list-style:none;padding:0;margin:0">
+{% for l in linhas %}
+  <li data-nome="{{ l.nome|lower }}">
+    <a href="{{ url_for('campo.editar', slug=l.slug) }}"
+       style="display:flex;align-items:center;gap:12px;padding:15px 16px;margin-bottom:8px;
+              background:var(--ink-2);border:1px solid var(--linha);border-radius:var(--raio);
+              color:var(--creme);text-decoration:none">
+      <span aria-hidden="true"
+            style="width:9px;height:9px;border-radius:50%;flex:none;
+                   background:{{ 'var(--verde)' if l.tem_foto else 'var(--linha)' }}"></span>
+      <span style="flex:1;min-width:0">
+        <strong style="display:block">{{ l.nome }}</strong>
+        <small style="color:var(--creme-dim)">
+          {{ 'prévia' if l.tipo == 'demo' else l.tipo }}{% if not l.tem_foto %} · sem foto{% endif %}
+        </small>
+      </span>
+      <span aria-hidden="true" style="color:var(--creme-dim)">›</span>
+    </a>
+  </li>
+{% endfor %}
+</ul>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  /* Sem tirar acento, digitar "tab" não acha "Tábuas" — e ninguém digita
+     acento com o celular na mão dentro de um bar. */
+  const semAcento = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+  const busca = document.getElementById('busca');
+  const itens = [...document.querySelectorAll('#lista li')].map(li => ({
+    li, nome: semAcento(li.dataset.nome),
+  }));
+  busca.addEventListener('input', () => {
+    const termo = semAcento(busca.value.trim());
+    itens.forEach(({li, nome}) => { li.hidden = termo && !nome.includes(termo); });
+  });
+</script>
+{% endblock %}

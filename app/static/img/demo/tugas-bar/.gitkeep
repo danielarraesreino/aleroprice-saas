@@ -1,0 +1,3 @@
+# Fotos de Tuga's Bar
+# capa.jpg = topo | prato-<nome>.jpg = cardapio | resto = galeria
+# Depois de colocar as fotos: flask aplicar-demos --slug tugas-bar

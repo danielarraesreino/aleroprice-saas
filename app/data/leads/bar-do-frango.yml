@@ -1,0 +1,31 @@
+# Bar do Frango — Barão Geraldo, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/bar-do-frango/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# 30 anos de casa e combo óbvio (panceta + litrão) que ninguém formalizou. Gancho: combo no site com preço fechado, subindo o ticket.
+
+nome: "Bar do Frango"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Clássico de Barão Geraldo"
+  kicker: "BARÃO GERALDO · CAMPINAS–SP · +30 ANOS"
+  hero_linha1: "Bar"
+  hero_linha2: "do Frango"
+  tagline: "Mais de 30 anos fritando o que a vizinhança gosta."
+  subline: "FRANGO · PANCETA · CERVEJA LITRÃO"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/bar-do-frango/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram não confirmado (o relatório sugeria @bardofrangobaraogeraldo).
+# Confirme o perfil e adicione instagram_url em site:.
+demo:
+  fonte: relatorio-rmc

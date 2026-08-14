@@ -1,6 +1,13 @@
 {% extends "base.html" %}
 {% block title %}Conteúdo do site · AleroPrice{% endblock %}
 
+{# imagem guarda caminho em static OU URL absoluta (Vercel Blob).
+   Mesma regra de publico.views._img() e do macro img() de campo/editar.html. #}
+{% macro img(caminho) -%}
+  {%- if caminho.startswith('http') -%}{{ caminho }}
+  {%- else -%}{{ url_for('static', filename=caminho) }}{%- endif -%}
+{%- endmacro %}
+
 {% block content %}
 <h2 class="mb-3"><i class="fas fa-store text-warning"></i> Conteúdo do site</h2>
 
@@ -25,10 +32,27 @@
       {% for it in itens %}
       <tr>
         <td>
-          {% if tipo == 'galeria' %}<code>{{ it.imagem }}</code>{% if it.legenda %} — {{ it.legenda }}{% endif %}
+          {% if tipo == 'galeria' %}
+          <div class="d-flex align-items-center gap-2">
+            <img src="{{ img(it.imagem) }}" alt="{{ it.legenda or 'Foto da galeria' }}" loading="lazy"
+                 style="width:56px;height:56px;object-fit:cover;border-radius:8px;flex:none">
+            <div class="min-width-0">
+              {% if it.legenda %}{{ it.legenda }}<br>{% endif %}
+              <small class="text-muted text-break"><code>{{ it.imagem }}</code></small>
+            </div>
+          </div>
           {% elif tipo == 'avaliacoes' %}<strong>{{ it.autor }}</strong> <span class="text-warning">{{ '★' * it.estrelas }}</span><br><small class="text-muted">{{ it.texto }}</small>
           {% elif tipo == 'equipe' %}{{ it.emoji }} <strong>{{ it.nome }}</strong>{% if it.papel %}<br><small class="text-muted">{{ it.papel }}</small>{% endif %}
-          {% else %}<strong>{{ it.nome }}</strong>{% if it.tag %} <span class="badge bg-warning text-dark">{{ it.tag }}</span>{% endif %}{% if it.descricao %}<br><small class="text-muted">{{ it.descricao }}</small>{% endif %}
+          {% else %}
+          <div class="d-flex align-items-center gap-2">
+            {% if it.imagem %}
+            <img src="{{ img(it.imagem) }}" alt="{{ it.nome }}" loading="lazy"
+                 style="width:56px;height:56px;object-fit:cover;border-radius:8px;flex:none">
+            {% endif %}
+            <div class="min-width-0">
+              <strong>{{ it.nome }}</strong>{% if it.tag %} <span class="badge bg-warning text-dark">{{ it.tag }}</span>{% endif %}{% if it.descricao %}<br><small class="text-muted">{{ it.descricao }}</small>{% endif %}
+            </div>
+          </div>
           {% endif %}
         </td>
         <td>{% if it.ativo %}<span class="badge bg-success">No ar</span>{% else %}<span class="badge bg-secondary">Oculto</span>{% endif %}</td>

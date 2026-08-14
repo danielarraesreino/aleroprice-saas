@@ -6,6 +6,7 @@ from app.extensions import db
 from app.models.modelo_promocao import Promocao, DIAS_SEMANA, DIAS_SEMANA_MAP
 from app.routes.promocoes import bp
 from app.utils.tenant import get_current_restaurant_id
+from app.utils.decorators import plano_minimo
 
 
 def _rid():
@@ -69,6 +70,7 @@ def _ler_form():
 
 
 @bp.route('/nova', methods=['GET', 'POST'])
+@plano_minimo('site')
 def nova():
     rid = _rid()
     if request.method == 'POST':
@@ -85,6 +87,7 @@ def nova():
 
 
 @bp.route('/<int:promo_id>/editar', methods=['GET', 'POST'])
+@plano_minimo('site')
 def editar(promo_id):
     rid = _rid()
     promo = Promocao.query.filter_by(id=promo_id, restaurant_id=rid).first_or_404()
@@ -103,6 +106,7 @@ def editar(promo_id):
 
 
 @bp.route('/<int:promo_id>/toggle', methods=['POST'])
+@plano_minimo('site')
 def toggle(promo_id):
     rid = _rid()
     promo = Promocao.query.filter_by(id=promo_id, restaurant_id=rid).first_or_404()
@@ -113,6 +117,7 @@ def toggle(promo_id):
 
 
 @bp.route('/<int:promo_id>/excluir', methods=['POST'])
+@plano_minimo('site')
 def excluir(promo_id):
     rid = _rid()
     promo = Promocao.query.filter_by(id=promo_id, restaurant_id=rid).first_or_404()

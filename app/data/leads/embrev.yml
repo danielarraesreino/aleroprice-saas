@@ -1,0 +1,36 @@
+# Embrev Barão — Barão Geraldo, Campinas–SP
+# Lead da varredura de Barão (14/08/2026). Foto: coloque os arquivos em
+# app/static/img/demo/embrev/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Banda ou DJ quase todo dia — e a agenda vive em story que some em 24h.
+# Gancho: página de agenda fixa que o público consulta antes de sair de casa,
+# e o cenário (ônibus e carros antigos) rende um site com cara única.
+
+nome: "Embrev Barão"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Bar rústico com música ao vivo em Barão"
+  kicker: "BARÃO GERALDO · CAMPINAS–SP"
+  hero_linha1: "Embrev"
+  hero_linha2: "Barão"
+  tagline: "Ônibus antigo, carro de época e banda quase todo dia."
+  subline: "MÚSICA AO VIVO · CHOPE GELADO · CENÁRIO ÚNICO"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+  endereco: "Av. Prof. Atílio Martini, 940 — Barão Geraldo"
+  horario: "Seg–Sex 16h–00h · Sáb 12h–00h · Dom 14h–00h"
+  maps_query: "Embrev Barão Geraldo Campinas"
+  instagram_url: "https://www.instagram.com/embrev/"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/embrev/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram @embrev confirmado em 14/08/2026 (morandoembarao.com + Foursquare).
+demo:
+  fonte: varredura-barao

@@ -1,0 +1,29 @@
+# Bar do Zé Galinha — Vinhedo–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/ze-galinha/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Mesmo perfil do Bar da Vila: o dono é a alma do negócio. Gancho: a tecnologia tira a burocracia do caminho dele, não substitui o atendimento.
+
+nome: "Bar do Zé Galinha"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Boteco tradicional em Vinhedo"
+  kicker: "VINHEDO–SP"
+  hero_linha1: "Bar do"
+  hero_linha2: "Zé Galinha"
+  tagline: "Chopp gelado, clima raiz e o Sr. Hélio na porta."
+  subline: "CHOPP · RAIZ · TRADIÇÃO"
+  cidade_uf: "Vinhedo–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/ze-galinha/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

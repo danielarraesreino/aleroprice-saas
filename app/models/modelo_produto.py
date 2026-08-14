@@ -8,7 +8,9 @@ class Produto(db.Model):
     __tablename__ = 'produto'
     
     id = db.Column(db.Integer, primary_key=True)
-    codigo = db.Column(db.String(20), unique=True)  # Código interno ou EAN/GTIN
+    # EAN/GTIN é global no mundo, mas o cadastro é de cada bar: unique global
+    # quebrava no primeiro import de NF-e com produto que outro já cadastrou.
+    codigo = db.Column(db.String(20))  # Código interno ou EAN/GTIN
     nome = db.Column(db.String(100), nullable=False)
     descricao = db.Column(db.Text)
     unidade = db.Column(db.String(5), nullable=False)  # kg, g, l, ml, un
@@ -29,7 +31,7 @@ class Produto(db.Model):
     
     # Multi-Tenancy
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurante.id'), nullable=False)
-    
+
     # Relações
     fornecedor = db.relationship('Fornecedor', back_populates='produtos')
     movimentacoes = db.relationship('EstoqueMovimentacao', back_populates='produto', lazy='dynamic')
@@ -40,6 +42,8 @@ class Produto(db.Model):
     
     # Restrições
     __table_args__ = (
+        # EAN é único por restaurante: dois bares compram o mesmo produto.
+        db.UniqueConstraint('codigo', 'restaurant_id', name='uq_produto_codigo_restaurant'),
         CheckConstraint('estoque_atual >= 0', name='check_estoque_positivo'),
         CheckConstraint('estoque_minimo >= 0', name='check_estoque_minimo_positivo'),
         CheckConstraint('preco_unitario >= 0', name='check_preco_positivo'),

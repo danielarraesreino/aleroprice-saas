@@ -18,7 +18,10 @@ def login():
             flash('Email ou senha inválidos', 'danger')
             return redirect(url_for('auth.login'))
             
-        login_user(usuario)
+        # `lembrar` vem marcado por padrão no form. Sem cookie persistente o
+        # login morre quando o navegador do celular descarta a aba — o que
+        # acontece toda vez que se abre a câmera no meio de uma visita.
+        login_user(usuario, remember=bool(request.form.get('lembrar')))
         next_page = request.args.get('next')
         if not next_page or not next_page.startswith('/'):
             next_page = url_for('dashboard.index')

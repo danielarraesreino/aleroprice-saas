@@ -396,6 +396,13 @@
       </div>
       <div class="preco-txt">
         <p>{{ preco_detalhe }}</p>
+        {# Único caminho de auto-atendimento do funil: antes, /cadastro só era
+           linkado pela página de 404. #}
+        <p style="margin-top:14px">
+          <a href="{{ url_for('public.cadastro') }}" style="color:var(--lime);text-decoration:underline">
+            Prefere começar sozinho? Crie seu site agora →
+          </a>
+        </p>
       </div>
     </div>
   </div>

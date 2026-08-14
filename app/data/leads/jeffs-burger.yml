@@ -1,0 +1,29 @@
+# Jeff's Burger — Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/jeffs-burger/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Volume brutal de madrugada e fila no caixa. Gancho: pedido pelo celular tira a fila e acelera o giro.
+
+nome: "Jeff's Burger"
+tema: neon-noite
+
+site:
+  vibe: hamburgueria
+  descritor: "Lanche grande em Campinas"
+  kicker: "CAMPINAS–SP"
+  hero_linha1: "Jeff's"
+  hero_linha2: "Burger"
+  tagline: "Prensado, generoso e madrugada adentro."
+  subline: "PRENSADO · HOT DOG · MADRUGADA"
+  cidade_uf: "Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/jeffs-burger/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

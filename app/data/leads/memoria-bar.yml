@@ -1,0 +1,31 @@
+# Memória Bar — Cambuí, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/memoria-bar/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Nota 4,9 e carta de vinhos que muda. Gancho: proteger essa nota — quando lota, a demora vira avaliação ruim; reserva organiza a noite.
+
+nome: "Memória Bar"
+tema: pub-escuro
+
+site:
+  vibe: pub
+  descritor: "Vinhos e coquetelaria no Cambuí"
+  kicker: "CAMBUÍ · CAMPINAS–SP"
+  hero_linha1: "Memória"
+  hero_linha2: "Bar"
+  tagline: "Carta de vinhos, luz baixa e conversa que rende."
+  subline: "VINHOS · DRINKS · CAMBUÍ"
+  cidade_uf: "Cambuí, Campinas–SP"
+  nota_google: "4,9"
+  selo_estrelas: "4,9 no Google"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/memoria-bar/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

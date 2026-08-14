@@ -1,0 +1,29 @@
+# Zé Burguer — Centro, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/ze-burguer/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Já usa promoção semanal como gatilho (batata de brinde na quarta). Gancho: essa promoção fica no site anunciando o dia e ganha destaque quando chega.
+
+nome: "Zé Burguer"
+tema: neon-noite
+
+site:
+  vibe: hamburgueria
+  descritor: "Hamburgueria no Centro de Campinas"
+  kicker: "CENTRO · CAMPINAS–SP"
+  hero_linha1: "Zé"
+  hero_linha2: "Burguer"
+  tagline: "Promoção que a galera espera a semana toda."
+  subline: "PROMOÇÃO · BATATA · CENTRO"
+  cidade_uf: "Centro, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/ze-burguer/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

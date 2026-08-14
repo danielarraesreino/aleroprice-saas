@@ -1,0 +1,31 @@
+# Giovannetti Rosário — Centro, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/giovannetti/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Patrimônio da boemia desde 1937 e presença digital fraca pro tamanho da história. Gancho: colocar a história da casa numa página que o Google mostra.
+
+nome: "Giovannetti Rosário"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Clássico da boemia de Campinas"
+  kicker: "CENTRO · CAMPINAS–SP · DESDE 1937"
+  hero_linha1: "Giovannetti"
+  hero_linha2: "Rosário"
+  tagline: "Desde 1937 no Centro: tradição que não precisa de apresentação."
+  subline: "TRADIÇÃO · CHOPP · CENTRO"
+  cidade_uf: "Centro, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/giovannetti/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram não confirmado (o relatório sugeria @giovannetticampinas).
+# Confirme o perfil e adicione instagram_url em site:.
+demo:
+  fonte: relatorio-rmc

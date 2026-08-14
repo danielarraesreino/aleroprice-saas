@@ -1,0 +1,29 @@
+# Bronco Burger — Barão Geraldo, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/bronco-burger/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Tem lanche-assinatura conhecido. Gancho: destacar o carro-chefe no topo do cardápio digital, empurrando o item de maior margem.
+
+nome: "Bronco Burger"
+tema: neon-noite
+
+site:
+  vibe: hamburgueria
+  descritor: "Hamburgueria artesanal em Barão"
+  kicker: "BARÃO GERALDO · CAMPINAS–SP"
+  hero_linha1: "Bronco"
+  hero_linha2: "Burger"
+  tagline: "Marca forte, lanche que virou assinatura."
+  subline: "ARTESANAL · CHIMI · ICÔNICO"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/bronco-burger/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

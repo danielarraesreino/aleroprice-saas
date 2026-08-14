@@ -1,0 +1,31 @@
+# Bar do Ademir — Barão Geraldo, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/bar-do-ademir/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Público jovem que resolve tudo pelo celular. Gancho: o cliente pede e paga no próprio telefone, sem disputar a atenção do garçom no som alto.
+
+nome: "Bar do Ademir"
+tema: neon-noite
+
+site:
+  vibe: boteco
+  descritor: "Forró e pista em Barão Geraldo"
+  kicker: "BARÃO GERALDO · CAMPINAS–SP"
+  hero_linha1: "Bar"
+  hero_linha2: "do Ademir"
+  tagline: "Som alto, pista cheia e a galera da Unicamp."
+  subline: "FORRÓ · PISTA · UNIVERSITÁRIO"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/bar-do-ademir/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram não confirmado (o relatório sugeria @contatobardoademir).
+# Confirme o perfil e adicione instagram_url em site:.
+demo:
+  fonte: relatorio-rmc

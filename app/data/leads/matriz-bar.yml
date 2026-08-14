@@ -1,0 +1,29 @@
+# Matriz Bar — Hortolândia–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/matriz-bar/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Consumo de repetição o tempo todo. Gancho: 'pedir mais um chopp' num toque no celular sobe o consumo por mesa na noite.
+
+nome: "Matriz Bar"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Bar de chopp em Hortolândia"
+  kicker: "HORTOLÂNDIA–SP"
+  hero_linha1: "Matriz"
+  hero_linha2: "Bar"
+  tagline: "Chopp claro e escuro, torresmo em rolo e caneca suada."
+  subline: "CHOPP · TORRESMO · ESPETOS"
+  cidade_uf: "Hortolândia–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/matriz-bar/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

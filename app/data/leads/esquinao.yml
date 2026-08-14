@@ -1,0 +1,29 @@
+# Esquinão — Sousas, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/esquinao/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Prato do dia acaba e o cliente pede o que não tem. Gancho: item some do cardápio com um toque, sem frustrar ninguém.
+
+nome: "Esquinão"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Tradicional no centrinho de Sousas"
+  kicker: "SOUSAS · CAMPINAS–SP"
+  hero_linha1: "Esquinão"
+  hero_linha2: ""
+  tagline: "Calçada cheia e o melhor ponto pra ver Sousas passar."
+  subline: "CHOPP · PORÇÕES · CENTRINHO"
+  cidade_uf: "Sousas, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/esquinao/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

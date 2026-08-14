@@ -1,0 +1,29 @@
+# Tuga's Bar — Sumaré–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/tugas-bar/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Vive de evento temático. Gancho: agenda dos eventos no site — o público sabe com antecedência e a casa enche antes da data.
+
+nome: "Tuga's Bar"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Bar e eventos em Sumaré"
+  kicker: "SUMARÉ–SP"
+  hero_linha1: "Tuga's"
+  hero_linha2: "Bar"
+  tagline: "Encontro de motociclista, feijoada colossal e jantar temático."
+  subline: "FEIJOADA · MOTOS · TEMÁTICO"
+  cidade_uf: "Sumaré–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/tugas-bar/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

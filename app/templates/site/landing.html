@@ -3,37 +3,50 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{{ site.nome }} — Buteco de família em Campinas · Samba, costelinha e comida de vó</title>
-<meta name="description" content="{{ site.nome }} — {{ site.tagline }}">
+{# `descritor` é o subtítulo da marca. Nulo cai na cidade, e nunca em "buteco de
+   família em Campinas" — que era o texto do Bar da Vila indo pra todo bar. #}
+{% set descritor = site.descritor or site.cidade_uf or 'Bar e restaurante' %}
+<title>{{ site.nome }} — {{ descritor }}</title>
+<meta name="description" content="{{ site.nome }} — {{ site.tagline or descritor }}">
 {# URL absoluta https pro card de compartilhamento (WhatsApp/Facebook/Instagram exigem) #}
 {% set og_base = 'https://' ~ request.host %}
-{# Card de compartilhamento: a foto de capa DESTE bar. Antes era sempre a do Bar
-   da Vila — ou seja, todo bar compartilhava a foto de outro no WhatsApp. #}
-{% set og_img = og_base ~ url_for('static', filename=(site.hero_foto or 'img/og-bardavila.jpg')) %}
+{# Card de compartilhamento: a foto de capa DESTE bar. Sem foto própria, nenhuma
+   tag de imagem — mandar a capa de outro bar é pior que não ter card. #}
+{% set og_img = (og_base ~ url_for('static', filename=site.hero_foto)) if site.hero_foto else None %}
+{% if tenant and tenant.eh_demo %}
+{# Prévia comercial não autorizada: não pode ser indexada nem competir com o
+   negócio real do dono no Google. Ver app/utils/demos.py. #}
+<meta name="robots" content="noindex,nofollow,noarchive">
+{% endif %}
 <meta property="og:site_name" content="{{ site.nome }}">
-<meta property="og:title" content="{{ site.nome }} — Buteco de família em Campinas">
-<meta property="og:description" content="{{ site.tagline }}">
+<meta property="og:title" content="{{ site.nome }} — {{ descritor }}">
+<meta property="og:description" content="{{ site.tagline or descritor }}">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="pt_BR">
 <meta property="og:url" content="{{ og_base ~ request.path }}">
+{% if og_img %}
 <meta property="og:image" content="{{ og_img }}">
 <meta property="og:image:secure_url" content="{{ og_img }}">
 <meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="{{ site.nome }} — buteco de família em Campinas">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="{{ site.nome }} — Buteco de família em Campinas">
-<meta name="twitter:description" content="{{ site.tagline }}">
-<meta name="twitter:image" content="{{ og_img }}">
-<meta name="theme-color" content="#100a06">
+<meta property="og:image:alt" content="{{ site.nome }} — {{ descritor }}">
+{% endif %}
+<meta name="twitter:card" content="{{ 'summary_large_image' if og_img else 'summary' }}">
+<meta name="twitter:title" content="{{ site.nome }} — {{ descritor }}">
+<meta name="twitter:description" content="{{ site.tagline or descritor }}">
+{% if og_img %}<meta name="twitter:image" content="{{ og_img }}">{% endif %}
+<meta name="theme-color" content="{{ tema_cor or '#100a06' }}">
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
 <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon-32.png') }}">
 <link rel="icon" type="image/png" sizes="64x64" href="{{ url_for('static', filename='img/favicon-64.png') }}">
 <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
 <script>
   // aplica tema salvo antes de pintar (evita flash)
-  (function(){var t=localStorage.getItem('bdv-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');})();
+  // Chave por bar: dois sites no mesmo navegador não compartilham preferência.
+  (function(){var k='fdb-theme-{{ tenant.slug if tenant and tenant.slug else "site" }}';
+   var t=localStorage.getItem(k)||localStorage.getItem('bdv-theme');
+   if(t==='light')document.documentElement.setAttribute('data-theme','light');})();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -467,16 +480,48 @@
 {# Paleta do bar. Vazio no tema padrão (boteco-ambar) — o :root acima já é ele.
    Qualquer outro preset sobrescreve as variáveis. Ver app/utils/temas.py. #}
 {% if tema_css %}<style>{{ tema_css|safe }}</style>{% endif %}
+{% if tenant and tenant.eh_demo %}
+<style>
+  .previa{position:fixed;left:0;right:0;bottom:0;z-index:200;
+    background:#1b1206;border-top:2px solid var(--amber, #ffb43d);
+    color:#f3e7d2;font-family:ui-sans-serif,system-ui,sans-serif;font-size:.86rem;
+    padding:12px 16px;display:flex;gap:12px;align-items:center;justify-content:center;
+    flex-wrap:wrap;text-align:center;box-shadow:0 -8px 24px rgba(0,0,0,.35)}
+  .previa b{color:var(--amber, #ffb43d)}
+  .previa a{color:#231206;background:var(--amber, #ffb43d);text-decoration:none;
+    font-weight:700;padding:8px 16px;border-radius:999px;white-space:nowrap}
+  .previa .fechar{background:none;border:1px solid rgba(243,231,210,.35);color:#f3e7d2;
+    border-radius:999px;padding:6px 12px;cursor:pointer;font:inherit}
+  body{padding-bottom:84px}
+  @media(max-width:600px){.previa{font-size:.78rem;padding:10px 12px}body{padding-bottom:132px}}
+</style>
+{% endif %}
 </head>
 <body>
+
+{% if tenant and tenant.eh_demo %}
+{# Prévia comercial: o bar ainda não é cliente e não pediu este site. Dizer isso
+   em alto e bom som é o que separa "demonstração" de "clone não autorizado".
+   O botão de assumir é o CTA da campanha; o de remoção é obrigação nossa. #}
+<div class="previa" role="complementary" id="previa">
+  <span>
+    <b>Prévia não oficial</b> — feita pelo Feira de Barão como demonstração.
+    Não é o site oficial de {{ site.nome }}.
+  </span>
+  <a href="https://wa.me/{{ site.whatsapp or contato_vendas }}?text={{ ('Quero assumir o site de ' ~ site.nome) | urlencode }}">Quero este site</a>
+  <a href="mailto:{{ email_vendas }}?subject={{ ('Remover prévia: ' ~ site.nome) | urlencode }}"
+     style="background:transparent;color:#f3e7d2;border:1px solid rgba(243,231,210,.35)">Pedir remoção</a>
+  <button class="fechar" onclick="document.getElementById('previa').remove();document.body.style.paddingBottom='0'">✕</button>
+</div>
+{% endif %}
 
 <nav>
   <a href="#topo" class="nav-logo"><img src="{{ url_for('static', filename='img/favicon-64.png') }}" alt="Logo {{ site.nome }}">{{ site.nome|upper }}</a>
   <div class="nav-links">
-    <a href="#cardapio">Cardápio</a>
-    <a href="#historia">História</a>
-    <a href="#avaliacoes">Avaliações</a>
-    <a href="#galeria">Galeria</a>
+    {% if dishes %}<a href="#cardapio">Cardápio</a>{% endif %}
+    {% if team or gallery %}<a href="#historia">História</a>{% endif %}
+    {% if reviews %}<a href="#avaliacoes">Avaliações</a>{% endif %}
+    {% if gallery %}<a href="#galeria">Galeria</a>{% endif %}
     {% if eventos %}<a href="#agenda">Agenda</a>{% endif %}
     <a href="#reservar">Reservar</a>
     <a href="#contato">Contato</a>
@@ -493,10 +538,10 @@
 <!-- MENU CANECA (mobile): a caneca derrama o chopp e revela os itens -->
 <div class="menu-scrim" id="menuScrim" onclick="toggleMenu()"></div>
 <div class="mobile-menu" id="mobileMenu" role="navigation" aria-label="Menu principal">
-  <a href="#cardapio" onclick="toggleMenu()">Cardápio</a>
-  <a href="#historia" onclick="toggleMenu()">História</a>
-  <a href="#avaliacoes" onclick="toggleMenu()">Avaliações</a>
-  <a href="#galeria" onclick="toggleMenu()">Galeria</a>
+  {% if dishes %}<a href="#cardapio" onclick="toggleMenu()">Cardápio</a>{% endif %}
+  {% if team or gallery %}<a href="#historia" onclick="toggleMenu()">História</a>{% endif %}
+  {% if reviews %}<a href="#avaliacoes" onclick="toggleMenu()">Avaliações</a>{% endif %}
+  {% if gallery %}<a href="#galeria" onclick="toggleMenu()">Galeria</a>{% endif %}
   {% if eventos %}<a href="#agenda" onclick="toggleMenu()">Agenda</a>{% endif %}
   <a href="#reservar" onclick="toggleMenu()">Reservar</a>
   <a href="#contato" onclick="toggleMenu()">Contato</a>
@@ -514,16 +559,17 @@
   <p class="subline">{{ site.subline }}</p>
   <div class="stars-badge"><span class="st">★★★★★</span> {{ site.selo_estrelas }}</div>
   <div class="cta-row">
-    <a class="btn btn-primary" href="https://wa.me/{{ site.whatsapp }}?text=Ol%C3%A1!%20Vim%20pelo%20site%20do%20Bar%20da%20Vila" target="_blank" rel="noopener">Chamar no WhatsApp</a>
+    <a class="btn btn-primary" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener">Chamar no WhatsApp</a>
     <a class="btn btn-ghost" href="https://www.google.com/maps/search/?api=1&query={{ site.maps_query }}" target="_blank" rel="noopener">Como chegar</a>
   </div>
-  <div class="scroll-hint">↓ role e sente o cheiro</div>
+  <div class="scroll-hint">{{ copy.scroll }}</div>
 </header>
 
 <div class="marquee">
+  {# Itens da vibe do bar. Antes era o cardápio do Bar da Vila em todo site. #}
+  {% set faixa = (site.subline.split('·') if site.subline and '·' in site.subline else copy.marquee) %}
   <div class="track">
-    COSTELINHA <span>◆</span> CROQUETE DA BRUNA <span>◆</span> CARBONARA <span>◆</span> PASTÉIS <span>◆</span> ORA-PRO-NÓBIS <span>◆</span> SAMBA AO VIVO <span>◆</span> CERVEJA GELADA <span>◆</span>
-    COSTELINHA <span>◆</span> CROQUETE DA BRUNA <span>◆</span> CARBONARA <span>◆</span> PASTÉIS <span>◆</span> ORA-PRO-NÓBIS <span>◆</span> SAMBA AO VIVO <span>◆</span> CERVEJA GELADA <span>◆</span>
+    {% for _ in range(2) %}{% for item in faixa %}{{ item|trim|upper }} <span>◆</span> {% endfor %}{% endfor %}
   </div>
 </div>
 
@@ -532,8 +578,8 @@
 <section class="sec" id="promocoes" style="padding-top:clamp(50px,7vw,80px)">
   <div class="wrap">
     <div class="reveal">
-      <div class="eyebrow">TÁ ROLANDO AGORA</div>
-      <div class="h2">Promoções da <em>casa</em></div>
+      <div class="eyebrow">{{ copy.promocoes.eyebrow }}</div>
+      <div class="h2">{{ copy.promocoes.titulo|safe }}</div>
     </div>
     <div class="promo-grid reveal">
       {% for p in promocoes %}
@@ -555,12 +601,13 @@
 {% endif %}
 
 <!-- CARDÁPIO -->
+{% if dishes %}
 <section class="sec" id="cardapio">
   <div class="wrap">
     <div class="reveal">
-      <div class="eyebrow">O QUE SAI DA COZINHA</div>
-      <div class="h2">Comida de <em>buteco</em>, feita com amor</div>
-      <p class="lead">Receita de família, tempero de vó. Porções generosas pra dividir na mesa — de R$ 20 a R$ 40 por pessoa.</p>
+      <div class="eyebrow">{{ copy.cardapio.eyebrow }}</div>
+      <div class="h2">{{ copy.cardapio.titulo|safe }}</div>
+      {% if copy.cardapio.lead %}<p class="lead">{{ copy.cardapio.lead }}</p>{% endif %}
     </div>
     <div class="menu-grid">
       {% for d in dishes %}
@@ -576,15 +623,17 @@
     </div>
   </div>
 </section>
+{% endif %}
 
 <!-- HISTÓRIA -->
+{% if team or gallery %}
 <section class="sec" id="historia" style="background:linear-gradient(180deg,transparent,rgba(42,23,13,.35),transparent)">
   <div class="wrap">
     <div class="story">
       <div class="reveal">
-        <div class="eyebrow">A FAMÍLIA</div>
-        <div class="h2">Cada um numa<br><em>posição do time</em></div>
-        <p>No {{ site.nome }} cada pessoa da equipe trabalha junto, em time — e isso é lindo de ver. É buteco raiz, acolhedor, onde você chega cliente e sai da família.</p>
+        <div class="eyebrow">{{ copy.historia.eyebrow }}</div>
+        <div class="h2">{{ copy.historia.titulo|safe }}</div>
+        <p>{{ copy.historia.texto }}</p>
       </div>
       <div class="family reveal">
         {% if gallery %}<img class="fam-photo" src="{{ gallery[0].img }}" alt="A equipe do {{ site.nome }}" loading="lazy">{% endif %}
@@ -595,19 +644,25 @@
     </div>
   </div>
 </section>
+{% endif %}
 
 <!-- AVALIAÇÕES -->
+{% if reviews %}
 <section class="sec" id="avaliacoes">
   <div class="wrap">
     <div class="rev-head reveal">
       <div>
-        <div class="eyebrow">QUEM VEM, VOLTA</div>
-        <div class="h2">Nota <em>quase perfeita</em></div>
+        <div class="eyebrow">{{ copy.avaliacoes.eyebrow }}</div>
+        <div class="h2">{{ copy.avaliacoes.titulo|safe }}</div>
       </div>
+      {# Nota real deste bar. Sem o dado, o bloco some — exibir 4,9/39 fixo era
+         publicar a reputação de um bar na página de outro. #}
+      {% if site.nota_google %}
       <div class="rev-score">
-        <div class="big">4,9<span style="font-size:.4em;color:var(--amber)">★</span></div>
-        <small>39 AVALIAÇÕES · GOOGLE</small>
+        <div class="big">{{ site.nota_google }}<span style="font-size:.4em;color:var(--amber)">★</span></div>
+        {% if site.qtd_avaliacoes %}<small>{{ site.qtd_avaliacoes }} AVALIAÇÕES · GOOGLE</small>{% endif %}
       </div>
+      {% endif %}
     </div>
     <div class="reviews">
       {% for r in reviews %}
@@ -616,18 +671,19 @@
     </div>
   </div>
 </section>
+{% endif %}
 
 <!-- AO VIVO -->
 <section class="sec" id="aovivo" style="background:linear-gradient(180deg,transparent,rgba(42,23,13,.35),transparent)">
   <div class="wrap">
     <div class="reveal">
-      <div class="eyebrow">O CLIMA DA CASA</div>
-      <div class="h2">Tem samba, tem <em>resenha</em></div>
+      <div class="eyebrow">{{ copy.clima.eyebrow }}</div>
+      <div class="h2">{{ copy.clima.titulo|safe }}</div>
     </div>
     <div class="live">
-      <div class="card reveal"><span class="em">🎶</span><b>Samba ao vivo</b><small>Fim de semana tem festa rolando</small></div>
-      <div class="card reveal"><span class="em">🍺</span><b>Cerveja gelada</b><small>Do jeito que buteco bom exige</small></div>
-      <div class="card reveal"><span class="em">🚗</span><b>Drive-through</b><small>Refeição no local ou pega e leva</small></div>
+      {% for emoji, titulo, sub in copy.clima.cards %}
+      <div class="card reveal"><span class="em">{{ emoji }}</span><b>{{ titulo }}</b><small>{{ sub }}</small></div>
+      {% endfor %}
     </div>
   </div>
 </section>
@@ -637,9 +693,9 @@
 <section class="sec" id="agenda" style="background:linear-gradient(180deg,transparent,rgba(42,23,13,.35),transparent)">
   <div class="wrap">
     <div class="reveal">
-      <div class="eyebrow">MARCA NA AGENDA</div>
-      <div class="h2">Próximos <em>eventos</em></div>
-      <p class="lead">Samba, roda e festa na Vila. Vem que tem sempre coisa boa rolando.</p>
+      <div class="eyebrow">{{ copy.agenda.eyebrow }}</div>
+      <div class="h2">{{ copy.agenda.titulo|safe }}</div>
+      <p class="lead">{{ copy.agenda.lead }}</p>
     </div>
     {% set meses = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'] %}
     <div class="agenda-list reveal">
@@ -659,12 +715,13 @@
 {% endif %}
 
 <!-- GALERIA -->
+{% if gallery %}
 <section class="sec" id="galeria">
   <div class="wrap">
     <div class="reveal">
-      <div class="eyebrow">DÁ UMA OLHADA</div>
-      <div class="h2">Momentos da <em>Vila</em></div>
-      <p class="lead">Da chapa ao samba, da mesa cheia à cerveja gelada. É assim que é por aqui.</p>
+      <div class="eyebrow">{{ copy.galeria.eyebrow }}</div>
+      <div class="h2">{{ copy.galeria.titulo|safe }}</div>
+      {% if copy.galeria.lead %}<p class="lead">{{ copy.galeria.lead }}</p>{% endif %}
     </div>
     <div class="gallery reveal">
       {% for g in gallery %}
@@ -675,16 +732,27 @@
     </div>
   </div>
 </section>
+{% endif %}
 
 <!-- RESERVA -->
 <section class="sec" id="reservar" style="background:linear-gradient(180deg,transparent,rgba(42,23,13,.35),transparent)">
   <div class="wrap">
     <div class="reserva-wrap">
       <div class="reserva-side reveal">
-        <div class="eyebrow">GARANTA SUA MESA</div>
-        <div class="h2">Reserve sua <em>mesa</em></div>
-        <p class="lead">Fim de semana com samba lota rápido. Reserva sua mesa em 30 segundos — a gente confirma no seu WhatsApp e deixa a cerveja gelando.</p>
+        <div class="eyebrow">{{ copy.reserva.eyebrow }}</div>
+        <div class="h2">{{ copy.reserva.titulo|safe }}</div>
+        <p class="lead">{{ copy.reserva.lead }}</p>
       </div>
+      {% if not reservas_ativas %}
+      <div class="reserva-form reveal" style="display:flex;flex-direction:column;justify-content:center;gap:16px">
+        <p style="color:var(--cream-dim)">{{ copy.reserva_ui.fallback }}</p>
+        {% if site.whatsapp %}
+        <a class="btn btn-primary" style="text-align:center"
+           href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}"
+           target="_blank" rel="noopener">Chamar no WhatsApp</a>
+        {% endif %}
+      </div>
+      {% else %}
       <form class="reserva-form reveal" id="reservaForm" onsubmit="return enviarReserva(event)" novalidate>
         {# Quando o site é servido pelo domínio do bar, o backend resolve o tenant
            pelo Host. Em /bar/<slug> (demos) o Host é o do produto — daí este campo. #}
@@ -717,13 +785,14 @@
           <label for="rf-obs">Observação (opcional)</label>
           <textarea id="rf-obs" name="observacao" placeholder="Aniversário? Cadeira de bebê? Conta pra gente."></textarea>
         </div>
-        <button class="btn btn-primary" type="submit" style="width:100%">Reservar mesa 🍺</button>
+        <button class="btn btn-primary" type="submit" style="width:100%">{{ copy.reserva_ui.botao }}</button>
         <div class="reserva-msg" id="reservaMsg" role="status" aria-live="polite"></div>
         <a class="reserva-wa" id="reservaWa" href="#" target="_blank" rel="noopener">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M.06 24l1.68-6.13A11.9 11.9 0 0 1 .16 11.9C.16 5.34 5.5.02 12.06.02a11.8 11.8 0 0 1 8.4 3.49 11.8 11.8 0 0 1 3.48 8.4c0 6.56-5.34 11.89-11.9 11.89a11.9 11.9 0 0 1-5.7-1.45L.06 24zM6.6 20.15c1.68.998 3.28 1.6 5.44 1.6 5.45 0 9.89-4.43 9.89-9.88 0-5.46-4.43-9.89-9.88-9.89-5.46 0-9.89 4.43-9.89 9.89 0 2.27.6 3.98 1.7 5.7l-1 3.65 3.65-.97zM17.5 14.3c-.07-.12-.27-.2-.57-.35-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.08.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2-1.41.25-.7.25-1.29.17-1.42z"/></svg>
-          Avisar o bar no WhatsApp
+          {{ copy.reserva_ui.titulo }}
         </a>
       </form>
+      {% endif %}
     </div>
   </div>
 </section>
@@ -732,20 +801,20 @@
 <section class="sec" id="contato">
   <div class="wrap">
     <div class="reveal">
-      <div class="eyebrow">VEM PRA VILA</div>
-      <div class="h2">Onde a gente <em>te espera</em></div>
+      <div class="eyebrow">{{ copy.contato.eyebrow }}</div>
+      <div class="h2">{{ copy.contato.titulo|safe }}</div>
     </div>
     <div class="contact">
       <ul class="info-list reveal">
         <li><span class="em">📍</span><span><b>Endereço</b>{{ site.endereco }}</span></li>
         <li><span class="em">🕐</span><span><b>Horário</b>{{ site.horario }}</span></li>
         <li><span class="em">📞</span><span><b>Telefone / WhatsApp</b>{{ site.telefone_exibicao }}</span></li>
-        <li><span class="em">🍴</span><span><b>Serviços</b>Refeição no local · Drive-through</span></li>
+        {% if site.servicos %}<li><span class="em">🍴</span><span><b>Serviços</b>{{ site.servicos }}</span></li>{% endif %}
       </ul>
       <div class="map-cta reveal">
-        <h3>Bateu a fome?</h3>
-        <p style="color:var(--cream-dim)">Chama no zap, reserva a mesa ou já vem chegando. A cerveja tá gelando.</p>
-        <a class="btn btn-primary" href="https://wa.me/{{ site.whatsapp }}?text=Ol%C3%A1!%20Quero%20reservar%20uma%20mesa%20no%20Bar%20da%20Vila" target="_blank" rel="noopener" style="text-align:center">Falar no WhatsApp</a>
+        <h3>{{ copy.cta.titulo }}</h3>
+        <p style="color:var(--cream-dim)">{{ copy.cta.linha }}</p>
+        <a class="btn btn-primary" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener" style="text-align:center">Falar no WhatsApp</a>
         <a class="btn btn-ghost" href="https://www.google.com/maps/search/?api=1&query={{ site.maps_query }}" target="_blank" rel="noopener" style="text-align:center">Abrir no mapa</a>
       </div>
     </div>
@@ -755,7 +824,7 @@
 <footer>
   <div class="wrap">
     <div class="fneon">{{ site.nome }}</div>
-    <small>Buteco de família · {{ site.cidade_uf }} · Feito com samba e ora-pro-nóbis 💛</small>
+    <small>{% if site.cidade_uf %}{{ site.cidade_uf }} · {% endif %}{{ copy.rodape }}</small>
     <div class="socials">
       <a href="{{ site.instagram_url }}" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram">
         <svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.9.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.86s0 3.6-.07 4.86c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.86.07s-3.6 0-4.86-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23C2.2 15.6 2.2 15.2 2.2 12s0-3.6.07-4.86c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.4 2.2 8.8 2.2 12 2.2zm0 1.98c-3.15 0-3.52.01-4.76.07-.9.04-1.39.2-1.71.32-.43.17-.74.37-1.06.69-.32.32-.52.63-.69 1.06-.12.32-.28.81-.32 1.71-.06 1.24-.07 1.61-.07 4.76s.01 3.52.07 4.76c.04.9.2 1.39.32 1.71.17.43.37.74.69 1.06.32.32.63.52 1.06.69.32.12.81.28 1.71.32 1.24.06 1.61.07 4.76.07s3.52-.01 4.76-.07c.9-.04 1.39-.2 1.71-.32.43-.17.74-.37 1.06-.69.32-.32.52-.63.69-1.06.12-.32.28-.81.32-1.71.06-1.24.07-1.61.07-4.76s-.01-3.52-.07-4.76c-.04-.9-.2-1.39-.32-1.71-.17-.43-.37-.74-.69-1.06-.32-.32-.63-.52-1.06-.69-.32-.12-.81-.28-1.71-.32-1.24-.06-1.61-.07-4.76-.07zm0 3.38a4.44 4.44 0 1 1 0 8.88 4.44 4.44 0 0 1 0-8.88zm0 7.32a2.88 2.88 0 1 0 0-5.76 2.88 2.88 0 0 0 0 5.76zm5.65-7.52a1.04 1.04 0 1 1-2.08 0 1.04 1.04 0 0 1 2.08 0z"/></svg>
@@ -772,18 +841,25 @@
   <span class="x">✕</span><img id="lightbox-img" src="" alt="Foto do {{ site.nome }}">
 </div>
 
-<a class="wa" href="https://wa.me/{{ site.whatsapp }}?text=Ol%C3%A1!%20Vim%20pelo%20site%20do%20Bar%20da%20Vila" target="_blank" rel="noopener" aria-label="WhatsApp">
+<a class="wa" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener" aria-label="WhatsApp">
   <svg viewBox="0 0 24 24"><path d="M.06 24l1.68-6.13A11.9 11.9 0 0 1 .16 11.9C.16 5.34 5.5.02 12.06.02a11.8 11.8 0 0 1 8.4 3.49 11.8 11.8 0 0 1 3.48 8.4c0 6.56-5.34 11.89-11.9 11.89a11.9 11.9 0 0 1-5.7-1.45L.06 24zM6.6 20.15c1.68.998 3.28 1.6 5.44 1.6 5.45 0 9.89-4.43 9.89-9.88 0-5.46-4.43-9.89-9.88-9.89-5.46 0-9.89 4.43-9.89 9.89 0 2.27.6 3.98 1.7 5.7l-1 3.65 3.65-.97zM17.5 14.3c-.07-.12-.27-.2-.57-.35-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.08.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2-1.41.25-.7.25-1.29.17-1.42z"/></svg>
 </a>
 
 <script>
+  var TEMA_KEY='fdb-theme-{{ tenant.slug if tenant and tenant.slug else "site" }}';
+  // Lê a cor de fundo real já com o preset aplicado, em vez de fixar hex do
+  // boteco-ambar: assim qualquer tema acerta a barra do navegador sozinho.
+  function corDeFundo(){
+    var v=getComputedStyle(document.documentElement).getPropertyValue('--ink');
+    return (v||'').trim()||'{{ tema_cor or "#100a06" }}';
+  }
   function toggleTheme(){
     var root=document.documentElement;
     var light=root.getAttribute('data-theme')!=='light';
-    if(light){root.setAttribute('data-theme','light');localStorage.setItem('bdv-theme','light');}
-    else{root.removeAttribute('data-theme');localStorage.setItem('bdv-theme','dark');}
+    if(light){root.setAttribute('data-theme','light');localStorage.setItem(TEMA_KEY,'light');}
+    else{root.removeAttribute('data-theme');localStorage.setItem(TEMA_KEY,'dark');}
     document.getElementById('theme-ic').textContent=light?'☾':'☀';
-    document.querySelector('meta[name=theme-color]').setAttribute('content',light?'#f6e9d2':'#100a06');
+    document.querySelector('meta[name=theme-color]').setAttribute('content',corDeFundo());
   }
   // sincroniza ícone com tema salvo no load
   document.addEventListener('DOMContentLoaded',function(){

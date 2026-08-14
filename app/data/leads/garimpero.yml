@@ -1,0 +1,33 @@
+# Cervejaria Garimpero — Barão Geraldo, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/garimpero/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Cliente senta na cadeira de praia e não quer entrar pra pedir. Gancho: pedido pelo celular direto da calçada.
+
+nome: "Cervejaria Garimpero"
+tema: pub-escuro
+
+site:
+  vibe: pub
+  descritor: "Brewpub em Barão Geraldo"
+  kicker: "BARÃO GERALDO · CAMPINAS–SP"
+  hero_linha1: "Cervejaria"
+  hero_linha2: "Garimpero"
+  tagline: "Cadeira de praia na calçada e chope da casa."
+  subline: "CHOPE DA CASA · FOOD TRUCK · CALÇADA"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+  nota_google: "4,7"
+  selo_estrelas: "4,7 no Google"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/garimpero/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram não confirmado (o relatório sugeria @cervejariagarimpero).
+# Confirme o perfil e adicione instagram_url em site:.
+demo:
+  fonte: relatorio-rmc

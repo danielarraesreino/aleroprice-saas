@@ -19,7 +19,8 @@ WHATSAPP_BAR_DA_VILA = '5519999779942'
 @pytest.fixture
 def bar_da_vila(session):
     r = Restaurante(nome='Bar da Vila', cnpj='11111111000191',
-                    slug='bar-da-vila', dominio='bardavila.bar')
+                    slug='bar-da-vila', dominio='bardavila.bar',
+                    subscription_tier='site')   # cliente pagante: recebe reserva
     session.add(r)
     session.commit()
     session.add(SiteConfig(restaurant_id=r.id, nome='Bar da Vila',
@@ -32,7 +33,8 @@ def bar_da_vila(session):
 def bar_novo(session):
     """Cliente novo, ainda sem SiteConfig — o caso que vazava."""
     r = Restaurante(nome='Bar do Ze', cnpj='22222222000192',
-                    slug='bar-do-ze', dominio=None)
+                    slug='bar-do-ze', dominio=None,
+                    subscription_tier='site')
     session.add(r)
     session.commit()
     return r

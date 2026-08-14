@@ -1,0 +1,39 @@
+# Toca do Tatu Espetaria — Barão Geraldo, Campinas–SP
+# Lead da varredura de Barão (14/08/2026). Foto: coloque os arquivos em
+# app/static/img/demo/toca-do-tatu/ e aponte abaixo.
+#
+# NÃO CONFUNDIR com tatu-bola.yml (Cambuí) — são casas diferentes.
+#
+# POR QUE LIGAR PRA ELE:
+# Espetaria de esquina, mesas ao ar livre, cachaças artesanais. Gancho: a
+# carta de cachaças no cardápio-vitrine — cada rótulo com origem e descrição
+# vende dose que o balcão não vende. Esquina ao ar livre + fim de semana
+# cheio = reserva resolve briga por mesa.
+
+nome: "Toca do Tatu"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Espetaria de esquina com cachaças artesanais"
+  kicker: "BARÃO GERALDO · CAMPINAS–SP"
+  hero_linha1: "Toca"
+  hero_linha2: "do Tatu"
+  tagline: "Espeto na brasa, mesa na calçada e cachaça de alambique."
+  subline: "ESPETOS · CACHAÇAS ARTESANAIS · MESA AO AR LIVRE"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+  endereco: "R. Ângelo Vicentim, 598 — Barão Geraldo"
+  horario: "Ter, Qua e Sex 15h–00h · Qui 15h–22h · Sáb 11h–00h"
+  maps_query: "Toca do Tatu Espetaria Campinas"
+  instagram_url: "https://www.instagram.com/tocadotatuespetaria/"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/toca-do-tatu/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram @tocadotatuespetaria confirmado em 14/08/2026 (morandoembarao.com).
+demo:
+  fonte: varredura-barao

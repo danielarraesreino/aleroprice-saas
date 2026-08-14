@@ -1,0 +1,29 @@
+# Wood Bar — Hortolândia–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/wood-bar/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Vive do happy hour com preço por faixa de horário. Gancho: o desconto liga e desliga sozinho no horário certo, sem erro de cobrança.
+
+nome: "Wood Bar"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Happy hour em Hortolândia"
+  kicker: "HORTOLÂNDIA–SP"
+  hero_linha1: "Wood"
+  hero_linha2: "Bar"
+  tagline: "Balde de frango, mesa cheia e fim de tarde comprido."
+  subline: "FRANGO FRITO · BALDE · HAPPY HOUR"
+  cidade_uf: "Hortolândia–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/wood-bar/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

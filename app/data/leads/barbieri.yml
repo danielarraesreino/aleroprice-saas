@@ -1,0 +1,31 @@
+# Barbieri Futebol & Bar — Barão Geraldo, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/barbieri/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Dia de jogo é caos organizado. Gancho: agenda dos jogos no site e reserva de mesa antes da final — enche a casa sem telefonema.
+
+nome: "Barbieri Futebol & Bar"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Bar de jogo em Barão Geraldo"
+  kicker: "BARÃO GERALDO · CAMPINAS–SP"
+  hero_linha1: "Barbieri Futebol"
+  hero_linha2: "& Bar"
+  tagline: "Camisa na parede, telão ligado e pagode depois do apito final."
+  subline: "FUTEBOL · PAGODE · BALDE DE CERVEJA"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/barbieri/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram não confirmado (o relatório sugeria @barbieri_futebolebar).
+# Confirme o perfil e adicione instagram_url em site:.
+demo:
+  fonte: relatorio-rmc

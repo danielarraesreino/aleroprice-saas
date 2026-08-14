@@ -1,0 +1,169 @@
+{% extends "campo/base.html" %}
+{% block titulo %}Proposta · {{ dados.nome }}{% endblock %}
+
+{% block topo %}
+  <a class="voltar" href="{{ url_for('campo.editar', slug=rest.slug) }}"
+     aria-label="Voltar para a edição">‹</a>
+  <h1>Proposta · {{ dados.nome }}</h1>
+{% endblock %}
+
+{% block conteudo %}
+<style>
+  .linha-dado{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--linha)}
+  .linha-dado:last-child{border-bottom:0}
+  .linha-dado b{flex:none;width:92px;font-weight:600;color:var(--creme-dim);font-size:13px}
+  .linha-dado span{flex:1;min-width:0;overflow-wrap:anywhere}
+  .entrega{margin:0;padding-left:0;list-style:none}
+  .entrega li{padding:7px 0 7px 26px;position:relative;border-bottom:1px solid var(--linha)}
+  .entrega li:last-child{border-bottom:0}
+  .entrega li::before{content:'✓';position:absolute;left:2px;color:var(--ambar);font-weight:700}
+  .plano{border:1px solid var(--linha);border-radius:10px;padding:13px 14px;margin-bottom:10px}
+  .plano.destaque{border-color:var(--ambar)}
+  .plano .preco{font-size:22px;font-weight:700;color:var(--ambar)}
+  .plano .preco small{font-size:13px;font-weight:400;color:var(--creme-dim)}
+  .nota-google{border:1px solid var(--ambar);border-radius:10px;padding:13px 14px;
+    margin-bottom:10px;text-align:center;font-size:15px}
+  .nota-google strong{font-size:22px;font-weight:700;color:var(--ambar)}
+  .linha-venda{margin:0;font-size:15px}
+  @media print{
+    body{background:#fff;color:#111}
+    .topo,.no-print{display:none}
+    .bloco{background:#fff;border-color:#bbb;color:#111;break-inside:avoid}
+    .bloco>h2{color:#555}
+    .nota,.linha-dado b,.plano .preco small{color:#444}
+    a{color:#111}
+    .plano .preco,.nota-google strong{color:#111}
+    .nota-google{border-color:#bbb}
+    .entrega li::before{color:#111}
+    .entrega li,.linha-dado{border-color:#ddd}
+  }
+</style>
+
+<div class="bloco">
+  <h2>O bar</h2>
+  <div class="linha-dado"><b>Nome</b><span>{{ dados.nome }}</span></div>
+  {% if dados.descritor %}<div class="linha-dado"><b>Sobre</b><span>{{ dados.descritor }}</span></div>{% endif %}
+  {% if dados.endereco %}<div class="linha-dado"><b>Endereço</b><span>{{ dados.endereco }}{% if dados.cidade_uf %} — {{ dados.cidade_uf }}{% endif %}</span></div>{% endif %}
+  {% if dados.horario %}<div class="linha-dado"><b>Horário</b><span>{{ dados.horario }}</span></div>{% endif %}
+  {% if dados.instagram %}<div class="linha-dado"><b>Instagram</b><span><a href="{{ dados.instagram }}" target="_blank" rel="noopener">{{ dados.instagram|replace('https://','')|replace('http://','')|replace('www.','') }}</a></span></div>{% endif %}
+  {% if dados.whatsapp %}<div class="linha-dado"><b>WhatsApp</b><span>{{ dados.whatsapp }}</span></div>{% endif %}
+</div>
+
+<div class="bloco" style="text-align:center">
+  <h2>O site, já no ar</h2>
+  <div style="background:#fff;border-radius:12px;padding:14px;display:inline-block;max-width:210px">
+    <img src="{{ url_for('campo.qr', slug=rest.slug) }}" alt="QR code do site do {{ dados.nome }}"
+         style="width:100%;display:block">
+  </div>
+  <p style="margin:10px 0 0;overflow-wrap:anywhere">
+    <a href="{{ url_previa }}" target="_blank" rel="noopener">{{ url_previa|replace('https://','') }}</a>
+  </p>
+  {% if e_demo %}
+  <p class="nota">
+    Prévia não oficial, montada com dados públicos —
+    {% if expira_em %}sai do ar em <strong>{{ expira_em|data_br }}</strong>{% else %}fica no ar por {{ dias_validade }} dias{% endif %}
+    se ninguém assumir.
+  </p>
+  {% endif %}
+</div>
+
+<div class="bloco">
+  <h2>Google</h2>
+  {% if dados.nota_google %}
+  <div class="nota-google">
+    Sua nota no Google: <strong>{{ dados.nota_google }}★</strong>{% if dados.qtd_avaliacoes %} · {{ dados.qtd_avaliacoes }} avaliações{% endif %}
+  </div>
+  {% endif %}
+  <p class="linha-venda">Seu cliente te acha no Google e no Maps.
+  <strong>O site é onde ele decide entrar.</strong></p>
+  {% if not dados.nota_google %}
+  <p class="nota" style="margin:6px 0 0">ainda sem avaliações? o site é seu cartão enquanto elas chegam</p>
+  {% endif %}
+  {% if dados.maps_query %}
+  <p style="margin:8px 0 0">
+    <a href="https://www.google.com/maps/search/?api=1&query={{ dados.maps_query|urlencode }}"
+       target="_blank" rel="noopener">Ver no Maps</a>
+  </p>
+  {% endif %}
+</div>
+
+<div class="bloco">
+  <h2>Endereço próprio</h2>
+  {% if dominio_livre %}
+  <div class="nota-google" style="text-align:left">
+    <strong style="font-size:19px;overflow-wrap:anywhere">{{ dominio_livre }}</strong>
+    <div style="margin-top:4px;font-size:14px;color:var(--creme-dim)">está livre agora</div>
+  </div>
+  <p class="linha-venda">No plano Site ele é seu: <strong>registramos e conectamos</strong> —
+  incluso no primeiro ano.</p>
+  {% else %}
+  <p class="linha-venda">Seu bar merece um endereço próprio, não um link emprestado.
+  <strong>Consultamos os domínios disponíveis na hora</strong> e registramos no seu nome.</p>
+  {% endif %}
+
+  {% if dominios_consulta %}
+  <div style="margin-top:10px;font-size:14px">
+    {% for item in dominios_consulta %}
+    <div class="linha-dado" style="gap:8px">
+      <span style="overflow-wrap:anywhere">{{ item.dominio }}</span>
+      <b style="width:auto;flex:none;text-align:right;color:{{ 'var(--verde)' if item.livre else 'var(--creme-dim)' }}">
+        {% if item.livre %}livre{% elif item.livre is none %}conferir{% else %}ocupado{% endif %}
+      </b>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if taxa_setup %}
+  <p class="nota" style="margin:10px 0 0">Instalação única de <strong>{{ taxa_setup }}</strong>:
+  registro do domínio, conexão e publicação do site.</p>
+  {% endif %}
+</div>
+
+<div class="bloco">
+  <h2>O que o site já entrega</h2>
+  <ul class="entrega">
+    <li><strong>Reserva de mesa</strong> — o cliente pede pelo site e o aviso cai no seu WhatsApp na hora</li>
+    <li><strong>Agenda da casa</strong> — shows, eventos e o que tem em cada dia, sem depender de story</li>
+    <li><strong>Promoções</strong> — a oferta da semana com destaque, você mesmo troca do celular</li>
+    <li><strong>Cardápio-vitrine</strong> — os pratos com foto, descrição e preço, achável no Google</li>
+    <li><strong>Endereço, horário e rota</strong> — um toque e o Maps abre no caminho do bar</li>
+  </ul>
+</div>
+
+<div class="bloco">
+  <h2>Planos</h2>
+  <div class="plano destaque">
+    <div class="preco">{{ precos.site }}<small>/mês</small></div>
+    <strong>Site</strong>
+    <p class="nota" style="margin:4px 0 0">O site completo: domínio próprio, edição pelo celular,
+    reservas, agenda e promoções.</p>
+  </div>
+  <div class="plano">
+    <div class="preco">{{ precos.pro }}<small>/mês</small></div>
+    <strong>Pro</strong>
+    <p class="nota" style="margin:4px 0 0">Tudo do Site + gestão do negócio: ficha técnica,
+    estoque, nota fiscal de entrada e relatórios.</p>
+  </div>
+</div>
+
+<div class="bloco">
+  <h2>Ao assumir</h2>
+  <ul class="entrega">
+    <li>A conta vira <strong>sua</strong>, criada na hora, com seu e-mail e senha</li>
+    <li>Suas fotos oficiais substituem as da prévia</li>
+    <li>O site sai do modo prévia: o aviso some e ele passa a aparecer no Google</li>
+    <li><strong>{{ dias_trial }} dias de teste grátis</strong> antes da primeira mensalidade</li>
+  </ul>
+</div>
+
+<div class="no-print">
+  {% if dados.whatsapp %}
+  <a class="btn zap" style="text-decoration:none;margin-bottom:10px"
+     href="https://wa.me/{{ dados.whatsapp }}?text={{ ('Olá! Montamos o site do ' ~ dados.nome ~ ' — dá uma olhada: ' ~ url_previa ~ ' — Planos: Site ' ~ precos.site ~ '/mês ou Pro ' ~ precos.pro ~ '/mês, com ' ~ dias_trial ~ ' dias de teste grátis. Quer que eu deixe no seu nome?')|urlencode }}">
+    Mandar a proposta no WhatsApp dele
+  </a>
+  {% endif %}
+  <button class="btn fantasma" type="button" onclick="window.print()">Imprimir / salvar em PDF</button>
+</div>
+{% endblock %}

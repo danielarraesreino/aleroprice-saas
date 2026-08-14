@@ -1,0 +1,31 @@
+# Beco 105 — Vinhedo–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/beco-105/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Casa nova com visual forte. Gancho: site que acompanha o visual e vira o link do Instagram.
+
+nome: "Beco 105"
+tema: neon-noite
+
+site:
+  vibe: pub
+  descritor: "Bar contemporâneo em Vinhedo"
+  kicker: "VINHEDO–SP"
+  hero_linha1: "Beco"
+  hero_linha2: "105"
+  tagline: "Arquitetura marcante e noite que rende."
+  subline: "DRINKS · MÚSICA · CONTEMPORÂNEO"
+  cidade_uf: "Vinhedo–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/beco-105/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram não confirmado (o relatório sugeria @beco_105).
+# Confirme o perfil e adicione instagram_url em site:.
+demo:
+  fonte: relatorio-rmc

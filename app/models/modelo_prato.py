@@ -9,7 +9,8 @@ class Prato(db.Model):
     __tablename__ = 'pratos'
     
     id = db.Column(db.Integer, primary_key=True)
-    nome = db.Column(db.String(100), nullable=False, unique=True)
+    # Único POR RESTAURANTE, não global: dois bares podem ter 'Caipirinha'.
+    nome = db.Column(db.String(100), nullable=False)
     descricao = db.Column(db.Text)
     categoria = db.Column(db.String(50))  # Ex: Entrada, Prato Principal, Sobremesa
     rendimento = db.Column(db.Float, nullable=False)  # Quantidade total produzida
@@ -25,7 +26,7 @@ class Prato(db.Model):
     
     # Multi-Tenancy
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurante.id'), nullable=False)
-    
+
     # Relações
     insumos = db.relationship('PratoInsumo', back_populates='prato', cascade='all, delete-orphan')
     registros_desperdicio = db.relationship('RegistroDesperdicio', back_populates='prato')
@@ -33,6 +34,8 @@ class Prato(db.Model):
     
     # Restrições
     __table_args__ = (
+        # Nome do prato é único POR RESTAURANTE: 'Caipirinha' existe em todo bar.
+        db.UniqueConstraint('nome', 'restaurant_id', name='uq_prato_nome_restaurant'),
         CheckConstraint('rendimento > 0', name='check_rendimento_positivo'),
         CheckConstraint('margem >= 0', name='check_margem_positiva'),
         CheckConstraint('preco_venda >= 0', name='check_preco_venda_positivo'),

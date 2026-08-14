@@ -1,0 +1,29 @@
+# Cosvesi Brewpub — Hortolândia–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/cosvesi/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Cerveja técnica que precisa ser explicada pra vender. Gancho: descrição de cada rótulo no cardápio, educando o cliente sem ocupar o balcão.
+
+nome: "Cosvesi Brewpub"
+tema: pub-escuro
+
+site:
+  vibe: pub
+  descritor: "Cervejaria premiada em Hortolândia"
+  kicker: "HORTOLÂNDIA–SP"
+  hero_linha1: "Cosvesi"
+  hero_linha2: "Brewpub"
+  tagline: "Sours, ácidas e cerveja levada a sério."
+  subline: "SOUR · PREMIADA · ARTESANAL"
+  cidade_uf: "Hortolândia–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/cosvesi/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

@@ -1,0 +1,31 @@
+# Empório do Nono — Barão Geraldo, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/emporio-do-nono/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Mesa de frios é o produto visual da casa. Gancho: foto grande dos acepipes no cardápio digital vende porção sem o cliente levantar da mesa.
+
+nome: "Empório do Nono"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Boteco e empório em Barão Geraldo"
+  kicker: "BARÃO GERALDO · CAMPINAS–SP · DESDE 1999"
+  hero_linha1: "Empório"
+  hero_linha2: "do Nono"
+  tagline: "Mesa de frios, chorinho e esquina charmosa desde 1999."
+  subline: "TÁBUAS · CHORINHO · EMPÓRIO"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/emporio-do-nono/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram não confirmado (o relatório sugeria @emporiodonono).
+# Confirme o perfil e adicione instagram_url em site:.
+demo:
+  fonte: relatorio-rmc

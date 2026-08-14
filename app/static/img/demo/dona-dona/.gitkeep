@@ -1,0 +1,3 @@
+# Fotos de Pizzaria Dona Dona
+# capa.jpg = topo | prato-<nome>.jpg = cardapio | resto = galeria
+# Depois de colocar as fotos: flask aplicar-demos --slug dona-dona

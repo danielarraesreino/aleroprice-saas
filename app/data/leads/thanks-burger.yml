@@ -1,0 +1,29 @@
+# Thanks Burger — Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/thanks-burger/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Posicionamento de luxo. Gancho: experiência digital limpa reforça o padrão — nada de cardápio plastificado numa casa desse nível.
+
+nome: "Thanks Burger"
+tema: neon-noite
+
+site:
+  vibe: hamburgueria
+  descritor: "Hambúrguer de carne nobre"
+  kicker: "CAMPINAS–SP"
+  hero_linha1: "Thanks"
+  hero_linha2: "Burger"
+  tagline: "Wagyu, blend próprio e acabamento de restaurante."
+  subline: "WAGYU · NOBRE · AUTORAL"
+  cidade_uf: "Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/thanks-burger/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

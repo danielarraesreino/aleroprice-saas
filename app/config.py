@@ -19,6 +19,15 @@ class Config:
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or SECRET_KEY
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
 
+    # Sessão. O uso real é o celular numa visita: sair pra câmera ou pro
+    # WhatsApp e voltar não pode deslogar. Sem REMEMBER_COOKIE_DURATION o
+    # cookie de sessão morre junto com a aba.
+    REMEMBER_COOKIE_DURATION = timedelta(days=30)
+    REMEMBER_COOKIE_HTTPONLY = True
+    REMEMBER_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+
 class DevelopmentConfig(Config):
     """Configuração de desenvolvimento"""
     DEBUG = True
@@ -35,6 +44,10 @@ class ProductionConfig(Config):
     DEBUG = False
     # Use variáveis de ambiente em produção
     SECRET_KEY = os.environ.get('SECRET_KEY')
+    # HTTPS em produção: cookie de sessão e de "continuar conectado" só viajam
+    # cifrados. Fora daqui fica desligado, senão o login quebra em dev (http).
+    SESSION_COOKIE_SECURE = True
+    REMEMBER_COOKIE_SECURE = True
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
     # Prevent SQLite in production to avoid Read-Only FS errors
     if not SQLALCHEMY_DATABASE_URI:

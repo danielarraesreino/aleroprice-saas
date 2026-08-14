@@ -1,0 +1,29 @@
+# O Matuto Churrascaria — Hortolândia–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/o-matuto/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Salão enorme, cliente sem conseguir chamar o garçom. Gancho: botão no celular pra chamar atendimento e pedir a conta.
+
+nome: "O Matuto Churrascaria"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Churrascaria em Hortolândia"
+  kicker: "HORTOLÂNDIA–SP"
+  hero_linha1: "O"
+  hero_linha2: "Matuto Churrascaria"
+  tagline: "Rodízio, buffet farto e casa grande."
+  subline: "RODÍZIO · CHURRASCO · BUFFET"
+  cidade_uf: "Hortolândia–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/o-matuto/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

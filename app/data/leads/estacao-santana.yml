@@ -1,0 +1,29 @@
+# Estação Santana — Sousas, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/estacao-santana/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Público multigeracional, muita mesa de família grande. Gancho: reserva pra mesa de 12 pessoas chegar pronta, não improvisada.
+
+nome: "Estação Santana"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Casarão e comida caipira"
+  kicker: "SOUSAS · CAMPINAS–SP"
+  hero_linha1: "Estação"
+  hero_linha2: "Santana"
+  tagline: "Casa de época, mesa grande e comida de fogão a lenha."
+  subline: "CAIPIRA · FAMÍLIA · CASARÃO"
+  cidade_uf: "Sousas, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/estacao-santana/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

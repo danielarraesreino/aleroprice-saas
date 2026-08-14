@@ -1,0 +1,31 @@
+# Boteco do Pezão — Jardim Santa Genebra, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/boteco-do-pezao/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Fluxo de shopping traz pico fora de hora. Gancho: promoção que liga e desliga sozinha no dia certo.
+
+nome: "Boteco do Pezão"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Boteco em Santa Genebra"
+  kicker: "STA. GENEBRA · CAMPINAS–SP"
+  hero_linha1: "Boteco"
+  hero_linha2: "do Pezão"
+  tagline: "Do lado do shopping, do jeito que boteco bom tem que ser."
+  subline: "PORÇÕES · CHOPP · BAIRRO"
+  cidade_uf: "Jardim Santa Genebra, Campinas–SP"
+  nota_google: "4,7"
+  selo_estrelas: "4,7 no Google"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/boteco-do-pezao/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

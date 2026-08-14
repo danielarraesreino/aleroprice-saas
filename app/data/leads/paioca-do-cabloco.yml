@@ -1,0 +1,29 @@
+# Paioça do Cabloco — Sousas, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/paioca-do-cabloco/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Megaevento com fila de saída e risco de calote. Gancho: agenda dos shows no site, com o público sabendo data e atração antes.
+
+nome: "Paioça do Cabloco"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Casa de shows e sertanejo"
+  kicker: "SOUSAS · CAMPINAS–SP"
+  hero_linha1: "Paioça"
+  hero_linha2: "do Cabloco"
+  tagline: "Celeiro grande, palco montado e noite que vai longe."
+  subline: "SHOWS · SERTANEJO · EVENTOS"
+  cidade_uf: "Sousas, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/paioca-do-cabloco/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

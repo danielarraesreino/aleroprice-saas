@@ -1,81 +1,105 @@
 {% extends "base.html" %}
 
-{% block title %}Upgrade para Pro - AleroPrice{% endblock %}
+{% block title %}Planos · Feira de Barão{% endblock %}
+
+{# Preços vêm de env (planos.PRECOS), nunca do HTML: antes esta tela dizia
+   R$ 97 enquanto a landing de venda anunciava R$ 197. #}
 
 {% block content %}
 <div class="container mt-5">
-    <div class="text-center mb-5">
-        <h1 class="display-4 fw-bold text-primary">Desbloqueie o Poder Total 🚀</h1>
-        <p class="lead text-muted">Escolha o plano ideal para transformar seu restaurante em uma máquina de lucros.</p>
-    </div>
+  <div class="text-center mb-4">
+    <h1 class="display-6 fw-bold">Escolha seu plano</h1>
+    <p class="lead text-muted">Seu site continua no ar em qualquer plano. O que muda é o que você controla.</p>
+  </div>
 
-    <div class="row row-cols-1 row-cols-md-3 mb-3 text-center justify-content-center">
-        <!-- Plano Free -->
-        <div class="col">
-            <div class="card mb-4 rounded-3 shadow-sm">
-                <div class="card-header py-3">
-                    <h4 class="my-0 fw-normal">Free</h4>
-                </div>
-                <div class="card-body">
-                    <h1 class="card-title pricing-card-title">R$ 0<small class="text-muted fw-light">/mês</small></h1>
-                    <ul class="list-unstyled mt-3 mb-4">
-                        <li><i class="fas fa-check text-success me-2"></i> Importação de NFE</li>
-                        <li><i class="fas fa-check text-success me-2"></i> Cadastro Automático</li>
-                        <li><i class="fas fa-times text-danger me-2"></i> Indicadores de Lucro</li>
-                        <li><i class="fas fa-times text-danger me-2"></i> Alertas de Inflação</li>
-                    </ul>
-                    <button type="button" class="w-100 btn btn-lg btn-outline-primary" disabled>Plano Atual</button>
-                </div>
-            </div>
+  {% if plano == 'trial' and dias_restantes is not none %}
+  <div class="alert alert-warning text-center">
+    <strong>Teste grátis:</strong> faltam {{ dias_restantes }} dia{{ 's' if dias_restantes != 1 }}.
+    Depois disso o site fica no ar, mas você para de editar e de receber reservas.
+  </div>
+  {% endif %}
+
+  <div class="row row-cols-1 row-cols-md-3 mb-3 text-center justify-content-center">
+
+    <div class="col">
+      <div class="card mb-4 rounded-3 shadow-sm h-100">
+        <div class="card-header py-3"><h4 class="my-0 fw-normal">Gratuito</h4></div>
+        <div class="card-body d-flex flex-column">
+          <h1 class="card-title pricing-card-title">R$ 0<small class="text-muted fw-light">/mês</small></h1>
+          <ul class="list-unstyled mt-3 mb-4 text-start">
+            <li><i class="fas fa-check text-success me-2"></i> Seu site no ar, sempre</li>
+            <li><i class="fas fa-check text-success me-2"></i> Endereço /bar/{{ slug or 'seu-bar' }}</li>
+            <li><i class="fas fa-times text-danger me-2"></i> Editar site e cardápio</li>
+            <li><i class="fas fa-times text-danger me-2"></i> Reservas online</li>
+            <li><i class="fas fa-times text-danger me-2"></i> Agenda e promoções</li>
+          </ul>
+          <button class="w-100 btn btn-lg btn-outline-secondary mt-auto" disabled>
+            {{ 'Plano atual' if plano == 'free' else 'Sem custo' }}
+          </button>
         </div>
+      </div>
+    </div>
 
-        <!-- Plano Pro -->
-        <div class="col">
-            <div class="card mb-4 rounded-3 shadow-lg border-primary">
-                <div class="card-header py-3 text-white bg-primary border-primary">
-                    <h4 class="my-0 fw-normal">Pro <span class="badge bg-warning text-dark ms-2"
-                            style="font-size: 0.6em;">RECOMENDADO</span></h4>
-                </div>
-                <div class="card-body">
-                    {% if current_user.restaurante.pricing_strategy == 'volume_based' %}
-                    <h1 class="card-title pricing-card-title">R$ 49<small class="text-muted fw-light">/mês</small></h1>
-                    <p class="text-muted">+ R$ 0,50 por NFE importada</p>
-                    <ul class="list-unstyled mt-3 mb-4">
-                        <li><i class="fas fa-check text-success me-2"></i> <strong>Pague pelo que usar</strong></li>
-                        <li><i class="fas fa-check text-success me-2"></i> <strong>Tudo do Free</strong></li>
-                        <li><i class="fas fa-check text-success me-2"></i> <strong>Lucro Real em Tempo Real</strong>
-                        </li>
-                        <li><i class="fas fa-check text-success me-2"></i> Alertas de Estoque Crítico</li>
-                        <li><i class="fas fa-check text-success me-2"></i> Matriz de Cardápio (BCG)</li>
-                    </ul>
-                    {% else %}
-                    <h1 class="card-title pricing-card-title">R$ 97<small class="text-muted fw-light">/mês</small></h1>
-                    <ul class="list-unstyled mt-3 mb-4">
-                        <li><i class="fas fa-check text-success me-2"></i> <strong>Tudo do Free</strong></li>
-                        <li><i class="fas fa-check text-success me-2"></i> <strong>Lucro Real em Tempo Real</strong>
-                        </li>
-                        <li><i class="fas fa-check text-success me-2"></i> Alertas de Estoque Crítico</li>
-                        <li><i class="fas fa-check text-success me-2"></i> Matriz de Cardápio (BCG)</li>
-                        <li><i class="fas fa-check text-success me-2"></i> Suporte Prioritário</li>
-                    </ul>
-                    {% endif %}
-                    <!-- Formulário de Checkout Stripe -->
-                    <form action="{{ url_for('billing.create_checkout_session') }}" method="POST">
-                        <button type="submit"
-                            class="w-100 btn btn-lg btn-primary shadow animate__animated animate__pulse animate__infinite">
-                            <i class="fas fa-credit-card me-2"></i> Assinar Agora
-                        </button>
-                    </form>
-                    <div class="text-center mt-2">
-                        <small class="text-muted"><i class="fas fa-lock"></i> Pagamento Seguro via Stripe</small>
-                    </div>
-                </div>
-            </div>
+    <div class="col">
+      <div class="card mb-4 rounded-3 shadow-lg border-primary h-100">
+        <div class="card-header py-3 text-white bg-primary border-primary">
+          <h4 class="my-0 fw-normal">Site <span class="badge bg-warning text-dark ms-2" style="font-size:.6em">MAIS ESCOLHIDO</span></h4>
         </div>
+        <div class="card-body d-flex flex-column">
+          <h1 class="card-title pricing-card-title">{{ precos.site }}<small class="text-muted fw-light">/mês</small></h1>
+          <ul class="list-unstyled mt-3 mb-4 text-start">
+            <li><i class="fas fa-check text-success me-2"></i> <strong>Tudo do Gratuito</strong></li>
+            <li><i class="fas fa-check text-success me-2"></i> Editar site, cardápio e fotos</li>
+            <li><i class="fas fa-check text-success me-2"></i> <strong>Reservas no seu WhatsApp</strong></li>
+            <li><i class="fas fa-check text-success me-2"></i> Agenda de eventos e promoções</li>
+            <li><i class="fas fa-check text-success me-2"></i> Domínio próprio e temas</li>
+          </ul>
+          {% if plano == 'site' %}
+          <button class="w-100 btn btn-lg btn-outline-primary mt-auto" disabled>Plano atual</button>
+          {% else %}
+          {# Venda é por telefone: o checkout online está desligado de
+             propósito (o código continua em billing/, dormente). #}
+          <a class="w-100 btn btn-lg btn-primary mt-auto"
+             href="https://wa.me/{{ zap_vendas }}?text={{ ('Quero o plano Site pro meu bar' | urlencode) }}"
+             target="_blank" rel="noopener">
+            <i class="fab fa-whatsapp me-2"></i> Quero o Site
+          </a>
+          {% endif %}
+        </div>
+      </div>
     </div>
 
-    <div class="text-center mt-4">
-        <p class="text-muted"><small>Sem fidelidade. Cancele quando quiser.</small></p>
+    <div class="col">
+      <div class="card mb-4 rounded-3 shadow-sm h-100">
+        <div class="card-header py-3"><h4 class="my-0 fw-normal">Pro</h4></div>
+        <div class="card-body d-flex flex-column">
+          <h1 class="card-title pricing-card-title">{{ precos.pro }}<small class="text-muted fw-light">/mês</small></h1>
+          <ul class="list-unstyled mt-3 mb-4 text-start">
+            <li><i class="fas fa-check text-success me-2"></i> <strong>Tudo do Site</strong></li>
+            <li><i class="fas fa-check text-success me-2"></i> <strong>Lucro real por prato</strong></li>
+            <li><i class="fas fa-check text-success me-2"></i> Ficha técnica e precificação</li>
+            <li><i class="fas fa-check text-success me-2"></i> Estoque, NF-e e desperdício</li>
+            <li><i class="fas fa-check text-success me-2"></i> Previsão de demanda</li>
+          </ul>
+          {% if plano == 'pro' %}
+          <button class="w-100 btn btn-lg btn-outline-primary mt-auto" disabled>Plano atual</button>
+          {% else %}
+          {# Venda é por telefone: o checkout online está desligado de
+             propósito (o código continua em billing/, dormente). #}
+          <a class="w-100 btn btn-lg btn-outline-primary mt-auto"
+             href="https://wa.me/{{ zap_vendas }}?text={{ ('Quero o plano Pro pro meu bar' | urlencode) }}"
+             target="_blank" rel="noopener">
+            <i class="fab fa-whatsapp me-2"></i> Quero o Pro
+          </a>
+          {% endif %}
+        </div>
+      </div>
     </div>
+
+  </div>
+
+  <div class="text-center mt-4">
+    <p class="text-muted"><small><i class="fas fa-headset"></i> Atendimento direto com a gente · Sem fidelidade, cancele quando quiser.</small></p>
+  </div>
 </div>
 {% endblock %}

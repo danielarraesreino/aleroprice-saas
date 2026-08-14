@@ -1,0 +1,29 @@
+# Velho Valentim — Joaquim Egídio, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/velho-valentim/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Carta de vinhos pesada e cara de atualizar. Gancho: carta digital elegante, com safra e harmonização, atualizada sem gráfica.
+
+nome: "Velho Valentim"
+tema: pub-escuro
+
+site:
+  vibe: pub
+  descritor: "Restaurante clássico em Joaquim Egídio"
+  kicker: "JOAQUIM EGÍDIO · CAMPINAS–SP"
+  hero_linha1: "Velho"
+  hero_linha2: "Valentim"
+  tagline: "Toalha branca, carta de vinhos e serviço à moda antiga."
+  subline: "VINHOS · CLÁSSICO · REQUINTE"
+  cidade_uf: "Joaquim Egídio, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/velho-valentim/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

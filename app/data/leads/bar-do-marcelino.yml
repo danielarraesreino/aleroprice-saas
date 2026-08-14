@@ -1,0 +1,29 @@
+# Bar do Marcelino — Joaquim Egídio, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/bar-do-marcelino/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Ciclista e motociclista têm pressa e param pouco. Gancho: pedir e pagar pelo celular antes mesmo de tirar o capacete.
+
+nome: "Bar do Marcelino"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Parada de motociclista e ciclista"
+  kicker: "JOAQUIM EGÍDIO · CAMPINAS–SP"
+  hero_linha1: "Bar"
+  hero_linha2: "do Marcelino"
+  tagline: "Ponto histórico da estrada: parou, comeu, seguiu."
+  subline: "ESTRADA · MOTO · CICLISMO"
+  cidade_uf: "Joaquim Egídio, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/bar-do-marcelino/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

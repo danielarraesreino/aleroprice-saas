@@ -1,0 +1,32 @@
+# Bad Bone Parrilla — Taquaral, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/bad-bone/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Ticket alto e cliente que escolhe ponto da carne. Gancho: cardápio no celular com foto de cada corte, e reserva pra não perder mesa no sábado.
+
+nome: "Bad Bone Parrilla"
+tema: pub-escuro
+
+site:
+  vibe: pub
+  descritor: "Parrilla e rock no Taquaral"
+  kicker: "TAQUARAL · CAMPINAS–SP"
+  hero_linha1: "Bad"
+  hero_linha2: "Bone Parrilla"
+  tagline: "Carne na brasa, fogo alto e rock clássico."
+  subline: "PARRILLA · BRASA · ROCK"
+  cidade_uf: "Taquaral, Campinas–SP"
+  instagram_url: https://www.instagram.com/badbone_campinas/
+  nota_google: "4,8"
+  selo_estrelas: "4,8 no Google"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/bad-bone/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

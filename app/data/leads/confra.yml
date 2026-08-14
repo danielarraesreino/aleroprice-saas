@@ -1,0 +1,33 @@
+# Cervejaria Confra — Barão Geraldo, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/confra/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Produção própria e público fiel. Gancho: agenda de lançamento de rótulo no site — motivo pro cliente voltar toda semana.
+
+nome: "Cervejaria Confra"
+tema: pub-escuro
+
+site:
+  vibe: pub
+  descritor: "Microcervejaria e forneria"
+  kicker: "BARÃO GERALDO · CAMPINAS–SP"
+  hero_linha1: "Cervejaria"
+  hero_linha2: "Confra"
+  tagline: "Produção própria na Mantiqueira e forno aceso aqui."
+  subline: "CHOPE PRÓPRIO · PIZZA · FORNERIA"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+  nota_google: "4,7"
+  selo_estrelas: "4,7 no Google"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/confra/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram não confirmado (o relatório sugeria @cervejariaconfra).
+# Confirme o perfil e adicione instagram_url em site:.
+demo:
+  fonte: relatorio-rmc

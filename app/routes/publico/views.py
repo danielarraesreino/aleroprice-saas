@@ -1,9 +1,12 @@
 import os
 import urllib.parse
 import urllib.request
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
-from flask import Blueprint, render_template, request, jsonify, current_app, abort
+from flask import (
+    Blueprint, render_template, request, jsonify, current_app, abort,
+    redirect, url_for, flash,
+)
 
 from app.extensions import db
 from app.models.modelo_reserva import Reserva
@@ -13,7 +16,10 @@ from . import bp
 from app.utils.site_router import (
     eh_dominio_do_produto, slug_unico, tenant_por_host, tenant_por_slug,
 )
-from app.utils.temas import css_do_tema
+from app.utils.temas import css_do_tema, cor_do_tema
+from app.utils.copy_site import copy_da_vibe
+from app.utils.planos import pode, precos
+from app.utils.tenant import limite_excedido
 
 
 def _alerta_whatsapp(texto, phone=None):
@@ -43,6 +49,7 @@ def _render_landing(rest):
     from app.models.modelo_evento import Evento
     from app.models.modelo_promocao import Promocao
 
+    _marcar_visita(rest)
     hoje = date.today()
     rid = rest.id if rest else None
 
@@ -58,9 +65,24 @@ def _render_landing(rest):
     site = montar_site(rest)
     cfg = getattr(rest, 'site_config', None) if rest else None
     tema = getattr(cfg, 'tema', None) if cfg else None
+    vibe = getattr(cfg, 'vibe', None) if cfg else None
+    copy = copy_da_vibe(vibe, site.get('nome') or '')
+
+    # Degradação por plano: quem não paga perde o controle do site, não o
+    # endereço. Sem reservas online, o formulário vira botão de WhatsApp — o
+    # cliente do bar nunca fica sem resposta.
+    reservas_ativas = pode(rest, 'reservas')
+    if not pode(rest, 'agenda'):
+        eventos = []
+    if not pode(rest, 'promocoes'):
+        promocoes = []
 
     return render_template('site/landing.html', eventos=eventos, promocoes=promocoes,
-                           site=site, tema_css=css_do_tema(tema), tenant=rest,
+                           site=site, tema_css=css_do_tema(tema),
+                           tema_cor=cor_do_tema(tema), tenant=rest, copy=copy,
+                           reservas_ativas=reservas_ativas,
+                           contato_vendas=os.environ.get('FEIRA_WHATSAPP', ''),
+                           email_vendas=os.environ.get('FEIRA_EMAIL', 'contato@feiradebarao.com.br'),
                            **montar_conteudo(rest))
 
 
@@ -96,11 +118,63 @@ def _contexto_produto():
     }
 
 
+@bp.route('/barao')
+def barao():
+    """Landing da campanha "Bares de Barão": a página que o vendedor manda no
+    WhatsApp do dono de bar de Barão Geraldo e abre na mesa.
+
+    Público por ser `public.*` (allowlist do guard global). Contato e preços
+    vêm de env — `_contexto_produto()` pro WhatsApp e `planos.precos()` pros
+    dois planos (Site/Pro) — pra nada de comercial ficar hardcoded em template.
+    """
+    tabela = precos()
+    return render_template('produto/barao.html',
+                           preco_site=tabela['site'], preco_pro=tabela['pro'],
+                           **_contexto_produto())
+
+
+@bp.route('/robots.txt')
+def robots():
+    """Segunda camada de proteção das prévias (a primeira é o meta noindex).
+
+    Bloqueia /bar/ inteiro em vez de listar as demos: listar entregaria a lista
+    de prospecção pra qualquer um, e cliente convertido usa domínio próprio.
+    """
+    corpo = (
+        'User-agent: *\n'
+        'Disallow: /bar/\n'
+        'Disallow: /s/\n'
+        'Disallow: /cadastro\n'
+        'Disallow: /app/\n'
+        'Allow: /\n'
+    )
+    return corpo, 200, {'Content-Type': 'text/plain; charset=utf-8'}
+
+
+def _marcar_visita(rest):
+    """Conta abertura de prévia. A pergunta da campanha é 'o dono abriu?', e
+    sem isso não há resposta — não existe analytics no projeto.
+
+    Best-effort: falha aqui nunca pode derrubar o site do bar.
+    """
+    if not (rest and rest.eh_demo):
+        return
+    try:
+        rest.demo_visitas = (rest.demo_visitas or 0) + 1
+        if rest.demo_primeira_visita is None:
+            rest.demo_primeira_visita = datetime.now()
+            current_app.logger.info(
+                f'Context: DEMO_ABERTA | {rest.slug} | fonte={rest.demo_fonte}')
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+
+
 @bp.route('/bar/<slug>')
 def landing_slug(slug):
     """Site de um bar pelo slug. Sempre funciona, com ou sem domínio próprio —
     é o endereço das demos (ex.: /bar/bar-do-ze)."""
-    rest = tenant_por_slug(slug)
+    rest = tenant_por_slug(slug)  # já filtra inativo
     if rest is None:
         abort(404)
     return _render_landing(rest)
@@ -110,6 +184,9 @@ def landing_slug(slug):
 def landing_tenant(rid):
     """Alias legado (preview por id). Mantido para não quebrar links já enviados."""
     rest = Restaurante.query.get_or_404(rid)
+    # `is False` e não `not rest.ativo`: NULL (tenant antigo) conta como ativo.
+    if rest.ativo is False:
+        abort(404)
     return _render_landing(rest)
 
 
@@ -125,6 +202,9 @@ def cadastro():
 
     dados = {'nome_bar': '', 'nome': '', 'email': ''}
     if request.method == 'POST':
+        if limite_excedido(f'cadastro:{request.remote_addr}', maximo=5, janela_segundos=900):
+            flash('Muitas tentativas de cadastro. Aguarde alguns minutos.', 'danger')
+            return render_template('site/cadastro.html', **dados)
         nome_bar = (request.form.get('nome_bar') or '').strip()
         nome = (request.form.get('nome') or '').strip() or 'Responsável'
         email = (request.form.get('email') or '').strip().lower()
@@ -148,13 +228,30 @@ def cadastro():
 
         # Slug já no cadastro: é o endereço do site do bar (/bar/<slug>) antes
         # de ele ter domínio próprio. Sem isso o cliente sai do signup sem site.
-        rest = Restaurante(nome=nome_bar, slug=slug_unico(nome_bar))
-        db.session.add(rest)
-        db.session.commit()
-        db.session.add(SiteConfig(restaurant_id=rest.id, nome=nome_bar))
-        admin = Usuario(nome=nome, email=email, senha=senha, tipo='admin', restaurant_id=rest.id)
-        db.session.add(admin)
-        db.session.commit()
+        #
+        # Commit único: restaurante, config e admin nascem juntos ou não nascem.
+        # Antes eram dois commits, e uma falha no meio deixava um tenant órfão
+        # (sem admin, mas consumindo o slug em slug_unico).
+        try:
+            # Nasce em teste grátis: sem isso a pessoa se cadastra e cai direto
+            # no paywall, sem nunca ver o produto funcionando.
+            from app.utils.planos import DIAS_DE_TRIAL
+            rest = Restaurante(
+                nome=nome_bar, slug=slug_unico(nome_bar),
+                trial_termina_em=date.today() + timedelta(days=DIAS_DE_TRIAL),
+            )
+            db.session.add(rest)
+            db.session.flush()  # atribui rest.id sem fechar a transação
+            db.session.add(SiteConfig(restaurant_id=rest.id, nome=nome_bar))
+            admin = Usuario(nome=nome, email=email, senha=senha, tipo='admin',
+                            restaurant_id=rest.id)
+            db.session.add(admin)
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            current_app.logger.exception(f"Context: SIGNUP_FALHOU | {nome_bar} | {email}")
+            flash('Não deu pra criar a conta agora. Tente de novo em instantes.', 'danger')
+            return render_template('site/cadastro.html', **dados)
 
         login_user(admin)
         current_app.logger.info(f"Context: SIGNUP | {nome_bar} | {email} | rid={rest.id}")
@@ -185,6 +282,10 @@ SITE_DEFAULTS = {
     'cidade_uf': None,
     'horario': None,
     'maps_query': None,
+    'descritor': None,
+    'servicos': None,
+    'nota_google': None,
+    'qtd_avaliacoes': None,
     'instagram_url': None,
     'facebook_url': None,
 }
@@ -254,6 +355,10 @@ def reservar():
     painel /reservas. Resolve o tenant pelo primeiro restaurante cadastrado
     (deploy single-tenant do Bar da Vila).
     """
+    if limite_excedido(f'reservar:{request.remote_addr}', maximo=8, janela_segundos=300):
+        return jsonify({'ok': False,
+                        'erros': ['Muitas tentativas. Aguarde alguns minutos.']}), 429
+
     dados = request.form if request.form else (request.get_json(silent=True) or {})
 
     nome = (dados.get('nome') or '').strip()
@@ -301,6 +406,18 @@ def reservar():
             f'Reserva sem tenant resolvível. host={request.host} slug={dados.get("slug")!r}'
         )
         return jsonify({'ok': False, 'erros': ['Não foi possível identificar o bar.']}), 400
+
+    # Gate no servidor: esconder o formulário no template não impede um POST
+    # direto. Sem o recurso, a reserva não entra e o cliente vai pro WhatsApp.
+    if not pode(restaurante, 'reservas'):
+        return jsonify({
+            'ok': False,
+            'erros': ['As reservas online deste bar estão desativadas. '
+                      'Chame no WhatsApp.'],
+            'wa_url': (f'https://wa.me/{restaurante.site_config.whatsapp}'
+                       if getattr(restaurante, 'site_config', None)
+                       and restaurante.site_config.whatsapp else None),
+        }), 403
 
     reserva = Reserva(
         nome=nome,

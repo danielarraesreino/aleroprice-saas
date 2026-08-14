@@ -1,0 +1,36 @@
+# Seo Bartô Petiscaria — Barão Geraldo, Campinas–SP
+# Lead da varredura de Barão (14/08/2026). Foto: coloque os arquivos em
+# app/static/img/demo/seo-barto/ e aponte abaixo.
+#
+# POR QUE LIGAR PRA ELE:
+# Comida de buteco com música — o espelho perfeito do Bar da Vila, na mesma
+# cidade. Gancho: abrir bardavila.bar no celular e dizer "fizemos esse pra um
+# buteco igual ao seu". É o pitch mais curto da campanha: mostrar, não explicar.
+
+nome: "Seo Bartô Petiscaria"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Petiscaria e comida de buteco em Barão"
+  kicker: "BARÃO GERALDO · CAMPINAS–SP"
+  hero_linha1: "Seo"
+  hero_linha2: "Bartô"
+  tagline: "Petisco de verdade, cerveja gelada e música no fim de semana."
+  subline: "PETISCOS · COMIDA DE BUTECO · MÚSICA AO VIVO"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+  endereco: "R. Agostinho Pattaro, 124 — Barão Geraldo"
+  horario: "Qua–Sex 17h–23h · Sáb e Dom 15h–00h"
+  maps_query: "Seo Bartô Petiscaria Campinas"
+  instagram_url: "https://www.instagram.com/seo_barto/"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/seo-barto/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram @seo_barto confirmado em 14/08/2026 (morandoembarao.com).
+demo:
+  fonte: varredura-barao

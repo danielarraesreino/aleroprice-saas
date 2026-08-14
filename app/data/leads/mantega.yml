@@ -1,0 +1,29 @@
+# Mantega — Hortolândia–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/mantega/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Dezenas de variações de peça. Gancho: cardápio digital organiza o catálogo enorme em categorias que o cliente navega sozinho.
+
+nome: "Mantega"
+tema: neon-noite
+
+site:
+  vibe: pub
+  descritor: "Culinária oriental em Hortolândia"
+  kicker: "HORTOLÂNDIA–SP"
+  hero_linha1: "Mantega"
+  hero_linha2: ""
+  tagline: "Barca caprichada e combinado que sai rápido."
+  subline: "SUSHI · TEMAKI · ORIENTAL"
+  cidade_uf: "Hortolândia–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/mantega/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

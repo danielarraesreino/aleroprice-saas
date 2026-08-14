@@ -1,9 +1,12 @@
 from flask import render_template, redirect, url_for, flash, request, abort
+from flask_login import current_user
 
 from app.extensions import db
 from app.models.modelo_sitecontent import DishCard, Review, TeamMember, GalleryItem
 from app.routes.conteudo import bp
 from app.utils.tenant import get_current_restaurant_id
+from app.utils.decorators import plano_minimo
+from app.utils.planos import limite
 
 # Motor genérico: cada tipo mapeia um model + a definição dos campos do formulário.
 # campo = (nome, rótulo, tipo_widget, obrigatório)
@@ -80,6 +83,7 @@ def index(tipo):
 
 @bp.route('/<tipo>/novo', methods=['GET', 'POST'])
 @bp.route('/<tipo>/<int:item_id>/editar', methods=['GET', 'POST'])
+@plano_minimo('site')
 def salvar(tipo, item_id=None):
     t = _tipo(tipo)
     rid = _rid()
@@ -89,6 +93,13 @@ def salvar(tipo, item_id=None):
     if request.method == 'POST':
         novo = item is None
         if novo:
+            # Limite por plano, checado uma vez só: o motor é genérico, então
+            # este `if` cobre cardápio, avaliações, equipe e galeria juntos.
+            teto = limite(current_user.restaurante, tipo)
+            if teto is not None and Model.query.filter_by(restaurant_id=rid).count() >= teto:
+                flash(f'Seu plano permite até {teto} itens em {t["label"]}. '
+                      f'Faça upgrade para adicionar mais.', 'warning')
+                return redirect(url_for('conteudo.index', tipo=tipo))
             item = Model(restaurant_id=rid, ativo=True)
             db.session.add(item)
         for campo, label, widget, obrig in t['campos']:
@@ -116,6 +127,7 @@ def salvar(tipo, item_id=None):
 
 
 @bp.route('/<tipo>/<int:item_id>/toggle', methods=['POST'])
+@plano_minimo('site')
 def toggle(tipo, item_id):
     t = _tipo(tipo)
     rid = _rid()
@@ -126,6 +138,7 @@ def toggle(tipo, item_id):
 
 
 @bp.route('/<tipo>/<int:item_id>/excluir', methods=['POST'])
+@plano_minimo('site')
 def excluir(tipo, item_id):
     t = _tipo(tipo)
     rid = _rid()

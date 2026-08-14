@@ -1,0 +1,3 @@
+# Fotos de Eskina Bar
+# capa.jpg = topo | prato-<nome>.jpg = cardapio | resto = galeria
+# Depois de colocar as fotos: flask aplicar-demos --slug eskina-bar

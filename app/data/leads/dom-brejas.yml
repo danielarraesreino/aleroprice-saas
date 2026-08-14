@@ -1,0 +1,31 @@
+# Dom Brejas — Taquaral, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/dom-brejas/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Rótulo muda toda semana e o cliente não sabe o que tem na torneira hoje. Gancho: ele atualiza o cardápio sozinho, em segundos, sem reimprimir nada.
+
+nome: "Dom Brejas"
+tema: neon-noite
+
+site:
+  vibe: pub
+  descritor: "Cervejaria artesanal no Taquaral"
+  kicker: "TAQUARAL · CAMPINAS–SP"
+  hero_linha1: "Dom"
+  hero_linha2: "Brejas"
+  tagline: "Rótulo que muda toda semana e calçada cheia."
+  subline: "CERVEJA ARTESANAL · ROTATIVO · TAQUARAL"
+  cidade_uf: "Taquaral, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/dom-brejas/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram não confirmado (o relatório sugeria @dombrejas).
+# Confirme o perfil e adicione instagram_url em site:.
+demo:
+  fonte: relatorio-rmc

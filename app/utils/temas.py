@@ -145,6 +145,16 @@ def css_do_tema(nome):
     return bloco(':root', tema['dark']) + bloco(':root[data-theme="light"]', tema['light'])
 
 
+def cor_do_tema(nome):
+    """Cor de fundo do preset, pro <meta name="theme-color"> (barra do navegador).
+
+    É o primeiro valor de `amostra`, que por convenção é o `--ink` do tema.
+    No padrão devolve '#100a06' — o mesmo que estava fixo no template.
+    """
+    tema = TEMAS.get(nome or TEMA_PADRAO) or TEMAS[TEMA_PADRAO]
+    return tema['amostra'][0]
+
+
 def opcoes_de_tema():
     """Lista pro seletor do /config-site."""
     return [

@@ -1,0 +1,29 @@
+# Eaí Burguer — Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/eaiburguer/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Ticket alto exige apresentação à altura. Gancho: cardápio com foto de cada lanche justifica o preço antes de o cliente perguntar.
+
+nome: "Eaí Burguer"
+tema: neon-noite
+
+site:
+  vibe: hamburgueria
+  descritor: "Hambúrguer autoral em Campinas"
+  kicker: "CAMPINAS–SP"
+  hero_linha1: "Eaí"
+  hero_linha2: "Burguer"
+  tagline: "Ingrediente caro, montagem caprichada e ticket alto."
+  subline: "AUTORAL · PREMIUM · CAMPINAS"
+  cidade_uf: "Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/eaiburguer/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

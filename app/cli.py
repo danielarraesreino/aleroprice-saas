@@ -72,3 +72,56 @@ def register_cli(app):
         click.echo(f'  Admin       : {email}')
         if senha_gerada:
             click.echo(f'  Senha       : {senha_gerada}   (anote — não será mostrada de novo)')
+
+    @app.cli.command('converter-demo')
+    @click.argument('slug')
+    @click.option('--email', required=True, help='E-mail do dono do bar.')
+    @click.option('--senha', default=None, help='Se omitida, é gerada e mostrada.')
+    @click.option('--nome', default='Responsável', help='Nome de quem vai logar.')
+    def converter_demo_cmd(slug, email, senha, nome):
+        """Prévia vira cliente. Mesma função do botão do Modo Campo.
+
+        Existe pro caso de a venda fechar por telefone, longe do bar: o
+        conteúdo curado continua no mesmo restaurant_id, só ganha dono.
+        """
+        import secrets
+
+        from app.extensions import db
+        from app.models.modelo_restaurante import Restaurante
+        from app.utils.demos import LeadInvalido, converter_demo
+
+        rest = Restaurante.query.filter_by(slug=slug).first()
+        if rest is None:
+            raise click.ClickException(f'não achei bar com slug "{slug}"')
+
+        senha = senha or secrets.token_urlsafe(9)
+        try:
+            converter_demo(rest, email, senha, nome_admin=nome)
+            db.session.commit()
+        except LeadInvalido as e:
+            db.session.rollback()
+            raise click.ClickException(str(e))
+
+        click.echo(f'{rest.nome} agora é cliente.')
+        click.echo(f'  Site  : /bar/{rest.slug}')
+        click.echo(f'  Login : {email}')
+        click.echo(f'  Senha : {senha}   (anote — não será mostrada de novo)')
+
+    @app.cli.command('aplicar-demos')
+    @click.option('--slug', default=None, help='Aplica só um lead (nome do arquivo sem .yml).')
+    def aplicar_demos(slug):
+        """Publica as prévias comerciais de app/data/leads/*.yml.
+
+        Mesmo código que a rota /bootstrap-demo?action=demos usa em produção —
+        aqui serve pra conferir o resultado antes de commitar o arquivo.
+        """
+        from app.utils.demos import aplicar_todos
+
+        resultado = aplicar_todos(slug=slug)
+        for item in resultado['ok']:
+            click.echo(f"OK  {item['arquivo']} -> /bar/{item['slug']}")
+            for linha in item['log']:
+                click.echo(f"    {linha}")
+        for item in resultado['erros']:
+            click.echo(f"ERRO {item['arquivo']}: {item['erro']}", err=True)
+        click.echo(f"\n{len(resultado['ok'])} aplicados, {len(resultado['erros'])} com erro.")

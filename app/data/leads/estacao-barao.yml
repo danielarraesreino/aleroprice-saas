@@ -1,0 +1,39 @@
+# Estação Barão — Barão Geraldo, Campinas–SP
+# Lead da varredura de Barão (14/08/2026). Foto: coloque os arquivos em
+# app/static/img/demo/estacao-barao/ e aponte abaixo.
+#
+# NÃO CONFUNDIR com estacao-santana.yml (Sousas) — são casas diferentes.
+#
+# POR QUE LIGAR PRA ELE:
+# Desde 1953 — um dos bares mais antigos de Barão, sede do clube do bairro.
+# 70 anos de história que nem Google nem Instagram contam. Gancho: a seção
+# "história" do site é feita exatamente pra isso; a casa vira patrimônio
+# digital do bairro. Atrai estudante com desconto — promoções têm público certo.
+
+nome: "Estação Barão"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Bar e restaurante desde 1953 em Barão"
+  kicker: "BARÃO GERALDO · DESDE 1953"
+  hero_linha1: "Estação"
+  hero_linha2: "Barão"
+  tagline: "Setenta anos de balcão — a história do bairro passa por aqui."
+  subline: "DESDE 1953 · ALMOÇO E NOITE · TRADIÇÃO DE BARÃO"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+  endereco: "R. Horácio Leonardi, 76 — Barão Geraldo"
+  horario: "Seg–Qui 11h–00h · Sex–Sáb 11h–01h · Dom 11h–00h"
+  maps_query: "Estação Barão Bar e Restaurante Campinas"
+  instagram_url: "https://www.instagram.com/estacao_bar/"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/estacao-barao/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram @estacao_bar confirmado em 14/08/2026 (morandoembarao.com).
+demo:
+  fonte: varredura-barao

@@ -1,0 +1,29 @@
+# Armazém Rural Bar — Joaquim Egídio, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/armazem-rural/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Terreno grande cansa a equipe: garçom anda demais. Gancho: mesa na grama pede pelo celular, sem ninguém cruzar o gramado duas vezes.
+
+nome: "Armazém Rural Bar"
+tema: praia-claro
+
+site:
+  vibe: praia
+  descritor: "Bar rural em Joaquim Egídio"
+  kicker: "JOAQUIM EGÍDIO · CAMPINAS–SP"
+  hero_linha1: "Armazém"
+  hero_linha2: "Rural Bar"
+  tagline: "Espaço aberto, verde em volta e o dia inteiro pela frente."
+  subline: "AO AR LIVRE · NATUREZA · FAMÍLIA"
+  cidade_uf: "Joaquim Egídio, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/armazem-rural/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

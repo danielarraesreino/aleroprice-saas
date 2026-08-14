@@ -1,0 +1,31 @@
+# Eskina Bar — Barão Geraldo, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/eskina-bar/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Fluxo alto de pedestre e happy hour com preço que muda de hora. Gancho: o preço do chopp muda no site sozinho quando o happy hour acaba.
+
+nome: "Eskina Bar"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Bar de esquina em Barão"
+  kicker: "BARÃO GERALDO · CAMPINAS–SP"
+  hero_linha1: "Eskina"
+  hero_linha2: "Bar"
+  tagline: "Ponto de encontro de quem passa e acaba ficando."
+  subline: "CHOPP · PORÇÕES · ESQUINA"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/eskina-bar/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram não confirmado (o relatório sugeria @eskinabarcampinas).
+# Confirme o perfil e adicione instagram_url em site:.
+demo:
+  fonte: relatorio-rmc

@@ -1,0 +1,29 @@
+# Bar do Guiu — Vinhedo–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/bar-do-guiu/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Mesa de amigos com conta dividida. Gancho: reserva e conta organizada evitam o pesadelo do rateio na maquininha.
+
+nome: "Bar do Guiu"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Bar de encontro em Vinhedo"
+  kicker: "VINHEDO–SP"
+  hero_linha1: "Bar"
+  hero_linha2: "do Guiu"
+  tagline: "Fim de semana com os amigos, sem pressa."
+  subline: "CERVEJA · PORÇÕES · AMIGOS"
+  cidade_uf: "Vinhedo–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/bar-do-guiu/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

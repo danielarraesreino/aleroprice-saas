@@ -1,0 +1,29 @@
+# Banana Café — Cambuí, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/banana-cafe/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Casa instagramável com coquetelaria de alto padrão. Gancho: site com a mesma cara do Instagram, e o link do cardápio no perfil do Google.
+
+nome: "Banana Café"
+tema: neon-noite
+
+site:
+  vibe: pub
+  descritor: "Bar e coquetelaria no Cambuí"
+  kicker: "CAMBUÍ · CAMPINAS–SP"
+  hero_linha1: "Banana"
+  hero_linha2: "Café"
+  tagline: "Coquetelaria autoral e ambiente que pede foto."
+  subline: "DRINKS AUTORAIS · MÚSICA · CAMBUÍ"
+  cidade_uf: "Cambuí, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/banana-cafe/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

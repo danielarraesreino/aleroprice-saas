@@ -1,0 +1,29 @@
+# Fexô Lanches — Vila Industrial, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/fexo-lanches/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Base fiel de vizinhança. Gancho: promoção semanal no site pra puxar o cliente que já gosta de volta mais vezes.
+
+nome: "Fexô Lanches"
+tema: boteco-ambar
+
+site:
+  vibe: hamburgueria
+  descritor: "Lanche de bairro na Vila Industrial"
+  kicker: "VILA INDUSTRIAL · CAMPINAS–SP"
+  hero_linha1: "Fexô"
+  hero_linha2: "Lanches"
+  tagline: "O lanche que a vizinhança defende."
+  subline: "LANCHE · BAIRRO · TRADIÇÃO"
+  cidade_uf: "Vila Industrial, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/fexo-lanches/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

@@ -42,6 +42,13 @@ SITE = {
     'instagram_url': 'https://www.instagram.com/barda_vila178/',
     'facebook_url': 'https://www.facebook.com/p/Bar-da-VILA-61561126014944/',
     'tema': 'boteco-ambar',
+    'vibe': 'boteco',
+    # Estes três eram texto fixo no template e apareciam no site de todo mundo.
+    # Agora são dados deste bar — sem eles, o bloco correspondente some.
+    'descritor': 'Buteco de família em Campinas',
+    'nota_google': '4,9',
+    'qtd_avaliacoes': 39,
+    'servicos': 'Refeição no local · Drive-through',
 }
 
 DISHES = [

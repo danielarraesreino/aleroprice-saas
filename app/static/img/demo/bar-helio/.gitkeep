@@ -1,0 +1,3 @@
+# Fotos de Bar Hélio
+# capa.jpg = topo | prato-<nome>.jpg = cardapio | resto = galeria
+# Depois de colocar as fotos: flask aplicar-demos --slug bar-helio

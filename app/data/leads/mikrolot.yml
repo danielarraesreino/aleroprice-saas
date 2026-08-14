@@ -1,0 +1,29 @@
+# Mikrolot — Taquaral, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/mikrolot/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Produto premium com ticket alto. Gancho: foto grande no cardápio digital vende adicional (bacon, cheddar) sem o garçom oferecer.
+
+nome: "Mikrolot"
+tema: neon-noite
+
+site:
+  vibe: hamburgueria
+  descritor: "Hamburgueria premium no Taquaral"
+  kicker: "TAQUARAL · CAMPINAS–SP"
+  hero_linha1: "Mikrolot"
+  hero_linha2: ""
+  tagline: "Angus, pão fresco e ponto na régua."
+  subline: "ANGUS · PREMIUM · ARTESANAL"
+  cidade_uf: "Taquaral, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/mikrolot/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

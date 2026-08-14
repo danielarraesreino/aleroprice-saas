@@ -1,0 +1,29 @@
+# Bar Hélio — Valinhos–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/bar-helio/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Reputação construída no atendimento pessoal. Gancho: o sistema lembra a preferência do cliente e deixa ele ainda mais atencioso.
+
+nome: "Bar Hélio"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Boteco de atendimento nota mil"
+  kicker: "VALINHOS–SP"
+  hero_linha1: "Bar"
+  hero_linha2: "Hélio"
+  tagline: "O anfitrião conhece cada cliente pelo nome."
+  subline: "ATENDIMENTO · CHOPP · VALINHOS"
+  cidade_uf: "Valinhos–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/bar-helio/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

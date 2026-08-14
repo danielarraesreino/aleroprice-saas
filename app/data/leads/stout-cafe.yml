@@ -1,0 +1,38 @@
+# Stout Café, Cultura & Bar — Barão Geraldo, Campinas–SP
+# Lead da varredura de Barão (14/08/2026). Foto: coloque os arquivos em
+# app/static/img/demo/stout-cafe/ e aponte abaixo.
+#
+# POR QUE LIGAR PRA ELE:
+# Feijoada com samba TODO sábado + agenda cultural com bandas — evento fixo
+# semanal é o caso de manual da página de agenda + promoções. Gancho: "sua
+# feijoada de sábado hoje depende de quem viu o story; com página fixa ela
+# aparece no Google quando alguém busca 'feijoada Barão Geraldo'."
+
+nome: "Stout Café, Cultura & Bar"
+tema: pub-escuro
+
+site:
+  vibe: boteco
+  descritor: "Café, cultura e bar em Barão"
+  kicker: "BARÃO GERALDO · CAMPINAS–SP"
+  hero_linha1: "Stout"
+  hero_linha2: "Café & Bar"
+  tagline: "Feijoada com samba no sábado e agenda cultural a semana inteira."
+  subline: "FEIJOADA COM SAMBA · BANDAS · CAFÉ E BAR"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+  endereco: "Av. Santa Isabel, 1015 — Barão Geraldo"
+  horario: "Qua, Qui, Sex e Dom a partir das 17h · Sáb a partir das 12h"
+  maps_query: "Stout Café Cultura Bar Campinas"
+  instagram_url: "https://www.instagram.com/bardenpaula/"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/stout-cafe/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram @bardenpaula confirmado em 14/08/2026 (morandoembarao.com) —
+# handle não bate com o nome da casa; confirmar na visita.
+demo:
+  fonte: varredura-barao

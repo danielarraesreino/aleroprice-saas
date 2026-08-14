@@ -1,0 +1,33 @@
+# Tatu Bola Bar — Cambuí, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/tatu-bola/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Mesas de calçada lotam no fim de tarde e a mesa coletiva pede 'mais um chopp' sem parar. Gancho: reserva de mesa caindo direto no WhatsApp dele.
+
+nome: "Tatu Bola Bar"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Boteco de esquina no Cambuí"
+  kicker: "CAMBUÍ · CAMPINAS–SP"
+  hero_linha1: "Tatu"
+  hero_linha2: "Bola Bar"
+  tagline: "Fitinha colorida, mesa na calçada e aquele fim de tarde que vira noite."
+  subline: "CHOPP · PORÇÕES · MESA NA CALÇADA"
+  cidade_uf: "Cambuí, Campinas–SP"
+  nota_google: "4,8"
+  selo_estrelas: "4,8 no Google"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/tatu-bola/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram não confirmado (o relatório sugeria @tatubola.campinas).
+# Confirme o perfil e adicione instagram_url em site:.
+demo:
+  fonte: relatorio-rmc

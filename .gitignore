@@ -40,3 +40,4 @@ vendas_teste.csv
 
 # worktrees locais (não versionar)
 .claude/worktrees/
+.env*

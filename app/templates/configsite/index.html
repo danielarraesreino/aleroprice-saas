@@ -1,6 +1,13 @@
 {% extends "base.html" %}
 {% block title %}Site · AleroPrice{% endblock %}
 
+{# hero_foto guarda caminho em static OU URL absoluta (Vercel Blob).
+   Mesma regra de publico.views._img() e do macro img() de campo/editar.html. #}
+{% macro img(caminho) -%}
+  {%- if caminho.startswith('http') -%}{{ caminho }}
+  {%- else -%}{{ url_for('static', filename=caminho) }}{%- endif -%}
+{%- endmacro %}
+
 {% set rotulos = {
   'nome':'Nome do bar (marca)',
   'hero_linha1':'Título grande — linha 1',
@@ -16,26 +23,86 @@
   'cidade_uf':'Cidade/UF (rodapé)',
   'horario':'Horário de funcionamento',
   'maps_query':'Busca do Google Maps (endereço com + no lugar de espaço)',
+  'descritor':'Subtítulo da marca (aparece na aba e ao compartilhar)',
+  'servicos':'Serviços (ex: Refeição no local · Delivery)',
+  'nota_google':'Nota no Google (ex: 4,8)',
+  'qtd_avaliacoes':'Quantidade de avaliações',
   'instagram_url':'Link do Instagram',
   'facebook_url':'Link do Facebook',
 } %}
+{% set dicas = {
+  'descritor':'Ex.: Hamburgueria artesanal em Vinhedo',
+  'whatsapp':'Ex.: 5519999998888',
+  'maps_query':'Ex.: Bar+do+Ze+Rua+X+123+Campinas',
+  'hero_foto':'Ex.: img/bar/foto-18.jpg',
+} %}
+{# Ordem: o que o dono realmente preenche primeiro; o resto fica em "avançado". #}
+{% set essenciais = ['nome','tagline','whatsapp','endereco','horario','hero_foto'] %}
+{% set avancados = ['maps_query','descritor','telefone_exibicao','cidade_uf','servicos','nota_google','qtd_avaliacoes','instagram_url','facebook_url'] %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
   <h2 class="mb-0"><i class="fas fa-globe text-warning"></i> Identidade do site</h2>
-  <a class="btn btn-outline-secondary" href="{{ url_for('public.landing') }}" target="_blank"><i class="fas fa-external-link-alt"></i> Ver site</a>
+  {# Link pro site DESTE bar. Antes apontava pra public.landing, que no domínio
+     do produto abre a página de vendas, não o site do cliente. #}
+  <a class="btn btn-outline-secondary" target="_blank"
+     href="{{ url_for('public.landing_slug', slug=slug) if slug else url_for('public.landing') }}">
+    <i class="fas fa-external-link-alt"></i> Ver meu site
+  </a>
 </div>
-<p class="text-muted">Deixe em branco pra usar o padrão (mostrado como dica no campo). Cada restaurante tem sua própria identidade.</p>
+<p class="text-muted">Campo em branco simplesmente não aparece no site.</p>
 
 <form method="post" class="col-lg-9">
-  {% for campo in defaults.keys() %}
+
+  <div class="mb-4">
+    <label class="form-label fw-semibold">Cara do site</label>
+    <select class="form-select" name="tema">
+      {% for t in temas %}
+      <option value="{{ t.valor }}" {{ 'selected' if (cfg.tema if cfg else 'boteco-ambar') == t.valor }}>
+        {{ t.label }} — {{ t.descricao }}
+      </option>
+      {% endfor %}
+    </select>
+    <div class="form-text">Muda as cores do site inteiro. Dá pra trocar quando quiser.</div>
+  </div>
+
+  <div class="mb-4">
+    <label class="form-label fw-semibold">Jeito de falar</label>
+    <select class="form-select" name="vibe">
+      {% for v in vibes %}
+      <option value="{{ v.valor }}" {{ 'selected' if (cfg.vibe if cfg and cfg.vibe else 'boteco') == v.valor }}>
+        {{ v.label }} — {{ v.descricao }}
+      </option>
+      {% endfor %}
+    </select>
+    <div class="form-text">Define os títulos das seções e o tom do texto do site.</div>
+  </div>
+
+  {% macro campo_texto(campo) %}
   <div class="mb-3">
     <label class="form-label">{{ rotulos.get(campo, campo) }}</label>
+    {% if campo == 'hero_foto' and cfg and cfg.hero_foto %}
+    <div class="mb-2">
+      <img src="{{ img(cfg.hero_foto) }}" alt="Foto do topo atual" loading="lazy"
+           style="width:104px;height:64px;object-fit:cover;border-radius:8px">
+    </div>
+    {% endif %}
     <input class="form-control" name="{{ campo }}"
-           value="{{ (cfg[campo] if cfg and cfg[campo] else '') }}"
-           placeholder="{{ defaults[campo] }}">
+           value="{{ cfg[campo] if cfg and cfg[campo] else '' }}"
+           placeholder="{{ dicas.get(campo, '') }}">
   </div>
-  {% endfor %}
+  {% endmacro %}
+
+  {% for campo in essenciais %}{{ campo_texto(campo) }}{% endfor %}
+
+  <details class="mb-4">
+    <summary class="mb-3">Textos do topo e mais detalhes</summary>
+    {% for campo in defaults.keys() if campo not in essenciais and campo not in avancados %}
+      {{ campo_texto(campo) }}
+    {% endfor %}
+    {% for campo in avancados %}{{ campo_texto(campo) }}{% endfor %}
+  </details>
+
   <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Salvar identidade</button>
 </form>
 {% endblock %}

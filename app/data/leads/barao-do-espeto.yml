@@ -1,0 +1,31 @@
+# Barão do Espeto — Barão Geraldo, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/barao-do-espeto/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Giro alto de item barato: muitos pedidos pequenos por mesa. Gancho: cardápio digital deixa o cliente escolher vários espetos de uma vez.
+
+nome: "Barão do Espeto"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Espetinho e sertanejo em Barão"
+  kicker: "BARÃO GERALDO · CAMPINAS–SP"
+  hero_linha1: "Barão"
+  hero_linha2: "do Espeto"
+  tagline: "Fumaça na grelha, palco montado e espeto saindo sem parar."
+  subline: "ESPETINHOS · SERTANEJO · AO VIVO"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/barao-do-espeto/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram não confirmado (o relatório sugeria @baraodoespeto).
+# Confirme o perfil e adicione instagram_url em site:.
+demo:
+  fonte: relatorio-rmc

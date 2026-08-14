@@ -1,0 +1,31 @@
+# Grainne's Irish Pub — Cambuí, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/grainnes-pub/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Ambiente de meia-luz onde ler cardápio de papel é ruim. Gancho: cardápio digital que abre no celular do cliente, iluminado.
+
+nome: "Grainne's Irish Pub"
+tema: pub-escuro
+
+site:
+  vibe: pub
+  descritor: "Pub irlandês no Cambuí"
+  kicker: "CAMBUÍ · CAMPINAS–SP"
+  hero_linha1: "Grainne's"
+  hero_linha2: "Irish Pub"
+  tagline: "Meia-luz, madeira escura e chope tirado como manda o figurino."
+  subline: "CHOPE · PUB · MÚSICA AO VIVO"
+  cidade_uf: "Cambuí, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/grainnes-pub/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram não confirmado (o relatório sugeria @grainnespub).
+# Confirme o perfil e adicione instagram_url em site:.
+demo:
+  fonte: relatorio-rmc

@@ -6,6 +6,7 @@ from app.extensions import db
 from app.models.modelo_evento import Evento
 from app.routes.agenda import bp
 from app.utils.tenant import get_current_restaurant_id
+from app.utils.decorators import plano_minimo
 
 
 def _rid():
@@ -45,6 +46,7 @@ def _ler_form():
 
 
 @bp.route('/novo', methods=['GET', 'POST'])
+@plano_minimo('site')
 def novo():
     rid = _rid()
     if request.method == 'POST':
@@ -62,6 +64,7 @@ def novo():
 
 
 @bp.route('/<int:evento_id>/editar', methods=['GET', 'POST'])
+@plano_minimo('site')
 def editar(evento_id):
     rid = _rid()
     evento = Evento.query.filter_by(id=evento_id, restaurant_id=rid).first_or_404()
@@ -80,6 +83,7 @@ def editar(evento_id):
 
 
 @bp.route('/<int:evento_id>/toggle', methods=['POST'])
+@plano_minimo('site')
 def toggle(evento_id):
     rid = _rid()
     evento = Evento.query.filter_by(id=evento_id, restaurant_id=rid).first_or_404()
@@ -90,6 +94,7 @@ def toggle(evento_id):
 
 
 @bp.route('/<int:evento_id>/excluir', methods=['POST'])
+@plano_minimo('site')
 def excluir(evento_id):
     rid = _rid()
     evento = Evento.query.filter_by(id=evento_id, restaurant_id=rid).first_or_404()

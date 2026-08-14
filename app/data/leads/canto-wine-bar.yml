@@ -1,0 +1,33 @@
+# Canto Wine Bar — Cambuí, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/canto-wine-bar/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# 4,9 no Google e público que decide pelo Google Maps. Gancho: link do cardápio direto no perfil do Google, virando visita em reserva.
+
+nome: "Canto Wine Bar"
+tema: pub-escuro
+
+site:
+  vibe: pub
+  descritor: "Wine bar no Cambuí"
+  kicker: "CAMBUÍ · CAMPINAS–SP"
+  hero_linha1: "Canto"
+  hero_linha2: "Wine Bar"
+  tagline: "Poltrona confortável, taça cheia e nenhuma pressa."
+  subline: "VINHOS · TÁBUAS · INTIMISTA"
+  cidade_uf: "Cambuí, Campinas–SP"
+  nota_google: "4,9"
+  selo_estrelas: "4,9 no Google"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/canto-wine-bar/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram não confirmado (o relatório sugeria @cantowinebar).
+# Confirme o perfil e adicione instagram_url em site:.
+demo:
+  fonte: relatorio-rmc

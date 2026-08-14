@@ -29,11 +29,34 @@ def _mock_billing():
     return 'test_PLACEHOLDER' in _stripe_secret_key() and not _is_production()
 
 
-def _ativar_pro(restaurante):
-    restaurante.subscription_tier = 'pro'
+def plano_do_price(price_id):
+    """Qual plano este price do Stripe representa. Sem env configurado, 'pro'
+    (comportamento anterior, quando só existia um plano)."""
+    if price_id and price_id == os.environ.get('STRIPE_PRICE_ID_SITE'):
+        return 'site'
+    return 'pro'
+
+
+def _ativar_plano(restaurante, sessao=None, plano='pro'):
+    """Liga o plano comprado e guarda os ids do Stripe.
+
+    Gravar `stripe_customer_id`/`stripe_subscription_id` é o que torna possível
+    reagir a cancelamento e inadimplência depois: sem eles, um evento de
+    cobrança chega sem dono e não dá pra rebaixar ninguém.
+    """
+    restaurante.subscription_tier = plano
     restaurante.subscription_status = 'active'
+    if sessao:
+        restaurante.stripe_customer_id = sessao.get('customer') or restaurante.stripe_customer_id
+        restaurante.stripe_subscription_id = (
+            sessao.get('subscription') or restaurante.stripe_subscription_id)
     db.session.commit()
-    current_app.logger.info(f'Plano Pro ativado para restaurante {restaurante.id}.')
+    current_app.logger.info(f'Plano {plano} ativado para restaurante {restaurante.id}.')
+
+
+# Nome antigo, mantido para não quebrar chamadas existentes.
+def _ativar_pro(restaurante):
+    _ativar_plano(restaurante, plano='pro')
 
 
 def _sessao_confere(checkout_session, restaurante):
@@ -67,11 +90,16 @@ def create_checkout_session():
     stripe.api_key = _stripe_secret_key()
 
     try:
-        price_id = os.environ.get('STRIPE_PRICE_ID_PRO', 'price_fake_pro_monthly')
-
-        # A/B Testing Logic
-        if restaurante.pricing_strategy == 'volume_based':
-            price_id = os.environ.get('STRIPE_PRICE_ID_VOLUME', 'price_fake_volume_test')
+        # Qual plano o botão pediu. Dois produtos distintos (site e gestão),
+        # não mais um tier binário com A/B de preço.
+        plano = 'site' if request.form.get('plano') == 'site' else 'pro'
+        price_id = (os.environ.get('STRIPE_PRICE_ID_SITE') if plano == 'site'
+                    else os.environ.get('STRIPE_PRICE_ID_PRO'))
+        if not price_id:
+            current_app.logger.error(f'STRIPE_PRICE_ID do plano {plano} não configurado.')
+            flash('Este plano ainda não está disponível para assinatura online. '
+                  'Fale conosco no WhatsApp.', 'warning')
+            return redirect(url_for('dashboard.upgrade'))
 
         checkout_session = stripe.checkout.Session.create(
             customer_email=current_user.email,
@@ -86,8 +114,8 @@ def create_checkout_session():
             success_url=url_for('billing.success', _external=True) + '?session_id={CHECKOUT_SESSION_ID}',
             cancel_url=url_for('billing.cancel', _external=True),
             metadata={
-                'pricing_strategy': restaurante.pricing_strategy,
-                'restaurant_id': restaurante.id
+                'plano': plano,
+                'restaurant_id': restaurante.id,
             }
         )
         return redirect(checkout_session.url, code=303)
@@ -136,8 +164,11 @@ def success():
         flash('Pagamento ainda não confirmado. Se você concluiu o pagamento, aguarde alguns instantes.', 'warning')
         return redirect(url_for('dashboard.upgrade'))
 
-    _ativar_pro(restaurante)
-    flash('Pagamento confirmado! Bem-vindo ao AleroPrice Pro 🚀', 'success')
+    # Plano comprado vem da metadata que gravamos no checkout; sem ela,
+    # 'pro' (comportamento antigo, quando só existia um plano).
+    plano = (checkout_session.get('metadata') or {}).get('plano') or 'pro'
+    _ativar_plano(restaurante, checkout_session, plano=plano)
+    flash(f'Pagamento confirmado! Plano {plano.capitalize()} ativo. 🚀', 'success')
     return redirect(url_for('dashboard.index'))
 
 
@@ -174,9 +205,11 @@ def webhook():
         current_app.logger.warning('Webhook com assinatura inválida rejeitado.')
         return jsonify(error='invalid signature'), 400
 
-    if event['type'] == 'checkout.session.completed':
-        sessao = event['data']['object']
-        restaurant_id = sessao.get('client_reference_id')
+    tipo = event['type']
+    objeto = event['data']['object']
+
+    if tipo == 'checkout.session.completed':
+        restaurant_id = objeto.get('client_reference_id')
         restaurante = Restaurante.query.get(restaurant_id) if restaurant_id else None
 
         if restaurante is None:
@@ -185,7 +218,63 @@ def webhook():
             )
             return jsonify(success=True)  # 200: não pedir retry ao Stripe
 
-        if sessao.get('payment_status') == 'paid':
-            _ativar_pro(restaurante)
+        if objeto.get('payment_status') == 'paid':
+            plano = (objeto.get('metadata') or {}).get('plano') or 'pro'
+            _ativar_plano(restaurante, objeto, plano=plano)
+
+    # Sem os eventos abaixo, quem cancela ou para de pagar continua com o plano
+    # para sempre — o webhook só sabia ativar.
+    elif tipo in ('customer.subscription.updated', 'customer.subscription.deleted',
+                  'invoice.payment_failed', 'invoice.paid'):
+        restaurante = _restaurante_do_evento(objeto)
+        if restaurante is None:
+            current_app.logger.warning(f'{tipo}: nenhum restaurante casou com o evento.')
+            return jsonify(success=True)
+        _sincronizar_assinatura(restaurante, tipo, objeto)
 
     return jsonify(success=True)
+
+
+def _restaurante_do_evento(objeto):
+    """Acha o tenant pelo customer/subscription do Stripe.
+
+    Só funciona porque `_ativar_plano` grava esses ids — antes eles nunca eram
+    gravados e não havia como ligar um evento de cobrança a um restaurante.
+    """
+    sub_id = objeto.get('id') if objeto.get('object') == 'subscription' else objeto.get('subscription')
+    if sub_id:
+        rest = Restaurante.query.filter_by(stripe_subscription_id=sub_id).first()
+        if rest:
+            return rest
+    cliente = objeto.get('customer')
+    if cliente:
+        return Restaurante.query.filter_by(stripe_customer_id=cliente).first()
+    return None
+
+
+def _sincronizar_assinatura(restaurante, tipo, objeto):
+    """Reflete no banco o que o Stripe diz da assinatura."""
+    from datetime import datetime, timezone
+
+    if tipo == 'customer.subscription.deleted':
+        restaurante.subscription_status = 'canceled'
+        current_app.logger.info(f'Assinatura cancelada: restaurante {restaurante.id}.')
+
+    elif tipo == 'invoice.payment_failed':
+        restaurante.subscription_status = 'past_due'
+        current_app.logger.warning(f'Pagamento falhou: restaurante {restaurante.id}.')
+
+    else:  # subscription.updated / invoice.paid
+        status = objeto.get('status')
+        if tipo == 'invoice.paid' or status in ('active', 'trialing'):
+            restaurante.subscription_status = 'active'
+        elif status in ('past_due', 'unpaid', 'canceled', 'incomplete_expired'):
+            restaurante.subscription_status = (
+                'canceled' if status.startswith('canceled') else 'past_due')
+
+        # `plano_ate` é o que faz o acesso expirar sozinho se o webhook falhar.
+        fim = objeto.get('current_period_end') or objeto.get('period_end')
+        if fim:
+            restaurante.plano_ate = datetime.fromtimestamp(fim, tz=timezone.utc).date()
+
+    db.session.commit()

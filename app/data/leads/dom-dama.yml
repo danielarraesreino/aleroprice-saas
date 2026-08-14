@@ -1,0 +1,29 @@
+# Dom Dama Bar — Jardim Campinas, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/dom-dama/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Área externa e pet friendly, atendimento espalhado. Gancho: cliente da varanda pede pelo celular sem o garçom cruzar o salão.
+
+nome: "Dom Dama Bar"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Boteco premium e pet friendly"
+  kicker: "JD. CAMPINAS · CAMPINAS–SP"
+  hero_linha1: "Dom"
+  hero_linha2: "Dama Bar"
+  tagline: "Costela no bafo, varanda tranquila e cachorro bem-vindo."
+  subline: "COSTELA · VARANDA · PET FRIENDLY"
+  cidade_uf: "Jardim Campinas, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/dom-dama/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

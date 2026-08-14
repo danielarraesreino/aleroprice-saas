@@ -1,0 +1,87 @@
+{# Modo Campo: casca própria, não estende base.html de propósito.
+
+   base.html carrega 4 CSS + 4 JS de CDN (Bootstrap, jQuery, DataTables) e uma
+   navbar de 14 itens. No 4G do bar isso é espera, e a navbar é justamente o
+   que atrapalha quando se está em pé com o dono olhando por cima do ombro. #}
+<!doctype html>
+<html lang="pt-BR" translate="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#12100e">
+<title>{% block titulo %}Campo{% endblock %}</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box}
+  :root{
+    --ink:#12100e; --ink-2:#1c1917; --linha:#2f2a25;
+    --creme:#f4efe8; --creme-dim:#a9a099;
+    --ambar:#ffb43d; --verde:#25d366; --erro:#ff6b5e;
+    --raio:14px;
+  }
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--ink); color:var(--creme);
+    font:16px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+    padding:0 0 max(28px,env(safe-area-inset-bottom));
+  }
+  a{color:var(--ambar)}
+  .topo{
+    position:sticky; top:0; z-index:20; background:var(--ink-2);
+    border-bottom:1px solid var(--linha);
+    padding:12px 16px calc(12px + env(safe-area-inset-top));
+    display:flex; align-items:center; gap:12px;
+  }
+  .topo h1{font-size:17px; margin:0; flex:1; line-height:1.25}
+  .topo .voltar{color:var(--creme-dim); text-decoration:none; font-size:22px}
+  .wrap{max-width:620px; margin:0 auto; padding:16px}
+  .bloco{
+    background:var(--ink-2); border:1px solid var(--linha);
+    border-radius:var(--raio); padding:16px; margin-bottom:14px;
+  }
+  .bloco > h2{
+    font-size:12px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--creme-dim); margin:0 0 12px; font-weight:600;
+  }
+  label{display:block; font-size:13px; color:var(--creme-dim); margin:0 0 5px}
+  input[type=text],input[type=email],input[type=tel],input[type=password]{
+    width:100%; padding:13px 14px; margin-bottom:12px;
+    background:var(--ink); color:var(--creme);
+    border:1px solid var(--linha); border-radius:10px;
+    font-size:16px; /* menor que 16px faz o iOS dar zoom ao focar */
+  }
+  input:focus-visible,button:focus-visible,label:focus-visible{
+    outline:2px solid var(--ambar); outline-offset:2px;
+  }
+  .btn{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    width:100%; min-height:52px; padding:14px 18px;
+    border:0; border-radius:12px; cursor:pointer;
+    font-size:16px; font-weight:600; font-family:inherit;
+    background:var(--ambar); color:#1a1206;
+  }
+  .btn.fantasma{background:transparent; color:var(--creme); border:1px solid var(--linha)}
+  .btn.zap{background:var(--verde); color:#04240f}
+  .btn.perigo{background:transparent; color:var(--erro); border:1px solid var(--erro);
+              min-height:40px; font-size:14px; width:auto; padding:8px 14px}
+  .aviso{
+    padding:12px 14px; border-radius:10px; margin-bottom:12px; font-size:14px;
+    background:#1f2a1c; border:1px solid #35502c; color:#cfe9c4;
+  }
+  .aviso.danger{background:#2a1a19; border-color:#5a2f2b; color:#ffcdc7}
+  .nota{font-size:13px; color:var(--creme-dim); margin:8px 0 0}
+</style>
+</head>
+<body>
+<div class="topo">{% block topo %}{% endblock %}</div>
+<div class="wrap">
+  {% with mensagens = get_flashed_messages(with_categories=true) %}
+    {% for categoria, texto in mensagens %}
+      <div class="aviso {{ 'danger' if categoria == 'danger' else '' }}">{{ texto }}</div>
+    {% endfor %}
+  {% endwith %}
+  {% block conteudo %}{% endblock %}
+</div>
+{% block scripts %}{% endblock %}
+</body>
+</html>

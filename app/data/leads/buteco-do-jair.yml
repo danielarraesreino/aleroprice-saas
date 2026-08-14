@@ -1,0 +1,31 @@
+# Buteco do Jair — Barão Geraldo, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/buteco-do-jair/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Coxinha famosa e samba no fim de semana — mesmo perfil do Bar da Vila, que já usa o sistema. Gancho: mostrar o site do Bar da Vila funcionando.
+
+nome: "Buteco do Jair"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Comida di buteco em Barão"
+  kicker: "BARÃO GERALDO · CAMPINAS–SP · DESDE 1989"
+  hero_linha1: "Buteco"
+  hero_linha2: "do Jair"
+  tagline: "Desde 1989: a coxinha que virou endereço."
+  subline: "COXINHA · SAMBA · BUTECO RAIZ"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/buteco-do-jair/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram não confirmado (o relatório sugeria @bardojaircampinas).
+# Confirme o perfil e adicione instagram_url em site:.
+demo:
+  fonte: relatorio-rmc

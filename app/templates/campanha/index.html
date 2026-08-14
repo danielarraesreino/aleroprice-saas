@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Campanha · AleroPrice{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="fas fa-bullseye text-warning"></i> Funil da campanha</h2>
+
+<div class="row text-center mb-4">
+  {% set cards = [
+    ('Prévias no ar', funil.demos, 'secondary'),
+    ('Abertas pelo dono', funil.abertas, 'warning'),
+    ('Com reserva', funil.com_reserva, 'info'),
+    ('Viraram cliente', funil.clientes, 'primary'),
+    ('Pagando', funil.pagantes, 'success'),
+  ] %}
+  {% for rotulo, valor, cor in cards %}
+  <div class="col">
+    <div class="card border-{{ cor }}">
+      <div class="card-body py-3">
+        <div class="display-6 text-{{ cor }}">{{ valor }}</div>
+        <small class="text-muted">{{ rotulo }}</small>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="table-responsive">
+  <table class="table table-sm table-hover align-middle">
+    <thead class="table-light">
+      <tr>
+        <th>Bar</th><th>Situação</th><th>Origem</th>
+        <th class="text-center">Visitas</th><th>Abriu em</th>
+        <th class="text-center">Reservas</th><th>Prévia até</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for l in linhas %}
+      <tr>
+        <td><strong>{{ l.nome }}</strong><br><small class="text-muted">/bar/{{ l.slug }}</small></td>
+        <td>
+          {% if l.tipo == 'demo' %}<span class="badge bg-secondary">Prévia</span>
+          {% else %}<span class="badge bg-primary">{{ l.plano }}</span>{% endif %}
+        </td>
+        <td><small>{{ l.fonte or '—' }}</small></td>
+        <td class="text-center {{ 'fw-bold text-success' if l.visitas else 'text-muted' }}">{{ l.visitas }}</td>
+        <td><small>{{ l.aberta_em.strftime('%d/%m %H:%M') if l.aberta_em else '—' }}</small></td>
+        <td class="text-center {{ 'fw-bold' if l.reservas }}">{{ l.reservas }}</td>
+        <td><small>{{ l.expira.strftime('%d/%m/%Y') if l.expira else '—' }}</small></td>
+        <td class="text-end">
+          <a class="btn btn-sm btn-outline-secondary" target="_blank"
+             href="{{ url_for('public.landing_slug', slug=l.slug) }}">abrir</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

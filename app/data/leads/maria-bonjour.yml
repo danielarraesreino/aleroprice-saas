@@ -1,0 +1,37 @@
+# Maria Bonjour Bar — Barão Geraldo, Campinas–SP
+# Lead da varredura de Barão (14/08/2026). Foto: coloque os arquivos em
+# app/static/img/demo/maria-bonjour/ e aponte abaixo.
+#
+# POR QUE LIGAR PRA ELE:
+# Gastronomia caprichada + carta de vinhos — o prato vende pela foto, e
+# Instagram enterra a foto em dois dias. Gancho: cardápio-vitrine permanente
+# com foto de cada prato, e agenda pra música ao vivo. Público de vinho
+# planeja a noite antes — site é onde essa decisão acontece.
+
+nome: "Maria Bonjour Bar"
+tema: pub-escuro
+
+site:
+  vibe: pub
+  descritor: "Bar de vinhos e gastronomia em Barão"
+  kicker: "BARÃO GERALDO · CAMPINAS–SP"
+  hero_linha1: "Maria"
+  hero_linha2: "Bonjour"
+  tagline: "Vinho bom, prato caprichado e música ao vivo."
+  subline: "VINHOS · CHOPES · GASTRONOMIA · MÚSICA AO VIVO"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+  endereco: "R. Ana Maria de Souza, 26 — Barão Geraldo"
+  horario: "Qua–Sáb 18h–01h · Dom 18h–23h"
+  maps_query: "Maria Bonjour Bar Campinas"
+  instagram_url: "https://www.instagram.com/mariabonjourbar/"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/maria-bonjour/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram @mariabonjourbar confirmado em 14/08/2026 (morandoembarao.com).
+demo:
+  fonte: varredura-barao

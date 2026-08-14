@@ -1,0 +1,29 @@
+# Cervejaria 3 Orelhas — Sousas, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/tres-orelhas/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Destino de fim de semana com pico concentrado. Gancho: reserva antecipada organiza o sábado e evita fila na porta.
+
+nome: "Cervejaria 3 Orelhas"
+tema: pub-escuro
+
+site:
+  vibe: pub
+  descritor: "Cervejaria artesanal em Sousas"
+  kicker: "SOUSAS · CAMPINAS–SP"
+  hero_linha1: "Cervejaria"
+  hero_linha2: "3 Orelhas"
+  tagline: "Galpão, tonel à vista e verde na janela."
+  subline: "ARTESANAL · GALPÃO · NATUREZA"
+  cidade_uf: "Sousas, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/tres-orelhas/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

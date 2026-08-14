@@ -1,0 +1,31 @@
+# Bar Santa Genebra — Barão Geraldo, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/bar-santa-genebra/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Almoço comercial com cliente de pressa. Gancho: prato do dia publicado de manhã no site e no Google, antes de o pessoal decidir onde comer.
+
+nome: "Bar Santa Genebra"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Almoço e boteco em Barão"
+  kicker: "BARÃO GERALDO · CAMPINAS–SP"
+  hero_linha1: "Bar"
+  hero_linha2: "Santa Genebra"
+  tagline: "Prato feito no capricho e happy hour logo depois."
+  subline: "ALMOÇO · PF · HAPPY HOUR"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/bar-santa-genebra/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram não confirmado (o relatório sugeria @santagenebrabar).
+# Confirme o perfil e adicione instagram_url em site:.
+demo:
+  fonte: relatorio-rmc

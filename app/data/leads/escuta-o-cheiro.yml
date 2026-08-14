@@ -1,0 +1,29 @@
+# Escuta o Cheiro — Sousas, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/escuta-o-cheiro/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Feijoada de domingo com roda de samba: lota e some. Gancho: agenda do samba publicada no site e reserva antecipada da feijoada.
+
+nome: "Escuta o Cheiro"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Samba e feijoada em Sousas"
+  kicker: "SOUSAS · CAMPINAS–SP"
+  hero_linha1: "Escuta"
+  hero_linha2: "o Cheiro"
+  tagline: "Árvore centenária, chão de terra e roda de samba no domingo."
+  subline: "FEIJOADA · SAMBA · DOMINGO"
+  cidade_uf: "Sousas, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/escuta-o-cheiro/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

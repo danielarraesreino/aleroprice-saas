@@ -59,64 +59,14 @@ with app.app_context():
     except Exception as e:
         print(f"Database initialization failed: {e}")
 
-# Dangerous admin/debug endpoints (/debug-db, /seed-vegan, /reset-db).
-# These are only registered when ENABLE_ADMIN_ENDPOINTS=1 is explicitly set,
-# and never when running in the Vercel/Railway production environment.
-# /reset-db in particular calls db.drop_all() and would wipe all tenant data.
-_admin_endpoints_enabled = (
-    os.environ.get('ENABLE_ADMIN_ENDPOINTS') == '1'
-    and config_name != 'production'
-)
+# Ferramentas destrutivas (/admin-dev/db, /seed-vegan, /reset-db) vivem em um
+# blueprint isolado, que só é registrado fora de produção, com
+# ENABLE_ADMIN_ENDPOINTS=1 e ADMIN_DEV_TOKEN definidos. Habilitar em produção
+# levanta erro no boot em vez de passar despercebido — ver app/routes/admin_dev.
+from app.routes.admin_dev import registrar as _registrar_admin_dev
 
-if _admin_endpoints_enabled:
-    @app.route('/debug-db', strict_slashes=False)
-    def debug_db():
-        try:
-            from sqlalchemy import inspect, text
-            inspector = inspect(db.engine)
-            tables = inspector.get_table_names()
-
-            # Check alembic version
-            try:
-                version = db.session.execute(text("SELECT * FROM alembic_version")).fetchall()
-            except:
-                version = "Table alembic_version not found"
-
-            return {
-                "status": "online",
-                "tables": tables,
-                "alembic_version": str(version),
-                "db_url_masked": app.config['SQLALCHEMY_DATABASE_URI'].split('@')[-1] if app.config['SQLALCHEMY_DATABASE_URI'] else "None"
-            }
-        except Exception as e:
-            return {"error": str(e)}
-
-    @app.route('/seed-vegan', strict_slashes=False)
-    def seed_vegan_route():
-        try:
-            from app.scripts.seed_vegan import seed_vegan_data
-            msg = seed_vegan_data()
-            return {
-                "status": "success",
-                "message": msg,
-                "info": "Refresh the Dashboard to see data."
-            }
-        except Exception as e:
-            return {"status": "error", "error": str(e)}
-
-    @app.route('/reset-db', strict_slashes=False)
-    def reset_db_route():
-        try:
-            # Nuclear option: Recreate schema
-            db.drop_all()
-            db.create_all()
-            return {
-                "status": "success",
-                "message": "Database reset successfully. Schema is now clean.",
-                "next_step": "Go to /seed-vegan to populate data."
-            }
-        except Exception as e:
-            return {"status": "error", "error": str(e)}
+with app.app_context():
+    _registrar_admin_dev(app, config_name)
 
 
 # ---------------------------------------------------------------------------
@@ -161,6 +111,17 @@ if _seed_token:
                 'pratos': conta('pratos', rid), 'produtos': conta('produto', rid),
                 'vendas': conta('historico_vendas', rid), 'notas': conta('nf_nota', rid),
             })
+            # Plano efetivo: sem isto não dá pra saber, olhando de fora, se um
+            # cliente foi rebaixado sem querer por uma mudança de paywall.
+            try:
+                from app.models.modelo_restaurante import Restaurante
+                from app.utils.planos import plano_efetivo
+                rest = Restaurante.query.get(rid)
+                info['plano'] = plano_efetivo(rest)
+                info['tier'] = rest.subscription_tier
+                info['tipo_conta'] = rest.tipo_conta
+            except Exception as e:
+                info['plano'] = f'? ({type(e).__name__})'
             out.append(info)
         return out
 
@@ -193,40 +154,183 @@ if _seed_token:
                 'tenants': _contagens(tem_slug),
             })
 
-        if acao != 'seed':
-            return jsonify({'error': "action deve ser 'status' ou 'seed'"}), 400
+        def _sincronizar_schema():
+            """Alinha o banco ao modelo. Prod foi construído por create_all sobre
+            um modelo antigo, então tabelas velhas (restaurante, promocao,
+            site_config...) não têm as colunas adicionadas depois. Ao invés de
+            caçar coluna a coluna, reflete o banco e adiciona TODA coluna que
+            estiver faltando.
 
-        log = []
+            Também **alarga** coluna de texto que ficou curta (ex.: hero_foto
+            nasceu VARCHAR(120) para caminho em static e passou a receber URL
+            de Vercel Blob). Só alarga, nunca estreita: aumentar o limite não
+            pode truncar dado existente, diminuir pode.
 
-        # 1. Schema. Prod foi construído por create_all sobre um modelo antigo,
-        #    então tabelas velhas (restaurante, promocao, site_config...) não têm
-        #    as colunas adicionadas depois. Ao invés de caçar coluna a coluna,
-        #    reflete o banco e adiciona TODA coluna do modelo que estiver
-        #    faltando. Idempotente e não destrutivo (só ADD COLUMN).
-        db.create_all()  # cria tabelas que faltam inteiras
-        insp = inspect(db.engine)
-        add_col = db.engine.dialect.type_compiler.process
-        n_cols = 0
-        for tabela in db.metadata.sorted_tables:
-            if not insp.has_table(tabela.name):
-                continue
-            existentes = {c['name'] for c in insp.get_columns(tabela.name)}
-            for coluna in tabela.columns:
-                if coluna.name in existentes:
+            Idempotente e não destrutivo."""
+            registro = []
+            db.create_all()  # cria tabelas que faltam inteiras
+            insp_local = inspect(db.engine)
+            add_col = db.engine.dialect.type_compiler.process
+            n = alargadas = 0
+            for tabela in db.metadata.sorted_tables:
+                if not insp_local.has_table(tabela.name):
                     continue
-                # Adiciona sempre como NULL (sem default/constraint): seguro pra
-                # dado que já está na tabela; os seeds preenchem o valor certo.
-                tipo = add_col(coluna.type)
+                no_banco = {c['name']: c for c in insp_local.get_columns(tabela.name)}
+                for coluna in tabela.columns:
+                    atual = no_banco.get(coluna.name)
+                    if atual is None:
+                        # Sempre NULL (sem default/constraint): seguro pra dado que
+                        # já está na tabela; os seeds preenchem o valor certo.
+                        tipo = add_col(coluna.type)
+                        try:
+                            db.session.execute(text(
+                                f'ALTER TABLE "{tabela.name}" ADD COLUMN "{coluna.name}" {tipo}'))
+                            db.session.commit()
+                            n += 1
+                            registro.append(f'  + {tabela.name}.{coluna.name} {tipo}')
+                        except Exception as ddl_e:
+                            db.session.rollback()
+                            registro.append(f'  ! {tabela.name}.{coluna.name}: {type(ddl_e).__name__}')
+                        continue
+
+                    quero = getattr(coluna.type, 'length', None)
+                    tenho = getattr(atual.get('type'), 'length', None)
+                    if not (isinstance(quero, int) and isinstance(tenho, int) and quero > tenho):
+                        continue
+                    tipo = add_col(coluna.type)
+                    try:
+                        # SQLite não impõe largura de VARCHAR e não tem ALTER
+                        # COLUMN TYPE — lá o modelo novo já vale sem DDL.
+                        if db.engine.dialect.name != 'sqlite':
+                            db.session.execute(text(
+                                f'ALTER TABLE "{tabela.name}" '
+                                f'ALTER COLUMN "{coluna.name}" TYPE {tipo}'))
+                            db.session.commit()
+                        alargadas += 1
+                        registro.append(
+                            f'  ~ {tabela.name}.{coluna.name} {tenho} -> {quero}')
+                    except Exception as ddl_e:
+                        db.session.rollback()
+                        registro.append(f'  ! {tabela.name}.{coluna.name}: {type(ddl_e).__name__}')
+            registro.append(
+                f'schema: {n} colunas adicionadas, {alargadas} alargadas '
+                f'(reflexão model vs banco)')
+            return registro
+
+        if acao == 'migrate':
+            # Alembic sob demanda. Não roda no boot de propósito: em serverless,
+            # N cold starts simultâneos = N `upgrade` na mesma alembic_version.
+            # O advisory lock do Postgres serializa isso de forma nativa.
+            from flask_migrate import stamp as alembic_stamp, upgrade as alembic_upgrade
+
+            e_postgres = db.engine.dialect.name == 'postgresql'
+            TRAVA = 728145  # constante arbitrária, só precisa ser estável
+            if e_postgres:
+                obteve = db.session.execute(
+                    text('SELECT pg_try_advisory_lock(:k)'), {'k': TRAVA}).scalar()
+                if not obteve:
+                    return jsonify({'mode': 'migrate',
+                                    'erro': 'outra migration em andamento'}), 409
+            def _versao_atual():
+                """None quando o Alembic nunca rodou aqui — a tabela pode nem
+                existir, e consultá-la aborta a transação no Postgres."""
                 try:
-                    db.session.execute(text(
-                        f'ALTER TABLE "{tabela.name}" ADD COLUMN "{coluna.name}" {tipo}'))
-                    db.session.commit()
-                    n_cols += 1
-                    log.append(f'  + {tabela.name}.{coluna.name} {tipo}')
-                except Exception as ddl_e:
+                    v = db.session.execute(
+                        text('SELECT version_num FROM alembic_version')).scalar()
+                    return v
+                except Exception:
                     db.session.rollback()
-                    log.append(f'  ! {tabela.name}.{coluna.name}: {type(ddl_e).__name__}')
-        log.append(f'schema: {n_cols} colunas adicionadas (reflexão model vs banco)')
+                    return None
+
+            try:
+                versao_antes = _versao_atual()
+                log_mig = [f'version_num antes: {versao_antes}']
+
+                # Baseline: prod nasceu de create_all(), então o schema já
+                # equivale ao head da cadeia — mas alembic_version está vazia.
+                # Stampar declara isso e dá de onde partir, sem reexecutar
+                # migrations antigas contra um banco que já as tem.
+                base = request.args.get('stamp')
+                if versao_antes is None and base:
+                    alembic_stamp(revision=base)
+                    log_mig.append(f'stamp {base}')
+
+                alembic_upgrade()
+                log_mig.append(f'version_num depois: {_versao_atual()}')
+                return jsonify({'mode': 'migrate', 'log': log_mig})
+            except Exception as e:
+                db.session.rollback()
+                return jsonify({'mode': 'migrate',
+                                'erro': f'{type(e).__name__}: {e}'}), 500
+            finally:
+                if e_postgres:
+                    db.session.execute(text('SELECT pg_advisory_unlock(:k)'), {'k': TRAVA})
+                    db.session.commit()
+
+        if acao == 'constraints':
+            # Leitura pura. Prod nasceu de create_all() sobre modelos antigos,
+            # então um unique que existe no SQLite de dev pode não existir aqui.
+            # Sem olhar, qualquer migration de constraint é chute.
+            insp = inspect(db.engine)
+            alvo = ['pratos', 'produto', 'categoria_desperdicio', 'usuario',
+                    'restaurante', 'fornecedor', 'nf_nota']
+            out = {}
+            for tabela in alvo:
+                if not insp.has_table(tabela):
+                    out[tabela] = 'tabela não existe'
+                    continue
+                out[tabela] = {
+                    'uniques': [
+                        {'nome': u.get('name'), 'colunas': u.get('column_names')}
+                        for u in insp.get_unique_constraints(tabela)
+                    ],
+                    'indices_unicos': [
+                        {'nome': i.get('name'), 'colunas': i.get('column_names')}
+                        for i in insp.get_indexes(tabela) if i.get('unique')
+                    ],
+                }
+            # Duplicatas que a mudança liberaria. Se já houver, o unique não
+            # existe em prod e metade do problema evapora.
+            dups = {}
+            for tabela, coluna in (('pratos', 'nome'), ('produto', 'codigo'),
+                                   ('categoria_desperdicio', 'nome')):
+                try:
+                    linhas = db.session.execute(text(
+                        f'SELECT {coluna}, count(*) c FROM {tabela} '
+                        f'GROUP BY {coluna} HAVING count(*) > 1 LIMIT 5')).fetchall()
+                    dups[f'{tabela}.{coluna}'] = [list(r) for r in linhas]
+                except Exception as e:
+                    db.session.rollback()
+                    dups[f'{tabela}.{coluna}'] = f'erro: {type(e).__name__}'
+            return jsonify({'mode': 'constraints', 'dialeto': db.engine.dialect.name,
+                            'tabelas': out, 'duplicatas': dups})
+
+        if acao == 'schema':
+            # Só alinha o schema. Separado de 'seed' porque seed também insere
+            # dados de demonstração, que colidem quando já existem — e aí um
+            # ajuste de coluna ficava refém de um seed que falha.
+            return jsonify({'mode': 'schema', 'log': _sincronizar_schema()})
+
+        if acao == 'demos':
+            # Publica as prévias comerciais de app/data/leads/*.yml.
+            # Idempotente: reaplicar atualiza, não duplica — importa porque esta
+            # rota pode dar timeout no meio e ser chamada de novo.
+            from app.utils.demos import aplicar_todos
+            log_schema = _sincronizar_schema()   # colunas novas antes de gravar
+            resultado = aplicar_todos(slug=request.args.get('slug'))
+            return jsonify({
+                'mode': 'demos',
+                'aplicados': len(resultado['ok']),
+                'falhas': len(resultado['erros']),
+                'schema': log_schema[-1],
+                **resultado,
+            }), (200 if not resultado['erros'] else 207)
+
+        if acao != 'seed':
+            return jsonify(
+                {'error': "action deve ser 'status', 'schema', 'seed' ou 'demos'"}), 400
+
+        log = _sincronizar_schema()
 
         from app.models.modelo_restaurante import Restaurante
         from app.models.usuario import Usuario

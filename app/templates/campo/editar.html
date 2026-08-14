@@ -1,0 +1,323 @@
+{% extends "campo/base.html" %}
+{% block titulo %}{{ rest.nome }} · Campo{% endblock %}
+
+{# hero_foto/imagem guardam caminho em static OU URL absoluta (Vercel Blob).
+   Mesma regra de publico.views._img(). #}
+{% macro img(caminho) -%}
+  {%- if caminho.startswith('http') -%}{{ caminho }}
+  {%- else -%}{{ url_for('static', filename=caminho) }}{%- endif -%}
+{%- endmacro %}
+
+{% block topo %}
+  <a class="voltar" href="{{ url_for('campo.index') }}" aria-label="Voltar para a lista">‹</a>
+  <h1>{{ rest.nome }}</h1>
+  <a href="{{ url_for('public.landing_slug', slug=rest.slug) }}" target="_blank"
+     rel="noopener" style="font-size:14px;white-space:nowrap">ver site ↗</a>
+{% endblock %}
+
+{% block conteudo %}
+
+<div class="bloco">
+  <h2>1 · Foto de capa</h2>
+  <div id="capa-preview" style="margin-bottom:12px">
+    {% if cfg.hero_foto %}
+      <img src="{{ img(cfg.hero_foto) }}" alt="Capa atual do site"
+           style="width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:10px;display:block">
+    {% else %}
+      <div style="width:100%;aspect-ratio:16/10;border:2px dashed var(--linha);
+                  border-radius:10px;display:grid;place-items:center;color:var(--creme-dim)">
+        sem foto ainda
+      </div>
+    {% endif %}
+  </div>
+  <label class="btn" for="capa-input">📷 Tirar ou escolher foto</label>
+  <input id="capa-input" type="file" accept="image/*" capture="environment"
+         data-alvo="capa" class="upload" hidden>
+  <p class="nota">A imagem é reduzida no próprio celular antes de subir.</p>
+</div>
+
+<div class="bloco">
+  <h2>2 · O básico</h2>
+  <form method="post" action="{{ url_for('campo.basico', slug=rest.slug) }}">
+    <label for="f-nome">Nome do bar</label>
+    <input id="f-nome" type="text" name="nome" value="{{ cfg.nome or rest.nome }}">
+
+    <label for="f-zap">WhatsApp (só números, com DDD)</label>
+    <input id="f-zap" type="tel" name="whatsapp" inputmode="numeric"
+           placeholder="5519999999999" value="{{ cfg.whatsapp or '' }}">
+
+    <label for="f-desc">Uma linha sobre a casa</label>
+    <input id="f-desc" type="text" name="descritor" maxlength="80"
+           placeholder="Boteco de esquina em Barão Geraldo"
+           value="{{ cfg.descritor or '' }}">
+
+    <label for="f-end">Endereço</label>
+    <input id="f-end" type="text" name="endereco" value="{{ cfg.endereco or '' }}">
+
+    <button class="btn" type="submit">Salvar</button>
+  </form>
+</div>
+
+<div class="bloco">
+  <h2>3 · A cara do site</h2>
+  <form method="post" action="{{ url_for('campo.estilo', slug=rest.slug) }}" id="form-estilo">
+    <p class="nota" style="margin:0 0 8px">Cores</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:16px">
+      {% for t in temas %}
+      <label style="display:flex;align-items:center;gap:9px;padding:11px;cursor:pointer;
+                    border:1px solid {{ 'var(--ambar)' if cfg.tema == t.valor else 'var(--linha)' }};
+                    border-radius:10px;margin:0">
+        <input type="radio" name="tema" value="{{ t.valor }}"
+               {% if cfg.tema == t.valor %}checked{% endif %} style="margin:0">
+        <span aria-hidden="true" style="display:flex;gap:3px">
+          {% for cor in t.amostra %}
+            <i style="width:13px;height:13px;border-radius:50%;background:{{ cor }};
+                      border:1px solid rgba(255,255,255,.18);display:block"></i>
+          {% endfor %}
+        </span>
+        <span style="font-size:13px">{{ t.label }}</span>
+      </label>
+      {% endfor %}
+    </div>
+
+    <p class="nota" style="margin:0 0 8px">Jeito de falar</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:16px">
+      {% for v in vibes %}
+      <label style="display:block;padding:11px;cursor:pointer;
+                    border:1px solid {{ 'var(--ambar)' if cfg.vibe == v.valor else 'var(--linha)' }};
+                    border-radius:10px;margin:0">
+        <input type="radio" name="vibe" value="{{ v.valor }}"
+               {% if cfg.vibe == v.valor %}checked{% endif %}>
+        <span style="font-size:13px">{{ v.label }}</span>
+      </label>
+      {% endfor %}
+    </div>
+    <button class="btn fantasma" type="submit">Aplicar</button>
+  </form>
+</div>
+
+<div class="bloco">
+  <h2>4 · Pratos ({{ pratos|length }})</h2>
+  {% for p in pratos %}
+    <div style="display:flex;align-items:center;gap:11px;padding:9px 0;
+                border-bottom:1px solid var(--linha)">
+      {% if p.imagem %}
+        <img src="{{ img(p.imagem) }}" alt=""
+             style="width:52px;height:52px;object-fit:cover;border-radius:8px;flex:none">
+      {% endif %}
+      <span style="flex:1;min-width:0">{{ p.nome }}</span>
+      <form method="post" style="margin:0"
+            action="{{ url_for('campo.remover', slug=rest.slug, tipo='prato', item_id=p.id) }}">
+        <button class="btn perigo" type="submit">tirar</button>
+      </form>
+    </div>
+  {% endfor %}
+
+  <div style="margin-top:14px">
+    <label for="prato-nome">Nome do prato</label>
+    <input id="prato-nome" type="text" placeholder="Costela na brasa">
+    <label class="btn" for="prato-input">📷 Foto do prato e adicionar</label>
+    <input id="prato-input" type="file" accept="image/*" capture="environment"
+           data-alvo="prato" class="upload" hidden>
+  </div>
+</div>
+
+<div class="bloco">
+  <h2>5 · Galeria ({{ galeria|length }})</h2>
+  {% if galeria %}
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;margin-bottom:14px">
+    {% for g in galeria %}
+      <form method="post" style="margin:0;position:relative"
+            action="{{ url_for('campo.remover', slug=rest.slug, tipo='galeria', item_id=g.id) }}">
+        <img src="{{ img(g.imagem) }}" alt=""
+             style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;display:block">
+        {# 34px: pequeno pra não ser tocado por acidente num grid de fotos,
+           grande o bastante pra acertar de primeira com o polegar. #}
+        <button type="submit" aria-label="Remover foto"
+                style="position:absolute;top:4px;right:4px;width:34px;height:34px;
+                       border:0;border-radius:50%;background:rgba(0,0,0,.7);
+                       color:#fff;cursor:pointer;font-size:18px;line-height:1">×</button>
+      </form>
+    {% endfor %}
+  </div>
+  {% endif %}
+  <label class="btn fantasma" for="galeria-input">📷 Adicionar à galeria</label>
+  <input id="galeria-input" type="file" accept="image/*" capture="environment"
+         data-alvo="galeria" class="upload" multiple hidden>
+</div>
+
+<div class="bloco">
+  <h2>6 · Endereço próprio</h2>
+  <button class="btn fantasma" type="button" id="btn-dominio">🔎 Ver domínios livres</button>
+  <div id="dominio-saida" style="margin-top:12px;font-size:15px"></div>
+  <p class="nota">Descobrir na mesa que o domínio do bar está livre costuma
+  valer mais que a explicação de recurso.</p>
+</div>
+
+<div class="bloco" style="text-align:center">
+  <h2>7 · Mostra pra ele</h2>
+  <div style="background:#fff;border-radius:12px;padding:14px;display:inline-block;max-width:230px">
+    <img src="{{ url_for('campo.qr', slug=rest.slug) }}" alt="QR code do site"
+         style="width:100%;display:block">
+  </div>
+  <p class="nota">Ele aponta a câmera e vê o próprio bar no telefone dele.</p>
+  <a class="btn fantasma" style="margin-top:10px;text-decoration:none"
+     href="{{ url_for('campo.proposta', slug=rest.slug) }}">
+    📄 Proposta pronta pra mostrar
+  </a>
+  {% if cfg.whatsapp %}
+    <a class="btn zap" style="margin-top:10px;text-decoration:none"
+       href="https://wa.me/{{ cfg.whatsapp }}?text={{ ('Olha o site do ' ~ rest.nome ~ ': ' ~ url_for('public.landing_slug', slug=rest.slug, _external=True))|urlencode }}">
+      Mandar o link no WhatsApp dele
+    </a>
+  {% endif %}
+</div>
+
+{% if (rest.tipo_conta or 'cliente') == 'demo' %}
+<div class="bloco" style="border-color:var(--ambar)">
+  <h2>8 · Fechar</h2>
+  <p class="nota" style="margin:0 0 14px">
+    Cria a conta dele com tudo que está aí. Nada é refeito — o mesmo site
+    continua, agora no nome dele.
+  </p>
+  <form method="post" action="{{ url_for('campo.converter', slug=rest.slug) }}">
+    <label for="c-resp">Nome do responsável</label>
+    <input id="c-resp" type="text" name="responsavel" placeholder="Gustavo">
+
+    <label for="c-email">E-mail dele</label>
+    <input id="c-email" type="email" name="email" required autocomplete="off">
+
+    <label for="c-senha">Senha (anote e entregue)</label>
+    <input id="c-senha" type="text" name="senha" value="{{ senha_sugerida }}" required>
+
+    <button class="btn" type="submit">Este bar é meu — criar conta</button>
+  </form>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+const SLUG = {{ rest.slug|tojson }};
+const URL_FOTO = {{ url_for('campo.foto', slug=rest.slug)|tojson }};
+const LADO_MAX = 1200;
+
+/* Reduzir no navegador, não no servidor: foto de celular tem ~4MB e o 4G do
+   bar não sobe isso enquanto alguém espera olhando. ~200KB sobe em segundos —
+   e assim o servidor não precisa de Pillow. */
+function reduzir(file) {
+  return new Promise((ok, falha) => {
+    const img = new Image();
+    img.onload = () => {
+      const escala = Math.min(1, LADO_MAX / Math.max(img.width, img.height));
+      const cv = document.createElement('canvas');
+      cv.width = Math.round(img.width * escala);
+      cv.height = Math.round(img.height * escala);
+      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+      URL.revokeObjectURL(img.src);
+      cv.toBlob(b => b ? ok(b) : falha(new Error('não consegui processar a imagem')),
+                'image/jpeg', 0.82);
+    };
+    img.onerror = () => falha(new Error('arquivo não é uma imagem válida'));
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+function avisar(texto, erro) {
+  const div = document.createElement('div');
+  div.className = 'aviso' + (erro ? ' danger' : '');
+  div.textContent = texto;
+  document.querySelector('.wrap').prepend(div);
+  if (!erro) setTimeout(() => div.remove(), 2500);
+}
+
+async function subir(file, alvo, rotulo) {
+  const dados = new FormData();
+  dados.append('imagem', await reduzir(file), (file.name || 'foto').replace(/\.\w+$/, '') + '.jpg');
+  dados.append('alvo', alvo);
+  if (rotulo) dados.append('nome', rotulo);
+
+  const resp = await fetch(URL_FOTO, {method: 'POST', body: dados});
+  const corpo = await resp.json().catch(() => ({erro: 'resposta inesperada do servidor'}));
+  if (!resp.ok) throw new Error(corpo.erro || 'falhou o envio');
+  return corpo;
+}
+
+document.querySelectorAll('input.upload').forEach(input => {
+  const botao = document.querySelector(`label[for="${input.id}"]`);
+  input.addEventListener('change', async () => {
+    const arquivos = [...input.files];
+    if (!arquivos.length) return;
+
+    const textoOriginal = botao.textContent;
+    botao.textContent = 'Enviando…';
+    botao.style.pointerEvents = 'none';
+    const campoNome = document.getElementById('prato-nome');
+
+    try {
+      for (const arquivo of arquivos) {
+        const r = await subir(arquivo, input.dataset.alvo,
+                              campoNome ? campoNome.value.trim() : '');
+        if (r.alvo === 'capa') {
+          document.getElementById('capa-preview').innerHTML =
+            `<img src="${r.url}" alt="Capa atual do site" style="width:100%;` +
+            `aspect-ratio:16/10;object-fit:cover;border-radius:10px;display:block">`;
+        }
+      }
+      if (input.dataset.alvo === 'capa') {
+        avisar('Capa trocada.');
+        botao.textContent = textoOriginal;
+        botao.style.pointerEvents = '';
+      } else {
+        location.reload();   // lista de pratos/galeria é renderizada no servidor
+      }
+    } catch (e) {
+      avisar(e.message, true);
+      botao.textContent = textoOriginal;
+      botao.style.pointerEvents = '';
+    } finally {
+      input.value = '';
+    }
+  });
+});
+
+/* Consulta de domínio sob demanda — não roda ao abrir a tela porque cada
+   consulta é ida à rede, e o vendedor nem sempre chega nessa parte. */
+const btnDominio = document.getElementById('btn-dominio');
+btnDominio.addEventListener('click', async () => {
+  const saida = document.getElementById('dominio-saida');
+  btnDominio.disabled = true;
+  btnDominio.textContent = 'Consultando…';
+  saida.textContent = '';
+  try {
+    const resp = await fetch({{ url_for('campo.dominio', slug=rest.slug)|tojson }});
+    const dados = await resp.json();
+    if (!resp.ok) throw new Error(dados.erro || 'falhou a consulta');
+
+    saida.innerHTML = dados.consulta.map(item => {
+      const rotulo = item.livre === true ? 'livre'
+                   : item.livre === false ? 'ocupado' : 'conferir';
+      const cor = item.livre === true ? 'var(--verde)' : 'var(--creme-dim)';
+      return `<div style="display:flex;gap:8px;padding:7px 0;border-bottom:1px solid var(--linha)">
+                <span style="flex:1;overflow-wrap:anywhere">${item.dominio}</span>
+                <b style="color:${cor}">${rotulo}</b>
+              </div>`;
+    }).join('');
+    if (dados.livre) {
+      saida.innerHTML += `<p style="margin:10px 0 0;color:var(--ambar)">
+        <strong>${dados.livre}</strong> está livre — dá pra registrar no nome dele.</p>`;
+    }
+  } catch (e) {
+    avisar(e.message, true);
+  } finally {
+    btnDominio.disabled = false;
+    btnDominio.textContent = '🔎 Ver domínios livres';
+  }
+});
+
+/* Escolher cor ou tom aplica na hora: em campo ninguém procura o botão Salvar. */
+document.querySelectorAll('#form-estilo input[type=radio]').forEach(r => {
+  r.addEventListener('change', () => document.getElementById('form-estilo').submit());
+});
+</script>
+{% endblock %}

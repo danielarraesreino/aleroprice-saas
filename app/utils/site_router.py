@@ -40,6 +40,16 @@ def eh_dominio_do_produto(host):
     return normalizar_host(host) == dominio_do_produto()
 
 
+def _publicavel(query):
+    """Filtro de tenant que pode servir site público.
+
+    `ativo IS NOT FALSE` (e não `ativo == True`) porque a coluna nasceu em
+    tenants antigos via ALTER TABLE ADD COLUMN, que grava NULL nas linhas
+    existentes. Tratar NULL como inativo tiraria do ar bares que já funcionam.
+    """
+    return query.filter(Restaurante.ativo.isnot(False))
+
+
 def tenant_por_host(host):
     """Restaurante dono deste domínio, ou None.
 
@@ -49,13 +59,15 @@ def tenant_por_host(host):
     h = normalizar_host(host)
     if not h or h == dominio_do_produto():
         return None
-    return Restaurante.query.filter(Restaurante.dominio == h).first()
+    return _publicavel(Restaurante.query.filter(Restaurante.dominio == h)).first()
 
 
 def tenant_por_slug(slug):
     if not slug:
         return None
-    return Restaurante.query.filter(Restaurante.slug == slug.strip().lower()).first()
+    return _publicavel(
+        Restaurante.query.filter(Restaurante.slug == slug.strip().lower())
+    ).first()
 
 
 def gerar_slug(nome):
@@ -70,15 +82,18 @@ def gerar_slug(nome):
     return texto[:60] or 'bar'
 
 
-def slug_unico(nome):
+def slug_unico(nome, preferido=None):
     """Slug livre para gravar em `Restaurante.slug` (unique no banco).
 
     Todo tenant precisa de um: sem slug o bar não tem endereço em /bar/<slug>,
     e o site dele fica inacessível até comprar domínio próprio. Colisão de nome
     entre bares é esperada ("Bar do Zé" tem em toda cidade), então desempata com
     sufixo numérico.
+
+    `preferido` permite fixar o endereço (é o nome do arquivo de lead) em vez
+    de derivar do nome do bar — o link já foi combinado antes de existir tenant.
     """
-    base = gerar_slug(nome)
+    base = gerar_slug(preferido or nome)
     slug = base
     n = 2
     while Restaurante.query.filter(Restaurante.slug == slug).first() is not None:

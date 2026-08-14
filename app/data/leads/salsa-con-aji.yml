@@ -1,0 +1,37 @@
+# Salsa con Ají — Barão Geraldo, Campinas–SP
+# Lead da varredura de Barão (14/08/2026). Foto: coloque os arquivos em
+# app/static/img/demo/salsa-con-aji/ e aponte abaixo.
+#
+# POR QUE LIGAR PRA ELE:
+# Único peruano da região + festas de salsa — e abre só sex/sáb/dom.
+# Gancho duplo: (1) meio bairro não sabe QUANDO abre — o site deixa o horário
+# na cara; (2) festa de salsa lota — é o caso perfeito de reserva online com
+# alerta no WhatsApp. Cozinha autoral pede cardápio-vitrine com foto.
+
+nome: "Salsa con Ají"
+tema: praia-claro
+
+site:
+  vibe: praia
+  descritor: "Restaurante e bar peruano em Barão"
+  kicker: "BARÃO GERALDO · SABOR PERUANO"
+  hero_linha1: "Salsa"
+  hero_linha2: "con Ají"
+  tagline: "Ceviche de verdade, pisco sour e festa de salsa."
+  subline: "CEVICHE · PISCO SOUR · FESTAS DE SALSA"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+  endereco: "R. Manoel Antunes Novo, 350 — Barão Geraldo"
+  horario: "Sex 11h30–14h e 18h–23h · Sáb 11h30–15h e 18h–00h · Dom 11h30–15h"
+  maps_query: "Salsa con Aji Barão Geraldo Campinas"
+  instagram_url: "https://www.instagram.com/salsaconaji30/"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/salsa-con-aji/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram @salsaconaji30 confirmado em 14/08/2026 (morandoembarao.com).
+demo:
+  fonte: varredura-barao

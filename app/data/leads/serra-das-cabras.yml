@@ -1,0 +1,29 @@
+# Cervejaria Serra das Cabras — Joaquim Egídio, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/serra-das-cabras/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Local remoto: difícil manter equipe grande. Gancho: automação compensa o time enxuto, sem perder atendimento.
+
+nome: "Cervejaria Serra das Cabras"
+tema: praia-claro
+
+site:
+  vibe: praia
+  descritor: "Cervejaria com vista em Joaquim Egídio"
+  kicker: "JOAQUIM EGÍDIO · CAMPINAS–SP"
+  hero_linha1: "Cervejaria Serra"
+  hero_linha2: "das Cabras"
+  tagline: "Vista aberta, cerveja própria e tempo pra ficar."
+  subline: "VISTA · ARTESANAL · NATUREZA"
+  cidade_uf: "Joaquim Egídio, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/serra-das-cabras/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

@@ -1,0 +1,29 @@
+# Venda Seu Joaquim — Hortolândia–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/venda-seu-joaquim/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Público sênior e famílias grandes. Gancho: site simples e legível, e a reserva feita pelo filho pelo WhatsApp.
+
+nome: "Venda Seu Joaquim"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Comida brasileira em Hortolândia"
+  kicker: "HORTOLÂNDIA–SP"
+  hero_linha1: "Venda"
+  hero_linha2: "Seu Joaquim"
+  tagline: "Cantina, brasilidade e almoço de domingo."
+  subline: "CANTINA · BRASILIDADE · DOMINGO"
+  cidade_uf: "Hortolândia–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/venda-seu-joaquim/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

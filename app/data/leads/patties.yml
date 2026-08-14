@@ -1,0 +1,29 @@
+# Patties — Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/patties/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Marca com identidade visual forte. Gancho: site com as cores e a tipografia da marca — o sistema some, a marca aparece.
+
+nome: "Patties"
+tema: neon-noite
+
+site:
+  vibe: hamburgueria
+  descritor: "Smash burger em Campinas"
+  kicker: "CAMPINAS–SP"
+  hero_linha1: "Patties"
+  hero_linha2: ""
+  tagline: "Retrô, rápido e padronizado do jeito certo."
+  subline: "ULTRASMASH · RETRÔ · COLLAB"
+  cidade_uf: "Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/patties/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

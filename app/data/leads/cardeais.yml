@@ -1,0 +1,29 @@
+# Cardeais Gastronomia — Vinhedo–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/cardeais/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Público de alto poder aquisitivo e prato lendário. Gancho: presença digital à altura do que a casa já entrega no salão.
+
+nome: "Cardeais Gastronomia"
+tema: pub-escuro
+
+site:
+  vibe: pub
+  descritor: "Gastronomia e happy hour em Vinhedo"
+  kicker: "VINHEDO–SP"
+  hero_linha1: "Cardeais"
+  hero_linha2: "Gastronomia"
+  tagline: "Bolinho de feijoada, drinks e um happy hour que virou ponto."
+  subline: "BOLINHO DE FEIJOADA · DRINKS · VINHEDO"
+  cidade_uf: "Vinhedo–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/cardeais/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

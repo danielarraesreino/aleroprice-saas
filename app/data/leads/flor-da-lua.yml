@@ -1,0 +1,31 @@
+# Bar Flor da Lua — Taquaral, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/flor-da-lua/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Nota 5,0 — raríssimo. Gancho: o site existe pra proteger essa nota e transformar quem procura no Google em cliente na porta.
+
+nome: "Bar Flor da Lua"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Bar de bairro no Taquaral"
+  kicker: "TAQUARAL · CAMPINAS–SP"
+  hero_linha1: "Bar Flor"
+  hero_linha2: "da Lua"
+  tagline: "Clima leve, som na medida e gente que volta sempre."
+  subline: "MÚSICA · PETISCOS · TRANQUILO"
+  cidade_uf: "Taquaral, Campinas–SP"
+  nota_google: "5,0"
+  selo_estrelas: "5,0 no Google"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/flor-da-lua/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

@@ -6,6 +6,7 @@ from app.extensions import db
 from app.models.modelo_reserva import Reserva
 from app.routes.reservas import bp
 from app.utils.tenant import get_current_restaurant_id
+from app.utils.decorators import plano_minimo
 
 
 @bp.route('/')
@@ -46,6 +47,7 @@ def _mudar_status(reserva_id, novo_status):
 
 
 @bp.route('/<int:reserva_id>/confirmar', methods=['POST'])
+@plano_minimo('site')
 def confirmar(reserva_id):
     r = _mudar_status(reserva_id, 'confirmada')
     flash(f'Reserva de {r.nome} confirmada.', 'success')
@@ -53,6 +55,7 @@ def confirmar(reserva_id):
 
 
 @bp.route('/<int:reserva_id>/cancelar', methods=['POST'])
+@plano_minimo('site')
 def cancelar(reserva_id):
     r = _mudar_status(reserva_id, 'cancelada')
     flash(f'Reserva de {r.nome} cancelada.', 'warning')

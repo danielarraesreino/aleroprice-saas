@@ -1,0 +1,29 @@
+# Ponto 1 Bar — Barão Geraldo, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/ponto-1/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Bar mais antigo de Barão, com acervo de 650 latinhas. Gancho: essa história virar página — é o que diferencia dele dos bares novos da região.
+
+nome: "Ponto 1 Bar"
+tema: pub-escuro
+
+site:
+  vibe: pub
+  descritor: "O bar mais antigo de Barão Geraldo"
+  kicker: "BARÃO GERALDO · CAMPINAS–SP · DESDE 1978"
+  hero_linha1: "Ponto"
+  hero_linha2: "1 Bar"
+  tagline: "650 latinhas na parede, blues no som e história em cada mesa."
+  subline: "BLUES · COLEÇÃO · DESDE 1978"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/ponto-1/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

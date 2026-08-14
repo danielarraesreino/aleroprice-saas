@@ -1,0 +1,31 @@
+# Botequim de Barão — Barão Geraldo, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/botequim-de-barao/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Mesa pequena e cardápio de papel ocupando espaço. Gancho: QR na mesa libera a mesa pro que importa — copo e comida.
+
+nome: "Botequim de Barão"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Botequim de conversa em Barão"
+  kicker: "BARÃO GERALDO · CAMPINAS–SP"
+  hero_linha1: "Botequim"
+  hero_linha2: "de Barão"
+  tagline: "Cerveja de garrafa, petisco clássico e papo que rende."
+  subline: "GARRAFA · PETISCOS · CONVERSA"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/botequim-de-barao/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram não confirmado (o relatório sugeria @botequimdebarao).
+# Confirme o perfil e adicione instagram_url em site:.
+demo:
+  fonte: relatorio-rmc

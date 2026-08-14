@@ -66,6 +66,16 @@
                         <a class="nav-link {% if 'conteudo' in request.endpoint %}active{% endif %}"
                             href="{{ url_for('conteudo.home') }}">Conteúdo</a>
                     </li>
+                    {% if current_user.is_authenticated and current_user.restaurant_id == 1 %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'campanha' in request.endpoint %}active{% endif %}"
+                            href="{{ url_for('campanha.index') }}">Campanha</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'campo' in request.endpoint %}active{% endif %}"
+                            href="{{ url_for('campo.index') }}">📱 Campo</a>
+                    </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'pratos.index' %}active{% endif %}"
                             href="{{ url_for('pratos.index') }}">Pratos</a>

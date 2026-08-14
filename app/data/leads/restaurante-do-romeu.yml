@@ -1,0 +1,29 @@
+# Restaurante do Romeu — Sumaré–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/restaurante-do-romeu/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# 30 anos de casa, muita mesa de família. Gancho: reserva pra mesa grande de domingo, sem telefonema no meio do almoço.
+
+nome: "Restaurante do Romeu"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Restaurante de família em Sumaré"
+  kicker: "SUMARÉ–SP · DESDE 1994"
+  hero_linha1: "Restaurante"
+  hero_linha2: "do Romeu"
+  tagline: "Desde 1994: picanha na tábua e mesa cheia de gente."
+  subline: "PICANHA · FAMÍLIA · ESPAÇO KIDS"
+  cidade_uf: "Sumaré–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/restaurante-do-romeu/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

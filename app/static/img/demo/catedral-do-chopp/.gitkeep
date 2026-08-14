@@ -1,0 +1,3 @@
+# Fotos de Catedral do Chopp
+# capa.jpg = topo | prato-<nome>.jpg = cardapio | resto = galeria
+# Depois de colocar as fotos: flask aplicar-demos --slug catedral-do-chopp

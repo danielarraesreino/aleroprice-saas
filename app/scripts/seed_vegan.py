@@ -88,9 +88,12 @@ def seed_vegan_data():
     ]
     
     objs_produtos = []
-    for nome, preco, unidade in ingredientes:
+    for i, (nome, preco, unidade) in enumerate(ingredientes, start=1):
         p = Produto(
-            codigo=str(random.randint(10000, 99999)),
+            # Sequencial, não sorteado: `random.randint` colidia de vez em
+            # quando e derrubava o seed com erro de unicidade — falha que só
+            # aparecia às vezes, o pior tipo.
+            codigo=f'VEG{i:04d}',
             nome=nome,
             preco_unitario=preco,
             unidade=unidade,

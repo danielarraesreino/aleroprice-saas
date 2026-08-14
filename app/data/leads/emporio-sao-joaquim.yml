@@ -1,0 +1,29 @@
+# Empório São Joaquim — Joaquim Egídio, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/emporio-sao-joaquim/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Vende no salão e na prateleira. Gancho: enquanto espera o prato, o cliente vê no celular o que dá pra levar — venda casada sem esforço.
+
+nome: "Empório São Joaquim"
+tema: praia-claro
+
+site:
+  vibe: praia
+  descritor: "Empório e bar em Joaquim Egídio"
+  kicker: "JOAQUIM EGÍDIO · CAMPINAS–SP"
+  hero_linha1: "Empório"
+  hero_linha2: "São Joaquim"
+  tagline: "Prateleira cheia, mesa boa e coisa boa pra levar pra casa."
+  subline: "EMPÓRIO · QUEIJOS · VINHOS"
+  cidade_uf: "Joaquim Egídio, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/emporio-sao-joaquim/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

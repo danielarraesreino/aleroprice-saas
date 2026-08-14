@@ -1,0 +1,29 @@
+# Em Brasa Burger — Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/em-brasa-burger/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Paga taxa alta de marketplace. Gancho: canal de pedido próprio, sem comissão por pedido — o cliente é dele, não do aplicativo.
+
+nome: "Em Brasa Burger"
+tema: neon-noite
+
+site:
+  vibe: hamburgueria
+  descritor: "Hambúrguer na brasa em Campinas"
+  kicker: "CAMPINAS–SP"
+  hero_linha1: "Em"
+  hero_linha2: "Brasa Burger"
+  tagline: "Carne na brasa de verdade e embalagem que mantém a crocância."
+  subline: "BRASA · SMASH · DELIVERY"
+  cidade_uf: "Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/em-brasa-burger/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

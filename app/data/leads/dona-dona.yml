@@ -1,0 +1,29 @@
+# Pizzaria Dona Dona — Sumaré–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/dona-dona/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Vários aniversários na mesma noite, conta dividida em mesa de 30. Gancho: reserva organizada por mesa e data, sem confusão no caderno.
+
+nome: "Pizzaria Dona Dona"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Pizzaria clássica em Sumaré"
+  kicker: "SUMARÉ–SP · DESDE 1976"
+  hero_linha1: "Pizzaria"
+  hero_linha2: "Dona Dona"
+  tagline: "Desde 1976: rodízio, aniversário e casa cheia."
+  subline: "RODÍZIO · PIZZA · ANIVERSÁRIOS"
+  cidade_uf: "Sumaré–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/dona-dona/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

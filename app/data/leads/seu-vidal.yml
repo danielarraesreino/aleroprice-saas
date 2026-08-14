@@ -1,0 +1,29 @@
+# Seu Vidal — Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/seu-vidal/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Opera por volume e margem apertada. Gancho: canal próprio de pedido evita a comissão que come a margem.
+
+nome: "Seu Vidal"
+tema: neon-noite
+
+site:
+  vibe: hamburgueria
+  descritor: "Hamburgueria de bairro"
+  kicker: "CAMPINAS–SP"
+  hero_linha1: "Seu"
+  hero_linha2: "Vidal"
+  tagline: "Lanche honesto, preço justo, fila na porta."
+  subline: "SMASH · BAIRRO · PREÇO JUSTO"
+  cidade_uf: "Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/seu-vidal/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+demo:
+  fonte: relatorio-rmc

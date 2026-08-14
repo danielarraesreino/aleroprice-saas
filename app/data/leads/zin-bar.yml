@@ -1,0 +1,33 @@
+# Zin Bar — Taquaral, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/zin-bar/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# Casa de 2007 com 4,8 no Google e foco em drinks. Gancho: promoção de happy hour que ele mesmo liga e desliga no site, sem depender de designer.
+
+nome: "Zin Bar"
+tema: pub-escuro
+
+site:
+  vibe: pub
+  descritor: "Bar e restaurante no Taquaral"
+  kicker: "TAQUARAL · CAMPINAS–SP · DESDE 2007"
+  hero_linha1: "Zin"
+  hero_linha2: "Bar"
+  tagline: "Desde 2007 no Taquaral: drinks bem feitos e mesa pra esticar a noite."
+  subline: "DRINKS · PETISCOS · HAPPY HOUR"
+  cidade_uf: "Taquaral, Campinas–SP"
+  nota_google: "4,8"
+  selo_estrelas: "4,8 no Google"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/zin-bar/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram não confirmado (o relatório sugeria @zinbarcampinas).
+# Confirme o perfil e adicione instagram_url em site:.
+demo:
+  fonte: relatorio-rmc

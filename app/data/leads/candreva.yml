@@ -1,0 +1,31 @@
+# Candreva Bar — Vila Proença, Campinas–SP
+# Lead da campanha RMC. Foto: coloque os arquivos em
+# app/static/img/demo/candreva/ e aponte abaixo (hero_foto, cardapio, galeria).
+#
+# POR QUE LIGAR PRA ELE:
+# 60 anos de casa e receita que virou nome na região. Gancho: a tradição ganha uma página que o filho/neto atualiza, sem mexer no que já funciona.
+
+nome: "Candreva Bar"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Tradicional de Campinas desde 1964"
+  kicker: "VILA PROENÇA · CAMPINAS–SP · DESDE 1964"
+  hero_linha1: "Candreva"
+  hero_linha2: "Bar"
+  tagline: "Torresmo, assado e 60 anos de casa cheia."
+  subline: "TORRESMO · ASSADOS · TRADIÇÃO"
+  cidade_uf: "Vila Proença, Campinas–SP"
+
+# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
+#   hero_foto: img/demo/candreva/capa.jpg
+cardapio: []
+avaliacoes: []
+equipe: []
+galeria: []
+
+# Instagram não confirmado (o relatório sugeria @barcandreva).
+# Confirme o perfil e adicione instagram_url em site:.
+demo:
+  fonte: relatorio-rmc
