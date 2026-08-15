@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+{#
+  MODELO "TRADICIONAL" — casa antiga, com história.
+
+  A tese deste layout: numa casa de 1953, o produto é o tempo. Por isso o ano de
+  fundação é tratado como marca (hero, marca d'água, linha do tempo) e a seção
+  de história vem ANTES do cardápio — invertendo a ordem do modelo clássico.
+
+  De onde sai o ano: não existe campo `ano_fundacao` no SiteConfig. Ele é
+  garimpado dos textos que o dono já escreve ("VILA LEMOS · DESDE 1953"). Se não
+  houver ano em lugar nenhum, nada é inventado: o bloco do ano some e a marca
+  d'água vira o monograma da casa.
+#}
+{% set descritor = site.descritor or site.cidade_uf or 'Bar e restaurante' %}
+
+{# ---------- ano de fundação: primeiro número de 4 dígitos plausível ---------- #}
+{% set _ac = namespace(v=None) %}
+{% for _f in [site.kicker, site.hero_linha2, site.hero_linha1, site.subline, site.tagline, site.descritor, site.selo_estrelas] %}
+  {% if _f and not _ac.v %}
+    {% for _p in (_f|string).replace('·', ' ').replace('–', ' ').replace('—', ' ').replace('-', ' ').replace('(', ' ').replace(')', ' ').replace(',', ' ').replace('.', ' ').replace('/', ' ').split() %}
+      {% if not _ac.v and _p|length == 4 and _p.isdigit() and _p|int >= 1800 and _p|int <= 2099 %}{% set _ac.v = _p %}{% endif %}
+    {% endfor %}
+  {% endif %}
+{% endfor %}
+{% set ano = _ac.v %}
+
+{# A história é o coração do modelo, mas continua sendo uma seção com corpo:
+   sem ano, sem foto e sem equipe não há o que contar — e ela some junto com o
+   link do menu. #}
+{% set tem_historia = (ano or team or gallery) %}
+
+{# ---------- prova social: a nota do Google ----------
+   Nota e depoimentos escritos são dados INDEPENDENTES. Todo bar da campanha tem
+   nota no Google; nenhum tem depoimento cadastrado. Amarrar a nota ao
+   `{% if reviews %}` fazia a prova social mais forte da página sumir junto com
+   os depoimentos que nunca existiram.
+   `|float` devolve 0 em texto que não é número — dado torto não vira estrela. #}
+{% set nota_num = ((site.nota_google|string).replace(',', '.')|float) if site.nota_google else 0 %}
+{% set estrelas_cheias = [[nota_num|int, 5]|min, 0]|max %}
+
+{# Foto de capa: o campo aceita caminho em static OU URL absoluta (Vercel Blob). #}
+{% set hero_src = site.hero_foto if (site.hero_foto and site.hero_foto.startswith('http')) else (url_for('static', filename=site.hero_foto) if site.hero_foto else None) %}
+{% set og_base = 'https://' ~ request.host %}
+{% set og_img = (hero_src if (hero_src and hero_src.startswith('http')) else ((og_base ~ hero_src) if hero_src else None)) %}
+
+<title>{{ site.nome }}{% if ano %} · desde {{ ano }}{% endif %} — {{ descritor }}</title>
+<meta name="description" content="{{ site.nome }} — {{ site.tagline or descritor }}">
+{% if tenant and tenant.eh_demo %}
+{# Prévia comercial não autorizada: não pode ser indexada nem competir com o
+   negócio real do dono no Google. Ver app/utils/demos.py. #}
+<meta name="robots" content="noindex,nofollow,noarchive">
+{% endif %}
+<meta property="og:site_name" content="{{ site.nome }}">
+<meta property="og:title" content="{{ site.nome }} — {{ descritor }}">
+<meta property="og:description" content="{{ site.tagline or descritor }}">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:url" content="{{ og_base ~ request.path }}">
+{# Card de compartilhamento só com a foto DESTE bar. #}
+{% if og_img %}
+<meta property="og:image" content="{{ og_img }}">
+<meta property="og:image:secure_url" content="{{ og_img }}">
+<meta property="og:image:alt" content="{{ site.nome }} — {{ descritor }}">
+{% endif %}
+<meta name="twitter:card" content="{{ 'summary_large_image' if og_img else 'summary' }}">
+<meta name="twitter:title" content="{{ site.nome }} — {{ descritor }}">
+<meta name="twitter:description" content="{{ site.tagline or descritor }}">
+{% if og_img %}<meta name="twitter:image" content="{{ og_img }}">{% endif %}
+<meta name="theme-color" content="{{ tema_cor or '#f6eddd' }}" id="meta-cor">
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon-32.png') }}">
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
+<script>
+  // Tema salvo antes da primeira pintura (evita piscar).
+  // Chave por bar: dois sites no mesmo navegador não dividem preferência.
+  (function(){
+    // `com-js` libera as animações de entrada; sem ela o conteúdo nasce visível.
+    document.documentElement.classList.add('com-js');
+    try{
+      var t=localStorage.getItem('fdb-tema-{{ tenant.slug if tenant and tenant.slug else "site" }}');
+      if(t==='claro'||t==='escuro')document.documentElement.setAttribute('data-theme',t==='claro'?'light':'dark');
+    }catch(e){}
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,500;1,700&family=Lora:ital,wght@0,400;0,500;1,400&family=Alegreya+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     PALETA — papel envelhecido, madeira e vermelho-esmalte.
+     Claro é o padrão (álbum de família); escuro é a casa à noite.
+     Todo token nasce no :root; a media query só troca valores.
+     ============================================================ */
+  :root{
+    --papel:#f6eddd;
+    --papel-2:#efe2ca;
+    --papel-3:#e6d5b6;
+    --moldura:#fffaf0;
+    --tinta:#2d1e13;
+    --tinta-suave:#6d5540;
+    --madeira:#6b4526;
+    --madeira-forte:#43290f;
+    --esmalte:#b32a1e;
+    --esmalte-fundo:rgba(179,42,30,.09);
+    --esmalte-texto:#fff6ec;
+    --azulejo:rgba(44,95,138,.34);
+    --linha:rgba(107,69,38,.26);
+    --linha-forte:rgba(107,69,38,.5);
+    --sombra:rgba(61,36,21,.18);
+    --vinheta:rgba(107,69,38,.16);
+    --brilho:rgba(255,255,255,.4);
+    --sepia:sepia(.3) saturate(.92) contrast(1.02);
+    --fita:rgba(199,166,108,.4);
+    /* Único gancho do preset de cor (app/utils/temas.py) neste modelo: os
+       ornamentos. Cor de texto e de papel ficam fora do alcance dele — um
+       preset neon não pode apagar a legibilidade do papel. */
+    --ornamento:var(--gold, #a9803a);
+    --maxw:1120px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --papel:#191009;
+      --papel-2:#22160d;
+      --papel-3:#2c1d11;
+      --moldura:#2d1e12;
+      --tinta:#f3e6cf;
+      --tinta-suave:#bda688;
+      --madeira:#c99a63;
+      --madeira-forte:#e2c093;
+      --esmalte:#e0503f;
+      --esmalte-fundo:rgba(224,80,63,.14);
+      --esmalte-texto:#1a0e08;
+      --azulejo:rgba(127,176,214,.26);
+      --linha:rgba(201,154,99,.26);
+      --linha-forte:rgba(201,154,99,.48);
+      --sombra:rgba(0,0,0,.55);
+      --vinheta:rgba(0,0,0,.5);
+      --brilho:rgba(255,236,205,.06);
+      --sepia:sepia(.38) saturate(.85) brightness(.84) contrast(1.05);
+      --fita:rgba(201,154,99,.22);
+    }
+  }
+  :root[data-theme="dark"]{
+    --papel:#191009;
+    --papel-2:#22160d;
+    --papel-3:#2c1d11;
+    --moldura:#2d1e12;
+    --tinta:#f3e6cf;
+    --tinta-suave:#bda688;
+    --madeira:#c99a63;
+    --madeira-forte:#e2c093;
+    --esmalte:#e0503f;
+    --esmalte-fundo:rgba(224,80,63,.14);
+    --esmalte-texto:#1a0e08;
+    --azulejo:rgba(127,176,214,.26);
+    --linha:rgba(201,154,99,.26);
+    --linha-forte:rgba(201,154,99,.48);
+    --sombra:rgba(0,0,0,.55);
+    --vinheta:rgba(0,0,0,.5);
+    --brilho:rgba(255,236,205,.06);
+    --sepia:sepia(.38) saturate(.85) brightness(.84) contrast(1.05);
+    --fita:rgba(201,154,99,.22);
+  }
+  /* Escolha explícita do visitante ganha da preferência do sistema. */
+  :root[data-theme="light"]{
+    --papel:#f6eddd;
+    --papel-2:#efe2ca;
+    --papel-3:#e6d5b6;
+    --moldura:#fffaf0;
+    --tinta:#2d1e13;
+    --tinta-suave:#6d5540;
+    --madeira:#6b4526;
+    --madeira-forte:#43290f;
+    --esmalte:#b32a1e;
+    --esmalte-fundo:rgba(179,42,30,.09);
+    --esmalte-texto:#fff6ec;
+    --azulejo:rgba(44,95,138,.34);
+    --linha:rgba(107,69,38,.26);
+    --linha-forte:rgba(107,69,38,.5);
+    --sombra:rgba(61,36,21,.18);
+    --vinheta:rgba(107,69,38,.16);
+    --brilho:rgba(255,255,255,.4);
+    --sepia:sepia(.3) saturate(.92) contrast(1.02);
+    --fita:rgba(199,166,108,.4);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  /* `hidden` tem que vencer os display: do modelo — o bloco de "anos de casa"
+     nasce escondido e só o JS o acende. */
+  [hidden]{display:none!important}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{
+    background:var(--papel);
+    color:var(--tinta);
+    font-family:"Lora",Georgia,"Times New Roman",serif;
+    font-size:17px;line-height:1.66;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* papel envelhecido: manchas suaves + vinheta nas bordas */
+  body::before{
+    content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(60% 40% at 12% 8%, var(--brilho), transparent 70%),
+      radial-gradient(50% 35% at 88% 22%, var(--vinheta), transparent 70%),
+      radial-gradient(70% 45% at 50% 104%, var(--vinheta), transparent 70%);
+  }
+  img{max-width:100%;height:auto;display:block}
+  a{color:inherit;text-decoration:none}
+  section,header,footer,nav{position:relative;z-index:2}
+  .env{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+  :focus-visible{outline:2px solid var(--esmalte);outline-offset:3px}
+  /* âncora do menu não pode parar embaixo da barra grudada no topo */
+  header[id],section[id]{scroll-margin-top:78px}
+
+  /* letreiro de esmalte / small caps — o "carimbo" do modelo */
+  .caps{font-family:"Alegreya Sans SC","Lora",serif;text-transform:uppercase;letter-spacing:.16em}
+
+  /* ---------- TOPO ---------- */
+  /* Barra e folha grudam juntas: menu aberto no meio da página tem que
+     aparecer embaixo da barra, não lá no começo do documento. */
+  .topo-fixo{position:sticky;top:0;z-index:50}
+  .barra{
+    background:var(--papel-2);
+    border-bottom:3px double var(--linha-forte);
+  }
+  .barra .env{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:11px;padding-bottom:11px}
+  .marca{display:flex;flex-direction:column;line-height:1.1;min-width:0}
+  .marca b{font-family:"Playfair Display",Georgia,serif;font-weight:700;font-size:1.12rem;letter-spacing:.01em;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:52vw}
+  .marca span{font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.2em;
+    font-size:.63rem;color:var(--tinta-suave)}
+  .barra-links{display:none}
+  .barra-ctrls{display:flex;align-items:center;gap:8px;flex-shrink:0}
+  .btn-icone{
+    width:38px;height:38px;display:grid;place-items:center;cursor:pointer;
+    background:transparent;border:1px solid var(--linha-forte);border-radius:2px;
+    color:var(--tinta);font-size:1rem;line-height:1;font-family:"Alegreya Sans SC",serif;
+  }
+  .btn-icone:hover{background:var(--papel-3)}
+  .sanduiche i{display:block;width:18px;height:1.5px;background:currentColor;margin:3px auto}
+
+  /* menu mobile: uma folha que desdobra por baixo da barra */
+  .folha{
+    display:block;overflow:hidden;max-height:0;
+    background:var(--papel-2);border-bottom:1px solid var(--linha);
+    box-shadow:0 12px 22px var(--sombra);
+    transition:max-height .45s cubic-bezier(.3,.8,.3,1);
+  }
+  .folha.aberta{max-height:640px}
+  .folha a{
+    display:block;padding:13px 20px;font-family:"Playfair Display",serif;font-size:1.12rem;
+    border-bottom:1px dotted var(--linha);max-width:var(--maxw);margin:0 auto;
+  }
+  .folha a:last-child{border-bottom:none}
+  .folha .entrar{font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.18em;
+    font-size:.8rem;color:var(--esmalte)}
+
+  @media(min-width:900px){
+    .barra-links{display:flex;gap:22px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+    .barra-links a{font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.14em;font-size:.82rem;
+      color:var(--tinta-suave);padding-bottom:2px;border-bottom:1px solid transparent}
+    .barra-links a:hover{color:var(--tinta);border-bottom-color:var(--esmalte)}
+    .barra-links .entrar{color:var(--esmalte)}
+    .marca b{font-size:1.3rem;max-width:none}
+    .sanduiche{display:none}
+    .folha{display:none}
+  }
+
+  /* faixa de azulejo — lattice desenhado em CSS, acompanha o tema */
+  .azulejo{
+    height:20px;
+    background-color:var(--papel-2);
+    background-image:
+      repeating-linear-gradient(45deg, var(--azulejo) 0 1px, transparent 1px 10px),
+      repeating-linear-gradient(-45deg, var(--azulejo) 0 1px, transparent 1px 10px);
+    border-top:1px solid var(--linha);border-bottom:1px solid var(--linha);
+  }
+
+  /* ---------- HERO ---------- */
+  .capa{padding:38px 0 8px;overflow:hidden}
+  .capa .env{display:flex;flex-direction:column;align-items:center;text-align:center}
+  .kicker{
+    font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.28em;
+    font-size:.7rem;color:var(--tinta-suave);margin-bottom:18px;text-align:center;
+    display:flex;align-items:center;justify-content:center;gap:12px;max-width:100%;
+  }
+  .kicker::before,.kicker::after{content:"";height:1px;width:26px;background:var(--ornamento);flex:none}
+  .nome-casa{
+    font-family:"Playfair Display",Georgia,serif;font-weight:900;
+    font-size:clamp(2.5rem,12.5vw,5.6rem);line-height:.93;letter-spacing:-.015em;
+    overflow-wrap:break-word;
+  }
+  .nome-casa .l2{display:block;font-style:italic;font-weight:700;color:var(--madeira)}
+  /* o ano é o herói: placa de fundação, não rodapé */
+  .fundacao{
+    margin-top:26px;padding:14px 30px;display:inline-block;
+    border-top:3px double var(--esmalte);border-bottom:3px double var(--esmalte);
+  }
+  .fundacao .desde{
+    display:block;font-family:"Alegreya Sans SC",serif;text-transform:uppercase;
+    letter-spacing:.42em;font-size:.72rem;color:var(--tinta-suave);margin-bottom:2px;
+  }
+  .fundacao .ano{
+    display:block;font-family:"Playfair Display",serif;font-weight:900;color:var(--esmalte);
+    font-size:clamp(3rem,17vw,5.6rem);line-height:.9;letter-spacing:.02em;
+  }
+  .fundacao .anos{display:block;font-family:"Lora",serif;font-style:italic;color:var(--tinta-suave);font-size:.92rem;margin-top:12px}
+  .tagline{font-style:italic;font-size:clamp(1.02rem,3.6vw,1.3rem);max-width:34em;margin:24px auto 0;color:var(--tinta)}
+  .subline{font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.18em;
+    font-size:.78rem;color:var(--tinta-suave);margin-top:10px}
+  .selo{
+    display:inline-flex;align-items:center;gap:9px;margin-top:20px;padding:7px 15px;
+    border:1px solid var(--linha-forte);border-radius:2px;background:var(--papel-2);
+    font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.1em;font-size:.76rem;
+  }
+  .selo .est{color:var(--esmalte);letter-spacing:.12em}
+  /* Selo de nota no hero: discreto, mas com o número em corpo de placa — quem
+     chega pelo celular decide nos primeiros 3cm de tela. */
+  .selo .nota-hero{
+    font-family:"Playfair Display",serif;font-weight:900;font-size:1.16rem;
+    color:var(--esmalte);letter-spacing:0;line-height:1;
+  }
+  .acoes{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:28px}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;
+    font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.16em;font-size:.86rem;
+    padding:13px 26px;border-radius:2px;border:1px solid var(--esmalte);
+    background:var(--esmalte);color:var(--esmalte-texto);
+    box-shadow:0 3px 0 0 var(--linha-forte);transition:transform .18s,box-shadow .18s;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 5px 0 0 var(--linha-forte)}
+  .btn.vazado{background:transparent;color:var(--tinta);border-color:var(--linha-forte);box-shadow:none}
+  .btn.vazado:hover{border-color:var(--esmalte);color:var(--esmalte)}
+  .btn.larga{width:100%}
+
+  /* foto de capa emoldurada — nada de banner sangrando na tela inteira */
+  .capa-foto{margin:36px auto 0;max-width:560px;width:100%}
+  .role{font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.24em;
+    font-size:.66rem;color:var(--tinta-suave);margin:30px 0 6px;text-align:center}
+
+  /* ---------- MOLDURAS ---------- */
+  .moldura{
+    position:relative;background:var(--moldura);padding:10px 10px 12px;
+    border:1px solid var(--linha);box-shadow:0 12px 30px var(--sombra);
+  }
+  .moldura img{filter:var(--sepia);width:100%}
+  .moldura figcaption{
+    font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.14em;
+    font-size:.68rem;color:var(--tinta-suave);text-align:center;padding:10px 4px 2px;
+  }
+  /* fita crepe segurando a foto */
+  .moldura::before{
+    content:"";position:absolute;top:-10px;left:50%;width:78px;height:20px;
+    transform:translateX(-50%) rotate(-2.5deg);background:var(--fita);
+    border-left:1px dashed rgba(0,0,0,.08);border-right:1px dashed rgba(0,0,0,.08);
+  }
+  .torta-a{transform:rotate(-1.4deg)}
+  .torta-b{transform:rotate(1.2deg)}
+
+  /* ---------- FAIXA DE ITENS (sem rolagem: é uma tabuleta, não um letreiro) ---------- */
+  .tabuleta{background:var(--papel-2);border-top:1px solid var(--linha);border-bottom:1px solid var(--linha);
+    padding:14px 0;margin-top:34px}
+  .tabuleta .env{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;
+    font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.14em;font-size:.8rem}
+  .tabuleta i{color:var(--ornamento);font-style:normal}
+
+  /* ---------- SEÇÕES ---------- */
+  .sec{padding:clamp(52px,9vw,86px) 0;overflow:hidden}
+  .sec:nth-of-type(even){background:var(--papel-2)}
+  .cabeca{max-width:38em}
+  .eyebrow{font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.26em;
+    font-size:.7rem;color:var(--esmalte);margin-bottom:8px}
+  .h2{font-family:"Playfair Display",Georgia,serif;font-weight:900;
+    font-size:clamp(1.85rem,7vw,3.1rem);line-height:1.04;letter-spacing:-.01em;overflow-wrap:break-word}
+  .h2 em{font-style:italic;font-weight:700;color:var(--madeira)}
+  .lead{color:var(--tinta-suave);margin-top:12px;max-width:34em}
+  .filete{width:64px;height:0;border-top:3px double var(--ornamento);margin:16px 0 0}
+
+  /* ---------- HISTÓRIA ---------- */
+  #historia{position:relative}
+  .marca-dagua{
+    position:absolute;right:-4vw;top:6%;z-index:0;pointer-events:none;user-select:none;
+    font-family:"Playfair Display",serif;font-weight:900;line-height:.8;
+    font-size:clamp(9rem,44vw,26rem);color:var(--tinta);opacity:.055;
+  }
+  #historia .env{position:relative;z-index:1}
+  .historia-texto{font-size:1.1rem;margin-top:18px;max-width:36em}
+  .historia-texto+.historia-texto{margin-top:14px}
+  .linha-tempo{list-style:none;margin:34px 0 0;border-left:3px double var(--linha-forte);padding-left:20px}
+  .linha-tempo li{position:relative;padding:0 0 22px}
+  .linha-tempo li:last-child{padding-bottom:0}
+  .linha-tempo li::before{
+    content:"";position:absolute;left:-27px;top:9px;width:9px;height:9px;
+    background:var(--esmalte);border-radius:50%;
+  }
+  .linha-tempo .mrc{font-family:"Playfair Display",serif;font-weight:900;font-size:1.5rem;color:var(--esmalte);line-height:1.1}
+  .linha-tempo b{display:block;font-family:"Alegreya Sans SC",serif;text-transform:uppercase;
+    letter-spacing:.16em;font-size:.78rem;margin-top:2px}
+  .linha-tempo small{color:var(--tinta-suave);font-size:.95rem}
+  .album-historia{margin-top:34px;max-width:460px}
+  .retratos{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:18px;margin-top:38px}
+  .retrato{text-align:center}
+  .retrato .rosto{
+    width:66px;height:66px;margin:0 auto 10px;display:grid;place-items:center;font-size:1.7rem;
+    background:var(--papel-3);border:1px solid var(--linha-forte);border-radius:50%;
+    box-shadow:inset 0 0 0 4px var(--moldura);
+  }
+  .retrato b{display:block;font-family:"Playfair Display",serif;font-weight:700;font-size:1.05rem}
+  .retrato small{color:var(--tinta-suave);font-style:italic;font-size:.9rem}
+
+  /* selos de clima — três placas esmaltadas, sem virar seção */
+  .placas{display:grid;grid-template-columns:1fr;gap:0;border-top:1px solid var(--linha);border-bottom:1px solid var(--linha)}
+  .placa{padding:22px 20px;text-align:center;border-bottom:1px dotted var(--linha)}
+  .placa:last-child{border-bottom:none}
+  .placa .em{font-size:1.5rem;display:block;margin-bottom:6px;filter:grayscale(.15)}
+  .placa b{display:block;font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.16em;font-size:.86rem}
+  .placa small{color:var(--tinta-suave);font-size:.92rem}
+  @media(min-width:760px){
+    .placas{grid-template-columns:repeat(3,1fr)}
+    .placa{border-bottom:none;border-right:1px dotted var(--linha)}
+    .placa:last-child{border-right:none}
+  }
+
+  /* ---------- CARDÁPIO: lista de tabuleta, com pontilhado ---------- */
+  .pratos{list-style:none;margin-top:32px}
+  .prato{display:flex;gap:16px;align-items:flex-start;padding:18px 0;border-bottom:1px dotted var(--linha)}
+  .prato:first-child{border-top:1px dotted var(--linha)}
+  .prato .mini{width:74px;height:74px;flex:none;overflow:hidden;background:var(--moldura);
+    border:1px solid var(--linha);padding:3px}
+  .prato .mini img{width:100%;height:100%;object-fit:cover;filter:var(--sepia)}
+  .prato .txt{min-width:0;flex:1}
+  .prato h3{font-family:"Playfair Display",serif;font-weight:700;font-size:1.22rem;line-height:1.25}
+  .prato p{color:var(--tinta-suave);font-size:.98rem;margin-top:4px}
+  .carimbo{
+    display:inline-block;margin-top:8px;padding:3px 9px;font-family:"Alegreya Sans SC",serif;
+    text-transform:uppercase;letter-spacing:.14em;font-size:.64rem;color:var(--esmalte);
+    border:1px solid var(--esmalte);border-radius:2px;transform:rotate(-1.5deg);
+  }
+  .prato.daqui{background:var(--esmalte-fundo);padding-left:14px;padding-right:14px;
+    border-left:3px solid var(--esmalte)}
+  @media(min-width:820px){
+    .pratos{columns:2;column-gap:44px}
+    .prato{break-inside:avoid}
+  }
+
+  /* ---------- CARTAZES (promoções) ---------- */
+  .cartazes{display:grid;grid-template-columns:1fr;gap:22px;margin-top:34px}
+  @media(min-width:700px){.cartazes{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}}
+  .cartaz{
+    position:relative;background:var(--moldura);border:1px solid var(--linha);
+    padding:24px 22px;box-shadow:0 10px 26px var(--sombra);
+  }
+  .cartaz::before{
+    content:"";position:absolute;top:-9px;left:22px;width:64px;height:18px;
+    transform:rotate(-3deg);background:var(--fita);
+  }
+  .cartaz:nth-child(even){transform:rotate(.8deg)}
+  .cartaz:nth-child(odd){transform:rotate(-.6deg)}
+  .cartaz .rot{font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.2em;
+    font-size:.68rem;color:var(--tinta-suave)}
+  .cartaz h3{font-family:"Playfair Display",serif;font-weight:900;font-size:1.5rem;line-height:1.05;margin:6px 0 8px}
+  .cartaz p{color:var(--tinta-suave);font-size:.98rem}
+  .cartaz .val{margin-top:12px;font-family:"Alegreya Sans SC",serif;text-transform:uppercase;
+    letter-spacing:.14em;font-size:.68rem;color:var(--tinta-suave)}
+  .cartaz.hoje{border:2px solid var(--esmalte)}
+  .cartaz.hoje .rot{color:var(--esmalte);font-weight:700}
+  .cartaz.hoje::after{
+    content:"";position:absolute;inset:-2px;border:1px solid var(--esmalte);opacity:0;
+    animation:bater 2.6s ease-in-out infinite;pointer-events:none;
+  }
+  @keyframes bater{0%,100%{opacity:0;transform:scale(1)}50%{opacity:.6;transform:scale(1.02)}}
+
+  /* ---------- AGENDA ---------- */
+  .agenda{list-style:none;margin-top:32px}
+  .agenda li{display:flex;gap:16px;align-items:flex-start;padding:18px 0;border-bottom:1px dotted var(--linha)}
+  .agenda li:first-child{border-top:1px dotted var(--linha)}
+  .data-placa{
+    flex:none;width:62px;text-align:center;padding:8px 0;background:var(--esmalte);color:var(--esmalte-texto);
+    font-family:"Alegreya Sans SC",serif;line-height:1;border-radius:2px;
+  }
+  .data-placa .d{display:block;font-size:1.6rem;font-weight:700}
+  .data-placa .m{display:block;font-size:.66rem;letter-spacing:.2em;margin-top:3px}
+  .agenda h3{font-family:"Playfair Display",serif;font-weight:700;font-size:1.15rem}
+  .agenda .quando{font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.16em;
+    font-size:.7rem;color:var(--tinta-suave);margin:3px 0 4px}
+  .agenda .desc{color:var(--tinta-suave);font-size:.96rem}
+
+  /* ---------- LIVRO DE VISITAS ---------- */
+  /* A PLACA DE REPUTAÇÃO. A nota do Google e os depoimentos escritos são dados
+     independentes: quase nenhum bar tem depoimento cadastrado, todos têm nota.
+     Por isso ela é um bloco com peso próprio — placa emoldurada, número em
+     corpo de manchete — e não uma linha miúda embaixo do título. */
+  .reputacao{
+    display:flex;flex-wrap:wrap;align-items:center;gap:16px 28px;margin-top:30px;
+    background:var(--moldura);border:1px solid var(--linha);
+    border-top:3px double var(--esmalte);border-bottom:3px double var(--esmalte);
+    box-shadow:0 12px 30px var(--sombra);padding:24px clamp(18px,4vw,32px);
+  }
+  .reputacao .placa-nota{flex:none;text-align:center;min-width:112px}
+  .reputacao .n{
+    display:block;font-family:"Playfair Display",serif;font-weight:900;color:var(--esmalte);
+    font-size:clamp(3.4rem,16vw,4.8rem);line-height:.84;letter-spacing:-.02em;
+  }
+  .reputacao .est{display:block;color:var(--esmalte);letter-spacing:.16em;font-size:1.05rem;margin-top:10px}
+  .reputacao .est .vazia{opacity:.34}
+  .reputacao .dizeres{flex:1 1 210px;min-width:0}
+  .reputacao .qtd{
+    font-family:"Playfair Display",serif;font-weight:700;line-height:1.16;
+    font-size:clamp(1.22rem,5.2vw,1.72rem);
+  }
+  .reputacao .qtd b{font-weight:900;color:var(--esmalte)}
+  .reputacao .onde{
+    display:block;font-family:"Alegreya Sans SC",serif;text-transform:uppercase;
+    letter-spacing:.2em;font-size:.7rem;color:var(--tinta-suave);margin-top:9px;
+  }
+  .visitas{display:grid;grid-template-columns:1fr;gap:18px;margin-top:32px}
+  @media(min-width:760px){.visitas{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}}
+  .visita{
+    background:var(--moldura);border:1px solid var(--linha);padding:22px 22px 18px;
+    background-image:repeating-linear-gradient(180deg, transparent 0 27px, var(--linha) 27px 28px);
+    background-position:0 14px;
+  }
+  .visita .est{color:var(--esmalte);letter-spacing:.18em;font-size:.9rem}
+  .visita p{font-style:italic;font-size:1.02rem;margin:8px 0 10px;line-height:28px}
+  .visita .quem{font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.16em;
+    font-size:.72rem;color:var(--tinta-suave)}
+
+  /* ---------- ÁLBUM ----------
+     Seis fotos, não dezesseis: o banco guarda o acervo inteiro, a parede mostra
+     o recorte. Grade fixa (2 no celular, 3 no desktop) e altura contida — álbum
+     se folheia, não se rola. O resto continua a um clique no WhatsApp. */
+  .album{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:30px}
+  @media(min-width:640px){.album{grid-template-columns:repeat(3,1fr);gap:20px}}
+  .album .moldura{cursor:zoom-in;padding:7px 7px 8px}
+  .album .moldura::before{width:52px;height:15px;top:-8px}
+  .album .moldura:nth-child(3n+1){transform:rotate(-1.2deg)}
+  .album .moldura:nth-child(3n+2){transform:rotate(.9deg)}
+  .album .moldura:nth-child(3n){transform:rotate(-.4deg)}
+  .album img{aspect-ratio:4/3;object-fit:cover;max-height:190px}
+  .album figcaption{font-size:.6rem;padding:8px 2px 0;letter-spacing:.1em}
+  .album-mais{
+    font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.2em;
+    font-size:.7rem;color:var(--tinta-suave);margin-top:22px;text-align:center;
+  }
+  .lupa{position:fixed;inset:0;z-index:120;background:rgba(20,12,6,.93);display:none;
+    align-items:center;justify-content:center;padding:20px}
+  .lupa.on{display:flex}
+  .lupa img{max-width:94vw;max-height:86vh;border:10px solid #fffaf0;box-shadow:0 24px 60px rgba(0,0,0,.6);filter:var(--sepia)}
+  .lupa .x{position:absolute;top:14px;right:18px;color:#f6eddd;font-size:2rem;cursor:pointer;line-height:1}
+
+  /* ---------- RESERVA: livro de reservas, campos em linha pautada ---------- */
+  .reserva-grade{display:grid;grid-template-columns:1fr;gap:28px;margin-top:26px}
+  @media(min-width:900px){.reserva-grade{grid-template-columns:.85fr 1.15fr;gap:48px;align-items:start}}
+  .livro{background:var(--moldura);border:1px solid var(--linha);box-shadow:0 12px 30px var(--sombra);
+    padding:clamp(20px,4vw,30px)}
+  .livro-topo{font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.2em;
+    font-size:.7rem;color:var(--tinta-suave);border-bottom:3px double var(--linha-forte);padding-bottom:10px;margin-bottom:18px}
+  .campo{margin-bottom:16px}
+  .campo label{display:block;font-family:"Alegreya Sans SC",serif;text-transform:uppercase;
+    letter-spacing:.16em;font-size:.68rem;color:var(--tinta-suave);margin-bottom:4px}
+  .campo input,.campo textarea{
+    width:100%;background:transparent;border:none;border-bottom:1px solid var(--linha-forte);
+    padding:8px 2px;color:var(--tinta);font-family:"Lora",Georgia,serif;font-size:1rem;border-radius:0;
+  }
+  .campo textarea{resize:vertical;min-height:58px;border:1px solid var(--linha-forte);padding:9px 10px}
+  .campo input:focus,.campo textarea:focus{outline:none;border-color:var(--esmalte);background:var(--esmalte-fundo)}
+  .campo input::placeholder,.campo textarea::placeholder{color:var(--tinta-suave);opacity:.65}
+  .dupla{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:400px){.dupla{grid-template-columns:1fr}}
+  .recado{display:none;margin-top:14px;padding:12px 14px;border-radius:2px;font-size:.96rem}
+  .recado.ok{display:block;background:var(--esmalte-fundo);border:1px solid var(--linha-forte)}
+  .recado.err{display:block;background:var(--esmalte-fundo);border:1px solid var(--esmalte);color:var(--esmalte)}
+  .zap-confirma{display:none;margin-top:12px}
+  .zap-confirma.mostra{display:inline-flex}
+
+  /* ---------- CONTATO ---------- */
+  .contato-grade{display:grid;grid-template-columns:1fr;gap:28px;margin-top:26px}
+  @media(min-width:860px){.contato-grade{grid-template-columns:1fr 1fr;gap:44px}}
+  .dados{list-style:none}
+  .dados li{display:flex;gap:14px;padding:14px 0;border-bottom:1px dotted var(--linha)}
+  .dados li:first-child{border-top:1px dotted var(--linha)}
+  .dados .em{font-size:1.1rem;width:26px;flex:none;text-align:center;filter:grayscale(.2)}
+  .dados b{display:block;font-family:"Alegreya Sans SC",serif;text-transform:uppercase;
+    letter-spacing:.16em;font-size:.68rem;color:var(--tinta-suave)}
+  .convite{background:var(--papel-3);border:1px solid var(--linha);padding:28px 24px;
+    display:flex;flex-direction:column;gap:14px;justify-content:center}
+  .convite h3{font-family:"Playfair Display",serif;font-weight:900;font-size:1.6rem;line-height:1.1}
+  .convite p{color:var(--tinta-suave)}
+
+  /* ---------- RODAPÉ ---------- */
+  footer{border-top:3px double var(--linha-forte);padding:40px 0 46px;text-align:center;background:var(--papel-2)}
+  footer .assina{font-family:"Playfair Display",serif;font-weight:900;font-size:1.7rem}
+  footer .desde-rodape{font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.3em;
+    font-size:.7rem;color:var(--tinta-suave);margin-top:6px}
+  footer .recado-rodape{color:var(--tinta-suave);margin-top:14px;font-style:italic}
+  .redes{display:flex;gap:12px;justify-content:center;margin-top:20px}
+  .redes a{width:40px;height:40px;display:grid;place-items:center;border:1px solid var(--linha-forte);
+    border-radius:2px;color:var(--tinta)}
+  .redes a:hover{background:var(--esmalte);border-color:var(--esmalte);color:var(--esmalte-texto)}
+  .redes svg{width:19px;height:19px;fill:currentColor}
+  .lojista{display:inline-block;margin-top:20px;font-family:"Alegreya Sans SC",serif;text-transform:uppercase;
+    letter-spacing:.18em;font-size:.7rem;color:var(--tinta-suave);border-bottom:1px solid var(--linha)}
+  .lojista:hover{color:var(--esmalte);border-color:var(--esmalte)}
+
+  /* ---------- ZAP FIXO ---------- */
+  .zap-fixo{
+    position:fixed;right:16px;bottom:16px;z-index:70;display:inline-flex;align-items:center;gap:8px;
+    padding:11px 15px;background:#1f7a45;color:#fff;border:1px solid rgba(0,0,0,.2);border-radius:2px;
+    box-shadow:0 8px 22px rgba(0,0,0,.3);font-family:"Alegreya Sans SC",serif;text-transform:uppercase;
+    letter-spacing:.16em;font-size:.74rem;
+  }
+  .zap-fixo svg{width:19px;height:19px;fill:currentColor}
+  .zap-fixo:hover{background:#176035}
+
+  /* ---------- REVELAR ----------
+     Só esconde quando há JS pra revelar de volta (a classe `com-js` entra no
+     <html> antes da primeira pintura). Sem JS, o site aparece inteiro. */
+  .com-js .revelar{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}
+  .com-js .revelar.vista{opacity:1;transform:none}
+
+  /* ---------- MOTION ----------
+     `.js-anim` só entra no <html> depois de confirmar que window.Motion existe
+     E que o visitante aceita movimento. CDN fora do ar, JS bloqueado ou
+     prefers-reduced-motion: a classe não entra, nenhum estado inicial se
+     aplica e a página nasce inteira e legível. Nada aqui esconde conteúdo
+     sozinho — e só transform/opacity são animados. */
+  .js-anim [data-hero]{opacity:0}
+  /* Sob o Motion quem anima é ele: a transição CSS sairia por cima e o
+     movimento ficaria com duas curvas. */
+  .js-anim .revelar{transition:none}
+  @media(prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    *{animation:none!important;transition:none!important}
+    .revelar{opacity:1;transform:none}
+    [data-hero]{opacity:1}
+  }
+
+  /* Selo de demonstração: só aparece em prévia, quando a casa ainda não tem
+     agenda própria e o site mostra o recurso com exemplo. */
+  .selo-exemplo{display:inline-block;vertical-align:middle;margin-left:8px;
+    padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;
+    letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;
+    background:rgba(255,255,255,.14);color:inherit;opacity:.85;
+    border:1px solid currentColor}
+</style>
+{# Preset de cor do bar (app/utils/temas.py). Vem depois do CSS do modelo pra
+   poder sobrescrever — aqui ele alcança os ornamentos via --gold. #}
+{% if tema_css %}<style>{{ tema_css|safe }}</style>{% endif %}
+{% if tenant and tenant.eh_demo %}
+<style>
+  .previa{
+    position:fixed;left:0;right:0;bottom:0;z-index:200;
+    background:var(--papel-2);border-top:3px double var(--esmalte);color:var(--tinta);
+    font-family:"Lora",Georgia,serif;font-size:.84rem;padding:12px 16px;
+    display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;text-align:center;
+    box-shadow:0 -8px 24px var(--sombra);
+  }
+  .previa b{color:var(--esmalte)}
+  .previa a{background:var(--esmalte);color:var(--esmalte-texto);padding:7px 14px;border-radius:2px;
+    font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.14em;font-size:.72rem;white-space:nowrap}
+  .previa .fechar{background:none;border:1px solid var(--linha-forte);color:var(--tinta);
+    border-radius:2px;padding:6px 11px;cursor:pointer;font:inherit}
+  body{padding-bottom:92px}
+  .zap-fixo{bottom:104px}
+  @media(max-width:600px){body{padding-bottom:148px}.zap-fixo{bottom:158px}}
+</style>
+{% endif %}
+</head>
+<body>
+
+{% if tenant and tenant.eh_demo %}
+{# Prévia comercial: o bar não pediu este site e não é cliente. Dizer isso em
+   alto e bom som é o que separa demonstração de clone não autorizado. #}
+<div class="previa" role="complementary" id="previa">
+  <span>
+    <b>Prévia não oficial</b> — feita pelo Feira de Barão como demonstração.
+    Não é o site oficial de {{ site.nome }}.
+  </span>
+  <a href="https://wa.me/{{ site.whatsapp or contato_vendas }}?text={{ ('Quero assumir o site de ' ~ site.nome) | urlencode }}">Quero este site</a>
+  <a href="mailto:{{ email_vendas }}?subject={{ ('Remover prévia: ' ~ site.nome) | urlencode }}"
+     style="background:transparent;color:var(--tinta);border:1px solid var(--linha-forte)">Pedir remoção</a>
+  <button class="fechar" onclick="document.getElementById('previa').remove();document.body.style.paddingBottom='0'">✕</button>
+</div>
+{% endif %}
+
+<div class="topo-fixo">
+<nav class="barra">
+  <div class="env">
+    <a href="#topo" class="marca">
+      <b>{{ site.nome }}</b>
+      <span>{% if ano %}Desde {{ ano }}{% elif site.cidade_uf %}{{ site.cidade_uf }}{% else %}{{ descritor }}{% endif %}</span>
+    </a>
+    <div class="barra-links">
+      {% if tem_historia %}<a href="#historia">A casa</a>{% endif %}
+      {% if dishes %}<a href="#cardapio">Cardápio</a>{% endif %}
+      {% if promocoes %}<a href="#promocoes">Promoções</a>{% endif %}
+      {% if eventos %}<a href="#agenda">Agenda</a>{% endif %}
+      {# Nota e depoimentos são dados independentes: o link existe se houver
+         qualquer um dos dois (ver a seção #avaliacoes). #}
+      {% if reviews or site.nota_google %}<a href="#avaliacoes">Avaliações</a>{% endif %}
+      {% if gallery %}<a href="#galeria">Álbum</a>{% endif %}
+      <a href="#reservar">Reservar</a>
+      <a href="#contato">Contato</a>
+      <a class="entrar" href="{{ url_for('auth.login') }}">Entrar no sistema</a>
+    </div>
+    <div class="barra-ctrls">
+      <button class="btn-icone" id="btn-tema" onclick="trocarTema()" aria-label="Alternar tema claro e escuro" title="Alternar tema"><span id="ic-tema">☾</span></button>
+      <button class="btn-icone sanduiche" id="btn-menu" onclick="abrirMenu()" aria-label="Abrir menu" aria-expanded="false" aria-controls="folha">
+        <span><i></i><i></i><i></i></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="folha" id="folha">
+  {% if tem_historia %}<a href="#historia" onclick="abrirMenu()">A casa</a>{% endif %}
+  {% if dishes %}<a href="#cardapio" onclick="abrirMenu()">Cardápio</a>{% endif %}
+  {% if promocoes %}<a href="#promocoes" onclick="abrirMenu()">Promoções</a>{% endif %}
+  {% if eventos %}<a href="#agenda" onclick="abrirMenu()">Agenda</a>{% endif %}
+  {% if reviews or site.nota_google %}<a href="#avaliacoes" onclick="abrirMenu()">Avaliações</a>{% endif %}
+  {% if gallery %}<a href="#galeria" onclick="abrirMenu()">Álbum</a>{% endif %}
+  <a href="#reservar" onclick="abrirMenu()">Reservar mesa</a>
+  <a href="#contato" onclick="abrirMenu()">Contato</a>
+  <a class="entrar" href="{{ url_for('auth.login') }}">Entrar no sistema</a>
+</div>
+</div>
+
+<div class="azulejo" aria-hidden="true"></div>
+
+<header class="capa" id="topo">
+  <div class="env">
+    {% if site.kicker %}<div class="kicker" data-hero>{{ site.kicker }}</div>{% endif %}
+    <h1 class="nome-casa" data-hero>
+      {% if site.hero_linha1 or site.hero_linha2 %}
+        {{ site.hero_linha1 }}{% if site.hero_linha2 %}<span class="l2">{{ site.hero_linha2 }}</span>{% endif %}
+      {% else %}
+        {{ site.nome }}
+      {% endif %}
+    </h1>
+
+    {% if ano %}
+    {# O ano em destaque real: placa de fundação logo abaixo do nome. #}
+    <div class="fundacao" data-hero>
+      <span class="desde caps">Desde</span>
+      <span class="ano">{{ ano }}</span>
+      <span class="anos" data-ano="{{ ano }}" hidden></span>
+    </div>
+    {% endif %}
+
+    {% if site.tagline %}<p class="tagline" data-hero>{{ site.tagline }}</p>{% endif %}
+    {% if site.subline %}<p class="subline" data-hero>{{ site.subline }}</p>{% endif %}
+
+    {# Selo de nota no primeiro palmo de tela — só com o dado desta casa, e
+       levando pra placa de reputação lá embaixo. Sem nota, cai no selo antigo. #}
+    {% if site.nota_google %}
+    <a class="selo" href="#avaliacoes" data-hero>
+      <span class="est" aria-hidden="true">★</span>
+      <span class="nota-hero">{{ site.nota_google }}</span>
+      <span>{% if site.qtd_avaliacoes %}{{ site.qtd_avaliacoes }} avaliações no Google{% else %}no Google{% endif %}</span>
+    </a>
+    {% elif site.selo_estrelas %}
+    <div class="selo" data-hero><span class="est">★★★★★</span> {{ site.selo_estrelas }}</div>
+    {% endif %}
+
+    <div class="acoes" data-hero>
+      {% if site.whatsapp %}
+      <a class="btn" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener">Chamar no WhatsApp</a>
+      {% endif %}
+      <a class="btn vazado" href="#reservar">Reservar mesa</a>
+      {% if site.maps_query %}
+      <a class="btn vazado" href="https://www.google.com/maps/search/?api=1&query={{ site.maps_query }}" target="_blank" rel="noopener">Como chegar</a>
+      {% endif %}
+    </div>
+
+    {% if hero_src %}
+    {# A moldura fica torta por CSS (`torta-a`). Quem anima é o invólucro: assim
+       o translate do Motion não come a inclinação da foto. #}
+    <div class="capa-foto" data-hero>
+      <figure class="moldura torta-a">
+        <img src="{{ hero_src }}" alt="{{ site.nome }}{% if site.cidade_uf %} — {{ site.cidade_uf }}{% endif %}" fetchpriority="high">
+        <figcaption>{{ site.nome }}{% if ano %} · desde {{ ano }}{% elif site.cidade_uf %} · {{ site.cidade_uf }}{% endif %}</figcaption>
+      </figure>
+    </div>
+    {% endif %}
+
+    <div class="role" data-hero>{{ copy.scroll }}</div>
+  </div>
+</header>
+
+{# Tabuleta de itens da casa: estática, para ler — não é letreiro que corre. #}
+{% set faixa = (site.subline.split('·') if site.subline and '·' in site.subline else copy.marquee) %}
+<div class="tabuleta">
+  <div class="env">
+    {% for item in faixa %}
+      <span>{{ item|trim }}</span>{% if not loop.last %}<i>◆</i>{% endif %}
+    {% endfor %}
+  </div>
+</div>
+
+{% if tem_historia %}
+<!-- A CASA / HISTÓRIA — vem antes do cardápio: é o que esta casa tem e as novas não têm -->
+<section class="sec" id="historia">
+  {# Sem ano, a marca d'água vira o monograma da casa — nunca um ano inventado. #}
+  <span class="marca-dagua" aria-hidden="true">{{ ano if ano else ((site.nome or '·')[0]|upper) }}</span>
+  <div class="env">
+    <div class="cabeca revelar">
+      <div class="eyebrow">{{ copy.historia.eyebrow }}</div>
+      <h2 class="h2">{{ copy.historia.titulo|safe }}</h2>
+      <div class="filete"></div>
+      <p class="historia-texto">{{ copy.historia.texto }}</p>
+      {% if site.kicker %}<p class="historia-texto"><em>{{ site.kicker }}</em></p>{% endif %}
+    </div>
+
+    {% if ano %}
+    <ol class="linha-tempo revelar">
+      <li>
+        <span class="mrc">{{ ano }}</span>
+        <b>A porta abre</b>
+        <small>{% if site.cidade_uf %}{{ site.cidade_uf }}{% else %}O começo de tudo{% endif %}.</small>
+      </li>
+      <li data-anos-item hidden>
+        <span class="mrc"><span data-ano="{{ ano }}"></span></span>
+        <b>Anos de casa</b>
+        <small>Tempo de porta aberta{% if site.cidade_uf %} em {{ site.cidade_uf }}{% endif %}.</small>
+      </li>
+      {% if site.nota_google %}
+      <li>
+        <span class="mrc">{{ site.nota_google }}★</span>
+        <b>No Google</b>
+        <small>{% if site.qtd_avaliacoes %}{{ site.qtd_avaliacoes }} avaliações de quem já sentou aqui{% else %}A nota de quem vem e volta{% endif %}.</small>
+      </li>
+      {% endif %}
+    </ol>
+    {% endif %}
+
+    {% if gallery %}
+    {# Mesmo motivo do hero: a inclinação é do quadro, o movimento é do invólucro. #}
+    <div class="album-historia revelar">
+      <figure class="moldura torta-b">
+        <img src="{{ gallery[0].img }}" alt="{{ gallery[0].legenda or (site.nome ~ ' — a casa') }}" loading="lazy">
+        <figcaption>{{ gallery[0].legenda or ('Na parede do ' ~ site.nome) }}</figcaption>
+      </figure>
+    </div>
+    {% endif %}
+
+    {% if team %}
+    <div class="retratos revelar">
+      {% for m in team %}
+      <div class="retrato">
+        <div class="rosto" aria-hidden="true">{{ m.emoji or '🧑‍🍳' }}</div>
+        <b>{{ m.nome }}</b>
+        {% if m.papel %}<small>{{ m.papel }}</small>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+{# Três placas esmaltadas com o clima da casa. Sem âncora e sem título de
+   seção: é uma faixa, não uma seção que possa nascer vazia. #}
+<div class="env">
+  <div class="placas">
+    {% for emoji, titulo, sub in copy.clima.cards %}
+    <div class="placa">
+      <span class="em" aria-hidden="true">{{ emoji }}</span>
+      <b>{{ titulo }}</b>
+      <small>{{ sub }}</small>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% if dishes %}
+<!-- CARDÁPIO — lista de tabuleta, não vitrine de fotos -->
+<section class="sec" id="cardapio">
+  <div class="env">
+    <div class="cabeca revelar">
+      <div class="eyebrow">{{ copy.cardapio.eyebrow }}</div>
+      <h2 class="h2">{{ copy.cardapio.titulo|safe }}</h2>
+      <div class="filete"></div>
+      {% if copy.cardapio.lead %}<p class="lead">{{ copy.cardapio.lead }}</p>{% endif %}
+    </div>
+    <ul class="pratos revelar">
+      {% for d in dishes %}
+      <li class="prato{% if d.destaque %} daqui{% endif %}">
+        {% if d.img %}
+        <div class="mini"><img src="{{ d.img }}" alt="{{ d.nome }}" loading="lazy"></div>
+        {% endif %}
+        <div class="txt">
+          <h3>{{ d.nome }}</h3>
+          {% if d.descricao %}<p>{{ d.descricao }}</p>{% endif %}
+          {% if d.tag %}<span class="carimbo">{{ d.tag }}</span>{% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+{% endif %}
+
+{% if promocoes %}
+<!-- PROMOÇÕES — cartazes colados na parede -->
+<section class="sec" id="promocoes">
+  <div class="env">
+    <div class="cabeca revelar">
+      <div class="eyebrow">{{ copy.promocoes.eyebrow }}</div>
+      <h2 class="h2">{{ copy.promocoes.titulo|safe }}</h2>
+      <div class="filete"></div>
+    </div>
+    <div class="cartazes revelar">
+      {% for p in promocoes %}
+      <div class="cartaz{% if p.acontece_hoje %} hoje{% endif %}">
+        <div class="rot">{% if p.acontece_hoje %}É hoje{% else %}{{ p.rotulo or 'Oferta da casa' }}{% endif %}</div>
+        <h3>{{ p.titulo }}{% if p.exemplo %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
+        {% if p.descricao %}<p>{{ p.descricao }}</p>{% endif %}
+        {# Sem repetir o rótulo do topo: recorrente já diz o dia ali em cima, e
+           pontual já diz "ATÉ 31/12". Aqui só entra o que ainda não foi dito. #}
+        {% if p.acontece_hoje %}
+          <div class="val">Toda {{ (p.rotulo or '').replace('TODA ', '')|lower }}{% if p.validade %} · até {{ p.validade.strftime('%d/%m/%Y') }}{% endif %}</div>
+        {% elif p.dia_semana is not none and p.validade %}
+          <div class="val">Até {{ p.validade.strftime('%d/%m/%Y') }}</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if eventos %}
+<!-- AGENDA — calendário de parede -->
+<section class="sec" id="agenda">
+  <div class="env">
+    <div class="cabeca revelar">
+      <div class="eyebrow">{{ copy.agenda.eyebrow }}</div>
+      <h2 class="h2">{{ copy.agenda.titulo|safe }}</h2>
+      <div class="filete"></div>
+      {% if copy.agenda.lead %}<p class="lead">{{ copy.agenda.lead }}</p>{% endif %}
+    </div>
+    {% set meses = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'] %}
+    {% set dias = ['DOM','SEG','TER','QUA','QUI','SEX','SÁB'] %}
+    <ul class="agenda revelar">
+      {% for e in eventos %}
+      <li>
+        <div class="data-placa">
+          <span class="d">{{ '%02d' % e.data.day }}</span>
+          <span class="m">{{ meses[e.data.month-1] }}</span>
+        </div>
+        <div>
+          <h3>{{ e.titulo }}{% if e.exemplo %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
+          <div class="quando">{{ dias[(e.data.weekday()+1)%7] }}{% if e.hora %} · {{ e.hora }}{% endif %}</div>
+          {% if e.descricao %}<div class="desc">{{ e.descricao }}</div>{% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+{% endif %}
+
+{# A seção existe se houver QUALQUER prova social: a nota do Google OU
+   depoimentos escritos. Sem nenhum dos dois ela some inteira, com o link do
+   menu junto — o invariante de seção órfã continua de pé. #}
+{% if reviews or site.nota_google %}
+<!-- AVALIAÇÕES — placa de reputação + livro de visitas -->
+<section class="sec" id="avaliacoes">
+  <div class="env">
+    <div class="cabeca revelar">
+      <div class="eyebrow">{{ copy.avaliacoes.eyebrow }}</div>
+      <h2 class="h2">{{ copy.avaliacoes.titulo|safe }}</h2>
+      <div class="filete"></div>
+    </div>
+
+    {# Nota real desta casa. Sem o dado, a placa some — nunca a reputação de
+       outro bar. Os números já vêm escritos no HTML: se o Motion não carregar,
+       continuam lá, parados e legíveis. #}
+    {% if site.nota_google %}
+    <div class="reputacao revelar" data-reputacao>
+      <div class="placa-nota">
+        <span class="n" data-conta-nota="{{ '%.2f'|format(nota_num) }}">{{ site.nota_google }}</span>
+        <span class="est" aria-hidden="true">{% for _i in range(5) %}{% if _i < estrelas_cheias %}★{% else %}<span class="vazia">★</span>{% endif %}{% endfor %}</span>
+      </div>
+      <div class="dizeres">
+        <div class="qtd">
+          {% if site.qtd_avaliacoes %}
+            <b data-conta="{{ site.qtd_avaliacoes }}">{{ site.qtd_avaliacoes }}</b> avaliações no Google
+          {% else %}
+            A nota desta casa <b>no Google</b>
+          {% endif %}
+        </div>
+        {# `site.nota_google` já vem escrito à brasileira ("4,7") — reusar o texto
+           do dono evita reformatar número e trocar vírgula por ponto. #}
+        <span class="onde">{{ site.nota_google }} de 5 · a nota de quem já sentou aqui{% if site.cidade_uf %}, em {{ site.cidade_uf }}{% endif %}</span>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if reviews %}
+    <div class="visitas revelar">
+      {% for r in reviews %}
+      <blockquote class="visita">
+        {% if r.estrelas %}<div class="est" aria-label="{{ r.estrelas }} de 5 estrelas">{{ '★' * r.estrelas }}</div>{% endif %}
+        <p>{{ r.texto }}</p>
+        <div class="quem">— {{ r.autor }}</div>
+      </blockquote>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+{% if gallery %}
+<!-- ÁLBUM DA CASA -->
+<section class="sec" id="galeria">
+  <div class="env">
+    <div class="cabeca revelar">
+      <div class="eyebrow">{{ copy.galeria.eyebrow }}</div>
+      <h2 class="h2">{{ copy.galeria.titulo|safe }}</h2>
+      <div class="filete"></div>
+      {% if copy.galeria.lead %}<p class="lead">{{ copy.galeria.lead }}</p>{% endif %}
+    </div>
+    {# No máximo 6 quadros na parede. O acervo inteiro continua no banco (e no
+       Instagram do bar); dezesseis fotos empilhadas viravam quilômetros de
+       rolagem e enterravam a reserva lá no fim da página. #}
+    <div class="album revelar">
+      {% for g in gallery %}
+      {% if loop.index <= 6 %}
+      <figure class="moldura" tabindex="0" role="button"
+              aria-label="Ampliar foto{% if g.legenda %}: {{ g.legenda }}{% endif %}"
+              onclick="ampliar('{{ g.img }}')"
+              onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();ampliar('{{ g.img }}')}">
+        <img src="{{ g.img }}" alt="{{ g.legenda or (site.nome ~ ' — foto da casa') }}" loading="lazy">
+        {% if g.legenda %}<figcaption>{{ g.legenda }}</figcaption>{% endif %}
+      </figure>
+      {% endif %}
+      {% endfor %}
+    </div>
+    {% if gallery|length > 6 %}
+    <p class="album-mais">e mais {{ gallery|length - 6 }} fotos na parede da casa</p>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+<!-- RESERVA -->
+<section class="sec" id="reservar">
+  <div class="env">
+    <div class="cabeca revelar">
+      <div class="eyebrow">{{ copy.reserva.eyebrow }}</div>
+      <h2 class="h2">{{ copy.reserva.titulo|safe }}</h2>
+      <div class="filete"></div>
+    </div>
+    <div class="reserva-grade">
+      <div class="revelar">
+        <p class="lead">{{ copy.reserva.lead }}</p>
+        {% if site.horario %}<p class="lead" style="margin-top:14px"><strong>Horário:</strong> {{ site.horario }}</p>{% endif %}
+      </div>
+
+      {% if reservas_ativas %}
+      <form class="livro revelar" id="livroReserva" onsubmit="return enviarReserva(event)" novalidate>
+        <div class="livro-topo">Livro de reservas{% if ano %} · desde {{ ano }}{% endif %}</div>
+        {# Servido em /bar/<slug>, o Host é o do produto — daí este campo. #}
+        <input type="hidden" name="slug" value="{{ tenant.slug if tenant else '' }}">
+        <div class="campo">
+          <label for="tr-nome">Nome</label>
+          <input id="tr-nome" name="nome" type="text" autocomplete="name" placeholder="Como te chamamos?" required>
+        </div>
+        <div class="dupla">
+          <div class="campo">
+            <label for="tr-tel">WhatsApp</label>
+            <input id="tr-tel" name="telefone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(19) 99999-9999" required>
+          </div>
+          <div class="campo">
+            <label for="tr-pessoas">Pessoas</label>
+            <input id="tr-pessoas" name="num_pessoas" type="number" min="1" max="50" value="2" required>
+          </div>
+        </div>
+        <div class="dupla">
+          <div class="campo">
+            <label for="tr-data">Data</label>
+            <input id="tr-data" name="data" type="date" required>
+          </div>
+          <div class="campo">
+            <label for="tr-hora">Horário</label>
+            <input id="tr-hora" name="hora" type="time" value="19:00" required>
+          </div>
+        </div>
+        <div class="campo">
+          <label for="tr-obs">Observação (opcional)</label>
+          <textarea id="tr-obs" name="observacao" placeholder="Aniversário? Cadeira de bebê? Conta pra gente."></textarea>
+        </div>
+        <button class="btn larga" type="submit">{{ copy.reserva_ui.botao }}</button>
+        <div class="recado" id="recadoReserva" role="status" aria-live="polite"></div>
+        <a class="btn vazado zap-confirma" id="zapConfirma" href="#" target="_blank" rel="noopener">{{ copy.reserva_ui.titulo }}</a>
+      </form>
+      {% else %}
+      <div class="livro revelar">
+        <div class="livro-topo">Reserva pelo WhatsApp</div>
+        <p class="lead" style="margin-top:0">{{ copy.reserva_ui.fallback }}</p>
+        {% if site.whatsapp %}
+        <a class="btn larga" style="margin-top:18px"
+           href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}"
+           target="_blank" rel="noopener">Chamar no WhatsApp</a>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- CONTATO -->
+<section class="sec" id="contato">
+  <div class="env">
+    <div class="cabeca revelar">
+      <div class="eyebrow">{{ copy.contato.eyebrow }}</div>
+      <h2 class="h2">{{ copy.contato.titulo|safe }}</h2>
+      <div class="filete"></div>
+    </div>
+    <div class="contato-grade">
+      <ul class="dados revelar">
+        {% if site.endereco %}<li><span class="em" aria-hidden="true">📍</span><span><b>Endereço</b>{{ site.endereco }}{% if site.cidade_uf %} · {{ site.cidade_uf }}{% endif %}</span></li>{% endif %}
+        {% if site.horario %}<li><span class="em" aria-hidden="true">🕐</span><span><b>Horário</b>{{ site.horario }}</span></li>{% endif %}
+        {% if site.telefone_exibicao %}<li><span class="em" aria-hidden="true">📞</span><span><b>Telefone e WhatsApp</b>{{ site.telefone_exibicao }}</span></li>{% endif %}
+        {% if site.servicos %}<li><span class="em" aria-hidden="true">🍽️</span><span><b>Serviços</b>{{ site.servicos }}</span></li>{% endif %}
+      </ul>
+      <div class="convite revelar">
+        <h3>{{ copy.cta.titulo }}</h3>
+        <p>{{ copy.cta.linha }}</p>
+        {% if site.whatsapp %}
+        <a class="btn" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener">Falar no WhatsApp</a>
+        {% endif %}
+        {% if site.maps_query %}
+        <a class="btn vazado" href="https://www.google.com/maps/search/?api=1&query={{ site.maps_query }}" target="_blank" rel="noopener">Abrir no mapa</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="azulejo" aria-hidden="true"></div>
+
+<footer>
+  <div class="env">
+    <div class="assina">{{ site.nome }}</div>
+    <div class="desde-rodape">
+      {% if ano %}Desde {{ ano }}{% if site.cidade_uf %} · {{ site.cidade_uf }}{% endif %}
+      {% elif site.cidade_uf %}{{ site.cidade_uf }}
+      {% else %}{{ descritor }}{% endif %}
+    </div>
+    <p class="recado-rodape">{{ copy.rodape }}</p>
+    {% if site.instagram_url or site.facebook_url %}
+    <div class="redes">
+      {% if site.instagram_url %}
+      <a href="{{ site.instagram_url }}" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2c3.2 0 3.6 0 4.9.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.86s0 3.6-.07 4.86c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.86.07s-3.6 0-4.86-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23C2.2 15.6 2.2 15.2 2.2 12s0-3.6.07-4.86c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.4 2.2 8.8 2.2 12 2.2zm0 1.98c-3.15 0-3.52.01-4.76.07-.9.04-1.39.2-1.71.32-.43.17-.74.37-1.06.69-.32.32-.52.63-.69 1.06-.12.32-.28.81-.32 1.71-.06 1.24-.07 1.61-.07 4.76s.01 3.52.07 4.76c.04.9.2 1.39.32 1.71.17.43.37.74.69 1.06.32.32.63.52 1.06.69.32.12.81.28 1.71.32 1.24.06 1.61.07 4.76.07s3.52-.01 4.76-.07c.9-.04 1.39-.2 1.71-.32.43-.17.74-.37 1.06-.69.32-.32.52-.63.69-1.06.12-.32.28-.81.32-1.71.06-1.24.07-1.61.07-4.76s-.01-3.52-.07-4.76c-.04-.9-.2-1.39-.32-1.71-.17-.43-.37-.74-.69-1.06-.32-.32-.63-.52-1.06-.69-.32-.12-.81-.28-1.71-.32-1.24-.06-1.61-.07-4.76-.07zm0 3.38a4.44 4.44 0 1 1 0 8.88 4.44 4.44 0 0 1 0-8.88zm0 7.32a2.88 2.88 0 1 0 0-5.76 2.88 2.88 0 0 0 0 5.76zm5.65-7.52a1.04 1.04 0 1 1-2.08 0 1.04 1.04 0 0 1 2.08 0z"/></svg>
+      </a>
+      {% endif %}
+      {% if site.facebook_url %}
+      <a href="{{ site.facebook_url }}" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z"/></svg>
+      </a>
+      {% endif %}
+    </div>
+    {% endif %}
+    <div><a class="lojista" href="{{ url_for('auth.login') }}">Área do lojista · entrar no sistema</a></div>
+  </div>
+</footer>
+
+{% if gallery %}
+<div class="lupa" id="lupa" onclick="this.classList.remove('on')">
+  <span class="x" aria-hidden="true">✕</span>
+  <img id="lupa-img" src="" alt="Foto ampliada do {{ site.nome }}">
+</div>
+{% endif %}
+
+{% if site.whatsapp %}
+<a class="zap-fixo" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener" aria-label="Falar no WhatsApp">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M.06 24l1.68-6.13A11.9 11.9 0 0 1 .16 11.9C.16 5.34 5.5.02 12.06.02a11.8 11.8 0 0 1 8.4 3.49 11.8 11.8 0 0 1 3.48 8.4c0 6.56-5.34 11.89-11.9 11.89a11.9 11.9 0 0 1-5.7-1.45L.06 24zM6.6 20.15c1.68.998 3.28 1.6 5.44 1.6 5.45 0 9.89-4.43 9.89-9.88 0-5.46-4.43-9.89-9.88-9.89-5.46 0-9.89 4.43-9.89 9.89 0 2.27.6 3.98 1.7 5.7l-1 3.65 3.65-.97zM17.5 14.3c-.07-.12-.27-.2-.57-.35-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.08.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2-1.41.25-.7.25-1.29.17-1.42z"/></svg>
+  Chamar
+</a>
+{% endif %}
+
+{# Motion (ex-Framer Motion), build vanilla — sem React e sem build step.
+   Versão pinada de propósito: `@latest` num CDN é uma dependência que muda
+   sozinha na madrugada, no site de 24 bares ao mesmo tempo.
+   Se este arquivo não carregar, `window.Motion` fica indefinido, a classe
+   `.js-anim` nunca entra no <html>, nenhum estado inicial se aplica e a página
+   serve inteira — só sem movimento. #}
+<script src="https://cdn.jsdelivr.net/npm/motion@13.1.0/dist/motion.js"></script>
+<script>
+  var TEMA_KEY = 'fdb-tema-{{ tenant.slug if tenant and tenant.slug else "site" }}';
+
+  function corDeFundo(){
+    var v = getComputedStyle(document.documentElement).getPropertyValue('--papel');
+    return (v || '').trim() || '{{ tema_cor or "#f6eddd" }}';
+  }
+  function pintarIcone(){
+    var escuro = document.documentElement.getAttribute('data-theme') === 'dark'
+      || (!document.documentElement.getAttribute('data-theme')
+          && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    var ic = document.getElementById('ic-tema');
+    if(ic) ic.textContent = escuro ? '☀' : '☾';
+    var meta = document.getElementById('meta-cor');
+    if(meta) meta.setAttribute('content', corDeFundo());
+  }
+  function trocarTema(){
+    var raiz = document.documentElement;
+    var escuroAgora = raiz.getAttribute('data-theme') === 'dark'
+      || (!raiz.getAttribute('data-theme')
+          && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    raiz.setAttribute('data-theme', escuroAgora ? 'light' : 'dark');
+    try{ localStorage.setItem(TEMA_KEY, escuroAgora ? 'claro' : 'escuro'); }catch(e){}
+    pintarIcone();
+  }
+
+  function abrirMenu(){
+    var folha = document.getElementById('folha');
+    var aberta = folha.classList.toggle('aberta');
+    document.getElementById('btn-menu').setAttribute('aria-expanded', aberta ? 'true' : 'false');
+  }
+
+  function ampliar(src){
+    var l = document.getElementById('lupa');
+    if(!l) return;
+    document.getElementById('lupa-img').src = src;
+    l.classList.add('on');
+  }
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){
+      var l = document.getElementById('lupa');
+      if(l) l.classList.remove('on');
+    }
+  });
+
+  function enviarReserva(ev){
+    ev.preventDefault();
+    var form = ev.target;
+    var btn = form.querySelector('button[type=submit]');
+    var msg = document.getElementById('recadoReserva');
+    btn.disabled = true;
+    var rotulo = btn.textContent;
+    btn.textContent = 'Enviando…';
+    msg.className = 'recado';
+    fetch('{{ url_for("public.reservar") }}', {
+      method: 'POST',
+      body: new FormData(form),
+      headers: {'Accept': 'application/json'}
+    })
+      .then(function(r){ return r.json().then(function(j){ return {ok: r.ok, j: j}; }); })
+      .then(function(res){
+        if(res.ok && res.j.ok){
+          msg.className = 'recado ok';
+          msg.textContent = res.j.mensagem;
+          var zap = document.getElementById('zapConfirma');
+          if(res.j.wa_url && zap){
+            zap.href = res.j.wa_url;
+            zap.classList.add('mostra');
+            zap.scrollIntoView({block: 'center', behavior: 'smooth'});
+          }
+          form.reset();
+          var d = document.getElementById('tr-data'); if(d) d.value = d.min;
+          var h = document.getElementById('tr-hora'); if(h) h.value = '19:00';
+        } else {
+          msg.className = 'recado err';
+          msg.textContent = (res.j.erros && res.j.erros.join(' ')) || 'Não deu pra enviar. Tenta pelo WhatsApp?';
+        }
+      })
+      .catch(function(){
+        msg.className = 'recado err';
+        msg.textContent = 'Sem conexão. Chama a gente no WhatsApp!';
+      })
+      .finally(function(){ btn.disabled = false; btn.textContent = rotulo; });
+    return false;
+  }
+
+  (function(){
+    pintarIcone();
+
+    // Data mínima da reserva = hoje.
+    var d = document.getElementById('tr-data');
+    if(d){
+      var t = new Date();
+      t.setMinutes(t.getMinutes() - t.getTimezoneOffset());
+      var iso = t.toISOString().slice(0, 10);
+      d.min = iso;
+      if(!d.value) d.value = iso;
+    }
+
+    // "X anos de casa": conta do ano de fundação até hoje, no cliente — o
+    // servidor não sabe o ano corrente do visitante e a conta nunca envelhece.
+    var atual = new Date().getFullYear();
+    document.querySelectorAll('[data-ano]').forEach(function(el){
+      var ano = parseInt(el.getAttribute('data-ano'), 10);
+      if(!ano || ano > atual) return;
+      var anos = atual - ano;
+      if(anos < 1) return;
+      if(el.classList.contains('anos')){
+        el.textContent = anos + ' anos de casa';
+        el.hidden = false;
+      } else {
+        el.textContent = anos;
+        var item = el.closest('[data-anos-item]');
+        if(item) item.hidden = false;
+      }
+    });
+
+    // ---------- MOVIMENTO ----------
+    // Casa antiga, movimento discreto: nada salta, tudo assenta. O Motion só
+    // entra em cena se a lib carregou E o visitante aceita movimento; fora
+    // disso, cai no IntersectionObserver de sempre e o site fica idêntico ao
+    // que era. Nenhum conteúdo depende de animação pra existir.
+    var alvos = document.querySelectorAll('.revelar');
+    function revelarTudo(){ alvos.forEach(function(el){ el.classList.add('vista'); }); }
+
+    var reduz = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var M = (!reduz && window.Motion) ? window.Motion : null;
+
+    if(!M){
+      // Revelar ao rolar (nada some se o observador não existir).
+      if(!('IntersectionObserver' in window)){ revelarTudo(); return; }
+      var io = new IntersectionObserver(function(entradas){
+        entradas.forEach(function(e){
+          if(e.isIntersecting){ e.target.classList.add('vista'); io.unobserve(e.target); }
+        });
+      }, {threshold: .12});
+      alvos.forEach(function(el){ io.observe(el); });
+      return;
+    }
+
+    document.documentElement.classList.add('js-anim');
+    var animar = M.animate, aoVer = M.inView, cascata = M.stagger;
+
+    // Conta de zero até o número que o servidor já escreveu — e termina
+    // devolvendo exatamente aquele texto, sem reformatar nada por conta própria.
+    function contar(el, alvo, casas){
+      var original = el.textContent;
+      var fim = function(){ el.textContent = original; };
+      try{
+        animar(0, alvo, {
+          duration: casas ? 1.1 : 1.25,
+          ease: 'easeOut',
+          onUpdate: function(v){
+            el.textContent = casas ? v.toFixed(casas).replace('.', ',')
+                                   : Math.round(v).toLocaleString('pt-BR');
+          },
+          onComplete: fim
+        });
+      }catch(e){ fim(); }
+    }
+
+    try{
+      // 1. Entrada do hero: o nome da casa primeiro, o resto assentando atrás.
+      animar('[data-hero]',
+             {opacity: [0, 1], y: [20, 0]},
+             {duration: .62, delay: cascata(.085), ease: [.22, .75, .3, 1]});
+
+      // 2. Cada bloco sobe uma vez, quando entra na tela.
+      aoVer('.revelar', function(el){
+        try{
+          animar(el, {opacity: [0, 1], y: [18, 0]}, {duration: .68, ease: 'easeOut'});
+        }catch(e){ el.classList.add('vista'); }
+      }, {amount: .12});
+
+      // 3. A nota do Google contando de zero. É o argumento de venda mais forte
+      //    da página: o número merece que o olho pare nele. Se o Motion sumir,
+      //    o valor final continua escrito no HTML desde o servidor.
+      aoVer('[data-reputacao]', function(bloco){
+        var n = bloco.querySelector('[data-conta-nota]');
+        if(n){
+          var nota = parseFloat(n.getAttribute('data-conta-nota'));
+          if(nota > 0) contar(n, nota, 1);
+        }
+        var q = bloco.querySelector('[data-conta]');
+        if(q){
+          var qtd = parseInt(q.getAttribute('data-conta'), 10);
+          if(qtd > 0) contar(q, qtd, 0);
+        }
+      }, {amount: .45});
+
+      // 4. Micro-interação nos CTAs: a mola devolve o botão de esmalte.
+      if(typeof M.hover === 'function'){
+        M.hover('.btn, .zap-fixo', function(el){
+          animar(el, {scale: 1.035, y: -2}, {type: M.spring, stiffness: 330, damping: 18});
+          return function(){
+            animar(el, {scale: 1, y: 0}, {type: M.spring, stiffness: 330, damping: 22});
+          };
+        });
+      }
+    }catch(e){
+      // Motion carregou mas engasgou: desfaz o estado inicial e devolve a
+      // página inteira. Página legível ganha de página animada, sempre.
+      document.documentElement.classList.remove('js-anim');
+      revelarTudo();
+    }
+  })();
+</script>
+</body>
+</html>

@@ -9,6 +9,7 @@ nome: "Cervejaria Garimpero"
 tema: pub-escuro
 
 site:
+  endereco: "Avenida Santa Isabel, 462, em Barão Geraldo, Campinas (SP)"
   vibe: pub
   descritor: "Brewpub em Barão Geraldo"
   kicker: "BARÃO GERALDO · CAMPINAS–SP"

@@ -9,6 +9,10 @@ nome: "Bar do Frango"
 tema: boteco-ambar
 
 site:
+  telefone_exibicao: "(19) 3289-1478"
+  endereco: "Av. Santa Isabel, 167 - Barão Geraldo, Campinas - SP, 13084-012"
+  qtd_avaliacoes: 292
+  nota_google: "4,5"
   vibe: boteco
   descritor: "Clássico de Barão Geraldo"
   kicker: "BARÃO GERALDO · CAMPINAS–SP · +30 ANOS"

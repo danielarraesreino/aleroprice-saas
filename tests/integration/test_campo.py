@@ -215,6 +215,76 @@ def test_qr_aponta_pro_site_do_bar(client, demo):
     assert b'<svg' in resp.data
 
 
+# --------------------------------------------------------------- modelo do site
+
+def test_visual_abre_com_a_previa_do_modelo_salvo(client, session, demo):
+    """A tela é a prévia: sem o iframe apontando pro site do bar, não há o que
+    mostrar ao dono."""
+    cfg = SiteConfig.query.filter_by(restaurant_id=demo.id).one()
+    cfg.modelo = 'craft'
+    session.commit()
+
+    entrar(client)
+    resp = client.get(f'/campo/{demo.slug}/visual')
+
+    assert resp.status_code == 200
+    corpo = resp.get_data(as_text=True)
+    assert f'/bar/{demo.slug}?modelo=craft' in corpo, 'iframe não abriu no modelo salvo'
+    # os 6 cartões, com a frase que o vendedor lê em voz alta
+    for esperado in ('Clássico', 'Craft', 'Brasa', 'Pra espetaria'):
+        assert esperado in corpo, f'sumiu do seletor: {esperado}'
+
+
+def test_visual_e_404_pra_quem_nao_e_operador(client, session, demo):
+    """Mesma regra do resto do Modo Campo: quem não opera nem sabe que existe."""
+    outro = Restaurante(nome='Bar Alheio 3', slug='bar-alheio-3', tipo_conta='cliente')
+    session.add(outro)
+    session.commit()
+    session.add(Usuario(nome='Dono', email='dono3@alheio.com', senha='segredo123',
+                        tipo='admin', restaurant_id=outro.id))
+    session.commit()
+
+    entrar(client, 'dono3@alheio.com')
+
+    assert client.get(f'/campo/{demo.slug}/visual').status_code == 404
+    assert client.post(f'/campo/{demo.slug}/visual',
+                       data={'modelo': 'craft'}).status_code == 404
+
+
+def test_usar_este_grava_e_troca_o_site(client, session, demo):
+    """O botão da venda: o que estava só na prévia passa a ser o site de fato."""
+    entrar(client)
+    resp = client.post(f'/campo/{demo.slug}/visual', data={'modelo': 'craft'})
+
+    assert resp.status_code == 302
+    assert SiteConfig.query.filter_by(restaurant_id=demo.id).one().modelo == 'craft'
+
+    # sem `?modelo=` na URL o visitante já vê o modelo escolhido
+    salvo = client.get(f'/bar/{demo.slug}').get_data(as_text=True)
+    espiado = client.get(f'/bar/{demo.slug}?modelo=craft').get_data(as_text=True)
+    classico = client.get(f'/bar/{demo.slug}?modelo=classico').get_data(as_text=True)
+    assert salvo == espiado, 'o site salvo não bate com a prévia que foi mostrada'
+    assert salvo != classico, 'trocar o modelo não mudou nada no site'
+
+
+def test_visual_recusa_modelo_inventado(client, session, demo):
+    """Presets fechados, igual tema e vibe — modelo desconhecido não grava."""
+    cfg = SiteConfig.query.filter_by(restaurant_id=demo.id).one()
+    cfg.modelo = 'craft'
+    session.commit()
+
+    entrar(client)
+    client.post(f'/campo/{demo.slug}/visual', data={'modelo': '"><script>'})
+
+    assert SiteConfig.query.filter_by(restaurant_id=demo.id).one().modelo == 'craft'
+
+
+def test_visual_tem_link_na_tela_de_edicao(client, demo):
+    entrar(client)
+    corpo = client.get(f'/campo/{demo.slug}').get_data(as_text=True)
+    assert f'/campo/{demo.slug}/visual' in corpo
+
+
 # --------------------------------------------------------------- proposta
 
 def test_proposta_abre_pro_operador_com_dados_do_bar(client, session, demo):

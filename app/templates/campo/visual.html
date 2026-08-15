@@ -1,0 +1,138 @@
+{% extends "campo/base.html" %}
+{% block titulo %}Modelo · {{ cfg.nome or rest.nome }}{% endblock %}
+
+{% block topo %}
+  <a class="voltar" href="{{ url_for('campo.editar', slug=rest.slug) }}"
+     aria-label="Voltar para a edição">‹</a>
+  <h1>Modelo do site</h1>
+{% endblock %}
+
+{% block conteudo %}
+{# Nome bonito do modelo salvo, pro botão não abrir escrito "classico". #}
+{% set atual = modelos|selectattr('valor', 'equalto', modelo_atual)|first %}
+<style>
+  /* Moldura de celular: o dono precisa reconhecer que aquilo é o telefone
+     dele, não um "sistema". A borda grossa é o que faz a página de dentro
+     virar produto na cabeça de quem olha. */
+  .moldura{
+    width:100%; max-width:340px; margin:0 auto;
+    border:9px solid #342e28; border-radius:30px; background:#000;
+    box-shadow:0 14px 34px rgba(0,0,0,.5); overflow:hidden;
+  }
+  /* Altura generosa de propósito: prévia baixa não mostra a diferença entre
+     um modelo e outro, que é justamente a ordem das seções. */
+  .moldura iframe{
+    display:block; width:100%; height:min(66vh,600px);
+    border:0; background:#fff;
+  }
+  .grade{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:9px; margin:0 0 14px;
+  }
+  .cartao{
+    display:block; width:100%; text-align:left; margin:0; cursor:pointer;
+    padding:12px 13px; border-radius:12px; font-family:inherit;
+    background:var(--ink); color:var(--creme);
+    border:1px solid var(--linha);
+  }
+  .cartao[aria-pressed="true"]{
+    border-color:var(--ambar); background:#241c10;
+  }
+  .cartao .nome{display:flex; align-items:center; gap:7px; font-size:15px; font-weight:600}
+  .cartao .para{display:block; margin-top:5px; font-size:12.5px; color:var(--creme-dim)}
+  .selo{
+    flex:none; font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+    padding:2px 6px; border-radius:5px; font-weight:700;
+    background:var(--verde); color:#04240f;
+  }
+  .marca{flex:none; color:var(--ambar); font-size:15px}
+  .cartao[aria-pressed="false"] .marca{visibility:hidden}
+  .barra{
+    position:sticky; bottom:0; z-index:10; margin:0 -16px -16px;
+    padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+    background:var(--ink-2); border-top:1px solid var(--linha);
+  }
+</style>
+
+<div class="bloco">
+  <h2>A cara do site</h2>
+  <div class="moldura">
+    <iframe id="previa" title="Prévia do site do {{ cfg.nome or rest.nome }}"
+            src="{{ url_previa }}?modelo={{ modelo_atual }}"></iframe>
+  </div>
+  <p class="nota" style="text-align:center">
+    Toque num modelo abaixo pra ver mudando aqui. Só muda de verdade quando
+    você apertar <strong>Usar este</strong>.
+  </p>
+</div>
+
+<div class="bloco">
+  <h2>Escolha o esqueleto</h2>
+  <div class="grade">
+    {% for m in modelos %}
+      <button type="button" class="cartao" data-modelo="{{ m.valor }}"
+              data-label="{{ m.label }}"
+              aria-pressed="{{ 'true' if m.valor == modelo_atual else 'false' }}">
+        <span class="nome">
+          <span class="marca" aria-hidden="true">●</span>
+          <span style="flex:1">{{ m.label }}</span>
+          {% if m.valor == modelo_atual %}<span class="selo">no ar</span>{% endif %}
+        </span>
+        <span class="para">{{ m.para }}</span>
+      </button>
+    {% endfor %}
+  </div>
+
+  <div class="barra">
+    <form method="post" action="{{ url_for('campo.visual', slug=rest.slug) }}">
+      <input type="hidden" name="modelo" id="campo-modelo" value="{{ modelo_atual }}">
+      <button class="btn" type="submit">
+        Usar este — <span id="rotulo-escolhido">{{ atual.label }}</span>
+      </button>
+    </form>
+    {% if cfg.whatsapp %}
+      <a class="btn zap" id="zap" style="margin-top:9px;text-decoration:none"
+         href="https://wa.me/{{ cfg.whatsapp }}?text={{ ('Olha como fica o site do ' ~ (cfg.nome or rest.nome) ~ ': ' ~ url_previa ~ '?modelo=' ~ modelo_atual)|urlencode }}">
+        Mandar pro zap dele
+      </a>
+    {% else %}
+      <p class="nota" style="text-align:center">
+        Sem o WhatsApp dele preenchido no básico, não dá pra mandar o link daqui.
+      </p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+/* Trocar o `src` do iframe é a coisa mais barata que existe e é o suficiente:
+   a prévia já aceita `?modelo=` sem gravar nada. Recarregar a página inteira a
+   cada toque, no 4G do bar, mataria a demonstração. */
+const BASE = {{ url_previa|tojson }};
+const ZAP  = {{ (cfg.whatsapp or '')|tojson }};
+const NOME = {{ (cfg.nome or rest.nome)|tojson }};
+
+const previa   = document.getElementById('previa');
+const campo    = document.getElementById('campo-modelo');
+const rotulo   = document.getElementById('rotulo-escolhido');
+const botaoZap = document.getElementById('zap');
+const cartoes  = [...document.querySelectorAll('.cartao')];
+
+function escolher(valor, label) {
+  const url = BASE + '?modelo=' + encodeURIComponent(valor);
+  previa.src = url;
+  campo.value = valor;
+  rotulo.textContent = label;
+  cartoes.forEach(c => c.setAttribute('aria-pressed',
+                                      c.dataset.modelo === valor ? 'true' : 'false'));
+  if (botaoZap) {
+    botaoZap.href = 'https://wa.me/' + ZAP + '?text=' +
+      encodeURIComponent('Olha como fica o site do ' + NOME + ': ' + url);
+  }
+}
+
+cartoes.forEach(c => c.addEventListener('click',
+  () => escolher(c.dataset.modelo, c.dataset.label)));
+</script>
+{% endblock %}

@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+{#
+  MODELO "CRAFT" — cervejaria artesanal / brewpub / taproom.
+
+  Cara: quadro de torneiras. Escuro, técnico, tipografia condensada industrial
+  pros títulos e monoespaçada pros dados. O cardápio NÃO é grade de cards: é
+  uma lista de torneiras numerada, cada rótulo numa linha, como o quadro atrás
+  do balcão. A régua de ticks (`.escala`) é o elemento gráfico que se repete —
+  e quando ela vira medidor preenchido (`.medida`) só marca dado REAL do bar
+  (estrelas da avaliação, nota do Google). Nada de IBU/teor inventado: o site é
+  de um bar de verdade, número chutado ali é mentira sobre o produto dele.
+
+  Ordem das seções (de propósito diferente do clássico): torneiras primeiro.
+  Quem abre o site de cervejaria quer saber o que está na torneira hoje.
+#}
+{% set descritor = site.descritor or site.cidade_uf or 'Bar e cervejaria' %}
+{# Nota do Google: dado independente dos depoimentos escritos. Quase todo bar da
+   campanha tem nota e nenhum tem depoimento — por isso os dois nunca podem
+   compartilhar o mesmo `{% if %}`. Calculado uma vez aqui porque é usado em dois
+   lugares (selo do hero e bloco de prova social). `|float` engole vírgula
+   brasileira depois do replace; sem nota, `nota_pct` fica 0 e nada renderiza. #}
+{% set nota_dec = site.nota_google|replace(',', '.') if site.nota_google else '' %}
+{% set nota_pct = ([(nota_dec|float / 5 * 100), 100]|min)|round(1) if site.nota_google else 0 %}
+{# Foto de capa: o hero_foto vem cru do SiteConfig (caminho estático OU URL
+   absoluta). Resolvemos os dois casos aqui — sem isso, url_for(filename=<url>)
+   gera link quebrado e url_for(filename=None) estoura BuildError. #}
+{% set hero_src = None %}
+{% if site.hero_foto %}
+  {% if site.hero_foto.startswith('http://') or site.hero_foto.startswith('https://') %}
+    {% set hero_src = site.hero_foto %}
+  {% else %}
+    {% set hero_src = url_for('static', filename=site.hero_foto) %}
+  {% endif %}
+{% endif %}
+{% set og_base = 'https://' ~ request.host %}
+{# Card de compartilhamento só com a foto DESTE bar. Sem foto própria, nenhuma
+   tag de imagem — mandar a capa de outro bar é pior que não ter card. #}
+{% set og_img = (hero_src if hero_src and hero_src.startswith('http') else (og_base ~ hero_src)) if hero_src else None %}
+<title>{{ site.nome }} — {{ descritor }}</title>
+<meta name="description" content="{{ site.nome }} — {{ site.tagline or descritor }}">
+{% if tenant and tenant.eh_demo %}
+{# Prévia comercial não autorizada: não pode ser indexada nem competir com o
+   negócio real do dono no Google. Ver app/utils/demos.py. #}
+<meta name="robots" content="noindex,nofollow,noarchive">
+{% endif %}
+<meta property="og:site_name" content="{{ site.nome }}">
+<meta property="og:title" content="{{ site.nome }} — {{ descritor }}">
+<meta property="og:description" content="{{ site.tagline or descritor }}">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:url" content="{{ og_base ~ request.path }}">
+{% if og_img %}
+<meta property="og:image" content="{{ og_img }}">
+<meta property="og:image:secure_url" content="{{ og_img }}">
+<meta property="og:image:alt" content="{{ site.nome }} — {{ descritor }}">
+{% endif %}
+<meta name="twitter:card" content="{{ 'summary_large_image' if og_img else 'summary' }}">
+<meta name="twitter:title" content="{{ site.nome }} — {{ descritor }}">
+<meta name="twitter:description" content="{{ site.tagline or descritor }}">
+{% if og_img %}<meta name="twitter:image" content="{{ og_img }}">{% endif %}
+<meta name="theme-color" content="{{ tema_cor or '#0b0c0b' }}">
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon-32.png') }}">
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
+<script>
+  /* Tema salvo aplicado antes de pintar (sem flash).
+     Chave por bar: dois sites no mesmo navegador não dividem preferência.
+     Sem nada salvo, carimba o que o sistema pede — assim o preset de cor
+     (que só sabe :root e [data-theme="light"]) sempre encontra um estado. */
+  (function(){
+    document.documentElement.classList.add('js');
+    try{
+      var k='fdb-tema-{{ tenant.slug if tenant and tenant.slug else "site" }}';
+      var t=localStorage.getItem(k);
+      if(t!=='light'&&t!=='dark'){
+        t=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)?'light':'dark';
+      }
+      document.documentElement.setAttribute('data-theme',t);
+    }catch(e){}
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+{# Motion (build vanilla, ex-Framer Motion). Versão pinada: `@latest` num site
+   de cliente é deixar terceiro publicar código novo na página do bar sem aviso.
+   Fica no <head> de propósito — o estado inicial do hero (opacidade 0) precisa
+   valer ANTES da primeira pintura, senão o nome do bar aparece e some. #}
+<script src="https://cdn.jsdelivr.net/npm/motion@13.1.0/dist/motion.js"></script>
+<script>
+  /* Gate único de TODA animação. Só entra se a lib respondeu de verdade E o
+     usuário aceita movimento. CDN fora do ar, bloqueado por firewall ou
+     prefers-reduced-motion => a classe não entra => nenhuma regra de estado
+     inicial casa => a página do bar fica 100% legível e visível. */
+  (function(){
+    try{
+      if(!window.Motion) return;
+      if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      document.documentElement.classList.add('js-anim');
+    }catch(e){}
+  })();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     TOKENS — escuro é o padrão. Os nomes --ink/--cream/--amber/…
+     são os mesmos que os presets de app/utils/temas.py sobrescrevem;
+     os semânticos (--bg, --fg, …) derivam deles.
+     ============================================================ */
+  :root{
+    --ink:#0b0c0b;          /* carvão */
+    --ink-2:#121412;
+    --wood:#191c18;         /* painel */
+    --cream:#ece4d6;
+    --cream-dim:#948d80;
+    --amber:#e0902a;        /* âmbar-cobre de cerveja */
+    --ember:#b4581f;        /* cobre queimado */
+    --gold:#c9a227;
+    --neon:#f0b357;
+    --green:#7f9c46;        /* verde-lúpulo */
+
+    --bg:var(--ink);
+    --bg-2:var(--ink-2);
+    --painel:var(--wood);
+    --fg:var(--cream);
+    --fg-dim:var(--cream-dim);
+    --linha:rgba(236,228,214,.16);
+    --linha-forte:rgba(236,228,214,.34);
+    --sombra:0 18px 40px rgba(0,0,0,.45);
+    --foto:grayscale(.28) contrast(1.06) brightness(.94);
+    --veu-1:rgba(6,7,6,.42);
+    --veu-m:rgba(6,7,6,.58);
+    --veu-2:rgba(6,7,6,.93);
+    /* O hero é foto + véu escuro nos DOIS temas. Por isso ele tem tokens
+       próprios: no claro o --amber vira marrom escuro e sumiria em cima da
+       foto. No escuro segue o preset; no claro trava num âmbar legível. */
+    --hero-fg:#f6efe1;
+    --hero-dim:rgba(246,239,225,.76);
+    --hero-amber:var(--amber);
+    --btn-fg:#14100a;
+    --maxw:1140px;
+    color-scheme:dark;
+  }
+  /* Claro: mesmo desenho, papel de ficha técnica em vez de quadro-negro. */
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --ink:#f1eee6;
+      --ink-2:#e7e3d8;
+      --wood:#fbf9f4;
+      --cream:#191713;
+      --cream-dim:#5f5a50;
+      --amber:#9c5c0b;
+      --ember:#8a3f12;
+      --gold:#8a6d12;
+      --neon:#a4700f;
+      --green:#4f6a28;
+      --linha:rgba(25,23,19,.16);
+      --linha-forte:rgba(25,23,19,.36);
+      --sombra:0 18px 40px rgba(60,45,20,.12);
+      --foto:grayscale(.12) contrast(1.03);
+      --veu-1:rgba(10,9,7,.42);
+      --veu-m:rgba(10,9,7,.58);
+      --veu-2:rgba(10,9,7,.92);
+      --hero-amber:#f0b357;
+      --btn-fg:#fffdf8;
+      color-scheme:light;
+    }
+  }
+  /* Toggle manual vence a preferência do sistema, nos dois sentidos.
+     (não repetimos o bloco escuro em [data-theme="dark"] de propósito: o
+     preset injeta em :root e precisa continuar mandando no escuro) */
+  :root[data-theme="light"]{
+    --ink:#f1eee6;
+    --ink-2:#e7e3d8;
+    --wood:#fbf9f4;
+    --cream:#191713;
+    --cream-dim:#5f5a50;
+    --amber:#9c5c0b;
+    --ember:#8a3f12;
+    --gold:#8a6d12;
+    --neon:#a4700f;
+    --green:#4f6a28;
+    --linha:rgba(25,23,19,.16);
+    --linha-forte:rgba(25,23,19,.36);
+    --sombra:0 18px 40px rgba(60,45,20,.12);
+    --foto:grayscale(.12) contrast(1.03);
+    --veu-1:rgba(10,9,7,.42);
+    --veu-m:rgba(10,9,7,.58);
+    --veu-2:rgba(10,9,7,.92);
+    --hero-amber:#f0b357;
+    --btn-fg:#fffdf8;
+    color-scheme:light;
+  }
+
+  /* ---------------------------------------------- base (mobile-first) */
+  *,*::before,*::after{box-sizing:border-box}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:var(--bg);color:var(--fg);
+    font-family:"Inter",system-ui,-apple-system,sans-serif;
+    font-size:16px;line-height:1.55;overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  img{display:block;max-width:100%}
+  a{color:inherit;text-decoration:none}
+  h1,h2,h3,p,ul,ol,figure{margin:0;padding:0}
+  ul,ol{list-style:none}
+  .wrap{width:100%;max-width:var(--maxw);margin:0 auto;padding:0 18px}
+  .mono{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+
+  /* ------------------------------------------------- régua / medidor */
+  /* Elemento de identidade: escala de ticks, como régua de IBU. Aqui é só
+     grafismo — separa blocos e assina o layout. */
+  .escala{position:relative;height:15px;border-bottom:1px solid var(--linha)}
+  .escala::before{content:"";position:absolute;left:0;right:0;bottom:0;height:5px;
+    background:repeating-linear-gradient(90deg,var(--linha) 0 1px,transparent 1px 9px)}
+  .escala::after{content:"";position:absolute;left:0;right:0;bottom:0;height:11px;
+    background:repeating-linear-gradient(90deg,var(--linha-forte) 0 1px,transparent 1px 45px)}
+  /* Versão medidor: a barra âmbar só aparece com dado real (--val). */
+  .medida{position:relative;height:13px;width:100%;max-width:220px}
+  .medida::before{content:"";position:absolute;left:0;right:0;top:0;height:8px;
+    background:repeating-linear-gradient(90deg,var(--linha-forte) 0 1px,transparent 1px 8px)}
+  .medida::after{content:"";position:absolute;left:0;bottom:0;height:3px;width:var(--val,0%);
+    background:var(--amber)}
+
+  /* ------------------------------------------------------------- nav */
+  nav{
+    position:fixed;top:0;left:0;right:0;z-index:60;
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:11px 18px;background:var(--bg);border-bottom:1px solid var(--linha);
+  }
+  .marca{display:inline-flex;align-items:center;gap:10px;min-width:0}
+  .marca .quadro{width:13px;height:13px;background:var(--amber);flex:0 0 auto}
+  .marca .nome{font-family:"Barlow Condensed","Arial Narrow",sans-serif;text-transform:uppercase;
+    font-weight:700;font-size:1.22rem;letter-spacing:.06em;line-height:1;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .nav-dir{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+  .nav-links{display:none}
+  .btn-icone{
+    width:38px;height:38px;display:grid;place-items:center;padding:0;cursor:pointer;
+    background:transparent;border:1px solid var(--linha-forte);color:var(--fg);
+    font-size:.95rem;line-height:1;transition:border-color .2s,color .2s,background .2s;
+  }
+  .btn-icone:hover{border-color:var(--amber);color:var(--amber)}
+  .nav-entrar{
+    display:none;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;
+    border:1px solid var(--linha-forte);padding:10px 14px;color:var(--fg);transition:all .2s;
+  }
+  .nav-entrar:hover{border-color:var(--amber);color:var(--amber)}
+  @media(min-width:900px){
+    nav{padding:12px 32px}
+    .nav-links{display:flex;align-items:center;gap:22px}
+    .nav-links a{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--fg-dim);
+      transition:color .2s;position:relative;padding-bottom:3px}
+    .nav-links a::after{content:"";position:absolute;left:0;right:100%;bottom:0;height:1px;
+      background:var(--amber);transition:right .25s}
+    .nav-links a:hover{color:var(--fg)}
+    .nav-links a:hover::after{right:0}
+    .nav-entrar{display:inline-block}
+    #btnMenu{display:none}
+  }
+
+  /* painel de menu (mobile): lista numerada, quadro de torneiras */
+  .painel{
+    position:fixed;inset:0;z-index:70;background:var(--bg);
+    padding:76px 18px 32px;overflow-y:auto;
+    transform:translateY(-100%);visibility:hidden;
+    transition:transform .38s cubic-bezier(.3,.8,.3,1),visibility .38s;
+  }
+  .painel.aberto{transform:none;visibility:visible}
+  .painel a{display:flex;align-items:baseline;gap:14px;padding:15px 0;
+    border-bottom:1px solid var(--linha);font-family:"Barlow Condensed","Arial Narrow",sans-serif;
+    text-transform:uppercase;font-weight:700;font-size:1.85rem;letter-spacing:.03em;line-height:1}
+  .painel a i{font-style:normal;font-family:"JetBrains Mono",monospace;font-size:.7rem;
+    color:var(--amber);letter-spacing:.1em;flex:0 0 auto}
+  .painel .fechar{position:absolute;top:11px;right:18px}
+  .painel .painel-pe{margin-top:22px;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--fg-dim);border-bottom:none;font-family:"JetBrains Mono",monospace;font-weight:400}
+
+  /* ------------------------------------------------------------ hero */
+  .hero{
+    position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;
+    padding:96px 0 0;overflow:hidden;
+  }
+  .hero-foto{
+    position:absolute;inset:0;background-size:cover;background-position:center;
+    filter:var(--foto);
+  }
+  /* Sem foto o hero não fica branco: fica o carvão com a régua ampliada. */
+  .hero-fundo{position:absolute;inset:0;
+    background:
+      repeating-linear-gradient(90deg,var(--linha) 0 1px,transparent 1px 34px),
+      linear-gradient(160deg,var(--bg-2),var(--bg) 70%)}
+  .hero-veu{position:absolute;inset:0;
+    background:linear-gradient(180deg,var(--veu-2) 0%,var(--veu-1) 24%,var(--veu-m) 50%,var(--veu-2) 85%)}
+  .hero-corpo{position:relative;z-index:2;padding-bottom:26px;
+    text-shadow:0 2px 16px rgba(0,0,0,.55)}
+  .hero-kicker{font-size:.66rem;letter-spacing:.26em;text-transform:uppercase;color:var(--hero-amber);
+    display:flex;align-items:center;gap:10px}
+  .hero-kicker::before{content:"";width:26px;height:1px;background:var(--hero-amber);flex:0 0 auto}
+  .hero-nome{font-family:"Barlow Condensed","Arial Narrow",sans-serif;text-transform:uppercase;
+    font-weight:700;line-height:.86;letter-spacing:-.005em;margin-top:14px;
+    font-size:clamp(3.2rem,20vw,10rem);color:var(--hero-fg)}
+  .hero-nome span{display:block}
+  .hero-nome span+span{color:var(--hero-amber)}
+  .hero-tag{margin-top:16px;max-width:38ch;color:var(--hero-fg);font-size:1.02rem}
+  /* selo discreto de reputação: chip de ficha técnica, não banner de anúncio */
+  .hero-nota{display:inline-flex;align-items:center;gap:9px;margin-top:16px;
+    padding:7px 12px;border:1px solid rgba(246,239,225,.34);background:rgba(8,9,8,.5);
+    font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--hero-dim)}
+  .hero-nota b{color:var(--hero-fg);font-size:.9rem;font-weight:700;letter-spacing:.04em}
+  .hero-nota .estrelas{font-size:.82rem}
+  .hero-acoes{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+
+  /* ------------------------------------------------------- estrelas */
+  /* Meia estrela de verdade: a camada âmbar é recortada em --val, então 4,7
+     mostra 4,7 — arredondar pra 5 seria inflar a nota do bar. */
+  /* `width:max-content` é obrigatório, não estético: como item de grid o
+     inline-block esticava pra largura toda e a camada âmbar (width:--val, %
+     do PRÓPRIO elemento) passava longe das 5 estrelas de baixo — 4,7 pintava
+     de ponta a ponta e virava 5,0 na tela. */
+  .estrelas{position:relative;display:inline-block;width:max-content;
+    white-space:nowrap;letter-spacing:.1em;line-height:1;flex:0 0 auto;justify-self:start}
+  .estrelas i{font-style:normal;color:var(--linha-forte)}
+  .estrelas b{position:absolute;left:0;top:0;width:var(--val,0%);overflow:hidden;
+    color:var(--amber);font-weight:400}
+  .hero-nota .estrelas i{color:rgba(246,239,225,.32)}
+  .hero-nota .estrelas b{color:var(--hero-amber)}
+  .hero-rolar{margin-top:24px;font-size:.66rem;letter-spacing:.24em;text-transform:uppercase;
+    color:var(--hero-dim)}
+  /* faixa de dados colada no rodapé do hero: ficha técnica da casa */
+  .hero-specs{position:relative;z-index:2;border-top:1px solid rgba(236,228,214,.22);
+    background:rgba(8,9,8,.68);backdrop-filter:blur(3px)}
+  .hero-specs ul{display:grid;grid-template-columns:1fr;padding:0}
+  .hero-specs li{padding:11px 0;border-bottom:1px solid rgba(236,228,214,.12)}
+  .hero-specs li:last-child{border-bottom:none}
+  .hero-specs .k{display:block;font-size:.6rem;letter-spacing:.24em;
+    text-transform:uppercase;color:var(--hero-amber)}
+  .hero-specs .v{display:block;font-size:.86rem;color:var(--hero-fg);margin-top:3px;line-height:1.35}
+  @media(min-width:760px){
+    .hero-corpo{padding-bottom:34px}
+    .hero-specs ul{grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0 26px}
+    .hero-specs li{border-bottom:none;padding:14px 0}
+  }
+
+  /* --------------------------------------------------------- botões */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    font-family:"JetBrains Mono",monospace;font-size:.72rem;font-weight:500;
+    letter-spacing:.18em;text-transform:uppercase;padding:14px 20px;cursor:pointer;
+    border:1px solid var(--amber);background:var(--amber);color:var(--btn-fg);
+    transition:transform .18s,background .2s,color .2s,border-color .2s;
+  }
+  .btn:hover{transform:translateY(-2px)}
+  /* dentro do hero o botão fantasma é sempre claro: o fundo ali é foto+véu */
+  .btn-vazio{background:transparent;color:var(--hero-fg);border-color:rgba(246,239,225,.45)}
+  .btn-vazio:hover{border-color:var(--hero-amber);color:var(--hero-amber)}
+  .btn-linha{background:transparent;color:var(--fg);border-color:var(--linha-forte)}
+  .btn-linha:hover{border-color:var(--amber);color:var(--amber)}
+  .btn-bloco{width:100%}
+
+  /* ---------------------------------------------------------- ticker */
+  .ticker{border-top:1px solid var(--linha);border-bottom:1px solid var(--linha);
+    background:var(--bg-2);overflow:hidden;white-space:nowrap;padding:10px 0}
+  .ticker .trilho{display:inline-block;animation:desliza 34s linear infinite;
+    font-family:"JetBrains Mono",monospace;font-size:.72rem;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--fg-dim)}
+  .ticker b{color:var(--fg);font-weight:500}
+  .ticker i{color:var(--amber);font-style:normal;margin:0 12px}
+  @keyframes desliza{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+  /* --------------------------------------------------------- seções */
+  /* A faixa alternada vai por `style="background:var(--bg-2)"` na própria
+     <section>, e não por classe: o teste de links (_links_quebrados em
+     tests/integration/test_landing_render.py) casa `<section class="sec" id=`
+     literalmente — qualquer classe extra faz a seção sumir do regex e o link
+     do menu virar "quebrado". */
+  .sec{padding:52px 0}
+  /* nav fixa: sem isso a âncora do menu para com o título embaixo da barra */
+  section[id],header[id]{scroll-margin-top:64px}
+  .sec-cab{margin:22px 0 30px}
+  .eyebrow{font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.3em;
+    text-transform:uppercase;color:var(--amber);display:block}
+  .h2{font-family:"Barlow Condensed","Arial Narrow",sans-serif;text-transform:uppercase;
+    font-weight:700;line-height:.92;letter-spacing:.005em;margin-top:10px;
+    font-size:clamp(2.1rem,10vw,3.9rem)}
+  .h2 em{font-style:italic;color:var(--amber);font-weight:600}
+  .lead{margin-top:12px;max-width:56ch;color:var(--fg-dim);font-size:.98rem}
+  @media(min-width:760px){
+    .sec{padding:88px 0}
+    .sec-cab{margin:26px 0 40px}
+  }
+
+  /* ------------------------------------------------ lista de torneiras */
+  .taps{border-top:1px solid var(--linha-forte)}
+  .tap{
+    display:grid;grid-template-columns:2.4rem 1fr;
+    grid-template-areas:"num nome" "num desc" "num tag" "foto foto";
+    column-gap:12px;padding:18px 0;border-bottom:1px solid var(--linha);
+    transition:background .2s;
+  }
+  .tap-num{grid-area:num;font-family:"JetBrains Mono",monospace;font-size:.74rem;
+    color:var(--fg-dim);padding-top:.42rem;letter-spacing:.06em}
+  .tap-nome{grid-area:nome;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
+    text-transform:uppercase;font-weight:700;line-height:.98;letter-spacing:.01em;
+    font-size:clamp(1.6rem,7.6vw,2.5rem)}
+  .tap-desc{grid-area:desc;color:var(--fg-dim);font-size:.92rem;margin-top:6px;max-width:60ch}
+  .tap-tag{grid-area:tag;justify-self:start;margin-top:10px;
+    font-family:"JetBrains Mono",monospace;font-size:.66rem;font-weight:700;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--amber);border-left:2px solid var(--amber);padding:2px 0 2px 9px}
+  .tap-foto{grid-area:foto;margin-top:14px;width:100%;max-width:220px;
+    border:1px solid var(--linha);overflow:hidden}
+  .tap-foto img{width:100%;height:120px;object-fit:cover;filter:var(--foto);transition:filter .3s,transform .4s}
+  .tap:hover .tap-foto img{filter:none;transform:scale(1.04)}
+  .tap--destaque{border-left:2px solid var(--amber);padding-left:12px;margin-left:-14px;background:var(--bg-2)}
+  .tap--destaque .tap-num{color:var(--amber)}
+  @media(min-width:760px){
+    .tap{grid-template-columns:3.4rem 1fr 132px;
+      grid-template-areas:"num nome foto" "num desc foto" "num tag foto";
+      column-gap:24px;align-items:start;padding:24px 0}
+    .tap-foto{margin-top:0;max-width:none;grid-row:1 / span 3;align-self:center}
+    .tap-foto img{height:96px}
+    .tap-num{font-size:.82rem;padding-top:.55rem}
+  }
+
+  /* ------------------------------------------------------ promoções */
+  .quadro{border-top:1px solid var(--linha-forte)}
+  .oferta{padding:18px 0;border-bottom:1px solid var(--linha);display:grid;gap:6px}
+  .oferta .rotulo{font-family:"JetBrains Mono",monospace;font-size:.64rem;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--fg-dim)}
+  .oferta.hoje{border-left:2px solid var(--green);padding-left:12px;margin-left:-14px}
+  .oferta.hoje .rotulo{color:var(--green);font-weight:700;animation:respira 2.6s ease-in-out infinite}
+  @keyframes respira{0%,100%{opacity:1}50%{opacity:.45}}
+  .oferta h3{font-family:"Barlow Condensed","Arial Narrow",sans-serif;text-transform:uppercase;
+    font-weight:700;font-size:clamp(1.4rem,6vw,2rem);line-height:1}
+  .oferta p{color:var(--fg-dim);font-size:.94rem;max-width:60ch}
+  .oferta .val{font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--amber)}
+
+  /* ------------------------------------------------------- a casa */
+  .casa{display:grid;gap:0;border-top:1px solid var(--linha-forte)}
+  .casa .item{display:grid;grid-template-columns:2.4rem 1fr;column-gap:12px;
+    padding:18px 0;border-bottom:1px solid var(--linha)}
+  .casa .em{font-size:1.5rem;line-height:1}
+  .casa b{display:block;font-family:"Barlow Condensed","Arial Narrow",sans-serif;
+    text-transform:uppercase;font-weight:700;font-size:1.35rem;letter-spacing:.02em;line-height:1.05}
+  .casa small{display:block;color:var(--fg-dim);font-size:.9rem;margin-top:4px}
+  @media(min-width:760px){
+    .casa{grid-template-columns:repeat(3,1fr);gap:0 26px}
+    .casa .item{border-bottom:none;border-top:none}
+  }
+
+  /* -------------------------------------------------------- agenda */
+  .grade{border-top:1px solid var(--linha-forte)}
+  .linha-ev{display:grid;grid-template-columns:5.4rem 1fr;column-gap:14px;
+    padding:16px 0;border-bottom:1px solid var(--linha)}
+  .linha-ev .quando{font-family:"JetBrains Mono",monospace;font-size:.72rem;color:var(--amber);
+    letter-spacing:.08em;line-height:1.5}
+  .linha-ev .quando span{display:block;color:var(--fg-dim);font-size:.66rem;letter-spacing:.16em}
+  .linha-ev h3{font-family:"Barlow Condensed","Arial Narrow",sans-serif;text-transform:uppercase;
+    font-weight:700;font-size:clamp(1.3rem,5.5vw,1.8rem);line-height:1.05}
+  .linha-ev p{color:var(--fg-dim);font-size:.92rem;margin-top:4px;max-width:60ch}
+
+  /* ------------------------------------------------------ história */
+  .historia{display:grid;gap:26px}
+  .historia p{color:var(--fg);font-size:1.02rem;margin-top:14px;max-width:56ch}
+  .retrato{width:100%;border:1px solid var(--linha);filter:var(--foto)}
+  .retrato img{width:100%;aspect-ratio:4/3;object-fit:cover}
+  .equipe{margin-top:18px;border-top:1px solid var(--linha)}
+  .equipe li{display:grid;grid-template-columns:38px 1fr;column-gap:12px;align-items:center;
+    padding:12px 0;border-bottom:1px solid var(--linha)}
+  .equipe .av{width:38px;height:38px;display:grid;place-items:center;font-size:1.2rem;
+    border:1px solid var(--linha-forte)}
+  .equipe b{font-family:"Barlow Condensed","Arial Narrow",sans-serif;text-transform:uppercase;
+    font-weight:700;font-size:1.15rem;letter-spacing:.03em;display:block;line-height:1.1}
+  .equipe small{font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--fg-dim)}
+  @media(min-width:860px){
+    .historia{grid-template-columns:1fr 1fr;gap:44px;align-items:start}
+  }
+
+  /* ----------------------------------------------------- avaliações */
+  /* A nota é o argumento de venda mais forte da página: vira painel, com o
+     peso de uma ficha técnica emoldurada — não uma linha miúda de rodapé. */
+  .nota-topo{display:grid;gap:18px;align-items:center;
+    border:1px solid var(--linha-forte);background:var(--painel);padding:22px 20px}
+  .nota-num{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:700;
+    font-size:clamp(4.2rem,21vw,7rem);line-height:.8;color:var(--amber);
+    letter-spacing:-.01em;display:flex;align-items:baseline;gap:2px}
+  .nota-num sup{font-size:.22em;color:var(--fg-dim);font-family:"JetBrains Mono",monospace;
+    letter-spacing:.1em;vertical-align:baseline;font-weight:400}
+  .nota-lado{display:grid;gap:11px;min-width:0}
+  .nota-estrelas{font-size:1.5rem}
+  .nota-legenda{font-family:"JetBrains Mono",monospace;font-size:.72rem;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--fg)}
+  .nota-legenda b{color:var(--amber);font-weight:700}
+  /* Medidor com elemento real (não pseudo): o Motion precisa de algo pra
+     escalar, e scaleX roda no compositor. Sem JS ele já nasce preenchido. */
+  .medidor{position:relative;height:13px;width:100%;max-width:280px}
+  .medidor::before{content:"";position:absolute;left:0;right:0;top:0;height:8px;
+    background:repeating-linear-gradient(90deg,var(--linha-forte) 0 1px,transparent 1px 8px)}
+  .medidor span{position:absolute;left:0;bottom:0;height:3px;width:var(--val,0%);
+    background:var(--amber);transform-origin:left center}
+  .notas{display:grid;gap:0;margin-top:26px;border-top:1px solid var(--linha)}
+  .nota{padding:20px 0;border-bottom:1px solid var(--linha)}
+  .nota .cab{display:flex;align-items:center;gap:12px}
+  .nota .pontos{font-family:"JetBrains Mono",monospace;font-size:.68rem;letter-spacing:.14em;
+    color:var(--amber);flex:0 0 auto}
+  .nota p{margin-top:12px;font-size:1rem;color:var(--fg);max-width:62ch}
+  .nota .quem{margin-top:10px;font-family:"JetBrains Mono",monospace;font-size:.66rem;
+    letter-spacing:.18em;text-transform:uppercase;color:var(--fg-dim)}
+  @media(min-width:480px){
+    .nota-topo{grid-template-columns:auto 1fr;gap:28px;padding:26px 24px}
+  }
+  @media(min-width:760px){
+    .nota-topo{gap:36px;padding:30px 28px}
+    .nota-estrelas{font-size:1.8rem}
+    .notas{grid-template-columns:1fr 1fr;column-gap:34px}
+  }
+
+  /* ------------------------------------------------------- galeria */
+  /* Prova de contato, não rolo infinito: 6 quadros de altura FIXA numa grade
+     compacta. A tira antiga empilhava as 16 fotos do banco e a página virava
+     scroll de foto — quem rola 11 mil pixels não chega no botão de reserva. */
+  .chapa{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;
+    border-top:1px solid var(--linha-forte);padding-top:20px}
+  .chapa figure{position:relative;min-width:0;border:1px solid var(--linha);overflow:hidden}
+  .chapa img{width:100%;height:118px;object-fit:cover;filter:var(--foto);
+    transition:filter .3s,transform .5s}
+  .chapa figure:hover img{filter:none;transform:scale(1.05)}
+  .chapa figcaption{position:absolute;left:0;right:0;bottom:0;padding:14px 8px 6px;
+    background:linear-gradient(180deg,transparent,rgba(6,7,6,.86));color:#ece4d6;
+    font-family:"JetBrains Mono",monospace;font-size:.58rem;letter-spacing:.12em;
+    text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .chapa-num{position:absolute;top:0;left:0;z-index:2;padding:4px 7px;
+    background:rgba(6,7,6,.7);color:var(--neon);font-family:"JetBrains Mono",monospace;
+    font-size:.58rem;letter-spacing:.1em}
+  .chapa-pe{margin-top:12px;font-family:"JetBrains Mono",monospace;font-size:.62rem;
+    letter-spacing:.18em;text-transform:uppercase;color:var(--fg-dim)}
+  .chapa-pe a{color:var(--amber);border-bottom:1px solid var(--linha-forte);padding-bottom:2px}
+  .chapa-pe a:hover{border-color:var(--amber)}
+  @media(min-width:620px){
+    .chapa{grid-template-columns:repeat(3,1fr);gap:12px}
+    .chapa img{height:150px}
+  }
+  @media(min-width:960px){
+    .chapa img{height:176px}
+  }
+
+  /* ------------------------------------------------------- reserva */
+  .reserva{display:grid;gap:26px}
+  .ficha{border:1px solid var(--linha-forte);background:var(--painel);padding:20px}
+  .ficha-topo{display:flex;justify-content:space-between;align-items:center;gap:10px;
+    font-family:"JetBrains Mono",monospace;font-size:.62rem;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--fg-dim);border-bottom:1px solid var(--linha);
+    padding-bottom:10px;margin-bottom:16px}
+  .campo{margin-bottom:14px}
+  .campo label{display:block;font-family:"JetBrains Mono",monospace;font-size:.62rem;
+    letter-spacing:.2em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
+  .campo input,.campo textarea{
+    width:100%;min-width:0;background:var(--bg);border:1px solid var(--linha-forte);border-radius:0;
+    padding:12px;color:var(--fg);font-family:"Inter",system-ui,sans-serif;font-size:16px;
+  }
+  .campo input:focus,.campo textarea:focus{outline:2px solid var(--amber);outline-offset:-1px;border-color:var(--amber)}
+  .campo textarea{resize:vertical;min-height:62px}
+  .par{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  /* Em tela muito estreita (360px pra baixo) o campo de data tem largura
+     mínima nativa e estoura as duas colunas — aí vira uma por linha. */
+  @media(max-width:359px){.par{grid-template-columns:1fr}}
+  .aviso{margin-top:12px;padding:12px;font-family:"JetBrains Mono",monospace;font-size:.72rem;
+    line-height:1.5;display:none;border:1px solid transparent}
+  .aviso.ok{display:block;border-color:var(--green);color:var(--green)}
+  .aviso.err{display:block;border-color:var(--ember);color:var(--ember)}
+  .zap-confirma{display:none;align-items:center;justify-content:center;gap:9px;margin-top:12px;
+    width:100%;background:#1f8f4d;border-color:#1f8f4d;color:#fff}
+  .zap-confirma.mostrar{display:flex}
+  @media(min-width:860px){
+    .reserva{grid-template-columns:.85fr 1.15fr;gap:44px;align-items:start}
+    .ficha{padding:28px}
+  }
+
+  /* ------------------------------------------------------- contato */
+  .contato{display:grid;gap:26px}
+  .dados{border-top:1px solid var(--linha-forte)}
+  .dados li{padding:14px 0;border-bottom:1px solid var(--linha)}
+  .dados .k{display:block;font-family:"JetBrains Mono",monospace;font-size:.62rem;
+    letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
+  .dados .v{display:block;margin-top:4px;font-size:.98rem}
+  .chamada{border:1px solid var(--linha-forte);background:var(--painel);padding:24px;
+    display:flex;flex-direction:column;gap:12px;justify-content:center}
+  .chamada h3{font-family:"Barlow Condensed","Arial Narrow",sans-serif;text-transform:uppercase;
+    font-weight:700;font-size:clamp(1.5rem,7vw,2.2rem);line-height:1}
+  .chamada p{color:var(--fg-dim);font-size:.96rem}
+  @media(min-width:860px){.contato{grid-template-columns:1fr 1fr;gap:44px;align-items:start}}
+
+  /* -------------------------------------------------------- rodapé */
+  footer{border-top:1px solid var(--linha);padding:34px 0 46px;margin-top:10px}
+  .rodape-nome{font-family:"Barlow Condensed","Arial Narrow",sans-serif;text-transform:uppercase;
+    font-weight:700;font-size:clamp(2rem,12vw,3.4rem);line-height:.9;letter-spacing:.01em}
+  .rodape-linha{margin-top:10px;font-family:"JetBrains Mono",monospace;font-size:.66rem;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--fg-dim)}
+  .sociais{display:flex;gap:10px;margin-top:20px}
+  .sociais a{width:40px;height:40px;display:grid;place-items:center;border:1px solid var(--linha-forte);
+    color:var(--fg);transition:all .2s}
+  .sociais a:hover{border-color:var(--amber);color:var(--amber)}
+  .sociais svg{width:19px;height:19px;fill:currentColor}
+  .lojista{display:inline-block;margin-top:22px;font-family:"JetBrains Mono",monospace;
+    font-size:.64rem;letter-spacing:.18em;text-transform:uppercase;color:var(--fg-dim);
+    border-bottom:1px solid var(--linha-forte);padding-bottom:3px}
+  .lojista:hover{color:var(--amber);border-color:var(--amber)}
+
+  /* ---------------------------------------------- whatsapp flutuante */
+  .zap-fixo{position:fixed;right:14px;bottom:14px;z-index:65;width:52px;height:52px;
+    display:grid;place-items:center;background:var(--bg);border:1px solid var(--amber);
+    box-shadow:var(--sombra);transition:transform .2s}
+  .zap-fixo:hover{transform:translateY(-3px)}
+  .zap-fixo svg{width:26px;height:26px;fill:var(--amber)}
+
+  /* ------------------------------------------------------- revelação */
+  /* Só esconde se o JS estiver vivo (a classe `js` vem do script do <head>).
+     Sem isso, JS bloqueado deixaria o site do bar em branco. */
+  .js .rev{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}
+  .js .rev.visivel{opacity:1;transform:none}
+
+  /* ------------------------------------------------------- animação */
+  /* TUDO aqui depende de `.js-anim`, que o <head> só carimba depois de
+     confirmar `window.Motion`. Sem a lib, nenhum seletor abaixo casa: o hero
+     nasce visível, o medidor nasce preenchido e a página não perde nada. */
+  .js-anim [data-anim]{opacity:0;transform:translateY(20px)}
+  .js-anim .medidor span{transform:scaleX(0)}
+  /* Estado de REPOUSO explícito. O Motion descarta os estilos inline dele ao
+     terminar; sem esta regra o elemento voltava pro estado inicial e o hero
+     ficava invisível depois de animar. O JS carimba `.anim-ok` assim que a
+     animação começa: enquanto ela roda o inline manda, quando ela sai daqui
+     é que fica o valor final. */
+  .js-anim [data-anim].anim-ok{opacity:1;transform:none}
+  .js-anim .medidor span.anim-ok{transform:none}
+  /* Quando o Motion assume a revelação, a transição CSS sai de cena: as duas
+     escrevendo transform/opacity ao mesmo tempo brigam e piscam. */
+  .js-anim .rev{transition:none}
+  /* o lift do botão passa a ser spring do Motion (inline style vence a regra) */
+  .js-anim .btn{transition:background .2s,color .2s,border-color .2s}
+
+  @media(prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    *,*::before,*::after{animation:none!important;transition:none!important}
+    .js .rev{opacity:1;transform:none}
+    /* cinto e suspensório: o gate já não carimba `.js-anim` sob reduced-motion,
+       mas se alguém trocar a preferência com a página aberta nada some */
+    .js-anim [data-anim]{opacity:1;transform:none}
+    .js-anim .medidor span{transform:none}
+  }
+
+  /* Selo de demonstração: só aparece em prévia, quando a casa ainda não tem
+     agenda própria e o site mostra o recurso com exemplo. */
+  .selo-exemplo{display:inline-block;vertical-align:middle;margin-left:8px;
+    padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;
+    letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;
+    background:rgba(255,255,255,.14);color:inherit;opacity:.85;
+    border:1px solid currentColor}
+</style>
+{# Paleta do bar (preset). Depois do CSS acima de propósito: é ele que
+   sobrescreve as variáveis. Ver app/utils/temas.py. #}
+{% if tema_css %}<style>{{ tema_css|safe }}</style>{% endif %}
+{% if tenant and tenant.eh_demo %}
+<style>
+  .previa{position:fixed;left:0;right:0;bottom:0;z-index:200;
+    background:#141613;border-top:2px solid var(--amber,#e0902a);color:#ece4d6;
+    font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.72rem;line-height:1.5;
+    padding:11px 14px;display:flex;gap:10px;align-items:center;justify-content:center;
+    flex-wrap:wrap;text-align:center}
+  .previa b{color:var(--amber,#e0902a)}
+  .previa a{background:var(--amber,#e0902a);color:#14100a;padding:8px 14px;
+    letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;font-weight:700}
+  .previa a.secundario{background:transparent;color:#ece4d6;border:1px solid rgba(236,228,214,.4);font-weight:400}
+  .previa .fechar{background:none;border:1px solid rgba(236,228,214,.35);color:#ece4d6;
+    padding:6px 11px;cursor:pointer;font:inherit}
+  /* A faixa é fixa no rodapé: o body reserva a altura dela em cada quebra,
+     senão o último bloco do site fica escondido atrás do aviso. */
+  body{padding-bottom:84px}
+  .zap-fixo{bottom:96px}
+  /* o hero encolhe a mesma altura: sem isso o aviso cobre o nome do bar
+     logo na abertura, que é justamente o que o dono precisa ver primeiro */
+  .hero{min-height:calc(100svh - 84px)}
+  @media(max-width:1199px){
+    body{padding-bottom:126px}
+    .zap-fixo{bottom:138px}
+    .hero{min-height:calc(100svh - 126px)}
+  }
+  @media(max-width:429px){
+    body{padding-bottom:186px}
+    .zap-fixo{bottom:198px}
+    .hero{min-height:calc(100svh - 186px)}
+  }
+</style>
+{% endif %}
+</head>
+<body>
+
+{% if tenant and tenant.eh_demo %}
+{# Prévia comercial: o bar ainda não é cliente e não pediu este site. Dizer isso
+   em alto e bom som é o que separa "demonstração" de "clone não autorizado".
+   O botão de assumir é o CTA da campanha; o de remoção é obrigação nossa. #}
+<div class="previa" role="complementary" id="previa">
+  <span>
+    <b>Prévia não oficial</b> — feita pelo Feira de Barão como demonstração.
+    Não é o site oficial de {{ site.nome }}.
+  </span>
+  <a href="https://wa.me/{{ site.whatsapp or contato_vendas }}?text={{ ('Quero assumir o site de ' ~ site.nome) | urlencode }}">Quero este site</a>
+  <a class="secundario" href="mailto:{{ email_vendas }}?subject={{ ('Remover prévia: ' ~ site.nome) | urlencode }}">Pedir remoção</a>
+  <button class="fechar" onclick="document.getElementById('previa').remove();document.body.style.paddingBottom='0'" aria-label="Fechar aviso de prévia">✕</button>
+</div>
+{% endif %}
+
+<nav>
+  <a href="#topo" class="marca" aria-label="{{ site.nome }} — topo da página">
+    <span class="quadro" aria-hidden="true"></span>
+    <span class="nome">{{ site.nome }}</span>
+  </a>
+  <div class="nav-links">
+    {% if dishes %}<a href="#cardapio">Torneiras</a>{% endif %}
+    {% if promocoes %}<a href="#promocoes">Ofertas</a>{% endif %}
+    {% if eventos %}<a href="#agenda">Agenda</a>{% endif %}
+    <a href="#casa">A casa</a>
+    {% if team or gallery %}<a href="#historia">Origem</a>{% endif %}
+    {% if reviews or site.nota_google %}<a href="#avaliacoes">Notas</a>{% endif %}
+    {% if gallery %}<a href="#galeria">Fotos</a>{% endif %}
+    <a href="#reservar">Reserva</a>
+    <a href="#contato">Contato</a>
+  </div>
+  <div class="nav-dir">
+    <a class="nav-entrar" href="{{ url_for('auth.login') }}">Entrar no sistema</a>
+    <button class="btn-icone" id="btnTema" onclick="alternarTema()" aria-label="Alternar tema claro e escuro" title="Alternar tema">
+      <span id="icoTema" aria-hidden="true">☾</span>
+    </button>
+    <button class="btn-icone" id="btnMenu" onclick="alternarMenu()" aria-label="Abrir menu" aria-expanded="false" aria-controls="painelMenu">
+      <span aria-hidden="true">≡</span>
+    </button>
+  </div>
+</nav>
+
+<div class="painel" id="painelMenu" role="dialog" aria-modal="true" aria-label="Menu de navegação">
+  <button class="btn-icone fechar" onclick="alternarMenu()" aria-label="Fechar menu"><span aria-hidden="true">✕</span></button>
+  {% if dishes %}<a href="#cardapio" onclick="alternarMenu()"><i>01</i>Torneiras</a>{% endif %}
+  {% if promocoes %}<a href="#promocoes" onclick="alternarMenu()"><i>02</i>Ofertas</a>{% endif %}
+  {% if eventos %}<a href="#agenda" onclick="alternarMenu()"><i>03</i>Agenda</a>{% endif %}
+  <a href="#casa" onclick="alternarMenu()"><i>04</i>A casa</a>
+  {% if team or gallery %}<a href="#historia" onclick="alternarMenu()"><i>05</i>Origem</a>{% endif %}
+  {% if reviews or site.nota_google %}<a href="#avaliacoes" onclick="alternarMenu()"><i>06</i>Notas</a>{% endif %}
+  {% if gallery %}<a href="#galeria" onclick="alternarMenu()"><i>07</i>Fotos</a>{% endif %}
+  <a href="#reservar" onclick="alternarMenu()"><i>08</i>Reserva</a>
+  <a href="#contato" onclick="alternarMenu()"><i>09</i>Contato</a>
+  <a class="painel-pe" href="{{ url_for('auth.login') }}">Área do lojista → entrar no sistema</a>
+</div>
+
+<!-- ============================ HERO ============================ -->
+<header class="hero" id="topo">
+  {% if hero_src %}
+  <div class="hero-foto" style="background-image:url('{{ hero_src }}')" role="img" aria-label="{{ site.nome }}"></div>
+  {% else %}
+  <div class="hero-fundo" aria-hidden="true"></div>
+  {% endif %}
+  <div class="hero-veu" aria-hidden="true"></div>
+
+  <div class="wrap hero-corpo">
+    {% if site.kicker %}<p class="hero-kicker mono" data-anim>{{ site.kicker }}</p>{% endif %}
+    <h1 class="hero-nome" data-anim>
+      <span>{{ site.hero_linha1 or site.nome }}</span>
+      {% if site.hero_linha2 %}<span>{{ site.hero_linha2 }}</span>{% endif %}
+    </h1>
+    {% if site.tagline %}<p class="hero-tag" data-anim>{{ site.tagline }}</p>{% endif %}
+    {# Selo de reputação logo na abertura: quem chega pelo WhatsApp decide em
+       três segundos. Só existe com nota REAL deste bar cadastrada. #}
+    {% if site.nota_google %}
+    <p class="hero-nota" data-anim>
+      <b>{{ site.nota_google }}</b>
+      <span class="estrelas" style="--val:{{ nota_pct }}%" role="img"
+            aria-label="Nota {{ site.nota_google }} de 5 no Google"><i aria-hidden="true">★★★★★</i><b aria-hidden="true">★★★★★</b></span>
+      <span>{% if site.qtd_avaliacoes %}{{ site.qtd_avaliacoes }} avaliações {% endif %}no Google</span>
+    </p>
+    {% endif %}
+    <div class="hero-acoes" data-anim>
+      {% if site.whatsapp %}
+      <a class="btn" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener">Falar no WhatsApp</a>
+      {% endif %}
+      {% if dishes %}<a class="btn btn-vazio" href="#cardapio">Ver as torneiras</a>{% endif %}
+      {% if site.maps_query %}
+      <a class="btn btn-vazio" href="https://www.google.com/maps/search/?api=1&query={{ site.maps_query }}" target="_blank" rel="noopener">Como chegar</a>
+      {% endif %}
+    </div>
+    {% if copy.scroll %}<p class="hero-rolar mono" data-anim>{{ copy.scroll }}</p>{% endif %}
+  </div>
+
+  {% if site.horario or site.cidade_uf or site.selo_estrelas or site.servicos %}
+  <div class="hero-specs">
+    <div class="wrap">
+      <ul class="mono">
+        {% if site.horario %}<li><span class="k">Horário</span><span class="v">{{ site.horario }}</span></li>{% endif %}
+        {% if site.cidade_uf %}<li><span class="k">Onde</span><span class="v">{{ site.cidade_uf }}</span></li>{% endif %}
+        {% if site.servicos %}<li><span class="k">Serviços</span><span class="v">{{ site.servicos }}</span></li>{% endif %}
+        {% if site.selo_estrelas %}<li><span class="k">Reputação</span><span class="v">{{ site.selo_estrelas }}</span></li>{% endif %}
+      </ul>
+    </div>
+  </div>
+  {% endif %}
+</header>
+
+{# Faixa técnica. O subline do próprio bar manda; sem ele, a lista da vibe. #}
+{% set faixa = (site.subline.split('·') if site.subline and '·' in site.subline else copy.marquee) %}
+<div class="ticker" aria-hidden="true">
+  <div class="trilho">
+    {% for _ in range(2) %}{% for item in faixa %}<b>{{ item|trim|upper }}</b><i>//</i>{% endfor %}{% endfor %}
+  </div>
+</div>
+
+<!-- ========================== TORNEIRAS ========================== -->
+{% if dishes %}
+<section class="sec" id="cardapio">
+  <div class="wrap">
+    <div class="escala" aria-hidden="true"></div>
+    <div class="sec-cab rev">
+      <span class="eyebrow">{{ copy.cardapio.eyebrow }}</span>
+      <h2 class="h2">{{ copy.cardapio.titulo|safe }}</h2>
+      {% if copy.cardapio.lead %}<p class="lead">{{ copy.cardapio.lead }}</p>{% endif %}
+    </div>
+    <ol class="taps">
+      {% for d in dishes %}
+      <li class="tap rev{% if d.destaque %} tap--destaque{% endif %}">
+        <span class="tap-num" aria-hidden="true">{{ '%02d' % loop.index }}</span>
+        <h3 class="tap-nome">{{ d.nome }}</h3>
+        {% if d.descricao %}<p class="tap-desc">{{ d.descricao }}</p>{% endif %}
+        {% if d.tag %}<span class="tap-tag">{{ d.tag }}</span>{% endif %}
+        {% if d.img %}
+        <div class="tap-foto"><img src="{{ d.img }}" alt="{{ d.nome }}" loading="lazy"></div>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+{% endif %}
+
+<!-- ========================== PROMOÇÕES ========================== -->
+{% if promocoes %}
+<section class="sec" id="promocoes" style="background:var(--bg-2)">
+  <div class="wrap">
+    <div class="escala" aria-hidden="true"></div>
+    <div class="sec-cab rev">
+      <span class="eyebrow">{{ copy.promocoes.eyebrow }}</span>
+      <h2 class="h2">{{ copy.promocoes.titulo|safe }}</h2>
+    </div>
+    <ul class="quadro">
+      {% for p in promocoes %}
+      {# Recorrente (ex.: chope de quarta) acende no dia certo. #}
+      <li class="oferta rev{% if p.acontece_hoje %} hoje{% endif %}">
+        <span class="rotulo">{% if p.acontece_hoje %}É hoje{% else %}{{ p.rotulo or 'Oferta' }}{% endif %}</span>
+        <h3>{{ p.titulo }}{% if p.exemplo %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
+        {% if p.descricao %}<p>{{ p.descricao }}</p>{% endif %}
+        {% if p.dia_semana is not none and p.rotulo %}
+          <span class="val">Toda {{ p.rotulo.replace('TODA ', '')|lower }}{% if p.validade %} · até {{ p.validade.strftime('%d/%m/%Y') }}{% endif %}</span>
+        {% elif p.validade %}
+          <span class="val">Válida até {{ p.validade.strftime('%d/%m/%Y') }}</span>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+{% endif %}
+
+<!-- =========================== AGENDA =========================== -->
+{% if eventos %}
+<section class="sec" id="agenda">
+  <div class="wrap">
+    <div class="escala" aria-hidden="true"></div>
+    <div class="sec-cab rev">
+      <span class="eyebrow">{{ copy.agenda.eyebrow }}</span>
+      <h2 class="h2">{{ copy.agenda.titulo|safe }}</h2>
+      {% if copy.agenda.lead %}<p class="lead">{{ copy.agenda.lead }}</p>{% endif %}
+    </div>
+    {% set dias = ['DOM','SEG','TER','QUA','QUI','SEX','SÁB'] %}
+    <ul class="grade">
+      {% for e in eventos %}
+      <li class="linha-ev rev">
+        <div class="quando">
+          {{ '%02d' % e.data.day }}/{{ '%02d' % e.data.month }}
+          <span>{{ dias[(e.data.weekday()+1)%7] }}{% if e.hora %} · {{ e.hora }}{% endif %}</span>
+        </div>
+        <div>
+          <h3>{{ e.titulo }}{% if e.exemplo %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
+          {% if e.descricao %}<p>{{ e.descricao }}</p>{% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+{% endif %}
+
+<!-- ============================ A CASA ============================ -->
+<section class="sec" id="casa" style="background:var(--bg-2)">
+  <div class="wrap">
+    <div class="escala" aria-hidden="true"></div>
+    <div class="sec-cab rev">
+      <span class="eyebrow">{{ copy.clima.eyebrow }}</span>
+      <h2 class="h2">{{ copy.clima.titulo|safe }}</h2>
+    </div>
+    <div class="casa">
+      {% for emoji, titulo, sub in copy.clima.cards %}
+      <div class="item rev">
+        <span class="em" aria-hidden="true">{{ emoji }}</span>
+        <div><b>{{ titulo }}</b><small>{{ sub }}</small></div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- =========================== ORIGEM =========================== -->
+{% if team or gallery %}
+<section class="sec" id="historia">
+  <div class="wrap">
+    <div class="escala" aria-hidden="true"></div>
+    <div class="historia">
+      <div class="rev">
+        <div class="sec-cab" style="margin-bottom:0">
+          <span class="eyebrow">{{ copy.historia.eyebrow }}</span>
+          <h2 class="h2">{{ copy.historia.titulo|safe }}</h2>
+        </div>
+        <p>{{ copy.historia.texto }}</p>
+        {% if team %}
+        <ul class="equipe">
+          {% for m in team %}
+          <li>
+            <span class="av" aria-hidden="true">{{ m.emoji }}</span>
+            <div><b>{{ m.nome }}</b>{% if m.papel %}<small>{{ m.papel }}</small>{% endif %}</div>
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+      {% if gallery %}
+      <figure class="retrato rev">
+        <img src="{{ gallery[0].img }}" alt="{{ gallery[0].legenda or (site.nome ~ ' por dentro') }}" loading="lazy">
+      </figure>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ========================= AVALIAÇÕES ========================= -->
+{# Nota do Google e depoimentos escritos são dados INDEPENDENTES. Enquanto os
+   dois dividiam este `{% if %}`, um bar com 4,7/504 e nenhum depoimento cadastrado
+   (o caso de TODOS os bares da campanha) perdia a seção inteira — e com ela a
+   prova social mais forte que tem. A seção existe se houver qualquer um dos dois;
+   sem nenhum, some por completo e o invariante de seção órfã continua de pé. #}
+{% if reviews or site.nota_google %}
+<section class="sec" id="avaliacoes" style="background:var(--bg-2)">
+  <div class="wrap">
+    <div class="escala" aria-hidden="true"></div>
+    <div class="sec-cab rev">
+      <span class="eyebrow">{{ copy.avaliacoes.eyebrow }}</span>
+      <h2 class="h2">{{ copy.avaliacoes.titulo|safe }}</h2>
+    </div>
+    {# Nota real deste bar. Sem o dado, só este bloco some — exibir nota fixa
+       era publicar a reputação de um bar na página de outro. #}
+    {% if site.nota_google %}
+    <div class="nota-topo rev">
+      <div class="nota-num">
+        {# O valor certo já vem no HTML: sem JS o número está lá, o contador do
+           Motion só reescreve por cima enquanto anima. #}
+        <span data-contador data-alvo="{{ nota_dec }}">{{ site.nota_google }}</span><sup>/5</sup>
+      </div>
+      <div class="nota-lado">
+        <span class="estrelas nota-estrelas" style="--val:{{ nota_pct }}%" role="img"
+              aria-label="Nota {{ site.nota_google }} de 5 no Google"><i aria-hidden="true">★★★★★</i><b aria-hidden="true">★★★★★</b></span>
+        <div class="nota-legenda">
+          {% if site.qtd_avaliacoes %}<b>{{ site.qtd_avaliacoes }}</b> AVALIAÇÕES · GOOGLE{% else %}NOTA NO GOOGLE{% endif %}
+        </div>
+        <div class="medidor" aria-hidden="true"><span style="--val:{{ nota_pct }}%"></span></div>
+      </div>
+    </div>
+    {% endif %}
+    {% if reviews %}
+    <div class="notas">
+      {% for r in reviews %}
+      <article class="nota rev">
+        <div class="cab">
+          <span class="pontos">{{ r.estrelas or 0 }}/5</span>
+          <span class="medida" style="--val:{{ (r.estrelas or 0) * 20 }}%" aria-hidden="true"></span>
+        </div>
+        <p>“{{ r.texto }}”</p>
+        <div class="quem">{{ r.autor }}</div>
+      </article>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+<!-- =========================== GALERIA =========================== -->
+{% if gallery %}
+<section class="sec" id="galeria">
+  <div class="wrap">
+    <div class="escala" aria-hidden="true"></div>
+    <div class="sec-cab rev">
+      <span class="eyebrow">{{ copy.galeria.eyebrow }}</span>
+      <h2 class="h2">{{ copy.galeria.titulo|safe }}</h2>
+      {% if copy.galeria.lead %}<p class="lead">{{ copy.galeria.lead }}</p>{% endif %}
+    </div>
+    {# No máximo 6. O banco deste bar tem 16 fotos; despejar todas empilhadas
+       transformava a página em rolagem de álbum e enterrava a reserva lá
+       embaixo. Seis quadros já provam a casa — o resto vive no Instagram. #}
+    <div class="chapa" role="group" aria-label="Fotos do {{ site.nome }}">
+      {% for g in gallery %}{% if loop.index <= 6 %}
+      <figure class="rev">
+        <span class="chapa-num" aria-hidden="true">{{ '%02d' % loop.index }}</span>
+        <img src="{{ g.img }}" alt="{{ g.legenda or (site.nome ~ ' — foto') }}" loading="lazy">
+        {% if g.legenda %}<figcaption>{{ g.legenda }}</figcaption>{% endif %}
+      </figure>
+      {% endif %}{% endfor %}
+    </div>
+    {% if gallery|length > 6 %}
+    <p class="chapa-pe">
+      Mostrando 6 de {{ gallery|length }} fotos{% if site.instagram_url %} ·
+      <a href="{{ site.instagram_url }}" target="_blank" rel="noopener">ver todas no Instagram</a>{% endif %}
+    </p>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+<!-- =========================== RESERVA =========================== -->
+<section class="sec" id="reservar" style="background:var(--bg-2)">
+  <div class="wrap">
+    <div class="escala" aria-hidden="true"></div>
+    <div class="reserva">
+      <div class="rev">
+        <div class="sec-cab" style="margin-bottom:0">
+          <span class="eyebrow">{{ copy.reserva.eyebrow }}</span>
+          <h2 class="h2">{{ copy.reserva.titulo|safe }}</h2>
+        </div>
+        {% if copy.reserva.lead %}<p class="lead">{{ copy.reserva.lead }}</p>{% endif %}
+      </div>
+
+      {% if not reservas_ativas %}
+      {# Plano sem reservas online: o formulário vira WhatsApp. O cliente do bar
+         nunca fica sem caminho pra falar com a casa. #}
+      <div class="ficha rev">
+        <div class="ficha-topo"><span>Reserva</span><span>via WhatsApp</span></div>
+        <p style="color:var(--fg-dim);font-size:.96rem">{{ copy.reserva_ui.fallback }}</p>
+        {% if site.whatsapp %}
+        <a class="btn btn-bloco" style="margin-top:16px"
+           href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}"
+           target="_blank" rel="noopener">Chamar no WhatsApp</a>
+        {% endif %}
+      </div>
+      {% else %}
+      <form class="ficha rev" id="reservaForm" onsubmit="return enviarReserva(event)" novalidate>
+        <div class="ficha-topo"><span>Ficha de reserva</span><span>Confirmação no zap</span></div>
+        {# Servido pelo domínio do bar, o backend resolve o tenant pelo Host.
+           Em /bar/<slug> (prévias) o Host é o do produto — daí este campo. #}
+        <input type="hidden" name="slug" value="{{ tenant.slug if tenant else '' }}">
+        <div class="campo">
+          <label for="rf-nome">Nome</label>
+          <input id="rf-nome" name="nome" type="text" autocomplete="name" placeholder="Como te chamamos?" required>
+        </div>
+        <div class="par">
+          <div class="campo">
+            <label for="rf-tel">WhatsApp</label>
+            <input id="rf-tel" name="telefone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(19) 99999-9999" required>
+          </div>
+          <div class="campo">
+            <label for="rf-pessoas">Pessoas</label>
+            <input id="rf-pessoas" name="num_pessoas" type="number" min="1" max="50" value="2" required>
+          </div>
+        </div>
+        <div class="par">
+          <div class="campo">
+            <label for="rf-data">Data</label>
+            <input id="rf-data" name="data" type="date" required>
+          </div>
+          <div class="campo">
+            <label for="rf-hora">Horário</label>
+            <input id="rf-hora" name="hora" type="time" value="19:00" required>
+          </div>
+        </div>
+        <div class="campo">
+          <label for="rf-obs">Observação (opcional)</label>
+          <textarea id="rf-obs" name="observacao" placeholder="Aniversário? Mesa alta? Conta pra gente."></textarea>
+        </div>
+        <button class="btn btn-bloco" type="submit">{{ copy.reserva_ui.botao }}</button>
+        <div class="aviso" id="reservaMsg" role="status" aria-live="polite"></div>
+        <a class="btn zap-confirma" id="reservaWa" href="#" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M.06 24l1.68-6.13A11.9 11.9 0 0 1 .16 11.9C.16 5.34 5.5.02 12.06.02a11.8 11.8 0 0 1 8.4 3.49 11.8 11.8 0 0 1 3.48 8.4c0 6.56-5.34 11.89-11.9 11.89a11.9 11.9 0 0 1-5.7-1.45L.06 24zM6.6 20.15c1.68.998 3.28 1.6 5.44 1.6 5.45 0 9.89-4.43 9.89-9.88 0-5.46-4.43-9.89-9.88-9.89-5.46 0-9.89 4.43-9.89 9.89 0 2.27.6 3.98 1.7 5.7l-1 3.65 3.65-.97zM17.5 14.3c-.07-.12-.27-.2-.57-.35-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.08.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2-1.41.25-.7.25-1.29.17-1.42z"/></svg>
+          {{ copy.reserva_ui.titulo }}
+        </a>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- =========================== CONTATO =========================== -->
+<section class="sec" id="contato">
+  <div class="wrap">
+    <div class="escala" aria-hidden="true"></div>
+    <div class="sec-cab rev">
+      <span class="eyebrow">{{ copy.contato.eyebrow }}</span>
+      <h2 class="h2">{{ copy.contato.titulo|safe }}</h2>
+    </div>
+    <div class="contato">
+      {# Bar recém-criado não tem nenhum destes campos: a lista inteira sai, em
+         vez de deixar um filete de borda solto na página. #}
+      {% if site.endereco or site.horario or site.telefone_exibicao or site.servicos or site.cidade_uf %}
+      <ul class="dados rev">
+        {% if site.endereco %}<li><span class="k">Endereço</span><span class="v">{{ site.endereco }}</span></li>{% endif %}
+        {% if site.horario %}<li><span class="k">Horário</span><span class="v">{{ site.horario }}</span></li>{% endif %}
+        {% if site.telefone_exibicao %}<li><span class="k">Telefone / WhatsApp</span><span class="v">{{ site.telefone_exibicao }}</span></li>{% endif %}
+        {% if site.servicos %}<li><span class="k">Serviços</span><span class="v">{{ site.servicos }}</span></li>{% endif %}
+        {% if site.cidade_uf %}<li><span class="k">Cidade</span><span class="v">{{ site.cidade_uf }}</span></li>{% endif %}
+      </ul>
+      {% endif %}
+      <div class="chamada rev">
+        <h3>{{ copy.cta.titulo }}</h3>
+        <p>{{ copy.cta.linha }}</p>
+        {% if site.whatsapp %}
+        <a class="btn btn-bloco" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener">Falar no WhatsApp</a>
+        {% endif %}
+        {% if site.maps_query %}
+        <a class="btn btn-linha btn-bloco" href="https://www.google.com/maps/search/?api=1&query={{ site.maps_query }}" target="_blank" rel="noopener">Abrir no mapa</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="escala" aria-hidden="true" style="margin-bottom:24px"></div>
+    <div class="rodape-nome">{{ site.nome }}</div>
+    <div class="rodape-linha">{% if site.cidade_uf %}{{ site.cidade_uf }} · {% endif %}{{ copy.rodape }}</div>
+    {% if site.instagram_url or site.facebook_url %}
+    <div class="sociais">
+      {% if site.instagram_url %}
+      <a href="{{ site.instagram_url }}" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2c3.2 0 3.6 0 4.9.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.86s0 3.6-.07 4.86c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.86.07s-3.6 0-4.86-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23C2.2 15.6 2.2 15.2 2.2 12s0-3.6.07-4.86c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.4 2.2 8.8 2.2 12 2.2zm0 1.98c-3.15 0-3.52.01-4.76.07-.9.04-1.39.2-1.71.32-.43.17-.74.37-1.06.69-.32.32-.52.63-.69 1.06-.12.32-.28.81-.32 1.71-.06 1.24-.07 1.61-.07 4.76s.01 3.52.07 4.76c.04.9.2 1.39.32 1.71.17.43.37.74.69 1.06.32.32.63.52 1.06.69.32.12.81.28 1.71.32 1.24.06 1.61.07 4.76.07s3.52-.01 4.76-.07c.9-.04 1.39-.2 1.71-.32.43-.17.74-.37 1.06-.69.32-.32.52-.63.69-1.06.12-.32.28-.81.32-1.71.06-1.24.07-1.61.07-4.76s-.01-3.52-.07-4.76c-.04-.9-.2-1.39-.32-1.71-.17-.43-.37-.74-.69-1.06-.32-.32-.63-.52-1.06-.69-.32-.12-.81-.28-1.71-.32-1.24-.06-1.61-.07-4.76-.07zm0 3.38a4.44 4.44 0 1 1 0 8.88 4.44 4.44 0 0 1 0-8.88zm0 7.32a2.88 2.88 0 1 0 0-5.76 2.88 2.88 0 0 0 0 5.76zm5.65-7.52a1.04 1.04 0 1 1-2.08 0 1.04 1.04 0 0 1 2.08 0z"/></svg>
+      </a>
+      {% endif %}
+      {% if site.facebook_url %}
+      <a href="{{ site.facebook_url }}" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z"/></svg>
+      </a>
+      {% endif %}
+    </div>
+    {% endif %}
+    <div><a class="lojista" href="{{ url_for('auth.login') }}">Área do lojista → entrar no sistema</a></div>
+  </div>
+</footer>
+
+{% if site.whatsapp %}
+<a class="zap-fixo" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener" aria-label="Falar no WhatsApp">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M.06 24l1.68-6.13A11.9 11.9 0 0 1 .16 11.9C.16 5.34 5.5.02 12.06.02a11.8 11.8 0 0 1 8.4 3.49 11.8 11.8 0 0 1 3.48 8.4c0 6.56-5.34 11.89-11.9 11.89a11.9 11.9 0 0 1-5.7-1.45L.06 24zM6.6 20.15c1.68.998 3.28 1.6 5.44 1.6 5.45 0 9.89-4.43 9.89-9.88 0-5.46-4.43-9.89-9.88-9.89-5.46 0-9.89 4.43-9.89 9.89 0 2.27.6 3.98 1.7 5.7l-1 3.65 3.65-.97zM17.5 14.3c-.07-.12-.27-.2-.57-.35-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.08.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2-1.41.25-.7.25-1.29.17-1.42z"/></svg>
+</a>
+{% endif %}
+
+<script>
+  var TEMA_KEY = 'fdb-tema-{{ tenant.slug if tenant and tenant.slug else "site" }}';
+
+  /* ------------------------------------------------------------ tema */
+  function temaAtual(){
+    return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+  }
+  function corDeFundo(){
+    var v = getComputedStyle(document.documentElement).getPropertyValue('--bg');
+    return (v || '').trim() || '{{ tema_cor or "#0b0c0b" }}';
+  }
+  function pintarIconeTema(){
+    var ico = document.getElementById('icoTema');
+    if (ico) ico.textContent = temaAtual() === 'light' ? '☀' : '☾';
+  }
+  function alternarTema(){
+    var novo = temaAtual() === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', novo);
+    try { localStorage.setItem(TEMA_KEY, novo); } catch (e) {}
+    pintarIconeTema();
+    var m = document.querySelector('meta[name=theme-color]');
+    if (m) m.setAttribute('content', corDeFundo());
+  }
+  pintarIconeTema();
+
+  /* ------------------------------------------------------------ menu */
+  function alternarMenu(){
+    var painel = document.getElementById('painelMenu');
+    var botao = document.getElementById('btnMenu');
+    var aberto = painel.classList.toggle('aberto');
+    botao.setAttribute('aria-expanded', aberto ? 'true' : 'false');
+    document.body.style.overflow = aberto ? 'hidden' : '';
+  }
+  document.addEventListener('keydown', function (ev){
+    if (ev.key === 'Escape' && document.getElementById('painelMenu').classList.contains('aberto')) {
+      alternarMenu();
+    }
+  });
+
+  /* --------------------------------------------------------- reserva */
+  // Data mínima = hoje no seletor.
+  (function(){
+    var d = document.getElementById('rf-data');
+    if (d) {
+      var t = new Date();
+      t.setMinutes(t.getMinutes() - t.getTimezoneOffset());
+      var iso = t.toISOString().slice(0, 10);
+      d.min = iso;
+      if (!d.value) d.value = iso;
+    }
+  })();
+
+  function enviarReserva(ev){
+    ev.preventDefault();
+    var form = ev.target;
+    var btn = form.querySelector('button[type=submit]');
+    var msg = document.getElementById('reservaMsg');
+    btn.disabled = true;
+    var txt = btn.textContent;
+    btn.textContent = 'Enviando…';
+    msg.className = 'aviso';
+    fetch('{{ url_for("public.reservar") }}', {
+      method: 'POST',
+      body: new FormData(form),
+      headers: { 'Accept': 'application/json' }
+    })
+      .then(function (r){ return r.json().then(function (j){ return { ok: r.ok, j: j }; }); })
+      .then(function (res){
+        if (res.ok && res.j.ok) {
+          msg.className = 'aviso ok';
+          msg.textContent = res.j.mensagem;
+          var wa = document.getElementById('reservaWa');
+          if (res.j.wa_url) {
+            wa.href = res.j.wa_url;
+            wa.classList.add('mostrar');
+            wa.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          }
+          form.reset();
+          var d = document.getElementById('rf-data');
+          if (d) d.value = d.min;
+          var h = document.getElementById('rf-hora');
+          if (h) h.value = '19:00';
+        } else {
+          msg.className = 'aviso err';
+          msg.textContent = (res.j.erros && res.j.erros.join(' ')) || 'Não deu pra enviar. Tenta pelo WhatsApp?';
+        }
+      })
+      .catch(function (){
+        msg.className = 'aviso err';
+        msg.textContent = 'Sem conexão. Chama a gente no WhatsApp!';
+      })
+      .finally(function (){ btn.disabled = false; btn.textContent = txt; });
+    return false;
+  }
+
+  /* ----------------------------------------------------- revelação */
+  /* Caminho de fallback: vale quando o Motion não carregou. Com a lib no ar
+     quem revela é o Motion.inView lá embaixo — os dois juntos escreveriam
+     opacity/transform no mesmo elemento e a revelação piscaria. */
+  (function(){
+    if (document.documentElement.classList.contains('js-anim')) return;
+    var alvos = document.querySelectorAll('.rev');
+    var reduzido = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduzido || !('IntersectionObserver' in window)) {
+      alvos.forEach(function (el){ el.classList.add('visivel'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entradas){
+      entradas.forEach(function (e){
+        if (e.isIntersecting) { e.target.classList.add('visivel'); io.unobserve(e.target); }
+      });
+    }, { threshold: .12, rootMargin: '0px 0px -40px 0px' });
+    alvos.forEach(function (el, i){
+      el.style.transitionDelay = (i % 5 * 55) + 'ms';
+      io.observe(el);
+    });
+  })();
+
+  /* ------------------------------------------------------- animação */
+  /* Só roda com `.js-anim` — carimbada no <head> depois de confirmar que o
+     Motion respondeu e que o usuário aceita movimento. Anima exclusivamente
+     transform e opacity (compositor, 60fps no celular do cliente).
+     Personalidade do modelo: nada de quique. É quadro de torneiras — a coisa
+     ENTRA firme, curta e reta, como giz batendo na lousa. */
+  (function(){
+    if (!document.documentElement.classList.contains('js-anim')) return;
+
+    var animate = Motion.animate, inView = Motion.inView,
+        stagger = Motion.stagger, spring = Motion.spring, hover = Motion.hover;
+    var reto = [0.22, 1, 0.36, 1];
+
+    /* `.anim-ok` = estado de repouso. Carimbado JUNTO com o disparo, não no
+       fim: enquanto a animação roda o estilo inline dela vence a classe, e
+       quando o Motion limpa o inline a classe segura o valor final. */
+    function repousa(el){ el.classList.add('anim-ok'); }
+
+    /* 1. Abertura do hero em cascata: kicker → nome → tagline → nota → CTAs. */
+    var heroi = document.querySelectorAll('.hero-corpo [data-anim]');
+    if (heroi.length) {
+      animate(heroi, { opacity: [0, 1], y: [20, 0] },
+              { duration: .62, delay: stagger(.085), ease: reto });
+      heroi.forEach(repousa);
+    }
+
+    /* 2. Scroll-reveal das seções. Sem `return` no callback: revela uma vez e
+          não re-esconde quando o bloco sai da tela. */
+    inView('.rev', function (el){
+      animate(el, { opacity: [0, 1], y: [14, 0] }, { duration: .55, ease: reto });
+      el.classList.add('visivel');
+    }, { amount: .15 });
+
+    /* 3. A nota do Google contando de 0 até o valor. É o número que vende a
+          casa — ele merece o olho do visitante. O texto correto já está no
+          HTML; aqui só reescrevemos durante a animação e devolvemos o
+          original no fim, pra vírgula brasileira não depender de arredondamento. */
+    inView('[data-contador]', function (el){
+      var alvo = parseFloat(el.dataset.alvo);
+      if (!isFinite(alvo)) return;
+      var original = el.textContent;
+      animate(0, alvo, {
+        duration: 1.1,
+        ease: 'easeOut',
+        onUpdate: function (v){ el.textContent = v.toFixed(1).replace('.', ','); },
+        onComplete: function (){ el.textContent = original; }
+      });
+    }, { amount: .9 });
+
+    /* 4. O medidor de reputação enchendo junto com o contador (scaleX, não
+          width: largura recalcula layout, escala não). */
+    inView('.medidor span', function (el){
+      animate(el, { scaleX: [0, 1] }, { duration: 1.1, ease: 'easeOut' });
+      repousa(el);
+    }, { amount: .9 });
+
+    /* 5. Micro-interação nos CTAs: mola curta e seca no hover. */
+    hover('.btn', function (el){
+      animate(el, { scale: 1.035, y: -2 }, { type: spring, stiffness: 380, damping: 20 });
+      return function (){
+        animate(el, { scale: 1, y: 0 }, { type: spring, stiffness: 380, damping: 24 });
+      };
+    });
+  })();
+</script>
+</body>
+</html>

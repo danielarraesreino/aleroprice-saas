@@ -60,6 +60,13 @@
 
 <div class="bloco">
   <h2>3 · A cara do site</h2>
+
+  {# Modelo vem antes de cor e tom porque é a decisão grande: trocar o
+     esqueleto refaz a página inteira, e a paleta se escolhe em cima do que
+     ficou. Link e não seletor — lá tem a prévia do lado. #}
+  <a class="btn" style="text-decoration:none;margin-bottom:14px"
+     href="{{ url_for('campo.visual', slug=rest.slug) }}">🎨 Escolher o modelo do site</a>
+
   <form method="post" action="{{ url_for('campo.estilo', slug=rest.slug) }}" id="form-estilo">
     <p class="nota" style="margin:0 0 8px">Cores</p>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:16px">

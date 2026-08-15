@@ -9,6 +9,8 @@ nome: "Buteco do Jair"
 tema: boteco-ambar
 
 site:
+  qtd_avaliacoes: 92
+  nota_google: "4,0"
   vibe: boteco
   descritor: "Comida di buteco em Barão"
   kicker: "BARÃO GERALDO · CAMPINAS–SP · DESDE 1989"

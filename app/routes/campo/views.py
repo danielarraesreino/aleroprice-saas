@@ -25,6 +25,9 @@ from app.routes.campo import bp
 from app.utils import blob, demos, dominios
 from app.utils.copy_site import opcoes_de_vibe, vibe_valida
 from app.utils.demos import LeadInvalido, converter_demo
+from app.utils.modelos import (
+    MODELO_PADRAO, MODELOS, modelo_valido, opcoes_de_modelo,
+)
 from app.utils.operador import e_operador
 from app.utils.planos import DIAS_DE_TRIAL, precos
 from app.utils.temas import opcoes_de_tema, tema_valido
@@ -111,6 +114,45 @@ def estilo(slug):
         cfg.vibe = vibe
     db.session.commit()
     return redirect(url_for('campo.editar', slug=slug))
+
+
+@bp.route('/<slug>/visual', methods=('GET', 'POST'))
+def visual(slug):
+    """Trocar o esqueleto do site na frente do dono, vendo mudar.
+
+    Tema e vibe cabem em radio button porque a diferença é uma cor e uma
+    palavra. Modelo não: é a página inteira mudando de ordem. Descrever isso
+    ("hero grande, cardápio depois") não vende — mostrar vende. Por isso a tela
+    é uma moldura de celular com a prévia dentro, e tocar num cartão só troca o
+    `src` do iframe: o site salvo continua o que era enquanto os dois olham as
+    opções.
+
+    O POST é o único momento em que grava. Modelo desconhecido não escreve nada
+    — mesma regra fechada de `estilo()`: preset conhecido ou nada.
+    """
+    rest = _bar(slug)
+    cfg = _config(rest)
+
+    if request.method == 'POST':
+        escolhido = (request.form.get('modelo') or '').strip()
+        if not modelo_valido(escolhido):
+            flash('Esse modelo eu não conheço — não mudei nada.', 'danger')
+            return redirect(url_for('campo.visual', slug=slug))
+        cfg.modelo = escolhido
+        db.session.commit()
+        flash(f'Pronto: o site do {cfg.nome or rest.nome} agora é o '
+              f'{MODELOS[escolhido]["label"]}.', 'success')
+        return redirect(url_for('campo.visual', slug=slug))
+
+    return render_template(
+        'campo/visual.html', rest=rest, cfg=cfg,
+        modelos=opcoes_de_modelo(),
+        # O que está salvo hoje — é o cartão que abre marcado e o que leva o
+        # selo "no ar". Valor órfão (modelo removido) cai no clássico, que é o
+        # que o visitante do site está vendo de fato.
+        modelo_atual=(cfg.modelo if modelo_valido(cfg.modelo) else MODELO_PADRAO),
+        url_previa=url_for('public.landing_slug', slug=rest.slug, _external=True),
+    )
 
 
 @bp.post('/<slug>/foto')

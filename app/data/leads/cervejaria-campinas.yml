@@ -9,6 +9,10 @@ nome: "Cervejaria Campinas"
 tema: pub-escuro
 
 site:
+  telefone_exibicao: "(19) 3288-0980"
+  endereco: "Av. Modesto Fernandes, 191 - Barão Geraldo, Campinas - SP, 13084-190"
+  qtd_avaliacoes: 106
+  nota_google: "4,7"
   vibe: pub
   descritor: "Tap house em Barão Geraldo"
   kicker: "BARÃO GERALDO · CAMPINAS–SP"

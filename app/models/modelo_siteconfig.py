@@ -50,6 +50,12 @@ class SiteConfig(db.Model):
     # faixa rolante e mensagem do WhatsApp. Um campo em vez de vinte.
     vibe = db.Column(db.String(30), default='boteco')
 
+    # Layout do site: nome de um modelo em app/utils/modelos.py. Não é cor nem
+    # texto (isso é `tema`/`vibe`) — é a ESTRUTURA da página: quais seções
+    # existem, em que ordem e com que cara. 'classico' é a landing atual, então
+    # todo mundo que já está no ar continua igual.
+    modelo = db.Column(db.String(30), default='classico')
+
     # Prova social. Vazios = o bloco de nota some (melhor do que exibir a nota
     # de outro bar, que era o que acontecia com o 4,9/39 fixo no template).
     nota_google = db.Column(db.String(10))

@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+{# ============================================================================
+   MODELO "BRASA" — espetaria, churrasco, casa de porção.
+
+   Direção de arte: papel pardo de açougue, madeira crua, carne e fogo. A página
+   é uma PLACA: tipografia pesada, cantos duros, textura de fibra em CSS puro e
+   nenhuma foto de enfeite — só comida. O cardápio vem em faixas largas (formato
+   PORÇÃO), não em cartõezinhos.
+
+   Autocontido de propósito (sem extends/include): o vendedor abre
+   `?modelo=brasa` na frente do dono do bar e o que carrega é só este arquivo.
+
+   Contexto: ver app/routes/publico/views.py:_render_landing.
+   Tudo em `site` pode ser None — cada bloco se esconde sozinho.
+============================================================================ #}
+{% macro foto(caminho) -%}
+  {#- Mesma regra de publico.views._img(): caminho em static OU URL absoluta
+      (Vercel Blob). `site.hero_foto` chega cru; `d.img` e `g.img` já vêm
+      resolvidos pela view e não passam por aqui. -#}
+  {%- if caminho.startswith('http') -%}{{ caminho }}{%- else -%}{{ url_for('static', filename=caminho) }}{%- endif -%}
+{%- endmacro %}
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% set descritor = site.descritor or site.cidade_uf or 'Espetaria e casa de porção' %}
+<title>{{ site.nome }} — {{ descritor }}</title>
+<meta name="description" content="{{ site.nome }} — {{ site.tagline or descritor }}">
+{% set og_base = 'https://' ~ request.host %}
+{# Card de compartilhamento só com a foto DESTE bar. Sem foto própria, nenhuma
+   tag de imagem — mandar a capa de outro bar é pior que não ter card. #}
+{% set og_img = ((site.hero_foto if site.hero_foto.startswith('http') else og_base ~ url_for('static', filename=site.hero_foto)) if site.hero_foto else None) %}
+{% if tenant and tenant.eh_demo %}
+{# Prévia comercial não autorizada: não pode ser indexada nem competir com o
+   negócio real do dono no Google. Ver app/utils/demos.py. #}
+<meta name="robots" content="noindex,nofollow,noarchive">
+{% endif %}
+<meta property="og:site_name" content="{{ site.nome }}">
+<meta property="og:title" content="{{ site.nome }} — {{ descritor }}">
+<meta property="og:description" content="{{ site.tagline or descritor }}">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:url" content="{{ og_base ~ request.path }}">
+{% if og_img %}
+<meta property="og:image" content="{{ og_img }}">
+<meta property="og:image:secure_url" content="{{ og_img }}">
+<meta property="og:image:alt" content="{{ site.nome }} — {{ descritor }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+{% endif %}
+<meta name="twitter:card" content="{{ 'summary_large_image' if og_img else 'summary' }}">
+<meta name="twitter:title" content="{{ site.nome }} — {{ descritor }}">
+<meta name="twitter:description" content="{{ site.tagline or descritor }}">
+{% if og_img %}<meta name="twitter:image" content="{{ og_img }}">{% endif %}
+<meta name="theme-color" content="{{ tema_cor or '#150e09' }}">
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon-32.png') }}">
+<link rel="icon" type="image/png" sizes="64x64" href="{{ url_for('static', filename='img/favicon-64.png') }}">
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
+<script>
+  // Tema antes da primeira pintura (sem flash). Preferência salva > sistema.
+  // Chave por bar: dois sites no mesmo navegador não dividem preferência.
+  (function(){
+    var k='fdb-tema-{{ tenant.slug if tenant and tenant.slug else "site" }}', t=null;
+    try{t=localStorage.getItem(k);}catch(e){}
+    if(t!=='claro'&&t!=='escuro'){
+      t=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)?'claro':'escuro';
+    }
+    // O atributo é sempre explícito: o preset de tema (temas.py) só sabe pintar
+    // :root e :root[data-theme="light"], então o modo claro precisa carregar
+    // esse valor pra paleta do bar chegar nele.
+    document.documentElement.setAttribute('data-theme', t==='claro'?'light':'dark');
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Staatliches&family=Zilla+Slab:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  /* ======================================================================
+     TOKENS
+     Os 10 nomes de paleta são os mesmos que app/utils/temas.py sobrescreve
+     (--ink, --cream, --amber…). Todo o resto do CSS usa os apelidos
+     semânticos abaixo, que apontam pra eles — assim trocar o preset troca a
+     casa inteira sem tocar em nenhuma regra.
+     ====================================================================== */
+  :root{
+    /* escuro = brasa depois que o fogo baixou */
+    --ink:#150e09;          /* marrom-brasa quase preto */
+    --ink-2:#1f150d;
+    --wood:#33210f;         /* madeira crua */
+    --cream:#f4e7cf;        /* creme de papel pardo */
+    --cream-dim:#b3966f;
+    --amber:#ff8a1f;        /* laranja de fogo — só acento */
+    --ember:#8f2114;        /* vermelho-carne profundo */
+    --gold:#c2410c;
+    --neon:#ffbe63;
+    --green:#77903f;
+
+    /* apelidos semânticos */
+    --papel:var(--ink);
+    --papel-2:var(--ink-2);
+    --madeira:var(--wood);
+    --tinta:var(--cream);
+    --tinta-2:var(--cream-dim);
+    --fogo:var(--amber);
+    --carne:var(--ember);
+    --brasa:var(--gold);
+
+    /* neutros que não pertencem à paleta do bar */
+    --linha:rgba(244,231,207,.18);
+    --linha-forte:rgba(244,231,207,.34);
+    --grao-a:rgba(0,0,0,.30);
+    --grao-b:rgba(255,255,255,.05);
+    --sombra:0 14px 0 -6px rgba(0,0,0,.45);
+    --sobre-fogo:#1b0d04;   /* texto por cima do laranja */
+
+    --maxw:1160px;
+    --f-placa:"Staatliches","Arial Narrow",Impact,sans-serif;
+    --f-peso:"Alfa Slab One",Rockwell,Georgia,serif;
+    --f-texto:"Zilla Slab",Georgia,"Times New Roman",serif;
+    color-scheme:dark;
+  }
+  /* claro = papel pardo de açougue.
+     Os mesmos valores aparecem no @media logo abaixo (fallback sem JS): nenhuma
+     cor mora só dentro de media query. */
+  :root[data-theme="light"]{
+    --ink:#e9dbbe;
+    --ink-2:#f0e4cb;
+    --wood:#d3bd95;
+    --cream:#2b1a0d;
+    --cream-dim:#5a4429;   /* escuro o bastante pra passar em cima da madeira */
+    --amber:#b8480a;
+    --ember:#7c1d12;
+    --gold:#94340a;
+    --neon:#8a3c06;
+    --green:#4f6a2c;
+    --linha:rgba(43,26,13,.22);
+    --linha-forte:rgba(43,26,13,.42);
+    --grao-a:rgba(90,55,20,.16);
+    --grao-b:rgba(255,255,255,.30);
+    --sombra:0 14px 0 -6px rgba(80,45,15,.25);
+    --sobre-fogo:#fff4e2;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]):not([data-theme="light"]){
+      --ink:#e9dbbe;
+      --ink-2:#f0e4cb;
+      --wood:#d3bd95;
+      --cream:#2b1a0d;
+      --cream-dim:#5a4429;   /* escuro o bastante pra passar em cima da madeira */
+      --amber:#b8480a;
+      --ember:#7c1d12;
+      --gold:#94340a;
+      --neon:#8a3c06;
+      --green:#4f6a2c;
+      --linha:rgba(43,26,13,.22);
+      --linha-forte:rgba(43,26,13,.42);
+      --grao-a:rgba(90,55,20,.16);
+      --grao-b:rgba(255,255,255,.30);
+      --sombra:0 14px 0 -6px rgba(80,45,15,.25);
+      --sobre-fogo:#fff4e2;
+      color-scheme:light;
+    }
+  }
+
+  /* ====================================================================== */
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{
+    background:var(--papel);
+    color:var(--tinta);
+    font-family:var(--f-texto);
+    font-size:17px;line-height:1.55;
+    overflow-x:hidden;
+    /* tipografia pesada em tela estreita: "PROMOÇÕES" em Alfa Slab não cabe em
+       320px e não tem espaço pra quebrar. Só quebra quando não couber. */
+    overflow-wrap:break-word;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* TEXTURA: fibra de papel pardo + granulado, 100% CSS, sem imagem externa. */
+  body::before{
+    content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.9;
+    background-image:
+      repeating-linear-gradient(93deg, var(--grao-a) 0 1px, transparent 1px 6px),
+      repeating-linear-gradient(2deg, var(--grao-a) 0 1px, transparent 1px 11px),
+      radial-gradient(circle at 18% 26%, var(--grao-a) 0 1.3px, transparent 2px),
+      radial-gradient(circle at 71% 63%, var(--grao-b) 0 1.2px, transparent 2px),
+      radial-gradient(circle at 88% 12%, var(--grao-a) 0 1px, transparent 2px);
+    background-size:auto,auto,43px 43px,67px 67px,53px 53px;
+    mix-blend-mode:multiply;
+  }
+  :root[data-theme="dark"] body::before,
+  :root:not([data-theme]) body::before{mix-blend-mode:normal;opacity:.55}
+  a{color:inherit;text-decoration:none}
+  img{max-width:100%;display:block}
+  section,header,footer,nav{position:relative;z-index:1}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 18px}
+  /* item de grid não encolhe abaixo do próprio min-content sem isto */
+  .reserva>*,.contato>*,.casa>*,.porcao>*,.chapa-grid>*{min-width:0}
+  @media(min-width:760px){.wrap{padding:0 32px}}
+
+  /* rasgo de papel: separa faixas sem borda reta */
+  .serra{height:13px;background:var(--carne);position:relative;z-index:1;
+    -webkit-mask:radial-gradient(circle at 50% 0, transparent 8px, #000 8.5px) 50% 0/19px 100% repeat-x;
+    mask:radial-gradient(circle at 50% 0, transparent 8px, #000 8.5px) 50% 0/19px 100% repeat-x}
+
+  /* ---------- BARRA (sticky, sólida: é placa, não vidro) ---------- */
+  .barra{position:sticky;top:0;z-index:60;background:var(--madeira);
+    border-bottom:3px solid var(--carne);box-shadow:0 6px 18px rgba(0,0,0,.28)}
+  /* flex-wrap + min-width:0 em toda linha flex: em 320px (e abaixo) a barra
+     quebra em duas linhas em vez de esticar a página. */
+  .barra-in{max-width:var(--maxw);margin:0 auto;padding:9px 18px;
+    display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px}
+  @media(min-width:760px){.barra-in{padding:9px 32px}}
+  .marca{display:inline-flex;align-items:center;gap:9px;font-family:var(--f-placa);
+    font-size:clamp(1.15rem,4.4vw,1.5rem);letter-spacing:.09em;color:var(--tinta);
+    text-transform:uppercase;line-height:1;min-width:0;flex:1 1 auto}
+  .marca span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .marca svg{width:19px;height:23px;flex:0 0 auto;fill:var(--fogo)}
+  .links{display:none;gap:20px;align-items:center;font-family:var(--f-placa);
+    letter-spacing:.1em;font-size:1.02rem;text-transform:uppercase}
+  .links a{color:var(--tinta-2);padding-bottom:2px;border-bottom:2px solid transparent;transition:color .2s,border-color .2s}
+  .links a:hover,.links a:focus-visible{color:var(--fogo);border-bottom-color:var(--fogo)}
+  .links .entrar{color:var(--fogo);border:2px solid var(--fogo);padding:4px 12px}
+  .links .entrar:hover{background:var(--fogo);color:var(--sobre-fogo)}
+  .ctrl{display:flex;align-items:center;gap:8px}
+  .btn-quad{font-family:var(--f-placa);letter-spacing:.11em;text-transform:uppercase;
+    background:transparent;border:2px solid var(--linha-forte);color:var(--tinta);
+    padding:7px 12px;font-size:.95rem;line-height:1.1;cursor:pointer;transition:background .2s,color .2s,border-color .2s}
+  .btn-quad:hover,.btn-quad:focus-visible{border-color:var(--fogo);color:var(--fogo)}
+  @media(min-width:1020px){
+    .links{display:flex}
+    #abrirMenu{display:none}
+  }
+
+  /* ---------- GAVETA (menu mobile, entra pela direita) ---------- */
+  .cortina{position:fixed;inset:0;z-index:70;background:rgba(10,6,3,.62);
+    opacity:0;visibility:hidden;transition:opacity .3s}
+  .cortina.aberta{opacity:1;visibility:visible}
+  /* visibility (e não só o transform): gaveta fechada sai da ordem de tabulação
+     — senão o teclado entra num menu que ninguém está vendo. */
+  .gaveta{position:fixed;top:0;right:0;bottom:0;z-index:71;width:min(86vw,340px);
+    background:var(--papel-2);border-left:4px solid var(--carne);
+    padding:20px 22px 28px;overflow-y:auto;visibility:hidden;
+    transform:translateX(101%);
+    transition:transform .34s cubic-bezier(.3,.8,.3,1), visibility 0s .34s;
+    box-shadow:-18px 0 40px rgba(0,0,0,.4)}
+  .gaveta.aberta{transform:none;visibility:visible;
+    transition:transform .34s cubic-bezier(.3,.8,.3,1), visibility 0s 0s}
+  .gaveta h2{font-family:var(--f-placa);letter-spacing:.16em;font-size:1rem;
+    color:var(--tinta-2);text-transform:uppercase;font-weight:400}
+  .gaveta .fechar{position:absolute;top:14px;right:16px}
+  .gaveta nav{display:block;margin-top:22px}
+  .gaveta nav a{display:block;font-family:var(--f-placa);letter-spacing:.07em;
+    font-size:1.5rem;text-transform:uppercase;color:var(--tinta);
+    padding:13px 0;border-bottom:1px dashed var(--linha)}
+  .gaveta nav a:last-of-type{border-bottom:none}
+  .gaveta .entrar{display:block;margin-top:18px;text-align:center;background:var(--fogo);
+    color:var(--sobre-fogo);font-family:var(--f-placa);letter-spacing:.09em;
+    font-size:1.2rem;padding:13px;text-transform:uppercase}
+
+  /* ---------- HERO ---------- */
+  .hero{background:var(--papel);padding-bottom:6px}
+  /* min-width:0: sem isso a coluna do grid não encolhe abaixo do min-content do
+     nome do bar e a página ganha rolagem lateral em tela estreita. */
+  .hero-grid{display:grid;grid-template-columns:1fr}
+  .hero-grid>*{min-width:0}
+  .hero-foto{position:relative;overflow:hidden;background:var(--madeira)}
+  .hero-foto img{width:100%;height:100%;object-fit:cover;
+    aspect-ratio:4/3;max-height:52svh;
+    /* tratamento quente: a foto vira brasa, não fica "foto de stock" */
+    filter:sepia(.3) saturate(1.35) contrast(1.12) brightness(.92)}
+  .hero-foto::after{content:"";position:absolute;inset:0;
+    background:
+      linear-gradient(190deg, rgba(255,110,20,.16), rgba(60,12,6,.5)),
+      radial-gradient(85% 70% at 50% 30%, transparent 30%, rgba(20,8,3,.6));
+    mix-blend-mode:multiply}
+  .hero-corpo{position:relative;z-index:2;margin-top:-46px}
+  .cartaz{background:var(--papel-2);border:2px solid var(--linha-forte);
+    padding:24px 20px 26px;box-shadow:var(--sombra)}
+  @media(min-width:760px){.cartaz{padding:34px 32px 36px}}
+  .fita{display:inline-block;font-family:var(--f-placa);letter-spacing:.22em;
+    text-transform:uppercase;font-size:.82rem;color:var(--sobre-fogo);
+    background:var(--fogo);padding:4px 14px;transform:rotate(-1.4deg);
+    box-shadow:2px 2px 0 var(--carne)}
+  /* a fonte cabe pela largura disponível dividida pelo nº de letras (--n), com
+     teto e piso — "Cervejaria Tábuas" e "Zé" ocupam a mesma faixa sem quebrar */
+  .nome{font-family:var(--f-peso);font-weight:400;
+    font-size:clamp(1.9rem, min(11.5vw, 92vw / var(--n, 10)), 5.6rem);
+    line-height:.9;letter-spacing:-.015em;
+    text-transform:uppercase;color:var(--tinta);margin:16px 0 0;
+    text-shadow:3px 3px 0 var(--carne)}
+  .nome .linha{display:block;white-space:nowrap}
+  /* irregularidade de carimbo: cada letra desalinha um tico. Letra é
+     inline-block (pra girar), e o <wbr> do HTML devolve o ponto de quebra que
+     o inline-block tira — nome comprido quebra em vez de esticar a página. */
+  .nome .ch{display:inline-block;transform:rotate(var(--r,0deg)) translateY(var(--y,0))}
+  .nome .ch:nth-child(3n){--r:-1.7deg;--y:2px}
+  .nome .ch:nth-child(4n){--r:1.4deg;--y:-2px}
+  .nome .ch:nth-child(5n+2){--r:-.7deg;--y:1px}
+  .tagline{font-family:var(--f-texto);font-style:italic;font-size:clamp(1.05rem,3.6vw,1.35rem);
+    color:var(--tinta);margin-top:16px;max-width:44ch}
+  .subline{font-family:var(--f-placa);letter-spacing:.1em;text-transform:uppercase;
+    color:var(--tinta-2);font-size:.98rem;margin-top:10px}
+  .selo{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px 9px;margin-top:18px;
+    border:2px dashed var(--linha-forte);padding:7px 14px;
+    font-family:var(--f-placa);letter-spacing:.08em;text-transform:uppercase;font-size:.92rem;color:var(--tinta-2)}
+  .selo .st{color:var(--fogo);letter-spacing:.14em}
+  .botoes{display:flex;flex-wrap:wrap;gap:11px;margin-top:22px}
+  .btn{font-family:var(--f-placa);letter-spacing:.09em;text-transform:uppercase;
+    font-size:1.12rem;padding:13px 24px;border:2px solid transparent;cursor:pointer;
+    display:inline-block;text-align:center;line-height:1.15;
+    transition:transform .15s,box-shadow .15s,background .2s,color .2s}
+  .btn-fogo{background:var(--fogo);color:var(--sobre-fogo);box-shadow:4px 4px 0 var(--carne)}
+  .btn-fogo:hover,.btn-fogo:focus-visible{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--carne)}
+  .btn-linha{border-color:var(--linha-forte);color:var(--tinta)}
+  .btn-linha:hover,.btn-linha:focus-visible{border-color:var(--fogo);color:var(--fogo)}
+  /* Bar sem foto de capa: nada de coluna vazia nem cartaz enfiado embaixo da barra.
+     Só as paddings vertical e horizontal em longhand — `padding` inteiro aqui
+     apagaria o respiro lateral do .wrap e o cartaz encostaria na borda da tela. */
+  .hero-grid.solo .hero-corpo{margin-top:0;padding-top:34px;padding-bottom:10px}
+  .hero-grid.solo{background:
+    linear-gradient(180deg,rgba(143,33,20,.22),transparent 60%),
+    repeating-linear-gradient(-45deg,rgba(0,0,0,.06) 0 14px,transparent 14px 28px)}
+  @media(min-width:940px){
+    .hero-grid{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);align-items:stretch;min-height:78svh}
+    .hero-grid.solo{grid-template-columns:1fr;min-height:0}
+    .hero-foto{order:2}
+    .hero-foto img{aspect-ratio:auto;height:100%;max-height:none;min-height:78svh}
+    .hero-corpo{margin-top:0;display:flex;align-items:center;padding-top:56px;padding-bottom:56px}
+    .hero-corpo .cartaz{width:100%}
+    .hero-grid.solo .hero-corpo{padding-top:64px;padding-bottom:24px}
+    .hero-grid.solo .cartaz{max-width:760px}
+  }
+
+  /* ---------- TÁBUA (itens da vibe, sem rolagem) ---------- */
+  .tabua{background:var(--madeira);border-top:3px solid var(--carne);border-bottom:3px solid var(--carne)}
+  .tabua-in{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 16px;padding:14px 18px}
+  .corte{font-family:var(--f-placa);letter-spacing:.11em;text-transform:uppercase;
+    font-size:clamp(.95rem,3.2vw,1.22rem);color:var(--tinta);display:inline-flex;align-items:center;gap:16px}
+  .corte::after{content:"";width:7px;height:7px;background:var(--fogo);transform:rotate(45deg)}
+  .corte:last-child::after{display:none}
+
+  /* ---------- SEÇÕES ---------- */
+  /* a barra é sticky: sem a margem de rolagem o título da seção para atrás dela */
+  .sec{padding:clamp(52px,9vw,96px) 0;scroll-margin-top:62px}
+  .cab{max-width:44ch}
+  .olho{font-family:var(--f-placa);letter-spacing:.24em;text-transform:uppercase;
+    font-size:.84rem;color:var(--carne);display:block}
+  :root[data-theme="dark"] .olho,:root:not([data-theme]) .olho{color:var(--fogo)}
+  .h2{font-family:var(--f-peso);font-weight:400;text-transform:uppercase;
+    font-size:clamp(1.85rem,7vw,3.5rem);line-height:.96;letter-spacing:-.01em;
+    color:var(--tinta);margin-top:10px}
+  .h2 em{font-family:var(--f-texto);font-style:italic;font-weight:700;
+    text-transform:none;letter-spacing:0;color:var(--fogo)}
+  .lead{color:var(--tinta-2);margin-top:14px;font-size:1.05rem;max-width:56ch}
+  .regua{height:4px;background:var(--carne);width:74px;margin-top:18px}
+
+  /* ---------- PORÇÕES (cardápio) ---------- */
+  .porcoes{display:flex;flex-direction:column;gap:26px;margin-top:34px}
+  /* O tico de torto mora numa custom property: quando o Motion entra, ele
+     reescreve `transform` inteiro (translate+rotate) e leria a inclinação de
+     volta em --tilt — sem isso a faixa "desentortava" ao aparecer. */
+  .porcao{position:relative;background:var(--papel-2);border:2px solid var(--linha);
+    box-shadow:var(--sombra);display:grid;grid-template-columns:1fr;overflow:hidden;
+    --tilt:0deg;transform:rotate(var(--tilt))}
+  .porcao:nth-child(odd){--tilt:-.25deg}
+  .porcao:nth-child(even){--tilt:.25deg}
+  .porcao-foto{position:relative;background:var(--madeira);overflow:hidden}
+  .porcao-foto img{width:100%;height:100%;object-fit:cover;aspect-ratio:16/10;
+    filter:saturate(1.2) contrast(1.08)}
+  .porcao-foto::after{content:"";position:absolute;inset:0;
+    background:linear-gradient(200deg,rgba(255,120,25,.14),rgba(110,22,10,.3));mix-blend-mode:multiply}
+  .sem-foto{display:grid;place-items:center;aspect-ratio:16/10;
+    font-family:var(--f-peso);font-size:4.4rem;color:var(--linha-forte);
+    background:repeating-linear-gradient(-45deg,var(--madeira) 0 12px,var(--papel) 12px 24px)}
+  .porcao-txt{padding:22px 20px 24px;display:flex;flex-direction:column;justify-content:center}
+  @media(min-width:760px){.porcao-txt{padding:30px 32px}}
+  .num{font-family:var(--f-peso);font-size:2rem;line-height:1;color:var(--fogo);opacity:.4;display:block}
+  @supports(-webkit-text-stroke:1px #000){
+    .num{color:transparent;-webkit-text-stroke:1.4px var(--fogo);opacity:.8}
+  }
+  .porcao h3{font-family:var(--f-placa);font-weight:400;text-transform:uppercase;
+    letter-spacing:.03em;font-size:clamp(1.7rem,6.6vw,2.6rem);line-height:.98;
+    color:var(--tinta);margin-top:6px}
+  .porcao p{color:var(--tinta-2);margin-top:10px;font-size:1.02rem;max-width:52ch}
+  .etiqueta{position:absolute;top:12px;left:12px;z-index:2;
+    background:var(--fogo);color:var(--sobre-fogo);font-family:var(--f-placa);
+    letter-spacing:.11em;text-transform:uppercase;font-size:.8rem;padding:5px 18px 5px 11px;
+    clip-path:polygon(0 0,100% 0,calc(100% - 11px) 50%,100% 100%,0 100%);
+    box-shadow:2px 2px 0 rgba(0,0,0,.3)}
+  .porcao.destaque{border-color:var(--fogo);box-shadow:0 0 0 4px var(--carne),var(--sombra)}
+  .campea{display:inline-block;margin-top:14px;align-self:flex-start;
+    font-family:var(--f-placa);letter-spacing:.16em;text-transform:uppercase;font-size:.8rem;
+    color:var(--carne);border:2px solid var(--carne);padding:4px 12px;transform:rotate(-2deg)}
+  :root[data-theme="dark"] .campea,:root:not([data-theme]) .campea{color:var(--fogo);border-color:var(--fogo)}
+  @media(min-width:820px){
+    /* faixa alternada: a foto troca de lado, mas mantém a MESMA largura — a
+       coluna dela é que troca de lugar junto. */
+    .porcao{grid-template-columns:minmax(0,44%) minmax(0,1fr)}
+    .porcao:nth-child(even){grid-template-columns:minmax(0,1fr) minmax(0,44%)}
+    .porcao:nth-child(even) .porcao-foto{order:2}
+    .porcao-foto img{aspect-ratio:auto;min-height:280px}
+    .sem-foto{aspect-ratio:auto;min-height:280px}
+  }
+
+  /* ---------- PROMOÇÕES (etiqueta de açougue) ---------- */
+  .etiquetas{display:grid;grid-template-columns:1fr;gap:18px;margin-top:32px}
+  @media(min-width:700px){.etiquetas{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  .promo{position:relative;background:var(--fogo);color:var(--sobre-fogo);
+    padding:26px 22px 22px 46px;box-shadow:4px 4px 0 var(--carne);
+    --tilt:-.5deg;transform:rotate(var(--tilt))}
+  .promo:nth-child(even){--tilt:.6deg}
+  .promo::before{content:"";position:absolute;left:16px;top:20px;width:13px;height:13px;
+    border-radius:50%;background:var(--papel);box-shadow:inset 0 0 0 2px rgba(0,0,0,.28)}
+  .promo .rot{font-family:var(--f-placa);letter-spacing:.18em;text-transform:uppercase;font-size:.8rem;opacity:.9}
+  .promo h3{font-family:var(--f-placa);font-weight:400;text-transform:uppercase;
+    font-size:clamp(1.5rem,5.4vw,2.1rem);line-height:1;margin:6px 0 8px;letter-spacing:.02em}
+  .promo p{font-size:1rem;line-height:1.45}
+  .promo .val{margin-top:12px;font-family:var(--f-placa);letter-spacing:.09em;
+    text-transform:uppercase;font-size:.82rem;opacity:.85}
+  .promo.hoje{outline:3px solid var(--carne);outline-offset:4px;animation:bate 2.6s ease-in-out infinite}
+  @keyframes bate{0%,100%{box-shadow:4px 4px 0 var(--carne)}50%{box-shadow:4px 4px 0 var(--carne),0 0 0 10px rgba(143,33,20,0)}}
+
+  /* ---------- AGENDA ---------- */
+  .cartazes{display:flex;flex-direction:column;gap:14px;margin-top:32px}
+  .cartaz-ev{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:flex-start;background:var(--papel-2);
+    border-left:6px solid var(--carne);border-top:1px solid var(--linha);
+    border-right:1px solid var(--linha);border-bottom:1px solid var(--linha);padding:16px 18px}
+  .data-fogo{flex:0 0 auto;width:66px;text-align:center;background:var(--madeira);
+    border:2px solid var(--linha-forte);padding:8px 0;font-family:var(--f-placa);color:var(--tinta);line-height:1}
+  .data-fogo .d{display:block;font-size:1.9rem}
+  .data-fogo .m{display:block;font-size:.8rem;letter-spacing:.14em;color:var(--fogo)}
+  .cartaz-ev h3{font-family:var(--f-placa);font-weight:400;text-transform:uppercase;
+    letter-spacing:.03em;font-size:1.35rem;color:var(--tinta);line-height:1.05}
+  .cartaz-ev .quando{font-family:var(--f-placa);letter-spacing:.13em;text-transform:uppercase;
+    font-size:.82rem;color:var(--carne);margin:3px 0 5px}
+  :root[data-theme="dark"] .cartaz-ev .quando,:root:not([data-theme]) .cartaz-ev .quando{color:var(--fogo)}
+  .cartaz-ev .desc{color:var(--tinta-2);font-size:.98rem}
+
+  /* ---------- CHAPA (o clima da casa) ---------- */
+  .chapa{background:var(--madeira)}
+  .chapa-grid{display:grid;grid-template-columns:1fr;gap:2px;margin-top:30px;
+    background:var(--linha);border:2px solid var(--linha)}
+  @media(min-width:760px){.chapa-grid{grid-template-columns:repeat(3,1fr)}}
+  .chapa-card{background:var(--papel);padding:26px 22px;text-align:left}
+  .chapa-card .em{font-size:1.9rem;display:block;line-height:1}
+  .chapa-card b{display:block;margin-top:10px;font-family:var(--f-placa);font-weight:400;
+    text-transform:uppercase;letter-spacing:.05em;font-size:1.3rem;color:var(--tinta)}
+  .chapa-card small{display:block;margin-top:4px;color:var(--tinta-2);font-size:.98rem;line-height:1.4}
+
+  /* ---------- AVALIAÇÕES (comandas) ---------- */
+  .rev-topo{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-end;justify-content:space-between}
+
+  /* PROVA SOCIAL — a nota do Google é o argumento mais forte da página, então
+     ela é uma PLACA de açougue inteira, não uma linha de rodapé: número em
+     Alfa Slab do tamanho de um título, estrelas e a contagem por extenso.
+     Existe sozinha (bar com nota e sem depoimento é a regra na campanha). */
+  .placa-nota{margin-top:30px;display:flex;flex-wrap:wrap;align-items:center;gap:16px 26px;
+    background:var(--papel-2);border:2px solid var(--linha-forte);
+    border-left:10px solid var(--carne);box-shadow:var(--sombra);padding:22px 22px 24px}
+  @media(min-width:760px){.placa-nota{padding:28px 34px;gap:20px 40px}}
+  .placa-nota .marcador{flex:0 0 auto;text-align:center;line-height:1;
+    border:3px double var(--carne);color:var(--carne);padding:12px 22px 14px;
+    font-family:var(--f-placa);--tilt:-2.5deg;transform:rotate(var(--tilt))}
+  :root[data-theme="dark"] .placa-nota .marcador,
+  :root:not([data-theme]) .placa-nota .marcador{color:var(--fogo);border-color:var(--fogo)}
+  .placa-nota .nota{display:block;font-family:var(--f-peso);font-weight:400;
+    font-size:clamp(3.1rem,13vw,4.6rem);line-height:.86;letter-spacing:-.02em;
+    font-variant-numeric:tabular-nums}
+  .placa-nota .de5{display:block;letter-spacing:.2em;font-size:.72rem;margin-top:8px}
+  .placa-nota .lado{min-width:0;flex:1 1 240px}
+  .placa-nota .estrelas{display:block;color:var(--fogo);font-size:clamp(1.3rem,5.4vw,1.75rem);
+    letter-spacing:.16em;line-height:1}
+  .placa-nota .quantas{display:block;margin-top:10px;font-family:var(--f-placa);
+    font-weight:400;text-transform:uppercase;letter-spacing:.07em;
+    font-size:clamp(1.15rem,4.6vw,1.7rem);line-height:1.05;color:var(--tinta)}
+  .placa-nota .quantas b{font-family:inherit;font-weight:400;color:var(--fogo)}
+  .placa-nota .rodape{display:block;margin-top:8px;color:var(--tinta-2);
+    font-family:var(--f-texto);font-style:italic;font-size:1rem;text-transform:none;letter-spacing:0}
+
+  /* selo discreto no hero: mesma prova, sem roubar a cena do nome do bar */
+  .selo-nota{display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:5px 10px;margin-top:18px;
+    border:2px solid var(--linha-forte);border-left:6px solid var(--fogo);padding:7px 14px;
+    font-family:var(--f-placa);letter-spacing:.09em;text-transform:uppercase;
+    font-size:.95rem;color:var(--tinta-2)}
+  .selo-nota .n{color:var(--tinta);font-size:1.3rem;letter-spacing:.02em;line-height:1}
+  .selo-nota .st{color:var(--fogo);letter-spacing:.1em}
+
+  .comandas{display:grid;grid-template-columns:1fr;gap:16px;margin-top:32px}
+  @media(min-width:700px){.comandas{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(min-width:1000px){.comandas{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  .comanda{background:var(--papel-2);border:1px dashed var(--linha-forte);padding:20px 18px 18px;
+    border-top:4px solid var(--carne)}
+  .comanda .st{color:var(--fogo);letter-spacing:.2em;font-size:1rem}
+  .comanda p{margin-top:9px;font-size:1.02rem;line-height:1.5;color:var(--tinta)}
+  .comanda .quem{margin-top:12px;padding-top:10px;border-top:1px dashed var(--linha);
+    font-family:var(--f-placa);letter-spacing:.1em;text-transform:uppercase;font-size:.9rem;color:var(--tinta-2)}
+
+  /* ---------- A CASA ---------- */
+  .casa{display:grid;grid-template-columns:1fr;gap:28px;align-items:start}
+  @media(min-width:900px){.casa{grid-template-columns:minmax(0,1fr) minmax(0,.85fr);gap:44px}}
+  .casa p.corpo{margin-top:16px;font-size:1.08rem;line-height:1.6}
+  .moldura{position:relative;border:2px solid var(--linha-forte);padding:9px;background:var(--papel-2)}
+  .moldura img{width:100%;aspect-ratio:4/3;object-fit:cover;filter:sepia(.22) saturate(1.15) contrast(1.05)}
+  .turma{list-style:none;margin-top:20px;display:flex;flex-wrap:wrap;gap:9px}
+  .turma li{display:inline-flex;align-items:center;gap:9px;border:2px solid var(--linha);
+    background:var(--papel-2);padding:8px 13px}
+  .turma .av{font-size:1.3rem;line-height:1}
+  .turma b{font-family:var(--f-placa);font-weight:400;text-transform:uppercase;
+    letter-spacing:.06em;font-size:1.05rem;color:var(--tinta);display:block;line-height:1.1}
+  .turma small{color:var(--tinta-2);font-size:.85rem}
+
+  /* ---------- GALERIA (tábua) ----------
+     Amostra, não álbum: no máximo 6 fotos (o corte é no HTML) e cada uma com
+     altura travada. Retrato 4/5 em grade de 2 colunas empilhava a página em
+     quase 12.000px — quem rola isso no celular desiste antes do WhatsApp. */
+  .tabuleiro{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:30px}
+  @media(min-width:560px){.tabuleiro{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  .tabuleiro figure{position:relative;margin:0;overflow:hidden;background:var(--madeira);
+    border:2px solid var(--linha)}
+  .tabuleiro img{width:100%;height:100%;object-fit:cover;aspect-ratio:4/3;max-height:210px;
+    filter:sepia(.2) saturate(1.2) contrast(1.06);transition:transform .5s}
+  .tabuleiro figure:hover img{transform:scale(1.05)}
+  .tabuleiro figcaption{position:absolute;left:0;right:0;bottom:0;padding:8px 10px;
+    background:linear-gradient(0deg,rgba(12,7,3,.88),transparent);color:#f4e7cf;
+    font-family:var(--f-placa);letter-spacing:.07em;text-transform:uppercase;font-size:.8rem;line-height:1.2}
+  /* o resto do álbum não some sem explicação: vira convite pro Instagram */
+  .mais-fotos{margin-top:16px;font-family:var(--f-placa);letter-spacing:.11em;
+    text-transform:uppercase;font-size:.95rem;color:var(--tinta-2)}
+  .mais-fotos a{border-bottom:2px solid var(--linha-forte);padding-bottom:2px}
+  .mais-fotos a:hover,.mais-fotos a:focus-visible{color:var(--fogo);border-bottom-color:var(--fogo)}
+
+  /* ---------- RESERVA (comanda de pedido) ---------- */
+  .reserva{display:grid;grid-template-columns:1fr;gap:26px;align-items:start}
+  @media(min-width:900px){.reserva{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:44px}}
+  .bloco-form{background:var(--papel-2);border:2px solid var(--linha-forte);box-shadow:var(--sombra)}
+  .bloco-form .topo-form{background:var(--carne);color:#f6ead4;padding:11px 18px;
+    font-family:var(--f-placa);letter-spacing:.16em;text-transform:uppercase;font-size:.92rem;
+    display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 10px}
+  .bloco-form .miolo{padding:20px 18px 24px}
+  @media(min-width:760px){.bloco-form .miolo{padding:26px 28px 30px}}
+  .campo{margin-bottom:15px}
+  .campo label{display:block;font-family:var(--f-placa);letter-spacing:.12em;text-transform:uppercase;
+    font-size:.85rem;color:var(--tinta-2);margin-bottom:5px}
+  .campo input,.campo textarea{width:100%;background:transparent;color:var(--tinta);
+    border:none;border-bottom:2px solid var(--linha-forte);border-radius:0;
+    padding:9px 2px;font-family:var(--f-texto);font-size:1.05rem}
+  .campo input:focus,.campo textarea:focus{outline:none;border-bottom-color:var(--fogo);
+    box-shadow:0 2px 0 var(--fogo)}
+  .campo textarea{resize:vertical;min-height:58px}
+  .dupla{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:400px){.dupla{grid-template-columns:1fr}}
+  .aviso{margin-top:12px;padding:11px 13px;font-family:var(--f-placa);letter-spacing:.06em;
+    font-size:1.02rem;display:none;border-left:5px solid transparent}
+  .aviso.ok{display:block;background:rgba(119,144,63,.16);border-left-color:var(--green);color:var(--tinta)}
+  .aviso.err{display:block;background:rgba(143,33,20,.14);border-left-color:var(--carne);color:var(--tinta)}
+  .zap-pos{display:none;align-items:center;justify-content:center;gap:9px;margin-top:12px;
+    background:#1f7a45;color:#fff;font-family:var(--f-placa);letter-spacing:.09em;
+    text-transform:uppercase;font-size:1.1rem;padding:13px;box-shadow:4px 4px 0 rgba(0,0,0,.3)}
+  .zap-pos.mostra{display:flex}
+  .lista-hora{list-style:none;margin-top:20px}
+  .lista-hora li{display:flex;gap:12px;padding:13px 0;border-bottom:1px dashed var(--linha)}
+  .lista-hora .em{flex:0 0 26px;font-size:1.15rem;line-height:1.4}
+  .lista-hora b{display:block;font-family:var(--f-placa);letter-spacing:.13em;text-transform:uppercase;
+    font-size:.82rem;color:var(--carne);font-weight:400}
+  :root[data-theme="dark"] .lista-hora b,:root:not([data-theme]) .lista-hora b{color:var(--fogo)}
+
+  /* ---------- CONTATO ---------- */
+  .contato{display:grid;grid-template-columns:1fr;gap:28px;align-items:start;margin-top:30px}
+  @media(min-width:900px){.contato{grid-template-columns:minmax(0,1fr) minmax(0,.9fr);gap:44px}}
+  .placa-cta{background:var(--madeira);border:2px solid var(--linha-forte);padding:26px 22px;
+    display:flex;flex-direction:column;gap:13px}
+  .placa-cta h3{font-family:var(--f-peso);font-weight:400;text-transform:uppercase;
+    font-size:clamp(1.4rem,5vw,2rem);line-height:1;color:var(--tinta)}
+  .placa-cta p{color:var(--tinta-2)}
+
+  /* ---------- RODAPÉ ---------- */
+  footer{background:var(--madeira);border-top:3px solid var(--carne);padding:40px 0 46px;text-align:center}
+  .assina{font-family:var(--f-peso);font-weight:400;text-transform:uppercase;
+    font-size:clamp(1.5rem,6vw,2.4rem);line-height:1;color:var(--tinta);text-shadow:2px 2px 0 var(--carne)}
+  footer small{display:block;margin-top:12px;color:var(--tinta-2)}
+  .redes{display:flex;gap:10px;justify-content:center;margin-top:20px}
+  .redes a{display:grid;place-items:center;width:44px;height:44px;border:2px solid var(--linha-forte);color:var(--tinta);transition:all .2s}
+  .redes a:hover{background:var(--fogo);color:var(--sobre-fogo);border-color:var(--fogo)}
+  .redes svg{width:21px;height:21px;fill:currentColor}
+  .lojista{display:inline-block;margin-top:20px;font-family:var(--f-placa);letter-spacing:.12em;
+    text-transform:uppercase;font-size:.86rem;color:var(--tinta-2);border-bottom:2px solid var(--linha)}
+  .lojista:hover{color:var(--fogo);border-bottom-color:var(--fogo)}
+
+  /* ---------- ZAP FLUTUANTE ---------- */
+  .zap-fixo{position:fixed;right:14px;bottom:calc(14px + var(--rodape-previa,0px));z-index:65;
+    display:inline-flex;align-items:center;gap:8px;background:#1f7a45;color:#fff;
+    padding:12px 15px;box-shadow:4px 4px 0 rgba(0,0,0,.35);
+    font-family:var(--f-placa);letter-spacing:.09em;text-transform:uppercase;font-size:.95rem}
+  .zap-fixo svg{width:22px;height:22px;fill:#fff;flex:0 0 auto}
+  .zap-fixo .rot{display:none}
+  @media(min-width:760px){.zap-fixo .rot{display:inline}}
+
+  /* ---------- MOVIMENTO ----------
+     TUDO que esconde conteúdo mora atrás de `.js-anim`, e essa classe só entra
+     no <html> depois que o JS confirma que a Motion carregou E que o usuário
+     não pediu menos movimento. CDN fora do ar = classe ausente = a placa
+     inteira aparece pintada, parada e legível. */
+  .js-anim .surge{opacity:0;transform:rotate(var(--tilt,0deg)) translateY(22px)}
+  /* rede de segurança: se a animação falhar no meio, o CSS revela sozinho */
+  .js-anim .surge.vis{opacity:1;transform:rotate(var(--tilt,0deg));
+    transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.2,1)}
+  .js-anim [data-hero]{opacity:0;transform:translateY(24px)}
+  .js-anim .nome .ch{opacity:0}
+  .js-anim .hero-foto img{opacity:0}
+  /* com Motion no comando, o transform do botão é inline: tirar o do CSS
+     evita a transição brigando com a mola */
+  .js-anim .btn-fogo:hover,.js-anim .btn-fogo:focus-visible{transform:none}
+  @media(prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    *{animation:none!important;transition:none!important}
+    .surge,.js-anim .surge{opacity:1;transform:rotate(var(--tilt,0deg))}
+    .gaveta{transition:none}
+  }
+  :focus-visible{outline:3px solid var(--fogo);outline-offset:2px}
+
+  /* Selo de demonstração: só aparece em prévia, quando a casa ainda não tem
+     agenda própria e o site mostra o recurso com exemplo. */
+  .selo-exemplo{display:inline-block;vertical-align:middle;margin-left:8px;
+    padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;
+    letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;
+    background:rgba(255,255,255,.14);color:inherit;opacity:.85;
+    border:1px solid currentColor}
+</style>
+{# Paleta do bar (app/utils/temas.py). Vem DEPOIS do CSS acima pra poder
+   sobrescrever os tokens; vazio no tema padrão. #}
+{% if tema_css %}<style>{{ tema_css|safe }}</style>{% endif %}
+{% if tenant and tenant.eh_demo %}
+<style>
+  .previa{position:fixed;left:0;right:0;bottom:0;z-index:200;
+    background:#1b1206;border-top:3px solid var(--fogo,#ff8a1f);color:#f3e7d2;
+    font-family:ui-sans-serif,system-ui,sans-serif;font-size:.86rem;
+    padding:12px 16px;display:flex;gap:10px;align-items:center;justify-content:center;
+    flex-wrap:wrap;text-align:center;box-shadow:0 -8px 24px rgba(0,0,0,.4)}
+  .previa b{color:var(--fogo,#ff8a1f)}
+  .previa a{color:#1b0d04;background:var(--fogo,#ff8a1f);text-decoration:none;
+    font-weight:700;padding:8px 15px;white-space:nowrap}
+  .previa .fechar{background:none;border:1px solid rgba(243,231,210,.35);color:#f3e7d2;
+    padding:6px 12px;cursor:pointer;font:inherit}
+  body{padding-bottom:88px;--rodape-previa:88px}
+  @media(max-width:600px){body{padding-bottom:136px;--rodape-previa:136px}.previa{font-size:.78rem;padding:10px 12px}}
+</style>
+{% endif %}
+</head>
+<body>
+
+{% if tenant and tenant.eh_demo %}
+{# Prévia comercial: o bar ainda não é cliente e não pediu este site. Dizer isso
+   em alto e bom som é o que separa "demonstração" de "clone não autorizado". #}
+<div class="previa" role="complementary" id="previa">
+  <span>
+    <b>Prévia não oficial</b> — feita pelo Feira de Barão como demonstração.
+    Não é o site oficial de {{ site.nome }}.
+  </span>
+  <a href="https://wa.me/{{ site.whatsapp or contato_vendas }}?text={{ ('Quero assumir o site de ' ~ site.nome) | urlencode }}">Quero este site</a>
+  <a href="mailto:{{ email_vendas }}?subject={{ ('Remover prévia: ' ~ site.nome) | urlencode }}"
+     style="background:transparent;color:#f3e7d2;border:1px solid rgba(243,231,210,.35)">Pedir remoção</a>
+  <button class="fechar" onclick="document.getElementById('previa').remove();document.body.style.paddingBottom='0';document.body.style.setProperty('--rodape-previa','0px')">✕</button>
+</div>
+{% endif %}
+
+<nav class="barra">
+  <div class="barra-in">
+    <a href="#topo" class="marca">
+      <svg viewBox="0 0 24 30" aria-hidden="true"><path d="M13 0c1 6-3 7-5 11-2 3.6-1 6 1 7-2.4-.3-4-2-4-5-3 3-5 6-5 10 0 4 4 7 9 7s10-3 10-8c0-6-5-9-6-13-.6-2.6 0-6 0-9z"/></svg>
+      <span>{{ (site.nome or '')|upper }}</span>
+    </a>
+    <div class="links">
+      {% if dishes %}<a href="#cardapio">Porções</a>{% endif %}
+      {% if promocoes %}<a href="#promocoes">Promoções</a>{% endif %}
+      {% if eventos %}<a href="#agenda">Agenda</a>{% endif %}
+      {# mesma condição da seção: a nota do Google sozinha já sustenta o bloco #}
+      {% if reviews or site.nota_google %}<a href="#avaliacoes">Avaliações</a>{% endif %}
+      {% if gallery %}<a href="#galeria">Galeria</a>{% endif %}
+      <a href="#reservar">Reservar</a>
+      <a class="entrar" href="{{ url_for('auth.login') }}">Entrar</a>
+    </div>
+    <div class="ctrl">
+      <button class="btn-quad" id="btnTema" onclick="trocarTema()" aria-label="Alternar tema claro e escuro" title="Alternar tema"><span id="icTema">☀</span></button>
+      <button class="btn-quad" id="abrirMenu" onclick="abrirGaveta()" aria-expanded="false" aria-controls="gaveta">Menu</button>
+    </div>
+  </div>
+</nav>
+
+<div class="cortina" id="cortina" onclick="fecharGaveta()"></div>
+<aside class="gaveta" id="gaveta" aria-hidden="true" aria-label="Menu do site">
+  <h2>Cardápio da casa</h2>
+  <button class="btn-quad fechar" onclick="fecharGaveta()" aria-label="Fechar menu">✕</button>
+  <nav>
+    {% if dishes %}<a href="#cardapio" onclick="fecharGaveta()">Porções</a>{% endif %}
+    {% if promocoes %}<a href="#promocoes" onclick="fecharGaveta()">Promoções</a>{% endif %}
+    {% if eventos %}<a href="#agenda" onclick="fecharGaveta()">Agenda</a>{% endif %}
+    {% if reviews or site.nota_google %}<a href="#avaliacoes" onclick="fecharGaveta()">Avaliações</a>{% endif %}
+    {% if team or gallery %}<a href="#casa" onclick="fecharGaveta()">A casa</a>{% endif %}
+    {% if gallery %}<a href="#galeria" onclick="fecharGaveta()">Galeria</a>{% endif %}
+    <a href="#reservar" onclick="fecharGaveta()">Reservar mesa</a>
+    <a href="#contato" onclick="fecharGaveta()">Contato</a>
+    <a class="entrar" href="{{ url_for('auth.login') }}">Entrar no sistema</a>
+  </nav>
+</aside>
+
+<!-- ===================== HERO ===================== -->
+<header class="hero" id="topo">
+  <div class="hero-grid{% if not site.hero_foto %} solo{% endif %}">
+    {% if site.hero_foto %}
+    {# Bar recém-criado ainda não tem capa: sem o guard, url_for(filename=None)
+       estoura BuildError e o site do cliente novo devolve 500. #}
+    <div class="hero-foto">
+      <img src="{{ foto(site.hero_foto) }}" alt="{{ site.nome }} — o que sai da brasa" fetchpriority="high">
+    </div>
+    {% endif %}
+    <div class="wrap hero-corpo">
+      <div class="cartaz">
+        {% if site.kicker %}<span class="fita" data-hero>{{ site.kicker }}</span>{% endif %}
+        {% set linha1 = site.hero_linha1 or site.nome %}
+        {% set linha2 = site.hero_linha2 %}
+        {# --n = maior linha em caracteres: nome comprido encolhe a fonte em vez
+           de quebrar. Sem isso o <wbr> por letra partia "CERVEJARIA" ao meio. #}
+        {% set n_nome = [linha1|length, (linha2 or '')|length, 6]|max %}
+        <h1 class="nome" style="--n:{{ n_nome }}" data-hero
+            aria-label="{{ (linha1 ~ ' ' ~ (linha2 or ''))|trim }}">
+          {%- for linha in [linha1, linha2] %}{% if linha %}<span class="linha">{% for ch in linha %}{% if ch == ' ' %} {% else %}<span class="ch">{{ ch }}</span>{% endif %}{% endfor %}</span>{% endif %}{% endfor -%}
+        </h1>
+        {% if site.tagline %}<p class="tagline" data-hero>{{ site.tagline }}</p>{% endif %}
+        {% if site.subline %}<p class="subline" data-hero>{{ site.subline }}</p>{% endif %}
+        {# Prova social já no primeiro olhar — mas discreta, que a placa aqui é o
+           nome do bar. Nota real deste bar; sem o dado, nenhum selo.
+           `nota_google` tem prioridade sobre `selo_estrelas` (texto solto
+           legado): os dois juntos repetiriam a mesma frase duas vezes. #}
+        {% if site.nota_google %}
+        <div class="selo-nota" data-hero>
+          <span class="n">{{ site.nota_google }}</span>
+          <span class="st" aria-hidden="true">★</span>
+          <span>{% if site.qtd_avaliacoes %}{{ site.qtd_avaliacoes }} avaliações no Google{% else %}no Google{% endif %}</span>
+        </div>
+        {% elif site.selo_estrelas %}
+        <div class="selo" data-hero><span class="st">★★★★★</span>{{ site.selo_estrelas }}</div>
+        {% endif %}
+        <div class="botoes" data-hero>
+          {% if site.whatsapp %}
+          <a class="btn btn-fogo" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener">Chamar no WhatsApp</a>
+          {% endif %}
+          {% if dishes %}
+          <a class="btn btn-linha" href="#cardapio">Ver as porções</a>
+          {% endif %}
+          {% if site.maps_query %}
+          <a class="btn btn-linha" href="https://www.google.com/maps/search/?api=1&query={{ site.maps_query }}" target="_blank" rel="noopener">Como chegar</a>
+          {% endif %}
+          <a class="btn btn-linha" href="#reservar">Reservar mesa</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ===================== TÁBUA DO DIA ===================== -->
+{# Itens da vibe (copy_site.py) ou os destaques que o dono escreveu no subline.
+   Placa parada, não faixa rolante: quem lê é o dono do bar, no celular. #}
+{% set faixa = (site.subline.split('·') if site.subline and '·' in site.subline else copy.marquee) %}
+<div class="tabua">
+  <div class="wrap tabua-in">
+    {% for item in faixa %}<span class="corte">{{ item|trim|upper }}</span>{% endfor %}
+  </div>
+</div>
+
+<!-- ===================== PORÇÕES ===================== -->
+{% if dishes %}
+<section class="sec" id="cardapio">
+  <div class="wrap">
+    <div class="cab surge">
+      <span class="olho">{{ copy.cardapio.eyebrow }}</span>
+      <h2 class="h2">{{ copy.cardapio.titulo|safe }}</h2>
+      {% if copy.cardapio.lead %}<p class="lead">{{ copy.cardapio.lead }}</p>{% endif %}
+      <div class="regua"></div>
+    </div>
+    <div class="porcoes">
+      {% for d in dishes %}
+      <article class="porcao surge{% if d.destaque %} destaque{% endif %}">
+        <div class="porcao-foto">
+          {% if d.tag %}<span class="etiqueta">{{ d.tag }}</span>{% endif %}
+          {% if d.img %}
+          <img src="{{ d.img }}" alt="{{ d.nome }}" loading="lazy">
+          {% else %}
+          {# Sem foto, o bloco vira placa de madeira com a inicial — some a
+             moldura vazia que denuncia site inacabado. #}
+          <div class="sem-foto" aria-hidden="true">{{ d.nome[0]|upper if d.nome else '·' }}</div>
+          {% endif %}
+        </div>
+        <div class="porcao-txt">
+          <span class="num">{{ '%02d' % loop.index }}</span>
+          <h3>{{ d.nome }}</h3>
+          {% if d.descricao %}<p>{{ d.descricao }}</p>{% endif %}
+          {% if d.destaque %}<span class="campea">Campeã da casa</span>{% endif %}
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ===================== PROMOÇÕES ===================== -->
+{% if promocoes %}
+<div class="serra"></div>
+<section class="sec" id="promocoes" style="background:var(--papel-2)">
+  <div class="wrap">
+    <div class="cab surge">
+      <span class="olho">{{ copy.promocoes.eyebrow }}</span>
+      <h2 class="h2">{{ copy.promocoes.titulo|safe }}</h2>
+      <div class="regua"></div>
+    </div>
+    <div class="etiquetas">
+      {% for p in promocoes %}
+      {# Recorrente (ex.: Costela de Quarta) mostra "TODA QUARTA" e acende no dia. #}
+      <article class="promo surge{% if p.acontece_hoje %} hoje{% endif %}">
+        <div class="rot">{% if p.acontece_hoje %}É hoje!{% else %}{{ p.rotulo or 'Oferta' }}{% endif %}</div>
+        <h3>{{ p.titulo }}{% if p.exemplo %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
+        {% if p.descricao %}<p>{{ p.descricao }}</p>{% endif %}
+        {% if p.dia_semana is not none and p.rotulo %}
+          <div class="val">Toda {{ p.rotulo.replace('TODA ', '')|lower }}{% if p.validade %} · até {{ p.validade.strftime('%d/%m/%Y') }}{% endif %}</div>
+        {% elif p.validade %}
+          <div class="val">Válida até {{ p.validade.strftime('%d/%m/%Y') }}</div>
+        {% endif %}
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ===================== AGENDA ===================== -->
+{% if eventos %}
+<section class="sec" id="agenda">
+  <div class="wrap">
+    <div class="cab surge">
+      <span class="olho">{{ copy.agenda.eyebrow }}</span>
+      <h2 class="h2">{{ copy.agenda.titulo|safe }}</h2>
+      {% if copy.agenda.lead %}<p class="lead">{{ copy.agenda.lead }}</p>{% endif %}
+      <div class="regua"></div>
+    </div>
+    {% set meses = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'] %}
+    {% set dias = ['DOM','SEG','TER','QUA','QUI','SEX','SÁB'] %}
+    <div class="cartazes surge">
+      {% for e in eventos %}
+      <article class="cartaz-ev">
+        <div class="data-fogo">
+          <span class="d">{{ '%02d' % e.data.day }}</span>
+          <span class="m">{{ meses[e.data.month - 1] }}</span>
+        </div>
+        <div>
+          <h3>{{ e.titulo }}{% if e.exemplo %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
+          <div class="quando">{{ dias[(e.data.weekday() + 1) % 7] }}{% if e.hora %} · {{ e.hora }}{% endif %}</div>
+          {% if e.descricao %}<div class="desc">{{ e.descricao }}</div>{% endif %}
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ===================== O CLIMA DA CASA ===================== -->
+<div class="serra"></div>
+<section class="sec" id="clima" style="background:var(--madeira)">
+  <div class="wrap">
+    <div class="cab surge">
+      <span class="olho">{{ copy.clima.eyebrow }}</span>
+      <h2 class="h2">{{ copy.clima.titulo|safe }}</h2>
+      <div class="regua"></div>
+    </div>
+    <div class="chapa-grid surge">
+      {% for emoji, titulo, sub in copy.clima.cards %}
+      <div class="chapa-card">
+        <span class="em" aria-hidden="true">{{ emoji }}</span>
+        <b>{{ titulo }}</b>
+        <small>{{ sub }}</small>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ===================== AVALIAÇÕES ===================== -->
+{# NOTA e DEPOIMENTO são dados independentes e cada um se sustenta sozinho.
+   Praticamente todo bar da campanha tem nota no Google e nenhum tem depoimento
+   escrito cadastrado — amarrar os dois no mesmo `if` apagava a prova social
+   mais forte da página justo no caso mais comum. Sem nenhum dos dois a seção
+   continua sumindo inteira (nada de título órfão). #}
+{% if reviews or site.nota_google %}
+<section class="sec" id="avaliacoes">
+  <div class="wrap">
+    <div class="rev-topo surge">
+      <div class="cab">
+        <span class="olho">{{ copy.avaliacoes.eyebrow }}</span>
+        <h2 class="h2">{{ copy.avaliacoes.titulo|safe }}</h2>
+        <div class="regua"></div>
+      </div>
+    </div>
+
+    {# Nota real deste bar. Sem o dado, a placa some — exibir nota fixa era
+       publicar a reputação de um bar na página de outro. #}
+    {% if site.nota_google %}
+    {% set nota_val = site.nota_google|string|replace(',', '.')|float(0) %}
+    {% set cheias = [[nota_val|round|int, 5]|min, 0]|max %}
+    <div class="placa-nota surge">
+      <div class="marcador">
+        {# o valor já vem escrito no HTML: sem JS (ou sem CDN) a nota está lá #}
+        <span class="nota" data-contar data-valor="{{ nota_val }}" data-casas="1">{{ site.nota_google }}</span>
+        <small class="de5">de 5</small>
+      </div>
+      <div class="lado">
+        <span class="estrelas" aria-hidden="true">{{ '★' * cheias }}{{ '☆' * (5 - cheias) }}</span>
+        {% if site.qtd_avaliacoes %}
+        <span class="quantas"><b data-contar data-valor="{{ site.qtd_avaliacoes }}">{{ site.qtd_avaliacoes }}</b> avaliações no Google</span>
+        {% else %}
+        <span class="quantas">Nota no Google</span>
+        {% endif %}
+        <span class="rodape">{{ copy.avaliacoes.lead or 'De quem já sentou aqui e voltou.' }}</span>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if reviews %}
+    <div class="comandas">
+      {% for r in reviews %}
+      <article class="comanda surge">
+        <div class="st" aria-label="{{ r.estrelas or 0 }} de 5 estrelas">{{ '★' * (r.estrelas or 0) }}</div>
+        <p>“{{ r.texto }}”</p>
+        <div class="quem">{{ r.autor }}</div>
+      </article>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+<!-- ===================== A CASA ===================== -->
+{% if team or gallery %}
+<section class="sec" id="casa" style="background:var(--papel-2)">
+  <div class="wrap">
+    <div class="casa">
+      <div class="surge">
+        <span class="olho">{{ copy.historia.eyebrow }}</span>
+        <h2 class="h2">{{ copy.historia.titulo|safe }}</h2>
+        <div class="regua"></div>
+        <p class="corpo">{{ copy.historia.texto }}</p>
+        {% if team %}
+        <ul class="turma">
+          {% for m in team %}
+          <li>
+            {% if m.emoji %}<span class="av" aria-hidden="true">{{ m.emoji }}</span>{% endif %}
+            <span><b>{{ m.nome }}</b>{% if m.papel %}<small>{{ m.papel }}</small>{% endif %}</span>
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+      {% if gallery %}
+      <figure class="moldura surge">
+        <img src="{{ gallery[0].img }}" alt="{{ gallery[0].legenda or ('A equipe do ' ~ site.nome) }}" loading="lazy">
+      </figure>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ===================== GALERIA ===================== -->
+{% if gallery %}
+<section class="sec" id="galeria">
+  <div class="wrap">
+    <div class="cab surge">
+      <span class="olho">{{ copy.galeria.eyebrow }}</span>
+      <h2 class="h2">{{ copy.galeria.titulo|safe }}</h2>
+      {% if copy.galeria.lead %}<p class="lead">{{ copy.galeria.lead }}</p>{% endif %}
+      <div class="regua"></div>
+    </div>
+    {# TETO DE 6. O banco guarda o álbum inteiro; a página mostra a amostra.
+       As 16 fotos do Tábuas empilhadas faziam ~12.000px de rolagem — a seção
+       de reserva ficava a meia hora de scroll do dedo de quem abriu no zap. #}
+    <div class="tabuleiro surge">
+      {% for g in gallery %}{% if loop.index <= 6 %}
+      <figure>
+        <img src="{{ g.img }}" alt="{{ g.legenda or (site.nome ~ ' — a casa por dentro') }}" loading="lazy">
+        {% if g.legenda %}<figcaption>{{ g.legenda }}</figcaption>{% endif %}
+      </figure>
+      {% endif %}{% endfor %}
+    </div>
+    {% if gallery|length > 6 and site.instagram_url %}
+    <p class="mais-fotos surge">
+      <a href="{{ site.instagram_url }}" target="_blank" rel="noopener">
+        +{{ gallery|length - 6 }} fotos no Instagram →</a>
+    </p>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+<!-- ===================== RESERVA ===================== -->
+<div class="serra"></div>
+<section class="sec" id="reservar" style="background:var(--madeira)">
+  <div class="wrap">
+    <div class="reserva">
+      <div class="surge">
+        <span class="olho">{{ copy.reserva.eyebrow }}</span>
+        <h2 class="h2">{{ copy.reserva.titulo|safe }}</h2>
+        <div class="regua"></div>
+        {% if copy.reserva.lead %}<p class="lead">{{ copy.reserva.lead }}</p>{% endif %}
+        <ul class="lista-hora">
+          {% if site.horario %}<li><span class="em" aria-hidden="true">🕐</span><span><b>Funcionamento</b>{{ site.horario }}</span></li>{% endif %}
+          {% if site.endereco %}<li><span class="em" aria-hidden="true">📍</span><span><b>Onde é</b>{{ site.endereco }}</span></li>{% endif %}
+          {% if site.telefone_exibicao %}<li><span class="em" aria-hidden="true">📞</span><span><b>Telefone</b>{{ site.telefone_exibicao }}</span></li>{% endif %}
+        </ul>
+      </div>
+
+      {% if not reservas_ativas %}
+      {# Sem reserva online no plano: vira botão de WhatsApp. O cliente do bar
+         nunca fica sem resposta. #}
+      <div class="bloco-form surge">
+        <div class="topo-form"><span>Reserva</span><span>Pelo WhatsApp</span></div>
+        <div class="miolo">
+          <p style="color:var(--tinta-2)">{{ copy.reserva_ui.fallback }}</p>
+          {% if site.whatsapp %}
+          <a class="btn btn-fogo" style="display:block;margin-top:16px"
+             href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}"
+             target="_blank" rel="noopener">Chamar no WhatsApp</a>
+          {% endif %}
+        </div>
+      </div>
+      {% else %}
+      <form class="bloco-form surge" id="reservaForm" onsubmit="return enviarReserva(event)" novalidate>
+        <div class="topo-form"><span>Comanda de reserva</span><span>{{ site.cidade_uf or 'Mesa' }}</span></div>
+        <div class="miolo">
+          {# Quando o site é servido pelo domínio do bar, o backend resolve o
+             tenant pelo Host. Em /bar/<slug> (demos) o Host é o do produto —
+             daí este campo. #}
+          <input type="hidden" name="slug" value="{{ tenant.slug if tenant else '' }}">
+          <div class="campo">
+            <label for="rf-nome">Seu nome</label>
+            <input id="rf-nome" name="nome" type="text" autocomplete="name" placeholder="Como te chamamos?" required>
+          </div>
+          <div class="dupla">
+            <div class="campo">
+              <label for="rf-tel">WhatsApp</label>
+              <input id="rf-tel" name="telefone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(19) 99999-9999" required>
+            </div>
+            <div class="campo">
+              <label for="rf-pessoas">Pessoas</label>
+              <input id="rf-pessoas" name="num_pessoas" type="number" min="1" max="50" value="2" required>
+            </div>
+          </div>
+          <div class="dupla">
+            <div class="campo">
+              <label for="rf-data">Data</label>
+              <input id="rf-data" name="data" type="date" required>
+            </div>
+            <div class="campo">
+              <label for="rf-hora">Horário</label>
+              <input id="rf-hora" name="hora" type="time" value="19:00" required>
+            </div>
+          </div>
+          <div class="campo">
+            <label for="rf-obs">Observação (opcional)</label>
+            <textarea id="rf-obs" name="observacao" placeholder="Aniversário? Cadeira de bebê? Conta pra gente."></textarea>
+          </div>
+          <button class="btn btn-fogo" type="submit" style="width:100%">{{ copy.reserva_ui.botao }}</button>
+          <div class="aviso" id="reservaMsg" role="status" aria-live="polite"></div>
+          <a class="zap-pos" id="reservaWa" href="#" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M.06 24l1.68-6.13A11.9 11.9 0 0 1 .16 11.9C.16 5.34 5.5.02 12.06.02a11.8 11.8 0 0 1 8.4 3.49 11.8 11.8 0 0 1 3.48 8.4c0 6.56-5.34 11.89-11.9 11.89a11.9 11.9 0 0 1-5.7-1.45L.06 24zM6.6 20.15c1.68.998 3.28 1.6 5.44 1.6 5.45 0 9.89-4.43 9.89-9.88 0-5.46-4.43-9.89-9.88-9.89-5.46 0-9.89 4.43-9.89 9.89 0 2.27.6 3.98 1.7 5.7l-1 3.65 3.65-.97zM17.5 14.3c-.07-.12-.27-.2-.57-.35-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.08.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2-1.41.25-.7.25-1.29.17-1.42z"/></svg>
+            {{ copy.reserva_ui.titulo }}
+          </a>
+        </div>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CONTATO ===================== -->
+<section class="sec" id="contato">
+  <div class="wrap">
+    <div class="cab surge">
+      <span class="olho">{{ copy.contato.eyebrow }}</span>
+      <h2 class="h2">{{ copy.contato.titulo|safe }}</h2>
+      <div class="regua"></div>
+    </div>
+    <div class="contato">
+      <ul class="lista-hora surge">
+        {% if site.endereco %}<li><span class="em" aria-hidden="true">📍</span><span><b>Endereço</b>{{ site.endereco }}</span></li>{% endif %}
+        {% if site.horario %}<li><span class="em" aria-hidden="true">🕐</span><span><b>Horário</b>{{ site.horario }}</span></li>{% endif %}
+        {% if site.telefone_exibicao %}<li><span class="em" aria-hidden="true">📞</span><span><b>Telefone / WhatsApp</b>{{ site.telefone_exibicao }}</span></li>{% endif %}
+        {% if site.servicos %}<li><span class="em" aria-hidden="true">🍴</span><span><b>Serviços</b>{{ site.servicos }}</span></li>{% endif %}
+        {% if site.cidade_uf %}<li><span class="em" aria-hidden="true">🧭</span><span><b>Cidade</b>{{ site.cidade_uf }}</span></li>{% endif %}
+      </ul>
+      <div class="placa-cta surge">
+        <h3>{{ copy.cta.titulo }}</h3>
+        <p>{{ copy.cta.linha }}</p>
+        {% if site.whatsapp %}
+        <a class="btn btn-fogo" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener">Falar no WhatsApp</a>
+        {% endif %}
+        {% if site.maps_query %}
+        <a class="btn btn-linha" href="https://www.google.com/maps/search/?api=1&query={{ site.maps_query }}" target="_blank" rel="noopener">Abrir no mapa</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="assina">{{ site.nome }}</div>
+    <small>{% if site.cidade_uf %}{{ site.cidade_uf }} · {% endif %}{{ copy.rodape }}</small>
+    {% if site.instagram_url or site.facebook_url %}
+    <div class="redes">
+      {% if site.instagram_url %}
+      <a href="{{ site.instagram_url }}" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2c3.2 0 3.6 0 4.9.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.86s0 3.6-.07 4.86c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.86.07s-3.6 0-4.86-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23C2.2 15.6 2.2 15.2 2.2 12s0-3.6.07-4.86c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.4 2.2 8.8 2.2 12 2.2zm0 1.98c-3.15 0-3.52.01-4.76.07-.9.04-1.39.2-1.71.32-.43.17-.74.37-1.06.69-.32.32-.52.63-.69 1.06-.12.32-.28.81-.32 1.71-.06 1.24-.07 1.61-.07 4.76s.01 3.52.07 4.76c.04.9.2 1.39.32 1.71.17.43.37.74.69 1.06.32.32.63.52 1.06.69.32.12.81.28 1.71.32 1.24.06 1.61.07 4.76.07s3.52-.01 4.76-.07c.9-.04 1.39-.2 1.71-.32.43-.17.74-.37 1.06-.69.32-.32.52-.63.69-1.06.12-.32.28-.81.32-1.71.06-1.24.07-1.61.07-4.76s-.01-3.52-.07-4.76c-.04-.9-.2-1.39-.32-1.71-.17-.43-.37-.74-.69-1.06-.32-.32-.63-.52-1.06-.69-.32-.12-.81-.28-1.71-.32-1.24-.06-1.61-.07-4.76-.07zm0 3.38a4.44 4.44 0 1 1 0 8.88 4.44 4.44 0 0 1 0-8.88zm0 7.32a2.88 2.88 0 1 0 0-5.76 2.88 2.88 0 0 0 0 5.76zm5.65-7.52a1.04 1.04 0 1 1-2.08 0 1.04 1.04 0 0 1 2.08 0z"/></svg>
+      </a>
+      {% endif %}
+      {% if site.facebook_url %}
+      <a href="{{ site.facebook_url }}" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z"/></svg>
+      </a>
+      {% endif %}
+    </div>
+    {% endif %}
+    <div><a class="lojista" href="{{ url_for('auth.login') }}">Área do lojista · entrar no sistema →</a></div>
+  </div>
+</footer>
+
+{% if site.whatsapp %}
+<a class="zap-fixo" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener" aria-label="Falar no WhatsApp">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M.06 24l1.68-6.13A11.9 11.9 0 0 1 .16 11.9C.16 5.34 5.5.02 12.06.02a11.8 11.8 0 0 1 8.4 3.49 11.8 11.8 0 0 1 3.48 8.4c0 6.56-5.34 11.89-11.9 11.89a11.9 11.9 0 0 1-5.7-1.45L.06 24zM6.6 20.15c1.68.998 3.28 1.6 5.44 1.6 5.45 0 9.89-4.43 9.89-9.88 0-5.46-4.43-9.89-9.88-9.89-5.46 0-9.89 4.43-9.89 9.89 0 2.27.6 3.98 1.7 5.7l-1 3.65 3.65-.97zM17.5 14.3c-.07-.12-.27-.2-.57-.35-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.08.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2-1.41.25-.7.25-1.29.17-1.42z"/></svg>
+  <span class="rot">Chamar no zap</span>
+</a>
+{% endif %}
+
+<script>
+  var TEMA_KEY = 'fdb-tema-{{ tenant.slug if tenant and tenant.slug else "site" }}';
+
+  // Cor real do fundo já com o preset aplicado — a barra do navegador acerta
+  // sozinha em qualquer tema.
+  function corDeFundo(){
+    var v = getComputedStyle(document.documentElement).getPropertyValue('--ink');
+    return (v || '').trim() || '{{ tema_cor or "#150e09" }}';
+  }
+  function pintarIcone(){
+    var claro = document.documentElement.getAttribute('data-theme') === 'light';
+    var ic = document.getElementById('icTema');
+    if (ic) ic.textContent = claro ? '☾' : '☀';
+    var meta = document.querySelector('meta[name=theme-color]');
+    if (meta) meta.setAttribute('content', corDeFundo());
+  }
+  function trocarTema(){
+    var raiz = document.documentElement;
+    var claro = raiz.getAttribute('data-theme') !== 'light';
+    raiz.setAttribute('data-theme', claro ? 'light' : 'dark');
+    try { localStorage.setItem(TEMA_KEY, claro ? 'claro' : 'escuro'); } catch (e) {}
+    pintarIcone();
+  }
+
+  // ----- gaveta (menu mobile) -----
+  function abrirGaveta(){ mexerGaveta(true); }
+  function fecharGaveta(){ mexerGaveta(false); }
+  function mexerGaveta(abrir){
+    var g = document.getElementById('gaveta'), c = document.getElementById('cortina'),
+        b = document.getElementById('abrirMenu');
+    g.classList.toggle('aberta', abrir);
+    c.classList.toggle('aberta', abrir);
+    g.setAttribute('aria-hidden', abrir ? 'false' : 'true');
+    b.setAttribute('aria-expanded', abrir ? 'true' : 'false');
+    document.body.style.overflow = abrir ? 'hidden' : '';
+    if (abrir) { var p = g.querySelector('a'); if (p) p.focus(); } else { b.focus(); }
+  }
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && document.getElementById('gaveta').classList.contains('aberta')) fecharGaveta();
+  });
+
+  // ----- reserva -----
+  // data mínima = hoje (fuso local, não UTC)
+  (function(){
+    var d = document.getElementById('rf-data');
+    if (!d) return;
+    var t = new Date(); t.setMinutes(t.getMinutes() - t.getTimezoneOffset());
+    var iso = t.toISOString().slice(0, 10);
+    d.min = iso; if (!d.value) d.value = iso;
+  })();
+
+  function enviarReserva(ev){
+    ev.preventDefault();
+    var form = ev.target,
+        btn = form.querySelector('button[type=submit]'),
+        msg = document.getElementById('reservaMsg');
+    btn.disabled = true;
+    var txt = btn.textContent; btn.textContent = 'Enviando…';
+    msg.className = 'aviso';
+    fetch('{{ url_for("public.reservar") }}', {
+        method: 'POST', body: new FormData(form), headers: {'Accept': 'application/json'}
+      })
+      .then(function(r){ return r.json().then(function(j){ return {ok: r.ok, j: j}; }); })
+      .then(function(res){
+        if (res.ok && res.j.ok) {
+          msg.className = 'aviso ok'; msg.textContent = res.j.mensagem;
+          var wa = document.getElementById('reservaWa');
+          if (res.j.wa_url) {
+            wa.href = res.j.wa_url; wa.classList.add('mostra');
+            wa.scrollIntoView({block: 'center', behavior: 'smooth'});
+          }
+          form.reset();
+          var d = document.getElementById('rf-data'); if (d) d.value = d.min;
+          var h = document.getElementById('rf-hora'); if (h) h.value = '19:00';
+        } else {
+          msg.className = 'aviso err';
+          msg.textContent = (res.j.erros && res.j.erros.join(' ')) || 'Não deu pra enviar. Tenta pelo WhatsApp?';
+        }
+      })
+      .catch(function(){
+        msg.className = 'aviso err';
+        msg.textContent = 'Sem conexão. Chama a gente no WhatsApp!';
+      })
+      .finally(function(){ btn.disabled = false; btn.textContent = txt; });
+    return false;
+  }
+
+  pintarIcone();
+</script>
+
+<!-- ===================== MOVIMENTO =====================
+     Motion (ex-Framer Motion), build vanilla, versão pinada: expõe window.Motion
+     e não precisa de build step nenhum neste Jinja. -->
+<script src="https://cdn.jsdelivr.net/npm/motion@13.1.0/dist/motion.js"></script>
+<script>
+(function(){
+  var reduzir = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  // `.js-anim` é o ÚNICO portão. Todo estado inicial que esconde alguma coisa
+  // está atrás dele no CSS, e ele só entra depois de confirmar que a lib
+  // carregou e que ninguém pediu menos movimento. CDN fora do ar => a placa
+  // aparece inteira, pintada e parada.
+  if (!window.Motion || reduzir) return;
+
+  var raiz = document.documentElement;
+  raiz.classList.add('js-anim');
+
+  var animate = Motion.animate, inView = Motion.inView, hover = Motion.hover,
+      spring = Motion.spring,
+      stagger = Motion.stagger || function(passo){ return function(i){ return i * passo; }; };
+
+  var molaEntra = spring ? {type: spring, stiffness: 340, damping: 16} : {duration: .22, ease: 'easeOut'},
+      molaSai   = spring ? {type: spring, stiffness: 340, damping: 22} : {duration: .22, ease: 'easeOut'};
+
+  try {
+    // --- 1. o cartaz do hero é montado de cima pra baixo ---
+    animate('[data-hero]', {opacity: [0, 1], y: [24, 0]},
+            {duration: .55, delay: stagger(.09), ease: [.25, .1, .25, 1]});
+
+    // Assinatura do modelo: o nome do bar é CARIMBADO letra por letra, como
+    // placa de açougue batida à mão. Só opacidade — a inclinação de cada letra
+    // continua sendo do CSS, e mexer no transform aqui a apagaria.
+    var letras = document.querySelectorAll('.nome .ch');
+    if (letras.length) {
+      animate(letras, {opacity: [0, 1]},
+              {duration: .22, delay: function(i){ return .2 + i * .014; }});
+    }
+
+    // a brasa "acende": a capa entra com um respiro de escala
+    var capa = document.querySelector('.hero-foto img');
+    if (capa) animate(capa, {opacity: [0, 1], scale: [1.07, 1]}, {duration: 1.2, ease: 'easeOut'});
+
+    // --- 2. scroll-reveal das faixas ---
+    inView('.surge', function(el){
+      try {
+        // --tilt: as faixas de porção e as etiquetas de promoção são tortas de
+        // propósito. O Motion reescreve `transform` inteiro, então a rotação
+        // precisa entrar junto ou a placa "desentorta" ao aparecer.
+        var tilt = (getComputedStyle(el).getPropertyValue('--tilt') || '').trim();
+        var alvo = {opacity: [0, 1], y: [26, 0]};
+        if (tilt && parseFloat(tilt)) alvo.rotate = [tilt, tilt];
+        animate(el, alvo, {duration: .62, ease: [.2, .7, .2, 1]});
+      } catch (e) {
+        el.classList.add('vis');   // cai no CSS de reserva
+      }
+      el.setAttribute('data-surgiu', '1');
+    }, {amount: .15});
+
+    // --- 3. a nota do Google conta de 0 até o valor ---
+    // O número verdadeiro já está escrito no HTML; o contador só reescreve por
+    // cima e devolve o texto original no fim.
+    inView('[data-contar]', function(el){
+      try {
+        var alvo = parseFloat(el.getAttribute('data-valor'));
+        if (!isFinite(alvo)) return;
+        var casas = parseInt(el.getAttribute('data-casas') || '0', 10),
+            fim = el.textContent,
+            volta = function(){ el.textContent = fim; };
+        var a = animate(0, alvo, {duration: 1.1, ease: 'easeOut', onUpdate: function(v){
+          el.textContent = casas ? v.toFixed(casas).replace('.', ',')
+                                 : Math.round(v).toLocaleString('pt-BR');
+        }});
+        if (a && a.finished && a.finished.then) a.finished.then(volta, volta);
+      } catch (e) {}
+    }, {amount: .8});
+
+    // --- 4. micro-interação: o botão de fogo tem mola ---
+    if (hover) {
+      hover('.btn-fogo, .zap-fixo', function(el){
+        animate(el, {scale: 1.04, y: -2}, molaEntra);
+        return function(){ animate(el, {scale: 1, y: 0}, molaSai); };
+      });
+    }
+  } catch (e) {
+    raiz.classList.remove('js-anim');   // sem portão, nada fica escondido
+    return;
+  }
+
+  // Rede de segurança. Nenhum bloco pode ficar preso no estado inicial: se o
+  // observer engasgar (aba aberta em segundo plano, que é onde o
+  // IntersectionObserver não roda), o que já passou da metade da tela aparece
+  // pelo CSS de reserva. O corte em 50% é folgado de propósito — o inView
+  // dispara com 15% à vista e sempre ganha a corrida no caminho normal.
+  var agendado = false;
+  function garantir(){
+    agendado = false;
+    var presos = 0;
+    try {
+      Array.prototype.forEach.call(document.querySelectorAll('.surge'), function(el){
+        if (el.getAttribute('data-surgiu') || el.classList.contains('vis')) return;
+        presos++;
+        if (el.getBoundingClientRect().top < window.innerHeight * .5) el.classList.add('vis');
+      });
+    } catch (e) { return; }
+    if (!presos) window.removeEventListener('scroll', pedir);
+  }
+  function pedir(){ if (!agendado) { agendado = true; requestAnimationFrame(garantir); } }
+  window.addEventListener('scroll', pedir, {passive: true});
+  setTimeout(garantir, 2500);
+})();
+</script>
+</body>
+</html>

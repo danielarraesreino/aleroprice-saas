@@ -18,6 +18,7 @@ from app.utils.site_router import (
 )
 from app.utils.temas import css_do_tema, cor_do_tema
 from app.utils.copy_site import copy_da_vibe
+from app.utils.modelos import MODELO_PADRAO, arquivo_do_modelo, modelo_valido
 from app.utils.planos import pode, precos
 from app.utils.tenant import limite_excedido
 
@@ -44,6 +45,24 @@ def _alerta_whatsapp(texto, phone=None):
         current_app.logger.warning(f'CallMeBot falhou: {e}')
 
 
+def _template_do_modelo(nome):
+    """Arquivo do modelo, com rede de segurança pro template que ainda não existe.
+
+    Os 6 modelos vivem em `app/utils/modelos.py`, mas os arquivos em
+    `site/modelos/` entram um a um. Sem esse check, um `?modelo=` apontando pra
+    template ainda não escrito derrubaria o site do bar com 500 — aqui ele só
+    volta pro clássico, que sempre existe.
+    """
+    from jinja2 import TemplateNotFound
+    arquivo = arquivo_do_modelo(nome)
+    try:
+        current_app.jinja_env.get_template(arquivo)
+    except TemplateNotFound:
+        current_app.logger.warning(f'Modelo {nome!r} sem template ({arquivo}); caindo no clássico.')
+        return arquivo_do_modelo(MODELO_PADRAO)
+    return arquivo
+
+
 def _render_landing(rest):
     """Renderiza a landing pra um restaurante (tenant) qualquer."""
     from app.models.modelo_evento import Evento
@@ -68,6 +87,18 @@ def _render_landing(rest):
     vibe = getattr(cfg, 'vibe', None) if cfg else None
     copy = copy_da_vibe(vibe, site.get('nome') or '')
 
+    # Qual layout renderizar. `?modelo=<x>` é a prévia do vendedor: troca o
+    # modelo só nesta resposta, sem gravar nada no banco — ele abre as opções
+    # na frente do dono do bar e o site salvo continua o que era. Valor
+    # desconhecido (na query ou no banco) cai no clássico, em silêncio.
+    modelo_salvo = getattr(cfg, 'modelo', None) if cfg else None
+    modelo_espiado = (request.args.get('modelo') or '').strip()
+    previewando = modelo_valido(modelo_espiado)
+    if previewando:
+        modelo_atual = modelo_espiado
+    else:
+        modelo_atual = modelo_salvo if modelo_valido(modelo_salvo) else MODELO_PADRAO
+
     # Degradação por plano: quem não paga perde o controle do site, não o
     # endereço. Sem reservas online, o formulário vira botão de WhatsApp — o
     # cliente do bar nunca fica sem resposta.
@@ -77,9 +108,22 @@ def _render_landing(rest):
     if not pode(rest, 'promocoes'):
         promocoes = []
 
-    return render_template('site/landing.html', eventos=eventos, promocoes=promocoes,
+    # Prévia sem agenda própria demonstra o recurso em vez de escondê-lo. É o que
+    # o dono do bar mais quer ver ("quem toca sexta"), e evento futuro não existe
+    # em dado público — sem isto, a seção some justamente na hora da venda.
+    # Cada item vem marcado como exemplo e a página já é declaradamente prévia.
+    if rest is not None and getattr(rest, 'eh_demo', False):
+        from app.utils.vitrine import eventos_de_exemplo, promocoes_de_exemplo
+        if not eventos:
+            eventos = eventos_de_exemplo(vibe)
+        if not promocoes:
+            promocoes = promocoes_de_exemplo(vibe)
+
+    return render_template(_template_do_modelo(modelo_atual),
+                           eventos=eventos, promocoes=promocoes,
                            site=site, tema_css=css_do_tema(tema),
                            tema_cor=cor_do_tema(tema), tenant=rest, copy=copy,
+                           modelo_atual=modelo_atual, previewando=previewando,
                            reservas_ativas=reservas_ativas,
                            contato_vendas=os.environ.get('FEIRA_WHATSAPP', ''),
                            email_vendas=os.environ.get('FEIRA_EMAIL', 'contato@feiradebarao.com.br'),

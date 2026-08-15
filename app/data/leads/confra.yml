@@ -9,6 +9,9 @@ nome: "Cervejaria Confra"
 tema: pub-escuro
 
 site:
+  telefone_exibicao: "(19) 99932-2627"
+  endereco: "R. José Martins, 503 - Barão Geraldo, Campinas - SP, 13084-153"
+  qtd_avaliacoes: 824
   vibe: pub
   descritor: "Microcervejaria e forneria"
   kicker: "BARÃO GERALDO · CAMPINAS–SP"

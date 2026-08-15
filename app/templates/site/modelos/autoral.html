@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+{# ---------------------------------------------------------------------------
+   MODELO "AUTORAL" — cozinha autoral, bistrô, chef que assina o prato.
+
+   Direção: editorial de gastronomia. Fundo claro (é o único modelo claro do
+   catálogo), serifada de display com contraste alto, muito respiro. O cardápio
+   é a seção principal e usa layout alternado foto/texto em vez de grade — cada
+   prato ocupa a largura da página, como página de revista.
+
+   Regras herdadas de site/landing.html (não afrouxar): noindex em prévia,
+   banner de prévia, seção some sem conteúdo, menu nunca aponta pra âncora
+   inexistente, og:image só com foto própria, tema_css depois do CSS local.
+--------------------------------------------------------------------------- #}
+{% set descritor = site.descritor or site.cidade_uf or 'Cozinha autoral' %}
+<title>{{ site.nome }} — {{ descritor }}</title>
+<meta name="description" content="{{ site.nome }} — {{ site.tagline or descritor }}">
+
+{# Foto de capa: aceita caminho estático ('img/bar/x.jpg') ou URL absoluta. #}
+{% set hero_arq = site.hero_foto %}
+{% if hero_arq and (hero_arq.startswith('http://') or hero_arq.startswith('https://')) %}
+  {% set hero_url = hero_arq %}
+{% elif hero_arq %}
+  {% set hero_url = url_for('static', filename=hero_arq) %}
+{% else %}
+  {% set hero_url = None %}
+{% endif %}
+{# Sem capa própria, o herói é o primeiro prato/foto DESTE bar — nunca de outro. #}
+{% set heroi_img = hero_url or (dishes and dishes[0].img) or (gallery and gallery[0].img) %}
+
+{% set og_base = 'https://' ~ request.host %}
+{# Card de compartilhamento só com foto de capa própria: mandar a capa de outro
+   bar no WhatsApp é pior que não ter card nenhum. #}
+{% if hero_url and hero_url.startswith('http') %}
+  {% set og_img = hero_url %}
+{% elif hero_url %}
+  {% set og_img = og_base ~ hero_url %}
+{% else %}
+  {% set og_img = None %}
+{% endif %}
+
+{% if tenant and tenant.eh_demo %}
+{# Prévia comercial não pedida pelo dono: não pode ser indexada nem competir
+   com o negócio real dele no Google. Ver app/utils/demos.py. #}
+<meta name="robots" content="noindex,nofollow,noarchive">
+{% endif %}
+<meta property="og:site_name" content="{{ site.nome }}">
+<meta property="og:title" content="{{ site.nome }} — {{ descritor }}">
+<meta property="og:description" content="{{ site.tagline or descritor }}">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:url" content="{{ og_base ~ request.path }}">
+{% if og_img %}
+<meta property="og:image" content="{{ og_img }}">
+<meta property="og:image:secure_url" content="{{ og_img }}">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{{ site.nome }} — {{ descritor }}">
+{% endif %}
+<meta name="twitter:card" content="{{ 'summary_large_image' if og_img else 'summary' }}">
+<meta name="twitter:title" content="{{ site.nome }} — {{ descritor }}">
+<meta name="twitter:description" content="{{ site.tagline or descritor }}">
+{% if og_img %}<meta name="twitter:image" content="{{ og_img }}">{% endif %}
+<meta name="theme-color" content="{{ tema_cor or '#fbf7f1' }}">
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon-32.png') }}">
+<link rel="icon" type="image/png" sizes="64x64" href="{{ url_for('static', filename='img/favicon-64.png') }}">
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
+<script>
+  // Tema antes da primeira pintura (evita flash) e SEMPRE explícito: com o
+  // atributo escrito, o preset de cor (tema_css) sabe qual paleta aplicar.
+  // Chave por bar — dois sites no mesmo navegador não dividem preferência.
+  (function(){
+    var k='fdb-tema-{{ tenant.slug if tenant and tenant.slug else "site" }}';
+    var salvo=null;
+    try{salvo=localStorage.getItem(k);}catch(e){}
+    var escuro = salvo ? salvo==='dark'
+                       : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    var r=document.documentElement;
+    r.setAttribute('data-theme', escuro?'dark':'light');
+    r.className += ' js';
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;1,6..96,400;1,6..96,500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  /* ===================== TOKENS =====================================
+     Claro é o padrão e vive no :root inteiro (nenhuma cor mora só dentro
+     de media query). O escuro repete os mesmos nomes em dois lugares:
+     preferência do sistema e escolha explícita no botão.
+     O acento sai de --amber quando existe preset de cor; sem preset, é o
+     azul-tinta deste modelo. Ele só pinta tipografia grande, fios e
+     marcações — nunca texto pequeno, pra não depender do contraste do
+     preset escolhido pelo dono. */
+  :root{
+    --papel:#fbf7f1;
+    --papel-2:#f4ece0;
+    --tinta:#15120e;
+    --tinta-2:#4b423a;
+    --tinta-3:#6e6459;   /* 5,4:1 no papel — legenda e olho ainda passam em AA */
+    --linha:rgba(21,18,14,.16);
+    --linha-forte:rgba(21,18,14,.34);
+    --acento:var(--amber,#1f3ad4);
+    --sombra:rgba(21,18,14,.10);
+    --maxw:1180px;
+    --gutter:clamp(20px,5vw,56px);
+    --serif:"Bodoni Moda",Georgia,"Times New Roman",serif;
+    --sans:"Instrument Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --papel:#141210;
+      --papel-2:#1c1917;
+      --tinta:#f7f0e5;
+      --tinta-2:#cec4b5;
+      --tinta-3:#8e8478;
+      --linha:rgba(247,240,229,.18);
+      --linha-forte:rgba(247,240,229,.38);
+      --acento:var(--amber,#93a6ff);
+      --sombra:rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --papel:#141210;
+    --papel-2:#1c1917;
+    --tinta:#f7f0e5;
+    --tinta-2:#cec4b5;
+    --tinta-3:#8e8478;
+    --linha:rgba(247,240,229,.18);
+    --linha-forte:rgba(247,240,229,.38);
+    --acento:var(--amber,#93a6ff);
+    --sombra:rgba(0,0,0,.5);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{
+    background:var(--papel);
+    color:var(--tinta-2);
+    font-family:var(--sans);
+    font-size:1.0625rem;
+    line-height:1.75;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  img{max-width:100%;display:block}
+  a{color:inherit;text-decoration:none}
+  ::selection{background:var(--tinta);color:var(--papel)}
+  :focus-visible{outline:2px solid var(--acento);outline-offset:3px}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--gutter)}
+  .sec{padding:clamp(72px,12vw,148px) 0;position:relative}
+  .faixa-clara{background:var(--papel-2)}
+
+  /* ---------- tipografia editorial ---------- */
+  .olho{
+    font-family:var(--sans);font-size:.7rem;font-weight:600;
+    letter-spacing:.24em;text-transform:uppercase;color:var(--tinta-3);
+    display:flex;align-items:center;gap:12px;margin-bottom:20px;
+  }
+  .olho::before{content:"";width:26px;height:2px;background:var(--acento);flex:none}
+  .titulo{
+    font-family:var(--serif);font-weight:400;color:var(--tinta);
+    font-size:clamp(2.05rem,6.4vw,3.7rem);line-height:1.06;letter-spacing:-.015em;
+    overflow-wrap:break-word;
+  }
+  .titulo em{font-style:italic;color:var(--acento)}
+  .lead{
+    max-width:54ch;margin-top:22px;font-size:1.06rem;color:var(--tinta-2);
+  }
+  .cab{max-width:none}
+  .fio{height:1px;background:var(--linha);border:0;margin:0}
+
+  /* ---------- botões ---------- */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:10px;
+    font-family:var(--sans);font-size:.76rem;font-weight:600;letter-spacing:.18em;
+    text-transform:uppercase;padding:16px 30px;border:1px solid var(--tinta);
+    background:var(--tinta);color:var(--papel);cursor:pointer;
+    transition:background .25s,color .25s,border-color .25s;
+  }
+  .btn:hover{background:transparent;color:var(--tinta)}
+  .btn-linha{background:transparent;color:var(--tinta);border-color:var(--linha-forte)}
+  .btn-linha:hover{background:var(--tinta);color:var(--papel);border-color:var(--tinta)}
+  .link-seta{
+    display:inline-flex;align-items:center;gap:9px;color:var(--tinta);
+    font-size:.94rem;border-bottom:1px solid var(--linha-forte);padding-bottom:3px;
+    transition:border-color .25s,color .25s;width:fit-content;
+  }
+  .link-seta:hover{color:var(--acento);border-color:var(--acento)}
+
+  /* ---------- cabeçalho fixo (fino, de revista) ---------- */
+  .masthead{
+    position:sticky;top:0;z-index:40;background:var(--papel);
+    border-bottom:1px solid var(--linha);
+  }
+  .masthead .interno{
+    max-width:var(--maxw);margin:0 auto;padding:14px var(--gutter);
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+  }
+  .marca{
+    font-family:var(--serif);font-size:1.12rem;font-weight:500;color:var(--tinta);
+    letter-spacing:.01em;line-height:1.2;
+  }
+  .marca span{
+    display:block;font-family:var(--sans);font-size:.6rem;font-weight:500;
+    letter-spacing:.24em;text-transform:uppercase;color:var(--tinta-3);margin-top:3px;
+  }
+  .mh-nav{display:none;gap:26px;align-items:center}
+  .mh-nav a{
+    font-size:.72rem;font-weight:500;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--tinta-2);transition:color .25s;
+  }
+  .mh-nav a:hover{color:var(--acento)}
+  .mh-acoes{display:flex;align-items:center;gap:10px}
+  .btn-icone{
+    width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--linha);
+    background:transparent;color:var(--tinta);cursor:pointer;font-size:.9rem;line-height:1;
+    transition:border-color .25s,color .25s;
+  }
+  .btn-icone:hover{border-color:var(--acento);color:var(--acento)}
+  .btn-indice{
+    font-family:var(--sans);font-size:.68rem;font-weight:600;letter-spacing:.18em;
+    text-transform:uppercase;padding:11px 16px;border:1px solid var(--linha);
+    background:transparent;color:var(--tinta);cursor:pointer;
+  }
+  @media(min-width:900px){
+    .mh-nav{display:flex}
+    .btn-indice{display:none}
+  }
+
+  /* ---------- índice (menu mobile) ---------- */
+  .indice{
+    position:fixed;inset:0;z-index:60;background:var(--papel);
+    padding:calc(var(--gutter) + 8px);overflow-y:auto;
+    opacity:0;visibility:hidden;transform:translateY(-10px);
+    transition:opacity .3s ease,transform .35s ease,visibility .3s;
+  }
+  .indice.aberto{opacity:1;visibility:visible;transform:none}
+  .indice-topo{display:flex;align-items:baseline;justify-content:space-between;
+    border-bottom:1px solid var(--linha);padding-bottom:14px}
+  .indice-topo b{font-family:var(--sans);font-size:.68rem;font-weight:600;
+    letter-spacing:.24em;text-transform:uppercase;color:var(--tinta-3)}
+  .indice-topo button{background:none;border:0;color:var(--tinta);font-size:1.5rem;
+    line-height:1;cursor:pointer;padding:4px 6px}
+  .indice ol{list-style:none;counter-reset:idx;margin-top:8px}
+  .indice li{counter-increment:idx;border-bottom:1px solid var(--linha)}
+  .indice li a{
+    display:flex;align-items:baseline;gap:16px;padding:18px 2px;
+    font-family:var(--serif);font-size:1.7rem;color:var(--tinta);line-height:1.2;
+  }
+  .indice li a::before{
+    content:counter(idx,decimal-leading-zero);
+    font-family:var(--sans);font-size:.66rem;font-weight:600;letter-spacing:.16em;
+    color:var(--acento);flex:none;
+  }
+  .indice .rodape-indice{margin-top:26px}
+
+  /* ---------- HERO ---------- */
+  .hero{padding:clamp(46px,9vw,96px) 0 clamp(60px,10vw,110px)}
+  .hero-grade{display:grid;gap:clamp(34px,6vw,62px);align-items:center}
+  .hero-kicker{
+    font-size:.7rem;font-weight:600;letter-spacing:.26em;text-transform:uppercase;
+    color:var(--tinta-3);margin-bottom:26px;
+  }
+  .hero h1{
+    font-family:var(--serif);font-weight:400;color:var(--tinta);
+    font-size:clamp(2.9rem,12.5vw,6.1rem);line-height:.98;letter-spacing:-.02em;
+    overflow-wrap:break-word;
+  }
+  .hero h1 .dois{display:block;font-style:italic;color:var(--acento)}
+  .hero-tag{
+    font-family:var(--serif);font-style:italic;font-size:clamp(1.15rem,3.4vw,1.55rem);
+    color:var(--tinta);line-height:1.5;max-width:34ch;margin-top:26px;
+  }
+  .hero-meta{
+    margin-top:22px;font-size:.76rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--tinta-3);max-width:44ch;
+  }
+  .hero-selo{
+    display:inline-flex;align-items:center;gap:10px;margin-top:22px;
+    padding-top:16px;border-top:1px solid var(--linha);
+    font-size:.78rem;letter-spacing:.1em;color:var(--tinta-2);
+  }
+  .hero-selo .est{color:var(--acento);letter-spacing:.16em}
+  /* Selo de nota no herói: o número grande já no primeiro olhar, sem roubar
+     a cena do título. Só existe quando o bar tem nota real. */
+  .hero-selo b{
+    font-family:var(--serif);font-weight:500;font-size:1.32rem;color:var(--tinta);
+    line-height:1;letter-spacing:0;font-variant-numeric:tabular-nums;
+  }
+  .hero-acoes{display:flex;flex-wrap:wrap;gap:12px;margin-top:34px}
+  .hero-foto{position:relative}
+  .hero-foto img{width:100%;aspect-ratio:4/5;object-fit:cover;filter:saturate(1.02)}
+  .hero-foto figcaption{
+    margin-top:12px;font-family:var(--serif);font-style:italic;font-size:.94rem;
+    color:var(--tinta-3);
+  }
+  .rolar{
+    margin-top:clamp(44px,7vw,70px);font-size:.7rem;letter-spacing:.24em;
+    text-transform:uppercase;color:var(--tinta-3);
+  }
+  @media(min-width:900px){
+    .hero-grade{grid-template-columns:1.02fr .98fr}
+    .hero-foto img{aspect-ratio:3/4}
+  }
+
+  /* faixa de palavras (substitui a faixa rolante do clássico: aqui é estática) */
+  .sabores{
+    border-top:1px solid var(--linha);border-bottom:1px solid var(--linha);
+    padding:20px 0;display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;
+    font-size:.68rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--tinta-3);
+  }
+  .sabores i{display:inline-block;width:4px;height:4px;background:var(--acento);flex:none}
+
+  /* ---------- CARDÁPIO (a seção principal) ---------- */
+  #cardapio .pratos{margin-top:clamp(46px,7vw,80px);display:flex;flex-direction:column;
+    gap:clamp(56px,9vw,120px)}
+  .prato{display:grid;gap:clamp(22px,4vw,54px);align-items:center}
+  .prato-foto{position:relative}
+  .prato-foto img{width:100%;aspect-ratio:4/5;object-fit:cover}
+  .prato-num{
+    font-family:var(--sans);font-size:.68rem;font-weight:600;letter-spacing:.2em;
+    color:var(--acento);display:flex;align-items:center;gap:12px;margin-bottom:16px;
+  }
+  .prato-num::after{content:"";flex:1;height:1px;background:var(--linha);max-width:70px}
+  .prato h3{
+    font-family:var(--serif);font-weight:400;color:var(--tinta);
+    font-size:clamp(1.75rem,5.6vw,2.7rem);line-height:1.1;letter-spacing:-.01em;
+  }
+  .prato p{margin-top:16px;max-width:46ch;font-size:1.04rem}
+  .prato .selo{
+    display:inline-block;margin-top:20px;padding-top:12px;border-top:1px solid var(--linha-forte);
+    font-size:.68rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--tinta);
+  }
+  .prato.destaque .prato-num::before{content:"";width:9px;height:9px;background:var(--acento);flex:none}
+  .prato.sem-foto{border-top:1px solid var(--linha);padding-top:clamp(24px,4vw,40px)}
+  @media(min-width:860px){
+    .prato.com-foto{grid-template-columns:1fr 1fr}
+    /* alternado: par inverte a ordem — revista, não grade */
+    .prato.com-foto:nth-child(even) .prato-foto{order:2}
+    .prato.sem-foto{grid-template-columns:1fr 1fr}
+    .prato-foto img{aspect-ratio:3/4}
+  }
+
+  /* ---------- PROMOÇÕES ---------- */
+  .promos{margin-top:clamp(38px,6vw,64px);display:grid;gap:0}
+  .promo{border-top:1px solid var(--linha);padding:26px 0}
+  .promo:last-child{border-bottom:1px solid var(--linha)}
+  .promo .rot{font-size:.68rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--tinta-3);display:flex;align-items:center;gap:10px}
+  .promo.hoje{padding-left:18px;border-left:2px solid var(--acento)}
+  .promo.hoje .rot{color:var(--tinta)}
+  .promo.hoje .rot::before{content:"";width:8px;height:8px;background:var(--acento);flex:none}
+  .promo h3{font-family:var(--serif);font-weight:400;color:var(--tinta);
+    font-size:clamp(1.35rem,4vw,1.9rem);line-height:1.2;margin-top:10px}
+  .promo p{margin-top:8px;max-width:52ch}
+  .promo .val{margin-top:10px;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta-3)}
+  @media(min-width:860px){
+    .promo{display:grid;grid-template-columns:.36fr 1fr;gap:28px;align-items:start}
+    .promo .rot{padding-top:6px}
+    .promo h3{margin-top:0}
+  }
+
+  /* ---------- HISTÓRIA ---------- */
+  .historia-grade{display:grid;gap:clamp(32px,5vw,60px);align-items:start}
+  .historia-texto{
+    font-family:var(--serif);font-size:clamp(1.2rem,3.4vw,1.6rem);line-height:1.6;
+    color:var(--tinta);margin-top:26px;max-width:32ch;
+  }
+  .historia-foto img{width:100%;aspect-ratio:5/4;object-fit:cover}
+  .historia-foto figcaption{margin-top:12px;font-family:var(--serif);font-style:italic;
+    font-size:.92rem;color:var(--tinta-3)}
+  .creditos{list-style:none;margin-top:30px}
+  .creditos li{display:flex;align-items:baseline;gap:14px;padding:13px 0;border-top:1px solid var(--linha)}
+  .creditos li:last-child{border-bottom:1px solid var(--linha)}
+  .creditos b{font-family:var(--serif);font-weight:500;font-size:1.06rem;color:var(--tinta);flex:none}
+  .creditos span{font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta-3)}
+  .creditos .em{font-size:1rem;opacity:.75;flex:none}
+  @media(min-width:900px){.historia-grade{grid-template-columns:1fr 1fr}}
+
+  /* ---------- CLIMA ---------- */
+  .clima{margin-top:clamp(38px,6vw,64px);display:grid;gap:0}
+  .clima-item{border-top:1px solid var(--linha);padding:26px 0}
+  .clima-item:last-child{border-bottom:1px solid var(--linha)}
+  .clima-item .em{font-size:1.1rem;opacity:.8}
+  .clima-item b{display:block;font-family:var(--serif);font-weight:400;color:var(--tinta);
+    font-size:1.4rem;line-height:1.25;margin:8px 0 6px}
+  .clima-item small{font-size:.98rem;color:var(--tinta-2);line-height:1.65;display:block;max-width:34ch}
+  @media(min-width:820px){
+    .clima{grid-template-columns:repeat(3,1fr);gap:clamp(24px,4vw,48px)}
+    .clima-item{border-bottom:0!important;padding-top:22px}
+  }
+
+  /* ---------- AVALIAÇÕES ----------
+     A nota do Google é o argumento de venda mais forte da página, então ela é
+     um BLOCO de prova social (número em display, contagem por extenso), não uma
+     legenda. Vive fora do bloco de depoimentos: são dados independentes. */
+  .prova{
+    margin-top:clamp(32px,5vw,50px);
+    border-top:2px solid var(--tinta);border-bottom:1px solid var(--linha);
+    padding:clamp(22px,4vw,32px) 0;
+    display:grid;gap:14px clamp(24px,4vw,44px);align-items:center;
+  }
+  .prova-n{display:flex;align-items:flex-end;gap:14px}
+  .prova-n .n{
+    font-family:var(--serif);font-size:clamp(3.4rem,13vw,5.4rem);line-height:.92;
+    color:var(--acento);letter-spacing:-.015em;font-variant-numeric:tabular-nums;
+  }
+  .prova-n .est{color:var(--acento);letter-spacing:.2em;font-size:.95rem;padding-bottom:13px}
+  .prova-txt{font-size:1.04rem;color:var(--tinta-2);max-width:38ch}
+  .prova-txt b{
+    font-family:var(--serif);font-weight:500;font-size:1.58rem;color:var(--tinta);
+    font-variant-numeric:tabular-nums;
+  }
+  .prova-txt small{
+    display:block;margin-top:9px;font-size:.68rem;font-weight:600;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--tinta-3);
+  }
+  @media(min-width:720px){.prova{grid-template-columns:auto 1fr}}
+  .depoimentos{margin-top:clamp(38px,6vw,64px);display:grid;gap:clamp(30px,5vw,52px)}
+  .depoimento{border-top:1px solid var(--linha);padding-top:24px}
+  .depoimento .est{color:var(--acento);letter-spacing:.22em;font-size:.82rem}
+  .depoimento blockquote{
+    font-family:var(--serif);font-style:italic;font-size:clamp(1.15rem,3.2vw,1.42rem);
+    line-height:1.55;color:var(--tinta);margin:14px 0 16px;
+  }
+  .depoimento cite{font-style:normal;font-size:.72rem;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--tinta-3)}
+  @media(min-width:860px){.depoimentos{grid-template-columns:1fr 1fr}}
+
+  /* ---------- AGENDA ---------- */
+  .agenda{margin-top:clamp(38px,6vw,64px)}
+  .evento{display:grid;gap:6px 24px;border-top:1px solid var(--linha);padding:24px 0}
+  .evento:last-child{border-bottom:1px solid var(--linha)}
+  .evento .data{font-size:.72rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--acento)}
+  .evento h3{font-family:var(--serif);font-weight:400;color:var(--tinta);
+    font-size:clamp(1.3rem,3.8vw,1.75rem);line-height:1.2}
+  .evento .quando{font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--tinta-3)}
+  .evento .desc{max-width:52ch;font-size:1rem}
+  @media(min-width:820px){
+    .evento{grid-template-columns:.22fr 1fr;align-items:baseline}
+    .evento .data{padding-top:4px}
+  }
+
+  /* ---------- GALERIA ----------
+     Galeria é amostra, não arquivo: no máximo 6 fotos (o template corta em
+     loop.index) e altura FIXA em vez de aspect-ratio. Com aspect-ratio, foto
+     em coluna única no celular vira 438px de altura cada — 15 delas faziam a
+     página passar de 11.000px. Aqui a altura é contida e a grade é de duas
+     colunas desde o celular. */
+  .galeria{margin-top:clamp(34px,5vw,56px);display:grid;grid-template-columns:1fr 1fr;
+    gap:clamp(14px,2.6vw,30px)}
+  .galeria figure img{width:100%;height:clamp(150px,32vw,210px);object-fit:cover}
+  .galeria figcaption{margin-top:8px;font-family:var(--serif);font-style:italic;
+    font-size:.84rem;color:var(--tinta-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .galeria-mais{margin-top:clamp(22px,3vw,30px)}
+  @media(min-width:720px){
+    /* Mosaico de revista: a primeira foto manda (2×2), as outras compõem em
+       volta. Três fileiras curtas — ritmo editorial sem virar rolagem de álbum.
+       A altura vem da fileira do grid, não da proporção da imagem. */
+    .galeria{grid-template-columns:repeat(3,1fr);grid-auto-rows:clamp(148px,14vw,186px)}
+    .galeria figure{display:flex;flex-direction:column;min-width:0}
+    .galeria figure img{height:auto;flex:1;min-height:0}
+    .galeria figure:first-child{grid-column:span 2;grid-row:span 2}
+  }
+
+  /* ---------- RESERVA ---------- */
+  .reserva-grade{display:grid;gap:clamp(34px,5vw,64px);align-items:start}
+  @media(min-width:900px){.reserva-grade{grid-template-columns:.85fr 1.15fr}}
+  .campo{margin-bottom:22px}
+  .campo label{display:block;font-size:.66rem;font-weight:600;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--tinta-3);margin-bottom:8px}
+  .campo input,.campo textarea{
+    width:100%;background:transparent;border:0;border-bottom:1px solid var(--linha-forte);
+    padding:9px 0;color:var(--tinta);font-family:var(--serif);font-size:1.12rem;
+    border-radius:0;transition:border-color .25s;
+  }
+  .campo input::placeholder,.campo textarea::placeholder{color:var(--tinta-3);font-family:var(--sans);font-size:.95rem}
+  .campo input:focus,.campo textarea:focus{outline:none;border-bottom-color:var(--acento)}
+  .campo textarea{resize:vertical;min-height:46px;line-height:1.6}
+  .dupla{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:420px){.dupla{grid-template-columns:1fr}}
+  .reserva-msg{display:none;margin-top:18px;padding:14px 16px;font-size:.95rem;
+    border-left:2px solid var(--acento);background:var(--papel-2);color:var(--tinta)}
+  .reserva-msg.ok,.reserva-msg.err{display:block}
+  .reserva-msg.err{border-left-color:var(--tinta-3)}
+  .reserva-zap{display:none;margin-top:18px}
+  .reserva-zap.mostra{display:inline-flex}
+  .reserva-nota{margin-top:18px;font-size:.8rem;color:var(--tinta-3);max-width:44ch}
+  form .btn{width:100%;margin-top:10px}
+
+  /* ---------- CONTATO ---------- */
+  .contato-grade{display:grid;gap:clamp(32px,5vw,60px);align-items:start}
+  @media(min-width:860px){.contato-grade{grid-template-columns:1fr 1fr}}
+  .dados{list-style:none;margin-top:30px}
+  .dados li{padding:18px 0;border-top:1px solid var(--linha)}
+  .dados li:last-child{border-bottom:1px solid var(--linha)}
+  .dados b{display:block;font-size:.66rem;font-weight:600;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--tinta-3);margin-bottom:6px}
+  .dados span{color:var(--tinta);font-size:1.02rem}
+  .chamada{border-top:2px solid var(--tinta);padding-top:26px}
+  .chamada h3{font-family:var(--serif);font-weight:400;color:var(--tinta);
+    font-size:clamp(1.7rem,5vw,2.4rem);line-height:1.12}
+  .chamada p{margin-top:14px;max-width:44ch}
+  .chamada .acoes{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+
+  /* ---------- RODAPÉ ---------- */
+  footer{border-top:1px solid var(--linha);padding:clamp(50px,8vw,84px) 0 calc(clamp(50px,8vw,84px) + 10px)}
+  .rodape-nome{font-family:var(--serif);font-size:clamp(2rem,8vw,3.4rem);color:var(--tinta);
+    line-height:1.05;letter-spacing:-.01em}
+  .rodape-linha{margin-top:16px;font-size:.94rem;color:var(--tinta-3)}
+  .rodape-links{display:flex;flex-wrap:wrap;gap:22px;margin-top:30px;
+    font-size:.7rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase}
+  .rodape-links a{color:var(--tinta-2);border-bottom:1px solid var(--linha);padding-bottom:3px;
+    transition:color .25s,border-color .25s}
+  .rodape-links a:hover{color:var(--acento);border-color:var(--acento)}
+
+  /* ---------- WhatsApp discreto ---------- */
+  .zap-fixo{
+    position:fixed;right:16px;bottom:16px;z-index:50;display:inline-flex;align-items:center;gap:9px;
+    background:var(--tinta);color:var(--papel);padding:12px 18px;
+    font-size:.68rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;
+    box-shadow:0 10px 30px var(--sombra);transition:transform .25s;
+  }
+  .zap-fixo:hover{transform:translateY(-2px)}
+  .zap-fixo svg{width:16px;height:16px;fill:currentColor;flex:none}
+
+  /* ---------- revelação suave ----------
+     Dois caminhos, nunca os dois ao mesmo tempo:
+     .js  → IntersectionObserver + transição CSS (base, sem dependência externa)
+     .js-anim → Motion assumiu (só entra se window.Motion existiu E o usuário
+                aceita movimento). O estado inicial escondido do herói mora
+                SÓ atrás de .js-anim: CDN fora do ar = classe ausente = página
+                inteira legível. */
+  .js .rev{opacity:0;transform:translateY(14px);
+    transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+  .js .rev.dentro{opacity:1;transform:none}
+  .js-anim [data-hero]{opacity:0;transform:translateY(18px)}
+  .js-anim .rev{transition:none}  /* com Motion, quem anima é o inline style */
+  @media(prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    *{animation:none!important;transition:none!important}
+    .js .rev,.js-anim [data-hero]{opacity:1;transform:none}
+  }
+
+  /* Selo de demonstração: só aparece em prévia, quando a casa ainda não tem
+     agenda própria e o site mostra o recurso com exemplo. */
+  .selo-exemplo{display:inline-block;vertical-align:middle;margin-left:8px;
+    padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;
+    letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;
+    background:rgba(255,255,255,.14);color:inherit;opacity:.85;
+    border:1px solid currentColor}
+</style>
+{# Preset de cor do bar (app/utils/temas.py). Vem DEPOIS do CSS local pra poder
+   sobrescrever — neste modelo o gancho é --amber, que vira o acento. #}
+{% if tema_css %}<style>{{ tema_css|safe }}</style>{% endif %}
+{% if tenant and tenant.eh_demo %}
+<style>
+  .previa{
+    position:fixed;left:0;right:0;bottom:0;z-index:200;background:var(--tinta);color:var(--papel);
+    font-family:var(--sans);font-size:.82rem;line-height:1.5;padding:13px 16px;
+    display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;justify-content:center;text-align:center;
+  }
+  .previa b{color:var(--papel)}
+  .previa a{background:var(--papel);color:var(--tinta);padding:8px 15px;white-space:nowrap;
+    font-size:.68rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase}
+  .previa a.vazado{background:transparent;color:var(--papel);border:1px solid var(--papel)}
+  .previa .fechar{background:none;border:0;color:var(--papel);font-size:1.1rem;cursor:pointer;padding:2px 6px}
+  body{padding-bottom:104px}
+  .zap-fixo{bottom:112px}
+  @media(min-width:760px){body{padding-bottom:76px}.zap-fixo{bottom:88px}}
+</style>
+{% endif %}
+</head>
+<body>
+
+{% if tenant and tenant.eh_demo %}
+{# Prévia comercial: este bar ainda não é cliente e não pediu o site. Dizer isso
+   em alto e bom som é o que separa demonstração de clone não autorizado. #}
+<div class="previa" role="complementary" id="previa">
+  <span><b>Prévia não oficial</b> — demonstração feita pelo Feira de Barão.
+    Não é o site oficial de {{ site.nome }}.</span>
+  <a href="https://wa.me/{{ contato_vendas or site.whatsapp }}?text={{ ('Quero assumir o site de ' ~ site.nome) | urlencode }}">Quero este site</a>
+  <a class="vazado" href="mailto:{{ email_vendas }}?subject={{ ('Remover prévia: ' ~ site.nome) | urlencode }}">Pedir remoção</a>
+  <button class="fechar" onclick="document.getElementById('previa').remove();document.body.style.paddingBottom='0'" aria-label="Fechar aviso">✕</button>
+</div>
+{% endif %}
+
+<header class="masthead">
+  <div class="interno">
+    <a href="#topo" class="marca">{{ site.nome }}<span>{{ descritor }}</span></a>
+    <nav class="mh-nav" aria-label="Seções do site">
+      {% if dishes %}<a href="#cardapio">Cardápio</a>{% endif %}
+      {% if promocoes %}<a href="#promocoes">Promoções</a>{% endif %}
+      {% if team or gallery %}<a href="#historia">A casa</a>{% endif %}
+      {% if reviews or site.nota_google %}<a href="#avaliacoes">Avaliações</a>{% endif %}
+      {% if eventos %}<a href="#agenda">Agenda</a>{% endif %}
+      {% if gallery %}<a href="#galeria">Galeria</a>{% endif %}
+      <a href="#reservar">Reservar</a>
+      <a href="#contato">Contato</a>
+    </nav>
+    <div class="mh-acoes">
+      <button class="btn-icone" id="btnTema" onclick="trocarTema()" aria-label="Alternar tema claro e escuro" title="Alternar tema"><span id="icTema">☾</span></button>
+      <button class="btn-indice" id="btnIndice" onclick="abrirIndice()" aria-expanded="false" aria-controls="indice">Índice</button>
+    </div>
+  </div>
+</header>
+
+<!-- ÍNDICE (menu no celular): sumário numerado, como abertura de revista -->
+<div class="indice" id="indice" role="dialog" aria-modal="true" aria-label="Índice do site">
+  <div class="indice-topo">
+    <b>Índice</b>
+    <button onclick="fecharIndice()" aria-label="Fechar índice">✕</button>
+  </div>
+  <ol>
+    {% if dishes %}<li><a href="#cardapio" onclick="fecharIndice()">Cardápio</a></li>{% endif %}
+    {% if promocoes %}<li><a href="#promocoes" onclick="fecharIndice()">Promoções</a></li>{% endif %}
+    {% if team or gallery %}<li><a href="#historia" onclick="fecharIndice()">A casa</a></li>{% endif %}
+    {% if reviews or site.nota_google %}<li><a href="#avaliacoes" onclick="fecharIndice()">Avaliações</a></li>{% endif %}
+    {% if eventos %}<li><a href="#agenda" onclick="fecharIndice()">Agenda</a></li>{% endif %}
+    {% if gallery %}<li><a href="#galeria" onclick="fecharIndice()">Galeria</a></li>{% endif %}
+    <li><a href="#reservar" onclick="fecharIndice()">Reservar mesa</a></li>
+    <li><a href="#contato" onclick="fecharIndice()">Contato</a></li>
+  </ol>
+  <div class="rodape-indice">
+    <a class="link-seta" href="{{ url_for('auth.login') }}">Área do lojista →</a>
+  </div>
+</div>
+
+<!-- HERO: o prato é o herói. Título serifado à esquerda, foto grande à direita. -->
+<section class="hero" id="topo">
+  <div class="wrap">
+    <div class="hero-grade">
+      <div>
+        {% if site.kicker %}<div class="hero-kicker" data-hero>{{ site.kicker }}</div>{% endif %}
+        <h1 data-hero>
+          <span>{{ site.hero_linha1 or site.nome }}</span>
+          {% if site.hero_linha2 %}<span class="dois">{{ site.hero_linha2 }}</span>{% endif %}
+        </h1>
+        {% if site.tagline %}<p class="hero-tag" data-hero>{{ site.tagline }}</p>{% endif %}
+        {% if site.subline %}<p class="hero-meta" data-hero>{{ site.subline }}</p>{% endif %}
+        {# Prova social já no herói — mas só com dado real deste bar. Quando há
+           nota do Google ela vence o texto solto de selo_estrelas (que costuma
+           dizer a mesma coisa em prosa); sem nota, o selo segue como estava. #}
+        {% if site.nota_google %}
+        <div class="hero-selo" data-hero>
+          <span class="est">★</span>
+          <b>{{ site.nota_google }}</b>
+          <span>· {% if site.qtd_avaliacoes %}{{ site.qtd_avaliacoes }} avaliações no Google{% else %}no Google{% endif %}</span>
+        </div>
+        {% elif site.selo_estrelas %}
+        <div class="hero-selo" data-hero><span class="est">★★★★★</span> {{ site.selo_estrelas }}</div>
+        {% endif %}
+        <div class="hero-acoes" data-hero>
+          <a class="btn" href="#reservar">{{ copy.reserva.eyebrow }}</a>
+          {% if site.whatsapp %}
+          <a class="btn btn-linha" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener">WhatsApp</a>
+          {% endif %}
+        </div>
+        {% if copy.scroll %}<div class="rolar" data-hero>{{ copy.scroll }}</div>{% endif %}
+      </div>
+      {% if heroi_img %}
+      <figure class="hero-foto" data-hero>
+        <img src="{{ heroi_img }}" alt="Prato do {{ site.nome }}" fetchpriority="high">
+        <figcaption>{{ site.nome }}{% if site.cidade_uf %} · {{ site.cidade_uf }}{% endif %}</figcaption>
+      </figure>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% if copy.marquee %}
+<div class="wrap">
+  <div class="sabores">
+    {% for item in copy.marquee %}<span>{{ item|trim }}</span>{% if not loop.last %}<i></i>{% endif %}{% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- CARDÁPIO: a seção principal deste modelo. Um prato por faixa, foto grande,
+     lado alternado. Prato sem foto vira bloco de texto, nunca caixa vazia. -->
+{% if dishes %}
+<section class="sec" id="cardapio">
+  <div class="wrap">
+    <div class="cab rev">
+      <div class="olho">{{ copy.cardapio.eyebrow }}</div>
+      <h2 class="titulo">{{ copy.cardapio.titulo|safe }}</h2>
+      {% if copy.cardapio.lead %}<p class="lead">{{ copy.cardapio.lead }}</p>{% endif %}
+    </div>
+    <div class="pratos">
+      {% for d in dishes %}
+      <article class="prato rev {{ 'com-foto' if d.img else 'sem-foto' }}{% if d.destaque %} destaque{% endif %}">
+        {% if d.img %}
+        <div class="prato-foto">
+          <img src="{{ d.img }}" alt="{{ d.nome }}" loading="lazy">
+        </div>
+        {% endif %}
+        <div>
+          <div class="prato-num">{{ '%02d' % loop.index }}</div>
+          <h3>{{ d.nome }}</h3>
+          {% if d.descricao %}<p>{{ d.descricao }}</p>{% endif %}
+          {% if d.tag %}<span class="selo">{{ d.tag }}</span>
+          {% elif d.destaque %}<span class="selo">Destaque da casa</span>{% endif %}
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- PROMOÇÕES -->
+{% if promocoes %}
+<section class="sec" id="promocoes">
+  <div class="wrap">
+    <div class="cab rev">
+      <div class="olho">{{ copy.promocoes.eyebrow }}</div>
+      <h2 class="titulo">{{ copy.promocoes.titulo|safe }}</h2>
+    </div>
+    <div class="promos rev">
+      {% for p in promocoes %}
+      <div class="promo{% if p.acontece_hoje %} hoje{% endif %}">
+        <div class="rot">{% if p.acontece_hoje %}É hoje{% else %}{{ p.rotulo or 'Oferta' }}{% endif %}</div>
+        <div>
+          <h3>{{ p.titulo }}{% if p.exemplo %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
+          {% if p.descricao %}<p>{{ p.descricao }}</p>{% endif %}
+          {% if p.dia_semana is not none and p.rotulo %}
+            <div class="val">Toda {{ p.rotulo.replace('TODA ', '')|lower }}{% if p.validade %} · até {{ p.validade.strftime('%d/%m/%Y') }}{% endif %}</div>
+          {% elif p.validade %}
+            <div class="val">Válida até {{ p.validade.strftime('%d/%m/%Y') }}</div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- A CASA: texto de abertura + ficha técnica de quem faz -->
+{% if team or gallery %}
+<section class="sec" id="historia">
+  <div class="wrap">
+    <div class="historia-grade">
+      <div class="rev">
+        <div class="olho">{{ copy.historia.eyebrow }}</div>
+        <h2 class="titulo">{{ copy.historia.titulo|safe }}</h2>
+        <p class="historia-texto">{{ copy.historia.texto }}</p>
+        {% if team %}
+        <ul class="creditos">
+          {% for m in team %}
+          <li>
+            {% if m.emoji %}<span class="em">{{ m.emoji }}</span>{% endif %}
+            <b>{{ m.nome }}</b>
+            {% if m.papel %}<span>{{ m.papel }}</span>{% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+      {% if gallery %}
+      <figure class="historia-foto rev">
+        <img src="{{ gallery[0].img }}" alt="{{ gallery[0].legenda or ('A casa — ' ~ site.nome) }}" loading="lazy">
+        <figcaption>{{ gallery[0].legenda or ('Um dia no ' ~ site.nome) }}</figcaption>
+      </figure>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- O CLIMA DA CASA -->
+<section class="sec" id="clima">
+  <div class="wrap">
+    <div class="cab rev">
+      <div class="olho">{{ copy.clima.eyebrow }}</div>
+      <h2 class="titulo">{{ copy.clima.titulo|safe }}</h2>
+    </div>
+    <div class="clima rev">
+      {% for emoji, titulo, sub in copy.clima.cards %}
+      <div class="clima-item">
+        <span class="em">{{ emoji }}</span>
+        <b>{{ titulo }}</b>
+        <small>{{ sub }}</small>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- AVALIAÇÕES: nota do Google e depoimentos escritos são dados INDEPENDENTES.
+     Quase todo bar tem nota e quase nenhum tem depoimento cadastrado — enquanto
+     a nota morava dentro do {% raw %}{% if reviews %}{% endraw %}, a prova social
+     sumia da página inteira. A seção existe se houver qualquer um dos dois; some
+     só quando não houver nenhum (invariante de seção órfã, preservado). -->
+{% if reviews or site.nota_google %}
+<section class="sec" id="avaliacoes">
+  <div class="wrap">
+    <div class="cab rev">
+      <div class="olho">{{ copy.avaliacoes.eyebrow }}</div>
+      <h2 class="titulo">{{ copy.avaliacoes.titulo|safe }}</h2>
+    </div>
+    {# Nota real deste bar. Sem o dado, o bloco some — exibir nota fixa era
+       publicar a reputação de um bar na página de outro. #}
+    {% if site.nota_google %}
+    <div class="prova rev">
+      <div class="prova-n">
+        {# data-target em ponto decimal pro contador do Motion; o texto visível
+           continua no formato BR, então sem JS a nota já está certa. #}
+        <span class="n" data-contador data-target="{{ site.nota_google|string|replace(',', '.') }}" data-casas="1">{{ site.nota_google }}</span>
+        <span class="est" aria-hidden="true">★★★★★</span>
+      </div>
+      <p class="prova-txt">
+        {% if site.qtd_avaliacoes %}
+          <b data-contador data-target="{{ site.qtd_avaliacoes }}">{{ site.qtd_avaliacoes }}</b> avaliações no Google.
+        {% else %}
+          Nota de quem já sentou à mesa.
+        {% endif %}
+        <small>Reputação verificada · Google</small>
+      </p>
+    </div>
+    {% endif %}
+    {% if reviews %}
+    <div class="depoimentos">
+      {% for r in reviews %}
+      <div class="depoimento rev">
+        {% if r.estrelas %}<div class="est">{{ '★' * r.estrelas }}</div>{% endif %}
+        <blockquote>“{{ r.texto }}”</blockquote>
+        <cite>{{ r.autor }}</cite>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+<!-- AGENDA -->
+{% if eventos %}
+<section class="sec" id="agenda">
+  <div class="wrap">
+    <div class="cab rev">
+      <div class="olho">{{ copy.agenda.eyebrow }}</div>
+      <h2 class="titulo">{{ copy.agenda.titulo|safe }}</h2>
+      {% if copy.agenda.lead %}<p class="lead">{{ copy.agenda.lead }}</p>{% endif %}
+    </div>
+    {% set meses = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'] %}
+    {% set dias = ['dom','seg','ter','qua','qui','sex','sáb'] %}
+    <div class="agenda rev">
+      {% for e in eventos %}
+      <div class="evento">
+        <div class="data">{{ '%02d' % e.data.day }} {{ meses[e.data.month-1] }}</div>
+        <div>
+          <h3>{{ e.titulo }}{% if e.exemplo %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
+          <div class="quando">{{ dias[(e.data.weekday()+1)%7] }}{% if e.hora %} · {{ e.hora }}{% endif %}</div>
+          {% if e.descricao %}<p class="desc">{{ e.descricao }}</p>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- GALERIA -->
+{% if gallery %}
+<section class="sec" id="galeria">
+  <div class="wrap">
+    <div class="cab rev">
+      <div class="olho">{{ copy.galeria.eyebrow }}</div>
+      <h2 class="titulo">{{ copy.galeria.titulo|safe }}</h2>
+      {% if copy.galeria.lead %}<p class="lead">{{ copy.galeria.lead }}</p>{% endif %}
+    </div>
+    {# Amostra, não álbum: no máximo 6. O banco pode ter 16 fotos; empilhar
+       todas fazia a página passar de 11.000px de altura no celular. #}
+    <div class="galeria rev">
+      {% for g in gallery %}{% if loop.index <= 6 %}
+      <figure>
+        <img src="{{ g.img }}" alt="{{ g.legenda or (site.nome ~ ' — foto da casa') }}" loading="lazy">
+        {% if g.legenda %}<figcaption>{{ g.legenda }}</figcaption>{% endif %}
+      </figure>
+      {% endif %}{% endfor %}
+    </div>
+    {% if gallery|length > 6 and site.instagram_url %}
+    <a class="link-seta galeria-mais" href="{{ site.instagram_url }}" target="_blank" rel="noopener">Ver mais fotos no Instagram →</a>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+<!-- RESERVA -->
+<section class="sec" id="reservar">
+  <div class="wrap">
+    <div class="reserva-grade">
+      <div class="rev">
+        <div class="olho">{{ copy.reserva.eyebrow }}</div>
+        <h2 class="titulo">{{ copy.reserva.titulo|safe }}</h2>
+        {% if copy.reserva.lead %}<p class="lead">{{ copy.reserva.lead }}</p>{% endif %}
+      </div>
+      {% if not reservas_ativas %}
+      <div class="rev">
+        <p class="lead" style="margin-top:0">{{ copy.reserva_ui.fallback }}</p>
+        {% if site.whatsapp %}
+        <a class="btn" style="margin-top:26px"
+           href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}"
+           target="_blank" rel="noopener">Chamar no WhatsApp</a>
+        {% endif %}
+      </div>
+      {% else %}
+      <form class="rev" id="reservaForm" onsubmit="return enviarReserva(event)" novalidate>
+        {# Servido pelo domínio do bar, o backend resolve o tenant pelo Host.
+           Em /bar/<slug> (prévias) o Host é o do produto — daí este campo. #}
+        <input type="hidden" name="slug" value="{{ tenant.slug if tenant else '' }}">
+        <div class="campo">
+          <label for="ar-nome">Seu nome</label>
+          <input id="ar-nome" name="nome" type="text" autocomplete="name" placeholder="Como te chamamos?" required>
+        </div>
+        <div class="dupla">
+          <div class="campo">
+            <label for="ar-tel">WhatsApp</label>
+            <input id="ar-tel" name="telefone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(19) 99999-9999" required>
+          </div>
+          <div class="campo">
+            <label for="ar-pessoas">Pessoas</label>
+            <input id="ar-pessoas" name="num_pessoas" type="number" min="1" max="50" value="2" required>
+          </div>
+        </div>
+        <div class="dupla">
+          <div class="campo">
+            <label for="ar-data">Data</label>
+            <input id="ar-data" name="data" type="date" required>
+          </div>
+          <div class="campo">
+            <label for="ar-hora">Horário</label>
+            <input id="ar-hora" name="hora" type="time" value="19:30" required>
+          </div>
+        </div>
+        <div class="campo">
+          <label for="ar-obs">Observação (opcional)</label>
+          <textarea id="ar-obs" name="observacao" placeholder="Aniversário? Restrição alimentar? Conta pra gente."></textarea>
+        </div>
+        <button class="btn" type="submit">{{ copy.reserva_ui.botao }}</button>
+        <div class="reserva-msg" id="reservaMsg" role="status" aria-live="polite"></div>
+        <a class="link-seta reserva-zap" id="reservaZap" href="#" target="_blank" rel="noopener">{{ copy.reserva_ui.titulo }} →</a>
+        {% if site.horario %}<p class="reserva-nota">{{ site.horario }}</p>{% endif %}
+      </form>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- CONTATO -->
+<section class="sec" id="contato">
+  <div class="wrap">
+    <div class="contato-grade">
+      <div class="rev">
+        <div class="olho">{{ copy.contato.eyebrow }}</div>
+        <h2 class="titulo">{{ copy.contato.titulo|safe }}</h2>
+        <ul class="dados">
+          {% if site.endereco %}<li><b>Endereço</b><span>{{ site.endereco }}</span></li>{% endif %}
+          {% if site.horario %}<li><b>Horário</b><span>{{ site.horario }}</span></li>{% endif %}
+          {% if site.telefone_exibicao %}<li><b>Telefone · WhatsApp</b><span>{{ site.telefone_exibicao }}</span></li>{% endif %}
+          {% if site.servicos %}<li><b>Serviços</b><span>{{ site.servicos }}</span></li>{% endif %}
+        </ul>
+        {% if site.maps_query %}
+        <a class="link-seta" style="margin-top:26px" href="https://www.google.com/maps/search/?api=1&query={{ site.maps_query }}" target="_blank" rel="noopener">Abrir no mapa →</a>
+        {% endif %}
+      </div>
+      <div class="chamada rev">
+        <h3>{{ copy.cta.titulo }}</h3>
+        <p>{{ copy.cta.linha }}</p>
+        <div class="acoes">
+          {% if site.whatsapp %}
+          <a class="btn" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener">Falar no WhatsApp</a>
+          {% endif %}
+          <a class="btn btn-linha" href="#reservar">Reservar mesa</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="rodape-nome">{{ site.nome }}</div>
+    <div class="rodape-linha">{% if site.cidade_uf %}{{ site.cidade_uf }} · {% endif %}{{ copy.rodape }}</div>
+    <div class="rodape-links">
+      {% if site.instagram_url %}<a href="{{ site.instagram_url }}" target="_blank" rel="noopener">Instagram</a>{% endif %}
+      {% if site.facebook_url %}<a href="{{ site.facebook_url }}" target="_blank" rel="noopener">Facebook</a>{% endif %}
+      {% if site.maps_query %}<a href="https://www.google.com/maps/search/?api=1&query={{ site.maps_query }}" target="_blank" rel="noopener">Como chegar</a>{% endif %}
+      <a href="{{ url_for('auth.login') }}">Área do lojista</a>
+    </div>
+  </div>
+</footer>
+
+{% if site.whatsapp %}
+<a class="zap-fixo" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener" aria-label="Falar no WhatsApp">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M.06 24l1.68-6.13A11.9 11.9 0 0 1 .16 11.9C.16 5.34 5.5.02 12.06.02a11.8 11.8 0 0 1 8.4 3.49 11.8 11.8 0 0 1 3.48 8.4c0 6.56-5.34 11.89-11.9 11.89a11.9 11.9 0 0 1-5.7-1.45L.06 24zM6.6 20.15c1.68.998 3.28 1.6 5.44 1.6 5.45 0 9.89-4.43 9.89-9.88 0-5.46-4.43-9.89-9.88-9.89-5.46 0-9.89 4.43-9.89 9.89 0 2.27.6 3.98 1.7 5.7l-1 3.65 3.65-.97zM17.5 14.3c-.07-.12-.27-.2-.57-.35-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.08.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2-1.41.25-.7.25-1.29.17-1.42z"/></svg>
+  WhatsApp
+</a>
+{% endif %}
+
+<script>
+  var TEMA_KEY='fdb-tema-{{ tenant.slug if tenant and tenant.slug else "site" }}';
+
+  function corDeFundo(){
+    var v=getComputedStyle(document.documentElement).getPropertyValue('--papel');
+    return (v||'').trim()||'{{ tema_cor or "#fbf7f1" }}';
+  }
+  function pintarIcone(){
+    var escuro=document.documentElement.getAttribute('data-theme')==='dark';
+    var ic=document.getElementById('icTema');
+    if(ic)ic.textContent=escuro?'☀':'☾';
+    var meta=document.querySelector('meta[name=theme-color]');
+    if(meta)meta.setAttribute('content',corDeFundo());
+  }
+  function trocarTema(){
+    var r=document.documentElement;
+    var escuro=r.getAttribute('data-theme')!=='dark';
+    r.setAttribute('data-theme',escuro?'dark':'light');
+    try{localStorage.setItem(TEMA_KEY,escuro?'dark':'light');}catch(e){}
+    pintarIcone();
+  }
+
+  // Índice (menu do celular)
+  function abrirIndice(){
+    document.getElementById('indice').classList.add('aberto');
+    document.getElementById('btnIndice').setAttribute('aria-expanded','true');
+    document.body.style.overflow='hidden';
+  }
+  function fecharIndice(){
+    document.getElementById('indice').classList.remove('aberto');
+    document.getElementById('btnIndice').setAttribute('aria-expanded','false');
+    document.body.style.overflow='';
+  }
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')fecharIndice();});
+
+  // Data mínima do seletor de reserva = hoje (fuso local, não UTC)
+  (function(){
+    var d=document.getElementById('ar-data');
+    if(!d)return;
+    var t=new Date(); t.setMinutes(t.getMinutes()-t.getTimezoneOffset());
+    var iso=t.toISOString().slice(0,10);
+    d.min=iso; if(!d.value)d.value=iso;
+  })();
+
+  function enviarReserva(ev){
+    ev.preventDefault();
+    var form=ev.target, btn=form.querySelector('button[type=submit]'), msg=document.getElementById('reservaMsg');
+    btn.disabled=true; var txt=btn.textContent; btn.textContent='Enviando…';
+    msg.className='reserva-msg';
+    fetch('{{ url_for("public.reservar") }}',{method:'POST',body:new FormData(form),headers:{'Accept':'application/json'}})
+      .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
+      .then(function(res){
+        if(res.ok && res.j.ok){
+          msg.className='reserva-msg ok'; msg.textContent=res.j.mensagem;
+          var wa=document.getElementById('reservaZap');
+          if(res.j.wa_url){
+            wa.href=res.j.wa_url; wa.classList.add('mostra');
+            wa.scrollIntoView({block:'center',behavior:'smooth'});
+          }
+          form.reset();
+          var d=document.getElementById('ar-data'); if(d)d.value=d.min;
+          var h=document.getElementById('ar-hora'); if(h)h.value='19:30';
+        } else {
+          msg.className='reserva-msg err';
+          msg.textContent=(res.j.erros&&res.j.erros.join(' '))||'Não deu pra enviar. Tenta pelo WhatsApp?';
+        }
+      })
+      .catch(function(){msg.className='reserva-msg err';msg.textContent='Sem conexão. Chama a gente no WhatsApp!';})
+      .finally(function(){btn.disabled=false;btn.textContent=txt;});
+    return false;
+  }
+
+  pintarIcone();
+
+  // ---- Revelação: contrato comum aos dois caminhos (Motion ou IO) ----------
+  // Este bloco roda ANTES do CDN da Motion e não depende dele: se o CDN
+  // pendurar, a rede de segurança abaixo mostra a página inteira do mesmo jeito.
+  var REV_ALVOS=document.querySelectorAll('.rev');
+  var REV_ARMADO=false, REV_TUDO=false;
+  function revelarTudo(){
+    REV_TUDO=true;
+    Array.prototype.forEach.call(REV_ALVOS,function(el){el.classList.add('dentro');});
+  }
+  setTimeout(function(){ if(!REV_ARMADO) revelarTudo(); },2200);
+</script>
+
+<!-- Motion (build vanilla, ex-Framer Motion). Versão pinada: @latest já quebrou
+     landing em produção uma vez. Vem depois do script acima de propósito — se
+     este arquivo não chegar, nada do que a página precisa pra funcionar some. -->
+<script src="https://cdn.jsdelivr.net/npm/motion@13.1.0/dist/motion.js"></script>
+<script>
+(function(){
+  var reduz=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Movimento reduzido, ou a rede de segurança já mostrou tudo: sem animação.
+  if(reduz || REV_TUDO){ REV_ARMADO=true; if(!REV_TUDO) revelarTudo(); return; }
+
+  var M=window.Motion;
+  var temMotion=!!(M && M.animate && M.inView && M.stagger);
+
+  // ---------- Caminho 1: Motion ------------------------------------------
+  if(temMotion){
+    var raiz=document.documentElement;
+    try{
+      // A classe é o gate: só agora existe estado inicial escondido no herói.
+      raiz.classList.add('js-anim');
+      REV_ARMADO=true;
+
+      // Entrada do herói em cascata: título, tagline, selo de nota, CTA, foto.
+      M.animate('[data-hero]',
+        {opacity:[0,1],y:[18,0]},
+        {duration:.7,delay:M.stagger(.085),ease:[.2,.7,.2,1]});
+
+      // Scroll-reveal seção a seção — mesmo ritmo editorial do CSS que substitui.
+      M.inView('.rev',function(el){
+        M.animate(el,{opacity:[0,1],y:[22,0]},{duration:.75,ease:[.2,.7,.2,1]});
+      },{amount:.15});
+
+      // A nota do Google contando de 0 até o valor: o número é o argumento,
+      // o movimento faz o olho parar nele. O texto correto já está no HTML.
+      M.inView('[data-contador]',function(el){
+        var alvo=parseFloat(el.getAttribute('data-target'));
+        if(isNaN(alvo)) return;
+        var casas=parseInt(el.getAttribute('data-casas')||'0',10);
+        M.animate(0,alvo,{duration:1.15,ease:'easeOut',onUpdate:function(v){
+          el.textContent = casas ? v.toFixed(casas).replace('.',',')
+                                 : Math.round(v).toLocaleString('pt-BR');
+        }});
+      },{amount:1});
+
+      // Micro-interação nos CTAs (só transform — nada de layout).
+      if(typeof M.hover==='function'){
+        M.hover('.btn',function(el){
+          M.animate(el,{scale:1.035},{type:M.spring,stiffness:320,damping:18});
+          return function(){ M.animate(el,{scale:1},{type:M.spring,stiffness:320,damping:22}); };
+        });
+      }
+      return;
+    }catch(e){
+      // API mudou embaixo da gente: desarma tudo e cai pro caminho simples.
+      raiz.classList.remove('js-anim');
+    }
+  }
+
+  // ---------- Caminho 2: IntersectionObserver (sem Motion) -----------------
+  if(!('IntersectionObserver' in window)){ REV_ARMADO=true; revelarTudo(); return; }
+  var io=new IntersectionObserver(function(itens){
+    itens.forEach(function(i){ if(i.isIntersecting){ i.target.classList.add('dentro'); io.unobserve(i.target); } });
+  },{threshold:.12,rootMargin:'0px 0px -6% 0px'});
+  Array.prototype.forEach.call(REV_ALVOS,function(el){io.observe(el);});
+  REV_ARMADO=true;
+  // Rede de segurança do observer: se ele não entregar nada (webview estranha,
+  // aba nunca pintada), o site não pode ficar em branco — revela tudo.
+  setTimeout(function(){
+    if(!document.querySelector('.rev.dentro')) revelarTudo();
+  },2200);
+})();
+</script>
+</body>
+</html>

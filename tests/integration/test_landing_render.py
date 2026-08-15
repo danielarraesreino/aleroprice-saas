@@ -13,6 +13,7 @@ import pytest
 from app.models.modelo_restaurante import Restaurante
 from app.models.modelo_siteconfig import SiteConfig
 from app.models.modelo_sitecontent import DishCard, Review, TeamMember, GalleryItem
+from app.utils.modelos import MODELOS
 
 
 @pytest.fixture
@@ -188,3 +189,171 @@ def test_menu_completo_quando_ha_conteudo(client, vitrine):
     assert _links_quebrados(corpo) == []
     for ancora in ('#cardapio', '#avaliacoes', '#galeria', '#contato'):
         assert ancora in corpo, f'menu perdeu {ancora} mesmo tendo conteúdo'
+
+
+# ---------------------------------------------------------------------------
+# Os invariantes acima valem pro clássico. Abaixo, valem pra TODOS os modelos.
+#
+# `modelos.MODELOS` é a fonte única: parametrizar pelas chaves faz o modelo que
+# nascer amanhã já entrar aqui sozinho, sem ninguém lembrar de adicionar o
+# teste. Um modelo bonito que vaza foto de outro bar, indexa prévia no Google
+# ou mostra "Cardápio" no menu sem cardápio é pior que não ter modelo nenhum.
+# ---------------------------------------------------------------------------
+
+TODOS_OS_MODELOS = sorted(MODELOS)
+
+# Seções que só existem se houver dado. Título sem corpo é o que denuncia site
+# inacabado — e é o estado natural de toda prévia da campanha, que nasce vazia.
+# (`clima`/`casa`/`aovivo` ficam de fora de propósito: são blocos de copy da
+# vibe, têm corpo próprio e não dependem de cadastro.)
+SECOES_COM_DADO = ('cardapio', 'avaliacoes', 'galeria', 'agenda', 'promocoes',
+                   'historia')
+
+
+def _secoes(corpo):
+    import re
+    return set(re.findall(r'<section[^>]*\bid="([^"]+)"', corpo))
+
+
+def _tem_form_de_reserva(corpo):
+    """O formulário que faz POST /reservar. Sem plano de reservas ele não pode
+    existir: o cliente do bar preenche, envia e ninguém recebe.
+
+    Procura a marcação do form, não o `function enviarReserva` — o helper de JS
+    fica no rodapé de todos os modelos mesmo quando o form não sai.
+    """
+    return 'name="num_pessoas"' in corpo or 'onsubmit="return enviarReserva' in corpo
+
+
+def _bar_do_modelo(session, modelo, *, slug, nome, demo=False, plano='site',
+                   hero_foto='img/bar/capa-propria.jpg', conteudo=True):
+    """Bar de teste rodando `modelo`.
+
+    `conteudo=False` devolve o bar recém-criado da campanha: existe, tem
+    modelo escolhido e nada mais.
+    """
+    from datetime import date, timedelta
+    from app.models.modelo_evento import Evento
+    from app.models.modelo_promocao import Promocao
+
+    r = Restaurante(nome=nome, slug=slug,
+                    tipo_conta='demo' if demo else 'cliente',
+                    subscription_tier=plano,
+                    subscription_status='active' if plano != 'free' else 'free')
+    session.add(r)
+    session.commit()
+
+    session.add(SiteConfig(restaurant_id=r.id, nome=nome, modelo=modelo,
+                           whatsapp='5519911110000', vibe='boteco',
+                           hero_foto=hero_foto if conteudo else None))
+    if conteudo:
+        session.add(DishCard(restaurant_id=r.id, nome='Bolinho de teste',
+                             descricao='Só existe aqui.', imagem='img/bar/prato-proprio.jpg',
+                             tag='★ TESTE', destaque=True, ordem=0, ativo=True))
+        session.add(Review(restaurant_id=r.id, autor='Cliente Fiel',
+                           texto='Voltaria mil vezes.', estrelas=5, ordem=0, ativo=True))
+        session.add(TeamMember(restaurant_id=r.id, nome='Chef Testeira',
+                               papel='Cozinha', emoji='👩‍🍳', ordem=0, ativo=True))
+        session.add(GalleryItem(restaurant_id=r.id, imagem='img/bar/galeria-propria.jpg',
+                                ordem=0, ativo=True))
+        session.add(Promocao(restaurant_id=r.id, titulo='Chope pela metade', ativo=True))
+        session.add(Evento(restaurant_id=r.id, titulo='Roda de samba de teste',
+                           data=date.today() + timedelta(days=5), ativo=True))
+    session.commit()
+    return r
+
+
+@pytest.mark.parametrize('modelo', TODOS_OS_MODELOS)
+class TestTodoModeloRespeitaOsInvariantes:
+    """Cada modelo é uma landing inteira reescrita. Nenhum pode regredir os
+    invariantes que o clássico já garante."""
+
+    def test_renderiza_com_conteudo_completo(self, client, session, modelo):
+        _bar_do_modelo(session, modelo, slug='bar-cheio', nome='Bar Cheio')
+
+        resp = client.get('/bar/bar-cheio')
+        corpo = resp.get_data(as_text=True)
+
+        assert resp.status_code == 200, f'{modelo} quebrou com conteúdo completo'
+        for trecho in ('Bar Cheio', 'Bolinho de teste', 'Cliente Fiel',
+                       'Chef Testeira', 'galeria-propria.jpg',
+                       'Roda de samba de teste', 'Chope pela metade'):
+            assert trecho in corpo, f'{modelo} não renderizou: {trecho}'
+
+    def test_bar_vazio_renderiza_sem_secao_orfa(self, client, session, modelo):
+        _bar_do_modelo(session, modelo, slug='bar-vazio-m', nome='Bar Vazio',
+                       conteudo=False)
+
+        resp = client.get('/bar/bar-vazio-m')
+        corpo = resp.get_data(as_text=True)
+
+        assert resp.status_code == 200, f'{modelo} quebrou com bar vazio'
+        assert 'Bar Vazio' in corpo
+        orfas = sorted(_secoes(corpo) & set(SECOES_COM_DADO))
+        assert orfas == [], f'{modelo} renderizou seção sem conteúdo: {orfas}'
+
+    def test_demo_avisa_que_e_previa_e_nao_indexa(self, client, session, modelo):
+        _bar_do_modelo(session, modelo, slug='bar-demo', nome='Bar Demo', demo=True)
+
+        corpo = client.get('/bar/bar-demo').get_data(as_text=True)
+
+        assert 'noindex' in corpo, f'{modelo} deixaria a prévia ser indexada'
+        assert 'Prévia não oficial' in corpo, f'{modelo} não avisa que é prévia'
+
+    def test_cliente_nao_e_marcado_como_previa(self, client, session, modelo):
+        _bar_do_modelo(session, modelo, slug='bar-cliente', nome='Bar Cliente')
+
+        corpo = client.get('/bar/bar-cliente').get_data(as_text=True)
+
+        assert 'noindex' not in corpo, f'{modelo} sumiu com o site do cliente do Google'
+        assert 'Prévia não oficial' not in corpo, f'{modelo} chama cliente de prévia'
+
+    def test_menu_nao_aponta_pra_secao_inexistente(self, client, session, modelo):
+        """Nos dois extremos: o bar cheio e o bar que acabou de nascer."""
+        _bar_do_modelo(session, modelo, slug='bar-cheio', nome='Bar Cheio')
+        _bar_do_modelo(session, modelo, slug='bar-vazio-m', nome='Bar Vazio',
+                       conteudo=False)
+
+        for slug in ('bar-cheio', 'bar-vazio-m'):
+            corpo = client.get(f'/bar/{slug}').get_data(as_text=True)
+            assert _links_quebrados(corpo) == [], f'{modelo} em /{slug}: link morto no menu'
+
+    def test_sem_capa_propria_nao_ha_og_image(self, client, session, vitrine, modelo):
+        """O card do WhatsApp com a foto de outro bar é o pior vazamento
+        possível: sai da nossa tela e vira print no grupo do cliente.
+
+        O Bar da Vila entra junto (fixture `vitrine`) justamente pra haver uma
+        capa alheia disponível pra vazar.
+        """
+        _bar_do_modelo(session, modelo, slug='bar-sem-capa', nome='Bar Sem Capa',
+                       hero_foto=None)
+
+        corpo = client.get('/bar/bar-sem-capa').get_data(as_text=True)
+
+        assert 'og:image' not in corpo, f'{modelo} anunciou og:image sem capa própria'
+        assert 'twitter:image' not in corpo, f'{modelo} anunciou twitter:image sem capa'
+        assert 'foto-18.jpg' not in corpo, f'{modelo} vazou a capa do Bar da Vila'
+
+    def test_com_capa_propria_o_og_image_e_a_dele(self, client, session, vitrine, modelo):
+        """Contraprova do teste acima: sem isto, bastaria nunca emitir og:image
+        pra 'passar' — e todo bar perderia o card de compartilhamento."""
+        _bar_do_modelo(session, modelo, slug='bar-com-capa', nome='Bar Com Capa',
+                       hero_foto='img/bar/capa-propria.jpg')
+
+        corpo = client.get('/bar/bar-com-capa').get_data(as_text=True)
+
+        assert 'og:image' in corpo, f'{modelo} não emitiu og:image tendo capa'
+        assert 'capa-propria.jpg' in corpo, f'{modelo} apontou og:image pra outra foto'
+        assert 'foto-18.jpg' not in corpo, f'{modelo} vazou a capa do Bar da Vila'
+
+    def test_sem_plano_de_reservas_sobra_o_whatsapp(self, client, session, modelo):
+        """Formulário que ninguém recebe é pior que não ter formulário. Sem o
+        plano, o bar continua alcançável — pelo WhatsApp."""
+        _bar_do_modelo(session, modelo, slug='bar-free', nome='Bar Free', plano='free')
+
+        corpo = client.get('/bar/bar-free').get_data(as_text=True)
+
+        assert not _tem_form_de_reserva(corpo), \
+            f'{modelo} mostrou form de reserva sem plano de reservas'
+        assert 'wa.me/5519911110000' in corpo, \
+            f'{modelo} deixou o bar sem plano também sem WhatsApp'

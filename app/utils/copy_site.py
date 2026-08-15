@@ -105,7 +105,11 @@ VIBES = {
         'contato': {'eyebrow': 'VEM TOMAR UMA', 'titulo': 'Onde a gente <em>te espera</em>'},
         'cta': {'titulo': 'Bateu a sede?',
                 'linha': 'Chama no zap, garante a mesa ou cola no balcão. O chope tá saindo gelado.'},
-        'rodape': 'Feito com lúpulo e som alto 🍺',
+        # "som alto" saiu de propósito: o rodapé fala em nome do dono, e a maioria
+        # destas casas fica em bairro residencial — anunciar barulho é dar munição
+        # pra reclamação de vizinho e afastar quem quer conversar. Lúpulo e
+        # paciência elogiam o processo da cerveja, sem prometer comportamento.
+        'rodape': 'Feito com lúpulo e paciência 🍺',
         'zap': 'Olá! Vim pelo site do {nome}',
         'scroll': '↓ role e veja o que tem na torneira',
     },
