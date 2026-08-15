@@ -13,6 +13,7 @@ variações que quebram ("a partir das 18h", "Sex 11h30–14h e 18h–23h") só
 aparecem no que os donos de bar realmente escreveram.
 """
 from datetime import date, datetime
+from decimal import Decimal
 
 import pytest
 
@@ -198,6 +199,80 @@ def test_prato_sem_nome_nao_entra_no_cardapio(site_completo):
         None, site_completo,
         [{'nome': '', 'descricao': 'x'}, {'nome': 'Coxinha'}], [], [], URL)
     assert [i['name'] for i in no_de(grafo, 'Menu')['hasMenuItem']] == ['Coxinha']
+
+
+# ------------------------------------------------------------------- preço
+
+def test_preco_do_prato_vira_offer(site_completo):
+    """`offers` é o que faz o preço aparecer no resultado de busca.
+
+    Ponto decimal e sem símbolo: `price: "R$ 18,50"` é oferta inválida pro Rich
+    Results. A moeda vai separada, em `priceCurrency`.
+    """
+    dishes = [{'nome': 'Porção de calabresa', 'preco': Decimal('18.50')}]
+    item = no_de(dados_estruturados(None, site_completo, dishes, [], [], URL),
+                 'Menu')['hasMenuItem'][0]
+
+    assert item['offers'] == {'@type': 'Offer', 'price': '18.50',
+                              'priceCurrency': 'BRL'}
+
+
+def test_prato_sem_preco_sai_sem_offers(site_completo):
+    """A regra de ouro aplicada a dinheiro: prato sem preço não tem oferta.
+
+    Emitir `Offer` vazio — ou pior, `price: "0.00"` — é o bar afirmando ao
+    Google que serve de graça. Chave ausente é a única resposta honesta.
+    """
+    dishes = [{'nome': 'Chope gelado'},
+              {'nome': 'Couvert', 'preco': None},
+              {'nome': 'Grátis', 'preco': Decimal('0.00')},
+              {'nome': 'Bagunça', 'preco': 'sob consulta'}]
+    itens = no_de(dados_estruturados(None, site_completo, dishes, [], [], URL),
+                  'Menu')['hasMenuItem']
+
+    assert len(itens) == 4
+    for item in itens:
+        assert 'offers' not in item, item['name']
+
+
+def test_cardapio_com_e_sem_preco_no_mesmo_bar(site_completo):
+    """O caso real: o dono precifica metade do cardápio e para. O que tem
+    preço anuncia; o que não tem, cala — na mesma lista."""
+    dishes = [{'nome': 'Porção de calabresa', 'preco': Decimal('42.00')},
+              {'nome': 'Chope gelado'}]
+    itens = no_de(dados_estruturados(None, site_completo, dishes, [], [], URL),
+                  'Menu')['hasMenuItem']
+
+    assert itens[0]['offers']['price'] == '42.00'
+    assert 'offers' not in itens[1]
+
+
+def test_preco_nao_deixa_chave_vazia_no_grafo(site_completo):
+    """Contraprova da varredura de lixo, agora com preço na jogada: nem
+    `price: ""` nem `price: "None"` podem sobrar em lugar nenhum."""
+    dishes = [{'nome': 'Com preço', 'preco': Decimal('9.90')},
+              {'nome': 'Sem preço', 'preco': ''},
+              {'nome': 'Preço fantasma', 'preco': 'None'}]
+    grafo = dados_estruturados(None, site_completo, dishes, [], [], URL)
+
+    for caminho, valor in varrer(grafo):
+        assert valor is not None, caminho
+        assert valor != '', caminho
+        assert valor != 'None', caminho
+
+    itens = no_de(grafo, 'Menu')['hasMenuItem']
+    assert [i.get('offers', {}).get('price') for i in itens] == ['9.90', None, None]
+
+
+def test_preco_sobrevive_a_serializacao(site_completo):
+    """O grafo vai pro HTML como string escapada — o preço tem que chegar
+    legível do outro lado."""
+    dishes = [{'nome': 'Costela', 'preco': Decimal('129.90')}]
+    texto = serializar(dados_estruturados(None, site_completo, dishes, [], [], URL))
+
+    assert '"price":"129.90"' in texto
+    assert '"priceCurrency":"BRL"' in texto
+    assert 'R$' not in texto      # símbolo é coisa de tela, não de schema
 
 
 def test_avaliacao_sem_autor_ou_texto_nao_vira_review(site_completo):

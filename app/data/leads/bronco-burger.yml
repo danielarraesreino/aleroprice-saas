@@ -9,6 +9,8 @@ nome: "Bronco Burger"
 tema: neon-noite
 
 site:
+  telefone_exibicao: "(19) 2121-1020"
+  endereco: "R. Agostinho Pattaro, 199 - Barão Geraldo, Campinas - SP, 13084-095"
   vibe: hamburgueria
   descritor: "Hamburgueria artesanal em Barão"
   kicker: "BARÃO GERALDO · CAMPINAS–SP"

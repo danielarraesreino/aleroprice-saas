@@ -2,7 +2,7 @@
 
 from flask import Flask
 from app.config import config
-from app.extensions import db, migrate
+from app.extensions import db, migrate, csrf
 
 import app.models # Importar todos os modelos para registro
 import locale
@@ -214,6 +214,21 @@ def create_app(config_name='default'):
             return
         if not current_user.is_authenticated:
             return redirect(url_for('auth.login', next=request.path))
+
+    # CSRF depois do guard de login — a ordem é o comportamento.
+    #
+    # O before_request do CSRFProtect entra na fila no momento do init_app.
+    # Inicializando aqui, `require_login` roda primeiro: quem tem a sessão
+    # expirada (e portanto também o token expirado) volta pro login em vez de
+    # levar um 400 seco no meio de um formulário preenchido.
+    #
+    # Sem isto, todo POST do painel e o formulário público de reserva aceitam
+    # request forjado de outro site — o flask-wtf estava no requirements e o
+    # TestingConfig já desligava a checagem, mas a proteção nunca foi ligada.
+    # As duas exceções vivem onde a rota vive, marcadas com `@csrf.exempt`:
+    # `billing.webhook` (app/routes/billing/views.py) e `bootstrap_demo`
+    # (run.py). Ambas são chamadas de fora, sem sessão e sem token.
+    csrf.init_app(app)
 
     # 404 próprio. /bar/<slug> é rota pública quente (é o endereço do site de
     # todo bar que ainda não tem domínio próprio), e um slug errado caía na

@@ -5,6 +5,7 @@
 <h2 class="mb-4"><i class="fas fa-tags text-warning"></i> {{ 'Editar' if promo else 'Nova' }} promoção</h2>
 
 <form method="post" class="col-lg-8">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <div class="mb-3">
     <label class="form-label">Título *</label>
     <input class="form-control" name="titulo" required value="{{ promo.titulo if promo else '' }}" placeholder="Ex.: Lanche de Quarta">

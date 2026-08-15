@@ -365,6 +365,18 @@
   .dish:hover .photo{transform:scale(1.07)}
   .dish .body{padding:22px 22px 26px}
   .dish h3{font-family:"Anton",sans-serif;text-transform:uppercase;letter-spacing:.5px;font-size:1.35rem;color:var(--cream)}
+  /* Nome à esquerda, preço à direita, alinhados pela base — o olho desce a
+     coluna de preços sem tropeçar. `tabular-nums` trava a largura do dígito
+     pra que 18,50 e 129,90 fiquem na mesma grade vertical; sem isso a coluna
+     "dança" e o cardápio parece feito no Word. */
+  /* `min-width:0` no nome: sem isso um prato de nome comprido empurra a linha
+     e a página ganha scroll horizontal em 375px. */
+  .dish .dish-linha{display:flex;align-items:baseline;justify-content:space-between;gap:14px}
+  .dish .dish-linha h3{min-width:0;overflow-wrap:anywhere}
+  .dish .dish-preco{
+    flex:none;font-family:"Bebas Neue",sans-serif;font-size:1.22rem;letter-spacing:.5px;
+    color:var(--amber);font-variant-numeric:tabular-nums;white-space:nowrap;
+  }
   .dish p{color:var(--cream-dim);font-size:.96rem;margin-top:8px}
   .dish .star-tag{position:absolute;top:14px;right:14px;z-index:2;font-family:"Bebas Neue",sans-serif;letter-spacing:1px;
     font-size:.72rem;color:var(--ink);background:var(--amber);padding:4px 11px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.4)}
@@ -722,7 +734,14 @@
            `MenuItem.image` do JSON-LD. #}
         {% if d.img %}<div class="photo" role="img" aria-label="{{ d.nome }}, prato do {{ site.nome }}" style="background-image:url('{{ d.img }}')"></div>{% endif %}
         <div class="body">
-          <h3>{{ d.nome }}</h3>
+          {# Preço na mesma linha do nome, alinhado à direita: é a primeira
+             pergunta de quem lê cardápio, e o `{% if %}` antes do filtro é
+             obrigatório — `moeda_br` devolve "R$ 0,00" para None, e prato sem
+             preço não anuncia preço nenhum. #}
+          <div class="dish-linha">
+            <h3>{{ d.nome }}</h3>
+            {% if d.preco %}<span class="dish-preco">{{ d.preco|moeda_br }}</span>{% endif %}
+          </div>
           {% if d.descricao %}<p>{{ d.descricao }}</p>{% endif %}
         </div>
       </div>
@@ -878,6 +897,10 @@
         {# Quando o site é servido pelo domínio do bar, o backend resolve o tenant
            pelo Host. Em /bar/<slug> (demos) o Host é o do produto — daí este campo. #}
         <input type="hidden" name="slug" value="{{ tenant.slug if tenant else '' }}">
+        {# O POST sai por fetch, mas com FormData(form): o FormData carrega este campo
+           junto com o resto. Tirar daqui abre o formulário de reserva pra POST
+           forjado de qualquer site. O mesmo token vai no header X-CSRFToken. #}
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="field">
           <label for="rf-nome">Seu nome</label>
           <input id="rf-nome" name="nome" type="text" autocomplete="name" placeholder="Como te chamamos?" required>
@@ -1008,7 +1031,7 @@
     var form=ev.target, btn=form.querySelector('button[type=submit]'), msg=document.getElementById('reservaMsg');
     btn.disabled=true; var txt=btn.textContent; btn.textContent='Enviando…';
     msg.className='reserva-msg';
-    fetch('{{ url_for("public.reservar") }}',{method:'POST',body:new FormData(form),headers:{'Accept':'application/json'}})
+    fetch('{{ url_for("public.reservar") }}',{method:'POST',body:new FormData(form),headers:{'Accept':'application/json','X-CSRFToken':'{{ csrf_token() }}'}})
       .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
       .then(function(res){
         if(res.ok && res.j.ok){

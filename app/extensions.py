@@ -26,6 +26,20 @@ db = SQLAlchemy(metadata=MetaData(naming_convention=CONVENCAO_DE_NOMES))
 # Criando a instância de Migrate
 migrate = Migrate()
 
+# Proteção CSRF de todo POST/PUT/PATCH/DELETE.
+#
+# Ligada em `create_app`. Três endpoints ficam de fora, e cada um por um motivo
+# diferente (ver os `csrf.exempt` correspondentes):
+#   - billing.webhook  → o Stripe chama de fora, sem sessão; a autenticação
+#                        dele é a assinatura HMAC do payload, não o cookie.
+#   - bootstrap_demo   → manutenção via curl, gated por SEED_TOKEN.
+# Todo o resto — inclusive `public.reservar`, que é POST anônimo de site
+# público — exige token. O formulário de reserva manda o token no corpo
+# (input hidden dentro do <form>, que o FormData carrega) e no header
+# X-CSRFToken.
+from flask_wtf.csrf import CSRFProtect
+csrf = CSRFProtect()
+
 # Adicione aqui outras extensões conforme necessário
 from flask_login import LoginManager
 login_manager = LoginManager()

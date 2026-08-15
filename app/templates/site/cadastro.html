@@ -48,6 +48,7 @@
     {% endwith %}
 
     <form method="post" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="field">
         <label for="nome_bar">Nome do bar/restaurante</label>
         <input id="nome_bar" name="nome_bar" value="{{ nome_bar }}" placeholder="Ex.: Boteco do Zé" required>

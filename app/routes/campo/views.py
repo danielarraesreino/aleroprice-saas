@@ -25,6 +25,7 @@ from app.routes.campo import bp
 from app.utils import blob, demos, dominios
 from app.utils.copy_site import opcoes_de_vibe, vibe_valida
 from app.utils.demos import LeadInvalido, converter_demo
+from app.utils.formatacao_br import ler_moeda
 from app.utils.modelos import (
     MODELO_PADRAO, MODELOS, modelo_valido, opcoes_de_modelo,
 )
@@ -104,6 +105,9 @@ def editar(slug):
                .order_by(GalleryItem.ordem).all())
     return render_template(
         'campo/editar.html', rest=rest, cfg=cfg, pratos=pratos, galeria=galeria,
+        # Quantos pratos o cliente na mesa veria de fato: é o que decide se o
+        # QR do cardápio pode ser oferecido (a página só existe com item ativo).
+        pratos_ativos=sum(1 for p in pratos if p.ativo),
         temas=opcoes_de_tema(), vibes=opcoes_de_vibe(),
         # Sugestão pronta: em campo ninguém inventa senha boa de cabeça.
         senha_sugerida=secrets.token_urlsafe(9),
@@ -207,10 +211,14 @@ def foto(slug):
         cfg.hero_foto = url
     elif alvo == 'prato':
         nome = (request.form.get('nome') or '').strip() or 'Prato da casa'
+        # O vendedor digita rápido, de pé: "18", "18,50" e "R$ 18,50" são a
+        # mesma coisa. Preço ilegível ou vazio vira None — o prato entra sem
+        # preço em vez de a foto se perder por causa do campo do lado.
+        preco = ler_moeda(request.form.get('preco'))
         ordem = db.session.query(db.func.count(DishCard.id)).filter_by(
             restaurant_id=rest.id).scalar() or 0
         db.session.add(DishCard(restaurant_id=rest.id, nome=nome, imagem=url,
-                                ordem=ordem, ativo=True))
+                                preco=preco, ordem=ordem, ativo=True))
     else:
         ordem = db.session.query(db.func.count(GalleryItem.id)).filter_by(
             restaurant_id=rest.id).scalar() or 0
@@ -347,16 +355,67 @@ def dominio(slug):
     return jsonify({'consulta': consulta, 'livre': dominios.primeiro_livre(consulta)})
 
 
-@bp.route('/<slug>/qr.svg')
-def qr(slug):
-    """QR do site pro dono apontar o celular dele e ver na hora.
+def _resposta_qr(destino):
+    """SVG do QR pra `destino`, pronto pra sair como imagem.
 
-    Ver o próprio bar aparecer na tela do próprio telefone é o que fecha a
-    conversa — mais do que qualquer explicação de recurso.
+    Documento completo (com `xmlns`) e não `svg_inline`: o inline existe pra
+    ser colado dentro do HTML e vem sem namespace — servido como arquivo, o
+    navegador não o reconhece como SVG e a `<img>` fica quebrada. Aqui os dois
+    QRs entram por `<img src=...>`, inclusive o da folha que vai pra impressora.
+
+    Fundo branco explícito pelo mesmo motivo: o QR pode acabar sobre papel
+    colorido ou sobre o fundo escuro do Modo Campo, e leitor de câmera precisa
+    do contraste e da margem clara em volta pra achar o código.
     """
+    import io
+
     import segno
 
+    buffer = io.BytesIO()
+    segno.make(destino, error='m').save(
+        buffer, kind='svg', scale=6, border=2,
+        dark='#000000', light='#ffffff', xmldecl=False)
+    return Response(buffer.getvalue(), mimetype='image/svg+xml')
+
+
+@bp.route('/<slug>/qr.svg')
+def qr(slug):
+    """QR do SITE pro dono apontar o celular dele e ver na hora.
+
+    Ver o próprio bar aparecer na tela do próprio telefone é o que fecha a
+    conversa — mais do que qualquer explicação de recurso. Este é o QR de
+    divulgação: vai no Instagram, no cartão, na porta.
+    """
     rest = _bar(slug)
-    destino = url_for('public.landing_slug', slug=rest.slug, _external=True)
-    svg = segno.make(destino, error='m').svg_inline(scale=6, border=2)
-    return Response(svg, mimetype='image/svg+xml')
+    return _resposta_qr(url_for('public.landing_slug', slug=rest.slug, _external=True))
+
+
+@bp.route('/<slug>/qr-cardapio.svg')
+def qr_cardapio(slug):
+    """QR do CARDÁPIO — o que vai colado na mesa.
+
+    Endereço diferente do de cima de propósito. Quem senta na mesa e aponta a
+    câmera quer ler o cardápio, não conhecer o bar em que já está: mandar essa
+    pessoa pra landing inteira, com hero, história e galeria antes da comida, é
+    fazê-la rolar a tela procurando o que o adesivo prometeu.
+    """
+    rest = _bar(slug)
+    return _resposta_qr(url_for('public.cardapio', slug=rest.slug, _external=True))
+
+
+@bp.route('/<slug>/qr-mesa')
+def qr_mesa(slug):
+    """A folha que o vendedor imprime e o bar cola na mesa.
+
+    O QR sozinho não vira adesivo: alguém precisa recortar, e o cliente na mesa
+    precisa saber pra que serve aquele quadrado. Esta página resolve as duas
+    coisas — QR grande, nome do bar e a chamada — e é o entregável físico da
+    visita, o que fica no bar quando o vendedor vai embora.
+    """
+    rest = _bar(slug)
+    cfg = _config(rest)
+    pratos = DishCard.query.filter_by(restaurant_id=rest.id, ativo=True).count()
+    return render_template(
+        'campo/qr_mesa.html', rest=rest, cfg=cfg, pratos=pratos,
+        url_cardapio=url_for('public.cardapio', slug=rest.slug, _external=True),
+    )

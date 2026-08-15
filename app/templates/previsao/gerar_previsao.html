@@ -118,6 +118,7 @@
                     {% endif %}
 
                     <form method="post" action="{{ url_for('previsao.gerar_previsao') }}">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <div class="form-group">
                             <label for="nome">Nome da Previsão *</label>
                             <input type="text" class="form-control" id="nome" name="nome" required>

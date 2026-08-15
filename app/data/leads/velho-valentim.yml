@@ -9,6 +9,10 @@ nome: "Velho Valentim"
 tema: pub-escuro
 
 site:
+  telefone_exibicao: "(19) 3298-6674"
+  endereco: "R. Dr. Heitor Penteado, 1092 - Joaquim Egídio, Campinas - SP, 13108-002"
+  qtd_avaliacoes: 705
+  nota_google: "4,5"
   vibe: pub
   descritor: "Restaurante clássico em Joaquim Egídio"
   kicker: "JOAQUIM EGÍDIO · CAMPINAS–SP"
@@ -17,6 +21,8 @@ site:
   tagline: "Toalha branca, carta de vinhos e serviço à moda antiga."
   subline: "VINHOS · CLÁSSICO · REQUINTE"
   cidade_uf: "Joaquim Egídio, Campinas–SP"
+  # Horário do site oficial velhovalentim.com.br (15/08/2026).
+  horario: "Qua–Sex 11h–15h · Sáb 11h30–22h30 · Dom 11h–17h30"
 
 # Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
 #   hero_foto: img/demo/velho-valentim/capa.jpg

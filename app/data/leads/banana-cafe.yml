@@ -9,6 +9,10 @@ nome: "Banana Café"
 tema: neon-noite
 
 site:
+  telefone_exibicao: "(19) 3252-9792"
+  endereco: "R. Gen. Osório, 2090 - Cambuí, Campinas - SP, 13025-150"
+  qtd_avaliacoes: 2089
+  nota_google: "4,4"
   vibe: pub
   descritor: "Bar e coquetelaria no Cambuí"
   kicker: "CAMBUÍ · CAMPINAS–SP"
@@ -17,13 +21,20 @@ site:
   tagline: "Coquetelaria autoral e ambiente que pede foto."
   subline: "DRINKS AUTORAIS · MÚSICA · CAMBUÍ"
   cidade_uf: "Cambuí, Campinas–SP"
+  # Horário conferido em duas fontes (bananacafebar.com.br e painel do Google
+  # via Restaurant Guru) em 15/08/2026.
+  horario: "Seg 12h–15h · Ter–Qui 12h–15h e 18h–23h · Sex 12h–15h e 18h–00h30 · Sáb 12h–00h30 · Dom 12h–16h"
+  hero_foto: img/demo/banana-cafe/capa.jpg
 
-# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
-#   hero_foto: img/demo/banana-cafe/capa.jpg
 cardapio: []
 avaliacoes: []
 equipe: []
-galeria: []
+# Fotos baixadas de bananacafebar.com.br (site oficial da casa) em 15/08/2026.
+galeria:
+  - img/demo/banana-cafe/ambiente-1.jpg
+  - img/demo/banana-cafe/ambiente-2.jpg
+  - img/demo/banana-cafe/ambiente-3.jpg
+  - img/demo/banana-cafe/ambiente-4.jpg
 
 demo:
   fonte: relatorio-rmc

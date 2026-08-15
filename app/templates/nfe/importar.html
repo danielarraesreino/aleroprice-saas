@@ -10,6 +10,7 @@
         <div class="card-body">
             <!-- Standard form submission compatible with Flask backend -->
             <form id="nfeForm" method="POST" enctype="multipart/form-data">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="mb-3">
                     <label for="xmlFile" class="form-label">Arquivo XML da NFe</label>
                     <input type="file" class="form-control" id="xmlFile" name="xml_file" accept=".xml" required>

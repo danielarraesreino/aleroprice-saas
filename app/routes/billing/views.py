@@ -1,6 +1,6 @@
 from flask import render_template, redirect, url_for, flash, request, jsonify, current_app, abort, session
 from flask_login import current_user, login_required
-from app.extensions import db
+from app.extensions import db, csrf
 from app.models.modelo_restaurante import Restaurante
 from app.routes.billing import bp
 import stripe
@@ -181,10 +181,17 @@ def cancel():
 
 
 @bp.route('/webhook', methods=['POST'])
+@csrf.exempt
 def webhook():
     """Webhook do Stripe. Endpoint público (sem login) — a assinatura é a autenticação.
 
     Fonte de verdade da ativação: `checkout.session.completed`.
+
+    Sem `@csrf.exempt` o endpoint morre: o Stripe chama de outro host, sem
+    cookie de sessão e sem token, então todo evento voltaria 400 e nenhuma
+    assinatura seria ativada ou cancelada. A troca é segura porque aqui a
+    autenticação não é o cookie — é a assinatura HMAC conferida logo abaixo,
+    e sem STRIPE_WEBHOOK_SECRET a rota recusa tudo.
     """
     endpoint_secret = os.environ.get('STRIPE_WEBHOOK_SECRET')
 

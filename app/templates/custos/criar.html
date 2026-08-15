@@ -3,6 +3,7 @@
 {% block content %}
 <h2>Novo Custo / Investimento</h2>
 <form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="form-group">
         <label>Descrição</label>
         <input type="text" name="descricao" class="form-control" required>

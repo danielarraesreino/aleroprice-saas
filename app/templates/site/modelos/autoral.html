@@ -129,7 +129,10 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;1,6..96,400;1,6..96,500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+{# Duas famílias, três variantes cada — e só as que o CSS realmente usa.
+   Saíram Bodoni 600, Bodoni itálico 500 e Instrument itálico 400: nenhuma
+   regra deste arquivo as pedia, e cada variante extra é peso baixado à toa. #}
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;1,6..96,400&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   /* ===================== TOKENS =====================================
      Claro é o padrão e vive no :root inteiro (nenhuma cor mora só dentro
@@ -149,10 +152,65 @@
     --linha-forte:rgba(21,18,14,.34);
     --acento:var(--amber,#1f3ad4);
     --sombra:rgba(21,18,14,.10);
-    --maxw:1180px;
-    --gutter:clamp(20px,5vw,56px);
     --serif:"Bodoni Moda",Georgia,"Times New Roman",serif;
     --sans:"Instrument Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+
+    /* ============ ESCALA TIPOGRÁFICA — razão 1,25 (terça maior) ==========
+       Antes havia 40 tamanhos soltos neste arquivo, oito deles entre 15,0 e
+       17,0 px (.92 .94 .95 .98 1 1.02 1.04 1.06rem) e sete entre 10,5 e
+       12,5 px. Diferença de meio pixel não é hierarquia, é tremor: ninguém
+       enxerga, e o olho lê como descuido. Agora são OITO degraus, e todo
+       font-size da página sai de um deles.
+
+       Cada clamp é interpolação linear de 360→1280px, derivada assim:
+         inclinação = (max_px − min_px) / (1280 − 360)
+         vw = inclinação × 100 · rem = (min_px − inclinação × 360) / 16
+       Não há clamp escolhido no olho. */
+    --t-display: clamp(2.5rem,    1.13rem + 6.09vw, 6rem);       /* 40 → 96 */
+    --t-h1:      clamp(2rem,      1.29rem + 3.15vw, 3.8125rem);  /* 32 → 61 */
+    --t-h2:      clamp(1.625rem,  1.31rem + 1.41vw, 2.4375rem);  /* 26 → 39 */
+    --t-h3:      clamp(1.25rem,   1.13rem + 0.54vw, 1.5625rem);  /* 20 → 25 */
+    --t-lead:    clamp(1.0625rem, 0.99rem + 0.33vw, 1.25rem);    /* 17 → 20 */
+    --t-corpo:   clamp(0.9375rem, 0.91rem + 0.11vw, 1rem);       /* 15 → 16 */
+    --t-eyebrow: 1rem;    /* FIXO: o olho de seção não escala com a viewport */
+    --t-micro:   0.8rem;  /* 12,8 — rótulo de UI, data, nav, legenda */
+
+    /* Entrelinhas por degrau. A do corpo é 1,8 — o respiro do editorial que
+       serve de referência (14/25,2 px medidos). 1,4 e 1,5 são o default de
+       framework e leem como default de framework. */
+    --lh-display:.92; --lh-h1:1.02; --lh-h2:1.08; --lh-h3:1.25;
+    --lh-lead:1.55;   --lh-corpo:1.8; --lh-micro:1.4;
+
+    /* Tracking do olho: 2,5 px. Escrito em em, e não em px, só porque
+       --t-eyebrow é FIXO em 1rem — .15625em × 16px = 2,5 px exatos, e como o
+       tamanho não escala o tracking também não. Mantém a regra (o valor não
+       pode acompanhar o corpo da fonte) sem cravar um px fora da grade de 4. */
+    --tk-olho:.15625em;
+    --tk-micro:.16em;
+
+    --medida:34rem;   /* 60–70 caracteres: a faixa em que se lê sem cansar */
+
+    /* ============ ESCALA DE ESPAÇAMENTO — base 4px ======================
+       Antes: 94 valores distintos de padding/margin/gap e 25 números px fora
+       de qualquer grade (9, 11, 13, 22, 26, 46, 62, 70, 110, 186…). Cada um
+       era um "achei que ficou bom" que ninguém consegue repetir na seção
+       seguinte. Agora todo espaço da página sai de --s-*, --sec-y ou
+       --gutter, e o vocabulário é deliberadamente curto. */
+    --s-1:.25rem; --s-2:.5rem;  --s-3:.75rem; --s-4:1rem;  --s-5:1.5rem;
+    --s-6:2rem;   --s-7:3rem;   --s-8:4rem;   --s-9:6rem;  --s-10:8rem;
+
+    /* Os três respiros GRANDES são fluidos; os --s-* acima são fixos. A razão
+       é medida, não estética: degrau fixo de 96 px entre pratos custava ~360 px
+       de página a mais no celular do que o valor antigo, porque no telefone o
+       respiro certo é menor que no desktop. Quem é fluido é só o que separa
+       blocos grandes — espaçamento de componente continua fixo, senão o ritmo
+       vertical volta a depender da largura da tela. Extremos na grade de 4. */
+    --sec-y:clamp(4.5rem,9vw,9rem);      /* 72 → 144 · respiro de seção   */
+    --r-ato:clamp(3rem,8vw,6rem);        /* 48 →  96 · prato a prato      */
+    --r-bloco:clamp(2.5rem,6vw,4rem);    /* 40 →  64 · cabeçalho a corpo  */
+    --gutter:clamp(1.25rem,4vw,2.5rem);  /* 20 → 40  */
+    --maxw:1180px;
+    --alvo:2.75rem;   /* 44 px — piso de alvo de toque em botão e ícone */
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
@@ -185,8 +243,8 @@
     background:var(--papel);
     color:var(--tinta-2);
     font-family:var(--sans);
-    font-size:1.0625rem;
-    line-height:1.75;
+    font-size:var(--t-corpo);
+    line-height:var(--lh-corpo);
     overflow-x:hidden;
     -webkit-font-smoothing:antialiased;
     text-rendering:optimizeLegibility;
@@ -194,36 +252,90 @@
   img{max-width:100%;display:block}
   a{color:inherit;text-decoration:none}
   ::selection{background:var(--tinta);color:var(--papel)}
-  :focus-visible{outline:2px solid var(--acento);outline-offset:3px}
+  :focus-visible{outline:2px solid var(--acento);outline-offset:var(--s-1)}
 
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--gutter)}
-  .sec{padding:clamp(72px,12vw,148px) 0;position:relative}
+  .sec{padding-block:var(--sec-y);position:relative}
   .faixa-clara{background:var(--papel-2)}
 
-  /* ---------- tipografia editorial ---------- */
+  /* ---------- tipografia editorial ----------
+     Serifada de display só em título e citação; sem serifa em tudo que é
+     leitura corrida e rótulo. Duas famílias, três pesos cada — nada além. */
+  h1,h2,h3{font-family:var(--serif);font-weight:400;color:var(--tinta);text-wrap:balance}
+  p{max-width:var(--medida);text-wrap:pretty}
+
+  /* Olho de seção: 16px fixo, 500, caixa alta, 2,5 px de tracking. Era .7rem
+     (11,2 px) — pequeno demais pra ser o rótulo editorial que ele quer ser. */
   .olho{
-    font-family:var(--sans);font-size:.7rem;font-weight:600;
-    letter-spacing:.24em;text-transform:uppercase;color:var(--tinta-3);
-    display:flex;align-items:center;gap:12px;margin-bottom:20px;
+    font-family:var(--sans);font-size:var(--t-eyebrow);font-weight:500;
+    letter-spacing:var(--tk-olho);text-transform:uppercase;color:var(--tinta-3);
+    line-height:var(--lh-micro);
+    display:flex;align-items:center;gap:var(--s-4);margin-bottom:var(--s-4);
+    padding-right:var(--tk-olho); /* caixa alta come o espaço da última letra */
   }
-  .olho::before{content:"";width:26px;height:2px;background:var(--acento);flex:none}
+  .olho::before{content:"";width:var(--s-6);height:2px;background:var(--acento);flex:none}
   .titulo{
-    font-family:var(--serif);font-weight:400;color:var(--tinta);
-    font-size:clamp(2.05rem,6.4vw,3.7rem);line-height:1.06;letter-spacing:-.015em;
+    font-size:var(--t-h1);line-height:var(--lh-h1);letter-spacing:-.015em;
     overflow-wrap:break-word;
   }
   .titulo em{font-style:italic;color:var(--acento)}
   .lead{
-    max-width:54ch;margin-top:22px;font-size:1.06rem;color:var(--tinta-2);
+    max-width:var(--medida);margin-top:var(--s-4);
+    font-size:var(--t-lead);line-height:var(--lh-lead);color:var(--tinta-2);
   }
   .cab{max-width:none}
+
+  /* ============================================================
+     EIXO 3 — EIXO DE LEITURA: ALTERNADO ESQUERDA/DIREITA.
+     Nenhuma seção fica no mesmo eixo da anterior: o cabeçalho pula de
+     lado a cada seção e a foto acompanha. O olho faz zigue-zague pela
+     página inteira, que é a leitura de revista de cozinha — e é o
+     contrário do `craft` (duas colunas travadas, título sempre à
+     esquerda) e do `noturno` (tudo centralizado num eixo só).
+     ============================================================ */
+  @media(min-width:900px){
+    body[data-leitura="alternado"] .sec:nth-of-type(even) > .wrap > .cab{
+      margin-left:auto;text-align:right;max-width:44rem;
+    }
+    body[data-leitura="alternado"] .sec:nth-of-type(even) > .wrap > .cab .olho{
+      flex-direction:row-reverse;
+    }
+    body[data-leitura="alternado"] .sec:nth-of-type(even) > .wrap > .cab .lead{
+      margin-left:auto;
+    }
+  }
+
+  /* ============================================================
+     EIXO 1 — SEÇÃO HEROÍNA: o cardápio de foto grande alternada.
+     Numa cozinha autoral o prato é o argumento, então ele ocupa meia
+     tela por vez e troca de lado a cada item. É a única seção com
+     respiro de ato dobrado e título em escala de display.
+     (A cauda, EIXO 2, é outra: a página fecha em `avaliacoes` —
+     nenhum outro modelo do conjunto termina na prova social.)
+     ============================================================ */
+  #cardapio{padding-block:calc(var(--sec-y) * 1.5)}
+  /* --t-display só a partir de 900px: em 375px ele é 26% maior que o
+     --t-h1 e o ganho de porte não se vê nessa largura — só o risco. */
+  @media(min-width:900px){ #cardapio .titulo{font-size:var(--t-display)} }
   .fio{height:1px;background:var(--linha);border:0;margin:0}
 
-  /* ---------- botões ---------- */
+  /* Fileira de lista (crédito, dado de contato, promoção, evento, clima):
+     um único ritmo pra todas. Seis paddings diferentes viravam seis seções
+     que não conversavam entre si. */
+  .creditos li,.dados li,.promo,.clima-item,.evento{padding:var(--s-5) 0}
+  /* Conteúdo que começa logo depois do cabeçalho da seção. */
+  .promos,.clima,.agenda,.depoimentos,.creditos,.dados,#cardapio .pratos{
+    margin-top:var(--r-bloco);
+  }
+
+  /* ---------- botões ----------
+     Alvo de toque: --alvo (44px) é piso, não sugestão. */
   .btn{
-    display:inline-flex;align-items:center;justify-content:center;gap:10px;
-    font-family:var(--sans);font-size:.76rem;font-weight:600;letter-spacing:.18em;
-    text-transform:uppercase;padding:16px 30px;border:1px solid var(--tinta);
+    display:inline-flex;align-items:center;justify-content:center;gap:var(--s-2);
+    font-family:var(--sans);font-size:var(--t-micro);font-weight:600;
+    letter-spacing:var(--tk-micro);line-height:var(--lh-micro);
+    text-transform:uppercase;padding:var(--s-4) var(--s-6);min-height:var(--alvo);
+    border:1px solid var(--tinta);
     background:var(--tinta);color:var(--papel);cursor:pointer;
     transition:background .25s,color .25s,border-color .25s;
   }
@@ -231,8 +343,9 @@
   .btn-linha{background:transparent;color:var(--tinta);border-color:var(--linha-forte)}
   .btn-linha:hover{background:var(--tinta);color:var(--papel);border-color:var(--tinta)}
   .link-seta{
-    display:inline-flex;align-items:center;gap:9px;color:var(--tinta);
-    font-size:.94rem;border-bottom:1px solid var(--linha-forte);padding-bottom:3px;
+    display:inline-flex;align-items:center;gap:var(--s-2);color:var(--tinta);
+    font-size:var(--t-corpo);border-bottom:1px solid var(--linha-forte);
+    padding-bottom:var(--s-1);
     transition:border-color .25s,color .25s;width:fit-content;
   }
   .link-seta:hover{color:var(--acento);border-color:var(--acento)}
@@ -243,33 +356,42 @@
     border-bottom:1px solid var(--linha);
   }
   .masthead .interno{
-    max-width:var(--maxw);margin:0 auto;padding:14px var(--gutter);
-    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    max-width:var(--maxw);margin:0 auto;padding:var(--s-4) var(--gutter);
+    display:flex;align-items:center;justify-content:space-between;gap:var(--s-4);
   }
+  /* min-width:0 + corte no descritor: o nome e o descritor vêm do cadastro do
+     bar e podem ser longos ("Cervejaria artesanal em Barão Geraldo"). Sem isso
+     o cabeçalho estoura a linha em telas estreitas. */
   .marca{
-    font-family:var(--serif);font-size:1.12rem;font-weight:500;color:var(--tinta);
-    letter-spacing:.01em;line-height:1.2;
+    font-family:var(--serif);font-size:var(--t-lead);font-weight:500;color:var(--tinta);
+    letter-spacing:.01em;line-height:var(--lh-h3);min-width:0;
   }
   .marca span{
-    display:block;font-family:var(--sans);font-size:.6rem;font-weight:500;
-    letter-spacing:.24em;text-transform:uppercase;color:var(--tinta-3);margin-top:3px;
+    display:block;font-family:var(--sans);font-size:var(--t-micro);font-weight:500;
+    letter-spacing:var(--tk-micro);text-transform:uppercase;color:var(--tinta-3);
+    line-height:var(--lh-micro);margin-top:var(--s-2);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   }
-  .mh-nav{display:none;gap:26px;align-items:center}
+  .mh-nav{display:none;gap:var(--s-4);align-items:center}
   .mh-nav a{
-    font-size:.72rem;font-weight:500;letter-spacing:.16em;text-transform:uppercase;
-    color:var(--tinta-2);transition:color .25s;
+    font-size:var(--t-micro);font-weight:500;letter-spacing:var(--tk-micro);
+    text-transform:uppercase;color:var(--tinta-2);transition:color .25s;
   }
   .mh-nav a:hover{color:var(--acento)}
-  .mh-acoes{display:flex;align-items:center;gap:10px}
+  .mh-acoes{display:flex;align-items:center;gap:var(--s-2)}
   .btn-icone{
-    width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--linha);
-    background:transparent;color:var(--tinta);cursor:pointer;font-size:.9rem;line-height:1;
+    width:var(--alvo);height:var(--alvo);display:grid;place-items:center;
+    border:1px solid var(--linha);
+    background:transparent;color:var(--tinta);cursor:pointer;
+    font-size:var(--t-corpo);line-height:1;
     transition:border-color .25s,color .25s;
   }
   .btn-icone:hover{border-color:var(--acento);color:var(--acento)}
   .btn-indice{
-    font-family:var(--sans);font-size:.68rem;font-weight:600;letter-spacing:.18em;
-    text-transform:uppercase;padding:11px 16px;border:1px solid var(--linha);
+    font-family:var(--sans);font-size:var(--t-micro);font-weight:600;
+    letter-spacing:var(--tk-micro);line-height:var(--lh-micro);
+    text-transform:uppercase;padding:var(--s-3) var(--s-4);min-height:var(--alvo);
+    border:1px solid var(--linha);
     background:transparent;color:var(--tinta);cursor:pointer;
   }
   @media(min-width:900px){
@@ -280,73 +402,107 @@
   /* ---------- índice (menu mobile) ---------- */
   .indice{
     position:fixed;inset:0;z-index:60;background:var(--papel);
-    padding:calc(var(--gutter) + 8px);overflow-y:auto;
-    opacity:0;visibility:hidden;transform:translateY(-10px);
+    padding:var(--s-6);overflow-y:auto;
+    opacity:0;visibility:hidden;transform:translateY(-8px);
     transition:opacity .3s ease,transform .35s ease,visibility .3s;
   }
   .indice.aberto{opacity:1;visibility:visible;transform:none}
   .indice-topo{display:flex;align-items:baseline;justify-content:space-between;
-    border-bottom:1px solid var(--linha);padding-bottom:14px}
-  .indice-topo b{font-family:var(--sans);font-size:.68rem;font-weight:600;
-    letter-spacing:.24em;text-transform:uppercase;color:var(--tinta-3)}
-  .indice-topo button{background:none;border:0;color:var(--tinta);font-size:1.5rem;
-    line-height:1;cursor:pointer;padding:4px 6px}
-  .indice ol{list-style:none;counter-reset:idx;margin-top:8px}
+    border-bottom:1px solid var(--linha);padding-bottom:var(--s-4)}
+  .indice-topo b{font-family:var(--sans);font-size:var(--t-micro);font-weight:600;
+    letter-spacing:var(--tk-olho);text-transform:uppercase;color:var(--tinta-3)}
+  .indice-topo button{background:none;border:0;color:var(--tinta);
+    font-size:var(--t-h3);line-height:1;cursor:pointer;
+    min-width:var(--alvo);min-height:var(--alvo)}
+  .indice ol{list-style:none;counter-reset:idx;margin-top:var(--s-2)}
   .indice li{counter-increment:idx;border-bottom:1px solid var(--linha)}
   .indice li a{
-    display:flex;align-items:baseline;gap:16px;padding:18px 2px;
-    font-family:var(--serif);font-size:1.7rem;color:var(--tinta);line-height:1.2;
+    display:flex;align-items:baseline;gap:var(--s-4);padding:var(--s-5) 0;
+    font-family:var(--serif);font-size:var(--t-h2);color:var(--tinta);
+    line-height:var(--lh-h2);
   }
   .indice li a::before{
     content:counter(idx,decimal-leading-zero);
-    font-family:var(--sans);font-size:.66rem;font-weight:600;letter-spacing:.16em;
-    color:var(--acento);flex:none;
+    font-family:var(--sans);font-size:var(--t-micro);font-weight:600;
+    letter-spacing:var(--tk-micro);color:var(--acento);flex:none;
   }
-  .indice .rodape-indice{margin-top:26px}
+  .indice .rodape-indice{margin-top:var(--s-6)}
+
+  /* ---------- TRATAMENTO DE FOTO ----------
+     A matéria-prima é foto de celular e do painel do Google: luz amarela,
+     enquadramento torto, resolução aleatória. `object-fit:cover` recorta — e
+     sem `object-position` o recorte é sempre 50% 50%, o centro geométrico,
+     onde o assunto quase nunca está. Havia ZERO object-position no arquivo:
+     todo corte de rosto e de prato era sorte.
+
+     Cada imagem declara o seu corte no atributo, e o valor vem do cadastro do
+     bar quando existir (`d.pos`, `g.pos`, `site.hero_pos`) — corte é dado da
+     foto, não constante de CSS. Os defaults por papel saem desta tabela:
+       pessoas/equipe 50% 28% · prato de cima 50% 50% · prato na mesa 50% 62%
+       balcão/salão 50% 65% · fachada com letreiro 50% 38% · copo/chope 50% 45%
+
+     O `var(--pos, 50% 45%)` abaixo é a rede: qualquer foto que entre sem valor
+     declarado cai em 50% 45%, e não em 50% 50%. A diferença importa porque
+     quase toda foto de bar tirada no celular tem teto e luminária sobrando no
+     topo — subir o corte erra menos que centralizar.
+     `background` dá cor de espera no lugar do cinza do navegador, e
+     width/height nos atributos seguram o CLS. */
+  .hero-foto img,.prato-foto img,.historia-foto img,.galeria figure img{
+    object-fit:cover;
+    object-position:var(--pos,50% 45%);
+    background:var(--papel-2);
+  }
+  /* `height:auto` é obrigatório junto com os atributos width/height do HTML:
+     sem ele o atributo vira altura fixa em px e a foto estica. Com ele, o
+     atributo só informa a proporção (reserva de espaço = CLS zero) e quem
+     manda na altura é o aspect-ratio do CSS. */
+  .hero-foto img,.prato-foto img,.historia-foto img{height:auto}
 
   /* ---------- HERO ---------- */
-  .hero{padding:clamp(46px,9vw,96px) 0 clamp(60px,10vw,110px)}
-  .hero-grade{display:grid;gap:clamp(34px,6vw,62px);align-items:center}
+  .hero{padding-block:var(--s-7) var(--sec-y)}
+  .hero-grade{display:grid;gap:var(--s-7);align-items:center}
   .hero-kicker{
-    font-size:.7rem;font-weight:600;letter-spacing:.26em;text-transform:uppercase;
-    color:var(--tinta-3);margin-bottom:26px;
+    font-size:var(--t-micro);font-weight:600;letter-spacing:var(--tk-olho);
+    line-height:var(--lh-micro);text-transform:uppercase;
+    color:var(--tinta-3);margin-bottom:var(--s-4);
   }
   .hero h1{
-    font-family:var(--serif);font-weight:400;color:var(--tinta);
-    font-size:clamp(2.9rem,12.5vw,6.1rem);line-height:.98;letter-spacing:-.02em;
+    font-size:var(--t-display);line-height:var(--lh-display);letter-spacing:-.02em;
     overflow-wrap:break-word;
   }
   .hero h1 .dois{display:block;font-style:italic;color:var(--acento)}
   .hero-tag{
-    font-family:var(--serif);font-style:italic;font-size:clamp(1.15rem,3.4vw,1.55rem);
-    color:var(--tinta);line-height:1.5;max-width:34ch;margin-top:26px;
+    font-family:var(--serif);font-style:italic;font-size:var(--t-h3);
+    color:var(--tinta);line-height:var(--lh-lead);max-width:var(--medida);
+    margin-top:var(--s-6);
   }
   .hero-meta{
-    margin-top:22px;font-size:.76rem;letter-spacing:.14em;text-transform:uppercase;
-    color:var(--tinta-3);max-width:44ch;
+    margin-top:var(--s-4);font-size:var(--t-micro);letter-spacing:var(--tk-micro);
+    line-height:var(--lh-micro);text-transform:uppercase;
+    color:var(--tinta-3);max-width:var(--medida);
   }
   .hero-selo{
-    display:inline-flex;align-items:center;gap:10px;margin-top:22px;
-    padding-top:16px;border-top:1px solid var(--linha);
-    font-size:.78rem;letter-spacing:.1em;color:var(--tinta-2);
+    display:inline-flex;align-items:center;gap:var(--s-2);margin-top:var(--s-6);
+    padding-top:var(--s-4);border-top:1px solid var(--linha);
+    font-size:var(--t-micro);letter-spacing:var(--tk-micro);color:var(--tinta-2);
   }
-  .hero-selo .est{color:var(--acento);letter-spacing:.16em}
+  .hero-selo .est{color:var(--acento);letter-spacing:var(--tk-micro)}
   /* Selo de nota no herói: o número grande já no primeiro olhar, sem roubar
      a cena do título. Só existe quando o bar tem nota real. */
   .hero-selo b{
-    font-family:var(--serif);font-weight:500;font-size:1.32rem;color:var(--tinta);
+    font-family:var(--serif);font-weight:500;font-size:var(--t-h3);color:var(--tinta);
     line-height:1;letter-spacing:0;font-variant-numeric:tabular-nums;
   }
-  .hero-acoes{display:flex;flex-wrap:wrap;gap:12px;margin-top:34px}
+  .hero-acoes{display:flex;flex-wrap:wrap;gap:var(--s-4);margin-top:var(--s-6)}
   .hero-foto{position:relative}
-  .hero-foto img{width:100%;aspect-ratio:4/5;object-fit:cover;filter:saturate(1.02)}
+  .hero-foto img{width:100%;aspect-ratio:4/5;filter:saturate(1.02)}
   .hero-foto figcaption{
-    margin-top:12px;font-family:var(--serif);font-style:italic;font-size:.94rem;
-    color:var(--tinta-3);
+    margin-top:var(--s-4);font-family:var(--serif);font-style:italic;
+    font-size:var(--t-corpo);color:var(--tinta-3);
   }
   .rolar{
-    margin-top:clamp(44px,7vw,70px);font-size:.7rem;letter-spacing:.24em;
-    text-transform:uppercase;color:var(--tinta-3);
+    margin-top:var(--s-6);font-size:var(--t-micro);letter-spacing:var(--tk-olho);
+    line-height:var(--lh-micro);text-transform:uppercase;color:var(--tinta-3);
   }
   @media(min-width:900px){
     .hero-grade{grid-template-columns:1.02fr .98fr}
@@ -356,89 +512,124 @@
   /* faixa de palavras (substitui a faixa rolante do clássico: aqui é estática) */
   .sabores{
     border-top:1px solid var(--linha);border-bottom:1px solid var(--linha);
-    padding:20px 0;display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;
-    font-size:.68rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;
-    color:var(--tinta-3);
+    padding:var(--s-5) 0;display:flex;flex-wrap:wrap;gap:var(--s-2) var(--s-4);
+    align-items:center;
+    font-size:var(--t-micro);font-weight:500;letter-spacing:var(--tk-micro);
+    line-height:var(--lh-micro);text-transform:uppercase;color:var(--tinta-3);
   }
   .sabores i{display:inline-block;width:4px;height:4px;background:var(--acento);flex:none}
 
   /* ---------- CARDÁPIO (a seção principal) ---------- */
-  #cardapio .pratos{margin-top:clamp(46px,7vw,80px);display:flex;flex-direction:column;
-    gap:clamp(56px,9vw,120px)}
-  .prato{display:grid;gap:clamp(22px,4vw,54px);align-items:center}
+  #cardapio .pratos{display:flex;flex-direction:column;gap:var(--r-ato)}
+  .prato{display:grid;gap:var(--s-6);align-items:center}
   .prato-foto{position:relative}
-  .prato-foto img{width:100%;aspect-ratio:4/5;object-fit:cover}
+  .prato-foto img{width:100%;aspect-ratio:4/5}
   .prato-num{
-    font-family:var(--sans);font-size:.68rem;font-weight:600;letter-spacing:.2em;
-    color:var(--acento);display:flex;align-items:center;gap:12px;margin-bottom:16px;
+    font-family:var(--sans);font-size:var(--t-micro);font-weight:600;
+    letter-spacing:var(--tk-micro);line-height:var(--lh-micro);
+    color:var(--acento);display:flex;align-items:center;gap:var(--s-4);
+    margin-bottom:var(--s-4);
   }
-  .prato-num::after{content:"";flex:1;height:1px;background:var(--linha);max-width:70px}
+  .prato-num::after{content:"";flex:1;height:1px;background:var(--linha);max-width:var(--s-8)}
   .prato h3{
-    font-family:var(--serif);font-weight:400;color:var(--tinta);
-    font-size:clamp(1.75rem,5.6vw,2.7rem);line-height:1.1;letter-spacing:-.01em;
+    font-size:var(--t-h2);line-height:var(--lh-h2);letter-spacing:-.01em;
   }
-  .prato p{margin-top:16px;max-width:46ch;font-size:1.04rem}
+  .prato p{margin-top:var(--s-4);max-width:var(--medida);font-size:var(--t-corpo)}
+  /* Seletor mais específico que `.prato p` de propósito: o preço é um <p> mas
+     não é texto corrido — tem o degrau de lead, a cor de acento e a entrelinha
+     curta. `tabular-nums` porque a página empilha um prato embaixo do outro e
+     os preços formam coluna. */
+  .prato .prato-preco{
+    margin-top:var(--s-3);max-width:none;font-family:var(--sans);
+    font-size:var(--t-lead);line-height:var(--lh-micro);font-weight:600;
+    color:var(--acento);font-variant-numeric:tabular-nums;
+  }
   .prato .selo{
-    display:inline-block;margin-top:20px;padding-top:12px;border-top:1px solid var(--linha-forte);
-    font-size:.68rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--tinta);
+    display:inline-block;margin-top:var(--s-4);padding-top:var(--s-4);
+    border-top:1px solid var(--linha-forte);
+    font-size:var(--t-micro);font-weight:600;letter-spacing:var(--tk-micro);
+    line-height:var(--lh-micro);text-transform:uppercase;color:var(--tinta);
   }
-  .prato.destaque .prato-num::before{content:"";width:9px;height:9px;background:var(--acento);flex:none}
-  .prato.sem-foto{border-top:1px solid var(--linha);padding-top:clamp(24px,4vw,40px)}
+  .prato.destaque .prato-num::before{content:"";width:8px;height:8px;background:var(--acento);flex:none}
+  .prato.sem-foto{border-top:1px solid var(--linha);padding-top:var(--s-6)}
   @media(min-width:860px){
     .prato.com-foto{grid-template-columns:1fr 1fr}
     /* alternado: par inverte a ordem — revista, não grade */
     .prato.com-foto:nth-child(even) .prato-foto{order:2}
+    /* EIXO 5 — TRATAMENTO DE FOTO: SANGRIA ALTERNADA.
+       A foto do prato rompe a coluna e vai até a borda da tela, alternando
+       o lado. Sem moldura, sem véu, sem duotone: cor real, porque comida
+       tratada em cor não se pede. É o oposto do `tradicional` (moldura de
+       papel em sépia) e do `noturno` (duotone). */
+       `--sangria` é clampado nos dois lados de propósito: piso em 0 pra
+       nunca virar margem positiva, e teto em 8rem pra que numa tela de
+       2560px a foto não vire faixa de rodovia. O `body` já tem
+       `overflow-x:hidden`, então o vão do scrollbar não gera rolagem
+       lateral — mas o teto existe pra não depender disso. */
+    .prato.com-foto{--sangria:clamp(0px, (100vw - var(--maxw)) / 2 + var(--gutter), 8rem)}
+    body[data-foto="sangria-alternada"] .prato.com-foto:nth-child(odd) .prato-foto{
+      margin-left:calc(var(--sangria) * -1);
+    }
+    body[data-foto="sangria-alternada"] .prato.com-foto:nth-child(even) .prato-foto{
+      margin-right:calc(var(--sangria) * -1);
+    }
     .prato.sem-foto{grid-template-columns:1fr 1fr}
     .prato-foto img{aspect-ratio:3/4}
   }
 
   /* ---------- PROMOÇÕES ---------- */
-  .promos{margin-top:clamp(38px,6vw,64px);display:grid;gap:0}
-  .promo{border-top:1px solid var(--linha);padding:26px 0}
+  .promos{display:grid;gap:0}
+  .promo{border-top:1px solid var(--linha)}
   .promo:last-child{border-bottom:1px solid var(--linha)}
-  .promo .rot{font-size:.68rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;
-    color:var(--tinta-3);display:flex;align-items:center;gap:10px}
-  .promo.hoje{padding-left:18px;border-left:2px solid var(--acento)}
+  .promo .rot{font-size:var(--t-micro);font-weight:600;letter-spacing:var(--tk-micro);
+    line-height:var(--lh-micro);text-transform:uppercase;
+    color:var(--tinta-3);display:flex;align-items:center;gap:var(--s-2)}
+  .promo.hoje{padding-left:var(--s-4);border-left:2px solid var(--acento)}
   .promo.hoje .rot{color:var(--tinta)}
   .promo.hoje .rot::before{content:"";width:8px;height:8px;background:var(--acento);flex:none}
-  .promo h3{font-family:var(--serif);font-weight:400;color:var(--tinta);
-    font-size:clamp(1.35rem,4vw,1.9rem);line-height:1.2;margin-top:10px}
-  .promo p{margin-top:8px;max-width:52ch}
-  .promo .val{margin-top:10px;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta-3)}
+  .promo h3{font-size:var(--t-h3);line-height:var(--lh-h3);margin-top:var(--s-2)}
+  .promo p{margin-top:var(--s-2);max-width:var(--medida)}
+  .promo .val{margin-top:var(--s-2);font-size:var(--t-micro);
+    letter-spacing:var(--tk-micro);line-height:var(--lh-micro);
+    text-transform:uppercase;color:var(--tinta-3)}
   @media(min-width:860px){
-    .promo{display:grid;grid-template-columns:.36fr 1fr;gap:28px;align-items:start}
-    .promo .rot{padding-top:6px}
+    .promo{display:grid;grid-template-columns:.36fr 1fr;gap:var(--s-6);align-items:start}
+    .promo .rot{padding-top:var(--s-1)}
     .promo h3{margin-top:0}
   }
 
   /* ---------- HISTÓRIA ---------- */
-  .historia-grade{display:grid;gap:clamp(32px,5vw,60px);align-items:start}
+  .historia-grade{display:grid;gap:var(--s-7);align-items:start}
   .historia-texto{
-    font-family:var(--serif);font-size:clamp(1.2rem,3.4vw,1.6rem);line-height:1.6;
-    color:var(--tinta);margin-top:26px;max-width:32ch;
+    font-family:var(--serif);font-size:var(--t-h3);line-height:var(--lh-lead);
+    color:var(--tinta);margin-top:var(--s-6);max-width:var(--medida);
   }
-  .historia-foto img{width:100%;aspect-ratio:5/4;object-fit:cover}
-  .historia-foto figcaption{margin-top:12px;font-family:var(--serif);font-style:italic;
-    font-size:.92rem;color:var(--tinta-3)}
-  .creditos{list-style:none;margin-top:30px}
-  .creditos li{display:flex;align-items:baseline;gap:14px;padding:13px 0;border-top:1px solid var(--linha)}
+  .historia-foto img{width:100%;aspect-ratio:5/4}
+  .historia-foto figcaption{margin-top:var(--s-4);font-family:var(--serif);
+    font-style:italic;font-size:var(--t-corpo);color:var(--tinta-3)}
+  .creditos{list-style:none}
+  .creditos li{display:flex;align-items:baseline;gap:var(--s-4);border-top:1px solid var(--linha)}
   .creditos li:last-child{border-bottom:1px solid var(--linha)}
-  .creditos b{font-family:var(--serif);font-weight:500;font-size:1.06rem;color:var(--tinta);flex:none}
-  .creditos span{font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta-3)}
-  .creditos .em{font-size:1rem;opacity:.75;flex:none}
+  .creditos b{font-family:var(--serif);font-weight:500;font-size:var(--t-lead);
+    color:var(--tinta);flex:none}
+  .creditos span{font-size:var(--t-micro);letter-spacing:var(--tk-micro);
+    line-height:var(--lh-micro);text-transform:uppercase;color:var(--tinta-3)}
+  .creditos .em{font-size:var(--t-corpo);opacity:.75;flex:none}
   @media(min-width:900px){.historia-grade{grid-template-columns:1fr 1fr}}
 
   /* ---------- CLIMA ---------- */
-  .clima{margin-top:clamp(38px,6vw,64px);display:grid;gap:0}
-  .clima-item{border-top:1px solid var(--linha);padding:26px 0}
+  .clima{display:grid;gap:0}
+  .clima-item{border-top:1px solid var(--linha)}
   .clima-item:last-child{border-bottom:1px solid var(--linha)}
-  .clima-item .em{font-size:1.1rem;opacity:.8}
+  .clima-item .em{font-size:var(--t-lead);opacity:.8}
   .clima-item b{display:block;font-family:var(--serif);font-weight:400;color:var(--tinta);
-    font-size:1.4rem;line-height:1.25;margin:8px 0 6px}
-  .clima-item small{font-size:.98rem;color:var(--tinta-2);line-height:1.65;display:block;max-width:34ch}
+    font-size:var(--t-h3);line-height:var(--lh-h3);margin-top:var(--s-2)}
+  .clima-item small{font-size:var(--t-corpo);color:var(--tinta-2);
+    line-height:var(--lh-corpo);display:block;max-width:var(--medida);
+    margin-top:var(--s-2)}
   @media(min-width:820px){
-    .clima{grid-template-columns:repeat(3,1fr);gap:clamp(24px,4vw,48px)}
-    .clima-item{border-bottom:0!important;padding-top:22px}
+    .clima{grid-template-columns:repeat(3,1fr);gap:var(--s-6)}
+    .clima-item{border-bottom:0!important}
   }
 
   /* ---------- AVALIAÇÕES ----------
@@ -446,132 +637,157 @@
      um BLOCO de prova social (número em display, contagem por extenso), não uma
      legenda. Vive fora do bloco de depoimentos: são dados independentes. */
   .prova{
-    margin-top:clamp(32px,5vw,50px);
+    margin-top:var(--s-6);
     border-top:2px solid var(--tinta);border-bottom:1px solid var(--linha);
-    padding:clamp(22px,4vw,32px) 0;
-    display:grid;gap:14px clamp(24px,4vw,44px);align-items:center;
+    padding:var(--s-5) 0;
+    display:grid;gap:var(--s-4);align-items:center;
   }
-  .prova-n{display:flex;align-items:flex-end;gap:14px}
+  .prova-n{display:flex;align-items:flex-end;gap:var(--s-4)}
+  /* O número é o argumento, então tem porte de argumento: degrau --t-h1 da
+     escala (32→61 px), o mesmo do título de seção. Em --t-corpo estaria errado. */
+  /* Entrelinha --lh-h1 e não --lh-display: 0,92 fecha a caixa em 56 px pra uma
+     fonte de 61 px, e em "4,7" a vírgula do Bodoni desce abaixo da linha de
+     base — o número encostava no fio de baixo do bloco. Display sem descendente
+     aguenta 0,92; número com vírgula, não. */
   .prova-n .n{
-    font-family:var(--serif);font-size:clamp(3.4rem,13vw,5.4rem);line-height:.92;
+    font-family:var(--serif);font-size:var(--t-h1);line-height:var(--lh-h1);
     color:var(--acento);letter-spacing:-.015em;font-variant-numeric:tabular-nums;
   }
-  .prova-n .est{color:var(--acento);letter-spacing:.2em;font-size:.95rem;padding-bottom:13px}
-  .prova-txt{font-size:1.04rem;color:var(--tinta-2);max-width:38ch}
+  .prova-n .est{color:var(--acento);letter-spacing:var(--tk-micro);
+    font-size:var(--t-corpo);padding-bottom:var(--s-1)}
+  .prova-txt{font-size:var(--t-lead);line-height:var(--lh-lead);
+    color:var(--tinta-2);max-width:var(--medida)}
+  /* O VOLUME convence: 504 pesa mais que a palavra "avaliações". */
   .prova-txt b{
-    font-family:var(--serif);font-weight:500;font-size:1.58rem;color:var(--tinta);
+    font-family:var(--serif);font-weight:500;font-size:var(--t-h3);color:var(--tinta);
     font-variant-numeric:tabular-nums;
   }
   .prova-txt small{
-    display:block;margin-top:9px;font-size:.68rem;font-weight:600;letter-spacing:.2em;
+    display:block;margin-top:var(--s-2);font-size:var(--t-micro);font-weight:600;
+    letter-spacing:var(--tk-micro);line-height:var(--lh-micro);
     text-transform:uppercase;color:var(--tinta-3);
   }
   @media(min-width:720px){.prova{grid-template-columns:auto 1fr}}
-  .depoimentos{margin-top:clamp(38px,6vw,64px);display:grid;gap:clamp(30px,5vw,52px)}
-  .depoimento{border-top:1px solid var(--linha);padding-top:24px}
-  .depoimento .est{color:var(--acento);letter-spacing:.22em;font-size:.82rem}
+  .depoimentos{display:grid;gap:var(--s-7)}
+  .depoimento{border-top:1px solid var(--linha);padding-top:var(--s-4)}
+  .depoimento .est{color:var(--acento);letter-spacing:var(--tk-micro);font-size:var(--t-corpo)}
   .depoimento blockquote{
-    font-family:var(--serif);font-style:italic;font-size:clamp(1.15rem,3.2vw,1.42rem);
-    line-height:1.55;color:var(--tinta);margin:14px 0 16px;
+    font-family:var(--serif);font-style:italic;font-size:var(--t-h3);
+    line-height:var(--lh-lead);color:var(--tinta);margin-top:var(--s-4);
+    max-width:var(--medida);
   }
-  .depoimento cite{font-style:normal;font-size:.72rem;letter-spacing:.18em;
-    text-transform:uppercase;color:var(--tinta-3)}
+  .depoimento cite{display:block;font-style:normal;margin-top:var(--s-4);
+    font-size:var(--t-micro);letter-spacing:var(--tk-micro);
+    line-height:var(--lh-micro);text-transform:uppercase;color:var(--tinta-3)}
   @media(min-width:860px){.depoimentos{grid-template-columns:1fr 1fr}}
 
   /* ---------- AGENDA ---------- */
-  .agenda{margin-top:clamp(38px,6vw,64px)}
-  .evento{display:grid;gap:6px 24px;border-top:1px solid var(--linha);padding:24px 0}
+  .evento{display:grid;gap:var(--s-2) var(--s-4);border-top:1px solid var(--linha)}
   .evento:last-child{border-bottom:1px solid var(--linha)}
-  .evento .data{font-size:.72rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;
-    color:var(--acento)}
-  .evento h3{font-family:var(--serif);font-weight:400;color:var(--tinta);
-    font-size:clamp(1.3rem,3.8vw,1.75rem);line-height:1.2}
-  .evento .quando{font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--tinta-3)}
-  .evento .desc{max-width:52ch;font-size:1rem}
+  .evento .data{font-size:var(--t-micro);font-weight:600;letter-spacing:var(--tk-micro);
+    line-height:var(--lh-micro);text-transform:uppercase;color:var(--acento)}
+  .evento h3{font-size:var(--t-h3);line-height:var(--lh-h3)}
+  .evento .quando{font-size:var(--t-micro);letter-spacing:var(--tk-micro);
+    line-height:var(--lh-micro);text-transform:uppercase;color:var(--tinta-3)}
+  .evento .desc{max-width:var(--medida);font-size:var(--t-corpo)}
   @media(min-width:820px){
     .evento{grid-template-columns:.22fr 1fr;align-items:baseline}
-    .evento .data{padding-top:4px}
+    .evento .data{padding-top:var(--s-1)}
   }
 
   /* ---------- GALERIA ----------
      Galeria é amostra, não arquivo: no máximo 6 fotos (o template corta em
      loop.index) e altura FIXA em vez de aspect-ratio. Com aspect-ratio, foto
-     em coluna única no celular vira 438px de altura cada — 15 delas faziam a
-     página passar de 11.000px. Aqui a altura é contida e a grade é de duas
-     colunas desde o celular. */
-  .galeria{margin-top:clamp(34px,5vw,56px);display:grid;grid-template-columns:1fr 1fr;
-    gap:clamp(14px,2.6vw,30px)}
-  .galeria figure img{width:100%;height:clamp(150px,32vw,210px);object-fit:cover}
-  .galeria figcaption{margin-top:8px;font-family:var(--serif);font-style:italic;
-    font-size:.84rem;color:var(--tinta-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .galeria-mais{margin-top:clamp(22px,3vw,30px)}
+     em coluna única no celular passava de 400px de altura cada — 15 delas
+     faziam a página passar de 11.000px. Aqui a altura é contida e a grade é
+     de duas colunas desde o celular. */
+  .galeria{margin-top:var(--s-6);display:grid;grid-template-columns:1fr 1fr;
+    gap:var(--s-4)}
+  .galeria figure img{width:100%;height:clamp(9.5rem,32vw,13rem)}
+  .galeria figcaption{margin-top:var(--s-2);font-family:var(--serif);font-style:italic;
+    font-size:var(--t-micro);line-height:var(--lh-micro);color:var(--tinta-3);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .galeria-mais{margin-top:var(--s-6)}
   @media(min-width:720px){
     /* Mosaico de revista: a primeira foto manda (2×2), as outras compõem em
        volta. Três fileiras curtas — ritmo editorial sem virar rolagem de álbum.
        A altura vem da fileira do grid, não da proporção da imagem. */
-    .galeria{grid-template-columns:repeat(3,1fr);grid-auto-rows:clamp(148px,14vw,186px)}
+    .galeria{grid-template-columns:repeat(3,1fr);grid-auto-rows:clamp(9.25rem,14vw,11.5rem)}
     .galeria figure{display:flex;flex-direction:column;min-width:0}
-    .galeria figure img{height:auto;flex:1;min-height:0}
+    /* aspect-ratio:auto neutraliza a proporção herdada dos atributos
+       width/height — no mosaico quem define a altura é a fileira do grid. */
+    .galeria figure img{height:auto;flex:1;min-height:0;aspect-ratio:auto}
     .galeria figure:first-child{grid-column:span 2;grid-row:span 2}
   }
 
   /* ---------- RESERVA ---------- */
-  .reserva-grade{display:grid;gap:clamp(34px,5vw,64px);align-items:start}
+  .reserva-grade{display:grid;gap:var(--s-7);align-items:start}
   @media(min-width:900px){.reserva-grade{grid-template-columns:.85fr 1.15fr}}
-  .campo{margin-bottom:22px}
-  .campo label{display:block;font-size:.66rem;font-weight:600;letter-spacing:.2em;
-    text-transform:uppercase;color:var(--tinta-3);margin-bottom:8px}
+  .campo{margin-bottom:var(--s-4)}
+  .campo label{display:block;font-size:var(--t-micro);font-weight:600;
+    letter-spacing:var(--tk-micro);line-height:var(--lh-micro);
+    text-transform:uppercase;color:var(--tinta-3);margin-bottom:var(--s-2)}
+  /* font-size no degrau --t-lead (mín. 17 px): abaixo de 16px o iOS dá zoom
+     no foco e joga o formulário pra fora da tela. */
   .campo input,.campo textarea{
     width:100%;background:transparent;border:0;border-bottom:1px solid var(--linha-forte);
-    padding:9px 0;color:var(--tinta);font-family:var(--serif);font-size:1.12rem;
+    padding:var(--s-2) 0;min-height:var(--alvo);
+    color:var(--tinta);font-family:var(--serif);font-size:var(--t-lead);
     border-radius:0;transition:border-color .25s;
   }
-  .campo input::placeholder,.campo textarea::placeholder{color:var(--tinta-3);font-family:var(--sans);font-size:.95rem}
+  .campo input::placeholder,.campo textarea::placeholder{color:var(--tinta-3);
+    font-family:var(--sans);font-size:var(--t-corpo)}
   .campo input:focus,.campo textarea:focus{outline:none;border-bottom-color:var(--acento)}
-  .campo textarea{resize:vertical;min-height:46px;line-height:1.6}
-  .dupla{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .campo textarea{resize:vertical;line-height:var(--lh-lead)}
+  .dupla{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-4)}
   @media(max-width:420px){.dupla{grid-template-columns:1fr}}
-  .reserva-msg{display:none;margin-top:18px;padding:14px 16px;font-size:.95rem;
+  .reserva-msg{display:none;margin-top:var(--s-4);padding:var(--s-3) var(--s-4);
+    font-size:var(--t-corpo);
     border-left:2px solid var(--acento);background:var(--papel-2);color:var(--tinta)}
   .reserva-msg.ok,.reserva-msg.err{display:block}
   .reserva-msg.err{border-left-color:var(--tinta-3)}
-  .reserva-zap{display:none;margin-top:18px}
+  .reserva-zap{display:none;margin-top:var(--s-4)}
   .reserva-zap.mostra{display:inline-flex}
-  .reserva-nota{margin-top:18px;font-size:.8rem;color:var(--tinta-3);max-width:44ch}
-  form .btn{width:100%;margin-top:10px}
+  .reserva-nota{margin-top:var(--s-4);font-size:var(--t-micro);
+    line-height:var(--lh-micro);color:var(--tinta-3);max-width:var(--medida)}
+  form .btn{width:100%;margin-top:var(--s-2)}
 
   /* ---------- CONTATO ---------- */
-  .contato-grade{display:grid;gap:clamp(32px,5vw,60px);align-items:start}
+  .contato-grade{display:grid;gap:var(--s-7);align-items:start}
   @media(min-width:860px){.contato-grade{grid-template-columns:1fr 1fr}}
-  .dados{list-style:none;margin-top:30px}
-  .dados li{padding:18px 0;border-top:1px solid var(--linha)}
+  .dados{list-style:none}
+  .dados li{border-top:1px solid var(--linha)}
   .dados li:last-child{border-bottom:1px solid var(--linha)}
-  .dados b{display:block;font-size:.66rem;font-weight:600;letter-spacing:.2em;
-    text-transform:uppercase;color:var(--tinta-3);margin-bottom:6px}
-  .dados span{color:var(--tinta);font-size:1.02rem}
-  .chamada{border-top:2px solid var(--tinta);padding-top:26px}
-  .chamada h3{font-family:var(--serif);font-weight:400;color:var(--tinta);
-    font-size:clamp(1.7rem,5vw,2.4rem);line-height:1.12}
-  .chamada p{margin-top:14px;max-width:44ch}
-  .chamada .acoes{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+  .dados b{display:block;font-size:var(--t-micro);font-weight:600;
+    letter-spacing:var(--tk-micro);line-height:var(--lh-micro);
+    text-transform:uppercase;color:var(--tinta-3);margin-bottom:var(--s-2)}
+  .dados span{color:var(--tinta);font-size:var(--t-corpo)}
+  .chamada{border-top:2px solid var(--tinta);padding-top:var(--s-6)}
+  .chamada h3{font-size:var(--t-h2);line-height:var(--lh-h2)}
+  .chamada p{margin-top:var(--s-4);max-width:var(--medida)}
+  .chamada .acoes{display:flex;flex-wrap:wrap;gap:var(--s-4);margin-top:var(--s-6)}
 
   /* ---------- RODAPÉ ---------- */
-  footer{border-top:1px solid var(--linha);padding:clamp(50px,8vw,84px) 0 calc(clamp(50px,8vw,84px) + 10px)}
-  .rodape-nome{font-family:var(--serif);font-size:clamp(2rem,8vw,3.4rem);color:var(--tinta);
-    line-height:1.05;letter-spacing:-.01em}
-  .rodape-linha{margin-top:16px;font-size:.94rem;color:var(--tinta-3)}
-  .rodape-links{display:flex;flex-wrap:wrap;gap:22px;margin-top:30px;
-    font-size:.7rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase}
-  .rodape-links a{color:var(--tinta-2);border-bottom:1px solid var(--linha);padding-bottom:3px;
-    transition:color .25s,border-color .25s}
+  footer{border-top:1px solid var(--linha);padding-block:var(--sec-y)}
+  .rodape-nome{font-family:var(--serif);font-size:var(--t-h1);color:var(--tinta);
+    line-height:var(--lh-h1);letter-spacing:-.01em}
+  .rodape-linha{margin-top:var(--s-4);font-size:var(--t-corpo);color:var(--tinta-3)}
+  .rodape-links{display:flex;flex-wrap:wrap;gap:var(--s-4);margin-top:var(--s-6);
+    font-size:var(--t-micro);font-weight:600;letter-spacing:var(--tk-micro);
+    line-height:var(--lh-micro);text-transform:uppercase}
+  .rodape-links a{color:var(--tinta-2);border-bottom:1px solid var(--linha);
+    padding-bottom:var(--s-1);transition:color .25s,border-color .25s}
   .rodape-links a:hover{color:var(--acento);border-color:var(--acento)}
 
   /* ---------- WhatsApp discreto ---------- */
   .zap-fixo{
-    position:fixed;right:16px;bottom:16px;z-index:50;display:inline-flex;align-items:center;gap:9px;
-    background:var(--tinta);color:var(--papel);padding:12px 18px;
-    font-size:.68rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;
-    box-shadow:0 10px 30px var(--sombra);transition:transform .25s;
+    position:fixed;right:var(--s-4);bottom:var(--s-4);z-index:50;
+    display:inline-flex;align-items:center;gap:var(--s-2);
+    background:var(--tinta);color:var(--papel);padding:var(--s-3) var(--s-4);
+    min-height:var(--alvo);
+    font-size:var(--t-micro);font-weight:600;letter-spacing:var(--tk-micro);
+    line-height:var(--lh-micro);text-transform:uppercase;
+    box-shadow:0 8px 32px var(--sombra);transition:transform .25s;
   }
   .zap-fixo:hover{transform:translateY(-2px)}
   .zap-fixo svg{width:16px;height:16px;fill:currentColor;flex:none}
@@ -583,10 +799,10 @@
                 aceita movimento). O estado inicial escondido do herói mora
                 SÓ atrás de .js-anim: CDN fora do ar = classe ausente = página
                 inteira legível. */
-  .js .rev{opacity:0;transform:translateY(14px);
+  .js .rev{opacity:0;transform:translateY(16px);
     transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
   .js .rev.dentro{opacity:1;transform:none}
-  .js-anim [data-hero]{opacity:0;transform:translateY(18px)}
+  .js-anim [data-hero]{opacity:0;transform:translateY(20px)}
   .js-anim .rev{transition:none}  /* com Motion, quem anima é o inline style */
   @media(prefers-reduced-motion:reduce){
     html{scroll-behavior:auto}
@@ -596,9 +812,10 @@
 
   /* Selo de demonstração: só aparece em prévia, quando a casa ainda não tem
      agenda própria e o site mostra o recurso com exemplo. */
-  .selo-exemplo{display:inline-block;vertical-align:middle;margin-left:8px;
-    padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;
-    letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;
+  .selo-exemplo{display:inline-block;vertical-align:middle;margin-left:var(--s-2);
+    padding:var(--s-1) var(--s-2);border-radius:100vmax;
+    font-size:var(--t-micro);font-weight:700;line-height:var(--lh-micro);
+    letter-spacing:var(--tk-micro);text-transform:uppercase;white-space:nowrap;
     background:rgba(255,255,255,.14);color:inherit;opacity:.85;
     border:1px solid currentColor}
 </style>
@@ -609,21 +826,26 @@
 <style>
   .previa{
     position:fixed;left:0;right:0;bottom:0;z-index:200;background:var(--tinta);color:var(--papel);
-    font-family:var(--sans);font-size:.82rem;line-height:1.5;padding:13px 16px;
-    display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;justify-content:center;text-align:center;
+    font-family:var(--sans);font-size:var(--t-corpo);line-height:var(--lh-lead);
+    padding:var(--s-3) var(--s-4);
+    display:flex;flex-wrap:wrap;gap:var(--s-2) var(--s-4);align-items:center;
+    justify-content:center;text-align:center;
   }
   .previa b{color:var(--papel)}
-  .previa a{background:var(--papel);color:var(--tinta);padding:8px 15px;white-space:nowrap;
-    font-size:.68rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase}
+  .previa a{background:var(--papel);color:var(--tinta);padding:var(--s-3) var(--s-4);
+    min-height:var(--alvo);display:inline-flex;align-items:center;white-space:nowrap;
+    font-size:var(--t-micro);font-weight:600;letter-spacing:var(--tk-micro);
+    line-height:var(--lh-micro);text-transform:uppercase}
   .previa a.vazado{background:transparent;color:var(--papel);border:1px solid var(--papel)}
-  .previa .fechar{background:none;border:0;color:var(--papel);font-size:1.1rem;cursor:pointer;padding:2px 6px}
-  body{padding-bottom:104px}
-  .zap-fixo{bottom:112px}
-  @media(min-width:760px){body{padding-bottom:76px}.zap-fixo{bottom:88px}}
+  .previa .fechar{background:none;border:0;color:var(--papel);font-size:var(--t-lead);
+    cursor:pointer;min-width:var(--alvo);min-height:var(--alvo)}
+  body{padding-bottom:var(--s-10)}
+  .zap-fixo{bottom:var(--s-10)}
+  @media(min-width:760px){body{padding-bottom:var(--s-9)}.zap-fixo{bottom:var(--s-9)}}
 </style>
 {% endif %}
 </head>
-<body>
+<body data-heroina="cardapio" data-leitura="alternado" data-foto="sangria-alternada">
 
 {% if tenant and tenant.eh_demo %}
 {# Prévia comercial: este bar ainda não é cliente e não pediu o site. Dizer isso
@@ -727,8 +949,16 @@
       <figure class="hero-foto" data-hero>
         {# Capa = LCP desta página. Sem `loading="lazy"` (adiar a maior imagem
            da dobra é atrasar de propósito a métrica que o Google mede) e com
-           `fetchpriority="high"` pra ela furar a fila das fontes e do CSS. #}
-        <img src="{{ heroi_img }}" alt="{{ heroi_alt }}" fetchpriority="high" decoding="async">
+           `fetchpriority="high"` pra ela furar a fila das fontes e do CSS.
+
+           `--pos` é o corte: 50% 40% porque capa de bar costuma ser fachada
+           com letreiro ou salão, e o assunto vive acima do centro. Quando o
+           cadastro trouxer o valor da foto, ele manda — corte é dado do bar,
+           não constante de CSS. width/height reservam o espaço (CLS). #}
+        <img src="{{ heroi_img }}" alt="{{ heroi_alt }}"
+             style="object-position:{{ site.hero_pos | default('50% 40%') }}"
+             width="1200" height="1500"
+             fetchpriority="high" decoding="async">
         <figcaption>{{ site.nome }}{% if site.cidade_uf %} · {{ site.cidade_uf }}{% endif %}</figcaption>
       </figure>
       {% endif %}
@@ -759,12 +989,22 @@
       <article class="prato rev {{ 'com-foto' if d.img else 'sem-foto' }}{% if d.destaque %} destaque{% endif %}">
         {% if d.img %}
         <div class="prato-foto">
-          <img src="{{ d.img }}" alt="{{ d.nome }}, prato do {{ site.nome }}" loading="lazy" decoding="async">
+          {# 50% 55%: entre o flat lay (50%) e a foto na mesa em ângulo baixo
+             (62%). Nos dois casos a comida fica no meio ou abaixo dele, e o
+             que sobra no topo é teto. Nunca cor real alterada — prato é a
+             única foto que não aceita tratamento de cor. #}
+          <img src="{{ d.img }}" alt="{{ d.nome }}, prato do {{ site.nome }}"
+               style="object-position:{{ d.pos | default('50% 55%') }}"
+               width="1200" height="1500" loading="lazy" decoding="async">
         </div>
         {% endif %}
         <div>
           <div class="prato-num">{{ '%02d' % loop.index }}</div>
           <h3>{{ d.nome }}</h3>
+          {# Editorial: o preço é uma linha própria logo abaixo do nome, no
+             degrau de corpo da escala — dado, não etiqueta. O `{% if %}` vem
+             antes do filtro porque `moeda_br` devolve "R$ 0,00" pra None. #}
+          {% if d.preco %}<p class="prato-preco">{{ d.preco|moeda_br }}</p>{% endif %}
           {% if d.descricao %}<p>{{ d.descricao }}</p>{% endif %}
           {% if d.tag %}<span class="selo">{{ d.tag }}</span>
           {% elif d.destaque %}<span class="selo">Destaque da casa</span>{% endif %}
@@ -827,7 +1067,11 @@
       </div>
       {% if gallery %}
       <figure class="historia-foto rev">
-        <img src="{{ gallery[0].img }}" alt="{{ (gallery[0].legenda ~ ' — ' ~ site.nome) if gallery[0].legenda else ('A casa por dentro — ' ~ site.nome) }}" loading="lazy" decoding="async">
+        {# Foto de ambiente: 50% 65%. O topo de foto de salão é teto e
+           luminária — descer o corte é o que traz o balcão pro quadro. #}
+        <img src="{{ gallery[0].img }}" alt="{{ (gallery[0].legenda ~ ' — ' ~ site.nome) if gallery[0].legenda else ('A casa por dentro — ' ~ site.nome) }}"
+             style="object-position:{{ gallery[0].pos | default('50% 65%') }}"
+             width="1200" height="960" loading="lazy" decoding="async">
         <figcaption>{{ gallery[0].legenda or ('Um dia no ' ~ site.nome) }}</figcaption>
       </figure>
       {% endif %}
@@ -836,12 +1080,12 @@
 </section>
 {% endif %}
 
-<!-- O CLIMA DA CASA -->
-<section class="sec" id="clima" aria-labelledby="t-clima">
+<!-- A COZINHA: o clima da casa, em nome próprio -->
+<section class="sec" id="cozinha" aria-labelledby="t-cozinha">
   <div class="wrap">
     <div class="cab rev">
       <div class="olho">{{ copy.clima.eyebrow }}</div>
-      <h2 class="titulo" id="t-clima">{{ copy.clima.titulo|safe }}</h2>
+      <h2 class="titulo" id="t-cozinha">{{ copy.clima.titulo|safe }}</h2>
     </div>
     <div class="clima rev">
       {% for emoji, titulo, sub in copy.clima.cards %}
@@ -854,6 +1098,160 @@
     </div>
   </div>
 </section>
+
+<!-- GALERIA -->
+{% if gallery %}
+<section class="sec" id="galeria" aria-labelledby="t-galeria">
+  <div class="wrap">
+    <div class="cab rev">
+      <div class="olho">{{ copy.galeria.eyebrow }}</div>
+      <h2 class="titulo" id="t-galeria">{{ copy.galeria.titulo|safe }}</h2>
+      {% if copy.galeria.lead %}<p class="lead">{{ copy.galeria.lead }}</p>{% endif %}
+    </div>
+    {# Amostra, não álbum: no máximo 6. O banco pode ter 16 fotos; empilhar
+       todas fazia a página passar de 11.000px de altura no celular. #}
+    <div class="galeria rev">
+      {% for g in gallery %}{% if loop.index <= 6 %}
+      <figure>
+        {# Galeria é foto misturada (celular de quatro pessoas diferentes), então
+           vale o default do sistema: 50% 45%. Não é 50% 50% de propósito —
+           foto de bar tirada no celular quase sempre tem teto sobrando. #}
+        <img src="{{ g.img }}" alt="{{ (g.legenda ~ ' — ' ~ site.nome) if g.legenda else (site.nome ~ ' — foto da casa ' ~ loop.index) }}"
+             style="object-position:{{ g.pos | default('50% 45%') }}"
+             width="800" height="600" loading="lazy" decoding="async">
+        {% if g.legenda %}<figcaption>{{ g.legenda }}</figcaption>{% endif %}
+      </figure>
+      {% endif %}{% endfor %}
+    </div>
+    {% if gallery|length > 6 and site.instagram_url %}
+    <a class="link-seta galeria-mais" href="{{ site.instagram_url }}" target="_blank" rel="noopener">Ver mais fotos no Instagram →</a>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+<!-- CONTATO -->
+<section class="sec" id="contato" aria-labelledby="t-contato">
+  <div class="wrap">
+    <div class="contato-grade">
+      <div class="rev">
+        <div class="olho">{{ copy.contato.eyebrow }}</div>
+        <h2 class="titulo" id="t-contato">{{ copy.contato.titulo|safe }}</h2>
+        <ul class="dados">
+          {% if site.endereco %}<li><b>Endereço</b><span>{{ site.endereco }}</span></li>{% endif %}
+          {% if site.horario %}<li><b>Horário</b><span>{{ site.horario }}</span></li>{% endif %}
+          {% if site.telefone_exibicao %}<li><b>Telefone · WhatsApp</b><span>{{ site.telefone_exibicao }}</span></li>{% endif %}
+          {% if site.servicos %}<li><b>Serviços</b><span>{{ site.servicos }}</span></li>{% endif %}
+        </ul>
+        {% if site.maps_query %}
+        <a class="link-seta acao-solta" href="https://www.google.com/maps/search/?api=1&query={{ site.maps_query }}" target="_blank" rel="noopener">Abrir no mapa →</a>
+        {% endif %}
+      </div>
+      <div class="chamada rev">
+        <h3>{{ copy.cta.titulo }}</h3>
+        <p>{{ copy.cta.linha }}</p>
+        <div class="acoes">
+          {% if site.whatsapp %}
+          <a class="btn" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener">Falar no WhatsApp</a>
+          {% endif %}
+          <a class="btn btn-linha" href="#reservar">Reservar mesa</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESERVA -->
+<section class="sec" id="reservar" aria-labelledby="t-reservar">
+  <div class="wrap">
+    <div class="reserva-grade">
+      <div class="rev">
+        <div class="olho">{{ copy.reserva.eyebrow }}</div>
+        <h2 class="titulo" id="t-reservar">{{ copy.reserva.titulo|safe }}</h2>
+        {% if copy.reserva.lead %}<p class="lead">{{ copy.reserva.lead }}</p>{% endif %}
+      </div>
+      {% if not reservas_ativas %}
+      <div class="rev">
+        <p class="lead sem-topo">{{ copy.reserva_ui.fallback }}</p>
+        {% if site.whatsapp %}
+        <a class="btn acao-solta"
+           href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}"
+           target="_blank" rel="noopener">Chamar no WhatsApp</a>
+        {% endif %}
+      </div>
+      {% else %}
+      <form class="rev" id="reservaForm" onsubmit="return enviarReserva(event)" novalidate>
+        {# Servido pelo domínio do bar, o backend resolve o tenant pelo Host.
+           Em /bar/<slug> (prévias) o Host é o do produto — daí este campo. #}
+        <input type="hidden" name="slug" value="{{ tenant.slug if tenant else '' }}">
+        {# O POST sai por fetch, mas com FormData(form): o FormData carrega este campo
+           junto com o resto. Tirar daqui abre o formulário de reserva pra POST
+           forjado de qualquer site. O mesmo token vai no header X-CSRFToken. #}
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="campo">
+          <label for="ar-nome">Seu nome</label>
+          <input id="ar-nome" name="nome" type="text" autocomplete="name" placeholder="Como te chamamos?" required>
+        </div>
+        <div class="dupla">
+          <div class="campo">
+            <label for="ar-tel">WhatsApp</label>
+            <input id="ar-tel" name="telefone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(19) 99999-9999" required>
+          </div>
+          <div class="campo">
+            <label for="ar-pessoas">Pessoas</label>
+            <input id="ar-pessoas" name="num_pessoas" type="number" min="1" max="50" value="2" required>
+          </div>
+        </div>
+        <div class="dupla">
+          <div class="campo">
+            <label for="ar-data">Data</label>
+            <input id="ar-data" name="data" type="date" required>
+          </div>
+          <div class="campo">
+            <label for="ar-hora">Horário</label>
+            <input id="ar-hora" name="hora" type="time" value="19:30" required>
+          </div>
+        </div>
+        <div class="campo">
+          <label for="ar-obs">Observação (opcional)</label>
+          <textarea id="ar-obs" name="observacao" placeholder="Aniversário? Restrição alimentar? Conta pra gente."></textarea>
+        </div>
+        <button class="btn" type="submit">{{ copy.reserva_ui.botao }}</button>
+        <div class="reserva-msg" id="reservaMsg" role="status" aria-live="polite"></div>
+        <a class="link-seta reserva-zap" id="reservaZap" href="#" target="_blank" rel="noopener">{{ copy.reserva_ui.titulo }} →</a>
+        {% if site.horario %}<p class="reserva-nota">{{ site.horario }}</p>{% endif %}
+      </form>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- AGENDA -->
+{% if eventos %}
+<section class="sec" id="agenda" aria-labelledby="t-agenda">
+  <div class="wrap">
+    <div class="cab rev">
+      <div class="olho">{{ copy.agenda.eyebrow }}</div>
+      <h2 class="titulo" id="t-agenda">{{ copy.agenda.titulo|safe }}</h2>
+      {% if copy.agenda.lead %}<p class="lead">{{ copy.agenda.lead }}</p>{% endif %}
+    </div>
+    {% set meses = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'] %}
+    {% set dias = ['dom','seg','ter','qua','qui','sex','sáb'] %}
+    <div class="agenda rev">
+      {% for e in eventos %}
+      <div class="evento">
+        <div class="data">{{ '%02d' % e.data.day }} {{ meses[e.data.month-1] }}</div>
+        <div>
+          <h3>{{ e.titulo }}{% if e.exemplo %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
+          <div class="quando">{{ dias[(e.data.weekday()+1)%7] }}{% if e.hora %} · {{ e.hora }}{% endif %}</div>
+          {% if e.descricao %}<p class="desc">{{ e.descricao }}</p>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
 
 <!-- AVALIAÇÕES: nota do Google e depoimentos escritos são dados INDEPENDENTES.
      Quase todo bar tem nota e quase nenhum tem depoimento cadastrado — enquanto
@@ -901,152 +1299,6 @@
   </div>
 </section>
 {% endif %}
-
-<!-- AGENDA -->
-{% if eventos %}
-<section class="sec" id="agenda" aria-labelledby="t-agenda">
-  <div class="wrap">
-    <div class="cab rev">
-      <div class="olho">{{ copy.agenda.eyebrow }}</div>
-      <h2 class="titulo" id="t-agenda">{{ copy.agenda.titulo|safe }}</h2>
-      {% if copy.agenda.lead %}<p class="lead">{{ copy.agenda.lead }}</p>{% endif %}
-    </div>
-    {% set meses = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'] %}
-    {% set dias = ['dom','seg','ter','qua','qui','sex','sáb'] %}
-    <div class="agenda rev">
-      {% for e in eventos %}
-      <div class="evento">
-        <div class="data">{{ '%02d' % e.data.day }} {{ meses[e.data.month-1] }}</div>
-        <div>
-          <h3>{{ e.titulo }}{% if e.exemplo %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
-          <div class="quando">{{ dias[(e.data.weekday()+1)%7] }}{% if e.hora %} · {{ e.hora }}{% endif %}</div>
-          {% if e.descricao %}<p class="desc">{{ e.descricao }}</p>{% endif %}
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
-</section>
-{% endif %}
-
-<!-- GALERIA -->
-{% if gallery %}
-<section class="sec" id="galeria" aria-labelledby="t-galeria">
-  <div class="wrap">
-    <div class="cab rev">
-      <div class="olho">{{ copy.galeria.eyebrow }}</div>
-      <h2 class="titulo" id="t-galeria">{{ copy.galeria.titulo|safe }}</h2>
-      {% if copy.galeria.lead %}<p class="lead">{{ copy.galeria.lead }}</p>{% endif %}
-    </div>
-    {# Amostra, não álbum: no máximo 6. O banco pode ter 16 fotos; empilhar
-       todas fazia a página passar de 11.000px de altura no celular. #}
-    <div class="galeria rev">
-      {% for g in gallery %}{% if loop.index <= 6 %}
-      <figure>
-        <img src="{{ g.img }}" alt="{{ (g.legenda ~ ' — ' ~ site.nome) if g.legenda else (site.nome ~ ' — foto da casa ' ~ loop.index) }}" loading="lazy" decoding="async">
-        {% if g.legenda %}<figcaption>{{ g.legenda }}</figcaption>{% endif %}
-      </figure>
-      {% endif %}{% endfor %}
-    </div>
-    {% if gallery|length > 6 and site.instagram_url %}
-    <a class="link-seta galeria-mais" href="{{ site.instagram_url }}" target="_blank" rel="noopener">Ver mais fotos no Instagram →</a>
-    {% endif %}
-  </div>
-</section>
-{% endif %}
-
-<!-- RESERVA -->
-<section class="sec" id="reservar" aria-labelledby="t-reservar">
-  <div class="wrap">
-    <div class="reserva-grade">
-      <div class="rev">
-        <div class="olho">{{ copy.reserva.eyebrow }}</div>
-        <h2 class="titulo" id="t-reservar">{{ copy.reserva.titulo|safe }}</h2>
-        {% if copy.reserva.lead %}<p class="lead">{{ copy.reserva.lead }}</p>{% endif %}
-      </div>
-      {% if not reservas_ativas %}
-      <div class="rev">
-        <p class="lead" style="margin-top:0">{{ copy.reserva_ui.fallback }}</p>
-        {% if site.whatsapp %}
-        <a class="btn" style="margin-top:26px"
-           href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}"
-           target="_blank" rel="noopener">Chamar no WhatsApp</a>
-        {% endif %}
-      </div>
-      {% else %}
-      <form class="rev" id="reservaForm" onsubmit="return enviarReserva(event)" novalidate>
-        {# Servido pelo domínio do bar, o backend resolve o tenant pelo Host.
-           Em /bar/<slug> (prévias) o Host é o do produto — daí este campo. #}
-        <input type="hidden" name="slug" value="{{ tenant.slug if tenant else '' }}">
-        <div class="campo">
-          <label for="ar-nome">Seu nome</label>
-          <input id="ar-nome" name="nome" type="text" autocomplete="name" placeholder="Como te chamamos?" required>
-        </div>
-        <div class="dupla">
-          <div class="campo">
-            <label for="ar-tel">WhatsApp</label>
-            <input id="ar-tel" name="telefone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(19) 99999-9999" required>
-          </div>
-          <div class="campo">
-            <label for="ar-pessoas">Pessoas</label>
-            <input id="ar-pessoas" name="num_pessoas" type="number" min="1" max="50" value="2" required>
-          </div>
-        </div>
-        <div class="dupla">
-          <div class="campo">
-            <label for="ar-data">Data</label>
-            <input id="ar-data" name="data" type="date" required>
-          </div>
-          <div class="campo">
-            <label for="ar-hora">Horário</label>
-            <input id="ar-hora" name="hora" type="time" value="19:30" required>
-          </div>
-        </div>
-        <div class="campo">
-          <label for="ar-obs">Observação (opcional)</label>
-          <textarea id="ar-obs" name="observacao" placeholder="Aniversário? Restrição alimentar? Conta pra gente."></textarea>
-        </div>
-        <button class="btn" type="submit">{{ copy.reserva_ui.botao }}</button>
-        <div class="reserva-msg" id="reservaMsg" role="status" aria-live="polite"></div>
-        <a class="link-seta reserva-zap" id="reservaZap" href="#" target="_blank" rel="noopener">{{ copy.reserva_ui.titulo }} →</a>
-        {% if site.horario %}<p class="reserva-nota">{{ site.horario }}</p>{% endif %}
-      </form>
-      {% endif %}
-    </div>
-  </div>
-</section>
-
-<!-- CONTATO -->
-<section class="sec" id="contato" aria-labelledby="t-contato">
-  <div class="wrap">
-    <div class="contato-grade">
-      <div class="rev">
-        <div class="olho">{{ copy.contato.eyebrow }}</div>
-        <h2 class="titulo" id="t-contato">{{ copy.contato.titulo|safe }}</h2>
-        <ul class="dados">
-          {% if site.endereco %}<li><b>Endereço</b><span>{{ site.endereco }}</span></li>{% endif %}
-          {% if site.horario %}<li><b>Horário</b><span>{{ site.horario }}</span></li>{% endif %}
-          {% if site.telefone_exibicao %}<li><b>Telefone · WhatsApp</b><span>{{ site.telefone_exibicao }}</span></li>{% endif %}
-          {% if site.servicos %}<li><b>Serviços</b><span>{{ site.servicos }}</span></li>{% endif %}
-        </ul>
-        {% if site.maps_query %}
-        <a class="link-seta" style="margin-top:26px" href="https://www.google.com/maps/search/?api=1&query={{ site.maps_query }}" target="_blank" rel="noopener">Abrir no mapa →</a>
-        {% endif %}
-      </div>
-      <div class="chamada rev">
-        <h3>{{ copy.cta.titulo }}</h3>
-        <p>{{ copy.cta.linha }}</p>
-        <div class="acoes">
-          {% if site.whatsapp %}
-          <a class="btn" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener">Falar no WhatsApp</a>
-          {% endif %}
-          <a class="btn btn-linha" href="#reservar">Reservar mesa</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
 </main>
 
 <footer>
@@ -1118,7 +1370,7 @@
     var form=ev.target, btn=form.querySelector('button[type=submit]'), msg=document.getElementById('reservaMsg');
     btn.disabled=true; var txt=btn.textContent; btn.textContent='Enviando…';
     msg.className='reserva-msg';
-    fetch('{{ url_for("public.reservar") }}',{method:'POST',body:new FormData(form),headers:{'Accept':'application/json'}})
+    fetch('{{ url_for("public.reservar") }}',{method:'POST',body:new FormData(form),headers:{'Accept':'application/json', 'X-CSRFToken': '{{ csrf_token() }}'}})
       .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
       .then(function(res){
         if(res.ok && res.j.ok){

@@ -89,6 +89,7 @@
                     <p class="text-muted">Adicione um registro de venda ao histórico para melhorar a precisão das previsões</p>
 
                     <form method="post" action="{{ url_for('previsao.registrar_venda') }}">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <div class="form-group">
                             <label for="data">Data da Venda *</label>
                             <input type="date" class="form-control" id="data" name="data" required>

@@ -39,6 +39,7 @@
 <div class="bloco">
   <h2>2 · O básico</h2>
   <form method="post" action="{{ url_for('campo.basico', slug=rest.slug) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label for="f-nome">Nome do bar</label>
     <input id="f-nome" type="text" name="nome" value="{{ cfg.nome or rest.nome }}">
 
@@ -68,6 +69,7 @@
      href="{{ url_for('campo.visual', slug=rest.slug) }}">🎨 Escolher o modelo do site</a>
 
   <form method="post" action="{{ url_for('campo.estilo', slug=rest.slug) }}" id="form-estilo">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <p class="nota" style="margin:0 0 8px">Cores</p>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:16px">
       {% for t in temas %}
@@ -113,16 +115,37 @@
              style="width:52px;height:52px;object-fit:cover;border-radius:8px;flex:none">
       {% endif %}
       <span style="flex:1;min-width:0">{{ p.nome }}</span>
+      {# Preço só quando existe: `moeda_br` devolve "R$ 0,00" pra None, e o
+         vendedor não pode ver na lista um preço que o site não vai mostrar. #}
+      {% if p.preco %}
+        <span style="flex:none;font-variant-numeric:tabular-nums;opacity:.85"
+              >{{ p.preco|moeda_br }}</span>
+      {% endif %}
       <form method="post" style="margin:0"
             action="{{ url_for('campo.remover', slug=rest.slug, tipo='prato', item_id=p.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button class="btn perigo" type="submit">tirar</button>
       </form>
     </div>
   {% endfor %}
 
   <div style="margin-top:14px">
-    <label for="prato-nome">Nome do prato</label>
-    <input id="prato-nome" type="text" placeholder="Costela na brasa">
+    {# Nome e preço lado a lado: é como a pergunta acontece na mesa ("o que é
+       e quanto custa"), e economiza uma rolagem no celular. O preço é
+       `type=text` + `inputmode=decimal` de propósito — o teclado numérico abre
+       igual, mas o campo não descarta "18,50" como `type=number` faria.
+       Vazio é válido: o prato entra sem preço. #}
+    <div style="display:flex;gap:10px;align-items:flex-end">
+      <div style="flex:1;min-width:0">
+        <label for="prato-nome">Nome do prato</label>
+        <input id="prato-nome" type="text" placeholder="Costela na brasa">
+      </div>
+      <div style="flex:none;width:38%;max-width:150px">
+        <label for="prato-preco">Preço (opcional)</label>
+        <input id="prato-preco" type="text" inputmode="decimal" placeholder="18,50"
+               style="font-variant-numeric:tabular-nums">
+      </div>
+    </div>
     <label class="btn" for="prato-input">📷 Foto do prato e adicionar</label>
     <input id="prato-input" type="file" accept="image/*" capture="environment"
            data-alvo="prato" class="upload" hidden>
@@ -136,6 +159,7 @@
     {% for g in galeria %}
       <form method="post" style="margin:0;position:relative"
             action="{{ url_for('campo.remover', slug=rest.slug, tipo='galeria', item_id=g.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <img src="{{ img(g.imagem) }}" alt=""
              style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;display:block">
         {# 34px: pequeno pra não ser tocado por acidente num grid de fotos,
@@ -163,11 +187,44 @@
 
 <div class="bloco" style="text-align:center">
   <h2>7 · Mostra pra ele</h2>
-  <div style="background:#fff;border-radius:12px;padding:14px;display:inline-block;max-width:230px">
-    <img src="{{ url_for('campo.qr', slug=rest.slug) }}" alt="QR code do site"
-         style="width:100%;display:block">
+  {# Dois QRs, e o rótulo embaixo de cada um é obrigatório: eles são quadrados
+     pretos idênticos aos olhos de qualquer pessoa. Trocar um pelo outro na
+     mesa manda o cliente sentado pra landing inteira — ou faz o dono divulgar
+     no Instagram um link que abre só o cardápio. #}
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+    <div style="flex:1 1 150px;max-width:200px">
+      <div style="background:#fff;border-radius:12px;padding:12px">
+        <img src="{{ url_for('campo.qr', slug=rest.slug) }}"
+             alt="QR code do site do {{ cfg.nome or rest.nome }}"
+             style="width:100%;display:block">
+      </div>
+      <p class="nota" style="margin-top:8px"><b>O site</b><br>pra divulgar</p>
+    </div>
+    <div style="flex:1 1 150px;max-width:200px">
+      <div style="background:#fff;border-radius:12px;padding:12px">
+        {# Sem prato cadastrado a página do cardápio não existe (404). Mostrar o
+           QR assim mesmo seria entregar ao bar um adesivo que não abre. #}
+        {% if pratos_ativos %}
+          <img src="{{ url_for('campo.qr_cardapio', slug=rest.slug) }}"
+               alt="QR code do cardápio do {{ cfg.nome or rest.nome }}"
+               style="width:100%;display:block">
+        {% else %}
+          <div style="aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+                      color:#6b6459;font-size:13px;line-height:1.35;padding:8px">
+            Cadastre um prato<br>no bloco 4
+          </div>
+        {% endif %}
+      </div>
+      <p class="nota" style="margin-top:8px"><b>O cardápio</b><br>pra colar na mesa</p>
+    </div>
   </div>
   <p class="nota">Ele aponta a câmera e vê o próprio bar no telefone dele.</p>
+  {% if pratos_ativos %}
+    <a class="btn fantasma" style="margin-top:10px;text-decoration:none"
+       href="{{ url_for('campo.qr_mesa', slug=rest.slug) }}">
+      🖨 Folha do cardápio pra imprimir
+    </a>
+  {% endif %}
   <a class="btn fantasma" style="margin-top:10px;text-decoration:none"
      href="{{ url_for('campo.proposta', slug=rest.slug) }}">
     📄 Proposta pronta pra mostrar
@@ -188,6 +245,7 @@
     continua, agora no nome dele.
   </p>
   <form method="post" action="{{ url_for('campo.converter', slug=rest.slug) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label for="c-resp">Nome do responsável</label>
     <input id="c-resp" type="text" name="responsavel" placeholder="Gustavo">
 
@@ -208,6 +266,10 @@
 const SLUG = {{ rest.slug|tojson }};
 const URL_FOTO = {{ url_for('campo.foto', slug=rest.slug)|tojson }};
 const LADO_MAX = 1200;
+/* Este upload não passa por <form>, então ninguém coloca o token por ele: o
+   FormData é montado à mão em `subir()`. Sem isto, a foto volta 400 e a venda
+   presencial para no primeiro clique da câmera. */
+const CSRF = {{ csrf_token()|tojson }};
 
 /* Reduzir no navegador, não no servidor: foto de celular tem ~4MB e o 4G do
    bar não sobe isso enquanto alguém espera olhando. ~200KB sobe em segundos —
@@ -238,13 +300,18 @@ function avisar(texto, erro) {
   if (!erro) setTimeout(() => div.remove(), 2500);
 }
 
-async function subir(file, alvo, rotulo) {
+async function subir(file, alvo, rotulo, preco) {
   const dados = new FormData();
+  dados.append('csrf_token', CSRF);
   dados.append('imagem', await reduzir(file), (file.name || 'foto').replace(/\.\w+$/, '') + '.jpg');
   dados.append('alvo', alvo);
   if (rotulo) dados.append('nome', rotulo);
+  /* Vai como o vendedor digitou ("18", "18,50", "R$ 18,50"): quem normaliza é
+     `ler_moeda` no servidor, uma regra só pros dois formulários. */
+  if (preco) dados.append('preco', preco);
 
-  const resp = await fetch(URL_FOTO, {method: 'POST', body: dados});
+  const resp = await fetch(URL_FOTO, {
+    method: 'POST', body: dados, headers: {'X-CSRFToken': CSRF}});
   const corpo = await resp.json().catch(() => ({erro: 'resposta inesperada do servidor'}));
   if (!resp.ok) throw new Error(corpo.erro || 'falhou o envio');
   return corpo;
@@ -260,11 +327,13 @@ document.querySelectorAll('input.upload').forEach(input => {
     botao.textContent = 'Enviando…';
     botao.style.pointerEvents = 'none';
     const campoNome = document.getElementById('prato-nome');
+    const campoPreco = document.getElementById('prato-preco');
 
     try {
       for (const arquivo of arquivos) {
         const r = await subir(arquivo, input.dataset.alvo,
-                              campoNome ? campoNome.value.trim() : '');
+                              campoNome ? campoNome.value.trim() : '',
+                              campoPreco ? campoPreco.value.trim() : '');
         if (r.alvo === 'capa') {
           document.getElementById('capa-preview').innerHTML =
             `<img src="${r.url}" alt="Capa atual do site" style="width:100%;` +

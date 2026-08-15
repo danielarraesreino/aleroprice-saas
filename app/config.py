@@ -28,6 +28,17 @@ class Config:
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
 
+    # CSRF (flask-wtf, ligado em `create_app`).
+    #
+    # Token vale enquanto a sessão valer, em vez de expirar em 1h (padrão do
+    # flask-wtf). Os dois usos reais aqui são páginas que ficam abertas: o site
+    # do bar no celular de quem vai reservar, e a tela do Modo Campo durante a
+    # visita inteira. Com o limite de 1h, voltar pra aba depois do almoço fazia
+    # a reserva e o upload de foto morrerem em 400 sem explicação. Expirar
+    # junto com a sessão mantém a garantia que importa (token amarrado a uma
+    # sessão específica) sem esse falso negativo.
+    WTF_CSRF_TIME_LIMIT = None
+
 class DevelopmentConfig(Config):
     """Configuração de desenvolvimento"""
     DEBUG = True

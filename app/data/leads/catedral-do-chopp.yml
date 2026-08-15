@@ -9,6 +9,10 @@ nome: "Catedral do Chopp"
 tema: boteco-ambar
 
 site:
+  telefone_exibicao: "(19) 3295-0110"
+  endereco: "R. Cel. Francisco Andrade Coutinho, 299 - Cambuí, Campinas - SP, 13025-190"
+  qtd_avaliacoes: 7890
+  nota_google: "4,5"
   vibe: boteco
   descritor: "Chopp e comemorações no Cambuí"
   kicker: "CAMBUÍ · CAMPINAS–SP"

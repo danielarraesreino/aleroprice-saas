@@ -82,6 +82,7 @@
                     <p class="text-muted">Atualize as informações da categoria</p>
 
                     <form method="post" action="{{ url_for('desperdicio.editar_categoria', id=categoria.id) }}">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <div class="form-group">
                             <label for="nome">Nome da Categoria *</label>
                             <input type="text" class="form-control" id="nome" name="nome" value="{{ categoria.nome }}" required>
