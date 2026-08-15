@@ -199,18 +199,33 @@ def barao():
 
 @bp.route('/robots.txt')
 def robots():
-    """Segunda camada de proteção das prévias (a primeira é o meta noindex).
+    """O que o buscador não deve rastrear — e `/bar/` NÃO está nessa lista.
 
-    Bloqueia /bar/ inteiro em vez de listar as demos: listar entregaria a lista
-    de prospecção pra qualquer um, e cliente convertido usa domínio próprio.
+    Bloquear `/bar/` era duplamente errado. Primeiro porque `/bar/<slug>` é o
+    endereço de todo cliente que ainda não comprou domínio próprio: o bar pagava
+    por um site que o Google estava proibido de ler.
+
+    Segundo porque não protegia a prévia — protegia menos. `Disallow` impede o
+    rastreador de abrir a página, e é lá dentro que está o `noindex`. Sem poder
+    ler, o Google pode manter a URL no índice sem conteúdo, que é exatamente o
+    que se queria evitar. As duas diretivas se anulavam.
+
+    Quem tira a prévia do índice é o `<meta name="robots" content="noindex">`
+    que todo modelo emite quando `tenant.eh_demo` — e que some sozinho na
+    conversão. O sitemap, por sua vez, lista só cliente.
     """
+    from app.utils.site_router import dominio_do_produto
+
     corpo = (
         'User-agent: *\n'
-        'Disallow: /bar/\n'
-        'Disallow: /s/\n'
         'Disallow: /cadastro\n'
         'Disallow: /app/\n'
+        'Disallow: /campo/\n'
+        'Disallow: /config-site/\n'
+        'Disallow: /conteudo/\n'
+        'Disallow: /campanha/\n'
         'Allow: /\n'
+        f'\nSitemap: https://{request.host or dominio_do_produto()}/sitemap.xml\n'
     )
     return corpo, 200, {'Content-Type': 'text/plain; charset=utf-8'}
 

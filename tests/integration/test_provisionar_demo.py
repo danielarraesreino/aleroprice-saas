@@ -78,15 +78,30 @@ def test_aplica_lead_e_publica_site(client, session, lead):
 
 
 def test_demo_nao_e_indexavel(client, session, lead):
-    """Assert jurídico: prévia não autorizada não pode ir pro Google."""
+    """Assert jurídico: prévia não autorizada não pode ir pro Google.
+
+    Quem faz isso é o `noindex` da própria página — e só ele. O `Disallow:
+    /bar/` que existia aqui atrapalhava duas vezes: bloqueava o site do cliente
+    pagante (que também mora em /bar/<slug>) e impedia o rastreador de abrir a
+    página pra ler justamente este noindex.
+    """
     demos.aplicar_todos()
     corpo = client.get('/bar/boteco-do-teste').get_data(as_text=True)
 
     assert 'noindex' in corpo
     assert 'Prévia não oficial' in corpo
 
+
+def test_robots_nao_bloqueia_o_site_do_cliente(client, session, lead):
+    """`/bar/<slug>` é o endereço de todo bar sem domínio próprio: bloqueá-lo é
+    vender um site que o Google não pode ler."""
     robots = client.get('/robots.txt').get_data(as_text=True)
-    assert 'Disallow: /bar/' in robots
+
+    assert 'Disallow: /bar/' not in robots
+    assert 'Disallow: /s/' not in robots
+    # o que continua fora do índice é o sistema, não o site de ninguém
+    for interno in ('/app/', '/campo/', '/cadastro'):
+        assert f'Disallow: {interno}' in robots
 
 
 def test_reaplicar_nao_duplica(client, session, lead):
