@@ -29,7 +29,10 @@ from app.utils.modelos import (
     MODELO_PADRAO, MODELOS, modelo_valido, opcoes_de_modelo,
 )
 from app.utils.operador import e_operador
-from app.utils.planos import DIAS_DE_TRIAL, conferir_convite, convite, precos
+from app.utils.planos import (
+    DIAS_DE_TRIAL, PagamentoInvalido, conferir_convite, convite,
+    plano_efetivo, precos, registrar_pagamento, rotulo,
+)
 from app.utils.temas import opcoes_de_tema, tema_valido
 
 # Campos que o Modo Campo edita. Curto de propósito: o resto continua no
@@ -102,11 +105,13 @@ def editar(slug):
               .order_by(DishCard.ordem).all())
     galeria = (GalleryItem.query.filter_by(restaurant_id=rest.id)
                .order_by(GalleryItem.ordem).all())
+    plano = plano_efetivo(rest)
     return render_template(
         'campo/editar.html', rest=rest, cfg=cfg, pratos=pratos, galeria=galeria,
         temas=opcoes_de_tema(), vibes=opcoes_de_vibe(),
         # Sugestão pronta: em campo ninguém inventa senha boa de cabeça.
         senha_sugerida=secrets.token_urlsafe(9),
+        plano=plano, plano_rotulo=rotulo(plano), precos=precos(),
     )
 
 
@@ -257,6 +262,33 @@ def converter(slug):
 
     flash(f'Pronto. Conta de {rest.nome} criada: {email} / {senha} — '
           f'anote antes de sair desta tela.', 'success')
+    return redirect(url_for('campo.editar', slug=slug))
+
+
+@bp.post('/<slug>/pagamento')
+def pagamento(slug):
+    """Registrar o dinheiro que entrou na mão, ali mesmo.
+
+    O PIX cai no celular do operador durante a conversa; o sistema não fica
+    sabendo. Sem este botão, o bar pagava e mesmo assim degradava pra `free` no
+    fim do trial — a conta certa existia só no Stripe, que está desligado.
+
+    Fica no Modo Campo (e não no painel do dono) de propósito: quem confirma
+    recebimento é quem vendeu, não quem comprou.
+    """
+    rest = _bar(slug)
+    try:
+        ate = registrar_pagamento(rest,
+                                  meses=request.form.get('meses', 1),
+                                  plano=request.form.get('plano', 'site'))
+        db.session.commit()
+    except PagamentoInvalido as e:
+        db.session.rollback()
+        flash(str(e), 'danger')
+        return redirect(url_for('campo.editar', slug=slug))
+
+    flash(f'Pagamento anotado. {rest.nome} está pago até '
+          f'{ate.strftime("%d/%m/%Y")}.', 'success')
     return redirect(url_for('campo.editar', slug=slug))
 
 

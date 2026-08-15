@@ -18,7 +18,7 @@ Bar imprime QR e põe o link no Instagram. Derrubar o site pune o cliente do bar
 não o bar — e vira dano à nossa reputação. Quem não paga perde o *controle* do
 site (não edita, não recebe reserva), nunca o endereço. Ver `RECURSOS_POR_PLANO`.
 """
-from datetime import date
+from datetime import date, timedelta
 import os
 
 # Janela de teste grátis, contada a partir do cadastro ou da conversão
@@ -159,6 +159,68 @@ def limite(rest, tipo):
     if atende(rest, 'site'):
         return None
     return LIMITES_FREE.get(tipo)
+
+
+class PagamentoInvalido(Exception):
+    """Recusa de registro de pagamento. Mensagem é pra ler em pé, no bar."""
+
+
+def _soma_meses(quando, meses):
+    """Mesmo dia, N meses à frente, encurtando quando o mês não tem o dia.
+
+    31/01 + 1 mês = 28/02 (ou 29 em bissexto). Sem isto, o dia 31 estouraria e
+    a alternativa comum — somar 30 dias — faz a data do bar andar para trás
+    todo mês, e o dono percebe.
+    """
+    total = (quando.month - 1) + meses
+    ano = quando.year + total // 12
+    mes = total % 12 + 1
+    ultimo = 31 if mes == 12 else (date(ano, mes + 1, 1) - timedelta(days=1)).day
+    return date(ano, mes, min(quando.day, ultimo))
+
+
+def registrar_pagamento(rest, meses=1, plano='site', hoje=None):
+    """Dinheiro que entrou fora do sistema: PIX, maquininha, transferência.
+
+    A cobrança automática foi abortada de propósito ("fecho manual"), e sem esta
+    função não havia caminho nenhum: `plano_ate` só era escrito pelo webhook do
+    Stripe. Na prática, o bar que pagava no PIX seguia contando os 14 dias de
+    trial e caía em `free` — o dono paga e o site congela.
+
+    Renovar antes de vencer **soma**, não substitui: a base é o vencimento atual
+    quando ele está no futuro, senão hoje. Quem paga adiantado não perde os dias
+    que já comprou, e quem some por dois meses recomeça de hoje em vez de comprar
+    um período que já passou.
+
+    `subscription_status` volta pra 'active' porque `plano_efetivo` trata
+    'canceled'/'past_due' como vencido — pagar de novo tem que limpar o estado
+    anterior, ou o bar continua degradado com a data certa.
+    """
+    if rest is None:
+        raise PagamentoInvalido('bar não encontrado')
+    if plano not in ('site', 'pro'):
+        raise PagamentoInvalido(f'plano "{plano}" não existe — use site ou pro')
+    try:
+        meses = int(meses)
+    except (TypeError, ValueError):
+        raise PagamentoInvalido('quantidade de meses inválida')
+    if not 1 <= meses <= 24:
+        raise PagamentoInvalido('meses tem que ficar entre 1 e 24')
+    if getattr(rest, 'tipo_conta', None) == 'demo':
+        raise PagamentoInvalido(
+            'esta ainda é uma prévia. Converta em conta do dono antes de '
+            'registrar o pagamento.')
+
+    hoje = hoje or date.today()
+    base = rest.plano_ate if rest.plano_ate and rest.plano_ate > hoje else hoje
+
+    rest.plano_ate = _soma_meses(base, meses)
+    rest.subscription_tier = plano
+    rest.subscription_status = 'active'
+    # O trial deixa de importar assim que há pagamento; zerar evita que
+    # `dias_de_trial_restantes` mostre "faltam 3 dias" pra quem já pagou.
+    rest.trial_termina_em = None
+    return rest.plano_ate
 
 
 def dias_de_trial_restantes(rest):

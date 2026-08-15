@@ -200,6 +200,35 @@
     <button class="btn" type="submit">Este bar é meu — criar conta</button>
   </form>
 </div>
+{% else %}
+{# Já é cliente. O PIX cai no celular do operador e o sistema não fica sabendo:
+   sem este bloco o bar paga e mesmo assim degrada pra `free` no fim do trial. #}
+<div class="bloco" style="border-color:var(--ambar)">
+  <h2>8 · Recebi</h2>
+  <p class="nota" style="margin:0 0 14px">
+    Hoje: <strong>{{ plano_rotulo }}</strong>{% if rest.plano_ate %},
+    pago até <strong>{{ rest.plano_ate|data_br }}</strong>{% elif rest.trial_termina_em %},
+    teste até <strong>{{ rest.trial_termina_em|data_br }}</strong>{% endif %}.
+    Renovar antes de vencer soma os dias que faltam, não joga fora.
+  </p>
+  <form method="post" action="{{ url_for('campo.pagamento', slug=rest.slug) }}">
+    <label for="p-plano">Plano</label>
+    <select id="p-plano" name="plano">
+      <option value="site">Site — {{ precos.site }}/mês</option>
+      <option value="pro" {% if plano == 'pro' %}selected{% endif %}>Pro — {{ precos.pro }}/mês</option>
+    </select>
+
+    <label for="p-meses">Quantos meses ele pagou</label>
+    <select id="p-meses" name="meses">
+      <option value="1">1 mês</option>
+      <option value="3">3 meses</option>
+      <option value="6">6 meses</option>
+      <option value="12">12 meses</option>
+    </select>
+
+    <button class="btn" type="submit">Anotar pagamento</button>
+  </form>
+</div>
 {% endif %}
 {% endblock %}
 

@@ -271,7 +271,20 @@ def converter_demo(rest, email, senha, nome_admin='Responsável', dias_trial=Non
     rest.tipo_conta = 'cliente'
     rest.demo_expira_em = None
     rest.ativo = True
-    rest.subscription_tier = 'site'
+    # Quem carrega os 14 dias é `trial_termina_em`, não o tier.
+    #
+    # Isto era `subscription_tier = 'site'`, e o efeito não era o pretendido:
+    # `plano_efetivo` lê `plano_ate is not None and hoje > plano_ate`, ou seja,
+    # data nula significa "sem corte conhecido — vale o tier". A regra existe
+    # pra proteger os tenants criados antes do campo `plano_ate`, mas toda
+    # conversão nascia dentro dela: tier 'site' + data nula = plano Site
+    # vitalício, de graça, e o trial de 14 dias nunca chegava a valer de nada.
+    #
+    # Com 'free' aqui, o acesso dos 14 dias vem de `plano_efetivo` devolvendo
+    # 'trial' (que vale como pro). Passado o prazo sem pagamento, cai pra free —
+    # site no ar, controle congelado, que é a degradação desenhada. Quem paga
+    # sobe pra 'site'/'pro' com data por `planos.registrar_pagamento`.
+    rest.subscription_tier = 'free'
     rest.trial_termina_em = date.today() + timedelta(days=dias_trial)
 
     admin = Usuario(nome=nome_admin, email=email, senha=senha,

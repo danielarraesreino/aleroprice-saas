@@ -14,7 +14,9 @@ Isto substitui o `Restaurante.query.order_by(id).first()` que servia "o
 primeiro bar do banco" na raiz — o que quebraria assim que houvesse 2 clientes.
 """
 import os
+from datetime import date
 
+from app.extensions import db
 from app.models.modelo_restaurante import Restaurante
 
 # Domínio onde mora a landing de venda. Env para não travar o valor no código
@@ -46,8 +48,32 @@ def _publicavel(query):
     `ativo IS NOT FALSE` (e não `ativo == True`) porque a coluna nasceu em
     tenants antigos via ALTER TABLE ADD COLUMN, que grava NULL nas linhas
     existentes. Tratar NULL como inativo tiraria do ar bares que já funcionam.
+
+    Prévia vencida sai do ar sozinha. `demo_expira_em` era escrito desde o
+    primeiro lead (`demos._expira_em`) e nunca lido por ninguém: a prévia de um
+    bar que não fechou ficava no ar indefinidamente, com o nome, a foto e a nota
+    do Google daquele bar. O prazo é justamente o que sustenta mostrar isso sem
+    ter fechado contrato — sem esta linha, o prazo era decorativo.
+
+    O corte vive aqui, e não em cada view, porque `tenant_por_host` e
+    `tenant_por_slug` são as duas portas do site público e as duas passam por
+    aqui. O Modo Campo consulta `Restaurante.query` direto (`campo._bar`), então
+    o operador continua enxergando e reativando a prévia vencida.
+
+    Cliente nunca é afetado: `converter_demo` zera `demo_expira_em` e troca o
+    `tipo_conta`, e demo sem data marcada segue no ar (não inventamos prazo
+    retroativo pra quem já estava publicado).
     """
-    return query.filter(Restaurante.ativo.isnot(False))
+    hoje = date.today()
+    return query.filter(
+        Restaurante.ativo.isnot(False),
+        db.or_(
+            Restaurante.tipo_conta.is_(None),
+            Restaurante.tipo_conta != 'demo',
+            Restaurante.demo_expira_em.is_(None),
+            Restaurante.demo_expira_em >= hoje,
+        ),
+    )
 
 
 def tenant_por_host(host):
