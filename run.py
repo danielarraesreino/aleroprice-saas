@@ -91,13 +91,6 @@ if _seed_token:
     import hmac
     from flask import request, abort, jsonify
 
-    # Chamado por curl na manutenção: não há navegador, nem sessão, nem token
-    # de CSRF pra mandar. Hoje a rota é GET (que o CSRFProtect nem olha), mas a
-    # isenção fica explícita pra que trocar o método por POST amanhã não quebre
-    # o único caminho de semear o Postgres de produção. Quem autentica aqui é o
-    # SEED_TOKEN, comparado em tempo constante logo na entrada da view.
-    from app.extensions import csrf
-
     def _contagens(tem_slug):
         # Defensivo: se a coluna slug ainda não existe (banco divergido), não dá
         # pra achar por slug — lista todos os tenants por id/nome.
@@ -133,7 +126,6 @@ if _seed_token:
         return out
 
     @app.route('/bootstrap-demo', strict_slashes=False)
-    @csrf.exempt
     def bootstrap_demo():
         if not hmac.compare_digest(request.args.get('token', ''), _seed_token):
             abort(404)  # token errado = endpoint não existe

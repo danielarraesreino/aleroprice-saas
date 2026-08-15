@@ -1,13 +1,3 @@
-# CONFIRMAR POR TELEFONE ANTES DE IR (verificado em 15/08/2026):
-# no Restaurant Guru, a ficha desse endereço (R. Maria da Conceição dos Santos,
-# 20 — CEP 13105-712) aparece com o nome "O Quintal Sousas" e marcada
-# "Permanentemente encerrado". NÃO marquei ativo: false porque a evidência é
-# de OUTRO nome: as fichas em nome de "Estação Santana" (Prefeitura de
-# Campinas, BenditoGuia, TodosNegócios, Tripadvisor) seguem como abertas, com
-# horário Ter–Sex 16h–00h e Sáb–Dom 12h–00h, e o telefone é outro
-# ((19) 3579-3430 aqui, (19) 99498-0020 na ficha encerrada). As duas leituras
-# possíveis são: a casa trocou de nome, ou trocou de dono e a antiga fechou.
-# Sem nota_google por isso — a nota 4,5 que existe está na ficha encerrada.
 # Estação Santana — Sousas, Campinas–SP
 # Lead da campanha RMC. Foto: coloque os arquivos em
 # app/static/img/demo/estacao-santana/ e aponte abaixo (hero_foto, cardapio, galeria).
@@ -19,8 +9,6 @@ nome: "Estação Santana"
 tema: boteco-ambar
 
 site:
-  telefone_exibicao: "(19) 3579-3430"
-  endereco: "R. Maria da Conceição dos Santos, 20 - Conj. Hab. Vila Santana, Sousas, Campinas - SP, 13105-712"
   vibe: boteco
   descritor: "Casarão e comida caipira"
   kicker: "SOUSAS · CAMPINAS–SP"

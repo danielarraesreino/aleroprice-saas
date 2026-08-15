@@ -9,19 +9,14 @@ nome: "Cervejaria Serra das Cabras"
 tema: praia-claro
 
 site:
-  endereco: "R. Treze de Maio, 1600 - Nova Sousas, Campinas - SP"
   vibe: praia
-  descritor: "Cervejaria com vista em Nova Sousas"
-  kicker: "NOVA SOUSAS · CAMPINAS–SP"
+  descritor: "Cervejaria com vista em Joaquim Egídio"
+  kicker: "JOAQUIM EGÍDIO · CAMPINAS–SP"
   hero_linha1: "Cervejaria Serra"
   hero_linha2: "das Cabras"
   tagline: "Vista aberta, cerveja própria e tempo pra ficar."
   subline: "VISTA · ARTESANAL · NATUREZA"
-  # O relatório trazia "Joaquim Egídio"; o endereço confirmado em duas fontes
-  # (Carta Campinas e PinEat, 15/08/2026) é Nova Sousas.
-  cidade_uf: "Nova Sousas, Campinas–SP"
-  # Duas fontes concordam (PinEat e ficha da casa, 15/08/2026): só sex e sáb.
-  horario: "Sex 17h–23h · Sáb 16h–23h"
+  cidade_uf: "Joaquim Egídio, Campinas–SP"
 
 # Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
 #   hero_foto: img/demo/serra-das-cabras/capa.jpg

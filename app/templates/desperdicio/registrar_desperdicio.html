@@ -100,7 +100,6 @@
                     <p class="text-muted">Registre ocorrências de desperdício para monitoramento e análise</p>
 
                     <form method="post" action="{{ url_for('desperdicio.registrar_desperdicio') }}">
-                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <div class="form-group">
                             <label>Tipo de Item *</label>
                             <div class="row">

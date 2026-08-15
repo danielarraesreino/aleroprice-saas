@@ -53,14 +53,12 @@
         <td class="text-end text-nowrap">
           {% if r.status != 'confirmada' %}
           <form method="post" action="{{ url_for('reservas.confirmar', reserva_id=r.id) }}" class="d-inline">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button class="btn btn-sm btn-success" title="Confirmar"><i class="fas fa-check"></i></button>
           </form>
           {% endif %}
           {% if r.status != 'cancelada' %}
           <form method="post" action="{{ url_for('reservas.cancelar', reserva_id=r.id) }}" class="d-inline"
                 onsubmit="return confirm('Cancelar a reserva de {{ r.nome }}?');">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button class="btn btn-sm btn-outline-secondary" title="Cancelar"><i class="fas fa-times"></i></button>
           </form>
           {% endif %}

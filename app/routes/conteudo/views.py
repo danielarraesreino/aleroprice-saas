@@ -6,24 +6,16 @@ from app.models.modelo_sitecontent import DishCard, Review, TeamMember, GalleryI
 from app.routes.conteudo import bp
 from app.utils.tenant import get_current_restaurant_id
 from app.utils.decorators import plano_minimo
-from app.utils.formatacao_br import ler_moeda
 from app.utils.planos import limite
 
 # Motor genérico: cada tipo mapeia um model + a definição dos campos do formulário.
 # campo = (nome, rótulo, tipo_widget, obrigatório)
-#
-# Widgets: 'text', 'textarea', 'check', 'number' e 'preco'. O 'preco' existe
-# separado do 'number' porque `number` grava int e dinheiro tem centavo — e
-# porque o campo aceita o que o dono escreve ("R$ 18,50"), não um formato só.
 TIPOS = {
     'cardapio': {
         'model': DishCard, 'label': 'Cardápio', 'singular': 'prato', 'resumo': 'nome',
         'campos': [
             ('nome', 'Nome do prato', 'text', True),
             ('descricao', 'Descrição', 'textarea', False),
-            # Não obrigatório: prato sob consulta existe, e forçar um número
-            # faria o dono digitar 0 — que vira "R$ 0,00" na cara do cliente.
-            ('preco', 'Preço (ex: 18,50 — deixe vazio para não mostrar)', 'preco', False),
             ('imagem', 'Imagem (caminho em static, ex: img/bar/foto-5.jpg, ou URL)', 'text', False),
             ('tag', 'Selo (ex: ★ O MAIS PEDIDO)', 'text', False),
             ('destaque', 'Destacar com borda', 'check', False),
@@ -113,10 +105,6 @@ def salvar(tipo, item_id=None):
         for campo, label, widget, obrig in t['campos']:
             if widget == 'check':
                 setattr(item, campo, request.form.get(campo) == 'on')
-            elif widget == 'preco':
-                # `ler_moeda` devolve None pra vazio, zero e lixo — e None é
-                # exatamente "não mostrar preço". Campo apagado limpa o preço.
-                setattr(item, campo, ler_moeda(request.form.get(campo)))
             elif widget == 'number':
                 raw = (request.form.get(campo) or '').strip()
                 val = int(raw) if raw.lstrip('-').isdigit() else None

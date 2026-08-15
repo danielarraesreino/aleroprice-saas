@@ -9,16 +9,6 @@ class DishCard(db.Model):
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurante.id'), nullable=False, index=True)
     nome = db.Column(db.String(120), nullable=False)
     descricao = db.Column(db.Text)
-    # Dinheiro é Numeric, nunca Float: float é binário (base 2) e não representa
-    # 18,10 exatamente — grava 18.099999999999998 e devolve isso pro card do
-    # prato e pro `offers.price` do JSON-LD. Preço errado no Google é reclamação
-    # no balcão do bar. Numeric(8,2) guarda o centavo como decimal, e 8 dígitos
-    # (até 999.999,99) sobra pra qualquer porção.
-    #
-    # Nullable de propósito: "sem preço" é um estado legítimo (o dono ainda não
-    # decidiu, ou o item é sob consulta). Zero NÃO é esse estado — prato sem
-    # preço não mostra nada, nunca "R$ 0,00".
-    preco = db.Column(db.Numeric(8, 2))
     imagem = db.Column(db.String(300))        # caminho em static (ex: img/bar/foto-5.jpg) ou URL
     tag = db.Column(db.String(40))            # selo, ex: "★ O MAIS PEDIDO"
     destaque = db.Column(db.Boolean, default=False)   # borda/realce

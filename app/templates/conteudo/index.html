@@ -50,9 +50,7 @@
                  style="width:56px;height:56px;object-fit:cover;border-radius:8px;flex:none">
             {% endif %}
             <div class="min-width-0">
-              {# Preço só aparece quando existe. `moeda_br` devolve "R$ 0,00"
-                 pra None — por isso o `if` vem antes do filtro, aqui e no site. #}
-              <strong>{{ it.nome }}</strong>{% if it.preco %} <span class="text-nowrap" style="font-variant-numeric:tabular-nums">{{ it.preco|moeda_br }}</span>{% endif %}{% if it.tag %} <span class="badge bg-warning text-dark">{{ it.tag }}</span>{% endif %}{% if it.descricao %}<br><small class="text-muted">{{ it.descricao }}</small>{% endif %}
+              <strong>{{ it.nome }}</strong>{% if it.tag %} <span class="badge bg-warning text-dark">{{ it.tag }}</span>{% endif %}{% if it.descricao %}<br><small class="text-muted">{{ it.descricao }}</small>{% endif %}
             </div>
           </div>
           {% endif %}
@@ -61,11 +59,9 @@
         <td class="text-end text-nowrap">
           <a class="btn btn-sm btn-outline-primary" href="{{ url_for('conteudo.salvar', tipo=tipo, item_id=it.id) }}" title="Editar"><i class="fas fa-pen"></i></a>
           <form method="post" action="{{ url_for('conteudo.toggle', tipo=tipo, item_id=it.id) }}" class="d-inline">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button class="btn btn-sm btn-outline-secondary" title="{{ 'Ocultar' if it.ativo else 'Publicar' }}"><i class="fas fa-{{ 'eye-slash' if it.ativo else 'eye' }}"></i></button>
           </form>
           <form method="post" action="{{ url_for('conteudo.excluir', tipo=tipo, item_id=it.id) }}" class="d-inline" onsubmit="return confirm('Excluir este item?');">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button class="btn btn-sm btn-outline-danger" title="Excluir"><i class="fas fa-trash"></i></button>
           </form>
         </td>

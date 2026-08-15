@@ -35,14 +35,12 @@
         <td class="text-end text-nowrap">
           <a class="btn btn-sm btn-outline-primary" href="{{ url_for('promocoes.editar', promo_id=p.id) }}" title="Editar"><i class="fas fa-pen"></i></a>
           <form method="post" action="{{ url_for('promocoes.toggle', promo_id=p.id) }}" class="d-inline">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button class="btn btn-sm btn-outline-secondary" title="{{ 'Ocultar' if p.ativo else 'Publicar' }}">
               <i class="fas fa-{{ 'eye-slash' if p.ativo else 'eye' }}"></i>
             </button>
           </form>
           <form method="post" action="{{ url_for('promocoes.excluir', promo_id=p.id) }}" class="d-inline"
                 onsubmit="return confirm('Excluir a promoção {{ p.titulo }}?');">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button class="btn btn-sm btn-outline-danger" title="Excluir"><i class="fas fa-trash"></i></button>
           </form>
         </td>

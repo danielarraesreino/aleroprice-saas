@@ -96,7 +96,6 @@
                     <p class="text-muted">Atualize os dados do fator de sazonalidade</p>
 
                     <form method="post" action="{{ url_for('previsao.editar_fator_sazonalidade', id=fator.id) }}">
-                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <div class="text-center mb-4">
                             <span class="badge badge-tipo">{{ fator.tipo|replace('_', ' ')|title }}</span>
                             <input type="hidden" name="tipo" value="{{ fator.tipo }}">

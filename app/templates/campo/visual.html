@@ -104,7 +104,6 @@
 
   <div class="barra">
     <form method="post" action="{{ url_for('campo.visual', slug=rest.slug) }}">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <input type="hidden" name="modelo" id="campo-modelo" value="{{ modelo_atual }}">
       <input type="hidden" name="modo" id="campo-modo" value="{{ modo_atual }}">
       <button class="btn" type="submit">

@@ -41,11 +41,6 @@ import unicodedata
 import urllib.parse
 from datetime import date, datetime
 
-# Única dependência interna deste módulo, e de propósito: preço aceito na tela
-# e preço publicado no grafo têm que ser o mesmo julgamento. `formatacao_br` é
-# folha (stdlib só), então o motor de SEO segue testável com dicts simples.
-from app.utils.formatacao_br import ler_moeda
-
 # Prefixo de assets do Flask (`static_url_path` padrão). Só é usado para
 # absolutizar caminho relativo gravado no banco ("img/demo/x/capa.jpg"); URL
 # absoluta e caminho que já começa com "/" passam intactos.
@@ -499,24 +494,6 @@ def meta_descricao(site, rest=None):
 
 # ----------------------------------------------------------------- o grafo
 
-def _preco_schema(valor):
-    """Preço do prato -> string com ponto decimal ('18.50'), ou None.
-
-    Duas notações, uma verdade: o cliente lê `R$ 18,50` na tela e o Google lê
-    `"price": "18.50"` no grafo. Schema.org exige ponto decimal e nada de
-    símbolo de moeda dentro de `price` (a moeda vai em `priceCurrency`) —
-    mandar "R$ 18,50" ali é preço inválido, que o Rich Results ignora ou
-    reprova.
-
-    Quem decide o que conta como preço é `ler_moeda`, o mesmo juiz dos dois
-    formulários: vazio, zero, negativo e lixo não são preço. Assim o grafo não
-    tem como anunciar `price: "0.00"` num prato sem preço — que seria a versão
-    estruturada de mentir pro Google, exatamente o que a regra de ouro proíbe.
-    """
-    valor = ler_moeda(valor)
-    return None if valor is None else f'{valor:.2f}'
-
-
 def _pedacos_do_cardapio(dishes, origem, id_cardapio):
     itens = []
     for i, prato in enumerate(dishes or [], start=1):
@@ -530,71 +507,8 @@ def _pedacos_do_cardapio(dishes, origem, id_cardapio):
         imagem = _url_absoluta(_campo(prato, 'img') or _campo(prato, 'imagem'), origem)
         if imagem:
             item['image'] = imagem
-        # `offers` é o que faz o preço aparecer no resultado de busca. Só entra
-        # quando existe preço — item sem preço sai sem a chave, não com Offer
-        # vazio (que `_sem_vazios` limparia, mas que nem deve ser montado).
-        preco = _preco_schema(_campo(prato, 'preco'))
-        if preco:
-            item['offers'] = {'@type': 'Offer', 'price': preco,
-                              'priceCurrency': 'BRL'}
         itens.append(item)
     return itens
-
-
-def menu_schema(nome, dishes, url_canonica, url_cardapio=None):
-    """Nó `Menu` deste bar, ou None quando não há prato cadastrado.
-
-    Um só cardápio, um só `@id` (`<canônica>#cardapio`) — o mesmo emitido pela
-    landing e pela página `/bar/<slug>/cardapio`. Se cada página inventasse o
-    próprio identificador, o mesmo cardápio viraria duas entidades no grafo.
-
-    `url` é o que muda: a documentação do schema.org pede que `hasMenu` leve a
-    um cardápio acessível em HTML, e a partir de agora existe um — a página do
-    QR. Sem ela (bar sem slug), sobra a âncora da seção dentro da landing, que
-    é o que sempre houve.
-    """
-    origem = _origem(url_canonica)
-    id_cardapio = f'{url_canonica}#cardapio'
-    itens = _pedacos_do_cardapio(dishes, origem, id_cardapio)
-    if not itens:
-        return None
-    return {
-        '@type': 'Menu',
-        '@id': id_cardapio,
-        'name': f'Cardápio — {nome}' if nome else 'Cardápio',
-        'url': url_cardapio or id_cardapio,
-        'inLanguage': 'pt-BR',
-        'hasMenuItem': itens,
-    }
-
-
-def cardapio_estruturado(rest, site, dishes, url_canonica, url_cardapio=None):
-    """Grafo da página de cardápio: o cardápio e o bar a que ele pertence.
-
-    Deliberadamente menor que `dados_estruturados`. Esta página é o cardápio —
-    repetir aqui endereço, horário e nota seria duplicar em duas URLs os fatos
-    que a landing já afirma, com o risco de as duas divergirem no dia em que
-    uma for editada. O `Restaurant` entra só como referência (`@id` + nome),
-    para que o `Menu` tenha dono e o robô saiba de que casa é este cardápio.
-    """
-    site = dict(site or {})
-    nome = _limpo(site.get('nome')) or _limpo(_campo(rest, 'nome'))
-    cardapio = menu_schema(nome, dishes, url_canonica, url_cardapio)
-    if cardapio is None:
-        return None
-
-    id_restaurante = f'{url_canonica}#restaurante'
-    cardapio['isPartOf'] = {'@id': id_restaurante}
-    casa = {
-        '@type': TIPO_POR_VIBE.get(
-            _limpo(site.get('vibe')) or _limpo(_campo(_campo(rest, 'site_config'), 'vibe')),
-            'Restaurant'),
-        '@id': id_restaurante,
-        'name': nome,
-        'url': url_canonica,
-        'hasMenu': {'@id': cardapio['@id']},
-    }
-    return _sem_vazios({'@context': 'https://schema.org', '@graph': [casa, cardapio]})
 
 
 def _pedacos_de_avaliacao(reviews, url_canonica, id_restaurante):
@@ -669,8 +583,7 @@ def _comodidades(servicos):
             for n in nomes]
 
 
-def dados_estruturados(rest, site, dishes, reviews, eventos, url_canonica,
-                       url_cardapio=None):
+def dados_estruturados(rest, site, dishes, reviews, eventos, url_canonica):
     """Grafo JSON-LD completo deste bar, pronto pra `json.dumps`.
 
     Recebe exatamente o que `_render_landing` já montou — nada é consultado no
@@ -767,16 +680,20 @@ def dados_estruturados(rest, site, dishes, reviews, eventos, url_canonica,
 
     grafo = [restaurante]
 
-    # Cardápio: `hasMenu` aponta pro nó do cardápio em vez de embutir o
-    # cardápio inteiro dentro do Restaurant — é o que o Google pede pra render
-    # o cardápio no resultado. O nó, por sua vez, leva o robô à página de
-    # cardápio em HTML (`url_cardapio`), que é o que a documentação do
-    # schema.org recomenda; sem ela, à âncora da seção, como sempre foi.
-    cardapio = menu_schema(nome, dishes, url_canonica, url_cardapio)
-    itens = cardapio['hasMenuItem'] if cardapio else []
-    if cardapio:
+    # Cardápio: `hasMenu` aponta pra âncora da seção (que existe em todos os 6
+    # modelos), em vez de embutir o cardápio inteiro dentro do Restaurant —
+    # é o que o Google pede pra render o cardápio no resultado.
+    itens = _pedacos_do_cardapio(dishes, origem, id_cardapio)
+    if itens:
         restaurante['hasMenu'] = {'@id': id_cardapio}
-        grafo.append(cardapio)
+        grafo.append({
+            '@type': 'Menu',
+            '@id': id_cardapio,
+            'name': f'Cardápio — {nome}' if nome else 'Cardápio',
+            'url': id_cardapio,
+            'inLanguage': 'pt-BR',
+            'hasMenuItem': itens,
+        })
 
     grafo.extend(_pedacos_de_avaliacao(reviews, url_canonica, id_restaurante))
     grafo.extend(_pedacos_de_evento(eventos, url_canonica, id_restaurante))

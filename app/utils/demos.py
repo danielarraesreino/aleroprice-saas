@@ -26,7 +26,6 @@ from app.extensions import db
 from app.models.modelo_restaurante import Restaurante
 from app.models.modelo_siteconfig import SiteConfig
 from app.models.modelo_sitecontent import DishCard, Review, TeamMember, GalleryItem
-from app.utils.formatacao_br import ler_moeda
 from app.utils.site_router import gerar_slug, slug_unico
 
 DIR_LEADS = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'leads')
@@ -42,7 +41,7 @@ CAMPOS_SITE = {
 
 # (chave no yml, model, campos aceitos por item)
 LISTAS = (
-    ('cardapio', DishCard, ('nome', 'descricao', 'preco', 'imagem', 'tag', 'destaque')),
+    ('cardapio', DishCard, ('nome', 'descricao', 'imagem', 'tag', 'destaque')),
     ('avaliacoes', Review, ('autor', 'texto', 'estrelas')),
     ('equipe', TeamMember, ('nome', 'papel', 'emoji')),
     ('galeria', GalleryItem, ('imagem', 'legenda')),
@@ -160,11 +159,6 @@ def _aplicar_listas(dados, rid, log):
             if not isinstance(bruto, dict):
                 raise LeadInvalido(f'`{chave}[{ordem}]` precisa ser um mapa')
             campos_item = {k: v for k, v in bruto.items() if k in campos}
-            # Preço no .yml vem escrito como gente escreve ("R$ 18,50", "18,50"
-            # ou 18.5) — quem normaliza é o mesmo juiz dos formulários. Sem
-            # isto, "R$ 18,50" derrubaria o INSERT inteiro na coluna Numeric.
-            if 'preco' in campos_item:
-                campos_item['preco'] = ler_moeda(campos_item['preco'])
             db.session.add(Model(restaurant_id=rid, ordem=ordem, ativo=True, **campos_item))
         if itens:
             log.append(f'  {chave}: {len(itens)}')

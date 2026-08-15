@@ -241,7 +241,6 @@
                     </button>
                 </div>
                 <form action="{{ url_for('cardapios.criar') }}" method="post" id="form-criar-sugestao">
-                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="usar_sugestao" value="true">
                     <input type="hidden" name="criterio" value="{{ request.args.get('criterio', 'combinado') }}">
                     <input type="hidden" name="periodo" value="{{ request.args.get('periodo', '30') }}">

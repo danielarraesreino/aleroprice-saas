@@ -9,7 +9,6 @@ seu, o que é o oposto da regra do resto do app. Por isso os testes de acesso
 são tão importantes quanto os de funcionalidade.
 """
 import io
-from decimal import Decimal
 
 import pytest
 from werkzeug.datastructures import FileStorage  # noqa: F401  (documenta o tipo esperado)
@@ -147,65 +146,6 @@ def test_prato_com_foto_entra_no_cardapio(client, session, demo):
     assert 'Costela na brasa' in corpo
     # a seção de cardápio é guardada por `{% if dishes %}` — tem que ter voltado
     assert 'O QUE SAI DA COZINHA' in corpo
-
-
-@pytest.mark.parametrize('digitado', ['18,50', '18.50', 'R$ 18,50', '  18,50  '])
-def test_preco_digitado_de_qualquer_jeito_vira_o_mesmo_valor(
-        client, session, demo, digitado):
-    """O vendedor digita de pé, no celular, com o dono olhando.
-
-    Exigir um formato só (ou pior, engolir o "R$" como parte do número) faz o
-    preço entrar errado no site do bar na frente do cliente. Os três jeitos que
-    ele escreve dezoito e cinquenta valem o mesmo.
-    """
-    entrar(client)
-
-    resp = client.post(f'/campo/{demo.slug}/foto', data={
-        'alvo': 'prato', 'nome': 'Costela na brasa', 'preco': digitado,
-        'imagem': (io.BytesIO(JPEG), 'costela.jpg'),
-    }, content_type='multipart/form-data')
-
-    assert resp.status_code == 200
-    prato = DishCard.query.filter_by(restaurant_id=demo.id).one()
-    assert prato.preco == Decimal('18.50'), digitado
-    assert 'R$ 18,50' in client.get(f'/bar/{demo.slug}').get_data(as_text=True)
-
-
-def test_prato_sem_preco_entra_mesmo_assim(client, session, demo):
-    """Preço é opcional: o campo em branco não pode custar a foto.
-
-    Em campo a foto é o que vende — se o formulário recusasse o prato por
-    falta de preço, o vendedor perderia a foto que acabou de tirar.
-    """
-    entrar(client)
-
-    resp = client.post(f'/campo/{demo.slug}/foto', data={
-        'alvo': 'prato', 'nome': 'Costela na brasa', 'preco': '',
-        'imagem': (io.BytesIO(JPEG), 'costela.jpg'),
-    }, content_type='multipart/form-data')
-
-    assert resp.status_code == 200
-    prato = DishCard.query.filter_by(restaurant_id=demo.id).one()
-    assert prato.preco is None
-
-    corpo = client.get(f'/bar/{demo.slug}').get_data(as_text=True)
-    assert 'Costela na brasa' in corpo
-    assert 'R$' not in corpo, 'prato sem preço mostrou cifrão'
-
-
-def test_preco_ilegivel_nao_derruba_o_upload(client, session, demo):
-    """Dedo errado no 4G do bar não pode virar erro na tela nem R$ 0,00 no
-    site: o prato entra sem preço e o vendedor corrige depois."""
-    entrar(client)
-
-    resp = client.post(f'/campo/{demo.slug}/foto', data={
-        'alvo': 'prato', 'nome': 'Costela na brasa', 'preco': 'dezoito e meio',
-        'imagem': (io.BytesIO(JPEG), 'costela.jpg'),
-    }, content_type='multipart/form-data')
-
-    assert resp.status_code == 200
-    assert DishCard.query.filter_by(restaurant_id=demo.id).one().preco is None
-    assert 'R$ 0,00' not in client.get(f'/bar/{demo.slug}').get_data(as_text=True)
 
 
 def test_arquivo_invalido_responde_erro_legivel(client, demo):

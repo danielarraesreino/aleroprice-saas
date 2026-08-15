@@ -209,20 +209,6 @@
   :root{
     --pad:20px;
     --maxw:1140px;
-
-    /* ---- design-10k · grade de 4px ---- */
-    --s-1:.25rem; --s-2:.5rem;  --s-3:.75rem; --s-4:1rem;  --s-5:1.5rem;
-    --s-6:2rem;   --s-7:3rem;   --s-8:4rem;   --s-9:6rem;  --s-10:8rem;
-
-    /* EIXO 4 — DENSIDADE. Casa de show é cartaz colado em cima de cartaz:
-       52 → 88px. Fica entre o `craft` (48 → 72) e o `brasa` (64 → 112), e
-       a 2x de distância do `tradicional` (88 → 176). */
-    --sec-y:clamp(3.25rem,6vw,5.5rem);
-    --medida:34rem;
-
-    /* EIXO 5 — o assunto de foto de casa noturna é o palco e a plateia,
-       que ficam abaixo do centro do quadro. */
-    --pos:50% 52%;
     --display:"Archivo Black","Arial Black",Impact,sans-serif;
     --cond:"Big Shoulders Display","Oswald","Arial Narrow",sans-serif;
     --corpo:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;
@@ -263,43 +249,7 @@
     text-transform:uppercase;letter-spacing:.18em;font-size:.78rem;line-height:1;
     background:var(--amber);color:var(--ink);padding:7px 11px 6px;margin-bottom:14px;
   }
-  .lead{color:var(--cream-dim);max-width:var(--medida);margin-top:var(--s-4);font-size:1.02rem}
-
-  /* ============================================================
-     EIXO 3 — EIXO DE LEITURA: CARTAZ CENTRALIZADO.
-     Um eixo só, no meio, como lambe-lambe colado no poste: selo, título e
-     linha de apoio empilhados e centrados, com a régua de conteúdo logo
-     abaixo. É o oposto do `brasa` (tudo ancorado à esquerda), do `craft`
-     (duas colunas travadas) e do `autoral` (zigue-zague).
-     O corpo longo continua alinhado à esquerda — centralizar 4 linhas ou
-     mais destrói a leitura (proibido da seção 8 da skill). Por isso o
-     `.lead` volta a `text-align:start` dentro do bloco centrado.
-     ============================================================ */
-     O cabeçalho de seção aqui aparece de duas formas: `.cab` (quando tem
-     algo à direita, como em #agenda e #avaliacoes) e um `.rv` solto, que é
-     o invólucro de revelação. Os dois são sempre o PRIMEIRO filho do
-     `.wrap` — daí o `:first-child`, que evita pegar `.rv` de conteúdo
-     (galeria, line-up) mais abaixo na mesma seção. */
-  body[data-leitura="cartaz"] .sec > .wrap > .cab,
-  body[data-leitura="cartaz"] .sec > .wrap > .rv:first-child{
-    display:flex;flex-direction:column;align-items:center;
-    text-align:center;justify-content:center;
-  }
-  body[data-leitura="cartaz"] .sec > .wrap > .cab .lead,
-  body[data-leitura="cartaz"] .sec > .wrap > .rv:first-child .lead{
-    text-align:start;margin-inline:auto;
-  }
-
-  /* ============================================================
-     EIXO 1 — SEÇÃO HEROÍNA: o line-up.
-     Quem procura casa de música quer saber quem toca e quando. A agenda é
-     a seção mais alta da página e é ela que fecha (EIXO 2 — cauda
-     `contato > reservar > agenda`): a última coisa lida é a próxima data.
-     ============================================================ */
-  #agenda{padding-block:calc(var(--sec-y) * 1.8) calc(var(--sec-y) * 2.2)}
-  #agenda .ttl{font-size:clamp(1.9rem,7.6vw,5rem)}    /* piso = o do .ttl base */
-  #agenda .lineup{margin-top:var(--s-8);border-top-width:4px}
-  #agenda .fila{padding-block:var(--s-5)}
+  .lead{color:var(--cream-dim);max-width:56ch;margin-top:14px;font-size:1.02rem}
   .rot{font-family:var(--cond);font-weight:700;text-transform:uppercase;letter-spacing:.16em;font-size:.8rem}
 
   /* ===================== MARQUISE (faixa do topo) ===================== */
@@ -519,20 +469,11 @@
   }
   .prato:hover .miniatura{filter:var(--foto-hover)}
   .prato-topo{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px}
-  .prato-topo h3{min-width:0;overflow-wrap:anywhere}
   .prato h3{font-family:var(--cond);font-weight:800;text-transform:uppercase;
     font-size:1.28rem;line-height:1.05;letter-spacing:.01em}
   .prato .etq{
     font-family:var(--cond);font-weight:800;text-transform:uppercase;letter-spacing:.12em;
     font-size:.66rem;background:var(--ember);color:var(--ink);padding:3px 7px 2px;
-  }
-  /* `margin-left:auto` fecha a linha do balcão com o preço na direita. Quando
-     nome + selo estouram a largura, o `flex-wrap` do .prato-topo desce o preço
-     pra linha seguinte em vez de espremer o nome — é o que segura os 375px. */
-  .prato .prato-preco{
-    margin-left:auto;flex:none;font-family:var(--cond);font-weight:800;
-    font-size:1.1rem;letter-spacing:.02em;color:var(--amber);
-    font-variant-numeric:tabular-nums;white-space:nowrap;
   }
   .prato p{color:var(--cream-dim);font-size:.94rem;margin-top:4px}
   .prato.top{border-left:3px solid var(--amber);padding-left:12px}
@@ -559,26 +500,11 @@
     margin-top:clamp(22px,4vw,34px);
   }
   .folha figure{position:relative;margin:0;min-width:0}
-  /* EIXO 5 — TRATAMENTO DE FOTO: DUOTONE.
-     Foto de casa noturna chega com balanço de branco brigando entre si —
-     uma amarelada do refletor, outra azulada do celular. O duotone joga
-     todas na paleta da casa (âmbar sobre carvão) e o conjunto passa a
-     parecer direção de arte em vez de pasta de fotos. O hover devolve a
-     cor real: é o "antes e depois" de graça.
-     É o oposto do `autoral`, que nunca trata cor porque a foto é comida. */
-  .folha figure{isolation:isolate;background:var(--ink)}
   .folha img{
     width:100%;aspect-ratio:4/3;max-height:160px;object-fit:cover;
-    object-position:var(--pos);
     filter:var(--foto-mini);transition:filter .45s ease;cursor:pointer;
     border:1px solid var(--linha);
   }
-  body[data-foto="duotone"] .folha figure::after{
-    content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
-    background:var(--amber);mix-blend-mode:multiply;opacity:.5;
-    transition:opacity .45s ease;
-  }
-  body[data-foto="duotone"] .folha figure:hover::after{opacity:0}
   .folha figure:hover img{filter:var(--foto-hover)}
   .folha figcaption{
     font-family:var(--cond);font-weight:700;text-transform:uppercase;letter-spacing:.12em;
@@ -630,7 +556,7 @@
 
   /* ===================== A CASA ===================== */
   .casa{display:grid;gap:24px;margin-top:clamp(20px,4vw,30px)}
-  .casa-foto{width:100%;aspect-ratio:4/3;object-fit:cover;object-position:var(--pos);filter:var(--foto-mini);
+  .casa-foto{width:100%;aspect-ratio:4/3;object-fit:cover;filter:var(--foto-mini);
     border:2px solid var(--cream);transition:filter .5s ease}
   .casa-foto:hover{filter:var(--foto-hover)}
   .casa p{margin-top:14px;font-size:1.02rem;color:var(--cream)}
@@ -789,7 +715,7 @@
 </style>
 {% endif %}
 </head>
-<body data-heroina="agenda" data-leitura="cartaz" data-foto="duotone">
+<body>
 
 {% if tenant and tenant.eh_demo %}
 {# Prévia comercial: o bar ainda não é cliente e não pediu este site. Dizer isso
@@ -932,36 +858,41 @@
   </div>
 </header>
 
-{# =============================== CARDÁPIO =============================== #}
-{% if dishes %}
-<section class="sec" id="cardapio" aria-labelledby="titulo-cardapio">
+{# ====================== LINE-UP: a agenda é o herói ====================== #}
+{% if eventos %}
+{# O título de seção é <h2>, não <div class="ttl">.
+   Era div em todas as nove seções, e isso deixava a página com um <h1> no hero
+   e <h3> nos itens, sem nenhum nível 2 no meio: o mesmo buraco de sumário que o
+   Café Container tem (41 <h2> soltos, zero <h1>), só que pelo avesso. Robô de
+   busca e leitor de tela montam o índice da página pelos headings; pulando o
+   nível 2, as seções não existem nesse índice.
+   Visualmente nada muda: o reset `*{margin:0;padding:0}` zera a margem que o
+   <h2> traria, e toda a aparência já vinha da classe .ttl, que fica.
+   O `aria-labelledby` aponta pro id do próprio <h2>, então a seção é anunciada
+   pelo nome ("Agenda") em vez de "região". #}
+<section class="sec" id="agenda" aria-labelledby="titulo-agenda">
   <div class="wrap">
-    <div class="rv">
-      <span class="selo">{{ copy.cardapio.eyebrow }}</span>
-      <h2 class="ttl" id="titulo-cardapio">{{ copy.cardapio.titulo|safe }}</h2>
-      {% if copy.cardapio.lead %}<p class="lead">{{ copy.cardapio.lead }}</p>{% endif %}
-    </div>
-    <div class="balcao rv">
-      {% for d in dishes %}
-      <div class="prato{% if d.destaque %} top{% endif %}">
-        {# alt com o nome do prato E o do bar: fora da página a imagem viaja
-           sozinha (Google Imagens, resumo de IA), e "Costela defumada" sem dono
-           não diz de que casa é. #}
-        {% if d.img %}<img class="miniatura" src="{{ d.img }}"
-             alt="{{ d.nome }} — prato do {{ nome_bar }}"
-             loading="lazy" decoding="async">{% endif %}
-        <div>
-          <div class="prato-topo">
-            <h3>{{ d.nome }}</h3>
-            {% if d.tag %}<span class="etq">{{ d.tag }}</span>{% endif %}
-            {# Última posição da linha e empurrado pra direita pelo CSS: o selo
-               fica colado no nome, o preço fecha a linha. `{% if %}` antes do
-               filtro — `moeda_br` devolve "R$ 0,00" pra None. #}
-            {% if d.preco %}<span class="prato-preco">{{ d.preco|moeda_br }}</span>{% endif %}
-          </div>
-          {% if d.descricao %}<p>{{ d.descricao }}</p>{% endif %}
-        </div>
+    <div class="cab rv">
+      <div>
+        <span class="selo">{{ copy.agenda.eyebrow }}</span>
+        <h2 class="ttl" id="titulo-agenda">{{ copy.agenda.titulo|safe }}</h2>
+        {% if copy.agenda.lead %}<p class="lead">{{ copy.agenda.lead }}</p>{% endif %}
       </div>
+    </div>
+    <div class="lineup rv">
+      {% for e in eventos %}
+      <a class="fila" href="#reservar">
+        <div class="data">
+          <span class="n">{{ '%02d' % e.data.day }}</span>
+          <span class="m">{{ meses[e.data.month - 1] }}</span>
+        </div>
+        <div class="info">
+          <h3>{{ e.titulo }}{% if e.exemplo %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
+          <div class="meta">{{ semana[(e.data.weekday() + 1) % 7] }}{% if e.hora %} · <em>{{ e.hora }}</em>{% endif %}</div>
+          {% if e.descricao %}<div class="desc">{{ e.descricao }}</div>{% endif %}
+        </div>
+        <span class="vai">Reservar →</span>
+      </a>
       {% endfor %}
     </div>
   </div>
@@ -994,12 +925,44 @@
 </section>
 {% endif %}
 
-{# ============================== O PALCO ============================== #}
-<section class="sec" id="palco" aria-labelledby="titulo-palco">
+{# =============================== CARDÁPIO =============================== #}
+{% if dishes %}
+<section class="sec" id="cardapio" aria-labelledby="titulo-cardapio">
+  <div class="wrap">
+    <div class="rv">
+      <span class="selo">{{ copy.cardapio.eyebrow }}</span>
+      <h2 class="ttl" id="titulo-cardapio">{{ copy.cardapio.titulo|safe }}</h2>
+      {% if copy.cardapio.lead %}<p class="lead">{{ copy.cardapio.lead }}</p>{% endif %}
+    </div>
+    <div class="balcao rv">
+      {% for d in dishes %}
+      <div class="prato{% if d.destaque %} top{% endif %}">
+        {# alt com o nome do prato E o do bar: fora da página a imagem viaja
+           sozinha (Google Imagens, resumo de IA), e "Costela defumada" sem dono
+           não diz de que casa é. #}
+        {% if d.img %}<img class="miniatura" src="{{ d.img }}"
+             alt="{{ d.nome }} — prato do {{ nome_bar }}"
+             loading="lazy" decoding="async">{% endif %}
+        <div>
+          <div class="prato-topo">
+            <h3>{{ d.nome }}</h3>
+            {% if d.tag %}<span class="etq">{{ d.tag }}</span>{% endif %}
+          </div>
+          {% if d.descricao %}<p>{{ d.descricao }}</p>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# ============================ CLIMA DA CASA ============================ #}
+<section class="sec" id="aovivo" data-band="alt" aria-labelledby="titulo-aovivo">
   <div class="wrap">
     <div class="rv">
       <span class="selo">{{ copy.clima.eyebrow }}</span>
-      <h2 class="ttl" id="titulo-palco">{{ copy.clima.titulo|safe }}</h2>
+      <h2 class="ttl" id="titulo-aovivo">{{ copy.clima.titulo|safe }}</h2>
     </div>
     <div class="clima rv">
       {% for emoji, titulo, sub in copy.clima.cards %}
@@ -1016,7 +979,7 @@
 
 {# =============================== GALERIA =============================== #}
 {% if gallery %}
-<section class="sec" id="galeria" data-band="alt" aria-labelledby="titulo-galeria">
+<section class="sec" id="galeria" aria-labelledby="titulo-galeria">
   <div class="wrap">
     <div class="rv">
       <span class="selo">{{ copy.galeria.eyebrow }}</span>
@@ -1038,36 +1001,6 @@
       </figure>
       {% endif %}
       {% endfor %}
-    </div>
-  </div>
-</section>
-{% endif %}
-
-{# ================================ A CASA ================================ #}
-{% if team or gallery %}
-<section class="sec" id="historia" aria-labelledby="titulo-historia">
-  <div class="wrap">
-    <div class="casa">
-      <div class="rv">
-        <span class="selo">{{ copy.historia.eyebrow }}</span>
-        <h2 class="ttl" id="titulo-historia">{{ copy.historia.titulo|safe }}</h2>
-        <p>{{ copy.historia.texto }}</p>
-        {% if team %}
-        <div class="time">
-          {% for m in team %}
-          <div>
-            <span class="av" aria-hidden="true">{{ m.emoji }}</span>
-            <div><b>{{ m.nome }}</b>{% if m.papel %}<small>{{ m.papel }}</small>{% endif %}</div>
-          </div>
-          {% endfor %}
-        </div>
-        {% endif %}
-      </div>
-      {% if gallery %}
-      <img class="casa-foto rv" src="{{ gallery[0].img }}"
-           alt="{{ nome_bar }} — o salão da casa"
-           loading="lazy" decoding="async">
-      {% endif %}
     </div>
   </div>
 </section>
@@ -1128,39 +1061,36 @@
 </section>
 {% endif %}
 
-{# =============================== CONTATO =============================== #}
-<section class="sec" id="contato" aria-labelledby="titulo-contato">
+{# ================================ A CASA ================================ #}
+{% if team or gallery %}
+<section class="sec" id="historia" aria-labelledby="titulo-historia">
   <div class="wrap">
-    <div class="rv">
-      <span class="selo">{{ copy.contato.eyebrow }}</span>
-      <h2 class="ttl" id="titulo-contato">{{ copy.contato.titulo|safe }}</h2>
-    </div>
-    <div class="contato">
-      {# Bar sem nenhum dado de contato não renderiza a lista: <ul> vazia deixa
-         só o filete da borda na tela, que é cara de site inacabado. #}
-      {% if site.endereco or site.horario or site.telefone_exibicao or site.servicos or site.cidade_uf %}
-      <ul class="dados rv">
-        {% if site.endereco %}<li><span class="rot">Endereço</span><span>{{ site.endereco }}</span></li>{% endif %}
-        {% if site.horario %}<li><span class="rot">Horário</span><span>{{ site.horario }}</span></li>{% endif %}
-        {% if site.telefone_exibicao %}<li><span class="rot">Telefone / WhatsApp</span><span>{{ site.telefone_exibicao }}</span></li>{% endif %}
-        {% if site.servicos %}<li><span class="rot">Serviços</span><span>{{ site.servicos }}</span></li>{% endif %}
-        {% if site.cidade_uf %}<li><span class="rot">Cidade</span><span>{{ site.cidade_uf }}</span></li>{% endif %}
-      </ul>
-      {% endif %}
-      <div class="chamada rv">
-        <h3>{{ copy.cta.titulo }}</h3>
-        <p>{{ copy.cta.linha }}</p>
-        {% if site.whatsapp %}
-        <a class="btn btn-forte" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener">Falar no WhatsApp</a>
+    <div class="casa">
+      <div class="rv">
+        <span class="selo">{{ copy.historia.eyebrow }}</span>
+        <h2 class="ttl" id="titulo-historia">{{ copy.historia.titulo|safe }}</h2>
+        <p>{{ copy.historia.texto }}</p>
+        {% if team %}
+        <div class="time">
+          {% for m in team %}
+          <div>
+            <span class="av" aria-hidden="true">{{ m.emoji }}</span>
+            <div><b>{{ m.nome }}</b>{% if m.papel %}<small>{{ m.papel }}</small>{% endif %}</div>
+          </div>
+          {% endfor %}
+        </div>
         {% endif %}
-        {% if site.maps_query %}
-        <a class="btn btn-linha" href="https://www.google.com/maps/search/?api=1&query={{ site.maps_query }}" target="_blank" rel="noopener">Abrir no mapa</a>
-        {% endif %}
-        <a class="btn btn-linha" href="#reservar">Reservar mesa</a>
       </div>
+      {% if gallery %}
+      <img class="casa-foto rv" src="{{ gallery[0].img }}"
+           alt="{{ nome_bar }} — o salão da casa"
+           loading="lazy" decoding="async">
+      {% endif %}
     </div>
   </div>
 </section>
+{% endif %}
+
 {# =============================== RESERVA =============================== #}
 <section class="sec" id="reservar" data-band="alt" aria-labelledby="titulo-reservar">
   <div class="wrap">
@@ -1188,10 +1118,6 @@
         {# Quando o site é servido pelo domínio do bar, o backend resolve o tenant
            pelo Host. Em /bar/<slug> (prévias) o Host é o do produto — daí o campo. #}
         <input type="hidden" name="slug" value="{{ tenant.slug if tenant else '' }}">
-        {# O POST sai por fetch, mas com FormData(form): o FormData carrega este campo
-           junto com o resto. Tirar daqui abre o formulário de reserva pra POST
-           forjado de qualquer site. O mesmo token vai no header X-CSRFToken. #}
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="ficha-topo">
           <span class="rot">Reserva de mesa</span>
           <span class="casa-nome">{{ nome_bar }}</span>
@@ -1236,46 +1162,39 @@
   </div>
 </section>
 
-{# ====================== LINE-UP: a agenda é o herói ====================== #}
-{% if eventos %}
-{# O título de seção é <h2>, não <div class="ttl">.
-   Era div em todas as nove seções, e isso deixava a página com um <h1> no hero
-   e <h3> nos itens, sem nenhum nível 2 no meio: o mesmo buraco de sumário que o
-   Café Container tem (41 <h2> soltos, zero <h1>), só que pelo avesso. Robô de
-   busca e leitor de tela montam o índice da página pelos headings; pulando o
-   nível 2, as seções não existem nesse índice.
-   Visualmente nada muda: o reset `*{margin:0;padding:0}` zera a margem que o
-   <h2> traria, e toda a aparência já vinha da classe .ttl, que fica.
-   O `aria-labelledby` aponta pro id do próprio <h2>, então a seção é anunciada
-   pelo nome ("Agenda") em vez de "região". #}
-<section class="sec" id="agenda" aria-labelledby="titulo-agenda">
+{# =============================== CONTATO =============================== #}
+<section class="sec" id="contato" aria-labelledby="titulo-contato">
   <div class="wrap">
-    <div class="cab rv">
-      <div>
-        <span class="selo">{{ copy.agenda.eyebrow }}</span>
-        <h2 class="ttl" id="titulo-agenda">{{ copy.agenda.titulo|safe }}</h2>
-        {% if copy.agenda.lead %}<p class="lead">{{ copy.agenda.lead }}</p>{% endif %}
-      </div>
+    <div class="rv">
+      <span class="selo">{{ copy.contato.eyebrow }}</span>
+      <h2 class="ttl" id="titulo-contato">{{ copy.contato.titulo|safe }}</h2>
     </div>
-    <div class="lineup rv">
-      {% for e in eventos %}
-      <a class="fila" href="#reservar">
-        <div class="data">
-          <span class="n">{{ '%02d' % e.data.day }}</span>
-          <span class="m">{{ meses[e.data.month - 1] }}</span>
-        </div>
-        <div class="info">
-          <h3>{{ e.titulo }}{% if e.exemplo %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
-          <div class="meta">{{ semana[(e.data.weekday() + 1) % 7] }}{% if e.hora %} · <em>{{ e.hora }}</em>{% endif %}</div>
-          {% if e.descricao %}<div class="desc">{{ e.descricao }}</div>{% endif %}
-        </div>
-        <span class="vai">Reservar →</span>
-      </a>
-      {% endfor %}
+    <div class="contato">
+      {# Bar sem nenhum dado de contato não renderiza a lista: <ul> vazia deixa
+         só o filete da borda na tela, que é cara de site inacabado. #}
+      {% if site.endereco or site.horario or site.telefone_exibicao or site.servicos or site.cidade_uf %}
+      <ul class="dados rv">
+        {% if site.endereco %}<li><span class="rot">Endereço</span><span>{{ site.endereco }}</span></li>{% endif %}
+        {% if site.horario %}<li><span class="rot">Horário</span><span>{{ site.horario }}</span></li>{% endif %}
+        {% if site.telefone_exibicao %}<li><span class="rot">Telefone / WhatsApp</span><span>{{ site.telefone_exibicao }}</span></li>{% endif %}
+        {% if site.servicos %}<li><span class="rot">Serviços</span><span>{{ site.servicos }}</span></li>{% endif %}
+        {% if site.cidade_uf %}<li><span class="rot">Cidade</span><span>{{ site.cidade_uf }}</span></li>{% endif %}
+      </ul>
+      {% endif %}
+      <div class="chamada rv">
+        <h3>{{ copy.cta.titulo }}</h3>
+        <p>{{ copy.cta.linha }}</p>
+        {% if site.whatsapp %}
+        <a class="btn btn-forte" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener">Falar no WhatsApp</a>
+        {% endif %}
+        {% if site.maps_query %}
+        <a class="btn btn-linha" href="https://www.google.com/maps/search/?api=1&query={{ site.maps_query }}" target="_blank" rel="noopener">Abrir no mapa</a>
+        {% endif %}
+        <a class="btn btn-linha" href="#reservar">Reservar mesa</a>
+      </div>
     </div>
   </div>
 </section>
-{% endif %}
 </main>
 
 <footer>
@@ -1386,7 +1305,7 @@
     fetch('{{ url_for("public.reservar") }}', {
       method: 'POST',
       body: new FormData(form),
-      headers: {'Accept': 'application/json', 'X-CSRFToken': '{{ csrf_token() }}'}
+      headers: {'Accept': 'application/json'}
     })
       .then(function(r){ return r.json().then(function(j){ return {ok: r.ok, j: j}; }); })
       .then(function(res){

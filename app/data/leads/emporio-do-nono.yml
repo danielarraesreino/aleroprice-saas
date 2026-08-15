@@ -22,8 +22,6 @@ site:
   tagline: "Mesa de frios, chorinho e esquina charmosa desde 1999."
   subline: "TÁBUAS · CHORINHO · EMPÓRIO"
   cidade_uf: "Barão Geraldo, Campinas–SP"
-  # Horário e telefone do site oficial emporiodonono.com.br (15/08/2026).
-  horario: "Seg–Qui 11h30–15h e 18h–23h · Sex 11h30–15h e 18h–23h30 · Sáb 11h30–23h30 · Dom 11h30–16h"
 
 # Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
 #   hero_foto: img/demo/emporio-do-nono/capa.jpg

@@ -15,7 +15,7 @@ from app.models.modelo_restaurante import Restaurante
 from . import bp
 from app.utils.site_router import (
     _publicavel, eh_dominio_do_produto, slug_unico, tenant_por_host,
-    tenant_por_slug, url_canonica, url_do_cardapio,
+    tenant_por_slug, url_canonica,
 )
 from app.utils import seo
 from app.utils.temas import css_do_tema, cor_do_tema
@@ -154,7 +154,7 @@ def _render_landing(rest):
     endereco_canonico = url_canonica(rest)
     json_ld = seo.serializar(seo.dados_estruturados(
         rest, site, conteudo['dishes'], conteudo['reviews'], eventos,
-        endereco_canonico, url_do_cardapio(rest),
+        endereco_canonico,
     ))
     meta_desc = seo.meta_descricao(site, rest)
 
@@ -342,91 +342,6 @@ def landing_slug(slug):
     return _render_landing(rest)
 
 
-def _grupos_do_cardapio(dishes):
-    """Divide o cardápio em blocos com título — sem inventar categoria.
-
-    Não existe campo de categoria em `DishCard`, e chutar uma ("Entradas",
-    "Pratos") seria escrever no cardápio do bar informação que o dono nunca
-    deu. O que existe de verdade é `destaque`: o prato que a casa quer que
-    apareça primeiro. Então é só isso que separa os dois blocos.
-
-    O título só aparece quando há de fato dois blocos. Cardápio inteiro em
-    destaque — ou nenhum — sai como lista única, sem cabeçalho enfeitando um
-    grupo que não tem par: é a mesma regra da landing, onde seção sem conteúdo
-    próprio não se anuncia.
-    """
-    destaques = [d for d in dishes if d.get('destaque')]
-    demais = [d for d in dishes if not d.get('destaque')]
-    if destaques and demais:
-        return [{'titulo': 'Destaques da casa', 'itens': destaques},
-                {'titulo': 'Também na cozinha', 'itens': demais}]
-    return [{'titulo': None, 'itens': list(dishes)}]
-
-
-def _render_cardapio(rest):
-    """A página que abre da mesa: só o cardápio, o mais leve possível.
-
-    Quem chega aqui apontou a câmera pro QR colado na mesa. Está sentado, com
-    uma mão, no 4G do bar e quer uma coisa só — o que tem pra comer e quanto
-    custa. Por isso esta página não carrega fonte de CDN, não anima nada e não
-    repete hero, história, galeria nem formulário de reserva: tudo isso mora na
-    landing, a um toque daqui.
-
-    Read-only de propósito: não há carrinho, pedido nem pagamento. O QR na mesa
-    substitui o cardápio plastificado, não o garçom.
-
-    Sem plano nenhum no meio: cardápio é o que o bar imprimiu e colou na mesa.
-    Um QR que para de abrir porque a mensalidade atrasou puniria o cliente do
-    bar na frente do prato — o oposto da degradação descrita em `planos.py`.
-    """
-    site = montar_site(rest)
-    dishes = montar_conteudo(rest)['dishes']
-
-    # Bar sem prato cadastrado não tem cardápio — e página de cardápio vazia é
-    # pior que 404: o cliente já está sentado, esperando ler alguma coisa.
-    # Nada aponta pra cá nesse estado (o JSON-LD só publica `Menu.url` quando
-    # há item, e o Modo Campo não oferece o QR).
-    if not dishes:
-        abort(404)
-
-    cfg = getattr(rest, 'site_config', None)
-    modo_salvo = getattr(cfg, 'tema_modo', None) if cfg else None
-    # Claro/escuro é a escolha da casa, igual à landing. Sem escolha, escuro —
-    # que é o default do site e o que o dono já viu ao aprovar.
-    tema_forcado = {'claro': 'light', 'escuro': 'dark'}.get(modo_salvo or '', '')
-
-    endereco_canonico = url_canonica(rest)
-    endereco_cardapio = url_do_cardapio(rest) or f'{endereco_canonico}/cardapio'
-    grafo = seo.cardapio_estruturado(rest, site, dishes, endereco_canonico,
-                                     endereco_cardapio)
-
-    return render_template(
-        'site/cardapio.html',
-        site=site, tenant=rest, grupos=_grupos_do_cardapio(dishes),
-        copy=copy_da_vibe(getattr(cfg, 'vibe', None) if cfg else None,
-                          site.get('nome') or ''),
-        tema_css=css_do_tema(getattr(cfg, 'tema', None) if cfg else None),
-        tema_cor=cor_do_tema(getattr(cfg, 'tema', None) if cfg else None),
-        tema_forcado=tema_forcado,
-        json_ld=seo.serializar(grafo) if grafo else None,
-        url_canonica=endereco_cardapio,
-        # Relativo de propósito: quem veio pelo QR está no domínio do bar e
-        # continua nele ao tocar "ver o site".
-        url_do_site=url_for('public.landing_slug', slug=rest.slug),
-        email_vendas=os.environ.get('FEIRA_EMAIL', 'contato@feiradebarao.com.br'),
-        contato_vendas=os.environ.get('FEIRA_WHATSAPP', ''),
-    )
-
-
-@bp.route('/bar/<slug>/cardapio')
-def cardapio(slug):
-    """Cardápio digital do bar, o endereço que o QR da mesa carrega."""
-    rest = tenant_por_slug(slug)  # já filtra inativo
-    if rest is None:
-        abort(404)
-    return _render_cardapio(rest)
-
-
 @bp.route('/s/<int:rid>')
 def landing_tenant(rid):
     """Alias legado (preview por id). Mantido para não quebrar links já enviados."""
@@ -579,12 +494,8 @@ def montar_conteudo(rest):
     # mostra a seção vazia, não o "Croquete da Bruna" e as avaliações reais dos
     # clientes de outro bar. Os dados do Bar da Vila foram persistidos como
     # linhas dele pela migration `add_slug_dominio_tema`.
-    # `preco` viaja como Decimal (ou None) até o template e o JSON-LD: quem
-    # formata é o filtro `moeda_br` na tela e `seo._preco_schema` no grafo —
-    # vírgula pro cliente, ponto pro Google, um valor só na origem.
     dishes = [{'nome': d.nome, 'descricao': d.descricao, 'img': _img(d.imagem),
-               'tag': d.tag, 'destaque': d.destaque, 'preco': d.preco}
-              for d in rows(DishCard)]
+               'tag': d.tag, 'destaque': d.destaque} for d in rows(DishCard)]
 
     reviews = [{'autor': r.autor, 'texto': r.texto, 'estrelas': r.estrelas}
                for r in rows(Review)]

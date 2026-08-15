@@ -9,8 +9,6 @@ nome: "Candreva Bar"
 tema: boteco-ambar
 
 site:
-  telefone_exibicao: "(19) 3232-7361"
-  endereco: "Av. Monte Castelo, 23 - Jardim Proença, Campinas - SP, 13026-240"
   vibe: boteco
   descritor: "Tradicional de Campinas desde 1964"
   kicker: "VILA PROENÇA · CAMPINAS–SP · DESDE 1964"
@@ -19,10 +17,6 @@ site:
   tagline: "Torresmo, assado e 60 anos de casa cheia."
   subline: "TORRESMO · ASSADOS · TRADIÇÃO"
   cidade_uf: "Vila Proença, Campinas–SP"
-  # Horário da unidade Proença, do site oficial barcandreva.com.br (15/08/2026).
-  # Sem nota_google: a única ficha com nota que achei (4,2 · 642) é da unidade
-  # TAQUARAL, e a rede tem 5 unidades. Nota de outra loja não entra aqui.
-  horario: "Seg–Qui 10h–23h · Sex–Sáb 10h–00h · Dom 10h–22h30"
 
 # Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
 #   hero_foto: img/demo/candreva/capa.jpg

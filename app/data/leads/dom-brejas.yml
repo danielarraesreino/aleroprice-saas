@@ -9,10 +9,6 @@ nome: "Dom Brejas"
 tema: neon-noite
 
 site:
-  telefone_exibicao: "(19) 3291-4752"
-  endereco: "Av. Barão de Itapura, 2947 - Taquaral, Campinas - SP, 13073-300"
-  qtd_avaliacoes: 3688
-  nota_google: "4,7"
   vibe: pub
   descritor: "Cervejaria artesanal no Taquaral"
   kicker: "TAQUARAL · CAMPINAS–SP"
@@ -21,9 +17,6 @@ site:
   tagline: "Rótulo que muda toda semana e calçada cheia."
   subline: "CERVEJA ARTESANAL · ROTATIVO · TAQUARAL"
   cidade_uf: "Taquaral, Campinas–SP"
-  # Horário conferido em duas fontes (dombrejas.com.br e painel do Google via
-  # Restaurant Guru) em 15/08/2026.
-  horario: "Seg–Ter 16h–23h30 · Qua–Qui 16h–01h · Sex 15h–01h · Sáb 11h–01h · Dom 11h–21h30"
 
 # Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
 #   hero_foto: img/demo/dom-brejas/capa.jpg

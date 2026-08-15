@@ -72,7 +72,6 @@
                     <p class="text-muted">Cardápio: <strong>{{ cardapio.nome }}</strong></p>
 
                     <form method="post" action="{{ url_for('cardapios.adicionar_secao', id=cardapio.id) }}">
-                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <div class="form-group">
                             <label for="nome">Nome da Seção *</label>
                             <input type="text" class="form-control" id="nome" name="nome" required list="secoes-sugeridas">

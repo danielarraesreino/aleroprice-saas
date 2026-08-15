@@ -1,26 +1,22 @@
-# Paioça do Caboclo — Sousas, Campinas–SP
+# Paioça do Cabloco — Sousas, Campinas–SP
 # Lead da campanha RMC. Foto: coloque os arquivos em
 # app/static/img/demo/paioca-do-cabloco/ e aponte abaixo (hero_foto, cardapio, galeria).
 #
 # POR QUE LIGAR PRA ELE:
 # Megaevento com fila de saída e risco de calote. Gancho: agenda dos shows no site, com o público sabendo data e atração antes.
 
-nome: "Paioça do Caboclo"
+nome: "Paioça do Cabloco"
 tema: boteco-ambar
 
 site:
-  telefone_exibicao: "(19) 3291-3176"
-  endereco: "Estr. das Cabras, km 5,5 - Joaquim Egídio, Campinas - SP"
   vibe: boteco
   descritor: "Casa de shows e sertanejo"
-  kicker: "JOAQUIM EGÍDIO · CAMPINAS–SP"
+  kicker: "SOUSAS · CAMPINAS–SP"
   hero_linha1: "Paioça"
-  hero_linha2: "do Caboclo"
+  hero_linha2: "do Cabloco"
   tagline: "Celeiro grande, palco montado e noite que vai longe."
   subline: "SHOWS · SERTANEJO · EVENTOS"
-  # O relatório trazia "Sousas"; paioca.com.br (site oficial) e a imprensa local
-  # dizem Joaquim Egídio — a estrada liga os dois distritos. 15/08/2026.
-  cidade_uf: "Joaquim Egídio, Campinas–SP"
+  cidade_uf: "Sousas, Campinas–SP"
 
 # Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
 #   hero_foto: img/demo/paioca-do-cabloco/capa.jpg

@@ -100,7 +100,6 @@
                     <p class="text-muted">Defina uma meta para reduzir o desperdício no seu estabelecimento</p>
 
                     <form method="post" action="{{ url_for('desperdicio.criar_meta') }}">
-                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <div class="form-group">
                             <label for="nome">Nome da Meta *</label>
                             <input type="text" class="form-control" id="nome" name="nome" required>

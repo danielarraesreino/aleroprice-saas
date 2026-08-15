@@ -55,9 +55,8 @@ propriedades calculadas (custo do prato, margem, valor da meta) além do schema.
 1. `run.py` escolhe o config: `APP_ENV` explícito > `VERCEL`/`RAILWAY_ENVIRONMENT` (⇒ `production`) > `default` (dev).
 2. `create_app()` monta o Flask, inicia Sentry (se `SENTRY_DSN`), extensões, locale pt-BR, filtros Jinja e registra os blueprints.
 3. `@before_request require_login` roda em **toda** requisição: se o endpoint não está na allowlist (`static`, `auth.login`, `auth.logout`, `billing.webhook`, `public.*`) e não há usuário autenticado → redirect pra `auth.login?next=<path>`.
-4. `CSRFProtect` (flask-wtf) roda **depois** do `require_login`, de propósito: sessão expirada leva o usuário de volta pro login em vez de dar 400 seco. Todo POST/PUT/PATCH/DELETE precisa de token — no campo `csrf_token` do form ou no header `X-CSRFToken`. Exceções, marcadas com `@csrf.exempt`: `billing.webhook` (autentica por assinatura HMAC do Stripe) e `bootstrap_demo` (curl de manutenção, gated por `SEED_TOKEN`).
-5. A view filtra por `restaurant_id` na mão. Isso não é enforçado por nada — é convenção.
-6. Template renderiza com filtros BR.
+4. A view filtra por `restaurant_id` na mão. Isso não é enforçado por nada — é convenção.
+5. Template renderiza com filtros BR.
 
 Prefixos registrados: `/estoque`, `/fornecedores`, `/nfe`, `/pratos`, `/produtos`,
 `/cardapios`, `/desperdicio`, `/previsao`, `/custos`, `/reservas`, `/agenda`,
