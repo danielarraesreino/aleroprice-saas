@@ -179,6 +179,13 @@ def create_app(config_name='default'):
             dominio_do_produto, eh_dominio_do_produto, normalizar_host,
         )
 
+        # Interruptor obrigatório: enquanto o DNS do domínio do produto não
+        # apontar pra cá, redirecionar o login pra lá deixa o operador sem
+        # conseguir entrar em lugar nenhum. Ligar SEPARAR_DOMINIOS=1 só depois
+        # de confirmar que o domínio responde.
+        if os.environ.get('SEPARAR_DOMINIOS') != '1':
+            return
+
         endpoint = request.endpoint
         if endpoint is None or endpoint in ENDPOINTS_DO_TENANT:
             return

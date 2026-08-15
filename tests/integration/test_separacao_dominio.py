@@ -19,6 +19,9 @@ CLIENTE = 'bardavila.bar'
 @pytest.fixture(autouse=True)
 def dominio_do_produto(monkeypatch):
     monkeypatch.setenv('DOMINIO_PRODUTO', PRODUTO)
+    # A separação é opt-in: sem o DNS apontando pro produto, redirecionar o
+    # login deixaria o operador sem conseguir entrar em lugar nenhum.
+    monkeypatch.setenv('SEPARAR_DOMINIOS', '1')
 
 
 @pytest.fixture
@@ -93,3 +96,13 @@ def test_link_do_painel_sai_do_dominio_do_bar(client, bar):
 
     assert f'https://{PRODUTO}/auth/login' in corpo
     assert 'href="/auth/login"' not in corpo
+
+
+def test_sem_o_interruptor_nada_e_redirecionado(client, bar, monkeypatch):
+    """Enquanto o DNS do produto não apontar pra cá, o sistema tem que continuar
+    respondendo no domínio antigo — senão o operador não loga em lugar nenhum."""
+    monkeypatch.delenv('SEPARAR_DOMINIOS', raising=False)
+
+    resp = client.get('/auth/login', headers={'Host': CLIENTE})
+
+    assert resp.status_code == 200
