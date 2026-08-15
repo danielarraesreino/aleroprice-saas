@@ -9,6 +9,10 @@ nome: "Eskina Bar"
 tema: boteco-ambar
 
 site:
+  endereco: "R. Horácio Leonardi, 12 - Barão Geraldo, Campinas - SP"
+  instagram_url: "https://www.instagram.com/eskinabarcampinas/"
+  maps_query: "Eskina Bar Campinas"
+  horario: "Seg–Dom a partir das 16h30"
   vibe: boteco
   descritor: "Bar de esquina em Barão"
   kicker: "BARÃO GERALDO · CAMPINAS–SP"

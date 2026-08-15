@@ -9,6 +9,9 @@ nome: "Barbieri Futebol & Bar"
 tema: boteco-ambar
 
 site:
+  instagram_url: "https://www.instagram.com/barbieri_futebolebar/"
+  maps_query: "Barbieri Futebol e Bar Campinas"
+  horario: "Ter e Qui 18h–00h · Sáb 18h–00h · Dom 12h–20h"
   telefone_exibicao: "(19) 3289-5055"
   endereco: "Av. Santa Isabel, 2295 - Barão Geraldo, Campinas - SP, 13084-643"
   qtd_avaliacoes: 190

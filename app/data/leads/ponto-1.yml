@@ -9,6 +9,10 @@ nome: "Ponto 1 Bar"
 tema: pub-escuro
 
 site:
+  endereco: "R. Eduardo Modesto, 54 - Barão Geraldo, Campinas - SP"
+  instagram_url: "https://www.instagram.com/ponto1bar/"
+  maps_query: "Ponto 1 Bar Barão Geraldo Campinas"
+  horario: "Seg–Qua 17h–00h · Qui–Sáb 17h–01h"
   vibe: pub
   descritor: "O bar mais antigo de Barão Geraldo"
   kicker: "BARÃO GERALDO · CAMPINAS–SP · DESDE 1978"

@@ -9,6 +9,10 @@ nome: "Buteco do Jair"
 tema: boteco-ambar
 
 site:
+  endereco: "R. Eduardo Modesto, 212 - Barão Geraldo, Campinas - SP"
+  instagram_url: "https://www.instagram.com/bardojaircampinas/"
+  maps_query: "Buteco do Jair Barão Geraldo Campinas"
+  horario: "Qua–Sáb 17h–00h"
   qtd_avaliacoes: 92
   nota_google: "4,0"
   vibe: boteco

@@ -9,6 +9,9 @@ nome: "Bar do Frango"
 tema: boteco-ambar
 
 site:
+  instagram_url: "https://www.instagram.com/bardofrangobaraogeraldo/"
+  maps_query: "Bar do Frango Barão Geraldo Campinas"
+  horario: "Seg–Sex 16h–23h · Sáb 12h–23h"
   telefone_exibicao: "(19) 3289-1478"
   endereco: "Av. Santa Isabel, 167 - Barão Geraldo, Campinas - SP, 13084-012"
   qtd_avaliacoes: 292

@@ -187,8 +187,11 @@ def _hhmm(hora, minuto):
 def _dias_schema(trecho):
     """'ter, qua e sex' -> 'Tu,We,Fr'. 'seg-qui' -> 'Mo-Th'. Falha -> None."""
     trecho = trecho.strip(' ,.-')
-    # "Seg a sex das 11h às 15h" deixa um 'das'/'de' pendurado no fim.
-    trecho = re.sub(r'\s+(das|de|dos|entre)$', '', trecho).strip(' ,.-')
+    # "Seg a sex das 11h às 15h" deixa um 'das'/'de' pendurado no fim, e
+    # "Qua–Sex a partir das 18h" deixa a locução inteira. Os dias vêm antes;
+    # o que sobra entre eles e a hora é ligação, não informação.
+    trecho = re.sub(r'\s+a\s+partir\s+(d[aeo]s?\s*)?$', '', trecho)
+    trecho = re.sub(r'\s+(das|de|dos|entre|a)$', '', trecho).strip(' ,.-')
     if not trecho:
         return None
     if any(marca in trecho for marca in _TODOS_OS_DIAS):
@@ -231,6 +234,75 @@ def _faixas_schema(trecho):
             return None
         faixas.append(f'{inicio}-{fim}')
     return faixas or None
+
+
+_DIA_LONGO = {
+    'Mo': 'Monday', 'Tu': 'Tuesday', 'We': 'Wednesday', 'Th': 'Thursday',
+    'Fr': 'Friday', 'Sa': 'Saturday', 'Su': 'Sunday',
+}
+_ORDEM_DIAS = list(_DIA_LONGO)
+
+
+def _expandir_dias(codigo):
+    """'Th-Sa' -> ['Thursday','Friday','Saturday'] · 'We' -> ['Wednesday']."""
+    nomes = []
+    for parte in codigo.split(','):
+        if '-' in parte:
+            ini, fim = parte.split('-', 1)
+            if ini not in _ORDEM_DIAS or fim not in _ORDEM_DIAS:
+                return []
+            i, f = _ORDEM_DIAS.index(ini), _ORDEM_DIAS.index(fim)
+            faixa = (_ORDEM_DIAS[i:f + 1] if i <= f
+                     else _ORDEM_DIAS[i:] + _ORDEM_DIAS[:f + 1])
+            nomes += [_DIA_LONGO[d] for d in faixa]
+        elif parte in _DIA_LONGO:
+            nomes.append(_DIA_LONGO[parte])
+        else:
+            return []
+    return nomes
+
+
+def abertura_schema(texto):
+    """Horário que só diz quando ABRE -> lista de OpeningHoursSpecification.
+
+    Seis bares de Barão escrevem "Qua–Sex a partir das 18h": a hora de fechar
+    simplesmente não é pública. `openingHours` (string) exige intervalo fechado,
+    então esse texto virava silêncio — o bar ficava sem horário nenhum no
+    Google, que é pior do que dizer só a abertura.
+
+    `OpeningHoursSpecification` aceita `opens` sem `closes`, e é isso que se faz
+    aqui: publica o que se sabe, cala o que não se sabe. Continua valendo a
+    regra de não inventar — hora de fechamento nunca é estimada.
+
+    Devolve [] quando o texto já tem intervalo completo (aí quem responde é
+    `horario_schema`) ou quando não dá pra ler os dias com segurança.
+    """
+    texto = _limpo(texto)
+    if not texto:
+        return []
+
+    especificacoes = []
+    for bloco in _SEPARADOR_DE_BLOCO.split(_normalizar_horario(texto)):
+        bloco = bloco.strip()
+        if not bloco:
+            continue
+        primeira = _HORA.search(bloco)
+        if not primeira:
+            return []
+        horas = _HORA.findall(bloco[primeira.start():])
+        # dois horários = intervalo fechado: não é caso desta função
+        if len(horas) != 1:
+            return []
+        abre = _hhmm(*horas[0])
+        dias = _expandir_dias(_dias_schema(bloco[:primeira.start()]) or '')
+        if not abre or not dias:
+            return []
+        especificacoes.append({
+            '@type': 'OpeningHoursSpecification',
+            'dayOfWeek': dias,
+            'opens': abre,
+        })
+    return especificacoes
 
 
 def horario_schema(texto):
@@ -574,9 +646,17 @@ def dados_estruturados(rest, site, dishes, reviews, eventos, url_canonica):
     if faixa_preco:
         restaurante['priceRange'] = faixa_preco
 
+    # Intervalo fechado vira `openingHours`. Quando a casa só divulga a
+    # abertura ("Qua–Sex a partir das 18h"), cai em
+    # `openingHoursSpecification` com `opens` e sem `closes`: publica o que se
+    # sabe em vez de deixar o bar sem horário nenhum no Google.
     horarios = horario_schema(site.get('horario'))
     if horarios:
         restaurante['openingHours'] = horarios
+    else:
+        aberturas = abertura_schema(site.get('horario'))
+        if aberturas:
+            restaurante['openingHoursSpecification'] = aberturas
 
     redes = [_limpo(site.get('instagram_url')), _limpo(site.get('facebook_url'))]
     redes = [r for r in redes if r]

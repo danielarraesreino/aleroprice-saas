@@ -9,6 +9,10 @@ nome: "Bar Santa Genebra"
 tema: boteco-ambar
 
 site:
+  endereco: "R. Ângelo Vicentim, 736 - Barão Geraldo, Campinas - SP"
+  instagram_url: "https://www.instagram.com/santagenebrabar/"
+  maps_query: "Bar Santa Genebra Campinas"
+  horario: "Seg–Sáb 8h–22h · Dom 8h–17h"
   vibe: boteco
   descritor: "Almoço e boteco em Barão"
   kicker: "BARÃO GERALDO · CAMPINAS–SP"

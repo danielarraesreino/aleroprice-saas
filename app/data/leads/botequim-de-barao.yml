@@ -9,6 +9,10 @@ nome: "Botequim de Barão"
 tema: boteco-ambar
 
 site:
+  endereco: "Av. Santa Isabel, 513 - Barão Geraldo, Campinas - SP"
+  instagram_url: "https://www.instagram.com/botequimdebarao/"
+  maps_query: "Botequim de Barão Campinas"
+  horario: "Ter–Qui 17h–00h · Sex–Sáb 17h–01h"
   vibe: boteco
   descritor: "Botequim de conversa em Barão"
   kicker: "BARÃO GERALDO · CAMPINAS–SP"

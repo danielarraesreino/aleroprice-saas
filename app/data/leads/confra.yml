@@ -9,6 +9,9 @@ nome: "Cervejaria Confra"
 tema: pub-escuro
 
 site:
+  instagram_url: "https://www.instagram.com/cervejariaconfra/"
+  maps_query: "Cervejaria Confra Barão Geraldo Campinas"
+  horario: "Ter–Qua 12h–23h · Qui–Sáb 12h–00h · Dom 12h–21h"
   telefone_exibicao: "(19) 99932-2627"
   endereco: "R. José Martins, 503 - Barão Geraldo, Campinas - SP, 13084-153"
   qtd_avaliacoes: 824

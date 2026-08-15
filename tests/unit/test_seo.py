@@ -17,8 +17,8 @@ from datetime import date, datetime
 import pytest
 
 from app.utils.seo import (
-    dados_estruturados, endereco_schema, horario_schema, meta_descricao,
-    serializar,
+    abertura_schema, dados_estruturados, endereco_schema, horario_schema,
+    meta_descricao, serializar,
 )
 from app.utils.vitrine import eventos_de_exemplo
 
@@ -502,3 +502,50 @@ def test_whatsapp_sujo_nao_vira_telefone():
     """Coluna é 'só dígitos com DDI'. O que não for isso não vira E.164."""
     site = {'nome': 'Bar X', 'whatsapp': '(19) 99977-9942'}
     assert 'telephone' not in dados_estruturados(None, site, [], [], [], URL)['@graph'][0]
+
+
+# ------------------------------------------- horário que só diz quando abre
+
+def test_abertura_sem_fechamento_vira_specification():
+    """Seis bares de Barão escrevem "a partir das 18h": a hora de fechar não é
+    pública. Antes isso virava silêncio — o bar ficava sem horário nenhum no
+    Google. `OpeningHoursSpecification` aceita `opens` sem `closes`."""
+    spec = abertura_schema('Qua–Sex a partir das 18h · Sáb e Dom a partir das 16h')
+
+    assert len(spec) == 2
+    assert spec[0]['dayOfWeek'] == ['Wednesday', 'Thursday', 'Friday']
+    assert spec[0]['opens'] == '18:00'
+    assert 'closes' not in spec[0], 'hora de fechar nunca é estimada'
+    assert spec[1]['dayOfWeek'] == ['Saturday', 'Sunday']
+    assert spec[1]['opens'] == '16:00'
+
+
+def test_abertura_com_meia_hora_e_todos_os_dias():
+    spec = abertura_schema('Seg–Dom a partir das 16h30')
+
+    assert len(spec) == 1
+    assert len(spec[0]['dayOfWeek']) == 7
+    assert spec[0]['opens'] == '16:30'
+
+
+def test_intervalo_fechado_nao_vira_specification():
+    """Quem tem hora de abrir E fechar é servido por `horario_schema`; emitir
+    os dois seria dizer a mesma coisa duas vezes, em desacordo."""
+    assert abertura_schema('Ter–Sáb 18h–01h') == []
+    assert abertura_schema('Seg–Qui 11h30–15h e 18h–23h') == []
+
+
+def test_horario_ilegivel_nao_vira_abertura():
+    for lixo in ('', None, 'consulte nossas redes', 'todo dia até tarde'):
+        assert abertura_schema(lixo) == []
+
+
+def test_grafo_usa_specification_quando_so_ha_abertura():
+    dados = dados_estruturados(
+        None, {'nome': 'Bar X', 'horario': 'Qua–Sex a partir das 18h'},
+        [], [], [], 'https://x.com.br/bar/x')
+    lugar = next(n for n in dados['@graph']
+                 if 'Bar' in str(n.get('@type')) or 'Restaurant' in str(n.get('@type')))
+
+    assert 'openingHours' not in lugar
+    assert lugar['openingHoursSpecification'][0]['opens'] == '18:00'

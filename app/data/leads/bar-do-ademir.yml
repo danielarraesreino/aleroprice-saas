@@ -9,6 +9,10 @@ nome: "Bar do Ademir"
 tema: neon-noite
 
 site:
+  endereco: "Av. Santa Isabel, 1422 - Barão Geraldo, Campinas - SP"
+  instagram_url: "https://www.instagram.com/contatobardoademir/"
+  maps_query: "Bar do Ademir Barão Geraldo Campinas"
+  horario: "Ter–Sáb 18h–01h"
   vibe: boteco
   descritor: "Forró e pista em Barão Geraldo"
   kicker: "BARÃO GERALDO · CAMPINAS–SP"

@@ -9,6 +9,9 @@ nome: "Cervejaria Garimpero"
 tema: pub-escuro
 
 site:
+  instagram_url: "https://www.instagram.com/cervejariagarimpero/"
+  maps_query: "Cervejaria Garimpero Barão Geraldo Campinas"
+  horario: "Qua–Qui 17h–02h · Sáb 14h–02h · Dom 14h–22h"
   endereco: "Avenida Santa Isabel, 462, em Barão Geraldo, Campinas (SP)"
   vibe: pub
   descritor: "Brewpub em Barão Geraldo"
