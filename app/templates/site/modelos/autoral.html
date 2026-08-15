@@ -17,7 +17,33 @@
 --------------------------------------------------------------------------- #}
 {% set descritor = site.descritor or site.cidade_uf or 'Cozinha autoral' %}
 <title>{{ site.nome }} — {{ descritor }}</title>
+{# Descrição: quem monta é app/utils/seo.py (nome + descritor + cidade + nota,
+   cortado nos 160 caracteres onde o Google corta). O texto local fica de
+   reserva pro caso de a view não mandar `meta_desc` — página sem description
+   deixa o buscador escolher o trecho sozinho, e a escolha dele é pior. #}
+{% if meta_desc %}
+<meta name="description" content="{{ meta_desc }}">
+{% else %}
 <meta name="description" content="{{ site.nome }} — {{ site.tagline or descritor }}">
+{% endif %}
+
+{# Endereço único desta página. `url_canonica` é a MESMA string que assina os
+   @id do JSON-LD e as linhas do sitemap (app/utils/site_router.py): o bar
+   responde em domínio próprio, /bar/<slug> e /s/<id>, e sem isso o Google vê
+   três páginas iguais e as IAs veem três entidades diferentes. Sem a variável,
+   `request.base_url` — que é a URL sem querystring, e ?modelo=/?modo= são
+   espiada de vendedor, não conteúdo. Prévia é noindex e mesmo assim declara
+   canonical: robô que ignore o noindex ainda aprende qual é a página real. #}
+{% set canonica = url_canonica or request.base_url %}
+<link rel="canonical" href="{{ canonica }}">
+
+{# Dados estruturados. É o que faz o bar existir como FATO (endereço, horário,
+   nota, cardápio, agenda) pro Google, pro AI Overview, pro Perplexity e pro
+   ChatGPT — e não como imagem bonita. Vem serializado da view; `serializar`
+   já neutraliza < > & pra que uma tagline com "</script>" não feche a tag. #}
+{% if json_ld %}
+<script type="application/ld+json">{{ json_ld|safe }}</script>
+{% endif %}
 
 {# Foto de capa: aceita caminho estático ('img/bar/x.jpg') ou URL absoluta. #}
 {% set hero_arq = site.hero_foto %}
@@ -30,6 +56,20 @@
 {% endif %}
 {# Sem capa própria, o herói é o primeiro prato/foto DESTE bar — nunca de outro. #}
 {% set heroi_img = hero_url or (dishes and dishes[0].img) or (gallery and gallery[0].img) %}
+
+{# O alt da capa acompanha DE ONDE a foto veio (mesma ordem da linha acima).
+   alt="" ou "imagem" não descreve nada: quem usa leitor de tela não sabe o que
+   está vendo, e o Google Imagens — que é entrada real de busca por bar — não
+   tem texto nenhum pra indexar. O nome do bar entra sempre. #}
+{% if hero_url %}
+  {% set heroi_alt = site.nome ~ ' — ' ~ (site.tagline or descritor) %}
+{% elif dishes and dishes[0].img %}
+  {% set heroi_alt = dishes[0].nome ~ ', prato do ' ~ site.nome %}
+{% elif gallery and gallery[0].img %}
+  {% set heroi_alt = (gallery[0].legenda ~ ' — ' ~ site.nome) if gallery[0].legenda else ('Ambiente do ' ~ site.nome) %}
+{% else %}
+  {% set heroi_alt = site.nome %}
+{% endif %}
 
 {% set og_base = 'https://' ~ request.host %}
 {# Card de compartilhamento só com foto de capa própria: mandar a capa de outro
@@ -52,7 +92,9 @@
 <meta property="og:description" content="{{ site.tagline or descritor }}">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="pt_BR">
-<meta property="og:url" content="{{ og_base ~ request.path }}">
+{# Mesmo endereço do canonical: link compartilhado no WhatsApp e página
+   indexada precisam ser a mesma coisa, senão o sinal social se divide. #}
+<meta property="og:url" content="{{ canonica }}">
 {% if og_img %}
 <meta property="og:image" content="{{ og_img }}">
 <meta property="og:image:secure_url" content="{{ og_img }}">
@@ -621,6 +663,7 @@
     <b>Índice</b>
     <button onclick="fecharIndice()" aria-label="Fechar índice">✕</button>
   </div>
+  <nav aria-label="Índice das seções">
   <ol>
     {% if dishes %}<li><a href="#cardapio" onclick="fecharIndice()">Cardápio</a></li>{% endif %}
     {% if promocoes %}<li><a href="#promocoes" onclick="fecharIndice()">Promoções</a></li>{% endif %}
@@ -631,18 +674,30 @@
     <li><a href="#reservar" onclick="fecharIndice()">Reservar mesa</a></li>
     <li><a href="#contato" onclick="fecharIndice()">Contato</a></li>
   </ol>
+  </nav>
   <div class="rodape-indice">
     <a class="link-seta" href="{{ url_do_sistema() }}">Área do lojista →</a>
   </div>
 </div>
 
+<!-- CONTEÚDO: tudo que é a página do bar. O cabeçalho, o índice, o rodapé e o
+     aviso de prévia ficam FORA — são casca de navegação, e leitor de tela (e
+     robô de extração) precisa saber onde começa o conteúdo de fato. -->
+{# Nenhum link aponta pra este id, de propósito: âncora de menu só pode apontar
+   pra uma <section class="sec"> (é o que o teste _links_quebrados verifica).
+   Um "pular para o conteúdo", se um dia entrar, usa #topo — a primeira seção. #}
+<main id="conteudo">
+
 <!-- HERO: o prato é o herói. Título serifado à esquerda, foto grande à direita. -->
-<section class="hero" id="topo">
+<section class="hero" id="topo" aria-labelledby="t-topo">
   <div class="wrap">
     <div class="hero-grade">
       <div>
         {% if site.kicker %}<div class="hero-kicker" data-hero>{{ site.kicker }}</div>{% endif %}
-        <h1 data-hero>
+        {# O ÚNICO h1 da página, e é o nome do bar. O concorrente de referência
+           (Café Container) tem 41 h2 soltos e nenhum h1: pro Google a página
+           não declara sobre quem ela é. Aqui declara, uma vez só. #}
+        <h1 id="t-topo" data-hero>
           <span>{{ site.hero_linha1 or site.nome }}</span>
           {% if site.hero_linha2 %}<span class="dois">{{ site.hero_linha2 }}</span>{% endif %}
         </h1>
@@ -670,7 +725,10 @@
       </div>
       {% if heroi_img %}
       <figure class="hero-foto" data-hero>
-        <img src="{{ heroi_img }}" alt="Prato do {{ site.nome }}" fetchpriority="high">
+        {# Capa = LCP desta página. Sem `loading="lazy"` (adiar a maior imagem
+           da dobra é atrasar de propósito a métrica que o Google mede) e com
+           `fetchpriority="high"` pra ela furar a fila das fontes e do CSS. #}
+        <img src="{{ heroi_img }}" alt="{{ heroi_alt }}" fetchpriority="high" decoding="async">
         <figcaption>{{ site.nome }}{% if site.cidade_uf %} · {{ site.cidade_uf }}{% endif %}</figcaption>
       </figure>
       {% endif %}
@@ -689,11 +747,11 @@
 <!-- CARDÁPIO: a seção principal deste modelo. Um prato por faixa, foto grande,
      lado alternado. Prato sem foto vira bloco de texto, nunca caixa vazia. -->
 {% if dishes %}
-<section class="sec" id="cardapio">
+<section class="sec" id="cardapio" aria-labelledby="t-cardapio">
   <div class="wrap">
     <div class="cab rev">
       <div class="olho">{{ copy.cardapio.eyebrow }}</div>
-      <h2 class="titulo">{{ copy.cardapio.titulo|safe }}</h2>
+      <h2 class="titulo" id="t-cardapio">{{ copy.cardapio.titulo|safe }}</h2>
       {% if copy.cardapio.lead %}<p class="lead">{{ copy.cardapio.lead }}</p>{% endif %}
     </div>
     <div class="pratos">
@@ -701,7 +759,7 @@
       <article class="prato rev {{ 'com-foto' if d.img else 'sem-foto' }}{% if d.destaque %} destaque{% endif %}">
         {% if d.img %}
         <div class="prato-foto">
-          <img src="{{ d.img }}" alt="{{ d.nome }}" loading="lazy">
+          <img src="{{ d.img }}" alt="{{ d.nome }}, prato do {{ site.nome }}" loading="lazy" decoding="async">
         </div>
         {% endif %}
         <div>
@@ -720,11 +778,11 @@
 
 <!-- PROMOÇÕES -->
 {% if promocoes %}
-<section class="sec" id="promocoes">
+<section class="sec" id="promocoes" aria-labelledby="t-promocoes">
   <div class="wrap">
     <div class="cab rev">
       <div class="olho">{{ copy.promocoes.eyebrow }}</div>
-      <h2 class="titulo">{{ copy.promocoes.titulo|safe }}</h2>
+      <h2 class="titulo" id="t-promocoes">{{ copy.promocoes.titulo|safe }}</h2>
     </div>
     <div class="promos rev">
       {% for p in promocoes %}
@@ -748,12 +806,12 @@
 
 <!-- A CASA: texto de abertura + ficha técnica de quem faz -->
 {% if team or gallery %}
-<section class="sec" id="historia">
+<section class="sec" id="historia" aria-labelledby="t-historia">
   <div class="wrap">
     <div class="historia-grade">
       <div class="rev">
         <div class="olho">{{ copy.historia.eyebrow }}</div>
-        <h2 class="titulo">{{ copy.historia.titulo|safe }}</h2>
+        <h2 class="titulo" id="t-historia">{{ copy.historia.titulo|safe }}</h2>
         <p class="historia-texto">{{ copy.historia.texto }}</p>
         {% if team %}
         <ul class="creditos">
@@ -769,7 +827,7 @@
       </div>
       {% if gallery %}
       <figure class="historia-foto rev">
-        <img src="{{ gallery[0].img }}" alt="{{ gallery[0].legenda or ('A casa — ' ~ site.nome) }}" loading="lazy">
+        <img src="{{ gallery[0].img }}" alt="{{ (gallery[0].legenda ~ ' — ' ~ site.nome) if gallery[0].legenda else ('A casa por dentro — ' ~ site.nome) }}" loading="lazy" decoding="async">
         <figcaption>{{ gallery[0].legenda or ('Um dia no ' ~ site.nome) }}</figcaption>
       </figure>
       {% endif %}
@@ -779,11 +837,11 @@
 {% endif %}
 
 <!-- O CLIMA DA CASA -->
-<section class="sec" id="clima">
+<section class="sec" id="clima" aria-labelledby="t-clima">
   <div class="wrap">
     <div class="cab rev">
       <div class="olho">{{ copy.clima.eyebrow }}</div>
-      <h2 class="titulo">{{ copy.clima.titulo|safe }}</h2>
+      <h2 class="titulo" id="t-clima">{{ copy.clima.titulo|safe }}</h2>
     </div>
     <div class="clima rev">
       {% for emoji, titulo, sub in copy.clima.cards %}
@@ -803,11 +861,11 @@
      sumia da página inteira. A seção existe se houver qualquer um dos dois; some
      só quando não houver nenhum (invariante de seção órfã, preservado). -->
 {% if reviews or site.nota_google %}
-<section class="sec" id="avaliacoes">
+<section class="sec" id="avaliacoes" aria-labelledby="t-avaliacoes">
   <div class="wrap">
     <div class="cab rev">
       <div class="olho">{{ copy.avaliacoes.eyebrow }}</div>
-      <h2 class="titulo">{{ copy.avaliacoes.titulo|safe }}</h2>
+      <h2 class="titulo" id="t-avaliacoes">{{ copy.avaliacoes.titulo|safe }}</h2>
     </div>
     {# Nota real deste bar. Sem o dado, o bloco some — exibir nota fixa era
        publicar a reputação de um bar na página de outro. #}
@@ -846,11 +904,11 @@
 
 <!-- AGENDA -->
 {% if eventos %}
-<section class="sec" id="agenda">
+<section class="sec" id="agenda" aria-labelledby="t-agenda">
   <div class="wrap">
     <div class="cab rev">
       <div class="olho">{{ copy.agenda.eyebrow }}</div>
-      <h2 class="titulo">{{ copy.agenda.titulo|safe }}</h2>
+      <h2 class="titulo" id="t-agenda">{{ copy.agenda.titulo|safe }}</h2>
       {% if copy.agenda.lead %}<p class="lead">{{ copy.agenda.lead }}</p>{% endif %}
     </div>
     {% set meses = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'] %}
@@ -873,11 +931,11 @@
 
 <!-- GALERIA -->
 {% if gallery %}
-<section class="sec" id="galeria">
+<section class="sec" id="galeria" aria-labelledby="t-galeria">
   <div class="wrap">
     <div class="cab rev">
       <div class="olho">{{ copy.galeria.eyebrow }}</div>
-      <h2 class="titulo">{{ copy.galeria.titulo|safe }}</h2>
+      <h2 class="titulo" id="t-galeria">{{ copy.galeria.titulo|safe }}</h2>
       {% if copy.galeria.lead %}<p class="lead">{{ copy.galeria.lead }}</p>{% endif %}
     </div>
     {# Amostra, não álbum: no máximo 6. O banco pode ter 16 fotos; empilhar
@@ -885,7 +943,7 @@
     <div class="galeria rev">
       {% for g in gallery %}{% if loop.index <= 6 %}
       <figure>
-        <img src="{{ g.img }}" alt="{{ g.legenda or (site.nome ~ ' — foto da casa') }}" loading="lazy">
+        <img src="{{ g.img }}" alt="{{ (g.legenda ~ ' — ' ~ site.nome) if g.legenda else (site.nome ~ ' — foto da casa ' ~ loop.index) }}" loading="lazy" decoding="async">
         {% if g.legenda %}<figcaption>{{ g.legenda }}</figcaption>{% endif %}
       </figure>
       {% endif %}{% endfor %}
@@ -898,12 +956,12 @@
 {% endif %}
 
 <!-- RESERVA -->
-<section class="sec" id="reservar">
+<section class="sec" id="reservar" aria-labelledby="t-reservar">
   <div class="wrap">
     <div class="reserva-grade">
       <div class="rev">
         <div class="olho">{{ copy.reserva.eyebrow }}</div>
-        <h2 class="titulo">{{ copy.reserva.titulo|safe }}</h2>
+        <h2 class="titulo" id="t-reservar">{{ copy.reserva.titulo|safe }}</h2>
         {% if copy.reserva.lead %}<p class="lead">{{ copy.reserva.lead }}</p>{% endif %}
       </div>
       {% if not reservas_ativas %}
@@ -959,12 +1017,12 @@
 </section>
 
 <!-- CONTATO -->
-<section class="sec" id="contato">
+<section class="sec" id="contato" aria-labelledby="t-contato">
   <div class="wrap">
     <div class="contato-grade">
       <div class="rev">
         <div class="olho">{{ copy.contato.eyebrow }}</div>
-        <h2 class="titulo">{{ copy.contato.titulo|safe }}</h2>
+        <h2 class="titulo" id="t-contato">{{ copy.contato.titulo|safe }}</h2>
         <ul class="dados">
           {% if site.endereco %}<li><b>Endereço</b><span>{{ site.endereco }}</span></li>{% endif %}
           {% if site.horario %}<li><b>Horário</b><span>{{ site.horario }}</span></li>{% endif %}
@@ -988,6 +1046,8 @@
     </div>
   </div>
 </section>
+
+</main>
 
 <footer>
   <div class="wrap">

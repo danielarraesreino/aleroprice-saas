@@ -7,7 +7,34 @@
    família em Campinas" — que era o texto do Bar da Vila indo pra todo bar. #}
 {% set descritor = site.descritor or site.cidade_uf or 'Bar e restaurante' %}
 <title>{{ site.nome }} — {{ descritor }}</title>
+{# Descrição: quem monta é app/utils/seo.py (nome + descritor + cidade + nota,
+   cortado nos 160 caracteres onde o Google corta). O texto local fica de
+   reserva pro caso de a view não mandar `meta_desc` — página sem description
+   deixa o buscador escolher o trecho sozinho, e a escolha dele é pior. #}
+{% if meta_desc %}
+<meta name="description" content="{{ meta_desc }}">
+{% else %}
 <meta name="description" content="{{ site.nome }} — {{ site.tagline or descritor }}">
+{% endif %}
+
+{# Endereço único desta página. `url_canonica` é a MESMA string que assina os
+   @id do JSON-LD e as linhas do sitemap (app/utils/site_router.py): o bar
+   responde em domínio próprio, /bar/<slug> e /s/<id>, e sem isso o Google vê
+   três páginas iguais e as IAs veem três entidades diferentes. Sem a variável,
+   `request.base_url` — que é a URL sem querystring, e ?modelo=/?modo= são
+   espiada de vendedor, não conteúdo. Prévia declara canonical do mesmo jeito:
+   robô que ignore o `robots` ainda aprende qual é a página real. #}
+{% set canonica = url_canonica or request.base_url %}
+<link rel="canonical" href="{{ canonica }}">
+
+{# Dados estruturados. É o que faz o bar existir como FATO (endereço, horário,
+   nota, cardápio, agenda) pro Google, pro AI Overview, pro Perplexity e pro
+   ChatGPT — e não como imagem bonita. Vem serializado da view; `serializar`
+   já neutraliza < > & pra que uma tagline com "</script>" não feche a tag. #}
+{% if json_ld %}
+<script type="application/ld+json">{{ json_ld|safe }}</script>
+{% endif %}
+
 {# URL absoluta https pro card de compartilhamento (WhatsApp/Facebook/Instagram exigem) #}
 {% set og_base = 'https://' ~ request.host %}
 {# Card de compartilhamento: a foto de capa DESTE bar. Sem foto própria, nenhuma
@@ -23,7 +50,9 @@
 <meta property="og:description" content="{{ site.tagline or descritor }}">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="pt_BR">
-<meta property="og:url" content="{{ og_base ~ request.path }}">
+{# Mesmo endereço do canonical: link compartilhado no WhatsApp e página
+   indexada precisam ser a mesma coisa, senão o sinal social se divide. #}
+<meta property="og:url" content="{{ canonica }}">
 {% if og_img %}
 <meta property="og:image" content="{{ og_img }}">
 <meta property="og:image:secure_url" content="{{ og_img }}">
@@ -48,6 +77,15 @@
    if(document.documentElement.hasAttribute('data-theme'))return;var t=localStorage.getItem(k)||localStorage.getItem('bdv-theme');
    if(t==='light')document.documentElement.setAttribute('data-theme','light');})();
 </script>
+{# A capa é o LCP desta página e entra por CSS (`background-image` do .hero-bg),
+   então o navegador só descobre o arquivo depois de baixar e aplicar o <style>
+   lá embaixo — tarde demais. O preload adianta o pedido e `fetchpriority=high`
+   fura a fila das fontes. É o equivalente, pra imagem de fundo, do que os
+   outros modelos fazem com `fetchpriority` no <img> da capa. Sem capa própria
+   não há o que precarregar (e a capa de outro bar nunca entra aqui). #}
+{% if site.hero_foto %}
+<link rel="preload" as="image" fetchpriority="high" href="{{ url_for('static', filename=site.hero_foto) }}">
+{% endif %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Monoton&family=Anton&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Bebas+Neue&display=swap" rel="stylesheet">
@@ -305,7 +343,13 @@
   /* ---------- SECTIONS ---------- */
   .sec{padding:clamp(70px,10vw,120px) 0}
   .eyebrow{font-family:"Bebas Neue",sans-serif;letter-spacing:5px;color:var(--ember);font-size:.95rem;margin-bottom:10px}
-  .h2{font-family:"Anton",sans-serif;text-transform:uppercase;font-size:clamp(2rem,6vw,4rem);line-height:.98;letter-spacing:1px;color:var(--cream)}
+  /* `font-weight:400` explícito porque os títulos de seção agora são h2 de
+     verdade (antes eram div.h2, que o buscador e o leitor de tela ignoram).
+     A Anton só tem um peso: sem isto o navegador simula o negrito padrão do
+     h2 e o título engorda — o texto muda de tag, nunca de cara.
+     (Comentário sem sinal de menor/maior de propósito: isto vai pro HTML
+     servido e não pode virar falso positivo em quem conta cabeçalhos.) */
+  .h2{font-family:"Anton",sans-serif;font-weight:400;text-transform:uppercase;font-size:clamp(2rem,6vw,4rem);line-height:.98;letter-spacing:1px;color:var(--cream)}
   .h2 em{font-family:"Fraunces",serif;font-style:italic;text-transform:none;color:var(--amber);font-weight:400}
   .lead{color:var(--cream-dim);font-size:1.12rem;max-width:640px;margin-top:16px}
 
@@ -547,8 +591,11 @@
 </div>
 {% endif %}
 
-<nav>
-  <a href="#topo" class="nav-logo"><img src="{{ url_for('static', filename='img/favicon-64.png') }}" alt="Logo {{ site.nome }}">{{ site.nome|upper }}</a>
+{# Dois <nav> na página (este e o menu do celular): cada um precisa do próprio
+   rótulo, senão o leitor de tela anuncia "navegação" duas vezes sem dizer
+   qual é qual. #}
+<nav aria-label="Seções do site">
+  <a href="#topo" class="nav-logo"><img src="{{ url_for('static', filename='img/favicon-64.png') }}" alt="Logo do {{ site.nome }}" width="30" height="30" decoding="async">{{ site.nome|upper }}</a>
   <div class="nav-links">
     {% if dishes %}<a href="#cardapio">Cardápio</a>{% endif %}
     {% if team or gallery %}<a href="#historia">História</a>{% endif %}
@@ -564,7 +611,11 @@
   <div class="nav-ctrls">
     <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema claro/escuro" title="Alternar tema"><span id="theme-ic">☀</span></button>
     <button class="mug-btn" id="mugBtn" onclick="toggleMenu()" aria-label="Abrir menu" aria-expanded="false">
-      <img src="{{ url_for('static', filename='img/favicon-64.png') }}" alt="Menu">
+      {# Os dois ícones do topo ficam acima da dobra e são de 30/40px: entram
+         sem `loading="lazy"` de propósito (adiar imagem visível na primeira
+         tela é o uso errado do lazy) e com width/height pra não empurrar o
+         layout quando carregam. #}
+      <img src="{{ url_for('static', filename='img/favicon-64.png') }}" alt="Menu do {{ site.nome }}" width="40" height="40" decoding="async">
     </button>
   </div>
 </nav>
@@ -581,6 +632,13 @@
   <a href="#contato" onclick="toggleMenu()">Contato</a>
   <a class="mm-cta" href="{{ url_do_sistema() }}">Entrar no sistema</a>
 </div>
+
+{# <main> = o conteúdo do bar. Ficam de fora o banner de prévia, os dois menus,
+   o rodapé, o lightbox e o botão flutuante do WhatsApp — casca do site, não
+   conteúdo. Sem esta marcação toda <section> era filha direta do <body> e não
+   havia "corpo principal" nenhum pro leitor de tela pular, nem pro extrator de
+   conteúdo do buscador separar o miolo da moldura. #}
+<main id="conteudo">
 
 <header id="topo">
   {# Bar recém-criado ainda não tem foto de capa: sem o guard, url_for(filename=None)
@@ -617,11 +675,14 @@
 
 {% if promocoes %}
 <!-- PROMOÇÕES -->
-<section class="sec" id="promocoes" style="padding-top:clamp(50px,7vw,80px)">
+{# Cada seção é rotulada pelo próprio título (`aria-labelledby` -> id do <h2>):
+   é assim que o leitor de tela anuncia "Promoções, região" em vez de "região"
+   e que a máquina sabe onde um assunto começa. #}
+<section class="sec" id="promocoes" aria-labelledby="t-promocoes" style="padding-top:clamp(50px,7vw,80px)">
   <div class="wrap">
     <div class="reveal">
       <div class="eyebrow">{{ copy.promocoes.eyebrow }}</div>
-      <div class="h2">{{ copy.promocoes.titulo|safe }}</div>
+      <h2 class="h2" id="t-promocoes">{{ copy.promocoes.titulo|safe }}</h2>
     </div>
     <div class="promo-grid reveal">
       {% for p in promocoes %}
@@ -644,18 +705,22 @@
 
 <!-- CARDÁPIO -->
 {% if dishes %}
-<section class="sec" id="cardapio">
+<section class="sec" id="cardapio" aria-labelledby="t-cardapio">
   <div class="wrap">
     <div class="reveal">
       <div class="eyebrow">{{ copy.cardapio.eyebrow }}</div>
-      <div class="h2">{{ copy.cardapio.titulo|safe }}</div>
+      <h2 class="h2" id="t-cardapio">{{ copy.cardapio.titulo|safe }}</h2>
       {% if copy.cardapio.lead %}<p class="lead">{{ copy.cardapio.lead }}</p>{% endif %}
     </div>
     <div class="menu-grid">
       {% for d in dishes %}
       <div class="dish reveal{% if d.destaque %} hot{% endif %}">
         {% if d.tag %}<span class="star-tag">{{ d.tag }}</span>{% endif %}
-        {% if d.img %}<div class="photo" style="background-image:url('{{ d.img }}')"></div>{% endif %}
+        {# Foto do prato entra como background (o corte 4/3 do card depende
+           disso). `role="img"` + rótulo é o que dá a esse pixel o mesmo nome
+           que um <img alt> teria; a URL da foto o Google recebe pelo
+           `MenuItem.image` do JSON-LD. #}
+        {% if d.img %}<div class="photo" role="img" aria-label="{{ d.nome }}, prato do {{ site.nome }}" style="background-image:url('{{ d.img }}')"></div>{% endif %}
         <div class="body">
           <h3>{{ d.nome }}</h3>
           {% if d.descricao %}<p>{{ d.descricao }}</p>{% endif %}
@@ -669,16 +734,16 @@
 
 <!-- HISTÓRIA -->
 {% if team or gallery %}
-<section class="sec" id="historia" style="background:linear-gradient(180deg,transparent,rgba(42,23,13,.35),transparent)">
+<section class="sec" id="historia" aria-labelledby="t-historia" style="background:linear-gradient(180deg,transparent,rgba(42,23,13,.35),transparent)">
   <div class="wrap">
     <div class="story">
       <div class="reveal">
         <div class="eyebrow">{{ copy.historia.eyebrow }}</div>
-        <div class="h2">{{ copy.historia.titulo|safe }}</div>
+        <h2 class="h2" id="t-historia">{{ copy.historia.titulo|safe }}</h2>
         <p>{{ copy.historia.texto }}</p>
       </div>
       <div class="family reveal">
-        {% if gallery %}<img class="fam-photo" src="{{ gallery[0].img }}" alt="A equipe do {{ site.nome }}" loading="lazy">{% endif %}
+        {% if gallery %}<img class="fam-photo" src="{{ gallery[0].img }}" alt="{{ (gallery[0].legenda ~ ' — ' ~ site.nome) if gallery[0].legenda else ('A casa e a equipe do ' ~ site.nome) }}" loading="lazy" decoding="async">{% endif %}
         {% for m in team %}
         <div class="fam-card"><div class="av">{{ m.emoji }}</div><div><b>{{ m.nome }}</b>{% if m.papel %}<small>{{ m.papel }}</small>{% endif %}</div></div>
         {% endfor %}
@@ -694,12 +759,12 @@
    nota no `{% if reviews %}` fazia a prova social sumir junto com a lista
    vazia. A seção existe se houver qualquer um dos dois; sem nenhum, some. #}
 {% if reviews or site.nota_google %}
-<section class="sec" id="avaliacoes">
+<section class="sec" id="avaliacoes" aria-labelledby="t-avaliacoes">
   <div class="wrap">
     <div class="rev-head reveal{% if not reviews %} solo{% endif %}">
       <div>
         <div class="eyebrow">{{ copy.avaliacoes.eyebrow }}</div>
-        <div class="h2">{{ copy.avaliacoes.titulo|safe }}</div>
+        <h2 class="h2" id="t-avaliacoes">{{ copy.avaliacoes.titulo|safe }}</h2>
       </div>
       {# Nota real deste bar. Sem o dado, o selo some — exibir 4,9/39 fixo era
          publicar a reputação de um bar na página de outro. #}
@@ -725,11 +790,11 @@
 {% endif %}
 
 <!-- AO VIVO -->
-<section class="sec" id="aovivo" style="background:linear-gradient(180deg,transparent,rgba(42,23,13,.35),transparent)">
+<section class="sec" id="aovivo" aria-labelledby="t-aovivo" style="background:linear-gradient(180deg,transparent,rgba(42,23,13,.35),transparent)">
   <div class="wrap">
     <div class="reveal">
       <div class="eyebrow">{{ copy.clima.eyebrow }}</div>
-      <div class="h2">{{ copy.clima.titulo|safe }}</div>
+      <h2 class="h2" id="t-aovivo">{{ copy.clima.titulo|safe }}</h2>
     </div>
     <div class="live">
       {% for emoji, titulo, sub in copy.clima.cards %}
@@ -741,11 +806,11 @@
 
 {% if eventos %}
 <!-- AGENDA -->
-<section class="sec" id="agenda" style="background:linear-gradient(180deg,transparent,rgba(42,23,13,.35),transparent)">
+<section class="sec" id="agenda" aria-labelledby="t-agenda" style="background:linear-gradient(180deg,transparent,rgba(42,23,13,.35),transparent)">
   <div class="wrap">
     <div class="reveal">
       <div class="eyebrow">{{ copy.agenda.eyebrow }}</div>
-      <div class="h2">{{ copy.agenda.titulo|safe }}</div>
+      <h2 class="h2" id="t-agenda">{{ copy.agenda.titulo|safe }}</h2>
       <p class="lead">{{ copy.agenda.lead }}</p>
     </div>
     {% set meses = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'] %}
@@ -767,11 +832,11 @@
 
 <!-- GALERIA -->
 {% if gallery %}
-<section class="sec" id="galeria">
+<section class="sec" id="galeria" aria-labelledby="t-galeria">
   <div class="wrap">
     <div class="reveal">
       <div class="eyebrow">{{ copy.galeria.eyebrow }}</div>
-      <div class="h2">{{ copy.galeria.titulo|safe }}</div>
+      <h2 class="h2" id="t-galeria">{{ copy.galeria.titulo|safe }}</h2>
       {% if copy.galeria.lead %}<p class="lead">{{ copy.galeria.lead }}</p>{% endif %}
     </div>
     {# Teto de 6 fotos: a vitrine é amostra, não álbum. O bar com 16 fotos no
@@ -779,8 +844,10 @@
        As outras continuam gravadas — só não vão todas pra home. #}
     <div class="gallery reveal">
       {% for g in gallery %}{% if loop.index <= 6 %}
-      <figure onclick="lb('{{ g.img }}')">
-        <img src="{{ g.img }}" alt="{{ g.legenda or (site.nome ~ ' — momento') }}" loading="lazy">
+      {# `lb(this)` em vez de `lb(src)`: assim a foto ampliada leva junto o
+         mesmo alt da miniatura, em vez de cair no texto genérico do lightbox. #}
+      <figure onclick="lb(this)">
+        <img src="{{ g.img }}" alt="{{ (g.legenda ~ ' — ' ~ site.nome) if g.legenda else (site.nome ~ ' — foto da casa ' ~ loop.index) }}" loading="lazy" decoding="async">
       </figure>
       {% endif %}{% endfor %}
     </div>
@@ -789,12 +856,12 @@
 {% endif %}
 
 <!-- RESERVA -->
-<section class="sec" id="reservar" style="background:linear-gradient(180deg,transparent,rgba(42,23,13,.35),transparent)">
+<section class="sec" id="reservar" aria-labelledby="t-reservar" style="background:linear-gradient(180deg,transparent,rgba(42,23,13,.35),transparent)">
   <div class="wrap">
     <div class="reserva-wrap">
       <div class="reserva-side reveal">
         <div class="eyebrow">{{ copy.reserva.eyebrow }}</div>
-        <div class="h2">{{ copy.reserva.titulo|safe }}</div>
+        <h2 class="h2" id="t-reservar">{{ copy.reserva.titulo|safe }}</h2>
         <p class="lead">{{ copy.reserva.lead }}</p>
       </div>
       {% if not reservas_ativas %}
@@ -852,11 +919,11 @@
 </section>
 
 <!-- CONTATO -->
-<section class="sec" id="contato">
+<section class="sec" id="contato" aria-labelledby="t-contato">
   <div class="wrap">
     <div class="reveal">
       <div class="eyebrow">{{ copy.contato.eyebrow }}</div>
-      <div class="h2">{{ copy.contato.titulo|safe }}</div>
+      <h2 class="h2" id="t-contato">{{ copy.contato.titulo|safe }}</h2>
     </div>
     <div class="contact">
       <ul class="info-list reveal">
@@ -875,6 +942,8 @@
   </div>
 </section>
 
+</main>
+
 <footer>
   <div class="wrap">
     <div class="fneon">{{ site.nome }}</div>
@@ -892,7 +961,7 @@
 </footer>
 
 <div class="lightbox" id="lightbox" onclick="this.classList.remove('on')">
-  <span class="x">✕</span><img id="lightbox-img" src="" alt="Foto do {{ site.nome }}">
+  <span class="x">✕</span><img id="lightbox-img" src="" alt="Foto do {{ site.nome }}" decoding="async">
 </div>
 
 <a class="wa" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener" aria-label="WhatsApp">
@@ -961,7 +1030,15 @@
       .finally(function(){btn.disabled=false;btn.textContent=txt;});
     return false;
   }
-  function lb(src){var b=document.getElementById('lightbox');document.getElementById('lightbox-img').src=src;b.classList.add('on');}
+  // Aceita a <figure> clicada (leva o alt da miniatura junto) ou, por
+  // compatibilidade, a URL crua — assim nada quebra se alguém chamar lb('x.jpg').
+  function lb(origem){
+    var b=document.getElementById('lightbox'), alvo=document.getElementById('lightbox-img');
+    var mini=(origem && origem.querySelector) ? origem.querySelector('img') : null;
+    alvo.src = mini ? mini.src : origem;
+    if(mini && mini.alt) alvo.alt = mini.alt;
+    b.classList.add('on');
+  }
   document.addEventListener('keydown',function(e){if(e.key==='Escape')document.getElementById('lightbox').classList.remove('on');});
 (function(){
   // embers

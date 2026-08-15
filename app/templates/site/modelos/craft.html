@@ -40,19 +40,51 @@
 {# Card de compartilhamento só com a foto DESTE bar. Sem foto própria, nenhuma
    tag de imagem — mandar a capa de outro bar é pior que não ter card. #}
 {% set og_img = (hero_src if hero_src and hero_src.startswith('http') else (og_base ~ hero_src)) if hero_src else None %}
+{# Endereço único deste bar. O mesmo site responde em até três lugares (domínio
+   próprio, /bar/<slug> e o /s/<id> legado); `url_canonica` (app/utils/site_router.py,
+   passado pela view) elege UM. É o mesmo endereço usado nos `@id` do JSON-LD —
+   se divergisse, o robô veria duas entidades pro mesmo bar. O fallback só entra
+   se alguém renderizar este arquivo por fora da view. #}
+{% set url_pagina = url_canonica or (og_base ~ request.path) %}
 <title>{{ site.nome }} — {{ descritor }}</title>
-<meta name="description" content="{{ site.nome }} — {{ site.tagline or descritor }}">
+{# Descrição montada em app/utils/seo.py: 140–160 caracteres (onde o Google
+   corta) só com dado REAL do bar — nome, descritor, tagline, cidade, nota.
+   Quando o bar não tem nada além do nome o motor devolve None e a tag não sai:
+   o trecho que o Google monta lendo a página rende mais que frase genérica
+   nossa, e descrição inventada é sinal ruim pra busca e pra IA. #}
+{% if meta_desc %}
+<meta name="description" content="{{ meta_desc }}">
+{% endif %}
+<link rel="canonical" href="{{ url_pagina }}">
 {% if tenant and tenant.eh_demo %}
 {# Prévia comercial não autorizada: não pode ser indexada nem competir com o
    negócio real do dono no Google. Ver app/utils/demos.py. #}
 <meta name="robots" content="noindex,nofollow,noarchive">
+{% else %}
+{# Site de cliente: libera foto grande e trecho inteiro no resultado. É o que
+   destrava o painel com imagem e o parágrafo completo que as IAs citam. #}
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+{% endif %}
+{# ------------------------------------------------------------------ JSON-LD
+   O único formato de dado estruturado que Google, Bing, Perplexity e ChatGPT
+   leem pra extrair fato. Sem isto o bar existe como imagem bonita; com isto ele
+   existe como NAP + horário + nota + cardápio + agenda, que é o que vira
+   estrela no resultado, painel lateral e citação em resposta de IA.
+
+   O grafo inteiro é montado em app/utils/seo.py (um lugar só, igual pros 76
+   bares do banco) e chega aqui como string já serializada — com `<`, `>` e `&`
+   escapados na origem, então `|safe` não abre XSS via texto do dono do bar.
+   Campo ausente = chave ausente: o motor nunca inventa dado, e item de
+   demonstração (`exemplo=True`) fica de fora. #}
+{% if json_ld %}
+<script type="application/ld+json">{{ json_ld|safe }}</script>
 {% endif %}
 <meta property="og:site_name" content="{{ site.nome }}">
 <meta property="og:title" content="{{ site.nome }} — {{ descritor }}">
 <meta property="og:description" content="{{ site.tagline or descritor }}">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="pt_BR">
-<meta property="og:url" content="{{ og_base ~ request.path }}">
+<meta property="og:url" content="{{ url_pagina }}">
 {% if og_img %}
 <meta property="og:image" content="{{ og_img }}">
 <meta property="og:image:secure_url" content="{{ og_img }}">
@@ -63,6 +95,14 @@
 <meta name="twitter:description" content="{{ site.tagline or descritor }}">
 {% if og_img %}<meta name="twitter:image" content="{{ og_img }}">{% endif %}
 <meta name="theme-color" content="{{ tema_cor or '#0b0c0b' }}">
+{% if hero_src %}
+{# A capa é o LCP desta página. Como ela é `background-image` do `.hero-foto`
+   (o véu e o corte do hero dependem disso), o navegador só descobre a URL
+   depois de baixar e casar o CSS — o preload adianta o pedido e o
+   `fetchpriority` põe na frente da fila. É o equivalente ao
+   `fetchpriority="high"` que se põe num `<img>` de capa. #}
+<link rel="preload" as="image" href="{{ hero_src }}" fetchpriority="high">
+{% endif %}
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
 <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon-32.png') }}">
 <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
@@ -716,7 +756,10 @@
 </div>
 {% endif %}
 
-<nav>
+{# `aria-label` porque a página tem duas navegações (esta barra e o painel do
+   celular): sem nome, o leitor de tela anuncia "navegação" duas vezes e quem
+   navega por landmark não sabe em qual entrou. #}
+<nav aria-label="Navegação principal">
   <a href="#topo" class="marca" aria-label="{{ site.nome }} — topo da página">
     <span class="quadro" aria-hidden="true"></span>
     <span class="nome">{{ site.nome }}</span>
@@ -757,10 +800,16 @@
   <a class="painel-pe" href="{{ url_do_sistema() }}">Área do lojista → entrar no sistema</a>
 </div>
 
+{# Conteúdo da página num landmark só. Antes as seções eram filhas diretas do
+   <body>, o que deixa o leitor de tela sem "pular pro conteúdo" e o extrator
+   (Google, Perplexity) sem saber onde acaba a moldura e começa o site do bar.
+   Nav, aviso de prévia e rodapé ficam de fora — não são o conteúdo. #}
+<main id="conteudo">
+
 <!-- ============================ HERO ============================ -->
 <header class="hero" id="topo">
   {% if hero_src %}
-  <div class="hero-foto" style="background-image:url('{{ hero_src }}')" role="img" aria-label="{{ site.nome }}"></div>
+  <div class="hero-foto" style="background-image:url('{{ hero_src }}')" role="img" aria-label="{{ site.nome }} — foto de capa da casa"></div>
   {% else %}
   <div class="hero-fundo" aria-hidden="true"></div>
   {% endif %}
@@ -823,12 +872,15 @@
 
 <!-- ========================== TORNEIRAS ========================== -->
 {% if dishes %}
-<section class="sec" id="cardapio">
+{# `aria-labelledby` no id do próprio <h2>: a região passa a se anunciar com o
+   título que está na tela ("Na torneira hoje"), em vez de "região" sem nome.
+   O atributo entra DEPOIS do id — o teste de links casa `<section class="sec" id=`. #}
+<section class="sec" id="cardapio" aria-labelledby="t-cardapio">
   <div class="wrap">
     <div class="escala" aria-hidden="true"></div>
     <div class="sec-cab rev">
       <span class="eyebrow">{{ copy.cardapio.eyebrow }}</span>
-      <h2 class="h2">{{ copy.cardapio.titulo|safe }}</h2>
+      <h2 class="h2" id="t-cardapio">{{ copy.cardapio.titulo|safe }}</h2>
       {% if copy.cardapio.lead %}<p class="lead">{{ copy.cardapio.lead }}</p>{% endif %}
     </div>
     <ol class="taps">
@@ -839,7 +891,9 @@
         {% if d.descricao %}<p class="tap-desc">{{ d.descricao }}</p>{% endif %}
         {% if d.tag %}<span class="tap-tag">{{ d.tag }}</span>{% endif %}
         {% if d.img %}
-        <div class="tap-foto"><img src="{{ d.img }}" alt="{{ d.nome }}" loading="lazy"></div>
+        {# O alt leva o nome do bar junto: "Chope IPA" sozinho não diz de quem é
+           a foto pra quem usa leitor de tela nem pro Google Imagens. #}
+        <div class="tap-foto"><img src="{{ d.img }}" alt="{{ d.nome }} — {{ site.nome }}" loading="lazy" decoding="async"></div>
         {% endif %}
       </li>
       {% endfor %}
@@ -850,12 +904,12 @@
 
 <!-- ========================== PROMOÇÕES ========================== -->
 {% if promocoes %}
-<section class="sec" id="promocoes" style="background:var(--bg-2)">
+<section class="sec" id="promocoes" aria-labelledby="t-promocoes" style="background:var(--bg-2)">
   <div class="wrap">
     <div class="escala" aria-hidden="true"></div>
     <div class="sec-cab rev">
       <span class="eyebrow">{{ copy.promocoes.eyebrow }}</span>
-      <h2 class="h2">{{ copy.promocoes.titulo|safe }}</h2>
+      <h2 class="h2" id="t-promocoes">{{ copy.promocoes.titulo|safe }}</h2>
     </div>
     <ul class="quadro">
       {% for p in promocoes %}
@@ -878,12 +932,12 @@
 
 <!-- =========================== AGENDA =========================== -->
 {% if eventos %}
-<section class="sec" id="agenda">
+<section class="sec" id="agenda" aria-labelledby="t-agenda">
   <div class="wrap">
     <div class="escala" aria-hidden="true"></div>
     <div class="sec-cab rev">
       <span class="eyebrow">{{ copy.agenda.eyebrow }}</span>
-      <h2 class="h2">{{ copy.agenda.titulo|safe }}</h2>
+      <h2 class="h2" id="t-agenda">{{ copy.agenda.titulo|safe }}</h2>
       {% if copy.agenda.lead %}<p class="lead">{{ copy.agenda.lead }}</p>{% endif %}
     </div>
     {% set dias = ['DOM','SEG','TER','QUA','QUI','SEX','SÁB'] %}
@@ -906,12 +960,12 @@
 {% endif %}
 
 <!-- ============================ A CASA ============================ -->
-<section class="sec" id="casa" style="background:var(--bg-2)">
+<section class="sec" id="casa" aria-labelledby="t-casa" style="background:var(--bg-2)">
   <div class="wrap">
     <div class="escala" aria-hidden="true"></div>
     <div class="sec-cab rev">
       <span class="eyebrow">{{ copy.clima.eyebrow }}</span>
-      <h2 class="h2">{{ copy.clima.titulo|safe }}</h2>
+      <h2 class="h2" id="t-casa">{{ copy.clima.titulo|safe }}</h2>
     </div>
     <div class="casa">
       {% for emoji, titulo, sub in copy.clima.cards %}
@@ -926,14 +980,14 @@
 
 <!-- =========================== ORIGEM =========================== -->
 {% if team or gallery %}
-<section class="sec" id="historia">
+<section class="sec" id="historia" aria-labelledby="t-historia">
   <div class="wrap">
     <div class="escala" aria-hidden="true"></div>
     <div class="historia">
       <div class="rev">
         <div class="sec-cab" style="margin-bottom:0">
           <span class="eyebrow">{{ copy.historia.eyebrow }}</span>
-          <h2 class="h2">{{ copy.historia.titulo|safe }}</h2>
+          <h2 class="h2" id="t-historia">{{ copy.historia.titulo|safe }}</h2>
         </div>
         <p>{{ copy.historia.texto }}</p>
         {% if team %}
@@ -949,7 +1003,9 @@
       </div>
       {% if gallery %}
       <figure class="retrato rev">
-        <img src="{{ gallery[0].img }}" alt="{{ gallery[0].legenda or (site.nome ~ ' por dentro') }}" loading="lazy">
+        <img src="{{ gallery[0].img }}"
+             alt="{{ (gallery[0].legenda ~ ' — ' ~ site.nome) if gallery[0].legenda else (site.nome ~ ' por dentro') }}"
+             loading="lazy" decoding="async">
       </figure>
       {% endif %}
     </div>
@@ -964,12 +1020,12 @@
    prova social mais forte que tem. A seção existe se houver qualquer um dos dois;
    sem nenhum, some por completo e o invariante de seção órfã continua de pé. #}
 {% if reviews or site.nota_google %}
-<section class="sec" id="avaliacoes" style="background:var(--bg-2)">
+<section class="sec" id="avaliacoes" aria-labelledby="t-avaliacoes" style="background:var(--bg-2)">
   <div class="wrap">
     <div class="escala" aria-hidden="true"></div>
     <div class="sec-cab rev">
       <span class="eyebrow">{{ copy.avaliacoes.eyebrow }}</span>
-      <h2 class="h2">{{ copy.avaliacoes.titulo|safe }}</h2>
+      <h2 class="h2" id="t-avaliacoes">{{ copy.avaliacoes.titulo|safe }}</h2>
     </div>
     {# Nota real deste bar. Sem o dado, só este bloco some — exibir nota fixa
        era publicar a reputação de um bar na página de outro. #}
@@ -1010,12 +1066,12 @@
 
 <!-- =========================== GALERIA =========================== -->
 {% if gallery %}
-<section class="sec" id="galeria">
+<section class="sec" id="galeria" aria-labelledby="t-galeria">
   <div class="wrap">
     <div class="escala" aria-hidden="true"></div>
     <div class="sec-cab rev">
       <span class="eyebrow">{{ copy.galeria.eyebrow }}</span>
-      <h2 class="h2">{{ copy.galeria.titulo|safe }}</h2>
+      <h2 class="h2" id="t-galeria">{{ copy.galeria.titulo|safe }}</h2>
       {% if copy.galeria.lead %}<p class="lead">{{ copy.galeria.lead }}</p>{% endif %}
     </div>
     {# No máximo 6. O banco deste bar tem 16 fotos; despejar todas empilhadas
@@ -1025,7 +1081,9 @@
       {% for g in gallery %}{% if loop.index <= 6 %}
       <figure class="rev">
         <span class="chapa-num" aria-hidden="true">{{ '%02d' % loop.index }}</span>
-        <img src="{{ g.img }}" alt="{{ g.legenda or (site.nome ~ ' — foto') }}" loading="lazy">
+        <img src="{{ g.img }}"
+             alt="{{ (g.legenda ~ ' — ' ~ site.nome) if g.legenda else (site.nome ~ ' — foto ' ~ loop.index ~ ' da casa') }}"
+             loading="lazy" decoding="async">
         {% if g.legenda %}<figcaption>{{ g.legenda }}</figcaption>{% endif %}
       </figure>
       {% endif %}{% endfor %}
@@ -1041,14 +1099,14 @@
 {% endif %}
 
 <!-- =========================== RESERVA =========================== -->
-<section class="sec" id="reservar" style="background:var(--bg-2)">
+<section class="sec" id="reservar" aria-labelledby="t-reservar" style="background:var(--bg-2)">
   <div class="wrap">
     <div class="escala" aria-hidden="true"></div>
     <div class="reserva">
       <div class="rev">
         <div class="sec-cab" style="margin-bottom:0">
           <span class="eyebrow">{{ copy.reserva.eyebrow }}</span>
-          <h2 class="h2">{{ copy.reserva.titulo|safe }}</h2>
+          <h2 class="h2" id="t-reservar">{{ copy.reserva.titulo|safe }}</h2>
         </div>
         {% if copy.reserva.lead %}<p class="lead">{{ copy.reserva.lead }}</p>{% endif %}
       </div>
@@ -1112,12 +1170,12 @@
 </section>
 
 <!-- =========================== CONTATO =========================== -->
-<section class="sec" id="contato">
+<section class="sec" id="contato" aria-labelledby="t-contato">
   <div class="wrap">
     <div class="escala" aria-hidden="true"></div>
     <div class="sec-cab rev">
       <span class="eyebrow">{{ copy.contato.eyebrow }}</span>
-      <h2 class="h2">{{ copy.contato.titulo|safe }}</h2>
+      <h2 class="h2" id="t-contato">{{ copy.contato.titulo|safe }}</h2>
     </div>
     <div class="contato">
       {# Bar recém-criado não tem nenhum destes campos: a lista inteira sai, em
@@ -1144,6 +1202,8 @@
     </div>
   </div>
 </section>
+
+</main>
 
 <footer>
   <div class="wrap">

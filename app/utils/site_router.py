@@ -103,6 +103,32 @@ def slug_unico(nome, preferido=None):
     return slug
 
 
+def url_canonica(rest):
+    """Endereço único e absoluto do site deste bar.
+
+    Um mesmo bar responde em até três lugares (domínio próprio, /bar/<slug> e o
+    /s/<id> legado). Para o Google isso é conteúdo duplicado, e para o JSON-LD é
+    pior: os `@id` do grafo mudariam conforme por onde o robô entrou, e o mesmo
+    bar viraria entidades diferentes. Aqui existe UMA resposta, a mesma no
+    `<link rel=canonical>`, no grafo e no sitemap.
+
+    Domínio próprio ganha sempre: é o endereço que o dono divulga e o que ele
+    paga pra ser dele. Sem domínio, /bar/<slug> — que é endereço definitivo, não
+    provisório. O /s/<id> só aparece pra tenant sem slug (linha antiga do banco),
+    e é o último recurso justamente porque o link não diz nada sobre o bar.
+    """
+    produto = dominio_do_produto()
+    if rest is None:
+        return f'https://{produto}/'
+    dominio = normalizar_host(getattr(rest, 'dominio', None))
+    if dominio:
+        return f'https://{dominio}/'
+    slug = (getattr(rest, 'slug', None) or '').strip()
+    if slug:
+        return f'https://{produto}/bar/{slug}'
+    return f'https://{produto}/s/{rest.id}'
+
+
 def url_do_sistema(caminho='/auth/login'):
     """Endereço absoluto do sistema, no domínio do produto.
 

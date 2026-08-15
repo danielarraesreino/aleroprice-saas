@@ -46,20 +46,46 @@
 {% set hero_src = site.hero_foto if (site.hero_foto and site.hero_foto.startswith('http')) else (url_for('static', filename=site.hero_foto) if site.hero_foto else None) %}
 {% set og_base = 'https://' ~ request.host %}
 {% set og_img = (hero_src if (hero_src and hero_src.startswith('http')) else ((og_base ~ hero_src) if hero_src else None)) %}
+{# Endereço único desta casa. O mesmo site responde em até três lugares (domínio
+   próprio, /bar/<slug> e o /s/<id> legado); `url_canonica`
+   (app/utils/site_router.py, passado pela view) elege UM. É o mesmo endereço
+   que assina os `@id` do JSON-LD — se divergisse, o robô veria duas entidades
+   pro mesmo bar. O fallback só entra se alguém renderizar este arquivo por fora
+   da view. #}
+{% set url_pagina = url_canonica or (og_base ~ request.path) %}
 
 <title>{{ site.nome }}{% if ano %} · desde {{ ano }}{% endif %} — {{ descritor }}</title>
-<meta name="description" content="{{ site.nome }} — {{ site.tagline or descritor }}">
+{# Descrição montada em app/utils/seo.py: 140–160 caracteres (onde o Google
+   corta), só com dado real desta casa. Bar que só tem nome cadastrado não
+   recebe tag nenhuma, de propósito — o trecho que o Google monta lendo a
+   página rende mais que frase genérica nossa, e descrição inventada é sinal
+   ruim tanto pra busca quanto pra IA. #}
+{% if meta_desc %}
+<meta name="description" content="{{ meta_desc }}">
+{% endif %}
+<link rel="canonical" href="{{ url_pagina }}">
 {% if tenant and tenant.eh_demo %}
 {# Prévia comercial não autorizada: não pode ser indexada nem competir com o
-   negócio real do dono no Google. Ver app/utils/demos.py. #}
+   negócio real do dono no Google. Ver app/utils/demos.py.
+   O canonical acima existe do mesmo jeito: `noindex` tira a página do índice,
+   não tira o dever de dizer qual é o endereço dela. #}
 <meta name="robots" content="noindex,nofollow,noarchive">
+{% endif %}
+{# Dados estruturados (JSON-LD). É o único formato que Google, Bing, Perplexity
+   e ChatGPT leem pra extrair fato — nome, endereço, telefone, horário, nota,
+   cardápio, agenda. Sem isto a casa existe como imagem bonita; com isto ela
+   existe como dado. Montado em app/utils/seo.py, um grafo só pra todo tenant.
+   Campo ausente = chave ausente: o motor nunca inventa dado, e item de
+   demonstração (`exemplo=True`) fica de fora. #}
+{% if json_ld %}
+<script type="application/ld+json">{{ json_ld|safe }}</script>
 {% endif %}
 <meta property="og:site_name" content="{{ site.nome }}">
 <meta property="og:title" content="{{ site.nome }} — {{ descritor }}">
 <meta property="og:description" content="{{ site.tagline or descritor }}">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="pt_BR">
-<meta property="og:url" content="{{ og_base ~ request.path }}">
+<meta property="og:url" content="{{ url_pagina }}">
 {# Card de compartilhamento só com a foto DESTE bar. #}
 {% if og_img %}
 <meta property="og:image" content="{{ og_img }}">
@@ -689,7 +715,7 @@
 {% endif %}
 
 <div class="topo-fixo">
-<nav class="barra">
+<nav class="barra" aria-label="Navegação principal">
   <div class="env">
     <a href="#topo" class="marca">
       <b>{{ site.nome }}</b>
@@ -731,6 +757,12 @@
 </div>
 
 <div class="azulejo" aria-hidden="true"></div>
+
+{# Conteúdo da página num landmark só. Antes as seções eram filhas diretas do
+   <body>, o que deixa o leitor de tela sem "pular pro conteúdo" e o extrator
+   (Google, Perplexity) sem saber onde acaba a moldura e começa o site do bar.
+   Barra, aviso de prévia e rodapé ficam de fora — não são o conteúdo. #}
+<main id="conteudo">
 
 <header class="capa" id="topo">
   <div class="env">
@@ -782,7 +814,11 @@
        o translate do Motion não come a inclinação da foto. #}
     <div class="capa-foto" data-hero>
       <figure class="moldura torta-a">
-        <img src="{{ hero_src }}" alt="{{ site.nome }}{% if site.cidade_uf %} — {{ site.cidade_uf }}{% endif %}" fetchpriority="high">
+        {# Esta é a LCP da página: nada de `loading="lazy"` aqui. `fetchpriority`
+           manda o navegador buscá-la antes das fontes e do resto. #}
+        <img src="{{ hero_src }}"
+             alt="{{ site.nome }} — foto de capa da casa{% if ano %}, aberta desde {{ ano }}{% endif %}{% if site.cidade_uf %}, em {{ site.cidade_uf }}{% endif %}"
+             fetchpriority="high" decoding="async">
         <figcaption>{{ site.nome }}{% if ano %} · desde {{ ano }}{% elif site.cidade_uf %} · {{ site.cidade_uf }}{% endif %}</figcaption>
       </figure>
     </div>
@@ -804,13 +840,13 @@
 
 {% if tem_historia %}
 <!-- A CASA / HISTÓRIA — vem antes do cardápio: é o que esta casa tem e as novas não têm -->
-<section class="sec" id="historia">
+<section class="sec" id="historia" aria-labelledby="tit-historia">
   {# Sem ano, a marca d'água vira o monograma da casa — nunca um ano inventado. #}
   <span class="marca-dagua" aria-hidden="true">{{ ano if ano else ((site.nome or '·')[0]|upper) }}</span>
   <div class="env">
     <div class="cabeca revelar">
       <div class="eyebrow">{{ copy.historia.eyebrow }}</div>
-      <h2 class="h2">{{ copy.historia.titulo|safe }}</h2>
+      <h2 class="h2" id="tit-historia">{{ copy.historia.titulo|safe }}</h2>
       <div class="filete"></div>
       <p class="historia-texto">{{ copy.historia.texto }}</p>
       {% if site.kicker %}<p class="historia-texto"><em>{{ site.kicker }}</em></p>{% endif %}
@@ -842,7 +878,9 @@
     {# Mesmo motivo do hero: a inclinação é do quadro, o movimento é do invólucro. #}
     <div class="album-historia revelar">
       <figure class="moldura torta-b">
-        <img src="{{ gallery[0].img }}" alt="{{ gallery[0].legenda or (site.nome ~ ' — a casa') }}" loading="lazy">
+        <img src="{{ gallery[0].img }}"
+             alt="{{ site.nome }} — {{ gallery[0].legenda or 'a casa por dentro' }}"
+             loading="lazy" decoding="async">
         <figcaption>{{ gallery[0].legenda or ('Na parede do ' ~ site.nome) }}</figcaption>
       </figure>
     </div>
@@ -879,11 +917,11 @@
 
 {% if dishes %}
 <!-- CARDÁPIO — lista de tabuleta, não vitrine de fotos -->
-<section class="sec" id="cardapio">
+<section class="sec" id="cardapio" aria-labelledby="tit-cardapio">
   <div class="env">
     <div class="cabeca revelar">
       <div class="eyebrow">{{ copy.cardapio.eyebrow }}</div>
-      <h2 class="h2">{{ copy.cardapio.titulo|safe }}</h2>
+      <h2 class="h2" id="tit-cardapio">{{ copy.cardapio.titulo|safe }}</h2>
       <div class="filete"></div>
       {% if copy.cardapio.lead %}<p class="lead">{{ copy.cardapio.lead }}</p>{% endif %}
     </div>
@@ -891,7 +929,9 @@
       {% for d in dishes %}
       <li class="prato{% if d.destaque %} daqui{% endif %}">
         {% if d.img %}
-        <div class="mini"><img src="{{ d.img }}" alt="{{ d.nome }}" loading="lazy"></div>
+        <div class="mini"><img src="{{ d.img }}"
+                               alt="{{ d.nome }} — prato do {{ site.nome }}"
+                               loading="lazy" decoding="async"></div>
         {% endif %}
         <div class="txt">
           <h3>{{ d.nome }}</h3>
@@ -907,11 +947,11 @@
 
 {% if promocoes %}
 <!-- PROMOÇÕES — cartazes colados na parede -->
-<section class="sec" id="promocoes">
+<section class="sec" id="promocoes" aria-labelledby="tit-promocoes">
   <div class="env">
     <div class="cabeca revelar">
       <div class="eyebrow">{{ copy.promocoes.eyebrow }}</div>
-      <h2 class="h2">{{ copy.promocoes.titulo|safe }}</h2>
+      <h2 class="h2" id="tit-promocoes">{{ copy.promocoes.titulo|safe }}</h2>
       <div class="filete"></div>
     </div>
     <div class="cartazes revelar">
@@ -936,11 +976,11 @@
 
 {% if eventos %}
 <!-- AGENDA — calendário de parede -->
-<section class="sec" id="agenda">
+<section class="sec" id="agenda" aria-labelledby="tit-agenda">
   <div class="env">
     <div class="cabeca revelar">
       <div class="eyebrow">{{ copy.agenda.eyebrow }}</div>
-      <h2 class="h2">{{ copy.agenda.titulo|safe }}</h2>
+      <h2 class="h2" id="tit-agenda">{{ copy.agenda.titulo|safe }}</h2>
       <div class="filete"></div>
       {% if copy.agenda.lead %}<p class="lead">{{ copy.agenda.lead }}</p>{% endif %}
     </div>
@@ -970,11 +1010,11 @@
    menu junto — o invariante de seção órfã continua de pé. #}
 {% if reviews or site.nota_google %}
 <!-- AVALIAÇÕES — placa de reputação + livro de visitas -->
-<section class="sec" id="avaliacoes">
+<section class="sec" id="avaliacoes" aria-labelledby="tit-avaliacoes">
   <div class="env">
     <div class="cabeca revelar">
       <div class="eyebrow">{{ copy.avaliacoes.eyebrow }}</div>
-      <h2 class="h2">{{ copy.avaliacoes.titulo|safe }}</h2>
+      <h2 class="h2" id="tit-avaliacoes">{{ copy.avaliacoes.titulo|safe }}</h2>
       <div class="filete"></div>
     </div>
 
@@ -1019,11 +1059,11 @@
 
 {% if gallery %}
 <!-- ÁLBUM DA CASA -->
-<section class="sec" id="galeria">
+<section class="sec" id="galeria" aria-labelledby="tit-galeria">
   <div class="env">
     <div class="cabeca revelar">
       <div class="eyebrow">{{ copy.galeria.eyebrow }}</div>
-      <h2 class="h2">{{ copy.galeria.titulo|safe }}</h2>
+      <h2 class="h2" id="tit-galeria">{{ copy.galeria.titulo|safe }}</h2>
       <div class="filete"></div>
       {% if copy.galeria.lead %}<p class="lead">{{ copy.galeria.lead }}</p>{% endif %}
     </div>
@@ -1037,7 +1077,9 @@
               aria-label="Ampliar foto{% if g.legenda %}: {{ g.legenda }}{% endif %}"
               onclick="ampliar('{{ g.img }}')"
               onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();ampliar('{{ g.img }}')}">
-        <img src="{{ g.img }}" alt="{{ g.legenda or (site.nome ~ ' — foto da casa') }}" loading="lazy">
+        <img src="{{ g.img }}"
+             alt="{{ site.nome }} — {{ g.legenda or 'foto da casa' }}"
+             loading="lazy" decoding="async">
         {% if g.legenda %}<figcaption>{{ g.legenda }}</figcaption>{% endif %}
       </figure>
       {% endif %}
@@ -1051,11 +1093,11 @@
 {% endif %}
 
 <!-- RESERVA -->
-<section class="sec" id="reservar">
+<section class="sec" id="reservar" aria-labelledby="tit-reservar">
   <div class="env">
     <div class="cabeca revelar">
       <div class="eyebrow">{{ copy.reserva.eyebrow }}</div>
-      <h2 class="h2">{{ copy.reserva.titulo|safe }}</h2>
+      <h2 class="h2" id="tit-reservar">{{ copy.reserva.titulo|safe }}</h2>
       <div class="filete"></div>
     </div>
     <div class="reserva-grade">
@@ -1117,11 +1159,11 @@
 </section>
 
 <!-- CONTATO -->
-<section class="sec" id="contato">
+<section class="sec" id="contato" aria-labelledby="tit-contato">
   <div class="env">
     <div class="cabeca revelar">
       <div class="eyebrow">{{ copy.contato.eyebrow }}</div>
-      <h2 class="h2">{{ copy.contato.titulo|safe }}</h2>
+      <h2 class="h2" id="tit-contato">{{ copy.contato.titulo|safe }}</h2>
       <div class="filete"></div>
     </div>
     <div class="contato-grade">
@@ -1144,6 +1186,8 @@
     </div>
   </div>
 </section>
+
+</main>
 
 <div class="azulejo" aria-hidden="true"></div>
 
@@ -1177,7 +1221,8 @@
 {% if gallery %}
 <div class="lupa" id="lupa" onclick="this.classList.remove('on')">
   <span class="x" aria-hidden="true">✕</span>
-  <img id="lupa-img" src="" alt="Foto ampliada do {{ site.nome }}">
+  <img id="lupa-img" src="" alt="Foto ampliada da casa — {{ site.nome }}"
+       loading="lazy" decoding="async">
 </div>
 {% endif %}
 

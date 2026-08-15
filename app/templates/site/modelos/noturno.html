@@ -23,8 +23,38 @@
 {% set hero_src = hero_raw if (hero_raw and (hero_raw.startswith('http://') or hero_raw.startswith('https://')))
                   else (url_for('static', filename=hero_raw) if hero_raw else '') %}
 <title>{{ nome_bar }} — {{ descritor }}</title>
-<meta name="description" content="{{ nome_bar }} — {{ site.tagline or descritor }}">
 {% set og_base = 'https://' ~ request.host %}
+{# ---------------------------------------------------------------------------
+   SINAL PARA BUSCA E PARA IA
+   O cartaz é para quem olha; este bloco é para quem lê por máquina — Google,
+   AI Overview, Perplexity, ChatGPT. Os três extraem dado estruturado, não
+   parágrafo bonito. Tudo aqui vem pronto da view (app/utils/seo.py): o
+   template não monta dado nem inventa default, só publica o que existe.
+   --------------------------------------------------------------------------- #}
+{# Endereço único do bar. O mesmo site responde em até três lugares (domínio
+   próprio, /bar/<slug>, /s/<id> legado) e sem canonical o Google trata isso
+   como conteúdo duplicado. `url_canonica` vem da view e é a MESMA string usada
+   nos @id do JSON-LD — se as duas divergissem, o grafo apontaria para uma
+   página e o canonical para outra. Prévia (eh_demo) é noindex logo abaixo, mas
+   o canonical existe do mesmo jeito: noindex diz "não me liste", canonical diz
+   "esta é a versão boa" — são respostas a perguntas diferentes. #}
+{% set url_deste_bar = url_canonica or (og_base ~ request.path) %}
+<link rel="canonical" href="{{ url_deste_bar }}">
+{# Descrição do resultado de busca. Só sai quando `meta_descricao()` conseguiu
+   montar algo com dado real do bar; sem isso a tag some, porque descrição
+   genérica rende menos que deixar o Google montar o trecho a partir da
+   página. Ver o docstring de app/utils/seo.py:meta_descricao. #}
+{% if meta_desc %}<meta name="description" content="{{ meta_desc }}">{% endif %}
+{# JSON-LD: o único formato que Google recomenda e o que as IAs leem. O grafo
+   (Restaurant/BarOrPub, AggregateRating, Menu, Review, Event, BreadcrumbList,
+   WebSite) é montado num lugar só para os 76 bares. `serializar()` já escapa
+   <, > e & — daí o |safe não reabrir buraco de XSS com texto do dono do bar. #}
+{% if json_ld %}<script type="application/ld+json">{{ json_ld|safe }}</script>{% endif %}
+{# A capa é o LCP desta página, e ela é background-image (o hero é um cartaz
+   em camadas, não uma <img>). Como o navegador só descobre background depois
+   de baixar e casar o CSS, o preload é o que adianta a maior pintura da tela —
+   é o equivalente ao fetchpriority="high" que se poria numa <img> de capa. #}
+{% if hero_src %}<link rel="preload" as="image" href="{{ hero_src }}" fetchpriority="high">{% endif %}
 {# Card de compartilhamento só com a foto DESTE bar. Sem foto própria, nenhuma
    tag de imagem — mandar a capa de outro bar é pior que não ter card. #}
 {% set og_img = (hero_src if hero_src.startswith('http') else og_base ~ hero_src) if hero_src else None %}
@@ -712,10 +742,15 @@
 
 <div class="barra">
   <a href="#topo" class="marca">
-    <img src="{{ url_for('static', filename='img/favicon-64.png') }}" alt="">
+    <img src="{{ url_for('static', filename='img/favicon-64.png') }}"
+         alt="Marca do {{ nome_bar }}" loading="lazy" decoding="async">
     <span>{{ nome_bar|upper }}</span>
   </a>
-  <div class="links">
+  {# <nav> de verdade, não <div>: é a navegação principal da página e precisa
+     ser um landmark para quem usa leitor de tela. O aria-label distingue esta
+     barra do menu do painel — dois <nav> sem nome viram "navegação" e
+     "navegação" na lista de landmarks, e o usuário não sabe qual é qual. #}
+  <nav class="links" aria-label="Seções desta página">
     {% if eventos %}<a href="#agenda">Agenda</a>{% endif %}
     {% if promocoes %}<a href="#promocoes">Promoções</a>{% endif %}
     {% if dishes %}<a href="#cardapio">Cardápio</a>{% endif %}
@@ -726,7 +761,7 @@
     {% if team or gallery %}<a href="#historia">A casa</a>{% endif %}
     <a href="#reservar">Reservar</a>
     <a href="#contato">Contato</a>
-  </div>
+  </nav>
   <div class="barra-fim">
     {% if eventos %}<span class="aovivo"><span class="bola"></span>Ao vivo</span>{% endif %}
     <button class="icone" id="btn-tema" onclick="trocarTema()" aria-label="Alternar tema claro e escuro" title="Alternar tema"><span id="ic-tema">☾</span></button>
@@ -739,7 +774,7 @@
     <span class="rot">{{ nome_bar|upper }}</span>
     <button class="icone" onclick="abrirMenu()" aria-label="Fechar menu">✕</button>
   </div>
-  <nav>
+  <nav aria-label="Menu do site">
     {% if eventos %}<a href="#agenda" onclick="abrirMenu()">Agenda</a>{% endif %}
     {% if promocoes %}<a href="#promocoes" onclick="abrirMenu()">Promoções</a>{% endif %}
     {% if dishes %}<a href="#cardapio" onclick="abrirMenu()">Cardápio</a>{% endif %}
@@ -755,6 +790,12 @@
 {# ============================ HERO / CARTAZ ============================ #}
 {% set meses = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'] %}
 {% set semana = ['DOM','SEG','TER','QUA','QUI','SEX','SÁB'] %}
+{# <main> começa no cartaz e termina no contato. A barra fixa, o painel de menu
+   e o rodapé ficam de fora — é o que permite "pular para o conteúdo" e o que
+   faz o extrator de artigo (o mesmo que as IAs usam) achar o miolo da página
+   sem levar junto o menu repetido em toda seção. O hero entra aqui dentro de
+   propósito: o <h1> é conteúdo, não cabeçalho de site. #}
+<main>
 <header class="topo" id="topo">
   {# Bar recém-criado ainda não tem capa: sem o guard o hero vira retângulo
      vazio (e url_for com filename=None estoura BuildError). #}
@@ -819,12 +860,22 @@
 
 {# ====================== LINE-UP: a agenda é o herói ====================== #}
 {% if eventos %}
-<section class="sec" id="agenda">
+{# O título de seção é <h2>, não <div class="ttl">.
+   Era div em todas as nove seções, e isso deixava a página com um <h1> no hero
+   e <h3> nos itens, sem nenhum nível 2 no meio: o mesmo buraco de sumário que o
+   Café Container tem (41 <h2> soltos, zero <h1>), só que pelo avesso. Robô de
+   busca e leitor de tela montam o índice da página pelos headings; pulando o
+   nível 2, as seções não existem nesse índice.
+   Visualmente nada muda: o reset `*{margin:0;padding:0}` zera a margem que o
+   <h2> traria, e toda a aparência já vinha da classe .ttl, que fica.
+   O `aria-labelledby` aponta pro id do próprio <h2>, então a seção é anunciada
+   pelo nome ("Agenda") em vez de "região". #}
+<section class="sec" id="agenda" aria-labelledby="titulo-agenda">
   <div class="wrap">
     <div class="cab rv">
       <div>
         <span class="selo">{{ copy.agenda.eyebrow }}</span>
-        <div class="ttl">{{ copy.agenda.titulo|safe }}</div>
+        <h2 class="ttl" id="titulo-agenda">{{ copy.agenda.titulo|safe }}</h2>
         {% if copy.agenda.lead %}<p class="lead">{{ copy.agenda.lead }}</p>{% endif %}
       </div>
     </div>
@@ -850,11 +901,11 @@
 
 {# ============================== PROMOÇÕES ============================== #}
 {% if promocoes %}
-<section class="sec" id="promocoes" data-band="alt">
+<section class="sec" id="promocoes" data-band="alt" aria-labelledby="titulo-promocoes">
   <div class="wrap">
     <div class="rv">
       <span class="selo">{{ copy.promocoes.eyebrow }}</span>
-      <div class="ttl">{{ copy.promocoes.titulo|safe }}</div>
+      <h2 class="ttl" id="titulo-promocoes">{{ copy.promocoes.titulo|safe }}</h2>
     </div>
     <div class="canhotos rv">
       {% for p in promocoes %}
@@ -876,17 +927,22 @@
 
 {# =============================== CARDÁPIO =============================== #}
 {% if dishes %}
-<section class="sec" id="cardapio">
+<section class="sec" id="cardapio" aria-labelledby="titulo-cardapio">
   <div class="wrap">
     <div class="rv">
       <span class="selo">{{ copy.cardapio.eyebrow }}</span>
-      <div class="ttl">{{ copy.cardapio.titulo|safe }}</div>
+      <h2 class="ttl" id="titulo-cardapio">{{ copy.cardapio.titulo|safe }}</h2>
       {% if copy.cardapio.lead %}<p class="lead">{{ copy.cardapio.lead }}</p>{% endif %}
     </div>
     <div class="balcao rv">
       {% for d in dishes %}
       <div class="prato{% if d.destaque %} top{% endif %}">
-        {% if d.img %}<img class="miniatura" src="{{ d.img }}" alt="{{ d.nome }}" loading="lazy">{% endif %}
+        {# alt com o nome do prato E o do bar: fora da página a imagem viaja
+           sozinha (Google Imagens, resumo de IA), e "Costela defumada" sem dono
+           não diz de que casa é. #}
+        {% if d.img %}<img class="miniatura" src="{{ d.img }}"
+             alt="{{ d.nome }} — prato do {{ nome_bar }}"
+             loading="lazy" decoding="async">{% endif %}
         <div>
           <div class="prato-topo">
             <h3>{{ d.nome }}</h3>
@@ -902,11 +958,11 @@
 {% endif %}
 
 {# ============================ CLIMA DA CASA ============================ #}
-<section class="sec" id="aovivo" data-band="alt">
+<section class="sec" id="aovivo" data-band="alt" aria-labelledby="titulo-aovivo">
   <div class="wrap">
     <div class="rv">
       <span class="selo">{{ copy.clima.eyebrow }}</span>
-      <div class="ttl">{{ copy.clima.titulo|safe }}</div>
+      <h2 class="ttl" id="titulo-aovivo">{{ copy.clima.titulo|safe }}</h2>
     </div>
     <div class="clima rv">
       {% for emoji, titulo, sub in copy.clima.cards %}
@@ -923,11 +979,11 @@
 
 {# =============================== GALERIA =============================== #}
 {% if gallery %}
-<section class="sec" id="galeria">
+<section class="sec" id="galeria" aria-labelledby="titulo-galeria">
   <div class="wrap">
     <div class="rv">
       <span class="selo">{{ copy.galeria.eyebrow }}</span>
-      <div class="ttl">{{ copy.galeria.titulo|safe }}</div>
+      <h2 class="ttl" id="titulo-galeria">{{ copy.galeria.titulo|safe }}</h2>
       {% if copy.galeria.lead %}<p class="lead">{{ copy.galeria.lead }}</p>{% endif %}
       {% if gallery|length > 6 %}<p class="acervo">6 de {{ gallery|length }} fotos da casa</p>{% endif %}
     </div>
@@ -938,8 +994,9 @@
       {% for g in gallery %}
       {% if loop.index <= 6 %}
       <figure>
-        <img src="{{ g.img }}" alt="{{ g.legenda or (nome_bar ~ ' — foto da casa') }}" loading="lazy"
-             onclick="ampliar('{{ g.img }}')">
+        {% set legenda_foto = nome_bar ~ ' — ' ~ (g.legenda or 'ambiente da casa') %}
+        <img src="{{ g.img }}" alt="{{ legenda_foto }}" loading="lazy" decoding="async"
+             onclick="ampliar('{{ g.img }}', this.alt)">
         <figcaption><span class="idx">{{ '%02d' % loop.index }}</span>{{ g.legenda or nome_bar }}</figcaption>
       </figure>
       {% endif %}
@@ -961,12 +1018,12 @@
 {# String("4,7") -> 4.7 pro contador. |float devolve 0 se vier lixo, não estoura. #}
 {% set nota_num = (site.nota_google|string|replace(',', '.')|float) if site.nota_google else 0 %}
 {% set cheias = [[nota_num|round|int, 0]|max, 5]|min %}
-<section class="sec" id="avaliacoes" data-band="alt">
+<section class="sec" id="avaliacoes" data-band="alt" aria-labelledby="titulo-avaliacoes">
   <div class="wrap">
     <div class="cab rv">
       <div>
         <span class="selo">{{ copy.avaliacoes.eyebrow }}</span>
-        <div class="ttl">{{ copy.avaliacoes.titulo|safe }}</div>
+        <h2 class="ttl" id="titulo-avaliacoes">{{ copy.avaliacoes.titulo|safe }}</h2>
       </div>
     </div>
 
@@ -1006,12 +1063,12 @@
 
 {# ================================ A CASA ================================ #}
 {% if team or gallery %}
-<section class="sec" id="historia">
+<section class="sec" id="historia" aria-labelledby="titulo-historia">
   <div class="wrap">
     <div class="casa">
       <div class="rv">
         <span class="selo">{{ copy.historia.eyebrow }}</span>
-        <div class="ttl">{{ copy.historia.titulo|safe }}</div>
+        <h2 class="ttl" id="titulo-historia">{{ copy.historia.titulo|safe }}</h2>
         <p>{{ copy.historia.texto }}</p>
         {% if team %}
         <div class="time">
@@ -1025,7 +1082,9 @@
         {% endif %}
       </div>
       {% if gallery %}
-      <img class="casa-foto rv" src="{{ gallery[0].img }}" alt="A casa do {{ nome_bar }}" loading="lazy">
+      <img class="casa-foto rv" src="{{ gallery[0].img }}"
+           alt="{{ nome_bar }} — o salão da casa"
+           loading="lazy" decoding="async">
       {% endif %}
     </div>
   </div>
@@ -1033,12 +1092,12 @@
 {% endif %}
 
 {# =============================== RESERVA =============================== #}
-<section class="sec" id="reservar" data-band="alt">
+<section class="sec" id="reservar" data-band="alt" aria-labelledby="titulo-reservar">
   <div class="wrap">
     <div class="reserva">
       <div class="rv">
         <span class="selo">{{ copy.reserva.eyebrow }}</span>
-        <div class="ttl">{{ copy.reserva.titulo|safe }}</div>
+        <h2 class="ttl" id="titulo-reservar">{{ copy.reserva.titulo|safe }}</h2>
         {% if copy.reserva.lead %}<p class="lead">{{ copy.reserva.lead }}</p>{% endif %}
       </div>
       {% if not reservas_ativas %}
@@ -1104,11 +1163,11 @@
 </section>
 
 {# =============================== CONTATO =============================== #}
-<section class="sec" id="contato">
+<section class="sec" id="contato" aria-labelledby="titulo-contato">
   <div class="wrap">
     <div class="rv">
       <span class="selo">{{ copy.contato.eyebrow }}</span>
-      <div class="ttl">{{ copy.contato.titulo|safe }}</div>
+      <h2 class="ttl" id="titulo-contato">{{ copy.contato.titulo|safe }}</h2>
     </div>
     <div class="contato">
       {# Bar sem nenhum dado de contato não renderiza a lista: <ul> vazia deixa
@@ -1136,6 +1195,7 @@
     </div>
   </div>
 </section>
+</main>
 
 <footer>
   <div class="wrap">
@@ -1162,7 +1222,9 @@
 {% if gallery %}
 <div class="luz" id="luz" onclick="this.classList.remove('on')">
   <span class="x" role="button" aria-label="Fechar">✕</span>
-  <img id="luz-img" src="" alt="Foto do {{ nome_bar }}">
+  {# O alt é reescrito por ampliar() com a legenda da foto clicada; este aqui é
+     o estado inicial, quando nenhuma foi aberta ainda. #}
+  <img id="luz-img" src="" alt="{{ nome_bar }} — foto ampliada da casa" decoding="async">
 </div>
 {% endif %}
 
@@ -1202,10 +1264,14 @@
     document.body.style.overflow = aberto ? 'hidden' : '';
   }
 
-  function ampliar(src){
+  function ampliar(src, alt){
     var l = document.getElementById('luz');
     if(!l) return;
-    document.getElementById('luz-img').src = src;
+    var img = document.getElementById('luz-img');
+    img.src = src;
+    // A foto ampliada carrega o mesmo alt da miniatura clicada: sem isso o
+    // leitor de tela anunciaria a legenda genérica para qualquer foto.
+    if(alt) img.alt = alt;
     l.classList.add('on');
   }
 

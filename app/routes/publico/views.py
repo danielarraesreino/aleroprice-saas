@@ -14,8 +14,10 @@ from app.models.modelo_restaurante import Restaurante
 
 from . import bp
 from app.utils.site_router import (
-    eh_dominio_do_produto, slug_unico, tenant_por_host, tenant_por_slug,
+    _publicavel, eh_dominio_do_produto, slug_unico, tenant_por_host,
+    tenant_por_slug, url_canonica,
 )
+from app.utils import seo
 from app.utils.temas import css_do_tema, cor_do_tema
 from app.utils.copy_site import copy_da_vibe
 from app.utils.modelos import MODELO_PADRAO, arquivo_do_modelo, modelo_valido
@@ -138,6 +140,24 @@ def _render_landing(rest):
         if not promocoes:
             promocoes = promocoes_de_exemplo(vibe)
 
+    conteudo = montar_conteudo(rest)
+
+    # Dados estruturados: o mesmo grafo pra qualquer tenant, montado do que já
+    # está nesta função — nenhuma query nova, nenhum dado inventado. É o que
+    # faz o bar existir pro Google e pras IAs como fato (endereço, horário,
+    # nota, cardápio) e não como imagem bonita. Ver app/utils/seo.py.
+    #
+    # A prévia comercial entra aqui igual ao cliente: ela já é `noindex` no
+    # template, e `dados_estruturados` recusa por conta própria os itens de
+    # demonstração (`exemplo=True`) — inclusive quando um dia a prévia deixar
+    # de ser noindex.
+    endereco_canonico = url_canonica(rest)
+    json_ld = seo.serializar(seo.dados_estruturados(
+        rest, site, conteudo['dishes'], conteudo['reviews'], eventos,
+        endereco_canonico,
+    ))
+    meta_desc = seo.meta_descricao(site, rest)
+
     return render_template(_template_do_modelo(modelo_atual),
                            eventos=eventos, promocoes=promocoes,
                            site=site, tema_css=css_do_tema(tema),
@@ -145,9 +165,11 @@ def _render_landing(rest):
                            modelo_atual=modelo_atual, previewando=previewando,
                            modo_atual=modo_atual, tema_forcado=tema_forcado,
                            reservas_ativas=reservas_ativas,
+                           json_ld=json_ld, meta_desc=meta_desc,
+                           url_canonica=endereco_canonico,
                            contato_vendas=os.environ.get('FEIRA_WHATSAPP', ''),
                            email_vendas=os.environ.get('FEIRA_EMAIL', 'contato@feiradebarao.com.br'),
-                           **montar_conteudo(rest))
+                           **conteudo)
 
 
 @bp.route('/')
@@ -228,6 +250,67 @@ def robots():
         f'\nSitemap: https://{request.host or dominio_do_produto()}/sitemap.xml\n'
     )
     return corpo, 200, {'Content-Type': 'text/plain; charset=utf-8'}
+
+
+def _tenants_do_sitemap(dono_do_dominio):
+    """Quem pode ser indexado neste domínio.
+
+    Duas regras, uma consulta. `_publicavel` tira o tenant desligado (o mesmo
+    filtro que decide se o site responde), e `Restaurante.clientes()` tira a
+    prévia comercial: ela é `noindex` por definição — não é o site oficial do
+    bar e não pode competir no Google com o negócio real do dono. Pedir
+    indexação do que a própria página manda não indexar é contradição, e o
+    Search Console reporta como erro.
+
+    No domínio de um bar sobra só ele: sitemap de um host fala do próprio host,
+    e o dono não hospeda a lista de clientes do produto no endereço dele.
+    """
+    consulta = _publicavel(Restaurante.clientes())
+    if dono_do_dominio is not None:
+        consulta = consulta.filter(Restaurante.id == dono_do_dominio.id)
+    return consulta.order_by(Restaurante.id).all()
+
+
+@bp.route('/sitemap.xml')
+def sitemap():
+    """Mapa de indexação do domínio que fez a requisição.
+
+    bardavila.bar/sitemap.xml  -> só o Bar da Vila
+    feiradebarao.com.br/…      -> a home de venda + a home de cada cliente
+
+    `lastmod` sai de `SiteConfig.data_atualizacao`, que é a data real da última
+    edição do site. Não é enfeite: o Perplexity pesa frescor na hora de citar, e
+    carimbar data falsa aqui é a maneira mais rápida de perder a confiança que
+    justamente se quer ganhar. Bar que nunca foi editado sai sem `lastmod`.
+    """
+    from xml.sax.saxutils import escape
+    from app.utils.site_router import dominio_do_produto
+
+    paginas = []
+    dono_do_dominio = tenant_por_host(request.host)
+    if dono_do_dominio is None:
+        # A landing de venda é a única página deste host que é nossa. Sitemap
+        # sem nenhuma URL do próprio host é ignorado pelo Google.
+        paginas.append((f'https://{dominio_do_produto()}/', None))
+
+    for tenant in _tenants_do_sitemap(dono_do_dominio):
+        cfg = getattr(tenant, 'site_config', None)
+        paginas.append((url_canonica(tenant), getattr(cfg, 'data_atualizacao', None)))
+
+    linhas = ['<?xml version="1.0" encoding="UTF-8"?>',
+              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+    for endereco, atualizado in paginas:
+        dia = atualizado.date() if isinstance(atualizado, datetime) else (
+            atualizado if isinstance(atualizado, date) else None)
+        linhas.append('  <url>')
+        linhas.append(f'    <loc>{escape(endereco)}</loc>')
+        if dia is not None:
+            linhas.append(f'    <lastmod>{dia.isoformat()}</lastmod>')
+        linhas.append('  </url>')
+    linhas.append('</urlset>')
+
+    return '\n'.join(linhas) + '\n', 200, {
+        'Content-Type': 'application/xml; charset=utf-8'}
 
 
 def _marcar_visita(rest):

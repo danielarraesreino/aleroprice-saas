@@ -164,13 +164,16 @@ def create_app(config_name='default'):
     # sair, que o domínio dele não carregue nenhum resto do sistema.
     #
     # O que continua respondendo no domínio do bar: o site, o POST de reserva
-    # (é o formulário da própria página) e o robots.txt. Todo o resto vai para
-    # o domínio do produto, preservando o caminho — quem salvou
-    # bardavila.bar/app nos favoritos cai no lugar certo.
+    # (é o formulário da própria página) e os dois arquivos que o buscador
+    # busca na raiz — robots.txt e sitemap.xml. Sem o sitemap aqui, o
+    # robots.txt do bar apontaria para um endereço que redireciona pro domínio
+    # do produto, e o Google descartaria o sitemap por ser de outro host. Todo
+    # o resto vai para o domínio do produto, preservando o caminho — quem
+    # salvou bardavila.bar/app nos favoritos cai no lugar certo.
     ENDPOINTS_DO_TENANT = {
         'static',
         'public.landing', 'public.landing_slug', 'public.landing_tenant',
-        'public.reservar', 'public.robots',
+        'public.reservar', 'public.robots', 'public.sitemap',
     }
 
     @app.before_request

@@ -25,8 +25,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 {% set descritor = site.descritor or site.cidade_uf or 'Espetaria e casa de porção' %}
 <title>{{ site.nome }} — {{ descritor }}</title>
-<meta name="description" content="{{ site.nome }} — {{ site.tagline or descritor }}">
+{# Descrição montada por app/utils/seo.meta_descricao a partir do dado REAL do
+   bar (descritor, tagline, cidade, nota) e cortada nos 160 caracteres em que o
+   Google trunca. Sem dado, o motor devolve None e a tag não sai: descrição
+   genérica ("Espetaria e casa de porção" carimbado em bar que não disse isso)
+   rende menos que deixar o Google montar o trecho sozinho a partir da página. #}
+{% if meta_desc %}<meta name="description" content="{{ meta_desc }}">{% endif %}
 {% set og_base = 'https://' ~ request.host %}
+{# Endereço único do bar. O mesmo site responde em até três lugares (domínio
+   próprio, /bar/<slug>, /s/<id> legado) e sem isto o Google indexaria três
+   páginas duplicadas do mesmo boteco. `url_canonica` vem da view — e é o mesmo
+   endereço que assina os @id do JSON-LD, senão o grafo aponta pra outra
+   entidade que não a página. Prévia é noindex, mas o canônico sai igual: o
+   robô que ignorar o noindex ainda tem que saber qual é o original. #}
+<link rel="canonical" href="{{ url_canonica or (og_base ~ request.path) }}">
 {# Card de compartilhamento só com a foto DESTE bar. Sem foto própria, nenhuma
    tag de imagem — mandar a capa de outro bar é pior que não ter card. #}
 {% set og_img = ((site.hero_foto if site.hero_foto.startswith('http') else og_base ~ url_for('static', filename=site.hero_foto)) if site.hero_foto else None) %}
@@ -40,7 +52,11 @@
 <meta property="og:description" content="{{ site.tagline or descritor }}">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="pt_BR">
-<meta property="og:url" content="{{ og_base ~ request.path }}">
+{# Mesmo endereço do <link rel=canonical>. O og:url é o canônico do lado social:
+   apontando pro host que serviu, um share feito de /bar/<slug> e outro feito do
+   domínio do bar viram DOIS objetos no Facebook/WhatsApp, cada um com sua
+   contagem — o mesmo boteco partido em dois. #}
+<meta property="og:url" content="{{ url_canonica or (og_base ~ request.path) }}">
 {% if og_img %}
 <meta property="og:image" content="{{ og_img }}">
 <meta property="og:image:secure_url" content="{{ og_img }}">
@@ -52,6 +68,22 @@
 <meta name="twitter:title" content="{{ site.nome }} — {{ descritor }}">
 <meta name="twitter:description" content="{{ site.tagline or descritor }}">
 {% if og_img %}<meta name="twitter:image" content="{{ og_img }}">{% endif %}
+{# ---------------------------------------------------------------------------
+   DADOS ESTRUTURADOS (JSON-LD)
+
+   O que separa esta página do concorrente bonito: quem lê o site hoje não é só
+   o Google, é o AI Overview, o Perplexity e o ChatGPT — e os três extraem
+   *fato*, não parágrafo. Sem isto a espetaria existe como imagem; com isto ela
+   existe como Restaurant/BarOrPub com endereço, telefone, horário, nota,
+   cardápio e agenda, e é isso que destrava a estrela abaixo do link, o painel
+   lateral e o cardápio no resultado.
+
+   O grafo inteiro é montado em app/utils/seo.py — um lugar só, igual pros 76
+   bares do banco — e chega aqui como string já serializada. `|safe` é seguro
+   porque `seo.serializar()` escapa `<`, `>` e `&`: um "</script>" digitado na
+   tagline pelo dono do bar não fecha esta tag.
+--------------------------------------------------------------------------- #}
+{% if json_ld %}<script type="application/ld+json">{{ json_ld|safe }}</script>{% endif %}
 <meta name="theme-color" content="{{ tema_cor or '#150e09' }}">
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
 <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon-32.png') }}">
@@ -248,7 +280,14 @@
     box-shadow:-18px 0 40px rgba(0,0,0,.4)}
   .gaveta.aberta{transform:none;visibility:visible;
     transition:transform .34s cubic-bezier(.3,.8,.3,1), visibility 0s 0s}
-  .gaveta h2{font-family:var(--f-placa);letter-spacing:.16em;font-size:1rem;
+  /* Rótulo da gaveta: parágrafo, não título de nível 2. Ele vem ANTES do
+     título de nível 1 no HTML, e um h2 órfão no topo quebra a árvore de
+     títulos que o Google e o leitor de tela percorrem — isto é decoração de
+     menu, não seção da página.
+     (Sem sinal de menor/maior no comentário: comentário de CSS vai pro
+     navegador, e tag escrita literal aqui envenena qualquer contagem de
+     títulos feita por regex — inclusive a nossa.) */
+  .gaveta .rotulo{font-family:var(--f-placa);letter-spacing:.16em;font-size:1rem;
     color:var(--tinta-2);text-transform:uppercase;font-weight:400}
   .gaveta .fechar{position:absolute;top:14px;right:16px}
   .gaveta nav{display:block;margin-top:22px}
@@ -664,7 +703,7 @@
 </div>
 {% endif %}
 
-<nav class="barra">
+<nav class="barra" aria-label="Navegação principal">
   <div class="barra-in">
     <a href="#topo" class="marca">
       <svg viewBox="0 0 24 30" aria-hidden="true"><path d="M13 0c1 6-3 7-5 11-2 3.6-1 6 1 7-2.4-.3-4-2-4-5-3 3-5 6-5 10 0 4 4 7 9 7s10-3 10-8c0-6-5-9-6-13-.6-2.6 0-6 0-9z"/></svg>
@@ -689,9 +728,9 @@
 
 <div class="cortina" id="cortina" onclick="fecharGaveta()"></div>
 <aside class="gaveta" id="gaveta" aria-hidden="true" aria-label="Menu do site">
-  <h2>Cardápio da casa</h2>
+  <p class="rotulo" id="rotulo-gaveta">Cardápio da casa</p>
   <button class="btn-quad fechar" onclick="fecharGaveta()" aria-label="Fechar menu">✕</button>
-  <nav>
+  <nav aria-labelledby="rotulo-gaveta">
     {% if dishes %}<a href="#cardapio" onclick="fecharGaveta()">Porções</a>{% endif %}
     {% if promocoes %}<a href="#promocoes" onclick="fecharGaveta()">Promoções</a>{% endif %}
     {% if eventos %}<a href="#agenda" onclick="fecharGaveta()">Agenda</a>{% endif %}
@@ -704,6 +743,12 @@
   </nav>
 </aside>
 
+{# <main> começa aqui: a barra e a gaveta acima são navegação, o rodapé abaixo é
+   assinatura. O que está entre os dois é o conteúdo do bar — e é esse recorte
+   que o leitor de tela pula direto ("ir pro conteúdo") e que o extrator de IA
+   usa pra separar a página do cromo que se repete em todo site. #}
+<main>
+
 <!-- ===================== HERO ===================== -->
 <header class="hero" id="topo">
   <div class="hero-grid{% if not site.hero_foto %} solo{% endif %}">
@@ -711,7 +756,11 @@
     {# Bar recém-criado ainda não tem capa: sem o guard, url_for(filename=None)
        estoura BuildError e o site do cliente novo devolve 500. #}
     <div class="hero-foto">
-      <img src="{{ foto(site.hero_foto) }}" alt="{{ site.nome }} — o que sai da brasa" fetchpriority="high">
+      {# Capa = imagem LCP. Nada de loading="lazy" aqui: adiar a única foto que
+         define a nota de carregamento é atirar no próprio pé. #}
+      <img src="{{ foto(site.hero_foto) }}"
+           alt="{{ site.nome }} — a casa e o que sai da brasa"
+           fetchpriority="high" decoding="async">
     </div>
     {% endif %}
     <div class="wrap hero-corpo">
@@ -770,11 +819,11 @@
 
 <!-- ===================== PORÇÕES ===================== -->
 {% if dishes %}
-<section class="sec" id="cardapio">
+<section class="sec" id="cardapio" aria-labelledby="t-cardapio">
   <div class="wrap">
     <div class="cab surge">
       <span class="olho">{{ copy.cardapio.eyebrow }}</span>
-      <h2 class="h2">{{ copy.cardapio.titulo|safe }}</h2>
+      <h2 class="h2" id="t-cardapio">{{ copy.cardapio.titulo|safe }}</h2>
       {% if copy.cardapio.lead %}<p class="lead">{{ copy.cardapio.lead }}</p>{% endif %}
       <div class="regua"></div>
     </div>
@@ -784,7 +833,9 @@
         <div class="porcao-foto">
           {% if d.tag %}<span class="etiqueta">{{ d.tag }}</span>{% endif %}
           {% if d.img %}
-          <img src="{{ d.img }}" alt="{{ d.nome }}" loading="lazy">
+          <img src="{{ d.img }}"
+               alt="{{ d.nome }} — porção servida no {{ site.nome }}"
+               loading="lazy" decoding="async">
           {% else %}
           {# Sem foto, o bloco vira placa de madeira com a inicial — some a
              moldura vazia que denuncia site inacabado. #}
@@ -807,11 +858,11 @@
 <!-- ===================== PROMOÇÕES ===================== -->
 {% if promocoes %}
 <div class="serra"></div>
-<section class="sec" id="promocoes" style="background:var(--papel-2)">
+<section class="sec" id="promocoes" aria-labelledby="t-promocoes" style="background:var(--papel-2)">
   <div class="wrap">
     <div class="cab surge">
       <span class="olho">{{ copy.promocoes.eyebrow }}</span>
-      <h2 class="h2">{{ copy.promocoes.titulo|safe }}</h2>
+      <h2 class="h2" id="t-promocoes">{{ copy.promocoes.titulo|safe }}</h2>
       <div class="regua"></div>
     </div>
     <div class="etiquetas">
@@ -835,11 +886,11 @@
 
 <!-- ===================== AGENDA ===================== -->
 {% if eventos %}
-<section class="sec" id="agenda">
+<section class="sec" id="agenda" aria-labelledby="t-agenda">
   <div class="wrap">
     <div class="cab surge">
       <span class="olho">{{ copy.agenda.eyebrow }}</span>
-      <h2 class="h2">{{ copy.agenda.titulo|safe }}</h2>
+      <h2 class="h2" id="t-agenda">{{ copy.agenda.titulo|safe }}</h2>
       {% if copy.agenda.lead %}<p class="lead">{{ copy.agenda.lead }}</p>{% endif %}
       <div class="regua"></div>
     </div>
@@ -866,11 +917,11 @@
 
 <!-- ===================== O CLIMA DA CASA ===================== -->
 <div class="serra"></div>
-<section class="sec" id="clima" style="background:var(--madeira)">
+<section class="sec" id="clima" aria-labelledby="t-clima" style="background:var(--madeira)">
   <div class="wrap">
     <div class="cab surge">
       <span class="olho">{{ copy.clima.eyebrow }}</span>
-      <h2 class="h2">{{ copy.clima.titulo|safe }}</h2>
+      <h2 class="h2" id="t-clima">{{ copy.clima.titulo|safe }}</h2>
       <div class="regua"></div>
     </div>
     <div class="chapa-grid surge">
@@ -892,11 +943,11 @@
    mais forte da página justo no caso mais comum. Sem nenhum dos dois a seção
    continua sumindo inteira (nada de título órfão). #}
 {% if reviews or site.nota_google %}
-<section class="sec" id="avaliacoes">
+<section class="sec" id="avaliacoes" aria-labelledby="t-avaliacoes">
   <div class="wrap">
     <div class="cab surge">
       <span class="olho">{{ copy.avaliacoes.eyebrow }}</span>
-      <h2 class="h2">{{ copy.avaliacoes.titulo|safe }}</h2>
+      <h2 class="h2" id="t-avaliacoes">{{ copy.avaliacoes.titulo|safe }}</h2>
       <div class="regua"></div>
     </div>
 
@@ -940,12 +991,12 @@
 
 <!-- ===================== A CASA ===================== -->
 {% if team or gallery %}
-<section class="sec" id="casa" style="background:var(--papel-2)">
+<section class="sec" id="casa" aria-labelledby="t-casa" style="background:var(--papel-2)">
   <div class="wrap">
     <div class="casa">
       <div class="surge">
         <span class="olho">{{ copy.historia.eyebrow }}</span>
-        <h2 class="h2">{{ copy.historia.titulo|safe }}</h2>
+        <h2 class="h2" id="t-casa">{{ copy.historia.titulo|safe }}</h2>
         <div class="regua"></div>
         <p class="corpo">{{ copy.historia.texto }}</p>
         {% if team %}
@@ -961,7 +1012,9 @@
       </div>
       {% if gallery %}
       <figure class="moldura surge">
-        <img src="{{ gallery[0].img }}" alt="{{ gallery[0].legenda or ('A equipe do ' ~ site.nome) }}" loading="lazy">
+        <img src="{{ gallery[0].img }}"
+             alt="{{ (gallery[0].legenda ~ ' — ' ~ site.nome) if gallery[0].legenda else ('A casa e a equipe do ' ~ site.nome) }}"
+             loading="lazy" decoding="async">
       </figure>
       {% endif %}
     </div>
@@ -971,11 +1024,11 @@
 
 <!-- ===================== GALERIA ===================== -->
 {% if gallery %}
-<section class="sec" id="galeria">
+<section class="sec" id="galeria" aria-labelledby="t-galeria">
   <div class="wrap">
     <div class="cab surge">
       <span class="olho">{{ copy.galeria.eyebrow }}</span>
-      <h2 class="h2">{{ copy.galeria.titulo|safe }}</h2>
+      <h2 class="h2" id="t-galeria">{{ copy.galeria.titulo|safe }}</h2>
       {% if copy.galeria.lead %}<p class="lead">{{ copy.galeria.lead }}</p>{% endif %}
       <div class="regua"></div>
     </div>
@@ -985,7 +1038,12 @@
     <div class="tabuleiro surge">
       {% for g in gallery %}{% if loop.index <= 6 %}
       <figure>
-        <img src="{{ g.img }}" alt="{{ g.legenda or (site.nome ~ ' — a casa por dentro') }}" loading="lazy">
+        <img src="{{ g.img }}"
+             {# Sem legenda cadastrada não dá pra dizer o que a foto mostra sem
+                inventar; o número ao menos separa uma da outra pra quem
+                navega a galeria por leitor de tela. #}
+             alt="{{ (g.legenda ~ ' — ' ~ site.nome) if g.legenda else (site.nome ~ ' — a casa por dentro, foto ' ~ loop.index) }}"
+             loading="lazy" decoding="async">
         {% if g.legenda %}<figcaption>{{ g.legenda }}</figcaption>{% endif %}
       </figure>
       {% endif %}{% endfor %}
@@ -1002,12 +1060,12 @@
 
 <!-- ===================== RESERVA ===================== -->
 <div class="serra"></div>
-<section class="sec" id="reservar" style="background:var(--madeira)">
+<section class="sec" id="reservar" aria-labelledby="t-reservar" style="background:var(--madeira)">
   <div class="wrap">
     <div class="reserva">
       <div class="surge">
         <span class="olho">{{ copy.reserva.eyebrow }}</span>
-        <h2 class="h2">{{ copy.reserva.titulo|safe }}</h2>
+        <h2 class="h2" id="t-reservar">{{ copy.reserva.titulo|safe }}</h2>
         <div class="regua"></div>
         {% if copy.reserva.lead %}<p class="lead">{{ copy.reserva.lead }}</p>{% endif %}
         <ul class="lista-hora">
@@ -1081,11 +1139,11 @@
 </section>
 
 <!-- ===================== CONTATO ===================== -->
-<section class="sec" id="contato">
+<section class="sec" id="contato" aria-labelledby="t-contato">
   <div class="wrap">
     <div class="cab surge">
       <span class="olho">{{ copy.contato.eyebrow }}</span>
-      <h2 class="h2">{{ copy.contato.titulo|safe }}</h2>
+      <h2 class="h2" id="t-contato">{{ copy.contato.titulo|safe }}</h2>
       <div class="regua"></div>
     </div>
     <div class="contato">
@@ -1109,6 +1167,8 @@
     </div>
   </div>
 </section>
+
+</main>
 
 <footer>
   <div class="wrap">
