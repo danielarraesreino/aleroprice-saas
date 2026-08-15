@@ -9,6 +9,9 @@ nome: "Bar do Ademir"
 tema: neon-noite
 
 site:
+  telefone_exibicao: "(19) 99450-5042"
+  qtd_avaliacoes: 922
+  nota_google: "4,5"
   endereco: "Av. Santa Isabel, 1422 - Barão Geraldo, Campinas - SP"
   instagram_url: "https://www.instagram.com/contatobardoademir/"
   maps_query: "Bar do Ademir Barão Geraldo Campinas"
