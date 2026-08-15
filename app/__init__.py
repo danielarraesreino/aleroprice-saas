@@ -85,6 +85,11 @@ def create_app(config_name='default'):
     # Registra os filtros de template para formatação brasileira
     from app.utils.template_filters import registrar_filtros
     registrar_filtros(app)
+
+    # Disponível em todo template: o link do painel tem que sair do domínio do
+    # bar e ir para o do produto (ver `sistema_fica_no_dominio_do_produto`).
+    from app.utils.site_router import url_do_sistema
+    app.jinja_env.globals['url_do_sistema'] = url_do_sistema
     
     # Registra os blueprints
     from app.routes.estoque import bp as estoque_bp
@@ -149,6 +154,46 @@ def create_app(config_name='default'):
     # var está setada, e valida o token em tempo constante antes de escrever.
     PUBLIC_ENDPOINTS = {'static', 'auth.login', 'auth.logout', 'billing.webhook',
                         'bootstrap_demo'}
+
+    # O domínio do cliente é dele: ali mora o site do bar e nada mais.
+    #
+    # Sem esta separação, bardavila.bar respondia /auth/login, /cadastro e o
+    # painel inteiro — ou seja, o site do Gustavo servia o formulário de
+    # cadastro dos concorrentes dele e expunha a administração do produto num
+    # endereço que não é nosso. Também é o que permite, no dia em que um cliente
+    # sair, que o domínio dele não carregue nenhum resto do sistema.
+    #
+    # O que continua respondendo no domínio do bar: o site, o POST de reserva
+    # (é o formulário da própria página) e o robots.txt. Todo o resto vai para
+    # o domínio do produto, preservando o caminho — quem salvou
+    # bardavila.bar/app nos favoritos cai no lugar certo.
+    ENDPOINTS_DO_TENANT = {
+        'static',
+        'public.landing', 'public.landing_slug', 'public.landing_tenant',
+        'public.reservar', 'public.robots',
+    }
+
+    @app.before_request
+    def sistema_fica_no_dominio_do_produto():
+        from app.utils.site_router import (
+            dominio_do_produto, eh_dominio_do_produto, normalizar_host,
+        )
+
+        endpoint = request.endpoint
+        if endpoint is None or endpoint in ENDPOINTS_DO_TENANT:
+            return
+
+        host = normalizar_host(request.host)
+        # Localhost, preview da Vercel e o próprio domínio do produto servem
+        # tudo: é onde se desenvolve e onde o sistema mora de verdade.
+        if (not host or eh_dominio_do_produto(host)
+                or host.startswith('localhost') or host.startswith('127.0.0.1')
+                or host.endswith('.vercel.app')):
+            return
+
+        # Chegou aqui: é domínio de cliente pedindo rota de sistema.
+        destino = f'https://{dominio_do_produto()}{request.full_path.rstrip("?")}'
+        return redirect(destino, code=302)
 
     @app.before_request
     def require_login():

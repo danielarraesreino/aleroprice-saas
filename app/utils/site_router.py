@@ -101,3 +101,13 @@ def slug_unico(nome, preferido=None):
         slug = f'{base[:60 - len(sufixo)]}{sufixo}'
         n += 1
     return slug
+
+
+def url_do_sistema(caminho='/auth/login'):
+    """Endereço absoluto do sistema, no domínio do produto.
+
+    O link "Entrar no sistema" mora dentro do site do bar, mas o sistema não —
+    o painel é do produto, não do cliente. Sem o domínio explícito, o link
+    apontaria para bardavila.bar/auth/login, que agora só redireciona.
+    """
+    return f'https://{dominio_do_produto()}{caminho}'

@@ -632,7 +632,7 @@
     <li><a href="#contato" onclick="fecharIndice()">Contato</a></li>
   </ol>
   <div class="rodape-indice">
-    <a class="link-seta" href="{{ url_for('auth.login') }}">Área do lojista →</a>
+    <a class="link-seta" href="{{ url_do_sistema() }}">Área do lojista →</a>
   </div>
 </div>
 
@@ -997,7 +997,7 @@
       {% if site.instagram_url %}<a href="{{ site.instagram_url }}" target="_blank" rel="noopener">Instagram</a>{% endif %}
       {% if site.facebook_url %}<a href="{{ site.facebook_url }}" target="_blank" rel="noopener">Facebook</a>{% endif %}
       {% if site.maps_query %}<a href="https://www.google.com/maps/search/?api=1&query={{ site.maps_query }}" target="_blank" rel="noopener">Como chegar</a>{% endif %}
-      <a href="{{ url_for('auth.login') }}">Área do lojista</a>
+      <a href="{{ url_do_sistema() }}">Área do lojista</a>
     </div>
   </div>
 </footer>

@@ -559,7 +559,7 @@
     {% if eventos %}<a href="#agenda">Agenda</a>{% endif %}
     <a href="#reservar">Reservar</a>
     <a href="#contato">Contato</a>
-    <a class="nav-cta" href="{{ url_for('auth.login') }}">Entrar no sistema</a>
+    <a class="nav-cta" href="{{ url_do_sistema() }}">Entrar no sistema</a>
   </div>
   <div class="nav-ctrls">
     <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema claro/escuro" title="Alternar tema"><span id="theme-ic">☀</span></button>
@@ -579,7 +579,7 @@
   {% if eventos %}<a href="#agenda" onclick="toggleMenu()">Agenda</a>{% endif %}
   <a href="#reservar" onclick="toggleMenu()">Reservar</a>
   <a href="#contato" onclick="toggleMenu()">Contato</a>
-  <a class="mm-cta" href="{{ url_for('auth.login') }}">Entrar no sistema</a>
+  <a class="mm-cta" href="{{ url_do_sistema() }}">Entrar no sistema</a>
 </div>
 
 <header id="topo">
@@ -887,7 +887,7 @@
         <svg viewBox="0 0 24 24"><path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z"/></svg>
       </a>
     </div>
-    <div><a class="lojista" href="{{ url_for('auth.login') }}">Área do lojista · entrar no sistema →</a></div>
+    <div><a class="lojista" href="{{ url_do_sistema() }}">Área do lojista · entrar no sistema →</a></div>
   </div>
 </footer>
 

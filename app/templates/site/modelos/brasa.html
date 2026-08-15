@@ -451,8 +451,6 @@
   .chapa-card small{display:block;margin-top:4px;color:var(--tinta-2);font-size:.98rem;line-height:1.4}
 
   /* ---------- AVALIAÇÕES (comandas) ---------- */
-  .rev-topo{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-end;justify-content:space-between}
-
   /* PROVA SOCIAL — a nota do Google é o argumento mais forte da página, então
      ela é uma PLACA de açougue inteira, não uma linha de rodapé: número em
      Alfa Slab do tamanho de um título, estrelas e a contagem por extenso.
@@ -680,7 +678,7 @@
       {% if reviews or site.nota_google %}<a href="#avaliacoes">Avaliações</a>{% endif %}
       {% if gallery %}<a href="#galeria">Galeria</a>{% endif %}
       <a href="#reservar">Reservar</a>
-      <a class="entrar" href="{{ url_for('auth.login') }}">Entrar</a>
+      <a class="entrar" href="{{ url_do_sistema() }}">Entrar</a>
     </div>
     <div class="ctrl">
       <button class="btn-quad" id="btnTema" onclick="trocarTema()" aria-label="Alternar tema claro e escuro" title="Alternar tema"><span id="icTema">☀</span></button>
@@ -702,7 +700,7 @@
     {% if gallery %}<a href="#galeria" onclick="fecharGaveta()">Galeria</a>{% endif %}
     <a href="#reservar" onclick="fecharGaveta()">Reservar mesa</a>
     <a href="#contato" onclick="fecharGaveta()">Contato</a>
-    <a class="entrar" href="{{ url_for('auth.login') }}">Entrar no sistema</a>
+    <a class="entrar" href="{{ url_do_sistema() }}">Entrar no sistema</a>
   </nav>
 </aside>
 
@@ -896,12 +894,10 @@
 {% if reviews or site.nota_google %}
 <section class="sec" id="avaliacoes">
   <div class="wrap">
-    <div class="rev-topo surge">
-      <div class="cab">
-        <span class="olho">{{ copy.avaliacoes.eyebrow }}</span>
-        <h2 class="h2">{{ copy.avaliacoes.titulo|safe }}</h2>
-        <div class="regua"></div>
-      </div>
+    <div class="cab surge">
+      <span class="olho">{{ copy.avaliacoes.eyebrow }}</span>
+      <h2 class="h2">{{ copy.avaliacoes.titulo|safe }}</h2>
+      <div class="regua"></div>
     </div>
 
     {# Nota real deste bar. Sem o dado, a placa some — exibir nota fixa era
@@ -1132,7 +1128,7 @@
       {% endif %}
     </div>
     {% endif %}
-    <div><a class="lojista" href="{{ url_for('auth.login') }}">Área do lojista · entrar no sistema →</a></div>
+    <div><a class="lojista" href="{{ url_do_sistema() }}">Área do lojista · entrar no sistema →</a></div>
   </div>
 </footer>
 

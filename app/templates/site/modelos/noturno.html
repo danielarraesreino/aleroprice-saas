@@ -82,7 +82,14 @@
     try{
       var reduz = window.matchMedia
                   && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if(window.Motion && !reduz) document.documentElement.classList.add('js-anim');
+      // Aba aberta em segundo plano: o navegador congela o rAF, a animação de
+      // entrada não começa e o cartaz ficaria em branco até alguém olhar. Nesse
+      // caso simplesmente não animamos — página estática e inteira é sempre
+      // melhor que página bonita e vazia.
+      var escondida = document.visibilityState === 'hidden';
+      if(window.Motion && !reduz && !escondida){
+        document.documentElement.classList.add('js-anim');
+      }
     }catch(e){}
   })();
 </script>
@@ -742,7 +749,7 @@
     <a href="#reservar" onclick="abrirMenu()">Reservar</a>
     <a href="#contato" onclick="abrirMenu()">Contato</a>
   </nav>
-  <a class="btn btn-linha entrar" href="{{ url_for('auth.login') }}">Entrar no sistema</a>
+  <a class="btn btn-linha entrar" href="{{ url_do_sistema() }}">Entrar no sistema</a>
 </div>
 
 {# ============================ HERO / CARTAZ ============================ #}
@@ -1148,7 +1155,7 @@
       {% endif %}
     </div>
     {% endif %}
-    <div><a class="lojista" href="{{ url_for('auth.login') }}">Área do lojista · entrar no sistema →</a></div>
+    <div><a class="lojista" href="{{ url_do_sistema() }}">Área do lojista · entrar no sistema →</a></div>
   </div>
 </footer>
 
@@ -1279,25 +1286,7 @@
     // Rede de segurança: se qualquer receita abaixo estourar, a classe cai e
     // tudo que estava escondido pelo estado inicial reaparece na hora. Página
     // ilegível é falha grave; página sem animação não é.
-    function comRede(fn){
-      try{ fn(); }catch(e){ raiz.classList.remove('js-anim'); }
-    }
-
-    // Aba aberta em segundo plano: o Chrome congela o rAF, a animação não anda
-    // e o conteúdo ficaria escondido até alguém olhar. Então só começamos
-    // quando a aba está visível de fato — quem abre o link em nova aba vê a
-    // entrada quando troca pra ela, nunca uma página em branco.
-    function quandoVisivel(fn){
-      if(document.visibilityState !== 'hidden') return comRede(fn);
-      var ouvir = function(){
-        if(document.visibilityState === 'hidden') return;
-        document.removeEventListener('visibilitychange', ouvir);
-        comRede(fn);
-      };
-      document.addEventListener('visibilitychange', ouvir);
-    }
-
-    quandoVisivel(function(){
+    try{
       // 1. O cartaz sendo colado: kicker, nome, tagline, selo, show e CTA em fila.
       animate('[data-hero]', {opacity: [0, 1], y: [22, 0]},
               {duration: .55, delay: stagger(.07), ease: [.22, .7, .2, 1]});
@@ -1337,7 +1326,9 @@
           animate(el, {y: 0}, {type: spring, stiffness: 340, damping: 22});
         };
       });
-    });
+    }catch(e){
+      raiz.classList.remove('js-anim');
+    }
   })();
 </script>
 </body>

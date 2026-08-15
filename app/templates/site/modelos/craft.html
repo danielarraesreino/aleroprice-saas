@@ -733,7 +733,7 @@
     <a href="#contato">Contato</a>
   </div>
   <div class="nav-dir">
-    <a class="nav-entrar" href="{{ url_for('auth.login') }}">Entrar no sistema</a>
+    <a class="nav-entrar" href="{{ url_do_sistema() }}">Entrar no sistema</a>
     <button class="btn-icone" id="btnTema" onclick="alternarTema()" aria-label="Alternar tema claro e escuro" title="Alternar tema">
       <span id="icoTema" aria-hidden="true">☾</span>
     </button>
@@ -754,7 +754,7 @@
   {% if gallery %}<a href="#galeria" onclick="alternarMenu()"><i>07</i>Fotos</a>{% endif %}
   <a href="#reservar" onclick="alternarMenu()"><i>08</i>Reserva</a>
   <a href="#contato" onclick="alternarMenu()"><i>09</i>Contato</a>
-  <a class="painel-pe" href="{{ url_for('auth.login') }}">Área do lojista → entrar no sistema</a>
+  <a class="painel-pe" href="{{ url_do_sistema() }}">Área do lojista → entrar no sistema</a>
 </div>
 
 <!-- ============================ HERO ============================ -->
@@ -1164,7 +1164,7 @@
       {% endif %}
     </div>
     {% endif %}
-    <div><a class="lojista" href="{{ url_for('auth.login') }}">Área do lojista → entrar no sistema</a></div>
+    <div><a class="lojista" href="{{ url_do_sistema() }}">Área do lojista → entrar no sistema</a></div>
   </div>
 </footer>
 

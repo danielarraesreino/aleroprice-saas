@@ -706,7 +706,7 @@
       {% if gallery %}<a href="#galeria">Álbum</a>{% endif %}
       <a href="#reservar">Reservar</a>
       <a href="#contato">Contato</a>
-      <a class="entrar" href="{{ url_for('auth.login') }}">Entrar no sistema</a>
+      <a class="entrar" href="{{ url_do_sistema() }}">Entrar no sistema</a>
     </div>
     <div class="barra-ctrls">
       <button class="btn-icone" id="btn-tema" onclick="trocarTema()" aria-label="Alternar tema claro e escuro" title="Alternar tema"><span id="ic-tema">☾</span></button>
@@ -726,7 +726,7 @@
   {% if gallery %}<a href="#galeria" onclick="abrirMenu()">Álbum</a>{% endif %}
   <a href="#reservar" onclick="abrirMenu()">Reservar mesa</a>
   <a href="#contato" onclick="abrirMenu()">Contato</a>
-  <a class="entrar" href="{{ url_for('auth.login') }}">Entrar no sistema</a>
+  <a class="entrar" href="{{ url_do_sistema() }}">Entrar no sistema</a>
 </div>
 </div>
 
@@ -1170,7 +1170,7 @@
       {% endif %}
     </div>
     {% endif %}
-    <div><a class="lojista" href="{{ url_for('auth.login') }}">Área do lojista · entrar no sistema</a></div>
+    <div><a class="lojista" href="{{ url_do_sistema() }}">Área do lojista · entrar no sistema</a></div>
   </div>
 </footer>
 
