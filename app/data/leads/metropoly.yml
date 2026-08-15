@@ -12,6 +12,9 @@ nome: "Metropoly Bar"
 tema: neon-noite
 
 site:
+  telefone_exibicao: "(19) 3289-5360"
+  qtd_avaliacoes: 59
+  nota_google: "4,4"
   vibe: pub
   descritor: "Game bar com 1000+ jogos de tabuleiro"
   kicker: "BARÃO GERALDO · CAMPINAS–SP"
@@ -20,7 +23,7 @@ site:
   tagline: "Mais de mil jogos de tabuleiro, comidinha boa e cerveja gelada."
   subline: "1000+ JOGOS · TORNEIOS · CERVEJA GELADA"
   cidade_uf: "Barão Geraldo, Campinas–SP"
-  endereco: "Av. Prof. Atílio Martini, 469 — Cidade Universitária"
+  endereco: "Av. Professor Atílio Martini, 469 - Cidade Universitária, Campinas - SP, 13083-830"
   horario: "Qua–Sex a partir das 18h · Sáb e Dom a partir das 16h"
   maps_query: "Metropoly Bar Campinas"
   instagram_url: "https://www.instagram.com/metropolybar/"

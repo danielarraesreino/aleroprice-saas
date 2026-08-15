@@ -9,6 +9,9 @@ nome: "Cervejaria Tábuas"
 tema: pub-escuro
 
 site:
+  endereco: "Av. Santa Isabel, 57 - Barão Geraldo, Campinas - SP, 13084-012"
+  qtd_avaliacoes: 504
+  nota_google: "4,7"
   vibe: pub
   descritor: "Cervejaria artesanal em Barão"
   kicker: "BARÃO GERALDO · CAMPINAS–SP"

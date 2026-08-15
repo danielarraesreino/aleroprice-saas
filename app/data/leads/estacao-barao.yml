@@ -14,6 +14,9 @@ nome: "Estação Barão"
 tema: boteco-ambar
 
 site:
+  telefone_exibicao: "(19) 99109-1080"
+  qtd_avaliacoes: 26
+  nota_google: "4,8"
   vibe: boteco
   descritor: "Bar e restaurante desde 1953 em Barão"
   kicker: "BARÃO GERALDO · DESDE 1953"
@@ -22,7 +25,7 @@ site:
   tagline: "Setenta anos de balcão — a história do bairro passa por aqui."
   subline: "DESDE 1953 · ALMOÇO E NOITE · TRADIÇÃO DE BARÃO"
   cidade_uf: "Barão Geraldo, Campinas–SP"
-  endereco: "R. Horácio Leonardi, 76 — Barão Geraldo"
+  endereco: "R. Horácio Leonardi, 76 - Barão Geraldo, Campinas - SP, 13084-105"
   horario: "Seg–Qui 11h–00h · Sex–Sáb 11h–01h · Dom 11h–00h"
   maps_query: "Estação Barão Bar e Restaurante Campinas"
   instagram_url: "https://www.instagram.com/estacao_bar/"
