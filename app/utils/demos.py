@@ -189,7 +189,13 @@ def aplicar_lead(caminho):
 
     rest.nome = dados['nome']
     rest.tipo_conta = 'demo'
-    rest.ativo = True
+    # `ativo: false` no arquivo tira a prévia do ar e a mantém fora.
+    #
+    # Sem isso o aplicador reativava tudo a cada rodada, e casa que fechou (o
+    # Google marca "permanentemente fechado") voltava a ter site publicado no
+    # nome dela — além de reentrar no roteiro e custar um deslocamento à toa.
+    # Apagar o lead não serve: a próxima varredura o recriaria.
+    rest.ativo = dados.get('ativo', True) is not False
     rest.demo_expira_em = _expira_em(dados)
     rest.demo_fonte = (dados.get('demo') or {}).get('fonte')
 

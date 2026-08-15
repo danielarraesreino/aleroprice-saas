@@ -13,6 +13,7 @@
 # aparece no Google quando alguém busca 'feijoada Barão Geraldo'."
 
 nome: "Stout Café, Cultura & Bar"
+ativo: false
 tema: pub-escuro
 
 site:

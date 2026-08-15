@@ -227,3 +227,35 @@ def test_yaml_tem_prioridade_sobre_a_pasta(session, tmp_path, monkeypatch):
     rest = Restaurante.query.filter_by(slug='bar-x').one()
     cfg = SiteConfig.query.filter_by(restaurant_id=rest.id).one()
     assert cfg.hero_foto == 'img/bar/foto-18.jpg'
+
+
+def test_casa_fechada_fica_fora_do_ar_mesmo_reaplicando(client, session, tmp_path, monkeypatch):
+    """`ativo: false` no lead tira a prévia do ar — e a mantém fora.
+
+    Sem isso o aplicador reativava tudo a cada rodada, e casa que fechou (o
+    Google marca "permanentemente fechado") voltava a ter site publicado no nome
+    dela, além de reentrar no roteiro e custar um deslocamento à toa. Apagar o
+    lead não serve: a próxima varredura o recriaria.
+    """
+    (tmp_path / 'bar-que-fechou.yml').write_text(
+        'nome: Bar Que Fechou\nativo: false\nsite:\n  tagline: Fechou.\n',
+        encoding='utf-8')
+    monkeypatch.setattr(demos, 'DIR_LEADS', str(tmp_path))
+
+    demos.aplicar_todos()
+    rest = Restaurante.query.filter_by(slug='bar-que-fechou').one()
+    assert rest.ativo is False
+    assert client.get('/bar/bar-que-fechou').status_code == 404
+
+    # a reaplicação é rotina (roda a cada deploy) e não pode ressuscitar a casa
+    demos.aplicar_todos()
+    session.expire_all()
+    assert Restaurante.query.filter_by(slug='bar-que-fechou').one().ativo is False
+    assert client.get('/bar/bar-que-fechou').status_code == 404
+
+
+def test_lead_sem_ativo_continua_publicando(client, session, lead):
+    """O padrão não muda: quem não declara `ativo` vai pro ar como sempre."""
+    demos.aplicar_todos()
+    assert Restaurante.query.filter_by(slug='boteco-do-teste').one().ativo is True
+    assert client.get('/bar/boteco-do-teste').status_code == 200
