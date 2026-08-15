@@ -644,3 +644,63 @@ def test_modo_invalido_nao_grava(client, session, demo):
     session.expire_all()
     cfg = SiteConfig.query.filter_by(restaurant_id=demo.id).one()
     assert (cfg.tema_modo or 'auto') == 'auto'
+
+
+# --------------------------------------------------- convite de fundador
+
+@pytest.fixture
+def com_convite(monkeypatch):
+    monkeypatch.setenv('FEIRA_PRECO_SITE', 'R$ 197')
+    monkeypatch.setenv('FEIRA_PRECO_PRO', 'R$ 347')
+    monkeypatch.setenv('FEIRA_CONVITE', 'BARAO')
+    monkeypatch.setenv('FEIRA_CONVITE_PRECO_SITE', 'R$ 129')
+    monkeypatch.setenv('FEIRA_TAXA_SETUP', 'R$ 297')
+
+
+def test_proposta_abre_com_preco_cheio(client, demo, com_convite):
+    """O desconto é gesto do vendedor na mesa, não preço de tabela: quem abre a
+    proposta vê o valor cheio."""
+    entrar(client)
+    corpo = client.get(f'/campo/{demo.slug}/proposta').get_data(as_text=True)
+
+    assert 'R$ 197' in corpo and 'R$ 347' in corpo
+    assert 'R$ 129' not in corpo, 'preço de convite não pode aparecer sem código'
+    assert 'código de convite' in corpo.lower(), 'o campo pra digitar tem que existir'
+
+
+def test_codigo_certo_aplica_o_desconto_mostrando_o_cheio(client, demo, com_convite):
+    """O preço cheio fica riscado ao lado: sem ver o que deixou de pagar, o
+    desconto não tem tamanho."""
+    entrar(client)
+    corpo = client.get(f'/campo/{demo.slug}/proposta?convite=BARAO').get_data(as_text=True)
+
+    assert 'R$ 129' in corpo
+    assert 'R$ 197' in corpo, 'o cheio continua visível, riscado'
+    assert 'Casa fundadora' in corpo
+    assert 'instalação' in corpo.lower()
+
+
+def test_codigo_aceita_como_o_dono_digita(client, demo, com_convite):
+    """O vendedor dita em voz alta num bar barulhento; o dono digita como ouviu."""
+    entrar(client)
+    for digitado in ('barao', '  BaRaO  ', 'BARAO'):
+        corpo = client.get(
+            f'/campo/{demo.slug}/proposta?convite={digitado.strip()}').get_data(as_text=True)
+        assert 'Casa fundadora' in corpo, f'recusou {digitado!r}'
+
+
+def test_codigo_errado_nao_da_desconto(client, demo, com_convite):
+    entrar(client)
+    corpo = client.get(f'/campo/{demo.slug}/proposta?convite=XPTO').get_data(as_text=True)
+
+    assert 'R$ 197' in corpo
+    assert 'Casa fundadora' not in corpo
+    assert 'não conheço' in corpo
+
+
+def test_sem_convite_configurado_o_campo_nem_aparece(client, demo, monkeypatch):
+    monkeypatch.delenv('FEIRA_CONVITE', raising=False)
+    entrar(client)
+    corpo = client.get(f'/campo/{demo.slug}/proposta').get_data(as_text=True)
+
+    assert 'código de convite' not in corpo.lower()

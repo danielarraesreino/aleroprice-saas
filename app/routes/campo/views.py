@@ -29,7 +29,7 @@ from app.utils.modelos import (
     MODELO_PADRAO, MODELOS, modelo_valido, opcoes_de_modelo,
 )
 from app.utils.operador import e_operador
-from app.utils.planos import DIAS_DE_TRIAL, precos
+from app.utils.planos import DIAS_DE_TRIAL, conferir_convite, convite, precos
 from app.utils.temas import opcoes_de_tema, tema_valido
 
 # Campos que o Modo Campo edita. Curto de propósito: o resto continua no
@@ -306,9 +306,19 @@ def proposta(slug):
     except Exception:
         consulta = []
 
+    # Convite de fundador: o desconto é concedido aqui, na mesa, digitando o
+    # código na frente do dono — e não fica barato na tabela pra sempre. Vem por
+    # querystring porque o vendedor às vezes manda o link já com o código pro
+    # WhatsApp dele ("olha, deixei o seu aplicado").
+    codigo = (request.args.get('convite') or '').strip()
+    convite_aplicado = conferir_convite(codigo)
+
     return render_template(
         'campo/proposta.html', rest=rest, cfg=cfg, dados=dados,
         precos=precos(),
+        tem_convite=convite() is not None,
+        convite_aplicado=convite_aplicado,
+        convite_recusado=bool(codigo) and convite_aplicado is None,
         dominios_consulta=consulta,
         dominio_livre=dominios.primeiro_livre(consulta),
         taxa_setup=dominios.taxa_de_instalacao(),

@@ -20,6 +20,12 @@
   .plano{border:1px solid var(--linha);border-radius:10px;padding:13px 14px;margin-bottom:10px}
   .plano.destaque{border-color:var(--ambar)}
   .plano .preco{font-size:22px;font-weight:700;color:var(--ambar)}
+  .plano .preco s.cheio{font-size:15px;font-weight:400;color:var(--creme-dim);
+    margin-right:7px;text-decoration-thickness:2px}
+  .convite{margin-top:12px;padding:11px 13px;border-radius:10px;font-size:14px;
+    border:1px solid var(--verde);background:rgba(37,211,102,.10)}
+  .convite code{font-family:ui-monospace,monospace;font-size:13px;padding:1px 6px;
+    border-radius:5px;background:rgba(255,255,255,.14)}
   .plano .preco small{font-size:13px;font-weight:400;color:var(--creme-dim)}
   .nota-google{border:1px solid var(--ambar);border-radius:10px;padding:13px 14px;
     margin-bottom:10px;text-align:center;font-size:15px}
@@ -33,6 +39,8 @@
     .nota,.linha-dado b,.plano .preco small{color:#444}
     a{color:#111}
     .plano .preco,.nota-google strong{color:#111}
+    .convite{border-color:#111;background:transparent}
+    .convite code{background:#eee}
     .nota-google{border-color:#bbb}
     .entrega li::before{color:#111}
     .entrega li,.linha-dado{border-color:#ddd}
@@ -133,18 +141,60 @@
 
 <div class="bloco">
   <h2>Planos</h2>
+
+  {# Com o convite aplicado, o preço cheio continua visível riscado ao lado: o
+     dono precisa ver o que está deixando de pagar, senão o desconto não tem
+     tamanho. #}
   <div class="plano destaque">
-    <div class="preco">{{ precos.site }}<small>/mês</small></div>
+    <div class="preco">
+      {% if convite_aplicado %}<s class="cheio">{{ precos.site }}</s>
+        {{ convite_aplicado.preco_site }}{% else %}{{ precos.site }}{% endif %}<small>/mês</small>
+    </div>
     <strong>Site</strong>
     <p class="nota" style="margin:4px 0 0">O site completo: domínio próprio, edição pelo celular,
     reservas, agenda e promoções.</p>
   </div>
   <div class="plano">
-    <div class="preco">{{ precos.pro }}<small>/mês</small></div>
+    <div class="preco">
+      {% if convite_aplicado %}<s class="cheio">{{ precos.pro }}</s>
+        {{ convite_aplicado.preco_pro }}{% else %}{{ precos.pro }}{% endif %}<small>/mês</small>
+    </div>
     <strong>Pro</strong>
     <p class="nota" style="margin:4px 0 0">Tudo do Site + gestão do negócio: ficha técnica,
     estoque, nota fiscal de entrada e relatórios.</p>
   </div>
+
+  {% if taxa_setup and not convite_aplicado %}
+  <p class="nota">Instalação: <strong>{{ taxa_setup }}</strong> uma vez só — registro do domínio,
+  montagem com as suas fotos e publicação.</p>
+  {% endif %}
+
+  {% if convite_aplicado %}
+    <div class="convite" role="status">
+      <strong>{{ convite_aplicado.rotulo }}</strong> — código
+      <code>{{ convite_aplicado.codigo }}</code> aplicado. Este preço é seu enquanto
+      for cliente{% if taxa_setup %}, e a instalação de {{ taxa_setup }} sai por conta
+      da casa{% endif %}.
+    </div>
+  {% elif tem_convite %}
+    {# O campo só existe se houver convite configurado. É aqui que o vendedor
+       digita o código na frente do dono — o desconto vira gesto, não tabela. #}
+    <form method="get" class="no-print" style="margin-top:12px">
+      <label for="codigo" class="nota" style="display:block;margin-bottom:6px">
+        Tem código de convite?
+      </label>
+      <div style="display:flex;gap:8px">
+        <input id="codigo" name="convite" type="text" autocomplete="off"
+               autocapitalize="characters" placeholder="ex.: BARAO"
+               style="flex:1;padding:11px 12px;font-size:16px;border-radius:9px;
+                      border:1px solid var(--linha);background:var(--ink);color:var(--creme)">
+        <button class="btn" type="submit" style="width:auto;padding:0 18px">Aplicar</button>
+      </div>
+      {% if convite_recusado %}
+        <p class="nota" style="color:var(--erro)">Esse código eu não conheço.</p>
+      {% endif %}
+    </form>
+  {% endif %}
 </div>
 
 <div class="bloco">

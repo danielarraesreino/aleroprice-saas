@@ -27,11 +27,61 @@ DIAS_DE_TRIAL = 14
 
 def precos():
     """Preço de cada plano, de env. Um lugar só: a tela de planos e a landing
-    de venda liam números diferentes (R$ 97 vs R$ 197) e divergiam sozinhas."""
+    de venda liam números diferentes (R$ 97 vs R$ 197) e divergiam sozinhas.
+
+    O piso de mercado (pesquisa de agosto/2026): site institucional custa R$
+    2.500-7.000 só para fazer, mais R$ 100-500/mês de manutenção e R$ 30-150/mês
+    de hospedagem; plataforma de cardápio cobra mensalidade E R$ 400-2.000 de
+    instalação. A mensalidade daqui fica abaixo da manutenção sozinha — e ainda
+    inclui o site, o domínio e as atualizações.
+    """
     return {
-        'site': os.environ.get('FEIRA_PRECO_SITE', 'R$ 129'),
-        'pro': os.environ.get('FEIRA_PRECO_PRO', 'R$ 249'),
+        'site': os.environ.get('FEIRA_PRECO_SITE', 'R$ 197'),
+        'pro': os.environ.get('FEIRA_PRECO_PRO', 'R$ 347'),
     }
+
+
+def taxa_de_instalacao():
+    """Cobrança única de registrar o domínio, montar com as fotos e publicar.
+
+    Sem a env a linha some da proposta — dá para testar o discurso antes de
+    fixar o valor, como já se faz com a mensalidade.
+    """
+    return (os.environ.get('FEIRA_TAXA_SETUP') or '').strip() or None
+
+
+# Convite de fundador: o desconto que o vendedor concede na mesa.
+#
+# Existe como objeto, e não como preço menor na tabela, por um motivo comercial:
+# preço baixo na vitrine vira o valor do produto e não volta mais. Concedido por
+# código, com prazo e número de vagas, ele continua sendo um favor — "as três
+# primeiras casas de Barão viram meu portfólio" — e o preço cheio segue de pé
+# para todo mundo depois.
+#
+# FEIRA_CONVITE define o código; sem ele nada disso aparece em lugar nenhum.
+def convite():
+    codigo = (os.environ.get('FEIRA_CONVITE') or '').strip()
+    if not codigo:
+        return None
+    return {
+        'codigo': codigo.upper(),
+        'preco_site': os.environ.get('FEIRA_CONVITE_PRECO_SITE', 'R$ 129'),
+        'preco_pro': os.environ.get('FEIRA_CONVITE_PRECO_PRO', 'R$ 249'),
+        'vagas': os.environ.get('FEIRA_CONVITE_VAGAS', '5'),
+        'rotulo': os.environ.get('FEIRA_CONVITE_ROTULO', 'Casa fundadora'),
+    }
+
+
+def conferir_convite(codigo):
+    """O código digitado vale? Devolve o convite ou None.
+
+    Comparação sem diferenciar maiúscula e espaço: o vendedor dita o código em
+    voz alta dentro de um bar barulhento, e o dono digita como ouviu.
+    """
+    convidado = convite()
+    if not convidado or not codigo:
+        return None
+    return convidado if (codigo or '').strip().upper() == convidado['codigo'] else None
 
 
 # Ordem de poder. Usada por `plano_minimo` para comparar.
