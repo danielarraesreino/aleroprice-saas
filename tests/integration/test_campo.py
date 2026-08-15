@@ -549,3 +549,50 @@ def test_rota_de_dominio_404_pra_quem_nao_e_operador(client, session, demo):
 
     entrar(client, 'dono2@alheio.com')
     assert client.get(f'/campo/{demo.slug}/dominio').status_code == 404
+
+
+# --------------------------------------------------------------- home de campo
+
+def test_operador_cai_no_modo_campo_ao_entrar(client, operador):
+    """Quem opera a campanha entra pelo celular, dentro de um bar. Mandá-lo pro
+    painel de lucratividade (14 itens de menu, feito pra notebook) custa toques
+    que não existem naquele momento."""
+    resp = entrar(client)
+
+    assert resp.headers['Location'] == '/campo/'
+
+
+def test_dono_de_bar_continua_indo_pro_painel(client, session, operador):
+    """O dashboard é o painel dele — não pode ser sequestrado pela ferramenta
+    de venda do operador."""
+    bar = Restaurante(nome='Bar Cliente', slug='bar-cliente', tipo_conta='cliente')
+    session.add(bar)
+    session.commit()
+    session.add(Usuario(nome='Dono', email='dono@cliente.com', senha='segredo123',
+                        tipo='admin', restaurant_id=bar.id))
+    session.commit()
+
+    resp = entrar(client, 'dono@cliente.com')
+
+    assert '/campo' not in resp.headers['Location']
+    assert '/app' in resp.headers['Location']
+
+
+def test_home_de_campo_mostra_o_que_esta_pronto(client, session, demo):
+    """Pronto = tem foto e tem nota. Sem os dois, a prévia parece um modelo com
+    o nome trocado — e é isso que o placar responde antes de sair pra rua."""
+    cfg = SiteConfig.query.filter_by(restaurant_id=demo.id).one()
+    cfg.hero_foto = 'img/demo/boteco-do-teste/capa.jpg'
+    cfg.nota_google = '4,7'
+    session.commit()
+
+    sem_nada = Restaurante(nome='Bar Cru', slug='bar-cru', tipo_conta='demo')
+    session.add(sem_nada)
+    session.commit()
+
+    entrar(client)
+    corpo = client.get('/campo/').get_data(as_text=True)
+
+    assert '4,7 ★' in corpo, 'a nota tem que aparecer na lista'
+    assert 'sem foto' in corpo, 'o que falta tem que estar visível'
+    assert 'data-pronto="sim"' in corpo and 'data-pronto="nao"' in corpo

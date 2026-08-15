@@ -57,19 +57,41 @@ def _config(rest):
 
 @bp.route('/')
 def index():
-    """Lista pra achar o bar em dois toques, com o que já tem foto na frente."""
+    """Home de quem está em campo: achar o bar em dois toques.
+
+    É para cá que o operador cai ao entrar (ver `auth._destino_depois_do_login`),
+    porque a pergunta dele ao abrir o celular no bar é sempre a mesma: qual bar
+    é este e o que já está pronto nele. Bar com foto aparece marcado, e os que
+    ainda não têm sobem para o topo — é o trabalho que falta.
+    """
     if not e_operador():
         abort(404)
 
     bares = Restaurante.query.order_by(Restaurante.nome).all()
     configs = {c.restaurant_id: c for c in SiteConfig.query.all()}
-    linhas = [{
-        'slug': b.slug,
-        'nome': b.nome,
-        'tipo': b.tipo_conta or 'cliente',
-        'tem_foto': bool(configs.get(b.id) and configs[b.id].hero_foto),
-    } for b in bares if b.slug]
-    return render_template('campo/lista.html', linhas=linhas)
+
+    linhas = []
+    for b in bares:
+        if not b.slug:
+            continue
+        cfg = configs.get(b.id)
+        linhas.append({
+            'slug': b.slug,
+            'nome': b.nome,
+            'tipo': b.tipo_conta or 'cliente',
+            'tem_foto': bool(cfg and cfg.hero_foto),
+            'nota': cfg.nota_google if cfg else None,
+            # Pronto para mostrar = tem foto e tem nota. É o que faz a prévia
+            # parecer o bar dele em vez de um modelo com o nome trocado.
+            'pronto': bool(cfg and cfg.hero_foto and cfg.nota_google),
+        })
+
+    resumo = {
+        'total': len(linhas),
+        'prontos': sum(1 for l in linhas if l['pronto']),
+        'clientes': sum(1 for l in linhas if l['tipo'] != 'demo'),
+    }
+    return render_template('campo/lista.html', linhas=linhas, resumo=resumo)
 
 
 @bp.route('/<slug>')
