@@ -99,6 +99,25 @@ def _render_landing(rest):
     else:
         modelo_atual = modelo_salvo if modelo_valido(modelo_salvo) else MODELO_PADRAO
 
+    # Claro ou escuro é escolha da casa, não do celular de quem visita.
+    #
+    # Todo modelo já sabe se pintar nos dois modos, mas quem decidia era o
+    # sistema do visitante (`prefers-color-scheme`). Na demonstração isso é ruim
+    # duas vezes: o vendedor não consegue mostrar "e no claro?" — que é metade
+    # da conversa sobre visual — e o dono aprova um site que o cliente dele pode
+    # ver de outro jeito.
+    #
+    # `auto` mantém o comportamento antigo (segue o aparelho + toggle da página).
+    # `claro`/`escuro` fixam, e `?modo=` espia sem gravar, igual ao modelo.
+    modo_salvo = getattr(cfg, 'tema_modo', None) if cfg else None
+    modo_espiado = (request.args.get('modo') or '').strip()
+    modo_atual = (modo_espiado if modo_espiado in ('claro', 'escuro', 'auto')
+                  else (modo_salvo or 'auto'))
+    if modo_espiado in ('claro', 'escuro', 'auto'):
+        previewando = True
+    # O template estampa isto no <html>; vazio = decide no navegador, como antes.
+    tema_forcado = {'claro': 'light', 'escuro': 'dark'}.get(modo_atual, '')
+
     # Degradação por plano: quem não paga perde o controle do site, não o
     # endereço. Sem reservas online, o formulário vira botão de WhatsApp — o
     # cliente do bar nunca fica sem resposta.
@@ -124,6 +143,7 @@ def _render_landing(rest):
                            site=site, tema_css=css_do_tema(tema),
                            tema_cor=cor_do_tema(tema), tenant=rest, copy=copy,
                            modelo_atual=modelo_atual, previewando=previewando,
+                           modo_atual=modo_atual, tema_forcado=tema_forcado,
                            reservas_ativas=reservas_ativas,
                            contato_vendas=os.environ.get('FEIRA_WHATSAPP', ''),
                            email_vendas=os.environ.get('FEIRA_EMAIL', 'contato@feiradebarao.com.br'),

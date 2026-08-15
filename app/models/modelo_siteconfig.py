@@ -56,6 +56,11 @@ class SiteConfig(db.Model):
     # todo mundo que já está no ar continua igual.
     modelo = db.Column(db.String(30), default='classico')
 
+    # Claro ou escuro: 'auto' segue o aparelho de quem visita (comportamento
+    # histórico), 'claro'/'escuro' fixam. Existe porque a casa tem uma escolha
+    # — e porque o vendedor precisa mostrar as duas na hora.
+    tema_modo = db.Column(db.String(10), default='auto')
+
     # Prova social. Vazios = o bloco de nota some (melhor do que exibir a nota
     # de outro bar, que era o que acontecia com o 4,9/39 fixo no template).
     nota_google = db.Column(db.String(10))

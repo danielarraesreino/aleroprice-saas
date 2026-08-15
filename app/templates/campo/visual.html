@@ -56,13 +56,32 @@
 
 <div class="bloco">
   <h2>A cara do site</h2>
+
+  {# Claro/escuro fica junto da prévia, não escondido numa aba: "e no claro?" é
+     metade da conversa sobre visual, e o dono decide olhando. #}
+  <div style="display:flex;gap:6px;margin-bottom:12px" role="group"
+       aria-label="Claro ou escuro">
+    {% for valor, rotulo in [('auto','Automático'), ('claro','Claro'), ('escuro','Escuro')] %}
+    <button type="button" class="modo" data-modo="{{ valor }}"
+            aria-pressed="{{ 'true' if valor == modo_atual else 'false' }}"
+            style="flex:1;min-height:42px;border-radius:9px;cursor:pointer;
+                   font-family:inherit;font-size:13px;
+                   background:{{ 'var(--ambar)' if valor == modo_atual else 'transparent' }};
+                   color:{{ '#1a1206' if valor == modo_atual else 'var(--creme)' }};
+                   border:1px solid {{ 'var(--ambar)' if valor == modo_atual else 'var(--linha)' }}">
+      {{ rotulo }}
+    </button>
+    {% endfor %}
+  </div>
+
   <div class="moldura">
     <iframe id="previa" title="Prévia do site do {{ cfg.nome or rest.nome }}"
-            src="{{ url_previa }}?modelo={{ modelo_atual }}"></iframe>
+            src="{{ url_previa }}?modelo={{ modelo_atual }}&modo={{ modo_atual }}"></iframe>
   </div>
   <p class="nota" style="text-align:center">
     Toque num modelo abaixo pra ver mudando aqui. Só muda de verdade quando
     você apertar <strong>Usar este</strong>.
+    <br><small>Automático = segue o aparelho de quem visita.</small>
   </p>
 </div>
 
@@ -86,6 +105,7 @@
   <div class="barra">
     <form method="post" action="{{ url_for('campo.visual', slug=rest.slug) }}">
       <input type="hidden" name="modelo" id="campo-modelo" value="{{ modelo_atual }}">
+      <input type="hidden" name="modo" id="campo-modo" value="{{ modo_atual }}">
       <button class="btn" type="submit">
         Usar este — <span id="rotulo-escolhido">{{ atual.label }}</span>
       </button>
@@ -115,24 +135,55 @@ const NOME = {{ (cfg.nome or rest.nome)|tojson }};
 
 const previa   = document.getElementById('previa');
 const campo    = document.getElementById('campo-modelo');
+const campoModo = document.getElementById('campo-modo');
 const rotulo   = document.getElementById('rotulo-escolhido');
 const botaoZap = document.getElementById('zap');
 const cartoes  = [...document.querySelectorAll('.cartao')];
+const botoesModo = [...document.querySelectorAll('.modo')];
 
-function escolher(valor, label) {
-  const url = BASE + '?modelo=' + encodeURIComponent(valor);
+let modelo = {{ modelo_atual|tojson }};
+let modo   = {{ modo_atual|tojson }};
+
+function endereco() {
+  return BASE + '?modelo=' + encodeURIComponent(modelo)
+              + '&modo=' + encodeURIComponent(modo);
+}
+
+function pintar(botoes, atributo, ativo) {
+  botoes.forEach(b => {
+    const e = b.dataset[atributo] === ativo;
+    b.setAttribute('aria-pressed', e);
+    b.style.background = e ? 'var(--ambar)' : 'transparent';
+    b.style.color = e ? '#1a1206' : 'var(--creme)';
+    b.style.borderColor = e ? 'var(--ambar)' : 'var(--linha)';
+  });
+}
+
+function atualizar(label) {
+  const url = endereco();
   previa.src = url;
-  campo.value = valor;
-  rotulo.textContent = label;
+  campo.value = modelo;
+  if (campoModo) campoModo.value = modo;
+  if (label) rotulo.textContent = label;
   cartoes.forEach(c => c.setAttribute('aria-pressed',
-                                      c.dataset.modelo === valor ? 'true' : 'false'));
+                                      c.dataset.modelo === modelo ? 'true' : 'false'));
+  pintar(botoesModo, 'modo', modo);
   if (botaoZap) {
     botaoZap.href = 'https://wa.me/' + ZAP + '?text=' +
       encodeURIComponent('Olha como fica o site do ' + NOME + ': ' + url);
   }
 }
 
-cartoes.forEach(c => c.addEventListener('click',
-  () => escolher(c.dataset.modelo, c.dataset.label)));
+cartoes.forEach(c => c.addEventListener('click', () => {
+  modelo = c.dataset.modelo;
+  atualizar(c.dataset.label);
+}));
+
+/* Trocar claro/escuro mantém o modelo escolhido: o vendedor está comparando as
+   duas versões DO MESMO layout, não pulando pra outro. */
+botoesModo.forEach(b => b.addEventListener('click', () => {
+  modo = b.dataset.modo;
+  atualizar();
+}));
 </script>
 {% endblock %}

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR"{% if tema_forcado %} data-theme="{{ tema_forcado }}"{% endif %}>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -62,7 +62,7 @@
   (function(){
     try{
       var k='fdb-tema-{{ tenant.slug if tenant and tenant.slug else "site" }}';
-      var t=localStorage.getItem(k);
+      if(document.documentElement.hasAttribute('data-theme'))return;var t=localStorage.getItem(k);
       if(t!=='light'&&t!=='dark'){
         t=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)?'light':'dark';
       }

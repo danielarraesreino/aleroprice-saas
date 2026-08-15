@@ -596,3 +596,51 @@ def test_home_de_campo_mostra_o_que_esta_pronto(client, session, demo):
     assert '4,7 ★' in corpo, 'a nota tem que aparecer na lista'
     assert 'sem foto' in corpo, 'o que falta tem que estar visível'
     assert 'data-pronto="sim"' in corpo and 'data-pronto="nao"' in corpo
+
+
+# --------------------------------------------------------- claro / escuro
+
+def test_previa_mostra_o_site_no_claro_e_no_escuro(client, session, demo):
+    """"E no claro?" é metade da conversa sobre visual. Sem isso, quem decide o
+    modo é o celular de quem visita, e o vendedor não consegue mostrar."""
+    entrar(client)
+
+    escuro = client.get(f'/bar/{demo.slug}?modo=escuro').get_data(as_text=True)
+    claro = client.get(f'/bar/{demo.slug}?modo=claro').get_data(as_text=True)
+    auto = client.get(f'/bar/{demo.slug}').get_data(as_text=True)
+
+    assert 'data-theme="dark"' in escuro.split('>', 2)[0] + escuro[:400]
+    assert 'data-theme="light"' in claro[:400]
+    assert 'data-theme=' not in auto[:200], 'auto tem que seguir o aparelho'
+
+
+def test_modo_espiado_nao_grava(client, session, demo):
+    entrar(client)
+    client.get(f'/bar/{demo.slug}?modo=claro')
+
+    session.expire_all()
+    cfg = SiteConfig.query.filter_by(restaurant_id=demo.id).one()
+    assert (cfg.tema_modo or 'auto') == 'auto'
+
+
+def test_salvar_modelo_leva_o_modo_junto(client, session, demo):
+    """Quem escolheu o layout olhando no claro quer salvar o claro."""
+    entrar(client)
+
+    client.post(f'/campo/{demo.slug}/visual', data={'modelo': 'craft', 'modo': 'claro'})
+
+    session.expire_all()
+    cfg = SiteConfig.query.filter_by(restaurant_id=demo.id).one()
+    assert (cfg.modelo, cfg.tema_modo) == ('craft', 'claro')
+
+    corpo = client.get(f'/bar/{demo.slug}').get_data(as_text=True)
+    assert 'data-theme="light"' in corpo[:400], 'o modo salvo tem que valer pro visitante'
+
+
+def test_modo_invalido_nao_grava(client, session, demo):
+    entrar(client)
+    client.post(f'/campo/{demo.slug}/visual', data={'modelo': 'craft', 'modo': 'roxo'})
+
+    session.expire_all()
+    cfg = SiteConfig.query.filter_by(restaurant_id=demo.id).one()
+    assert (cfg.tema_modo or 'auto') == 'auto'

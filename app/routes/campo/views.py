@@ -161,6 +161,11 @@ def visual(slug):
             flash('Esse modelo eu não conheço — não mudei nada.', 'danger')
             return redirect(url_for('campo.visual', slug=slug))
         cfg.modelo = escolhido
+        # Claro/escuro vem junto: quem escolheu o layout olhando no claro quer
+        # salvar o claro, não voltar pro automático.
+        modo = (request.form.get('modo') or '').strip()
+        if modo in ('auto', 'claro', 'escuro'):
+            cfg.tema_modo = modo
         db.session.commit()
         flash(f'Pronto: o site do {cfg.nome or rest.nome} agora é o '
               f'{MODELOS[escolhido]["label"]}.', 'success')
@@ -173,6 +178,8 @@ def visual(slug):
         # selo "no ar". Valor órfão (modelo removido) cai no clássico, que é o
         # que o visitante do site está vendo de fato.
         modelo_atual=(cfg.modelo if modelo_valido(cfg.modelo) else MODELO_PADRAO),
+        modo_atual=(cfg.tema_modo if cfg.tema_modo in ('auto', 'claro', 'escuro')
+                    else 'auto'),
         url_previa=url_for('public.landing_slug', slug=rest.slug, _external=True),
     )
 
