@@ -9,6 +9,9 @@ nome: "Ponto 1 Bar"
 tema: pub-escuro
 
 site:
+  telefone_exibicao: "(19) 3289-2378"
+  qtd_avaliacoes: 22
+  nota_google: "4,0"
   endereco: "R. Eduardo Modesto, 54 - Barão Geraldo, Campinas - SP"
   instagram_url: "https://www.instagram.com/ponto1bar/"
   maps_query: "Ponto 1 Bar Barão Geraldo Campinas"

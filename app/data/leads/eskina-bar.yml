@@ -9,6 +9,9 @@ nome: "Eskina Bar"
 tema: boteco-ambar
 
 site:
+  telefone_exibicao: "(19) 3722-5237"
+  qtd_avaliacoes: 40
+  nota_google: "3,9"
   endereco: "R. Horácio Leonardi, 12 - Barão Geraldo, Campinas - SP"
   instagram_url: "https://www.instagram.com/eskinabarcampinas/"
   maps_query: "Eskina Bar Campinas"

@@ -12,6 +12,9 @@ nome: "Maria Bonjour Bar"
 tema: pub-escuro
 
 site:
+  telefone_exibicao: "(19) 3201-1011"
+  qtd_avaliacoes: 1951
+  nota_google: "4,6"
   vibe: pub
   descritor: "Bar de vinhos e gastronomia em Barão"
   kicker: "BARÃO GERALDO · CAMPINAS–SP"
@@ -20,7 +23,7 @@ site:
   tagline: "Vinho bom, prato caprichado e música ao vivo."
   subline: "VINHOS · CHOPES · GASTRONOMIA · MÚSICA AO VIVO"
   cidade_uf: "Barão Geraldo, Campinas–SP"
-  endereco: "R. Ana Maria de Souza, 26 — Barão Geraldo"
+  endereco: "R"
   horario: "Qua–Sáb 18h–01h · Dom 18h–23h"
   maps_query: "Maria Bonjour Bar Campinas"
   instagram_url: "https://www.instagram.com/mariabonjourbar/"

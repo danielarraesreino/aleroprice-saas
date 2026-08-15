@@ -9,6 +9,9 @@ nome: "Botequim de Barão"
 tema: boteco-ambar
 
 site:
+  telefone_exibicao: "(19) 99699-9585"
+  qtd_avaliacoes: 2
+  nota_google: "5,0"
   endereco: "Av. Santa Isabel, 513 - Barão Geraldo, Campinas - SP"
   instagram_url: "https://www.instagram.com/botequimdebarao/"
   maps_query: "Botequim de Barão Campinas"

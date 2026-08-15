@@ -1,3 +1,8 @@
+# ATENÇÃO — A CASA MUDOU DE NOME (verificado em 15/08/2026):
+# o antigo "Birits Bar" agora se chama BAR DO CARAMELO, mesmo endereço
+# (Rua Agostinho Pattaro, 127, perto da Praça do Coco). Chegar chamando pelo
+# nome antigo entrega que a lista é velha. O Instagram @birits.bar foi removido
+# daqui porque não foi confirmado para o nome novo — confirmar na visita.
 # Birits Bar — Barão Geraldo, Campinas–SP
 # Lead da campanha RMC. Foto: coloque os arquivos em
 # app/static/img/demo/birits-bar/ e aponte abaixo (hero_foto, cardapio, galeria).
@@ -5,19 +10,19 @@
 # POR QUE LIGAR PRA ELE:
 # Área aberta dificulta o garçom enxergar quem precisa. Gancho: o cliente chama e pede pelo celular, e o time foca em atender bem.
 
-nome: "Birits Bar"
+nome: "Bar do Caramelo"
 tema: boteco-ambar
 
 site:
-  endereco: "R. Agostinho Pattaro, 127 - Barão Geraldo, Campinas - SP"
-  instagram_url: "https://www.instagram.com/birits.bar/"
+  endereco: "Rua Agostinho Pattaro, 127, Barão Geraldo, Campinas - SP"
+
   maps_query: "Birits Bar Campinas"
   horario: "Qua–Sex a partir das 17h · Sáb e Dom a partir das 13h"
   vibe: boteco
   descritor: "Bar aconchegante em Barão"
   kicker: "BARÃO GERALDO · CAMPINAS–SP"
-  hero_linha1: "Birits"
-  hero_linha2: "Bar"
+  hero_linha1: "Bar do"
+  hero_linha2: "Caramelo"
   tagline: "Luz pendente, mesa na calçada e clima ameno."
   subline: "CERVEJA · PETISCOS · CALÇADA"
   cidade_uf: "Barão Geraldo, Campinas–SP"
