@@ -783,6 +783,9 @@
       <span>{% if site.qtd_avaliacoes %}{{ site.qtd_avaliacoes }} avaliações {% endif %}no Google</span>
     </p>
     {% endif %}
+    {# Sem nenhum dos três, a fileira de botões sobrava como espaço morto (e o
+       Motion ainda animava um div vazio). Bar da campanha nasce assim. #}
+    {% if site.whatsapp or dishes or site.maps_query %}
     <div class="hero-acoes" data-anim>
       {% if site.whatsapp %}
       <a class="btn" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener">Falar no WhatsApp</a>
@@ -792,6 +795,7 @@
       <a class="btn btn-vazio" href="https://www.google.com/maps/search/?api=1&query={{ site.maps_query }}" target="_blank" rel="noopener">Como chegar</a>
       {% endif %}
     </div>
+    {% endif %}
     {% if copy.scroll %}<p class="hero-rolar mono" data-anim>{{ copy.scroll }}</p>{% endif %}
   </div>
 

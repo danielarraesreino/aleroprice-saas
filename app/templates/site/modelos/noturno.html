@@ -1271,48 +1271,72 @@
      nada aqui roda e nada ficou escondido. Só transform e opacity: tudo no
      compositor, sem reflow, 60fps em celular fraco. */
   (function(){
-    if(!window.Motion || !document.documentElement.classList.contains('js-anim')) return;
+    var raiz = document.documentElement;
+    if(!window.Motion || !raiz.classList.contains('js-anim')) return;
     var animate = Motion.animate, inView = Motion.inView,
         stagger = Motion.stagger, spring = Motion.spring, hover = Motion.hover;
 
-    // 1. O cartaz sendo colado: kicker, nome, tagline, selo, show e CTA em fila.
-    animate('[data-hero]', {opacity: [0, 1], y: [22, 0]},
-            {duration: .55, delay: stagger(.07), ease: [.22, .7, .2, 1]});
+    // Rede de segurança: se qualquer receita abaixo estourar, a classe cai e
+    // tudo que estava escondido pelo estado inicial reaparece na hora. Página
+    // ilegível é falha grave; página sem animação não é.
+    function comRede(fn){
+      try{ fn(); }catch(e){ raiz.classList.remove('js-anim'); }
+    }
 
-    // 2. Scroll-reveal por seção. Sem return no callback: sobe uma vez e fica.
-    inView('.rv', function(el){
-      animate(el, {opacity: [0, 1], y: [18, 0]}, {duration: .6, ease: 'easeOut'});
-    }, {amount: .15});
+    // Aba aberta em segundo plano: o Chrome congela o rAF, a animação não anda
+    // e o conteúdo ficaria escondido até alguém olhar. Então só começamos
+    // quando a aba está visível de fato — quem abre o link em nova aba vê a
+    // entrada quando troca pra ela, nunca uma página em branco.
+    function quandoVisivel(fn){
+      if(document.visibilityState !== 'hidden') return comRede(fn);
+      var ouvir = function(){
+        if(document.visibilityState === 'hidden') return;
+        document.removeEventListener('visibilitychange', ouvir);
+        comRede(fn);
+      };
+      document.addEventListener('visibilitychange', ouvir);
+    }
 
-    // 3. A nota contando de 0 até o valor — o número é o argumento de venda.
-    //    O valor final já está no HTML: sem JS o texto continua correto.
-    inView('[data-conta]', function(el){
-      var alvo = Number(el.getAttribute('data-alvo')),
-          dec = Number(el.getAttribute('data-dec') || 0);
-      if(!isFinite(alvo) || alvo <= 0) return;
-      animate(0, alvo, {
-        duration: 1.1, ease: 'easeOut',
-        onUpdate: function(v){
-          el.textContent = v.toLocaleString('pt-BR', {
-            minimumFractionDigits: dec, maximumFractionDigits: dec
-          });
-        }
+    quandoVisivel(function(){
+      // 1. O cartaz sendo colado: kicker, nome, tagline, selo, show e CTA em fila.
+      animate('[data-hero]', {opacity: [0, 1], y: [22, 0]},
+              {duration: .55, delay: stagger(.07), ease: [.22, .7, .2, 1]});
+
+      // 2. Scroll-reveal por seção. Sem return no callback: sobe uma vez e fica.
+      inView('.rv', function(el){
+        animate(el, {opacity: [0, 1], y: [18, 0]}, {duration: .6, ease: 'easeOut'});
+      }, {amount: .15});
+
+      // 3. A nota contando de 0 até o valor — o número é o argumento de venda.
+      //    O valor final já está no HTML: sem JS o texto continua correto.
+      inView('[data-conta]', function(el){
+        var alvo = Number(el.getAttribute('data-alvo')),
+            dec = Number(el.getAttribute('data-dec') || 0);
+        if(!isFinite(alvo) || alvo <= 0) return;
+        animate(0, alvo, {
+          duration: 1.1, ease: 'easeOut',
+          onUpdate: function(v){
+            el.textContent = v.toLocaleString('pt-BR', {
+              minimumFractionDigits: dec, maximumFractionDigits: dec
+            });
+          }
+        });
+      }, {amount: .9});
+
+      // 4. Micro-interação: o botão descola do papel e a sombra dura cresce
+      //    junto (o box-shadow continua sendo do CSS; aqui só transform).
+      hover('.btn-forte', function(el){
+        animate(el, {x: -2, y: -2, scale: 1.03}, {type: spring, stiffness: 320, damping: 16});
+        return function(){
+          animate(el, {x: 0, y: 0, scale: 1}, {type: spring, stiffness: 320, damping: 20});
+        };
       });
-    }, {amount: .9});
-
-    // 4. Micro-interação: o botão descola do papel e a sombra dura cresce junto
-    //    (o box-shadow continua sendo do CSS; aqui só transform).
-    hover('.btn-forte', function(el){
-      animate(el, {x: -2, y: -2, scale: 1.03}, {type: spring, stiffness: 320, damping: 16});
-      return function(){
-        animate(el, {x: 0, y: 0, scale: 1}, {type: spring, stiffness: 320, damping: 20});
-      };
-    });
-    hover('.btn-linha', function(el){
-      animate(el, {y: -2}, {type: spring, stiffness: 340, damping: 18});
-      return function(){
-        animate(el, {y: 0}, {type: spring, stiffness: 340, damping: 22});
-      };
+      hover('.btn-linha', function(el){
+        animate(el, {y: -2}, {type: spring, stiffness: 340, damping: 18});
+        return function(){
+          animate(el, {y: 0}, {type: spring, stiffness: 340, damping: 22});
+        };
+      });
     });
   })();
 </script>
