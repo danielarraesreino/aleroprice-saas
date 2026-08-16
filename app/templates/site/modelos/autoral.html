@@ -1426,7 +1426,21 @@
     var raiz=document.documentElement;
     try{
       // A classe é o gate: só agora existe estado inicial escondido no herói.
-      raiz.classList.add('js-anim');
+      /* Aba em segundo plano não liga o portão.
+         Ctrl+clique, link aberto do WhatsApp, sessão restaurada: a aba nasce
+         oculta, e o navegador não roda animação em aba oculta. Como todo estado
+         inicial que esconde conteúdo mora atrás desta classe, ligá-la aqui
+         deixava a página EM BRANCO até alguém focar. Adia até ficar visível;
+         enquanto isso a página aparece inteira, pintada e parada. */
+      if (document.visibilityState === 'hidden') {
+        document.addEventListener('visibilitychange', function _liga() {
+          if (document.visibilityState !== 'visible') return;
+          document.removeEventListener('visibilitychange', _liga);
+          raiz.classList.add('js-anim');
+        });
+      } else {
+        raiz.classList.add('js-anim');
+      }
       REV_ARMADO=true;
 
       // Entrada do herói em cascata: título, tagline, selo de nota, CTA, foto.

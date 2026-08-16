@@ -1090,7 +1090,21 @@
   if(!window.Motion || reduce) return;
   var animate=Motion.animate, inView=Motion.inView, stagger=Motion.stagger,
       spring=Motion.spring, hover=Motion.hover;
-  document.documentElement.classList.add('js-anim');
+  /* Aba em segundo plano não liga o portão.
+     Ctrl+clique, link aberto do WhatsApp, sessão restaurada: a aba nasce
+     oculta, e o navegador não roda animação em aba oculta. Como todo estado
+     inicial que esconde conteúdo mora atrás desta classe, ligá-la aqui
+     deixava a página EM BRANCO até alguém focar. Adia até ficar visível;
+     enquanto isso a página aparece inteira, pintada e parada. */
+  if (document.visibilityState === 'hidden') {
+    document.addEventListener('visibilitychange', function _liga() {
+      if (document.visibilityState !== 'visible') return;
+      document.removeEventListener('visibilitychange', _liga);
+      document.documentElement.classList.add('js-anim');
+    });
+  } else {
+    document.documentElement.classList.add('js-anim');
+  }
 
   // 1. Entrada do hero em sequência (kicker → tagline → subline → selo → CTA).
   var heroItens=document.querySelectorAll('[data-hero]');

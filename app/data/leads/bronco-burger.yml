@@ -10,7 +10,7 @@ tema: neon-noite
 
 site:
   nota_google: '4,5'
-  avaliacoes_google: '2.757'
+  qtd_avaliacoes: 2757
   # Endereço com CEP (do lead) e telefone do painel do Maps — o (19) 2121-1020
   # que estava aqui veio do relatório gerado, não de fonte verificável.
   telefone_exibicao: "(19) 99102-4192"

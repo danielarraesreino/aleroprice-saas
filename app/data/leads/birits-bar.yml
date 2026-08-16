@@ -15,7 +15,7 @@ tema: boteco-ambar
 
 site:
   nota_google: '4,7'
-  avaliacoes_google: '371'
+  qtd_avaliacoes: 371
   endereco: "Rua Agostinho Pattaro, 127, Barão Geraldo, Campinas - SP"
 
   maps_query: "Birits Bar Campinas"
