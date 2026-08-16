@@ -1,10 +1,11 @@
-from flask import render_template, redirect, url_for, flash, request
+from flask import render_template, redirect, url_for, flash, request, jsonify
 
 from app.extensions import db
 from app.models.modelo_siteconfig import SiteConfig
 from app.routes.configsite import bp
 from app.routes.publico.views import SITE_DEFAULTS
 from app.utils.tenant import get_current_restaurant_id
+from app.utils import blob
 from app.utils.decorators import plano_minimo
 from app.utils.temas import opcoes_de_tema, tema_valido
 from app.utils.copy_site import opcoes_de_vibe, vibe_valida
@@ -13,6 +14,47 @@ from app.utils.modelos import (
 )
 
 CAMPOS = list(SITE_DEFAULTS.keys())
+
+
+@bp.post('/foto')
+@plano_minimo('site')
+def foto():
+    """O dono troca a própria foto de capa.
+
+    Existia só no Modo Campo (`campo.foto`), que é ferramenta do operador e
+    responde 404 pro cliente. No painel, o campo de capa era um texto pedindo
+    "caminho em static, ex: img/bar/foto-18.jpg" — ou seja, o dono do bar não
+    tinha como pôr foto nenhuma no site que ele paga. Quem podia era só quem
+    vendeu.
+
+    Mesma mecânica do Modo Campo: a imagem chega já reduzida pelo navegador
+    (foto de celular tem ~4MB e o 4G não sobe isso enquanto alguém espera), sobe
+    pro Vercel Blob e a resposta é JSON — recarregar a página inteira depois de
+    cada foto é lento e faz perder o resto do formulário preenchido.
+    """
+    rid = get_current_restaurant_id()
+    if not rid:
+        return jsonify({'erro': 'sessão sem restaurante'}), 400
+
+    from app.models.modelo_restaurante import Restaurante
+    rest = Restaurante.query.get(rid)
+    if rest is None:
+        return jsonify({'erro': 'restaurante não encontrado'}), 404
+
+    try:
+        url = blob.enviar(request.files.get('imagem'), rest.slug or f's{rid}')
+    except blob.UploadInvalido as e:
+        return jsonify({'erro': str(e)}), 400
+    except blob.UploadIndisponivel as e:
+        return jsonify({'erro': str(e)}), 503
+
+    cfg = SiteConfig.query.filter_by(restaurant_id=rid).first()
+    if cfg is None:
+        cfg = SiteConfig(restaurant_id=rid, nome=rest.nome)
+        db.session.add(cfg)
+    cfg.hero_foto = url
+    db.session.commit()
+    return jsonify({'ok': True, 'url': url})
 
 
 @bp.route('/', methods=['GET', 'POST'])

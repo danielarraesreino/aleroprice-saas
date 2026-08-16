@@ -16,7 +16,7 @@
   'tagline':'Frase principal (tagline)',
   'subline':'Subfrase (itens/destaques)',
   'selo_estrelas':'Selo de avaliações',
-  'hero_foto':'Foto do topo (caminho em static, ex: img/bar/foto-18.jpg)',
+  'hero_foto':'Foto do topo do site',
   'whatsapp':'WhatsApp (só números, com 55 e DDD)',
   'telefone_exibicao':'Telefone exibido',
   'endereco':'Endereço completo',
@@ -125,15 +125,36 @@
   {% macro campo_texto(campo) %}
   <div class="mb-3">
     <label class="form-label">{{ rotulos.get(campo, campo) }}</label>
-    {% if campo == 'hero_foto' and cfg and cfg.hero_foto %}
-    <div class="mb-2">
-      <img src="{{ img(cfg.hero_foto) }}" alt="Foto do topo atual" loading="lazy"
-           style="width:104px;height:64px;object-fit:cover;border-radius:8px">
-    </div>
+    {% if campo == 'hero_foto' %}
+      {# A foto de capa é escolhida do celular, não digitada.
+
+         Este campo era um texto pedindo "caminho em static, ex:
+         img/bar/foto-18.jpg" — o dono do bar não tinha como pôr foto no site
+         que ele paga. O uploader existia, mas só no Modo Campo, que é do
+         operador. Aqui é o mesmo: reduz no navegador e sobe por fetch. #}
+      <div class="d-flex align-items-start gap-3 mb-2">
+        <img id="capa-atual" alt="Foto do topo atual" loading="lazy"
+             src="{{ img(cfg.hero_foto) if cfg and cfg.hero_foto else '' }}"
+             style="width:160px;aspect-ratio:16/10;object-fit:cover;border-radius:8px;
+                    border:1px solid #dee2e6;background:#f8f9fa;
+                    {{ '' if (cfg and cfg.hero_foto) else 'display:none' }}">
+        <div class="flex-fill">
+          <label class="btn btn-outline-primary" for="capa-arquivo">
+            <i class="fas fa-camera"></i> Escolher foto do celular
+          </label>
+          <input id="capa-arquivo" type="file" accept="image/*" hidden>
+          <div class="form-text" id="capa-aviso">
+            A imagem é reduzida no seu aparelho antes de subir. JPG ou PNG.
+          </div>
+        </div>
+      </div>
+      <input type="hidden" id="capa-valor" name="hero_foto"
+             value="{{ cfg.hero_foto if cfg and cfg.hero_foto else '' }}">
+    {% else %}
+      <input class="form-control" name="{{ campo }}"
+             value="{{ cfg[campo] if cfg and cfg[campo] else '' }}"
+             placeholder="{{ dicas.get(campo, '') }}">
     {% endif %}
-    <input class="form-control" name="{{ campo }}"
-           value="{{ cfg[campo] if cfg and cfg[campo] else '' }}"
-           placeholder="{{ dicas.get(campo, '') }}">
   </div>
   {% endmacro %}
 
@@ -149,4 +170,68 @@
 
   <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Salvar identidade</button>
 </form>
+
+<script>
+/* Reduz no aparelho, não no servidor.
+ *
+ * Foto de celular tem ~4MB. Subir isso inteiro no 4G demora o suficiente pro
+ * dono achar que travou — e o servidor não teria Pillow pra reduzir depois.
+ * ~200KB sobe em segundos. Mesma técnica do Modo Campo. */
+(() => {
+  const LADO_MAX = 1600;
+  const entrada = document.getElementById('capa-arquivo');
+  const previa  = document.getElementById('capa-atual');
+  const oculto  = document.getElementById('capa-valor');
+  const aviso   = document.getElementById('capa-aviso');
+  if (!entrada) return;
+
+  const CSRF = {{ csrf_token()|tojson }};
+
+  function reduzir(file) {
+    return new Promise((ok, falha) => {
+      const img = new Image();
+      img.onload = () => {
+        const escala = Math.min(1, LADO_MAX / Math.max(img.width, img.height));
+        const cv = document.createElement('canvas');
+        cv.width = Math.round(img.width * escala);
+        cv.height = Math.round(img.height * escala);
+        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+        cv.toBlob(b => b ? ok(b) : falha(new Error('não consegui ler a imagem')),
+                  'image/jpeg', 0.82);
+        URL.revokeObjectURL(img.src);
+      };
+      img.onerror = () => falha(new Error('arquivo não parece uma imagem'));
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
+  entrada.addEventListener('change', async () => {
+    const file = entrada.files && entrada.files[0];
+    if (!file) return;
+    aviso.textContent = 'Enviando…';
+    aviso.className = 'form-text text-primary';
+    try {
+      const menor = await reduzir(file);
+      const dados = new FormData();
+      dados.append('imagem', menor, 'capa.jpg');
+      /* O upload não passa pelo <form>, então ninguém põe o token por ele. */
+      const resp = await fetch({{ url_for('configsite.foto')|tojson }}, {
+        method: 'POST', body: dados, headers: {'X-CSRFToken': CSRF},
+      });
+      const res = await resp.json();
+      if (!resp.ok) throw new Error(res.erro || 'falhou o envio');
+      previa.src = res.url;
+      previa.style.display = '';
+      oculto.value = res.url;
+      aviso.textContent = 'Foto trocada. Já está no seu site.';
+      aviso.className = 'form-text text-success';
+    } catch (e) {
+      aviso.textContent = e.message;
+      aviso.className = 'form-text text-danger';
+    } finally {
+      entrada.value = '';
+    }
+  });
+})();
+</script>
 {% endblock %}
