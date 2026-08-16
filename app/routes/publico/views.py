@@ -201,11 +201,79 @@ def landing():
     return render_template('produto/landing.html', **_contexto_produto())
 
 
+def _bares_da_feira():
+    """As barracas da feira: prévias de Barão Geraldo já montadas, lidas dos
+    mesmos leads versionados que publicam cada /bar/<slug>.
+
+    Nenhuma query e nenhum dado inventado — é o arquivo que o aplicador de
+    demos usa como fonte da verdade. Barraca só entra com produto na banca:
+    precisa de nota do Google, foto de capa e endereço em Barão. Ficam de fora
+    o bar-vitrine fictício (fonte `vitrine-da-campanha`) e lead desativado.
+
+    As fotos vêm de `img/feira/<slug>-{480,800}.jpg`: recortes 4:3 otimizados
+    (≤ 50 KB) gerados a partir das capas das demos. Vivem numa pasta própria
+    de propósito — dentro de `img/demo/<slug>/` o `fotos_do_bar()` as varreria
+    pra dentro da galeria da prévia do bar no próximo `aplicar-demos`.
+    """
+    import yaml
+    from app.utils.demos import listar_leads
+
+    static_dir = os.path.join(current_app.root_path, 'static')
+    bares = []
+    for caminho in listar_leads():
+        slug = os.path.splitext(os.path.basename(caminho))[0]
+        try:
+            with open(caminho, encoding='utf-8') as f:
+                dados = yaml.safe_load(f) or {}
+        except Exception:
+            continue
+        if not isinstance(dados, dict) or dados.get('ativo', True) is False:
+            continue
+        if (dados.get('demo') or {}).get('fonte') == 'vitrine-da-campanha':
+            continue
+        site = dados.get('site') or {}
+        nota = str(site.get('nota_google') or '').strip()
+        regiao = ' '.join(str(site.get(k) or '')
+                          for k in ('endereco', 'cidade_uf', 'kicker'))
+        if not nota or 'Barão' not in regiao:
+            continue
+        if not os.path.isfile(os.path.join(static_dir, 'img', 'demo', slug, 'capa.jpg')):
+            continue
+
+        thumb = f'img/feira/{slug}-480.jpg'
+        grande = f'img/feira/{slug}-800.jpg'
+        tem_thumb = os.path.isfile(os.path.join(static_dir, 'img', 'feira', f'{slug}-480.jpg'))
+        bares.append({
+            'slug': slug,
+            'nome': (dados.get('nome') or slug).strip(),
+            'nota': nota,
+            'avaliacoes': site.get('qtd_avaliacoes'),
+            'descritor': (site.get('descritor') or '').strip(),
+            # Lead novo sem recorte gerado ainda: cai na capa original. Pesada,
+            # mas a barraca aparece — gerar o recorte é otimização, não requisito.
+            'foto_480': thumb if tem_thumb else f'img/demo/{slug}/capa.jpg',
+            'foto_800': grande if (tem_thumb and os.path.isfile(
+                os.path.join(static_dir, 'img', 'feira', f'{slug}-800.jpg'))) else None,
+        })
+
+    # Quem tem mais avaliação abre a feira: volume é o argumento (1.951 pesa
+    # mais que qualquer adjetivo), e a ordem fica estável entre deploys.
+    bares.sort(key=lambda b: (-(b['avaliacoes'] or 0), b['nome']))
+    return bares
+
+
 def _contexto_produto():
     """Dados comerciais da landing de venda. Vêm de env pra não versionar
     número de telefone nem preço — os dois mudam sem deploy."""
     zap = (os.environ.get('FEIRA_WHATSAPP') or '').strip()
     msg = urllib.parse.quote('Oi! Vi o Feira de Barão e quero saber como funciona pro meu bar.')
+
+    bares = _bares_da_feira()
+    com_nota = [float(b['nota'].replace(',', '.')) for b in bares]
+    nota_media = (f"{sum(com_nota) / len(com_nota):.1f}".replace('.', ',')
+                  if com_nota else None)
+
+    from app.utils.modelos import opcoes_de_modelo
     return {
         'zap_url': f'https://wa.me/{zap}?text={msg}' if zap else '#preco',
         'preco': os.environ.get('FEIRA_PRECO', 'R$ 197'),
@@ -215,6 +283,11 @@ def _contexto_produto():
             'Site no ar, reservas, cardápio digital e o sistema de custos completo. '
             'Sem taxa de setup e sem fidelidade — se não servir, você sai.'
         ),
+        'bares': bares,
+        'total_bares': len(bares),
+        'total_avaliacoes': sum(b['avaliacoes'] or 0 for b in bares),
+        'nota_media': nota_media,
+        'modelos': opcoes_de_modelo(),
     }
 
 

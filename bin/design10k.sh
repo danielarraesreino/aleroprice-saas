@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # design-10k — teste dos 5 segundos.  uso: bash design10k.sh arquivo.html
 f="$1"; [ -f "$f" ] || { echo "uso: bash design10k.sh arquivo.html"; exit 1; }
-F=$(tr '\n' ' ' < "$f")
+F=$(tr '\n' ' ' < "$f")                      # achata: <img> quebrado em 3 linhas é a regra
 IMGS=$(printf '%s' "$F" | grep -oE '<img[^>]*>')
 n(){ printf '%s' "$1" | grep -c "$2"; }
 r(){ printf '%-30s %-8s %s\n' "$1" "$2" "$3"; }
