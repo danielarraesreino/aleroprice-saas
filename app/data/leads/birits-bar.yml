@@ -14,6 +14,7 @@ nome: "Bar do Caramelo"
 tema: boteco-ambar
 
 site:
+  hero_foto: "img/demo/birits-bar/capa.jpg"
   nota_google: '4,7'
   qtd_avaliacoes: 371
   endereco: "Rua Agostinho Pattaro, 127, Barão Geraldo, Campinas - SP"

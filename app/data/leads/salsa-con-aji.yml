@@ -12,6 +12,7 @@ nome: "Salsa con Ají"
 tema: praia-claro
 
 site:
+  hero_foto: "img/demo/salsa-con-aji/capa.jpg"
   qtd_avaliacoes: 357
   nota_google: "4,6"
   vibe: praia

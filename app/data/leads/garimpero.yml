@@ -9,6 +9,7 @@ nome: "Cervejaria Garimpero"
 tema: pub-escuro
 
 site:
+  hero_foto: "img/demo/garimpero/capa.jpg"
   instagram_url: "https://www.instagram.com/cervejariagarimpero/"
   maps_query: "Cervejaria Garimpero Barão Geraldo Campinas"
   horario: "Qua–Qui 17h–02h · Sáb 14h–02h · Dom 14h–22h"

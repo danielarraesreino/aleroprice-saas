@@ -9,6 +9,7 @@ nome: "Ponto 1 Bar"
 tema: pub-escuro
 
 site:
+  hero_foto: "img/demo/ponto-1/capa.jpg"
   telefone_exibicao: "(19) 3289-2378"
   qtd_avaliacoes: 22
   nota_google: "4,0"

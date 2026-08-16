@@ -9,6 +9,7 @@ nome: "Barão do Espeto"
 tema: boteco-ambar
 
 site:
+  hero_foto: "img/demo/barao-do-espeto/capa.jpg"
   nota_google: '4,4'
   qtd_avaliacoes: 183
   telefone_exibicao: "(19) 99681-4466"

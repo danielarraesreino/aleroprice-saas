@@ -9,6 +9,7 @@ nome: "Cervejaria Tábuas"
 tema: pub-escuro
 
 site:
+  hero_foto: "img/demo/tabuas/capa.jpg"
   instagram_url: "https://www.instagram.com/tabuascervejaria/"
   maps_query: "Cervejaria Tábuas Barão Geraldo Campinas"
   horario: "Ter 17h–22h · Qua 17h30–23h · Qui–Sex 17h30–00h · Sáb 12h–00h · Dom 16h–22h"

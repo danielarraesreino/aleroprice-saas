@@ -14,6 +14,7 @@ nome: "Toca do Tatu"
 tema: boteco-ambar
 
 site:
+  hero_foto: "img/demo/toca-do-tatu/capa.jpg"
   telefone_exibicao: "(19) 3289-0955"
   qtd_avaliacoes: 15
   nota_google: "3,8"

@@ -9,6 +9,7 @@ nome: "Cervejaria Campinas"
 tema: pub-escuro
 
 site:
+  hero_foto: "img/demo/cervejaria-campinas/capa.jpg"
   instagram_url: "https://www.instagram.com/cervejariacampinas/"
   maps_query: "Cervejaria Campinas Tap House Barão Geraldo"
   horario: "Ter–Qui 15h–23h · Sex 13h–23h · Sáb 10h–23h · Dom 10h–19h"

@@ -9,6 +9,7 @@ nome: "Barbieri Futebol & Bar"
 tema: boteco-ambar
 
 site:
+  hero_foto: "img/demo/barbieri/capa.jpg"
   instagram_url: "https://www.instagram.com/barbieri_futebolebar/"
   maps_query: "Barbieri Futebol e Bar Campinas"
   horario: "Ter e Qui 18h–00h · Sáb 18h–00h · Dom 12h–20h"

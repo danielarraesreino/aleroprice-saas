@@ -49,8 +49,17 @@ LUZ = {
     'boteco-ambar': ('luz âmbar quente de lâmpadas incandescentes, madeira '
                      'escura envernizada pelo uso, azulejo branco antigo com '
                      'rejunte escurecido'),
-    'neon-noite':   ('luz de neon magenta e ciano refletindo em superfícies '
-                     'escuras, preto fosco, aço escovado, contraste alto'),
+    # O neon é ACENTO, não a luz principal.
+    #
+    # A primeira versão pedia "neon magenta e ciano refletindo em superfícies
+    # escuras, preto fosco, contraste alto" — e o modelo entregou uma caverna
+    # magenta onde não dava pra ver o bar. Bar real com identidade neon tem luz
+    # quente de trabalho no balcão e neon nas bordas; dizer isso explicitamente
+    # é o que separa "hamburgueria à noite" de "porão roxo".
+    'neon-noite':   ('luz quente de trabalho iluminando o balcão e as mesas, '
+                     'com letreiros de neon magenta e ciano ao fundo apenas '
+                     'como acento colorido nas bordas do quadro; ambiente '
+                     'legível e bem exposto, nunca escuro demais'),
     'pub-escuro':   ('luz baixa de lâmpadas de filamento, verde-garrafa, couro '
                      'gasto, latão opaco e madeira maciça escura'),
     'praia-claro':  ('luz natural de fim de tarde, turquesa e areia, madeira '

@@ -14,6 +14,7 @@ nome: "Estação Barão"
 tema: boteco-ambar
 
 site:
+  hero_foto: "img/demo/estacao-barao/capa.jpg"
   telefone_exibicao: "(19) 99109-1080"
   qtd_avaliacoes: 26
   nota_google: "4,8"

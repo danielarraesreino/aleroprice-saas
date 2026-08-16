@@ -9,6 +9,7 @@ nome: "Bar do Frango"
 tema: boteco-ambar
 
 site:
+  hero_foto: "img/demo/bar-do-frango/capa.jpg"
   instagram_url: "https://www.instagram.com/bardofrangobaraogeraldo/"
   maps_query: "Bar do Frango Barão Geraldo Campinas"
   horario: "Seg–Sex 16h–23h · Sáb 12h–23h"

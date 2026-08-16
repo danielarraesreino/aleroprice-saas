@@ -9,6 +9,7 @@ nome: "Bronco Burger"
 tema: neon-noite
 
 site:
+  hero_foto: "img/demo/bronco-burger/capa.jpg"
   nota_google: '4,5'
   qtd_avaliacoes: 2757
   # Endereço com CEP (do lead) e telefone do painel do Maps — o (19) 2121-1020

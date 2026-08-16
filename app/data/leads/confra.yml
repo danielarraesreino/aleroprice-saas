@@ -9,6 +9,7 @@ nome: "Cervejaria Confra"
 tema: pub-escuro
 
 site:
+  hero_foto: "img/demo/confra/capa.jpg"
   instagram_url: "https://www.instagram.com/cervejariaconfra/"
   maps_query: "Cervejaria Confra Barão Geraldo Campinas"
   horario: "Ter–Qua 12h–23h · Qui–Sáb 12h–00h · Dom 12h–21h"
