@@ -41,3 +41,6 @@ vendas_teste.csv
 # worktrees locais (não versionar)
 .claude/worktrees/
 .env*
+
+# Relatórios do levantamento: saída de execução, não fonte.
+scripts/saida/
