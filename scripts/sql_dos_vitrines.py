@@ -122,15 +122,33 @@ SELECT id, {txt(e.get('nome'))}, {txt(e.get('papel'))}, {txt(e.get('emoji'))}, {
     return '\n'.join(L)
 
 
+def conferencia():
+    return '\n'.join([
+        '-- Conferência: uma linha por vitrine, cada uma com 8 pratos.',
+        'SELECT r.slug, r.nome, count(d.id) AS pratos',
+        '  FROM restaurante r LEFT JOIN site_dish d ON d.restaurant_id = r.id',
+        f' WHERE r.demo_fonte = {txt(FONTE)}',
+        ' GROUP BY r.slug, r.nome ORDER BY r.slug;',
+    ])
+
+
 if __name__ == '__main__':
-    print('-- Bares-vitrine da campanha. Gerado por scripts/sql_dos_vitrines.py')
-    print('-- Idempotente: pode rodar de novo sem duplicar.')
-    print('BEGIN;')
-    for slug in VITRINES:
-        print(emitir(slug))
-    print('\nCOMMIT;')
-    print('\n-- Conferência: 6 linhas, cada uma com 8 pratos.')
-    print("SELECT r.slug, r.nome, count(d.id) AS pratos")
-    print("  FROM restaurante r LEFT JOIN site_dish d ON d.restaurant_id = r.id")
-    print(f" WHERE r.demo_fonte = {txt(FONTE)}")
-    print(" GROUP BY r.slug, r.nome ORDER BY r.slug;")
+    # Um arquivo por bar, e não um só com os seis.
+    #
+    # O arquivo único deu 38 KB e voltou `syntax error at or near "estaurante"`
+    # — "restaurante" sem o R, ou seja, o texto foi cortado no meio na hora de
+    # colar. Editor web tem limite, e SQL truncado é pior que SQL que não roda:
+    # a parte que colou pode até executar.
+    destino = sys.argv[1] if len(sys.argv) > 1 else '.'
+    os.makedirs(destino, exist_ok=True)
+
+    for n, slug in enumerate(VITRINES, 1):
+        corpo = '\n'.join([
+            f'-- {n}/{len(VITRINES)} · {slug}',
+            '-- Idempotente: pode rodar de novo sem duplicar.',
+            'BEGIN;', emitir(slug), '\nCOMMIT;', '', conferencia(),
+        ])
+        caminho = os.path.join(destino, f'{n}-{slug}.sql')
+        with open(caminho, 'w', encoding='utf-8') as f:
+            f.write(corpo + '\n')
+        print(f'{caminho}  ({len(corpo) // 1024 + 1} KB)')

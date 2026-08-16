@@ -8,6 +8,9 @@ from app.utils.tenant import get_current_restaurant_id
 from app.utils.decorators import plano_minimo
 from app.utils.temas import opcoes_de_tema, tema_valido
 from app.utils.copy_site import opcoes_de_vibe, vibe_valida
+from app.utils.modelos import (
+    MODELO_PADRAO, modelo_valido, opcoes_de_modelo,
+)
 
 CAMPOS = list(SITE_DEFAULTS.keys())
 
@@ -45,6 +48,17 @@ def index():
         if vibe and vibe_valida(vibe):
             cfg.vibe = vibe
 
+        # Modelo é a decisão maior que existe aqui — troca o esqueleto da
+        # página, não a paleta. Faltava no painel: o dono só via as 4 cores e
+        # ficava no `classico` pra sempre, sem saber que existiam outros cinco.
+        # Trocar o layout do próprio site é escolha dele, não do vendedor.
+        modelo = (request.form.get('modelo') or '').strip()
+        if modelo and modelo_valido(modelo):
+            cfg.modelo = modelo
+        modo = (request.form.get('tema_modo') or '').strip()
+        if modo in ('auto', 'claro', 'escuro'):
+            cfg.tema_modo = modo
+
         db.session.commit()
         flash('Site atualizado. Recarregue a página pública pra ver.', 'success')
         return redirect(url_for('configsite.index'))
@@ -53,4 +67,9 @@ def index():
     rest = Restaurante.query.get(rid)
     return render_template('configsite/index.html', cfg=cfg, defaults=SITE_DEFAULTS,
                            temas=opcoes_de_tema(), vibes=opcoes_de_vibe(),
+                           modelos=opcoes_de_modelo(),
+                           modelo_atual=(cfg.modelo if cfg and modelo_valido(cfg.modelo)
+                                         else MODELO_PADRAO),
+                           modo_atual=(cfg.tema_modo if cfg and cfg.tema_modo
+                                       in ('auto', 'claro', 'escuro') else 'auto'),
                            slug=(rest.slug if rest else None))
