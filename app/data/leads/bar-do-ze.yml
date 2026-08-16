@@ -27,6 +27,7 @@ nome: "Bar do Zé"
 tema: boteco-ambar
 
 site:
+  hero_foto: "img/demo/bar-do-ze/capa.jpg"
   vibe: boteco
   descritor: "Boteco de esquina, chope gelado e petisco na brasa"
   kicker: "BARÃO GERALDO · CAMPINAS–SP"
@@ -47,11 +48,13 @@ site:
 cardapio:
   - nome: "Linguiça da casa"
     descricao: "Artesanal, feita aqui, na brasa com cebola e pão de alho."
+    imagem: "img/demo/bar-do-ze/prato-linguica-da-casa.jpg"
     preco: "38,00"
     tag: "Da brasa"
     destaque: true
   - nome: "Costela na brasa"
     descricao: "Seis horas de brasa lenta, com mandioca frita e vinagrete."
+    imagem: "img/demo/bar-do-ze/prato-costela-na-brasa.jpg"
     preco: "89,00"
     tag: "Da brasa"
     destaque: true
@@ -69,6 +72,7 @@ cardapio:
     tag: "Pra dividir"
   - nome: "Chope claro"
     descricao: "Pilsen da casa, tirado com dois dedos de colarinho. 300ml."
+    imagem: "img/demo/bar-do-ze/prato-chope-claro.jpg"
     preco: "12,00"
     tag: "Torneira"
     destaque: true
