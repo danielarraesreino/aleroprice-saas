@@ -25,6 +25,12 @@
   {% endfor %}
 </div>
 
+{# Atalho pra antes de entrar no bar: mostrar as seis opções sem abrir o site
+   de nenhum cliente. Fica acima da busca porque essa é a ordem da conversa —
+   primeiro "olha o que dá pra fazer", depois "vamos montar o seu". #}
+<a class="btn fantasma" style="text-decoration:none;text-align:center;display:block"
+   href="{{ url_for('campanha.modelos') }}">🎨 Mostrar as seis caras do site</a>
+
 <div class="bloco">
   <h2>Qual bar</h2>
   <input type="search" id="busca" placeholder="Digitar nome do bar"

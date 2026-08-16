@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Modelos de site · Campanha{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-1">
+  <h2 class="mb-0"><i class="fas fa-palette text-warning"></i> As seis caras do site</h2>
+  <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('campanha.index') }}">
+    ← Funil da campanha
+  </a>
+</div>
+<p class="text-muted mb-4">
+  Cada modelo tem um bar de demonstração próprio, com o conteúdo que ele foi
+  feito pra destacar. Abra na frente do dono e mostre a diferença — nada aqui
+  mexe no site de nenhum cliente.
+</p>
+
+{% if faltando %}
+<div class="alert alert-warning py-2">
+  <strong>{{ faltando|length }} sem bar de demonstração no banco.</strong>
+  Rode <code>flask aplicar-demos</code> — os arquivos estão em
+  <code>app/data/leads/vitrine-*.yml</code>.
+</div>
+{% endif %}
+
+<div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3 mb-5">
+  {% for c in cartoes %}
+  <div class="col">
+    <div class="card h-100 {{ '' if c.pronto else 'opacity-50' }}">
+      <div class="card-body d-flex flex-column">
+        <div class="d-flex align-items-baseline gap-2 mb-1">
+          <h5 class="card-title mb-0 text-capitalize">{{ c.modelo }}</h5>
+          <small class="text-muted">{{ c.bar }}</small>
+        </div>
+        <p class="card-text mb-2">{{ c.destaque }}</p>
+        <p class="card-text text-muted small mb-3"><strong>Pra quem:</strong> {{ c.para }}</p>
+
+        <div class="mt-auto d-flex gap-2">
+          {% if c.pronto %}
+            {# `?modelo=` mostra sem gravar: o site salvo do bar continua o que era. #}
+            <a class="btn btn-sm btn-primary flex-fill" target="_blank" rel="noopener"
+               href="{{ url_for('public.landing_slug', slug=c.slug, modelo=c.modelo) }}">
+              Ver prévia
+            </a>
+            <a class="btn btn-sm btn-outline-secondary" target="_blank" rel="noopener"
+               title="Mesmo modelo, versão clara"
+               href="{{ url_for('public.landing_slug', slug=c.slug, modelo=c.modelo, modo='claro') }}">
+              ☀
+            </a>
+            <a class="btn btn-sm btn-outline-secondary" target="_blank" rel="noopener"
+               title="Mesmo modelo, versão escura"
+               href="{{ url_for('public.landing_slug', slug=c.slug, modelo=c.modelo, modo='escuro') }}">
+              ☾
+            </a>
+          {% else %}
+            <span class="btn btn-sm btn-outline-secondary disabled flex-fill">
+              falta aplicar
+            </span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title">Como usar no bar</h5>
+    <ol class="mb-3">
+      <li class="mb-2">
+        <strong>Mostre as opções.</strong> Abra esta página no celular e vá
+        tocando em <em>Ver prévia</em>. Pergunte qual se parece mais com a casa
+        dele — ele responde olhando, não imaginando.
+      </li>
+      <li class="mb-2">
+        <strong>Aplique no bar dele.</strong> Em
+        <a href="{{ url_for('campo.index') }}">Modo Campo</a>, abra o bar e use o
+        bloco <em>3 · A cara do site</em>: a prévia fica no topo e muda a cada
+        toque. Só o botão <em>Aplicar</em> grava.
+      </li>
+      <li>
+        <strong>Feche.</strong> Bloco <em>8 · Fechar</em> cria a conta do dono.
+        Depois que o dinheiro entrar, o bloco <em>8 · Recebi</em> registra até
+        quando ele pagou — sem isso o site degrada pra gratuito no fim do teste.
+      </li>
+    </ol>
+    <p class="text-muted small mb-0">
+      Os seis bares acima são fictícios, criados só pra demonstração. Eles
+      aparecem na lista do Modo Campo com o prefixo <code>vitrine-</code> —
+      não são leads e não devem ser visitados.
+    </p>
+  </div>
+</div>
+{% endblock %}
