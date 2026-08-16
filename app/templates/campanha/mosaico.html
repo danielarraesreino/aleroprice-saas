@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Mosaico · Campanha{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
+  <h2 class="mb-0"><i class="fas fa-table-cells text-warning"></i> O que sai hoje</h2>
+  <div class="d-flex gap-2">
+    <a class="btn btn-sm {{ 'btn-warning' if so_barao else 'btn-outline-secondary' }}"
+       href="{{ url_for('campanha.mosaico', barao=1) }}">Só Barão</a>
+    <a class="btn btn-sm {{ 'btn-outline-secondary' if so_barao else 'btn-warning' }}"
+       href="{{ url_for('campanha.mosaico') }}">Todos</a>
+    <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('campanha.index') }}">Funil</a>
+  </div>
+</div>
+<p class="text-muted mb-4">
+  {{ resumo.com_capa }} de {{ resumo.total }} com foto de capa ·
+  {{ resumo.clientes }} já são clientes.
+  Ordenado por número de avaliações — quem tem mais gente passando na porta vem primeiro.
+</p>
+
+<div class="row row-cols-2 row-cols-md-3 row-cols-xl-4 g-3">
+  {% for c in cartoes %}
+  <div class="col">
+    <div class="card h-100 {{ 'border-warning' if c.vitrine }}">
+      {# A capa é a razão do cartão existir: o vendedor reconhece o bar pela
+         foto antes de ler o nome. Sem capa, o buraco tem que gritar. #}
+      {% if c.capa %}
+        <img class="card-img-top" loading="lazy" alt="Capa de {{ c.nome }}"
+             src="{{ url_for('static', filename=c.capa) }}"
+             style="aspect-ratio:16/10;object-fit:cover">
+      {% else %}
+        <div class="card-img-top d-flex align-items-center justify-content-center
+                    bg-light text-danger border-bottom"
+             style="aspect-ratio:16/10">
+          <small><i class="fas fa-triangle-exclamation"></i> sem capa</small>
+        </div>
+      {% endif %}
+
+      <div class="card-body p-2 d-flex flex-column">
+        <div class="d-flex align-items-start justify-content-between gap-1">
+          <strong class="small lh-sm">{{ c.nome }}</strong>
+          {% if c.vitrine %}<span class="badge bg-warning text-dark">demo</span>
+          {% elif not c.eh_demo %}<span class="badge bg-primary">{{ c.plano }}</span>{% endif %}
+        </div>
+
+        <div class="small text-muted mt-1">
+          {% if c.nota %}
+            <span class="text-warning">★</span> {{ c.nota }}
+            {% if c.avaliacoes %}<span class="text-nowrap">({{ c.avaliacoes }})</span>{% endif %}
+          {% else %}
+            <span class="text-danger">sem nota</span>
+          {% endif %}
+          · {{ c.fotos }} foto{{ '' if c.fotos == 1 else 's' }}
+        </div>
+
+        {% if c.horario %}
+        <div class="small text-muted text-truncate" title="{{ c.horario }}">
+          {{ c.horario }}
+        </div>
+        {% endif %}
+
+        <div class="mt-auto pt-2 d-flex gap-1">
+          <a class="btn btn-sm btn-primary flex-fill" target="_blank" rel="noopener"
+             href="{{ url_for('public.landing_slug', slug=c.slug) }}">Ver</a>
+          <a class="btn btn-sm btn-outline-secondary"
+             title="Editar no Modo Campo"
+             href="{{ url_for('campo.editar', slug=c.slug) }}">✎</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% if not cartoes %}
+<div class="alert alert-warning">
+  Nenhum bar. Rode <code>flask aplicar-demos</code> para carregar os leads.
+</div>
+{% endif %}
+{% endblock %}

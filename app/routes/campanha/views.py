@@ -92,6 +92,72 @@ VITRINE = (
 )
 
 
+@bp.route('/mosaico')
+def mosaico():
+    """Os bares numa tela só, com a capa de cada um — o que sai hoje.
+
+    A pergunta antes de ir pra rua é "o que eu levo": quais prévias estão
+    prontas de verdade e quais ainda abrem sem foto. Uma a uma isso são 23
+    abas; aqui é uma rolagem.
+
+    Fica no celular durante a visita: cada cartão leva pra prévia (mostrar ao
+    dono) e pro Modo Campo (editar na mesa).
+    """
+    if not _e_operador():
+        abort(404)
+
+    import glob
+    import os
+    from flask import current_app, request
+
+    from app.models.modelo_siteconfig import SiteConfig
+
+    tenants = Restaurante.query.order_by(Restaurante.nome).all()
+    cfgs = {c.restaurant_id: c for c in SiteConfig.query.all()}
+    raiz = os.path.join(current_app.static_folder, 'img', 'demo')
+
+    so_barao = request.args.get('barao') == '1'
+
+    cartoes = []
+    for t in tenants:
+        if not t.slug:
+            continue
+        cfg = cfgs.get(t.id)
+        regiao = f'{getattr(cfg, "cidade_uf", "") or ""} {getattr(cfg, "endereco", "") or ""}'
+        if so_barao and 'Barão Geraldo' not in regiao:
+            continue
+
+        # Conta o que existe em disco, não o que o banco diz: o aplicador pode
+        # não ter rodado ainda, e um cartão dizendo "tem foto" sem foto é o
+        # tipo de surpresa que se descobre na frente do dono.
+        fotos = glob.glob(os.path.join(raiz, t.slug, '*.jpg'))
+        cartoes.append({
+            'slug': t.slug,
+            'nome': t.nome,
+            'capa': (f'img/demo/{t.slug}/capa.jpg'
+                     if os.path.exists(os.path.join(raiz, t.slug, 'capa.jpg')) else None),
+            'fotos': len(fotos),
+            'nota': getattr(cfg, 'nota_google', None) if cfg else None,
+            'avaliacoes': getattr(cfg, 'qtd_avaliacoes', None) if cfg else None,
+            'horario': getattr(cfg, 'horario', None) if cfg else None,
+            'eh_demo': (t.tipo_conta or 'cliente') == 'demo',
+            'plano': plano_efetivo(t),
+            'vitrine': t.demo_fonte == FONTE_VITRINE,
+        })
+
+    # Mais avaliações primeiro: é o bar com mais gente passando na porta, e é
+    # com quem vale gastar a próxima hora.
+    cartoes.sort(key=lambda c: -(c['avaliacoes'] or 0))
+
+    resumo = {
+        'total': len(cartoes),
+        'com_capa': sum(1 for c in cartoes if c['capa']),
+        'clientes': sum(1 for c in cartoes if not c['eh_demo']),
+    }
+    return render_template('campanha/mosaico.html', cartoes=cartoes,
+                           resumo=resumo, so_barao=so_barao)
+
+
 @bp.route('/modelos')
 def modelos():
     """As seis caras do site, prontas pra mostrar na mesa.
