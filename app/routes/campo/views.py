@@ -135,15 +135,31 @@ def basico(slug):
 
 @bp.post('/<slug>/estilo')
 def estilo(slug):
+    """Grava a cara do site: modelo, claro/escuro, cor e tom, de uma vez.
+
+    Os quatro vêm no mesmo formulário porque é uma decisão só na conversa ("a
+    cara do site"), e porque a prévia ao lado já mostrou o conjunto — salvar em
+    partes deixaria o site num estado que o dono não chegou a ver.
+
+    Preset conhecido ou nada, campo a campo: valor estranho não escreve e não
+    derruba os outros três.
+    """
     rest = _bar(slug)
     cfg = _config(rest)
+    modelo = (request.form.get('modelo') or '').strip()
+    modo = (request.form.get('modo') or '').strip()
     tema = request.form.get('tema')
     vibe = request.form.get('vibe')
+    if modelo and modelo_valido(modelo):
+        cfg.modelo = modelo
+    if modo in ('auto', 'claro', 'escuro'):
+        cfg.tema_modo = modo
     if tema and tema_valido(tema):
         cfg.tema = tema
     if vibe and vibe_valida(vibe):
         cfg.vibe = vibe
     db.session.commit()
+    flash('Aplicado — é assim que o cliente dele vai ver.', 'success')
     return redirect(url_for('campo.editar', slug=slug))
 
 

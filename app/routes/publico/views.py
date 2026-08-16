@@ -18,8 +18,8 @@ from app.utils.site_router import (
     tenant_por_slug, url_canonica, url_do_cardapio,
 )
 from app.utils import seo
-from app.utils.temas import css_do_tema, cor_do_tema
-from app.utils.copy_site import copy_da_vibe
+from app.utils.temas import css_do_tema, cor_do_tema, tema_valido
+from app.utils.copy_site import copy_da_vibe, vibe_valida
 from app.utils.modelos import MODELO_PADRAO, arquivo_do_modelo, modelo_valido
 from app.utils.planos import pode, precos
 from app.utils.tenant import limite_excedido
@@ -87,6 +87,20 @@ def _render_landing(rest):
     cfg = getattr(rest, 'site_config', None) if rest else None
     tema = getattr(cfg, 'tema', None) if cfg else None
     vibe = getattr(cfg, 'vibe', None) if cfg else None
+
+    # Cor e tom também se espiam por querystring, igual ao modelo.
+    #
+    # O seletor do Modo Campo mostra a página mudando enquanto o dono escolhe,
+    # e sem isto metade dos controles (cor, tom) não movia nada na prévia — o
+    # vendedor tinha que salvar pra descobrir o resultado, no meio da conversa.
+    # Mesma regra fechada de sempre: preset conhecido ou nada, e nunca grava.
+    tema_espiado = (request.args.get('tema') or '').strip()
+    vibe_espiada = (request.args.get('vibe') or '').strip()
+    if tema_valido(tema_espiado):
+        tema = tema_espiado
+    if vibe_valida(vibe_espiada):
+        vibe = vibe_espiada
+
     copy = copy_da_vibe(vibe, site.get('nome') or '')
 
     # Qual layout renderizar. `?modelo=<x>` é a prévia do vendedor: troca o

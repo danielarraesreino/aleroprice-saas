@@ -62,14 +62,61 @@
 <div class="bloco">
   <h2>3 · A cara do site</h2>
 
-  {# Modelo vem antes de cor e tom porque é a decisão grande: trocar o
-     esqueleto refaz a página inteira, e a paleta se escolhe em cima do que
-     ficou. Link e não seletor — lá tem a prévia do lado. #}
-  <a class="btn" style="text-decoration:none;margin-bottom:14px"
-     href="{{ url_for('campo.visual', slug=rest.slug) }}">🎨 Escolher o modelo do site</a>
+  {# A prévia fica no topo do bloco e muda a cada toque, sem gravar nada: a
+     conversa no bar é "e assim?", não "salva e vê". O iframe carrega o site
+     real com ?modelo=&tema=&vibe=&modo=, que a landing sabe espiar sem
+     persistir — só o botão Aplicar escreve no banco. #}
+  <div style="position:relative;border:1px solid var(--linha);border-radius:12px;
+              overflow:hidden;margin-bottom:14px;background:#000">
+    <iframe id="previa" title="Prévia do site"
+            src="{{ url_for('public.landing_slug', slug=rest.slug) }}"
+            style="width:100%;height:340px;border:0;display:block"
+            loading="lazy"></iframe>
+    <span id="previa-carregando" aria-live="polite"
+          style="position:absolute;inset:auto 8px 8px auto;font-size:11px;
+                 padding:3px 8px;border-radius:20px;background:rgba(0,0,0,.65);
+                 color:#fff;opacity:0;transition:opacity .15s">atualizando…</span>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:16px">
+    <a class="btn fantasma" style="text-decoration:none;flex:1;text-align:center"
+       href="{{ url_for('campo.visual', slug=rest.slug) }}">Ver em tela cheia</a>
+    <button class="btn fantasma" type="button" id="previa-recarregar"
+            style="flex:none">↻</button>
+  </div>
 
   <form method="post" action="{{ url_for('campo.estilo', slug=rest.slug) }}" id="form-estilo">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    {# Modelo vem antes de cor e tom porque é a decisão grande: trocar o
+       esqueleto refaz a página inteira, e a paleta se escolhe em cima do que
+       ficou. #}
+    <p class="nota" style="margin:0 0 8px">Modelo</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:16px">
+      {% for m in modelos %}
+      <label style="display:block;padding:11px;cursor:pointer;
+                    border:1px solid {{ 'var(--ambar)' if modelo_atual == m.valor else 'var(--linha)' }};
+                    border-radius:10px;margin:0">
+        <input type="radio" name="modelo" value="{{ m.valor }}"
+               {% if modelo_atual == m.valor %}checked{% endif %}>
+        <span style="font-size:13px;font-weight:600">{{ m.label }}</span>
+        <span class="nota" style="display:block;margin:3px 0 0;font-size:11px">{{ m.para }}</span>
+      </label>
+      {% endfor %}
+    </div>
+
+    <p class="nota" style="margin:0 0 8px">Claro ou escuro</p>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">
+      {% for valor, rotulo_modo in [('auto','Automático'), ('claro','Claro'), ('escuro','Escuro')] %}
+      <label style="display:block;padding:11px;cursor:pointer;text-align:center;
+                    border:1px solid {{ 'var(--ambar)' if modo_atual == valor else 'var(--linha)' }};
+                    border-radius:10px;margin:0">
+        <input type="radio" name="modo" value="{{ valor }}"
+               {% if modo_atual == valor %}checked{% endif %}>
+        <span style="font-size:13px">{{ rotulo_modo }}</span>
+      </label>
+      {% endfor %}
+    </div>
+
     <p class="nota" style="margin:0 0 8px">Cores</p>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:16px">
       {% for t in temas %}
@@ -421,9 +468,47 @@ btnDominio.addEventListener('click', async () => {
   }
 });
 
-/* Escolher cor ou tom aplica na hora: em campo ninguém procura o botão Salvar. */
-document.querySelectorAll('#form-estilo input[type=radio]').forEach(r => {
-  r.addEventListener('change', () => document.getElementById('form-estilo').submit());
-});
+/* Escolher mostra na prévia; só Aplicar grava.
+ *
+ * Antes, qualquer radio dava submit no form: o site do bar mudava de verdade a
+ * cada toque e a página recarregava inteira, jogando o vendedor de volta pro
+ * topo no meio da conversa. Pior, o dono via a mudança já valendo antes de
+ * dizer que gostou. Agora o toque só troca o `src` do iframe — a landing sabe
+ * espiar `?modelo=&tema=&vibe=&modo=` sem gravar nada. */
+(() => {
+  const form = document.getElementById('form-estilo');
+  const previa = document.getElementById('previa');
+  if (!form || !previa) return;
+
+  const aviso = document.getElementById('previa-carregando');
+  const BASE = {{ url_for('public.landing_slug', slug=rest.slug)|tojson }};
+  let pendente;
+
+  function atualizar() {
+    const d = new FormData(form);
+    const q = new URLSearchParams();
+    for (const campo of ['modelo', 'tema', 'vibe', 'modo']) {
+      const v = d.get(campo);
+      if (v) q.set(campo, v);
+    }
+    if (aviso) aviso.style.opacity = '1';
+    previa.src = `${BASE}?${q}`;
+  }
+
+  previa.addEventListener('load', () => { if (aviso) aviso.style.opacity = '0'; });
+
+  form.querySelectorAll('input[type=radio]').forEach(r => {
+    /* Debounce curto: tocar em modelo e cor em seguida dispararia duas cargas
+       no 4G do bar, e a primeira chegaria depois da segunda. */
+    r.addEventListener('change', () => {
+      clearTimeout(pendente);
+      pendente = setTimeout(atualizar, 120);
+    });
+  });
+
+  document.getElementById('previa-recarregar')?.addEventListener('click', atualizar);
+
+  /* Abre já mostrando o que está salvo, sem querystring nenhuma. */
+})();
 </script>
 {% endblock %}
