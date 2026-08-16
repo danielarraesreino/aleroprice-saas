@@ -270,6 +270,7 @@
     Renovar antes de vencer soma os dias que faltam, não joga fora.
   </p>
   <form method="post" action="{{ url_for('campo.pagamento', slug=rest.slug) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label for="p-plano">Plano</label>
     <select id="p-plano" name="plano">
       <option value="site">Site — {{ precos.site }}/mês</option>
