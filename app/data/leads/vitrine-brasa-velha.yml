@@ -1,0 +1,89 @@
+# Brasa Velha — VITRINE DO MODELO `brasa`. Bar fictício, não existe na rua.
+#
+# O modelo brasa põe porção, tamanho e preço no centro da página. Então aqui o
+# cardápio diz quantas pessoas cada porção serve e o peso do corte — que é a
+# pergunta real na mesa de espetaria ("dá pra dois?") e o que faz a diferença
+# entre um card bonito e um card útil.
+#
+# Preço em todos os itens: sem isso o modelo brasa perde a coluna de números que
+# é a espinha dele, e o `offers.price` do JSON-LD fica vazio.
+
+nome: "Brasa Velha"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Espetaria de fogo de chão, corte pesado e porção que serve mesa"
+  kicker: "BARÃO GERALDO · CAMPINAS–SP"
+  hero_linha1: "Brasa"
+  hero_linha2: "Velha"
+  tagline: "Fogo de chão desde as dez da manhã. O corte sai quando fica pronto."
+  subline: "PICANHA · COSTELA · FRALDINHA · MANDIOCA"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+  endereco: "Rua da Demonstração, 700 - Barão Geraldo, Campinas - SP"
+  telefone_exibicao: "(19) 99999-0007"
+  whatsapp: "5519999990007"
+  horario: "Qui–Sex 18h–00h · Sáb 12h–00h · Dom 12h–18h"
+  nota_google: '4,6'
+  qtd_avaliacoes: 894
+
+cardapio:
+  - nome: "Costela fogo de chão"
+    descricao: "8 horas de brasa lenta, 1,2kg com osso. Serve 3 a 4 pessoas. Vai com mandioca e vinagrete."
+    preco: "168,00"
+    tag: "Serve 3–4"
+    destaque: true
+  - nome: "Picanha na tábua"
+    descricao: "800g fatiada na mesa, ponto ao gosto. Serve 2 a 3. Acompanha farofa de ovo e pão de alho."
+    preco: "149,00"
+    tag: "Serve 2–3"
+    destaque: true
+  - nome: "Fraldinha na chapa"
+    descricao: "600g em tiras, cebola caramelizada por cima. Serve 2. Vai com arroz biro-biro."
+    preco: "112,00"
+    tag: "Serve 2"
+  - nome: "Linguiça artesanal"
+    descricao: "500g, feita aqui com pimenta calabresa. Serve 2. Com pão na brasa e mostarda."
+    preco: "58,00"
+    tag: "Serve 2"
+  - nome: "Costelinha suína com melado"
+    descricao: "700g glaceada em melado de cana e alecrim. Serve 2. Doce e defumada."
+    preco: "94,00"
+    tag: "Serve 2"
+  - nome: "Mandioca na manteiga de garrafa"
+    descricao: "Cozida e frita na hora, 400g. Serve 2 a 3. O acompanhamento que todo mundo pede duas vezes."
+    preco: "36,00"
+    tag: "Acompanha"
+  - nome: "Farofa de ovo e bacon"
+    descricao: "Feita na hora com farinha de mandioca torrada. Serve 3."
+    preco: "24,00"
+    tag: "Acompanha"
+  - nome: "Espeto de queijo coalho com melado"
+    descricao: "Duas unidades, tostado na brasa. Serve 1."
+    preco: "22,00"
+    tag: "Espeto"
+
+avaliacoes:
+  - autor: "Wagner D."
+    texto: "Costela desmancha no garfo. Pedimos uma pra quatro e sobrou. Preço justo pelo tamanho."
+    estrelas: 5
+  - autor: "Simone R."
+    texto: "O cardápio diz quantas pessoas cada porção serve, o que evita aquele constrangimento de pedir errado. Detalhe pequeno que fez diferença."
+    estrelas: 5
+  - autor: "Otávio L."
+    texto: "Fui no domingo ao meio-dia, brasa já acesa desde cedo. Mandioca na manteiga de garrafa é obrigatória."
+    estrelas: 4
+
+equipe:
+  - nome: "Seu Dito"
+    papel: "Assador, 40 anos de fogo de chão"
+    emoji: "🔥"
+  - nome: "Márcia"
+    papel: "Cozinha e acompanhamentos"
+    emoji: "🍚"
+  - nome: "Léo"
+    papel: "Salão"
+    emoji: "🥩"
+
+demo:
+  fonte: vitrine-da-campanha

@@ -1,0 +1,90 @@
+# Sala Vermelha — VITRINE DO MODELO `noturno`. Casa fictícia, não existe na rua.
+#
+# O noturno sobe a agenda pro topo: quem chega por esta página veio pelo show,
+# não pela comida. Por isso o cardápio aqui é curto e de balcão (drinks e
+# petisco de mão), e o peso está na agenda — que o aplicador de leads ainda não
+# grava, então os shows entram pelo painel (`/agenda`) depois de aplicar.
+#
+# Enquanto a agenda real não é cadastrada, a prévia mostra os eventos de exemplo
+# de `app/utils/vitrine.py`, que já existem justamente pra isso e vêm marcados
+# como exemplo.
+
+nome: "Sala Vermelha"
+tema: neon-noite
+
+site:
+  vibe: pub
+  descritor: "Casa de show pequena, palco baixo e som de gente que se importa"
+  kicker: "BARÃO GERALDO · CAMPINAS–SP"
+  hero_linha1: "Sala"
+  hero_linha2: "Vermelha"
+  tagline: "Cento e vinte lugares, palco a um metro de você."
+  subline: "SAMBA · MPB · JAZZ · QUINTA A DOMINGO"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+  endereco: "Rua da Demonstração, 900 - Barão Geraldo, Campinas - SP"
+  telefone_exibicao: "(19) 99999-0009"
+  whatsapp: "5519999990009"
+  horario: "Qui–Sáb 20h–03h · Dom 18h–00h"
+  nota_google: '4,9'
+  qtd_avaliacoes: 267
+
+cardapio:
+  - nome: "Negroni da casa"
+    descricao: "Gin nacional, vermute rosso e bitter. Servido com casca de laranja queimada."
+    preco: "38,00"
+    tag: "Balcão"
+    destaque: true
+  - nome: "Caipirinha de cachaça envelhecida"
+    descricao: "Três anos em amburana, limão siciliano, açúcar demerara."
+    preco: "34,00"
+    tag: "Balcão"
+    destaque: true
+  - nome: "Gin tônica com pimenta rosa"
+    descricao: "Gin cítrico, tônica artesanal, pimenta rosa e alecrim maçaricado."
+    preco: "36,00"
+    tag: "Balcão"
+  - nome: "Chope artesanal"
+    descricao: "Pilsen ou IPA, 300ml. Trocamos a torneira toda semana."
+    preco: "18,00"
+    tag: "Balcão"
+  - nome: "Croquete de costela"
+    descricao: "Seis unidades com maionese de páprica. Petisco de uma mão só — a outra segura o copo."
+    preco: "44,00"
+    tag: "Pra petiscar"
+  - nome: "Bolinho de bacalhau"
+    descricao: "Oito unidades, receita da avó do dono, com azeite e limão."
+    preco: "52,00"
+    tag: "Pra petiscar"
+  - nome: "Batata rústica com alecrim"
+    descricao: "Com maionese de ervas da casa. Serve 2."
+    preco: "32,00"
+    tag: "Pra petiscar"
+  - nome: "Couvert artístico"
+    descricao: "Por pessoa, cobrado só nos dias de show. Vai inteiro pros músicos."
+    preco: "25,00"
+    tag: "Show"
+
+avaliacoes:
+  - autor: "Letícia B."
+    texto: "Som impecável pra uma casa desse tamanho. Dá pra conversar entre uma música e outra sem gritar."
+    estrelas: 5
+  - autor: "Marcos V."
+    texto: "Couvert vai inteiro pro músico e eles falam isso na cara dura. Voltei três vezes só por causa disso."
+    estrelas: 5
+  - autor: "Juliana C."
+    texto: "Palco baixo, você fica colado na banda. Cheguei 20h30 numa sexta e já estava cheio — vá cedo ou reserve."
+    estrelas: 5
+
+equipe:
+  - nome: "Dedé"
+    papel: "Dono e curador da programação"
+    emoji: "🎷"
+  - nome: "Fabiana"
+    papel: "Bar e coquetelaria"
+    emoji: "🍸"
+  - nome: "Serginho"
+    papel: "Som e palco"
+    emoji: "🎚️"
+
+demo:
+  fonte: vitrine-da-campanha

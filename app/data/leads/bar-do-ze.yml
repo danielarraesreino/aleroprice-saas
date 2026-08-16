@@ -1,0 +1,107 @@
+# Bar do Zé — BAR-VITRINE DA CAMPANHA. Não é lead, não existe na rua.
+#
+# Pra que serve
+# ------------
+# Os 6 modelos se diferenciam por QUAL seção manda na página: craft destaca
+# chope, autoral destaca foto de prato, brasa destaca porção com preço, noturno
+# destaca agenda. Com os leads de hoje (todos com `cardapio: []`), os seis
+# renderizam a mesma coisa — capa, nota, contato — e trocar de modelo não muda
+# nada visível. Este bar existe pra resolver isso: é o único com TODAS as seções
+# cheias, e é nele que se abre `/bar/bar-do-ze?modelo=craft`, `?modelo=brasa`,
+# etc. pra mostrar as opções ao dono antes de mexer no bar dele.
+#
+# Por que inventado, e por que sem foto
+# -------------------------------------
+# Nome fictício, cardápio fictício, avaliações fictícias: nenhum dado de bar
+# real é usado aqui, então não há terceiro sendo exposto numa página de
+# demonstração. Pelo mesmo motivo não há `hero_foto` nem `galeria` — foto de
+# bar real neste arquivo seria exatamente o problema que ele evita. Quando
+# houver imagem própria ou licenciada, ela entra em
+# app/static/img/demo/bar-do-ze/ e o aplicador acha sozinha.
+#
+# Os textos das avaliações são escritos e assinados com primeiro nome + inicial,
+# como depoimento de demonstração. Não copie review real do Google para cá: é
+# texto de autoria de outra pessoa.
+
+nome: "Bar do Zé"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Boteco de esquina, chope gelado e petisco na brasa"
+  kicker: "BARÃO GERALDO · CAMPINAS–SP"
+  hero_linha1: "Bar"
+  hero_linha2: "do Zé"
+  tagline: "O boteco que a rua inteira chama de sala de casa."
+  subline: "CHOPE GELADO · BRASA · SAMBA DE SEXTA"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+  endereco: "Rua da Demonstração, 100 - Barão Geraldo, Campinas - SP"
+  telefone_exibicao: "(19) 99999-0000"
+  whatsapp: "5519999990000"
+  horario: "Ter–Qui 17h–23h · Sex 17h–01h · Sáb 12h–01h · Dom 12h–20h"
+  nota_google: '4,7'
+  qtd_avaliacoes: 348
+
+# Preço em todos: é o que o modelo `brasa` coloca no centro da página, e é o que
+# alimenta `offers.price` no JSON-LD (a faixa de preço que o Google mostra).
+cardapio:
+  - nome: "Linguiça da casa"
+    descricao: "Artesanal, feita aqui, na brasa com cebola e pão de alho."
+    preco: "38,00"
+    tag: "Da brasa"
+    destaque: true
+  - nome: "Costela na brasa"
+    descricao: "Seis horas de brasa lenta, com mandioca frita e vinagrete."
+    preco: "89,00"
+    tag: "Da brasa"
+    destaque: true
+  - nome: "Bolinho de feijoada"
+    descricao: "Oito unidades, com couve crocante e uma pitada de laranja."
+    preco: "42,00"
+    tag: "Pra dividir"
+  - nome: "Frango a passarinho"
+    descricao: "Alho, limão e cheiro-verde. A porção que não sai da mesa."
+    preco: "48,00"
+    tag: "Pra dividir"
+  - nome: "Pastel de queijo com goiabada"
+    descricao: "Seis unidades. Doce e salgado, como pediu a dona Cida."
+    preco: "28,00"
+    tag: "Pra dividir"
+  - nome: "Chope claro"
+    descricao: "Pilsen da casa, tirado com dois dedos de colarinho. 300ml."
+    preco: "12,00"
+    tag: "Torneira"
+    destaque: true
+  - nome: "Chope escuro"
+    descricao: "Malte torrado, corpo médio, doçura de caramelo. 300ml."
+    preco: "14,00"
+    tag: "Torneira"
+  - nome: "Caipirinha de cachaça"
+    descricao: "Cachaça de alambique de Salinas, limão taiti, açúcar na medida."
+    preco: "22,00"
+    tag: "Balcão"
+
+avaliacoes:
+  - autor: "Marina S."
+    texto: "Chope gelado de verdade e atendimento de quem conhece você pelo nome. A linguiça da casa vale a viagem."
+    estrelas: 5
+  - autor: "Rodrigo P."
+    texto: "Vou desde a faculdade. Mudou pouca coisa, e isso é o elogio. Costela na brasa continua sendo a melhor de Barão."
+    estrelas: 5
+  - autor: "Ana Luiza F."
+    texto: "Fui na sexta com samba ao vivo, lotado mas bem organizado. Consegui mesa reservando pelo site."
+    estrelas: 4
+
+equipe:
+  - nome: "Zé"
+    papel: "Dono e chapeiro há 30 anos"
+    emoji: "🔥"
+  - nome: "Dona Cida"
+    papel: "Cozinha e os doces da casa"
+    emoji: "👩‍🍳"
+  - nome: "Tiago"
+    papel: "Balcão e chope"
+    emoji: "🍺"
+
+demo:
+  fonte: vitrine-da-campanha

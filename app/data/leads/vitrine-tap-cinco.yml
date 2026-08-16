@@ -1,0 +1,94 @@
+# Tap Cinco — VITRINE DO MODELO `craft`. Bar fictício, não existe na rua.
+#
+# Um bar-vitrine por modelo, porque um só não mostra a diferença: o `craft`
+# manda a torneira pro topo, o `brasa` manda a porção com preço, o `noturno`
+# manda a agenda. Preencher os seis com o mesmo cardápio de boteco faria os seis
+# parecerem o mesmo site de novo — que é exatamente o problema que estes
+# arquivos existem pra resolver.
+#
+# Aqui o cardápio é quase todo torneira, com estilo, IBU e teor no texto de cada
+# uma: é o que o modelo craft tem espaço pra mostrar e o que um taproom de
+# verdade colocaria. A comida é curta e serve de acompanhamento, não de atração.
+#
+# Nada de dado real: nome, textos e avaliações são escritos pra demonstração.
+
+nome: "Tap Cinco"
+tema: pub-escuro
+
+site:
+  vibe: pub
+  descritor: "Taproom com cinco torneiras rotativas e fábrica na casa ao lado"
+  kicker: "BARÃO GERALDO · CAMPINAS–SP"
+  hero_linha1: "Tap"
+  hero_linha2: "Cinco"
+  tagline: "Cinco torneiras que mudam toda semana. Nenhuma delas por acaso."
+  subline: "IPA · WEISS · STOUT · SOUR · PILSEN"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+  endereco: "Rua da Demonstração, 500 - Barão Geraldo, Campinas - SP"
+  telefone_exibicao: "(19) 99999-0005"
+  whatsapp: "5519999990005"
+  horario: "Qua–Qui 17h–23h · Sex–Sáb 16h–01h · Dom 15h–22h"
+  nota_google: '4,8'
+  qtd_avaliacoes: 512
+
+cardapio:
+  - nome: "IPA da Casa"
+    descricao: "American IPA, 6.2% · 55 IBU. Amargor cítrico de casca de laranja e final seco. Puxa toranja no aroma."
+    preco: "24,00"
+    tag: "Torneira 1"
+    destaque: true
+  - nome: "Weiss de Trigo"
+    descricao: "Hefeweizen, 5.1% · 12 IBU. Banana e cravo da levedura alemã, corpo redondo, colarinho denso."
+    preco: "22,00"
+    tag: "Torneira 2"
+    destaque: true
+  - nome: "Stout de Café"
+    descricao: "Dry stout, 5.8% · 40 IBU. Café coado do produtor da serra, chocolate amargo, final torrado."
+    preco: "26,00"
+    tag: "Torneira 3"
+    destaque: true
+  - nome: "Sour de Maracujá"
+    descricao: "Fruited sour, 4.4% · 8 IBU. Acidez limpa, polpa de maracujá fresca, refrescante e perigosa."
+    preco: "27,00"
+    tag: "Torneira 4"
+  - nome: "Pilsen Clássica"
+    descricao: "Pilsen tcheca, 4.8% · 30 IBU. Malte pilsener e lúpulo Saaz. A que o cervejeiro bebe no fim do turno."
+    preco: "20,00"
+    tag: "Torneira 5"
+  - nome: "Growler 1L pra viagem"
+    descricao: "Qualquer torneira, enchido na hora com contrapressão. Traga o seu ou leve o nosso."
+    preco: "58,00"
+    tag: "Pra levar"
+  - nome: "Tábua de frios curados"
+    descricao: "Salame italiano, presunto cru, queijo meia-cura e picles da casa. Pensada pra dividir com uma IPA."
+    preco: "72,00"
+    tag: "Pra acompanhar"
+  - nome: "Pretzel com mostarda escura"
+    descricao: "Assado aqui, sal grosso por cima, mostarda feita com a nossa stout."
+    preco: "34,00"
+    tag: "Pra acompanhar"
+
+avaliacoes:
+  - autor: "Felipe M."
+    texto: "As cinco torneiras mudam de verdade toda semana. Já provei umas quinze cervejas diferentes aqui e não repeti nenhuma sem querer."
+    estrelas: 5
+  - autor: "Carolina T."
+    texto: "Pedi ajuda pra escolher e o cara do balcão explicou cada uma sem ser chato. Saí sabendo o que é IBU."
+    estrelas: 5
+  - autor: "Bruno A."
+    texto: "Stout de café é absurda. O pretzel com a mostarda deles também. Único ponto: lota rápido na sexta."
+    estrelas: 4
+
+equipe:
+  - nome: "Rafa"
+    papel: "Cervejeiro e dono"
+    emoji: "🍺"
+  - nome: "Nina"
+    papel: "Balcão e curadoria das torneiras"
+    emoji: "🎯"
+  - nome: "Caio"
+    papel: "Cozinha"
+    emoji: "🥨"
+
+demo:
+  fonte: vitrine-da-campanha

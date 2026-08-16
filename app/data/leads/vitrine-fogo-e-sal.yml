@@ -1,0 +1,91 @@
+# Fogo & Sal — VITRINE DO MODELO `autoral`. Casa fictícia, não existe na rua.
+#
+# O autoral abre com foto grande de prato e assinatura de quem cozinha. Então
+# aqui o cardápio é curto (oito pratos, não trinta), cada descrição nomeia a
+# técnica e a origem do ingrediente, e a equipe traz a chef primeiro — é o que a
+# página coloca em destaque.
+#
+# Preço mais alto que os outros vitrines de propósito: bistrô autoral e boteco
+# não competem na mesma faixa, e ver os dois lado a lado mostra ao dono que o
+# modelo acompanha o posicionamento da casa dele.
+
+nome: "Fogo & Sal"
+tema: praia-claro
+
+site:
+  vibe: praia
+  descritor: "Cozinha autoral de fogo, menu curto que muda com a feira"
+  kicker: "BARÃO GERALDO · CAMPINAS–SP"
+  hero_linha1: "Fogo"
+  hero_linha2: "& Sal"
+  tagline: "Oito pratos por vez. Mudam quando a feira muda."
+  subline: "FOGO · FERMENTAÇÃO · PRODUTOR LOCAL"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+  endereco: "Rua da Demonstração, 300 - Barão Geraldo, Campinas - SP"
+  telefone_exibicao: "(19) 99999-0003"
+  whatsapp: "5519999990003"
+  horario: "Ter–Sáb 19h–23h30 · Dom 12h–16h"
+  nota_google: '4,8'
+  qtd_avaliacoes: 421
+
+cardapio:
+  - nome: "Barriga de porco, milho e limão queimado"
+    descricao: "Porco de produtor da serra, 12 horas em baixa temperatura e finalizada na brasa. Creme de milho verde e limão maçaricado."
+    preco: "78,00"
+    tag: "Principal"
+    destaque: true
+  - nome: "Pirarucu na folha de bananeira"
+    descricao: "Pirarucu de manejo do Amazonas, assado na folha com azeite de urucum. Farofa de castanha."
+    preco: "92,00"
+    tag: "Principal"
+    destaque: true
+  - nome: "Ravióli de abóbora e queijo canastra"
+    descricao: "Massa fresca feita na casa, abóbora cabotiá assada, canastra meia-cura e sálvia na manteiga."
+    preco: "68,00"
+    tag: "Principal"
+  - nome: "Arroz de costela e ora-pro-nóbis"
+    descricao: "Costela desfiada em caldo próprio, arroz cremoso e ora-pro-nóbis da horta da casa."
+    preco: "72,00"
+    tag: "Principal"
+  - nome: "Beterraba na brasa com labneh"
+    descricao: "Beterraba assada inteira nas cinzas, labneh de leite de cabra, mel de laranjeira e dukkah."
+    preco: "48,00"
+    tag: "Entrada"
+  - nome: "Pão de fermentação natural e manteiga de ervas"
+    descricao: "Massa de três dias, forno de pedra. Manteiga batida na casa com ervas do quintal."
+    preco: "28,00"
+    tag: "Entrada"
+  - nome: "Sorvete de rapadura com azeite e flor de sal"
+    descricao: "Feito aqui, sem base pronta. O azeite e o sal por cima não são enfeite."
+    preco: "34,00"
+    tag: "Doce"
+  - nome: "Menu do chef — 5 tempos"
+    descricao: "O que veio de melhor da feira naquele dia. Precisa avisar na reserva."
+    preco: "210,00"
+    tag: "Menu"
+    destaque: true
+
+avaliacoes:
+  - autor: "Renata A."
+    texto: "Menu curto e tudo funcionava junto. A barriga de porco com o limão queimado é o tipo de prato que a gente lembra semanas depois."
+    estrelas: 5
+  - autor: "Gustavo H."
+    texto: "A chef passou nas mesas explicando o que tinha chegado da feira naquele dia. Isso muda a refeição inteira."
+    estrelas: 5
+  - autor: "Paula M."
+    texto: "Preço condiz com o que é servido. Fizemos o menu de cinco tempos no aniversário e valeu cada real."
+    estrelas: 5
+
+equipe:
+  - nome: "Chef Bia Rangel"
+    papel: "Cozinha e criação do menu"
+    emoji: "👩‍🍳"
+  - nome: "Tomás"
+    papel: "Fermentação e panificação"
+    emoji: "🍞"
+  - nome: "Duda"
+    papel: "Salão e harmonização"
+    emoji: "🍷"
+
+demo:
+  fonte: vitrine-da-campanha

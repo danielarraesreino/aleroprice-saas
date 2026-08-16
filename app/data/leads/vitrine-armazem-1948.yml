@@ -1,0 +1,90 @@
+# Armazém 1948 — VITRINE DO MODELO `tradicional`. Casa fictícia, não existe na rua.
+#
+# O tradicional põe a história da casa na frente: fundação, família, os pratos
+# que não saem do cardápio desde sempre. O texto da seção de história vem da
+# vibe (`copy_site.py`), não deste arquivo — o que dá o tom aqui é o cardápio,
+# onde cada prato carrega o ano ou a geração que o trouxe.
+#
+# É o modelo pros bares mais antigos de Barão (Estação Barão de 1953, Ponto 1 de
+# 1978, Buteco do Jair de 1989): o que eles têm e o bar novo não tem é tempo, e
+# o site precisa dizer isso na primeira dobra.
+
+nome: "Armazém 1948"
+tema: boteco-ambar
+
+site:
+  vibe: boteco
+  descritor: "Armazém e bar desde 1948, três gerações no mesmo balcão"
+  kicker: "BARÃO GERALDO · CAMPINAS–SP"
+  hero_linha1: "Armazém"
+  hero_linha2: "1948"
+  tagline: "Setenta e sete anos no mesmo balcão de madeira."
+  subline: "DESDE 1948 · TRÊS GERAÇÕES · RECEITA DA NONNA"
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+  endereco: "Rua da Demonstração, 48 - Barão Geraldo, Campinas - SP"
+  telefone_exibicao: "(19) 99999-0048"
+  whatsapp: "5519999990048"
+  horario: "Seg–Sex 11h–15h e 17h–23h · Sáb 11h–23h · Dom 11h–16h"
+  nota_google: '4,7'
+  qtd_avaliacoes: 1203
+
+cardapio:
+  - nome: "Polenta frita com molho de linguiça"
+    descricao: "No cardápio desde 1948. A receita é da nonna Assunta e nunca foi anotada — passa de cabeça, de geração em geração."
+    preco: "46,00"
+    tag: "Desde 1948"
+    destaque: true
+  - nome: "Bife à parmegiana"
+    descricao: "Entrou em 1971, quando o filho assumiu a cozinha. Serve 2, com arroz, fritas e o molho que sobra pro pão."
+    preco: "98,00"
+    tag: "Desde 1971"
+    destaque: true
+  - nome: "Macarronada de domingo"
+    descricao: "Só aos domingos, desde sempre. Molho de seis horas com costela e linguiça. Enquanto durar a panela."
+    preco: "76,00"
+    tag: "Só domingo"
+  - nome: "Bolinho de arroz da casa"
+    descricao: "Do arroz que sobrou de ontem, como manda a tradição. Dez unidades."
+    preco: "32,00"
+    tag: "Desde 1948"
+  - nome: "Filé de tilápia à milanesa"
+    descricao: "Entrou em 1996, na terceira geração. Com arroz, purê e limão."
+    preco: "68,00"
+    tag: "Desde 1996"
+  - nome: "Sopa de capeletti"
+    descricao: "Massa fechada à mão toda manhã. De maio a agosto, quando esfria em Barão."
+    preco: "42,00"
+    tag: "No inverno"
+  - nome: "Pudim de leite da vovó"
+    descricao: "Assado em banho-maria no mesmo forno de 1948. Furinho pequeno, do jeito certo."
+    preco: "22,00"
+    tag: "Doce"
+  - nome: "Cafezinho coado no pano"
+    descricao: "Coador de flanela, como o seu Antônio fazia. Sai o dia inteiro."
+    preco: "5,00"
+    tag: "Balcão"
+
+avaliacoes:
+  - autor: "Dona Neusa P."
+    texto: "Venho aqui desde criança, hoje trago meus netos. A polenta é exatamente a mesma. Isso não tem preço."
+    estrelas: 5
+  - autor: "Roberto S."
+    texto: "Macarronada de domingo é um programa de família. Chegue antes do meio-dia ou não pega."
+    estrelas: 5
+  - autor: "Ellen F."
+    texto: "Lugar de história, atendimento de gente que conhece o freguês pelo nome. Parmegiana serve dois com folga."
+    estrelas: 5
+
+equipe:
+  - nome: "Seu Antônio (in memoriam)"
+    papel: "Fundador, 1948"
+    emoji: "🕰️"
+  - nome: "Dona Lúcia"
+    papel: "Segunda geração, cozinha"
+    emoji: "👵"
+  - nome: "Marcelo"
+    papel: "Terceira geração, salão e balcão"
+    emoji: "☕"
+
+demo:
+  fonte: vitrine-da-campanha
