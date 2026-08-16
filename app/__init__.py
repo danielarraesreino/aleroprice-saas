@@ -174,6 +174,12 @@ def create_app(config_name='default'):
         'static',
         'public.landing', 'public.landing_slug', 'public.landing_tenant',
         'public.reservar', 'public.robots', 'public.sitemap',
+        # O cardápio é o QR colado na mesa: tem que abrir no endereço do bar.
+        # Fora daqui ele levava 302 pro domínio do produto — o cliente sentado
+        # via a barra do navegador trocar de bardavila.bar pra feiradebarao, e
+        # o `Menu.url` do JSON-LD (que aponta pro domínio do bar) virava um
+        # redirecionamento pra outro host, que o Google trata como sinal fraco.
+        'public.cardapio',
     }
 
     @app.before_request

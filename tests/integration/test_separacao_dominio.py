@@ -42,6 +42,26 @@ def test_site_do_bar_responde_no_dominio_dele(client, bar, rota):
     assert resp.status_code == 200
 
 
+def test_cardapio_abre_no_dominio_do_bar(client, bar, session):
+    """O QR colado na mesa aponta pro domínio do bar e tem que abrir ali.
+
+    Sem `public.cardapio` na allowlist, o cliente sentado apontava a câmera e
+    via a barra do navegador trocar de bardavila.bar pra feiradebarao.com.br —
+    e o `Menu.url` do JSON-LD, que publica o endereço do bar, virava um
+    redirecionamento pra outro host.
+    """
+    from app.models.modelo_sitecontent import DishCard
+    # A página só existe com prato ativo (ver `_render_cardapio`); sem isto o
+    # 404 mascararia o 302 que este teste procura.
+    session.add(DishCard(restaurant_id=bar.id, nome='Costelinha', ativo=True))
+    session.commit()
+
+    resp = client.get('/bar/bar-da-vila/cardapio', headers={'Host': CLIENTE})
+
+    assert resp.status_code == 200, (
+        f'cardápio saiu do domínio do bar (foi pra {resp.headers.get("Location")})')
+
+
 def test_reserva_funciona_no_dominio_do_bar(client, bar):
     """O formulário de reserva está na própria página — mandá-lo para outro
     domínio quebraria o fetch e o cliente do bar ficaria sem resposta."""
