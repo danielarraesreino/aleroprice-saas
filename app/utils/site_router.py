@@ -155,6 +155,30 @@ def url_canonica(rest):
     return f'https://{produto}/s/{rest.id}'
 
 
+def url_do_cardapio(rest):
+    """Endereço absoluto do cardápio QR deste bar, ou None quando não há.
+
+    É a URL que vira QR colado na mesa e que o JSON-LD publica em `Menu.url`,
+    então precisa de duas garantias: ser absoluta (papel impresso não tem base
+    href) e responder de fato.
+
+    Por isso o caminho é sempre `/bar/<slug>/cardapio`, que é a rota registrada
+    e que atende em qualquer Host — inclusive no domínio próprio do bar. A
+    origem acompanha a canônica (domínio do bar quando ele tem um): quem lê o
+    cardápio na mesa fica no endereço do bar, não no do produto.
+
+    Bar sem slug (linha antiga, que só responde em /s/<id>) devolve None: sem
+    endereço de cardápio, ninguém publica link pra ele.
+    """
+    if rest is None:
+        return None
+    slug = (getattr(rest, 'slug', None) or '').strip()
+    if not slug:
+        return None
+    dominio = normalizar_host(getattr(rest, 'dominio', None)) or dominio_do_produto()
+    return f'https://{dominio}/bar/{slug}/cardapio'
+
+
 def url_do_sistema(caminho='/auth/login'):
     """Endereço absoluto do sistema, no domínio do produto.
 

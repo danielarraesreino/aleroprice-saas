@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+{# Cardápio QR: a página que abre quando o cliente aponta a câmera pro adesivo
+   da mesa.
+
+   É a única página do site que nasce sabendo onde vai ser lida: sentado, com
+   uma mão, no 4G do bar, com o garçom esperando. Tudo aqui é consequência
+   disso — sem fonte de CDN (a landing carrega 4 famílias do Google Fonts;
+   aqui a primeira linha de texto não pode esperar rede), sem animação, sem
+   imagem acima da dobra que não seja prato, sem JavaScript.
+
+   Read-only: mostra o que tem e quanto custa. Não há carrinho, pedido nem
+   pagamento — o QR substitui o cardápio plastificado, não o garçom.
+
+   Autocontido de propósito: não estende os modelos de landing. Os 6 modelos
+   existem para o bar ter cara própria na vitrine; o cardápio da mesa tem uma
+   função só e a mesma forma em todos eles. O que muda entre bares é a paleta,
+   que entra por `tema_css` igual à landing. #}
+<html lang="pt-BR"{% if tema_forcado %} data-theme="{{ tema_forcado }}"{% endif %}>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Cardápio — {{ site.nome }}</title>
+<meta name="description" content="Cardápio do {{ site.nome }}{% if site.cidade_uf %} — {{ site.cidade_uf }}{% endif %}.">
+
+{# Endereço único desta página, o mesmo que o QR carrega e o mesmo que o
+   `Menu.url` do JSON-LD publica. O bar responde em domínio próprio e em
+   /bar/<slug>: sem canonical, o Google vê dois cardápios. #}
+<link rel="canonical" href="{{ url_canonica }}">
+
+{% if tenant and tenant.eh_demo %}
+{# Prévia comercial: mesma regra da landing. O bar não pediu este site e não
+   pode ser indexado no lugar do negócio real. Ver app/utils/demos.py. #}
+<meta name="robots" content="noindex,nofollow,noarchive">
+{% endif %}
+
+{# Dados estruturados: o nó `Menu` com os mesmos `@id` da landing, agora com
+   `url` apontando pra cá — cardápio em HTML é o que o schema.org pede em
+   `hasMenu`. Ver app/utils/seo.py. #}
+{% if json_ld %}
+<script type="application/ld+json">{{ json_ld|safe }}</script>
+{% endif %}
+
+<meta property="og:site_name" content="{{ site.nome }}">
+<meta property="og:title" content="Cardápio — {{ site.nome }}">
+<meta property="og:description" content="O que sai da cozinha do {{ site.nome }}.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:url" content="{{ url_canonica }}">
+{# Mesma regra da landing: card com foto só se a foto for DESTE bar. #}
+{% if site.hero_foto %}
+<meta property="og:image" content="{{ 'https://' ~ request.host ~ url_for('static', filename=site.hero_foto) }}">
+{% endif %}
+<meta name="theme-color" content="{{ tema_cor or '#100a06' }}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon-32.png') }}">
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
+<style>
+  /* Mesma paleta do :root da landing (boteco-ambar). Os presets de
+     app/utils/temas.py sobrescrevem estas variáveis logo abaixo, então o
+     cardápio sai na cor do bar sem repetir tema nenhum aqui. */
+  :root{
+    --ink:#100a06; --ink-2:#1c120b; --wood:#2a170d;
+    --cream:#f6e9d2; --cream-dim:#cdb69a;
+    --amber:#ffb43d; --ember:#ff6a2b; --gold:#e8a33d;
+    --neon:#ffca57; --green:#7ea850;
+    --linha:rgba(246,233,210,.14);
+  }
+  :root[data-theme="light"]{
+    --ink:#f6e9d2; --ink-2:#efe0c4; --wood:#e6d2ad;
+    --cream:#2a170d; --cream-dim:#6b4a2c;
+    --amber:#b3660f; --ember:#c8431a; --gold:#a86f1c;
+    --neon:#8a4b12; --green:#5d7d34;
+    --linha:rgba(42,23,13,.16);
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--ink); color:var(--cream);
+    /* Fonte do sistema: a da landing vem de CDN e atrasaria a primeira
+       palavra do cardápio no 4G do bar. */
+    font:17px/1.5 ui-serif,Georgia,"Times New Roman",serif;
+    /* Trava de rolagem lateral: nenhum item pode empurrar a página pro lado
+       num aparelho de 375px. */
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:640px; margin:0 auto; padding:0 18px}
+  a{color:var(--amber)}
+  img{max-width:100%}
+
+  header{padding:26px 0 18px}
+  .eyebrow{
+    margin:0 0 6px; font-family:ui-sans-serif,system-ui,sans-serif;
+    font-size:12px; font-weight:700; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--amber);
+  }
+  h1{
+    margin:0; font-size:clamp(28px,8vw,40px); line-height:1.1; font-weight:700;
+    /* Nome comprido de bar não pode estourar a tela de 375px. */
+    overflow-wrap:anywhere;
+  }
+  .lead{margin:10px 0 0; color:var(--cream-dim); font-size:15px}
+
+  h2{
+    margin:26px 0 12px; padding-bottom:8px; border-bottom:1px solid var(--linha);
+    font-family:ui-sans-serif,system-ui,sans-serif;
+    font-size:12px; font-weight:700; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--cream-dim);
+  }
+
+  ul.itens{list-style:none; margin:0; padding:0}
+  li.item{
+    display:flex; gap:14px; align-items:flex-start;
+    padding:16px 0; border-bottom:1px solid var(--linha);
+  }
+  li.item:last-child{border-bottom:0}
+  .foto{
+    flex:0 0 auto; width:84px; height:84px; border-radius:10px;
+    object-fit:cover; background:var(--ink-2); display:block;
+  }
+  /* min-width:0 é o que permite o texto quebrar dentro do flex em vez de
+     alargar a linha e criar rolagem lateral. */
+  .txt{flex:1 1 auto; min-width:0}
+  .linha{
+    display:flex; gap:10px; align-items:baseline; justify-content:space-between;
+  }
+  .nome{
+    margin:0; font-size:18px; font-weight:600; line-height:1.25;
+    overflow-wrap:anywhere;
+  }
+  .preco{
+    flex:0 0 auto; font-family:ui-sans-serif,system-ui,sans-serif;
+    font-size:16px; font-weight:700; color:var(--amber); white-space:nowrap;
+  }
+  .desc{margin:6px 0 0; font-size:15px; color:var(--cream-dim); overflow-wrap:anywhere}
+  .tag{
+    display:inline-block; margin-top:8px; padding:3px 9px; border-radius:999px;
+    font-family:ui-sans-serif,system-ui,sans-serif; font-size:10px; font-weight:700;
+    letter-spacing:.1em; text-transform:uppercase;
+    color:var(--ink); background:var(--amber);
+  }
+
+  footer{
+    margin-top:32px; padding:22px 0 max(28px,env(safe-area-inset-bottom));
+    border-top:1px solid var(--linha);
+    font-family:ui-sans-serif,system-ui,sans-serif; font-size:14px;
+  }
+  .acoes{display:flex; flex-wrap:wrap; gap:10px}
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center;
+    /* 48px de altura: alvo de toque de quem está segurando o celular com uma
+       mão só, do outro lado da mesa. */
+    min-height:48px; padding:12px 18px; border-radius:999px;
+    font-weight:600; text-decoration:none;
+    border:1px solid var(--linha); color:var(--cream);
+  }
+  .btn.zap{background:#25d366; border-color:#25d366; color:#04240f}
+  .rodape-nota{margin:14px 0 0; color:var(--cream-dim); font-size:12px}
+</style>
+{# Paleta do bar. Vazia no tema padrão — o :root acima já é ele. #}
+{% if tema_css %}<style>{{ tema_css|safe }}</style>{% endif %}
+{% if tenant and tenant.eh_demo %}
+<style>
+  .previa{
+    position:fixed; left:0; right:0; bottom:0; z-index:200;
+    background:#1b1206; border-top:2px solid var(--amber,#ffb43d); color:#f3e7d2;
+    font-family:ui-sans-serif,system-ui,sans-serif; font-size:.82rem;
+    padding:10px 14px; display:flex; gap:10px; align-items:center;
+    justify-content:center; flex-wrap:wrap; text-align:center;
+  }
+  .previa b{color:var(--amber,#ffb43d)}
+  .previa a{
+    color:#231206; background:var(--amber,#ffb43d); text-decoration:none;
+    font-weight:700; padding:8px 14px; border-radius:999px; white-space:nowrap;
+  }
+  body{padding-bottom:120px}
+</style>
+{% endif %}
+</head>
+<body>
+
+{% if tenant and tenant.eh_demo %}
+{# Prévia comercial: dizer em alto e bom som que este não é o site oficial é o
+   que separa demonstração de clone não autorizado. Igual à landing. #}
+<div class="previa" role="complementary">
+  <span><b>Prévia não oficial</b> — demonstração do Feira de Barão.
+  Não é o cardápio oficial de {{ site.nome }}.</span>
+  <a href="mailto:{{ email_vendas }}?subject={{ ('Remover prévia: ' ~ site.nome) | urlencode }}">Pedir remoção</a>
+</div>
+{% endif %}
+
+<div class="wrap">
+  <header>
+    {# Um <h1> só na página, e ele é o nome do bar: quem lê pelo QR já sabe
+       onde está, mas o buscador e o leitor de tela precisam da identidade. #}
+    <p class="eyebrow">Cardápio</p>
+    <h1>{{ site.nome }}</h1>
+    {% if copy.cardapio.lead %}<p class="lead">{{ copy.cardapio.lead }}</p>{% endif %}
+  </header>
+
+  <main>
+    {% for grupo in grupos %}
+    {% set primeiro_grupo = loop.first %}
+    <section>
+      {# Título só quando o cardápio se divide de verdade em dois blocos —
+         ver `_grupos_do_cardapio`. #}
+      {% if grupo.titulo %}<h2>{{ grupo.titulo }}</h2>{% endif %}
+      <ul class="itens">
+        {% for d in grupo.itens %}
+        <li class="item">
+          {% if d.img %}
+          {# width/height reservam o espaço antes de a foto chegar: sem eles a
+             lista pula sob o dedo no meio da leitura. A primeira entra sem
+             `lazy` (está na primeira tela); o resto espera a rolagem.
+
+             `alt` vazio de propósito: o nome do prato vem logo ao lado, em
+             texto. Repeti-lo aqui faria o leitor de tela anunciar o mesmo
+             prato duas vezes antes de chegar ao preço. #}
+          <img class="foto" src="{{ d.img }}" alt=""
+               width="84" height="84" decoding="async"
+               {% if not (primeiro_grupo and loop.first) %}loading="lazy"{% endif %}>
+          {% endif %}
+          <div class="txt">
+            <div class="linha">
+              <h3 class="nome">{{ d.nome }}</h3>
+              {# `moeda_br` devolve "R$ 0,00" pra None: sem este `if`, prato sem
+                 preço passaria a anunciar comida de graça. #}
+              {% if d.preco %}<span class="preco">{{ d.preco|moeda_br }}</span>{% endif %}
+            </div>
+            {% if d.descricao %}<p class="desc">{{ d.descricao }}</p>{% endif %}
+            {% if d.tag %}<span class="tag">{{ d.tag }}</span>{% endif %}
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endfor %}
+  </main>
+
+  <footer>
+    <div class="acoes">
+      {# Rótulo curto, sem o nome do bar: "Ver o site do Bar da Vila Nova
+         Esperança do Norte" vira botão de três linhas no celular. #}
+      <a class="btn" href="{{ url_do_site }}">Ver o site do bar</a>
+      {% if site.whatsapp %}
+      <a class="btn zap" href="https://wa.me/{{ site.whatsapp }}">Falar no WhatsApp</a>
+      {% endif %}
+    </div>
+    {# Preço muda; cardápio impresso mente por meses. Dizer que esta página é a
+       versão viva é o argumento do QR na mesa. #}
+    <p class="rodape-nota">Cardápio atualizado pela casa. Sujeito a alteração
+    de itens e preços.</p>
+  </footer>
+</div>
+
+</body>
+</html>

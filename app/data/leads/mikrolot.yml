@@ -9,14 +9,18 @@ nome: "Mikrolot"
 tema: neon-noite
 
 site:
+  telefone_exibicao: "(19) 98417-6000"
+  endereco: "R. João Duque, 342 - Parque Imperador, Campinas - SP, 13097-111"
   vibe: hamburgueria
-  descritor: "Hamburgueria premium no Taquaral"
-  kicker: "TAQUARAL · CAMPINAS–SP"
+  descritor: "Hamburgueria premium no Parque Imperador"
+  kicker: "PARQUE IMPERADOR · CAMPINAS–SP"
   hero_linha1: "Mikrolot"
   hero_linha2: ""
   tagline: "Angus, pão fresco e ponto na régua."
   subline: "ANGUS · PREMIUM · ARTESANAL"
-  cidade_uf: "Taquaral, Campinas–SP"
+  # O relatório trazia "Taquaral"; mikrolot.com.br (site oficial, 15/08/2026)
+  # lista só duas unidades: Parque Imperador e Swiss Park. Nenhuma no Taquaral.
+  cidade_uf: "Parque Imperador, Campinas–SP"
 
 # Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
 #   hero_foto: img/demo/mikrolot/capa.jpg

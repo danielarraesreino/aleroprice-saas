@@ -147,6 +147,20 @@
     --sobre-fogo:#1b0d04;   /* texto por cima do laranja */
 
     --maxw:1160px;
+
+    /* ---- design-10k · grade de 4px ---- */
+    --s-1:.25rem; --s-2:.5rem;  --s-3:.75rem; --s-4:1rem;  --s-5:1.5rem;
+    --s-6:2rem;   --s-7:3rem;   --s-8:4rem;   --s-9:6rem;  --s-10:8rem;
+
+    /* EIXO 4 — DENSIDADE. Espetaria é robusta, não apertada: 64 → 112px.
+       Fica acima do `craft` (48 → 72) e do `noturno` (52 → 88), e abaixo do
+       `autoral` (72 → 144) e do `tradicional` (88 → 176). */
+    --sec-y:clamp(4rem,7vw,7rem);
+    --medida:34rem;
+
+    /* EIXO 5 — porção na tábua, fotografada de cima e um pouco de lado:
+       o assunto fica abaixo do centro. */
+    --pos:50% 58%;
     --f-placa:"Staatliches","Arial Narrow",Impact,sans-serif;
     --f-peso:"Alfa Slab One",Rockwell,Georgia,serif;
     --f-texto:"Zilla Slab",Georgia,"Times New Roman",serif;
@@ -383,8 +397,42 @@
 
   /* ---------- SEÇÕES ---------- */
   /* a barra é sticky: sem a margem de rolagem o título da seção para atrás dela */
-  .sec{padding:clamp(52px,9vw,96px) 0;scroll-margin-top:62px}
+  .sec{padding-block:var(--sec-y);scroll-margin-top:62px}
+  /* Duas faixas de fundo, declaradas DEPOIS do id (o regex
+     `<section class="sec" id=` de tests/integration/test_landing_render.py
+     continua casando). Antes eram `style="background:..."` inline — o que
+     obrigava a reescrever cor em cinco lugares a cada reordenação. */
+  .sec[data-band="papel"]{background:var(--papel-2)}
+  .sec[data-band="madeira"]{background:var(--madeira)}
   .cab{max-width:44ch}
+
+  /* ============================================================
+     EIXO 3 — EIXO DE LEITURA: ASSIMÉTRICO À ESQUERDA.
+     Nada é centrado e nada é simétrico: o cabeçalho fica ancorado numa
+     coluna estreita à esquerda, o conteúdo transborda pra direita e a
+     régua de brasa corta o bloco no mesmo ponto em toda seção. É a
+     leitura de placa de açougue — uma margem só, forte, e o resto
+     empurrado. Distinto do `noturno` (cartaz centrado), do `craft`
+     (duas colunas travadas e sticky) e do `autoral` (alterna de lado).
+     ============================================================ */
+  @media(min-width:900px){
+    body[data-leitura="assimetrico"] .sec > .wrap > .cab{
+      max-width:32rem;margin-left:0;padding-left:var(--s-6);
+      border-left:8px solid var(--carne);
+    }
+    body[data-leitura="assimetrico"] .sec > .wrap > .cab .lead{max-width:var(--medida)}
+  }
+
+  /* ============================================================
+     EIXO 1 — SEÇÃO HEROÍNA: a galeria de porções.
+     Numa espetaria a decisão é tomada pelo olho: a pessoa vê a tábua
+     saindo e pede. Por isso a galeria vem logo depois do hero, na
+     primeira rolagem, é a seção mais alta e a única com título em escala
+     de display — enquanto a página fecha na promoção (EIXO 2 — cauda
+     `reservar > contato > promocoes`), que é o motivo de vir hoje.
+     ============================================================ */
+  #galeria{padding-block:calc(var(--sec-y) * 1.6)}
+  #galeria .h2{font-size:clamp(1.85rem,7vw,4.8rem)}   /* piso = o do .h2 base */
   .olho{font-family:var(--f-placa);letter-spacing:.24em;text-transform:uppercase;
     font-size:.84rem;color:var(--carne);display:block}
   :root[data-theme="dark"] .olho,:root:not([data-theme]) .olho{color:var(--fogo)}
@@ -407,7 +455,7 @@
   .porcao:nth-child(odd){--tilt:-.25deg}
   .porcao:nth-child(even){--tilt:.25deg}
   .porcao-foto{position:relative;background:var(--madeira);overflow:hidden}
-  .porcao-foto img{width:100%;height:100%;object-fit:cover;aspect-ratio:16/10;
+  .porcao-foto img{width:100%;height:100%;object-fit:cover;object-position:var(--pos);aspect-ratio:16/10;
     filter:saturate(1.2) contrast(1.08)}
   .porcao-foto::after{content:"";position:absolute;inset:0;
     background:linear-gradient(200deg,rgba(255,120,25,.14),rgba(110,22,10,.3));mix-blend-mode:multiply}
@@ -423,6 +471,13 @@
   .porcao h3{font-family:var(--f-placa);font-weight:400;text-transform:uppercase;
     letter-spacing:.03em;font-size:clamp(1.7rem,6.6vw,2.6rem);line-height:.98;
     color:var(--tinta);margin-top:6px}
+  /* Mesma fonte de placa do nome, um degrau abaixo: na churrascaria o preço é
+     pintado junto com a porção, não colado como etiqueta. `--fogo` serve os
+     dois modos sem regra extra — o apelido já troca de valor com o tema
+     (#ff8a1f na brasa, #b8480a no papel pardo). */
+  .porcao-preco{display:block;margin-top:8px;font-family:var(--f-placa);
+    font-size:clamp(1.2rem,3.6vw,1.55rem);letter-spacing:.05em;color:var(--fogo);
+    font-variant-numeric:tabular-nums}
   .porcao p{color:var(--tinta-2);margin-top:10px;font-size:1.02rem;max-width:52ch}
   .etiqueta{position:absolute;top:12px;left:12px;z-index:2;
     background:var(--fogo);color:var(--sobre-fogo);font-family:var(--f-placa);
@@ -553,11 +608,31 @@
      Amostra, não álbum: no máximo 6 fotos (o corte é no HTML) e cada uma com
      altura travada. Retrato 4/5 em grade de 2 colunas empilhava a página em
      quase 12.000px — quem rola isso no celular desiste antes do WhatsApp. */
-  .tabuleiro{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:30px}
-  @media(min-width:560px){.tabuleiro{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  /* EIXO 5 — TRATAMENTO DE FOTO: MOSAICO DENSO E ASSIMÉTRICO.
+     Grade de 4 colunas com fluxo denso: a 1ª e a 4ª foto ocupam duas
+     colunas e duas linhas, as outras preenchem os buracos. Grade simétrica
+     de 3 com 6 fotos é a cara de cardápio de delivery — a assimetria é o
+     que faz seis fotos de celular parecerem uma vitrine montada.
+     Em 375px a assimetria é desligada: com 2 colunas ela vira bagunça. */
+  .tabuleiro{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;
+    margin-top:var(--s-7)}
+  @media(min-width:560px){
+    body[data-foto="mosaico"] .tabuleiro{
+      grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-flow:dense;
+      grid-auto-rows:minmax(0,1fr);
+    }
+    body[data-foto="mosaico"] .tabuleiro > figure:nth-child(1),
+    body[data-foto="mosaico"] .tabuleiro > figure:nth-child(4){
+      grid-column:span 2;grid-row:span 2;
+    }
+    body[data-foto="mosaico"] .tabuleiro > figure:nth-child(1) img,
+    body[data-foto="mosaico"] .tabuleiro > figure:nth-child(4) img{
+      aspect-ratio:auto;height:100%;max-height:none;
+    }
+  }
   .tabuleiro figure{position:relative;margin:0;overflow:hidden;background:var(--madeira);
     border:2px solid var(--linha)}
-  .tabuleiro img{width:100%;height:100%;object-fit:cover;aspect-ratio:4/3;max-height:210px;
+  .tabuleiro img{width:100%;height:100%;object-fit:cover;object-position:var(--pos);aspect-ratio:4/3;max-height:210px;
     filter:sepia(.2) saturate(1.2) contrast(1.06);transition:transform .5s}
   .tabuleiro figure:hover img{transform:scale(1.05)}
   .tabuleiro figcaption{position:absolute;left:0;right:0;bottom:0;padding:8px 10px;
@@ -686,7 +761,7 @@
 </style>
 {% endif %}
 </head>
-<body>
+<body data-heroina="galeria" data-leitura="assimetrico" data-foto="mosaico">
 
 {% if tenant and tenant.eh_demo %}
 {# Prévia comercial: o bar ainda não é cliente e não pediu este site. Dizer isso
@@ -817,6 +892,42 @@
   </div>
 </div>
 
+<!-- ===================== GALERIA ===================== -->
+{% if gallery %}
+<section class="sec" id="galeria" aria-labelledby="t-galeria">
+  <div class="wrap">
+    <div class="cab surge">
+      <span class="olho">{{ copy.galeria.eyebrow }}</span>
+      <h2 class="h2" id="t-galeria">{{ copy.galeria.titulo|safe }}</h2>
+      {% if copy.galeria.lead %}<p class="lead">{{ copy.galeria.lead }}</p>{% endif %}
+      <div class="regua"></div>
+    </div>
+    {# TETO DE 6. O banco guarda o álbum inteiro; a página mostra a amostra.
+       As 16 fotos do Tábuas empilhadas faziam ~12.000px de rolagem — a seção
+       de reserva ficava a meia hora de scroll do dedo de quem abriu no zap. #}
+    <div class="tabuleiro surge">
+      {% for g in gallery %}{% if loop.index <= 6 %}
+      <figure>
+        <img src="{{ g.img }}"
+             {# Sem legenda cadastrada não dá pra dizer o que a foto mostra sem
+                inventar; o número ao menos separa uma da outra pra quem
+                navega a galeria por leitor de tela. #}
+             alt="{{ (g.legenda ~ ' — ' ~ site.nome) if g.legenda else (site.nome ~ ' — a casa por dentro, foto ' ~ loop.index) }}"
+             loading="lazy" decoding="async">
+        {% if g.legenda %}<figcaption>{{ g.legenda }}</figcaption>{% endif %}
+      </figure>
+      {% endif %}{% endfor %}
+    </div>
+    {% if gallery|length > 6 and site.instagram_url %}
+    <p class="mais-fotos surge">
+      <a href="{{ site.instagram_url }}" target="_blank" rel="noopener">
+        +{{ gallery|length - 6 }} fotos no Instagram →</a>
+    </p>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
 <!-- ===================== PORÇÕES ===================== -->
 {% if dishes %}
 <section class="sec" id="cardapio" aria-labelledby="t-cardapio">
@@ -845,6 +956,11 @@
         <div class="porcao-txt">
           <span class="num">{{ '%02d' % loop.index }}</span>
           <h3>{{ d.nome }}</h3>
+          {# Placa de churrascaria: o preço vem logo abaixo do nome, na mesma
+             fonte de placa, sem caixa nem etiqueta. `{% if %}` antes do filtro
+             porque `moeda_br` devolve "R$ 0,00" pra None — porção sem preço
+             não anuncia preço. #}
+          {% if d.preco %}<span class="porcao-preco">{{ d.preco|moeda_br }}</span>{% endif %}
           {% if d.descricao %}<p>{{ d.descricao }}</p>{% endif %}
           {% if d.destaque %}<span class="campea">Campeã da casa</span>{% endif %}
         </div>
@@ -855,34 +971,26 @@
 </section>
 {% endif %}
 
-<!-- ===================== PROMOÇÕES ===================== -->
-{% if promocoes %}
+<!-- ===================== O FOGO ===================== -->
 <div class="serra"></div>
-<section class="sec" id="promocoes" aria-labelledby="t-promocoes" style="background:var(--papel-2)">
+<section class="sec" id="fogo" data-band="madeira" aria-labelledby="t-fogo">
   <div class="wrap">
     <div class="cab surge">
-      <span class="olho">{{ copy.promocoes.eyebrow }}</span>
-      <h2 class="h2" id="t-promocoes">{{ copy.promocoes.titulo|safe }}</h2>
+      <span class="olho">{{ copy.clima.eyebrow }}</span>
+      <h2 class="h2" id="t-fogo">{{ copy.clima.titulo|safe }}</h2>
       <div class="regua"></div>
     </div>
-    <div class="etiquetas">
-      {% for p in promocoes %}
-      {# Recorrente (ex.: Costela de Quarta) mostra "TODA QUARTA" e acende no dia. #}
-      <article class="promo surge{% if p.acontece_hoje %} hoje{% endif %}">
-        <div class="rot">{% if p.acontece_hoje %}É hoje!{% else %}{{ p.rotulo or 'Oferta' }}{% endif %}</div>
-        <h3>{{ p.titulo }}{% if p.exemplo %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
-        {% if p.descricao %}<p>{{ p.descricao }}</p>{% endif %}
-        {% if p.dia_semana is not none and p.rotulo %}
-          <div class="val">Toda {{ p.rotulo.replace('TODA ', '')|lower }}{% if p.validade %} · até {{ p.validade.strftime('%d/%m/%Y') }}{% endif %}</div>
-        {% elif p.validade %}
-          <div class="val">Válida até {{ p.validade.strftime('%d/%m/%Y') }}</div>
-        {% endif %}
-      </article>
+    <div class="chapa-grid surge">
+      {% for emoji, titulo, sub in copy.clima.cards %}
+      <div class="chapa-card">
+        <span class="em" aria-hidden="true">{{ emoji }}</span>
+        <b>{{ titulo }}</b>
+        <small>{{ sub }}</small>
+      </div>
       {% endfor %}
     </div>
   </div>
 </section>
-{% endif %}
 
 <!-- ===================== AGENDA ===================== -->
 {% if eventos %}
@@ -915,26 +1023,38 @@
 </section>
 {% endif %}
 
-<!-- ===================== O CLIMA DA CASA ===================== -->
-<div class="serra"></div>
-<section class="sec" id="clima" aria-labelledby="t-clima" style="background:var(--madeira)">
+<!-- ===================== A CASA ===================== -->
+{% if team or gallery %}
+<section class="sec" id="casa" data-band="papel" aria-labelledby="t-casa">
   <div class="wrap">
-    <div class="cab surge">
-      <span class="olho">{{ copy.clima.eyebrow }}</span>
-      <h2 class="h2" id="t-clima">{{ copy.clima.titulo|safe }}</h2>
-      <div class="regua"></div>
-    </div>
-    <div class="chapa-grid surge">
-      {% for emoji, titulo, sub in copy.clima.cards %}
-      <div class="chapa-card">
-        <span class="em" aria-hidden="true">{{ emoji }}</span>
-        <b>{{ titulo }}</b>
-        <small>{{ sub }}</small>
+    <div class="casa">
+      <div class="surge">
+        <span class="olho">{{ copy.historia.eyebrow }}</span>
+        <h2 class="h2" id="t-casa">{{ copy.historia.titulo|safe }}</h2>
+        <div class="regua"></div>
+        <p class="corpo">{{ copy.historia.texto }}</p>
+        {% if team %}
+        <ul class="turma">
+          {% for m in team %}
+          <li>
+            {% if m.emoji %}<span class="av" aria-hidden="true">{{ m.emoji }}</span>{% endif %}
+            <span><b>{{ m.nome }}</b>{% if m.papel %}<small>{{ m.papel }}</small>{% endif %}</span>
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
       </div>
-      {% endfor %}
+      {% if gallery %}
+      <figure class="moldura surge">
+        <img src="{{ gallery[0].img }}"
+             alt="{{ (gallery[0].legenda ~ ' — ' ~ site.nome) if gallery[0].legenda else ('A casa e a equipe do ' ~ site.nome) }}"
+             loading="lazy" decoding="async">
+      </figure>
+      {% endif %}
     </div>
   </div>
 </section>
+{% endif %}
 
 <!-- ===================== AVALIAÇÕES ===================== -->
 {# NOTA e DEPOIMENTO são dados independentes e cada um se sustenta sozinho.
@@ -989,78 +1109,9 @@
 </section>
 {% endif %}
 
-<!-- ===================== A CASA ===================== -->
-{% if team or gallery %}
-<section class="sec" id="casa" aria-labelledby="t-casa" style="background:var(--papel-2)">
-  <div class="wrap">
-    <div class="casa">
-      <div class="surge">
-        <span class="olho">{{ copy.historia.eyebrow }}</span>
-        <h2 class="h2" id="t-casa">{{ copy.historia.titulo|safe }}</h2>
-        <div class="regua"></div>
-        <p class="corpo">{{ copy.historia.texto }}</p>
-        {% if team %}
-        <ul class="turma">
-          {% for m in team %}
-          <li>
-            {% if m.emoji %}<span class="av" aria-hidden="true">{{ m.emoji }}</span>{% endif %}
-            <span><b>{{ m.nome }}</b>{% if m.papel %}<small>{{ m.papel }}</small>{% endif %}</span>
-          </li>
-          {% endfor %}
-        </ul>
-        {% endif %}
-      </div>
-      {% if gallery %}
-      <figure class="moldura surge">
-        <img src="{{ gallery[0].img }}"
-             alt="{{ (gallery[0].legenda ~ ' — ' ~ site.nome) if gallery[0].legenda else ('A casa e a equipe do ' ~ site.nome) }}"
-             loading="lazy" decoding="async">
-      </figure>
-      {% endif %}
-    </div>
-  </div>
-</section>
-{% endif %}
-
-<!-- ===================== GALERIA ===================== -->
-{% if gallery %}
-<section class="sec" id="galeria" aria-labelledby="t-galeria">
-  <div class="wrap">
-    <div class="cab surge">
-      <span class="olho">{{ copy.galeria.eyebrow }}</span>
-      <h2 class="h2" id="t-galeria">{{ copy.galeria.titulo|safe }}</h2>
-      {% if copy.galeria.lead %}<p class="lead">{{ copy.galeria.lead }}</p>{% endif %}
-      <div class="regua"></div>
-    </div>
-    {# TETO DE 6. O banco guarda o álbum inteiro; a página mostra a amostra.
-       As 16 fotos do Tábuas empilhadas faziam ~12.000px de rolagem — a seção
-       de reserva ficava a meia hora de scroll do dedo de quem abriu no zap. #}
-    <div class="tabuleiro surge">
-      {% for g in gallery %}{% if loop.index <= 6 %}
-      <figure>
-        <img src="{{ g.img }}"
-             {# Sem legenda cadastrada não dá pra dizer o que a foto mostra sem
-                inventar; o número ao menos separa uma da outra pra quem
-                navega a galeria por leitor de tela. #}
-             alt="{{ (g.legenda ~ ' — ' ~ site.nome) if g.legenda else (site.nome ~ ' — a casa por dentro, foto ' ~ loop.index) }}"
-             loading="lazy" decoding="async">
-        {% if g.legenda %}<figcaption>{{ g.legenda }}</figcaption>{% endif %}
-      </figure>
-      {% endif %}{% endfor %}
-    </div>
-    {% if gallery|length > 6 and site.instagram_url %}
-    <p class="mais-fotos surge">
-      <a href="{{ site.instagram_url }}" target="_blank" rel="noopener">
-        +{{ gallery|length - 6 }} fotos no Instagram →</a>
-    </p>
-    {% endif %}
-  </div>
-</section>
-{% endif %}
-
 <!-- ===================== RESERVA ===================== -->
 <div class="serra"></div>
-<section class="sec" id="reservar" aria-labelledby="t-reservar" style="background:var(--madeira)">
+<section class="sec" id="reservar" data-band="madeira" aria-labelledby="t-reservar">
   <div class="wrap">
     <div class="reserva">
       <div class="surge">
@@ -1097,6 +1148,10 @@
              tenant pelo Host. Em /bar/<slug> (demos) o Host é o do produto —
              daí este campo. #}
           <input type="hidden" name="slug" value="{{ tenant.slug if tenant else '' }}">
+          {# O POST sai por fetch, mas com FormData(form): o FormData carrega este campo
+             junto com o resto. Tirar daqui abre o formulário de reserva pra POST
+             forjado de qualquer site. O mesmo token vai no header X-CSRFToken. #}
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <div class="campo">
             <label for="rf-nome">Seu nome</label>
             <input id="rf-nome" name="nome" type="text" autocomplete="name" placeholder="Como te chamamos?" required>
@@ -1168,6 +1223,34 @@
   </div>
 </section>
 
+<!-- ===================== PROMOÇÕES ===================== -->
+{% if promocoes %}
+<div class="serra"></div>
+<section class="sec" id="promocoes" data-band="papel" aria-labelledby="t-promocoes">
+  <div class="wrap">
+    <div class="cab surge">
+      <span class="olho">{{ copy.promocoes.eyebrow }}</span>
+      <h2 class="h2" id="t-promocoes">{{ copy.promocoes.titulo|safe }}</h2>
+      <div class="regua"></div>
+    </div>
+    <div class="etiquetas">
+      {% for p in promocoes %}
+      {# Recorrente (ex.: Costela de Quarta) mostra "TODA QUARTA" e acende no dia. #}
+      <article class="promo surge{% if p.acontece_hoje %} hoje{% endif %}">
+        <div class="rot">{% if p.acontece_hoje %}É hoje!{% else %}{{ p.rotulo or 'Oferta' }}{% endif %}</div>
+        <h3>{{ p.titulo }}{% if p.exemplo %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
+        {% if p.descricao %}<p>{{ p.descricao }}</p>{% endif %}
+        {% if p.dia_semana is not none and p.rotulo %}
+          <div class="val">Toda {{ p.rotulo.replace('TODA ', '')|lower }}{% if p.validade %} · até {{ p.validade.strftime('%d/%m/%Y') }}{% endif %}</div>
+        {% elif p.validade %}
+          <div class="val">Válida até {{ p.validade.strftime('%d/%m/%Y') }}</div>
+        {% endif %}
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
 </main>
 
 <footer>
@@ -1259,7 +1342,7 @@
     var txt = btn.textContent; btn.textContent = 'Enviando…';
     msg.className = 'aviso';
     fetch('{{ url_for("public.reservar") }}', {
-        method: 'POST', body: new FormData(form), headers: {'Accept': 'application/json'}
+        method: 'POST', body: new FormData(form), headers: {'Accept': 'application/json', 'X-CSRFToken': '{{ csrf_token() }}'}
       })
       .then(function(r){ return r.json().then(function(j){ return {ok: r.ok, j: j}; }); })
       .then(function(res){

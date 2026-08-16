@@ -8,6 +8,8 @@
 2. **Bar recém-criado.** Sem conteúdo nenhum, o site não pode exibir título de
    seção com corpo vazio, nem herdar identidade de ninguém.
 """
+from decimal import Decimal
+
 import pytest
 
 from app.models.modelo_restaurante import Restaurante
@@ -226,11 +228,15 @@ def _tem_form_de_reserva(corpo):
 
 
 def _bar_do_modelo(session, modelo, *, slug, nome, demo=False, plano='site',
-                   hero_foto='img/bar/capa-propria.jpg', conteudo=True):
+                   hero_foto='img/bar/capa-propria.jpg', conteudo=True,
+                   preco=None):
     """Bar de teste rodando `modelo`.
 
     `conteudo=False` devolve o bar recém-criado da campanha: existe, tem
     modelo escolhido e nada mais.
+
+    `preco=None` é o padrão de propósito: o cardápio sem preço é o estado em
+    que quase todo bar entra, e é ele que não pode mostrar "R$ 0,00".
     """
     from datetime import date, timedelta
     from app.models.modelo_evento import Evento
@@ -249,7 +255,8 @@ def _bar_do_modelo(session, modelo, *, slug, nome, demo=False, plano='site',
     if conteudo:
         session.add(DishCard(restaurant_id=r.id, nome='Bolinho de teste',
                              descricao='Só existe aqui.', imagem='img/bar/prato-proprio.jpg',
-                             tag='★ TESTE', destaque=True, ordem=0, ativo=True))
+                             tag='★ TESTE', destaque=True, ordem=0, ativo=True,
+                             preco=preco))
         session.add(Review(restaurant_id=r.id, autor='Cliente Fiel',
                            texto='Voltaria mil vezes.', estrelas=5, ordem=0, ativo=True))
         session.add(TeamMember(restaurant_id=r.id, nome='Chef Testeira',
@@ -345,6 +352,51 @@ class TestTodoModeloRespeitaOsInvariantes:
         assert 'og:image' in corpo, f'{modelo} não emitiu og:image tendo capa'
         assert 'capa-propria.jpg' in corpo, f'{modelo} apontou og:image pra outra foto'
         assert 'foto-18.jpg' not in corpo, f'{modelo} vazou a capa do Bar da Vila'
+
+    def test_preco_do_prato_aparece_no_cardapio(self, client, session, modelo):
+        """A primeira pergunta de quem lê cardápio. Os 6 modelos respondem —
+        em real brasileiro, com vírgula."""
+        _bar_do_modelo(session, modelo, slug='bar-com-preco', nome='Bar Com Preço',
+                       preco=Decimal('18.50'))
+
+        corpo = client.get('/bar/bar-com-preco').get_data(as_text=True)
+
+        assert 'R$ 18,50' in corpo, f'{modelo} não mostrou o preço do prato'
+        # `tabular-nums` é o que mantém a coluna de preços reta quando os
+        # números têm larguras diferentes. Sem isso o cardápio "dança".
+        assert 'tabular-nums' in corpo, \
+            f'{modelo} mostrou preço sem font-variant-numeric:tabular-nums'
+
+    def test_preco_na_tela_e_no_json_ld_sao_o_mesmo_numero(self, client, session, modelo):
+        """Vírgula pra pessoa, ponto pro Google — a partir do mesmo valor.
+
+        Divergir aqui é o pior tipo de erro: o cliente lê um preço no site e o
+        Google anuncia outro no resultado de busca.
+        """
+        _bar_do_modelo(session, modelo, slug='bar-preco-seo', nome='Bar SEO',
+                       preco=Decimal('42.90'))
+
+        corpo = client.get('/bar/bar-preco-seo').get_data(as_text=True)
+
+        assert 'R$ 42,90' in corpo, f'{modelo} não mostrou o preço na tela'
+        assert '"price":"42.90"' in corpo, f'{modelo} não emitiu offers no JSON-LD'
+        assert '"priceCurrency":"BRL"' in corpo, f'{modelo} emitiu preço sem moeda'
+
+    def test_prato_sem_preco_nao_mostra_simbolo_nenhum(self, client, session, modelo):
+        """O invariante que protege o bar que ainda não precificou.
+
+        `moeda_br` devolve "R$ 0,00" quando recebe None — se algum modelo
+        aplicar o filtro sem checar antes, o cardápio inteiro anuncia comida
+        de graça. Por isso a asserção é sobre o cifrão, não sobre o zero.
+        """
+        _bar_do_modelo(session, modelo, slug='bar-sem-preco', nome='Bar Sem Preço')
+
+        corpo = client.get('/bar/bar-sem-preco').get_data(as_text=True)
+
+        assert 'Bolinho de teste' in corpo, f'{modelo} perdeu o prato'
+        assert 'R$' not in corpo, f'{modelo} mostrou cifrão em prato sem preço'
+        assert 'R$ 0,00' not in corpo, f'{modelo} anunciou prato de graça'
+        assert '"offers"' not in corpo, f'{modelo} emitiu Offer sem preço'
 
     def test_sem_plano_de_reservas_sobra_o_whatsapp(self, client, session, modelo):
         """Formulário que ninguém recebe é pior que não ter formulário. Sem o

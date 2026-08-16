@@ -34,7 +34,7 @@ Monetização: plano `free` vs `pro` via Stripe, com A/B de estratégia de preç
 |---|---|
 | `app/__init__.py` | app factory, registro de blueprints, **guard global de login** |
 | `app/config.py` | `DevelopmentConfig` / `TestingConfig` / `ProductionConfig` |
-| `app/extensions.py` | `db`, `migrate`, `login_manager` |
+| `app/extensions.py` | `db`, `migrate`, `login_manager`, `csrf` |
 | `app/cli.py` | `flask create-tenant` — único jeito oficial de provisionar tenant via CLI |
 | `app/models/` | 20+ modelos, um arquivo por domínio (`modelo_*.py`) |
 | `app/routes/<dominio>/views.py` | um blueprint por domínio |
@@ -71,11 +71,25 @@ allowlist conscientemente.
 `restaurante.subscription_tier != 'pro'` e redireciona pra `dashboard.upgrade`.
 Hoje só os relatórios avançados do dashboard usam.
 
-**4. Formatação é brasileira.** Use os filtros Jinja registrados em
+**4. Todo POST precisa de token de CSRF.** `CSRFProtect` está ligado em
+`create_app`. Formulário novo nasce com
+
+```html
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+```
+
+e POST por `fetch` manda o token no corpo (`FormData(form)` já leva o input
+hidden) ou no header `X-CSRFToken`. Duas exceções, marcadas com `@csrf.exempt`
+onde a rota vive: `billing.webhook` (o Stripe autentica por assinatura HMAC) e
+`bootstrap_demo` em `run.py` (curl de manutenção, gated por `SEED_TOKEN`).
+`tests/integration/test_csrf.py` varre `app/templates/` e falha se algum
+`<form method="post">` ficar sem token.
+
+**5. Formatação é brasileira.** Use os filtros Jinja registrados em
 `app/utils/template_filters.py` (`moeda_br`, `peso_br`, `percentual_br`,
 `data_br`, `numero_br`), não formate à mão no template.
 
-**5. Endpoints destrutivos são gated.** `/debug-db`, `/seed-vegan` e `/reset-db`
+**6. Endpoints destrutivos são gated.** `/debug-db`, `/seed-vegan` e `/reset-db`
 (faz `db.drop_all()`) só existem quando `ENABLE_ADMIN_ENDPOINTS=1` **e** o
 config não é `production` (`run.py`). Não afrouxe isso.
 

@@ -71,6 +71,7 @@
                     <h2 class="form-title">Editar Cardápio</h2>
 
                     <form method="post" action="{{ url_for('cardapios.editar', id=cardapio.id) }}">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <div class="form-group">
                             <label for="nome">Nome do Cardápio *</label>
                             <input type="text" class="form-control" id="nome" name="nome" value="{{ cardapio.nome }}" required>

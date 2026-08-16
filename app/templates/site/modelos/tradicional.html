@@ -146,6 +146,23 @@
        preset neon não pode apagar a legibilidade do papel. */
     --ornamento:var(--gold, #a9803a);
     --maxw:1120px;
+
+    /* ---- design-10k · grade de 4px ---- */
+    --s-1:.25rem; --s-2:.5rem;  --s-3:.75rem; --s-4:1rem;  --s-5:1.5rem;
+    --s-6:2rem;   --s-7:3rem;   --s-8:4rem;   --s-9:6rem;  --s-10:8rem; --s-11:10rem;
+
+    /* EIXO 4 — DENSIDADE. tradicional é o modelo mais AREJADO do conjunto:
+       casa antiga se lê devagar, com parede entre um assunto e outro.
+       88 → 176px, contra 48 → 72px do `craft`. São 2,4x no topo da escala —
+       a meta da skill pede 1,5x entre o mais denso e o mais arejado. */
+    --sec-y:clamp(5.5rem,11vw,11rem);
+    --gutter:clamp(1.25rem,4vw,2.5rem);
+    --medida:34rem;
+    --lh-corpo:1.8;
+
+    /* EIXO 5 — foto de casa antiga: o assunto é a parede e o retrato, e o
+       teto é lixo. 50% 42% sobe o corte. */
+    --pos:50% 42%;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
@@ -374,7 +391,13 @@
     position:relative;background:var(--moldura);padding:10px 10px 12px;
     border:1px solid var(--linha);box-shadow:0 12px 30px var(--sombra);
   }
-  .moldura img{filter:var(--sepia);width:100%}
+  /* EIXO 5 — TRATAMENTO DE FOTO: MOLDURA SÉPIA.
+     Toda foto vive dentro de moldura de papel com fita crepe e legenda
+     datilografada, em sépia — foto de celular vira retrato de parede, e
+     16 fotos de 4 aparelhos diferentes passam a parecer um álbum só.
+     É o oposto exato do `autoral` (sangria alternada, cor real e nenhuma
+     moldura). */
+  .moldura img{filter:var(--sepia);width:100%;object-position:var(--pos)}
   .moldura figcaption{
     font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.14em;
     font-size:.68rem;color:var(--tinta-suave);text-align:center;padding:10px 4px 2px;
@@ -396,16 +419,60 @@
   .tabuleta i{color:var(--ornamento);font-style:normal}
 
   /* ---------- SEÇÕES ---------- */
-  .sec{padding:clamp(52px,9vw,86px) 0;overflow:hidden}
-  .sec:nth-of-type(even){background:var(--papel-2)}
+  .sec{padding-block:var(--sec-y);overflow:hidden}
+  /* A faixa alternada ia por `:nth-of-type(even)`, o que era frágil por dois
+     motivos: quase toda seção aqui é condicional (bar sem cardápio, sem
+     agenda, sem foto), então a paridade mudava de bar pra bar e as listras
+     saíam trocadas; e qualquer reordenação embaralhava tudo. Agora é
+     declarado no HTML, DEPOIS do id — o regex `<section class="sec" id=` de
+     tests/integration/test_landing_render.py continua casando. */
+  .sec[data-band="alt"]{background:var(--papel-2)}
   .cabeca{max-width:38em}
   .eyebrow{font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.26em;
     font-size:.7rem;color:var(--esmalte);margin-bottom:8px}
   .h2{font-family:"Playfair Display",Georgia,serif;font-weight:900;
     font-size:clamp(1.85rem,7vw,3.1rem);line-height:1.04;letter-spacing:-.01em;overflow-wrap:break-word}
   .h2 em{font-style:italic;font-weight:700;color:var(--madeira)}
-  .lead{color:var(--tinta-suave);margin-top:12px;max-width:34em}
-  .filete{width:64px;height:0;border-top:3px double var(--ornamento);margin:16px 0 0}
+  .lead{color:var(--tinta-suave);margin-top:var(--s-3);max-width:var(--medida);
+    line-height:var(--lh-corpo)}
+  .filete{width:64px;height:0;border-top:3px double var(--ornamento);margin:var(--s-4) 0 0}
+
+  /* ============================================================
+     EIXO 3 — EIXO DE LEITURA: LINHA DO TEMPO VERTICAL.
+     A página inteira pendura num fio duplo à esquerda, e cada seção é um
+     nó nesse fio. Não é ornamento solto: é o mesmo desenho da
+     `.linha-tempo` da seção herói, estendido ao documento todo — a casa se
+     lê como cronologia, de cima pra baixo.
+     Só entra em tela larga; em 375px o fio comeria a margem e a gutter é
+     mais valiosa que o grafismo.
+     ============================================================ */
+  @media(min-width:900px){
+    body[data-leitura="linha-tempo"] .sec > .env{position:relative;padding-left:var(--s-9)}
+    body[data-leitura="linha-tempo"] .sec > .env::before{
+      content:"";position:absolute;left:var(--s-5);top:0;bottom:calc(var(--sec-y) * -1);
+      border-left:3px double var(--linha);
+    }
+    body[data-leitura="linha-tempo"] .sec:last-of-type > .env::before{bottom:0}
+    body[data-leitura="linha-tempo"] .sec > .env > .cabeca{position:relative}
+    body[data-leitura="linha-tempo"] .sec > .env > .cabeca::before{
+      content:"";position:absolute;left:calc(var(--s-9) * -1 + var(--s-5) - 4px);top:.6em;
+      width:12px;height:12px;border-radius:50%;
+      background:var(--papel);border:2px solid var(--ornamento);
+    }
+  }
+
+  /* ============================================================
+     EIXO 1 — SEÇÃO HEROÍNA: a história, em anos.
+     O que uma casa antiga tem e uma casa nova não tem é tempo. Por isso a
+     linha do tempo é a seção mais alta da página e a última (EIXO 2 —
+     cauda `reservar > contato > historia`): o número que fica na cabeça
+     de quem sai é o ano em que a porta abriu.
+     ============================================================ */
+  #historia{padding-block:calc(var(--sec-y) * 1.4) calc(var(--sec-y) * 1.6)}
+  #historia .h2{font-size:clamp(1.85rem,7vw,4.2rem)}  /* piso = o do .h2 base */
+  #historia .linha-tempo{margin-top:var(--s-8)}
+  #historia .linha-tempo .mrc{font-size:clamp(1.9rem,7vw,3.4rem)}
+  #historia .linha-tempo li{padding-bottom:var(--s-7)}
 
   /* ---------- HISTÓRIA ---------- */
   #historia{position:relative}
@@ -458,9 +525,18 @@
   .prato:first-child{border-top:1px dotted var(--linha)}
   .prato .mini{width:74px;height:74px;flex:none;overflow:hidden;background:var(--moldura);
     border:1px solid var(--linha);padding:3px}
-  .prato .mini img{width:100%;height:100%;object-fit:cover;filter:var(--sepia)}
+  .prato .mini img{width:100%;height:100%;object-fit:cover;object-position:var(--pos);filter:var(--sepia)}
   .prato .txt{min-width:0;flex:1}
   .prato h3{font-family:"Playfair Display",serif;font-weight:700;font-size:1.22rem;line-height:1.25}
+  /* `margin-left:auto` empurra o preço pra margem direita da coluna sem
+     esticar o nome — o cardápio de casa antiga lê-se assim, nome de um lado e
+     número do outro. `tabular-nums` mantém a coluna de números reta mesmo
+     quando o cardápio quebra em duas colunas no desktop. */
+  .prato-linha{display:flex;align-items:baseline;gap:12px}
+  .prato-linha h3{min-width:0;overflow-wrap:anywhere}
+  .prato-preco{margin-left:auto;flex:none;font-family:"Playfair Display",serif;
+    font-weight:700;font-size:1.06rem;color:var(--esmalte);
+    font-variant-numeric:tabular-nums;white-space:nowrap}
   .prato p{color:var(--tinta-suave);font-size:.98rem;margin-top:4px}
   .carimbo{
     display:inline-block;margin-top:8px;padding:3px 9px;font-family:"Alegreya Sans SC",serif;
@@ -567,7 +643,7 @@
   .album .moldura:nth-child(3n+1){transform:rotate(-1.2deg)}
   .album .moldura:nth-child(3n+2){transform:rotate(.9deg)}
   .album .moldura:nth-child(3n){transform:rotate(-.4deg)}
-  .album img{aspect-ratio:4/3;object-fit:cover;max-height:190px}
+  .album img{aspect-ratio:4/3;object-fit:cover;object-position:var(--pos);max-height:190px}
   .album figcaption{font-size:.6rem;padding:8px 2px 0;letter-spacing:.1em}
   .album-mais{
     font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.2em;
@@ -697,7 +773,7 @@
 </style>
 {% endif %}
 </head>
-<body>
+<body data-heroina="historia" data-leitura="linha-tempo" data-foto="moldura-sepia">
 
 {% if tenant and tenant.eh_demo %}
 {# Prévia comercial: o bar não pediu este site e não é cliente. Dizer isso em
@@ -723,6 +799,7 @@
     </a>
     <div class="barra-links">
       {% if tem_historia %}<a href="#historia">A casa</a>{% endif %}
+      {% if copy.clima.cards %}<a href="#salao">O salão</a>{% endif %}
       {% if dishes %}<a href="#cardapio">Cardápio</a>{% endif %}
       {% if promocoes %}<a href="#promocoes">Promoções</a>{% endif %}
       {% if eventos %}<a href="#agenda">Agenda</a>{% endif %}
@@ -745,6 +822,7 @@
 
 <div class="folha" id="folha">
   {% if tem_historia %}<a href="#historia" onclick="abrirMenu()">A casa</a>{% endif %}
+  {% if copy.clima.cards %}<a href="#salao" onclick="abrirMenu()">O salão</a>{% endif %}
   {% if dishes %}<a href="#cardapio" onclick="abrirMenu()">Cardápio</a>{% endif %}
   {% if promocoes %}<a href="#promocoes" onclick="abrirMenu()">Promoções</a>{% endif %}
   {% if eventos %}<a href="#agenda" onclick="abrirMenu()">Agenda</a>{% endif %}
@@ -838,82 +916,41 @@
   </div>
 </div>
 
-{% if tem_historia %}
-<!-- A CASA / HISTÓRIA — vem antes do cardápio: é o que esta casa tem e as novas não têm -->
-<section class="sec" id="historia" aria-labelledby="tit-historia">
-  {# Sem ano, a marca d'água vira o monograma da casa — nunca um ano inventado. #}
-  <span class="marca-dagua" aria-hidden="true">{{ ano if ano else ((site.nome or '·')[0]|upper) }}</span>
+{# ---------------------------------------------------------------------
+   O SALÃO — três placas esmaltadas com o clima da casa.
+
+   Este bloco já existia, mas como `<div>` mudo: renderizava
+   `copy.clima.cards` e jogava fora o `eyebrow` e o `titulo` que a mesma
+   vibe já entrega — os outros cinco modelos mostram os dois. Virou seção
+   nomeada porque (a) é um assunto próprio, com landmark e título, e (b) é
+   a assinatura estrutural deste modelo: `salao` não existe em nenhum
+   outro, e é ele que tira o `tradicional` da colisão de 89% de conjunto
+   de seções com o `craft`, o `noturno` e o `landing`.
+
+   A guarda é `copy.clima.cards`, não dado do bar: a copy vem da vibe e
+   nunca depende de cadastro — mas se um dia vier vazia, a seção some em
+   vez de deixar título órfão na página (invariante do projeto).
+   --------------------------------------------------------------------- #}
+{% if copy.clima.cards %}
+<section class="sec" id="salao" data-band="alt" aria-labelledby="tit-salao">
   <div class="env">
     <div class="cabeca revelar">
-      <div class="eyebrow">{{ copy.historia.eyebrow }}</div>
-      <h2 class="h2" id="tit-historia">{{ copy.historia.titulo|safe }}</h2>
+      <div class="eyebrow">{{ copy.clima.eyebrow }}</div>
+      <h2 class="h2" id="tit-salao">{{ copy.clima.titulo|safe }}</h2>
       <div class="filete"></div>
-      <p class="historia-texto">{{ copy.historia.texto }}</p>
-      {% if site.kicker %}<p class="historia-texto"><em>{{ site.kicker }}</em></p>{% endif %}
     </div>
-
-    {% if ano %}
-    <ol class="linha-tempo revelar">
-      <li>
-        <span class="mrc">{{ ano }}</span>
-        <b>A porta abre</b>
-        <small>{% if site.cidade_uf %}{{ site.cidade_uf }}{% else %}O começo de tudo{% endif %}.</small>
-      </li>
-      <li data-anos-item hidden>
-        <span class="mrc"><span data-ano="{{ ano }}"></span></span>
-        <b>Anos de casa</b>
-        <small>Tempo de porta aberta{% if site.cidade_uf %} em {{ site.cidade_uf }}{% endif %}.</small>
-      </li>
-      {% if site.nota_google %}
-      <li>
-        <span class="mrc">{{ site.nota_google }}★</span>
-        <b>No Google</b>
-        <small>{% if site.qtd_avaliacoes %}{{ site.qtd_avaliacoes }} avaliações de quem já sentou aqui{% else %}A nota de quem vem e volta{% endif %}.</small>
-      </li>
-      {% endif %}
-    </ol>
-    {% endif %}
-
-    {% if gallery %}
-    {# Mesmo motivo do hero: a inclinação é do quadro, o movimento é do invólucro. #}
-    <div class="album-historia revelar">
-      <figure class="moldura torta-b">
-        <img src="{{ gallery[0].img }}"
-             alt="{{ site.nome }} — {{ gallery[0].legenda or 'a casa por dentro' }}"
-             loading="lazy" decoding="async">
-        <figcaption>{{ gallery[0].legenda or ('Na parede do ' ~ site.nome) }}</figcaption>
-      </figure>
-    </div>
-    {% endif %}
-
-    {% if team %}
-    <div class="retratos revelar">
-      {% for m in team %}
-      <div class="retrato">
-        <div class="rosto" aria-hidden="true">{{ m.emoji or '🧑‍🍳' }}</div>
-        <b>{{ m.nome }}</b>
-        {% if m.papel %}<small>{{ m.papel }}</small>{% endif %}
+    <div class="placas revelar">
+      {% for emoji, titulo, sub in copy.clima.cards %}
+      <div class="placa">
+        <span class="em" aria-hidden="true">{{ emoji }}</span>
+        <b>{{ titulo }}</b>
+        <small>{{ sub }}</small>
       </div>
       {% endfor %}
     </div>
-    {% endif %}
   </div>
 </section>
 {% endif %}
-
-{# Três placas esmaltadas com o clima da casa. Sem âncora e sem título de
-   seção: é uma faixa, não uma seção que possa nascer vazia. #}
-<div class="env">
-  <div class="placas">
-    {% for emoji, titulo, sub in copy.clima.cards %}
-    <div class="placa">
-      <span class="em" aria-hidden="true">{{ emoji }}</span>
-      <b>{{ titulo }}</b>
-      <small>{{ sub }}</small>
-    </div>
-    {% endfor %}
-  </div>
-</div>
 
 {% if dishes %}
 <!-- CARDÁPIO — lista de tabuleta, não vitrine de fotos -->
@@ -934,7 +971,13 @@
                                loading="lazy" decoding="async"></div>
         {% endif %}
         <div class="txt">
-          <h3>{{ d.nome }}</h3>
+          {# Lista de tabuleta: nome à esquerda, preço encostado na direita.
+             O `{% if %}` vem antes do filtro porque `moeda_br` devolve
+             "R$ 0,00" pra None — prato sem preço fica sem preço. #}
+          <div class="prato-linha">
+            <h3>{{ d.nome }}</h3>
+            {% if d.preco %}<span class="prato-preco">{{ d.preco|moeda_br }}</span>{% endif %}
+          </div>
           {% if d.descricao %}<p>{{ d.descricao }}</p>{% endif %}
           {% if d.tag %}<span class="carimbo">{{ d.tag }}</span>{% endif %}
         </div>
@@ -947,7 +990,7 @@
 
 {% if promocoes %}
 <!-- PROMOÇÕES — cartazes colados na parede -->
-<section class="sec" id="promocoes" aria-labelledby="tit-promocoes">
+<section class="sec" id="promocoes" data-band="alt" aria-labelledby="tit-promocoes">
   <div class="env">
     <div class="cabeca revelar">
       <div class="eyebrow">{{ copy.promocoes.eyebrow }}</div>
@@ -1010,7 +1053,7 @@
    menu junto — o invariante de seção órfã continua de pé. #}
 {% if reviews or site.nota_google %}
 <!-- AVALIAÇÕES — placa de reputação + livro de visitas -->
-<section class="sec" id="avaliacoes" aria-labelledby="tit-avaliacoes">
+<section class="sec" id="avaliacoes" data-band="alt" aria-labelledby="tit-avaliacoes">
   <div class="env">
     <div class="cabeca revelar">
       <div class="eyebrow">{{ copy.avaliacoes.eyebrow }}</div>
@@ -1093,7 +1136,7 @@
 {% endif %}
 
 <!-- RESERVA -->
-<section class="sec" id="reservar" aria-labelledby="tit-reservar">
+<section class="sec" id="reservar" data-band="alt" aria-labelledby="tit-reservar">
   <div class="env">
     <div class="cabeca revelar">
       <div class="eyebrow">{{ copy.reserva.eyebrow }}</div>
@@ -1111,6 +1154,10 @@
         <div class="livro-topo">Livro de reservas{% if ano %} · desde {{ ano }}{% endif %}</div>
         {# Servido em /bar/<slug>, o Host é o do produto — daí este campo. #}
         <input type="hidden" name="slug" value="{{ tenant.slug if tenant else '' }}">
+        {# O POST sai por fetch, mas com FormData(form): o FormData carrega este campo
+           junto com o resto. Tirar daqui abre o formulário de reserva pra POST
+           forjado de qualquer site. O mesmo token vai no header X-CSRFToken. #}
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="campo">
           <label for="tr-nome">Nome</label>
           <input id="tr-nome" name="nome" type="text" autocomplete="name" placeholder="Como te chamamos?" required>
@@ -1187,6 +1234,68 @@
   </div>
 </section>
 
+{% if tem_historia %}
+<!-- A CASA / HISTÓRIA — vem antes do cardápio: é o que esta casa tem e as novas não têm -->
+<section class="sec" id="historia" data-band="alt" aria-labelledby="tit-historia">
+  {# Sem ano, a marca d'água vira o monograma da casa — nunca um ano inventado. #}
+  <span class="marca-dagua" aria-hidden="true">{{ ano if ano else ((site.nome or '·')[0]|upper) }}</span>
+  <div class="env">
+    <div class="cabeca revelar">
+      <div class="eyebrow">{{ copy.historia.eyebrow }}</div>
+      <h2 class="h2" id="tit-historia">{{ copy.historia.titulo|safe }}</h2>
+      <div class="filete"></div>
+      <p class="historia-texto">{{ copy.historia.texto }}</p>
+      {% if site.kicker %}<p class="historia-texto"><em>{{ site.kicker }}</em></p>{% endif %}
+    </div>
+
+    {% if ano %}
+    <ol class="linha-tempo revelar">
+      <li>
+        <span class="mrc">{{ ano }}</span>
+        <b>A porta abre</b>
+        <small>{% if site.cidade_uf %}{{ site.cidade_uf }}{% else %}O começo de tudo{% endif %}.</small>
+      </li>
+      <li data-anos-item hidden>
+        <span class="mrc"><span data-ano="{{ ano }}"></span></span>
+        <b>Anos de casa</b>
+        <small>Tempo de porta aberta{% if site.cidade_uf %} em {{ site.cidade_uf }}{% endif %}.</small>
+      </li>
+      {% if site.nota_google %}
+      <li>
+        <span class="mrc">{{ site.nota_google }}★</span>
+        <b>No Google</b>
+        <small>{% if site.qtd_avaliacoes %}{{ site.qtd_avaliacoes }} avaliações de quem já sentou aqui{% else %}A nota de quem vem e volta{% endif %}.</small>
+      </li>
+      {% endif %}
+    </ol>
+    {% endif %}
+
+    {% if gallery %}
+    {# Mesmo motivo do hero: a inclinação é do quadro, o movimento é do invólucro. #}
+    <div class="album-historia revelar">
+      <figure class="moldura torta-b">
+        <img src="{{ gallery[0].img }}"
+             alt="{{ site.nome }} — {{ gallery[0].legenda or 'a casa por dentro' }}"
+             loading="lazy" decoding="async">
+        <figcaption>{{ gallery[0].legenda or ('Na parede do ' ~ site.nome) }}</figcaption>
+      </figure>
+    </div>
+    {% endif %}
+
+    {% if team %}
+    <div class="retratos revelar">
+      {% for m in team %}
+      <div class="retrato">
+        <div class="rosto" aria-hidden="true">{{ m.emoji or '🧑‍🍳' }}</div>
+        <b>{{ m.nome }}</b>
+        {% if m.papel %}<small>{{ m.papel }}</small>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
 </main>
 
 <div class="azulejo" aria-hidden="true"></div>
@@ -1297,7 +1406,7 @@
     fetch('{{ url_for("public.reservar") }}', {
       method: 'POST',
       body: new FormData(form),
-      headers: {'Accept': 'application/json'}
+      headers: {'Accept': 'application/json', 'X-CSRFToken': '{{ csrf_token() }}'}
     })
       .then(function(r){ return r.json().then(function(j){ return {ok: r.ok, j: j}; }); })
       .then(function(res){

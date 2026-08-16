@@ -12,6 +12,7 @@
 <h2 class="mb-4"><i class="fas fa-store text-warning"></i> {{ 'Editar' if item else 'Adicionar' }} {{ t.singular }} <span class="text-muted">· {{ t.label }}</span></h2>
 
 <form method="post" class="col-lg-7">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   {% for campo, label, widget, obrig in t.campos %}
   <div class="mb-3 {{ 'form-check form-switch' if widget == 'check' }}">
     {% if widget == 'check' %}
@@ -20,6 +21,21 @@
     {% elif widget == 'textarea' %}
       <label class="form-label">{{ label }}{{ ' *' if obrig }}</label>
       <textarea class="form-control" name="{{ campo }}" rows="3" {{ 'required' if obrig }}>{{ item[campo] if item and item[campo] else '' }}</textarea>
+    {% elif widget == 'preco' %}
+      {# Preço é `text` + `inputmode="decimal"`, não `number`: o teclado de
+         número do celular abre igual, mas o campo aceita "R$ 18,50" e "18,50"
+         sem o navegador apagar o que foi digitado (input[type=number] descarta
+         valor que ele considera inválido — e vírgula é inválida pra ele).
+         Quem normaliza é `ler_moeda`, no servidor.
+         O valor de volta sai sem "R$" e sem separador de milhar pra que editar
+         e salvar de novo devolva exatamente o mesmo número. #}
+      <label class="form-label" for="{{ campo }}">{{ label }}</label>
+      <div class="input-group">
+        <span class="input-group-text">R$</span>
+        <input class="form-control" type="text" inputmode="decimal" id="{{ campo }}" name="{{ campo }}"
+               placeholder="18,50"
+               value="{{ ('%.2f'|format(item[campo]))|replace('.', ',') if item and item[campo] is not none else '' }}">
+      </div>
     {% else %}
       <label class="form-label">{{ label }}{{ ' *' if obrig }}</label>
       {% if campo == 'imagem' and item and item.imagem %}

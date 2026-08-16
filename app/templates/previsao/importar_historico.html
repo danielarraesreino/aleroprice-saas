@@ -110,6 +110,7 @@
 
                     <form method="post" action="{{ url_for('previsao.importar_historico') }}"
                         enctype="multipart/form-data">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <div class="form-group">
                             <label>Arquivo CSV ou Excel</label>
                             <div class="upload-area" id="upload-area"

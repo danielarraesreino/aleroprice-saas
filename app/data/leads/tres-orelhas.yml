@@ -1,4 +1,4 @@
-# Cervejaria 3 Orelhas — Sousas, Campinas–SP
+# Cervejaria 3 Orelhas — Joaquim Egídio, Campinas–SP
 # Lead da campanha RMC. Foto: coloque os arquivos em
 # app/static/img/demo/tres-orelhas/ e aponte abaixo (hero_foto, cardapio, galeria).
 #
@@ -9,14 +9,17 @@ nome: "Cervejaria 3 Orelhas"
 tema: pub-escuro
 
 site:
+  endereco: "R. Prof. Manoel Saturnino do Amaral, 30 - Joaquim Egídio, Campinas - SP, 13108-044"
   vibe: pub
-  descritor: "Cervejaria artesanal em Sousas"
-  kicker: "SOUSAS · CAMPINAS–SP"
+  descritor: "Cervejaria artesanal em Joaquim Egídio"
+  kicker: "JOAQUIM EGÍDIO · CAMPINAS–SP"
   hero_linha1: "Cervejaria"
   hero_linha2: "3 Orelhas"
   tagline: "Galpão, tonel à vista e verde na janela."
   subline: "ARTESANAL · GALPÃO · NATUREZA"
-  cidade_uf: "Sousas, Campinas–SP"
+  # O relatório trazia "Sousas"; o endereço confirmado em duas fontes
+  # (Carta Campinas e gula.menu, 15/08/2026) é Joaquim Egídio.
+  cidade_uf: "Joaquim Egídio, Campinas–SP"
 
 # Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
 #   hero_foto: img/demo/tres-orelhas/capa.jpg

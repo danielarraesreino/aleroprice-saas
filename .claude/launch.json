@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "aleroprice-landing",
-      "runtimeExecutable": "python",
-      "runtimeArgs": ["-c", "from app import create_app; a=create_app('default'); a.config['SQLALCHEMY_ECHO']=False; a.run(host='127.0.0.1', port=5055)"],
+      "runtimeExecutable": "flask",
+      "runtimeArgs": ["--app", "app", "run", "--port", "5055", "--debug"],
       "port": 5055
     }
   ]

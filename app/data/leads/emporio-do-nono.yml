@@ -11,7 +11,6 @@ tema: boteco-ambar
 site:
   nota_google: '4,6'
   avaliacoes_google: '3.994'
-  telefone: '(19) 3289-0041'
   instagram_url: "https://www.instagram.com/emporiodonono/"
   maps_query: "Empório do Nono Barão Geraldo Campinas"
   horario: "Seg–Qui 11h30–15h e 18h–23h · Sex 11h30–15h e 18h–00h · Sáb 11h30–00h · Dom 11h30–16h"
@@ -25,6 +24,8 @@ site:
   tagline: "Mesa de frios, chorinho e esquina charmosa desde 1999."
   subline: "TÁBUAS · CHORINHO · EMPÓRIO"
   cidade_uf: "Barão Geraldo, Campinas–SP"
+  # Horário e telefone do site oficial emporiodonono.com.br (15/08/2026).
+  horario: "Seg–Qui 11h30–15h e 18h–23h · Sex 11h30–15h e 18h–23h30 · Sáb 11h30–23h30 · Dom 11h30–16h"
 
 # Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
 #   hero_foto: img/demo/emporio-do-nono/capa.jpg

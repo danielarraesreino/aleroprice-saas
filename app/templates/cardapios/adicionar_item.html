@@ -105,6 +105,7 @@
                         <!-- Tab para selecionar prato existente -->
                         <div class="tab-pane fade show active" id="prato" role="tabpanel" aria-labelledby="prato-tab">
                             <form method="post" action="{{ url_for('cardapios.adicionar_item', secao_id=secao.id) }}" id="form-prato">
+                              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <input type="hidden" name="tipo_adicao" value="prato">
                                 
                                 <div class="form-group">
@@ -170,6 +171,7 @@
                         <!-- Tab para adicionar item manual -->
                         <div class="tab-pane fade" id="manual" role="tabpanel" aria-labelledby="manual-tab">
                             <form method="post" action="{{ url_for('cardapios.adicionar_item', secao_id=secao.id) }}" id="form-manual">
+                              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <input type="hidden" name="tipo_adicao" value="manual">
                                 
                                 <div class="form-group">

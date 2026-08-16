@@ -5,6 +5,7 @@
 <h2 class="mb-4"><i class="fas fa-music text-warning"></i> {{ 'Editar' if evento else 'Novo' }} evento</h2>
 
 <form method="post" class="col-lg-7">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <div class="mb-3">
     <label class="form-label">Título *</label>
     <input class="form-control" name="titulo" required value="{{ evento.titulo if evento else '' }}" placeholder="Ex.: Samba do Gustavo">
