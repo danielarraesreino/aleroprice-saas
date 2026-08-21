@@ -244,18 +244,17 @@ def test_preco_no_grafo_sai_com_ponto(client, bar_com_cardapio):
 
 @pytest.fixture
 def operador(session):
-    """O primeiro tenant é o operador da campanha — critério de `e_operador`."""
-    rest = Restaurante(nome='Alero (operador)', slug='alero-qr')
+    rest = Restaurante(nome='Alero', slug='alero')
     session.add(rest)
     session.commit()
-    usuario = Usuario(nome='Vendedor', email='vendedor@alero-qr.com',
-                      senha='segredo123', tipo='admin', restaurant_id=rest.id)
+    usuario = Usuario(nome='Vendedor', email='vendedor@alero.com',
+                      senha='segredo123', tipo='superadmin', restaurant_id=rest.id)
     session.add(usuario)
     session.commit()
     return usuario
 
 
-def entrar(client, email='vendedor@alero-qr.com', senha='segredo123'):
+def entrar(client, email='vendedor@alero.com', senha='segredo123'):
     return client.post('/auth/login', data={'email': email, 'senha': senha})
 
 

@@ -23,31 +23,89 @@ import os
 
 # Janela de teste grátis, contada a partir do cadastro ou da conversão
 # demo->cliente. Um número, um lugar.
-DIAS_DE_TRIAL = 14
+#
+# Zero por decisão comercial: a prévia já É o teste. O bar vê o próprio site
+# pronto, com foto e nota, antes de pagar qualquer coisa — dar mais 14 dias de
+# produto completo depois disso só adiava a conversa sobre dinheiro e deixava
+# contas abertas sem ninguém para cobrar. Continua em env para reabrir sem
+# deploy se a rua disser o contrário.
+DIAS_DE_TRIAL = int(os.environ.get('FEIRA_DIAS_TRIAL', '0') or 0)
+
 
 def precos():
     """Preço de cada plano, de env. Um lugar só: a tela de planos e a landing
     de venda liam números diferentes (R$ 97 vs R$ 197) e divergiam sozinhas.
 
-    O piso de mercado (pesquisa de agosto/2026): site institucional custa R$
-    2.500-7.000 só para fazer, mais R$ 100-500/mês de manutenção e R$ 30-150/mês
-    de hospedagem; plataforma de cardápio cobra mensalidade E R$ 400-2.000 de
-    instalação. A mensalidade daqui fica abaixo da manutenção sozinha — e ainda
-    inclui o site, o domínio e as atualizações.
+    Onde R$ 147,90 cai no mercado (pesquisa de agosto/2026)
+    ------------------------------------------------------
+    - Plataforma de cardápio digital: R$ 59,94 a R$ 299,90/mês — só o cardápio.
+    - Manutenção de site em agência: R$ 300 a R$ 1.000/mês — só a manutenção.
+    - Hospedagem avulsa: R$ 30 a R$ 500/mês. Domínio .com.br: R$ 40 a R$ 80/ano.
+
+    A mensalidade daqui fica na faixa de quem vende só o cardápio, e entrega
+    site, cardápio, reservas, hospedagem e domínio. É posicionamento agressivo
+    de propósito: o concorrente real destes bares não é uma agência, é não ter
+    nada.
     """
     return {
-        'site': os.environ.get('FEIRA_PRECO_SITE', 'R$ 197'),
-        'pro': os.environ.get('FEIRA_PRECO_PRO', 'R$ 347'),
+        'site': os.environ.get('FEIRA_PRECO_SITE', 'R$ 147,90'),
+        'pro': os.environ.get('FEIRA_PRECO_PRO', 'R$ 247,90'),
     }
 
 
 def taxa_de_instalacao():
-    """Cobrança única de registrar o domínio, montar com as fotos e publicar.
+    """Cobrança única de montar o site e pôr o bar no mapa.
+
+    Não é "taxa de ativação" de assinatura: é trabalho com entregável próprio —
+    design exclusivo (não um dos seis modelos prontos) e a configuração do
+    Google Meu Negócio, que é o que tira o bar do ostracismo na busca.
+
+    Sobre o valor: criação de site começa em R$ 500 no mercado brasileiro
+    (página única), e agência cobra R$ 500 a R$ 1.500 POR MÊS só para cuidar do
+    Perfil da Empresa no Google. R$ 349 cobrindo os dois, uma vez, está abaixo
+    do piso — é preço de entrada, não de mercado. Ver `docs/PRECIFICACAO.md`.
 
     Sem a env a linha some da proposta — dá para testar o discurso antes de
     fixar o valor, como já se faz com a mensalidade.
     """
-    return (os.environ.get('FEIRA_TAXA_SETUP') or '').strip() or None
+    return (os.environ.get('FEIRA_TAXA_SETUP') or 'R$ 349').strip() or None
+
+
+def compra_do_site():
+    """O caminho de quem prefere pagar uma vez e ser dono.
+
+    Por que a compra NÃO inclui o painel
+    ------------------------------------
+    Com os dois preços lado a lado, o primeiro ano da compra sai R$ 723,80 mais
+    barato que assinar (R$ 1.400 contra R$ 349 + 12 × R$ 147,90). Se os dois
+    entregassem a mesma coisa, todo dono que fizesse a conta compraria, e a
+    receita recorrente — que é o que faz o negócio valer alguma coisa — morria
+    no primeiro ano.
+
+    A saída não é subir o preço. Licença perpétua no mercado custa de 2 a 3
+    anuidades, o que aqui daria R$ 3.549: bar de bairro não paga, e a venda se
+    perde. A saída é o escopo. O que se vende por preço único é o **site
+    pronto**, que no mercado brasileiro custa de R$ 800 a R$ 15.000 — R$ 1.400
+    está na faixa e é honesto. O que não se vende por preço único é software que
+    roda todo dia (reserva caindo no WhatsApp, painel que edita do celular,
+    atualização): isso tem custo recorrente de verdade, e por isso é recorrente.
+
+    Assim os dois deixam de ser comparáveis: um leva um site, o outro leva um
+    sistema. Quem compra e depois quer o painel assina — e aí a compra vira
+    porta de entrada em vez de fuga. Ver `docs/PRECIFICACAO.md`.
+    """
+    return {
+        'valor': os.environ.get('FEIRA_COMPRA_SITE', 'R$ 1.400'),
+        'inclui': os.environ.get(
+            'FEIRA_COMPRA_INCLUI',
+            'Site pronto, cardápio com QR, seu bar configurado no Google, '
+            'um ano de domínio e um ano de hospedagem'),
+        'nao_inclui': os.environ.get(
+            'FEIRA_COMPRA_NAO_INCLUI',
+            'Reserva no WhatsApp, agenda, promoções e o painel que edita do '
+            'celular — isso é do plano mensal'),
+        'renovacao': os.environ.get('FEIRA_COMPRA_RENOVACAO', 'R$ 390/ano'),
+    }
 
 
 # Convite de fundador: o desconto que o vendedor concede na mesa.
@@ -97,8 +155,26 @@ RECURSOS_POR_PLANO = {
 
 # Teto de itens de conteúdo no plano free. Não é punição: é o suficiente pra
 # manter um site honesto no ar depois que o trial acaba.
-LIMITES_FREE = {'cardapio': 5, 'galeria': 3, 'avaliacoes': 3, 'equipe': 3,
+#
+# `cardapio` saiu da lista de propósito. O cardápio digital com QR é entregue
+# inteiro para todo mundo, em qualquer plano: cortado em cinco itens ele não
+# serve ao bar nem ao freguês, e um QR na mesa que abre meio cardápio queima o
+# produto na frente do cliente do cliente. É a peça que faz o bar existir no
+# celular de quem está sentado na mesa — não é ela que vende o plano.
+LIMITES_FREE = {'galeria': 3, 'avaliacoes': 3, 'equipe': 3,
                 'diferenciais': 3}
+
+
+def fim_do_trial(a_partir_de=None):
+    """Data em que o teste grátis acaba, ou None quando não há teste.
+
+    Existe porque `hoje + 0 dias` é hoje, e `hoje <= trial_termina_em` daria um
+    dia inteiro de Pro para quem não tem teste nenhum. Zero tem que ser nenhum:
+    devolve None, e `plano_efetivo` pula o ramo do trial.
+    """
+    if DIAS_DE_TRIAL <= 0:
+        return None
+    return (a_partir_de or date.today()) + timedelta(days=DIAS_DE_TRIAL)
 
 
 def plano_efetivo(rest):

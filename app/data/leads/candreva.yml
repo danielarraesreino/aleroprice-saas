@@ -9,6 +9,7 @@ nome: "Candreva Bar"
 tema: boteco-ambar
 
 site:
+  modelo: tradicional
   telefone_exibicao: "(19) 3232-7361"
   endereco: "Av. Monte Castelo, 23 - Jardim Proença, Campinas - SP, 13026-240"
   vibe: boteco

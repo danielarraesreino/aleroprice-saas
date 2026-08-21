@@ -9,6 +9,7 @@ nome: "Bar do Carioca"
 tema: boteco-ambar
 
 site:
+  modelo: craft
   vibe: boteco
   descritor: "Boteco de bairro em Campinas"
   kicker: "JD. CHAPADÃO · CAMPINAS–SP"

@@ -9,6 +9,7 @@ nome: "Cervejaria Confra"
 tema: pub-escuro
 
 site:
+  modelo: craft
   hero_foto: "img/demo/confra/capa.jpg"
   instagram_url: "https://www.instagram.com/cervejariaconfra/"
   maps_query: "Cervejaria Confra Barão Geraldo Campinas"

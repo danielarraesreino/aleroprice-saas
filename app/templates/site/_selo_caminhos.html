@@ -1,0 +1,25 @@
+{#
+  Selo de apoio ao Caminhos Campinas, no rodapé do site do bar.
+
+  Um arquivo só, incluído pelos seis modelos: o texto é uma declaração pública
+  em nome do bar, e seis cópias viram seis versões que divergem na primeira
+  correção.
+
+  Sem cor própria. Herda `currentColor` e a fonte do rodapé de cada modelo —
+  são seis paletas diferentes (clássico, craft, tradicional, autoral, noturno,
+  brasa) e um selo com cor fixa brigaria com pelo menos quatro delas. Discreto
+  por decisão: quem entra no site é freguês do bar procurando cardápio, e o
+  selo informa sem interromper.
+
+  Só renderiza quando `apoia_caminhos` é verdadeiro — o que a view só entrega
+  para cliente que ligou a opção no painel, nunca para prévia.
+#}
+{% if apoia_caminhos and coletivo %}
+<p class="selo-caminhos" style="margin-top:1.25rem;padding-top:1rem;
+   border-top:1px solid currentColor;opacity:.72;font-size:.8rem;line-height:1.5">
+  Esta casa apoia o
+  <a href="{{ coletivo.caminhos }}" target="_blank" rel="noopener"
+     style="color:currentColor;text-decoration:underline">Caminhos Campinas</a>
+  — dados abertos e formação com a população em situação de rua de Campinas.
+</p>
+{% endif %}

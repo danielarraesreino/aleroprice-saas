@@ -9,6 +9,7 @@ nome: "Jeff's Burger"
 tema: neon-noite
 
 site:
+  modelo: noturno
   vibe: hamburgueria
   descritor: "Lanche grande em Campinas"
   kicker: "CAMPINAS–SP"

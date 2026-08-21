@@ -9,6 +9,7 @@ nome: "Buteco do Jair"
 tema: boteco-ambar
 
 site:
+  modelo: noturno
   hero_foto: "img/demo/buteco-do-jair/capa.jpg"
   endereco: "R. Eduardo Modesto, 212 - Barão Geraldo, Campinas - SP"
   instagram_url: "https://www.instagram.com/bardojaircampinas/"

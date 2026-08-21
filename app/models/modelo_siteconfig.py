@@ -61,11 +61,22 @@ class SiteConfig(db.Model):
     # — e porque o vendedor precisa mostrar as duas na hora.
     tema_modo = db.Column(db.String(10), default='auto')
 
+    # O bar escolhe exibir no rodapé que apoia o Caminhos Campinas, projeto de
+    # dados abertos e formação com a população em situação de rua.
+    #
+    # Opt-in, e desligado por padrão, por dois motivos. O primeiro é do dono: o
+    # rodapé do site é dele, e causa é escolha, não brinde que vem embutido no
+    # plano. O segundo é da causa: selo que aparece sem ninguém pedir vira
+    # decoração, e decoração não sustenta projeto nenhum.
+    apoia_caminhos = db.Column(db.Boolean, default=False)
+
     # Prova social. Vazios = o bloco de nota some (melhor do que exibir a nota
     # de outro bar, que era o que acontecia com o 4,9/39 fixo no template).
     nota_google = db.Column(db.String(10))
     qtd_avaliacoes = db.Column(db.Integer)
-    servicos = db.Column(db.String(200))
+    # Notificações WhatsApp via CallMeBot (grátis)
+    callmebot_phone = db.Column(db.String(20))
+    callmebot_apikey = db.Column(db.String(50))
 
     data_atualizacao = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 

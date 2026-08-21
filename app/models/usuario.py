@@ -35,8 +35,12 @@ class Usuario(UserMixin, db.Model):
         return check_password_hash(self.senha, senha)
     
     def is_admin(self):
-        """Verifica se o usuário é um administrador"""
-        return self.tipo == 'admin'
+        """Verifica se o usuário é um administrador do seu tenant"""
+        return self.tipo in ('admin', 'superadmin')
+    
+    def is_superadmin(self):
+        """Verifica se o usuário é o Master Admin da plataforma global"""
+        return self.tipo == 'superadmin'
     
     def to_dict(self):
         """Retorna um dicionário com os dados do usuário (sem a senha)"""

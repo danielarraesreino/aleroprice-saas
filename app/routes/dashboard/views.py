@@ -540,7 +540,14 @@ def obter_dados_matriz_bcg(data_inicio, data_fim, restaurant_id):
 
 @bp.route('/upgrade')
 def upgrade():
-    """Página de Upgrade/Planos"""
+    """Página de Upgrade/Planos.
+
+    `current_user` é importado aqui porque o módulo não o importa no topo — sem
+    isto a rota levantava `NameError` e devolvia 500. E esta é a página que o
+    cliente do plano Site encontra ao esbarrar num recurso do Pro: o momento
+    exato em que ele consideraria pagar mais terminava numa tela de erro.
+    """
+    from flask_login import current_user
     from app.utils.planos import (
         precos, plano_efetivo, dias_de_trial_restantes,
     )

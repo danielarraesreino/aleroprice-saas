@@ -9,6 +9,7 @@ nome: "Mikrolot"
 tema: neon-noite
 
 site:
+  modelo: craft
   telefone_exibicao: "(19) 98417-6000"
   endereco: "R. João Duque, 342 - Parque Imperador, Campinas - SP, 13097-111"
   vibe: hamburgueria

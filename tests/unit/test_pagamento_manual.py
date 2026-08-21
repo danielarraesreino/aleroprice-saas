@@ -119,8 +119,11 @@ class TestConversaoNaoDaPlanoDeGraca:
 
         assert r.subscription_tier == 'free'
         assert r.plano_ate is None
-        # Durante os 14 dias o acesso é amplo — mas por trial, não por tier.
-        assert plano_efetivo(r) == 'trial'
+        # Sem teste grátis (`FEIRA_DIAS_TRIAL=0`), a conversão nasce em free e
+        # o acesso vem do pagamento. Com teste aberto, o acesso viria de
+        # `trial_termina_em` — nunca do tier, que é o furo do plano vitalício.
+        assert plano_efetivo(r) == 'free'
+        assert r.trial_termina_em is None
 
     def test_passado_o_trial_sem_pagar_cai_para_free(self, app, session):
         from app.utils.demos import converter_demo

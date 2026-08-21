@@ -9,6 +9,7 @@ nome: "Bar do Marcelino"
 tema: boteco-ambar
 
 site:
+  modelo: classico
   telefone_exibicao: "(19) 3203-8525"
   endereco: "R. Heitor Penteado, 1113 - Joaquim Egídio, Campinas - SP"
   qtd_avaliacoes: 1122

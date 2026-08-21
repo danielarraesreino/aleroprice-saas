@@ -9,6 +9,7 @@ nome: "Botequim de Barão"
 tema: boteco-ambar
 
 site:
+  modelo: tradicional
   hero_foto: "img/demo/botequim-de-barao/capa.jpg"
   telefone_exibicao: "(19) 99699-9585"
   qtd_avaliacoes: 2

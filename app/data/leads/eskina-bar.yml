@@ -9,6 +9,7 @@ nome: "Eskina Bar"
 tema: boteco-ambar
 
 site:
+  modelo: craft
   hero_foto: "img/demo/eskina-bar/capa.jpg"
   telefone_exibicao: "(19) 3722-5237"
   qtd_avaliacoes: 40

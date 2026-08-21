@@ -9,6 +9,7 @@ nome: "Banana Café"
 tema: neon-noite
 
 site:
+  modelo: noturno
   telefone_exibicao: "(19) 3252-9792"
   endereco: "R. Gen. Osório, 2090 - Cambuí, Campinas - SP, 13025-150"
   qtd_avaliacoes: 2089

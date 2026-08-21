@@ -9,6 +9,7 @@ nome: "Restaurante do Romeu"
 tema: boteco-ambar
 
 site:
+  modelo: brasa
   vibe: boteco
   descritor: "Restaurante de família em Sumaré"
   kicker: "SUMARÉ–SP · DESDE 1994"

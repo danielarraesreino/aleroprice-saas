@@ -9,6 +9,7 @@ nome: "Cervejaria Campinas"
 tema: pub-escuro
 
 site:
+  modelo: craft
   hero_foto: "img/demo/cervejaria-campinas/capa.jpg"
   instagram_url: "https://www.instagram.com/cervejariacampinas/"
   maps_query: "Cervejaria Campinas Tap House Barão Geraldo"

@@ -19,6 +19,7 @@ nome: "Estação Santana"
 tema: boteco-ambar
 
 site:
+  modelo: tradicional
   telefone_exibicao: "(19) 3579-3430"
   endereco: "R. Maria da Conceição dos Santos, 20 - Conj. Hab. Vila Santana, Sousas, Campinas - SP, 13105-712"
   vibe: boteco

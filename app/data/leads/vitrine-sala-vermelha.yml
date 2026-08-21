@@ -13,6 +13,7 @@ nome: "Sala Vermelha"
 tema: neon-noite
 
 site:
+  modelo: noturno
   vibe: pub
   descritor: "Casa de show pequena, palco baixo e som de gente que se importa"
   kicker: "BARÃO GERALDO · CAMPINAS–SP"

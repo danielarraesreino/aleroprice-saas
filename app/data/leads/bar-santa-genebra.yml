@@ -9,6 +9,7 @@ nome: "Bar Santa Genebra"
 tema: boteco-ambar
 
 site:
+  modelo: classico
   hero_foto: "img/demo/bar-santa-genebra/capa.jpg"
   telefone_exibicao: "(19) 99478-9212"
   qtd_avaliacoes: 10

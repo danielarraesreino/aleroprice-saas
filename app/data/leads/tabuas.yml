@@ -9,6 +9,7 @@ nome: "Cervejaria Tábuas"
 tema: pub-escuro
 
 site:
+  modelo: craft
   hero_foto: "img/demo/tabuas/capa.jpg"
   instagram_url: "https://www.instagram.com/tabuascervejaria/"
   maps_query: "Cervejaria Tábuas Barão Geraldo Campinas"

@@ -9,6 +9,7 @@ nome: "Bar Hélio"
 tema: boteco-ambar
 
 site:
+  modelo: craft
   vibe: boteco
   descritor: "Boteco de atendimento nota mil"
   kicker: "VALINHOS–SP"

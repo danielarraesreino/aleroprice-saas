@@ -16,6 +16,7 @@ nome: "Tap Cinco"
 tema: pub-escuro
 
 site:
+  modelo: craft
   vibe: pub
   descritor: "Taproom com cinco torneiras rotativas e fábrica na casa ao lado"
   kicker: "BARÃO GERALDO · CAMPINAS–SP"

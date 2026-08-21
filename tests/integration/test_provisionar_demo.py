@@ -160,7 +160,8 @@ def test_conversao_preserva_conteudo(client, session, lead):
 
     assert rest.tipo_conta == 'cliente'
     assert rest.demo_expira_em is None
-    assert rest.trial_termina_em is not None
+    # Sem teste grátis, nasce em free — o acesso vem do pagamento.
+    assert rest.subscription_tier == 'free'
     assert admin.restaurant_id == rest.id
     # mesmo restaurant_id, mesmas linhas: nada foi recriado
     assert DishCard.query.filter_by(restaurant_id=rest.id).count() == pratos_antes

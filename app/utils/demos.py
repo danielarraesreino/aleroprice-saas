@@ -286,12 +286,18 @@ def converter_demo(rest, email, senha, nome_admin='Responsável', dias_trial=Non
     # conversão nascia dentro dela: tier 'site' + data nula = plano Site
     # vitalício, de graça, e o trial de 14 dias nunca chegava a valer de nada.
     #
-    # Com 'free' aqui, o acesso dos 14 dias vem de `plano_efetivo` devolvendo
+    # Com 'free' aqui, o acesso do teste vem de `plano_efetivo` devolvendo
     # 'trial' (que vale como pro). Passado o prazo sem pagamento, cai pra free —
     # site no ar, controle congelado, que é a degradação desenhada. Quem paga
     # sobe pra 'site'/'pro' com data por `planos.registrar_pagamento`.
+    #
+    # Com `FEIRA_DIAS_TRIAL=0` (o padrão hoje) não há teste: `fim_do_trial`
+    # devolve None e a conversão nasce direto em free. `hoje + 0 dias` daria um
+    # dia inteiro de Pro para quem não tem teste nenhum.
+    from app.utils.planos import fim_do_trial
     rest.subscription_tier = 'free'
-    rest.trial_termina_em = date.today() + timedelta(days=dias_trial)
+    rest.trial_termina_em = (fim_do_trial() if dias_trial == DIAS_DE_TRIAL
+                             else date.today() + timedelta(days=dias_trial))
 
     admin = Usuario(nome=nome_admin, email=email, senha=senha,
                     tipo='admin', restaurant_id=rest.id)

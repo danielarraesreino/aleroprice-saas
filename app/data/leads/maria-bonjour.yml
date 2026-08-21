@@ -12,6 +12,7 @@ nome: "Maria Bonjour Bar"
 tema: pub-escuro
 
 site:
+  modelo: craft
   hero_foto: "img/demo/maria-bonjour/capa.jpg"
   telefone_exibicao: "(19) 3201-1011"
   qtd_avaliacoes: 1951

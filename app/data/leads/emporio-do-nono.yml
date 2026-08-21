@@ -9,6 +9,7 @@ nome: "Empório do Nono"
 tema: boteco-ambar
 
 site:
+  modelo: tradicional
   hero_foto: "img/demo/emporio-do-nono/capa.jpg"
   nota_google: '4,6'
   qtd_avaliacoes: 3994

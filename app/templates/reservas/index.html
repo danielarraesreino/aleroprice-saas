@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Reservas · AleroPrice{% endblock %}
+{% block title %}Reservas · {{ MARCA }}{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
@@ -12,6 +12,16 @@
     <span class="badge bg-success">{{ contagem.confirmada }} confirmada{{ 's' if contagem.confirmada != 1 }}</span>
     {% endif %}
   </div>
+</div>
+
+<div class="alert alert-success bg-opacity-10 border-success d-flex align-items-center justify-content-between flex-wrap gap-2 py-2 px-3 mb-3">
+  <div class="small">
+    <i class="fab fa-whatsapp text-success me-1"></i>
+    <strong>Alertas no WhatsApp (CallMeBot):</strong> Receba cada nova reserva instantaneamente no seu celular sem custos.
+  </div>
+  <a href="{{ url_for('configsite.index') }}" class="btn btn-sm btn-outline-success py-0 px-2">
+    Configurar WhatsApp <i class="fas fa-arrow-right"></i>
+  </a>
 </div>
 
 <ul class="nav nav-pills mb-3">

@@ -51,6 +51,10 @@
             <span class="text-danger">sem nota</span>
           {% endif %}
           · {{ c.fotos }} foto{{ '' if c.fotos == 1 else 's' }}
+          {# Qual dos seis modelos este bar recebeu. A campanha já rodou uma vez
+             inteira no `classico` — os seis existiam e nenhum bar usava outro.
+             Ver isso na grade é o que denuncia se voltar a acontecer. #}
+          · <span class="text-body-secondary">{{ c.modelo }}</span>
         </div>
 
         {% if c.horario %}

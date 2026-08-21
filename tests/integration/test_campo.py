@@ -34,12 +34,12 @@ def disco_isolado(tmp_path, monkeypatch):
 
 @pytest.fixture
 def operador(session):
-    """O primeiro tenant é o operador da campanha — critério de `e_operador`."""
+    """Operador Master (SuperAdmin) da campanha."""
     rest = Restaurante(nome='Alero (operador)', slug='alero')
     session.add(rest)
     session.commit()
     usuario = Usuario(nome='Vendedor', email='vendedor@alero.com',
-                      senha='segredo123', tipo='admin', restaurant_id=rest.id)
+                      senha='segredo123', tipo='superadmin', restaurant_id=rest.id)
     session.add(usuario)
     session.commit()
     return usuario
@@ -456,7 +456,9 @@ def test_converter_cria_a_conta_sem_refazer_o_site(client, session, demo):
     rest = Restaurante.query.get(demo.id)
     assert rest.tipo_conta == 'cliente'
     assert rest.demo_expira_em is None
-    assert rest.trial_termina_em is not None
+    # Sem teste grátis, a conta nasce em free e o acesso vem do pagamento
+    # registrado no Modo Campo. O que importa aqui é que deixou de ser prévia.
+    assert rest.subscription_tier == 'free'
 
     dono = Usuario.query.filter_by(email='gustavo@boteco.com').one()
     assert dono.restaurant_id == rest.id

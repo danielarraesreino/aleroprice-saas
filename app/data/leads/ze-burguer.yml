@@ -9,6 +9,7 @@ nome: "Zé Burguer"
 tema: neon-noite
 
 site:
+  modelo: noturno
   vibe: hamburgueria
   descritor: "Hamburgueria no Centro de Campinas"
   kicker: "CENTRO · CAMPINAS–SP"

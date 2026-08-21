@@ -9,6 +9,7 @@ nome: "Mantega"
 tema: neon-noite
 
 site:
+  modelo: craft
   vibe: pub
   descritor: "Culinária oriental em Hortolândia"
   kicker: "HORTOLÂNDIA–SP"

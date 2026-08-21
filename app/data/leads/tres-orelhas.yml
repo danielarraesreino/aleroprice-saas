@@ -9,6 +9,7 @@ nome: "Cervejaria 3 Orelhas"
 tema: pub-escuro
 
 site:
+  modelo: craft
   endereco: "R. Prof. Manoel Saturnino do Amaral, 30 - Joaquim Egídio, Campinas - SP, 13108-044"
   vibe: pub
   descritor: "Cervejaria artesanal em Joaquim Egídio"

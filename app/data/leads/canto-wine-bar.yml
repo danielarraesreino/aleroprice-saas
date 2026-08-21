@@ -9,6 +9,7 @@ nome: "Canto Wine Bar"
 tema: pub-escuro
 
 site:
+  modelo: autoral
   vibe: pub
   descritor: "Wine bar no Cambuí"
   kicker: "CAMBUÍ · CAMPINAS–SP"

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{{ titulo }} — Alero</title>
+<title>{{ titulo }} — {{ MARCA }}</title>
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
 <style>
   :root{--ink:#140f0a;--surface:#1e1811;--cream:#f3e7d2;--muted:#b09a7d;--amber:#ffb43d;--ember:#ff6a2b;--hair:rgba(255,180,60,.16)}
@@ -36,7 +36,7 @@
   <main class="card">
     <div class="brand">
       <span class="mark">🍺</span>
-      <b>Alero</b>
+      <b>{{ MARCA }}</b>
     </div>
 
     <span class="code">Erro 404</span>

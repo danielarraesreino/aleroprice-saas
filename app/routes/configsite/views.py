@@ -101,6 +101,11 @@ def index():
         if modo in ('auto', 'claro', 'escuro'):
             cfg.tema_modo = modo
 
+        # Checkbox não enviado = desmarcado. Por isso lê presença na chave, e
+        # não `CAMPOS` — que ignora campo ausente pra não apagar texto que o
+        # formulário não trouxe. Aqui ausência é justamente a resposta "não".
+        cfg.apoia_caminhos = bool(request.form.get('apoia_caminhos'))
+
         db.session.commit()
         flash('Site atualizado. Recarregue a página pública pra ver.', 'success')
         return redirect(url_for('configsite.index'))
@@ -115,3 +120,46 @@ def index():
                            modo_atual=(cfg.tema_modo if cfg and cfg.tema_modo
                                        in ('auto', 'claro', 'escuro') else 'auto'),
                            slug=(rest.slug if rest else None))
+
+
+@bp.post('/testar-callmebot')
+@plano_minimo('site')
+def testar_callmebot():
+    """Envia uma mensagem de teste para o WhatsApp do bar via CallMeBot."""
+    import urllib.parse
+    import urllib.request
+    
+    rid = get_current_restaurant_id()
+    if not rid:
+        return jsonify({'ok': False, 'erro': 'Sessão sem restaurante'}), 400
+
+    cfg = SiteConfig.query.filter_by(restaurant_id=rid).first()
+    
+    # Pode receber do form do teste ou do SiteConfig salvo
+    phone = (request.form.get('callmebot_phone') or request.json.get('callmebot_phone') if request.is_json else None)
+    apikey = (request.form.get('callmebot_apikey') or request.json.get('callmebot_apikey') if request.is_json else None)
+    
+    if not phone and cfg:
+        phone = cfg.callmebot_phone or cfg.whatsapp
+    if not apikey and cfg:
+        apikey = cfg.callmebot_apikey or os.environ.get('CALLMEBOT_APIKEY')
+
+    if not phone or not apikey:
+        return jsonify({'ok': False, 'erro': 'Preencha o número do WhatsApp e a API Key do CallMeBot antes de testar.'}), 400
+
+    # Limpa caracteres não numéricos do telefone
+    phone_clean = ''.join(c for c in str(phone) if c.isdigit())
+    apikey_clean = str(apikey).strip()
+
+    texto = "🔔 *AleroPrice*: Teste de notificação CallMeBot recebido com sucesso no seu WhatsApp! As novas reservas do seu site tocarão aqui instantaneamente. 🍻"
+    params = urllib.parse.urlencode({'phone': phone_clean, 'text': texto, 'apikey': apikey_clean})
+    url = 'https://api.callmebot.com/whatsapp.php?' + params
+
+    try:
+        with urllib.request.urlopen(url, timeout=8) as resp:
+            body = resp.read().decode('utf-8', errors='ignore')
+            if '200' in str(resp.status) or 'Message queued' in body or 'OK' in body:
+                return jsonify({'ok': True, 'mensagem': 'Alerta de teste enviado! Verifique seu WhatsApp.'})
+            return jsonify({'ok': True, 'mensagem': f'Chamada realizada: {body[:100]}'})
+    except Exception as e:
+        return jsonify({'ok': False, 'erro': f'Falha ao conectar com CallMeBot: {str(e)}'}), 500

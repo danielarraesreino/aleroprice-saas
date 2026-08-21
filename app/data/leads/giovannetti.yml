@@ -9,6 +9,7 @@ nome: "Giovannetti Rosário"
 tema: boteco-ambar
 
 site:
+  modelo: craft
   endereco: "R. Gen. Osório, 1059 - Centro, Campinas - SP, 13010-111"
   qtd_avaliacoes: 2254
   nota_google: "4,6"

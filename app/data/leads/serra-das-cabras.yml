@@ -9,6 +9,7 @@ nome: "Cervejaria Serra das Cabras"
 tema: praia-claro
 
 site:
+  modelo: craft
   endereco: "R. Treze de Maio, 1600 - Nova Sousas, Campinas - SP"
   vibe: praia
   descritor: "Cervejaria com vista em Nova Sousas"

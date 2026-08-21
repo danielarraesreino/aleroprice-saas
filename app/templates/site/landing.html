@@ -26,6 +26,7 @@
    robô que ignore o `robots` ainda aprende qual é a página real. #}
 {% set canonica = url_canonica or request.base_url %}
 <link rel="canonical" href="{{ canonica }}">
+<link rel="alternate" type="text/markdown" title="LLM Summary" href="/llms.txt">
 
 {# Dados estruturados. É o que faz o bar existir como FATO (endereço, horário,
    nota, cardápio, agenda) pro Google, pro AI Overview, pro Perplexity e pro
@@ -981,6 +982,7 @@
     </div>
     <div><a class="lojista" href="{{ url_do_sistema() }}">Área do lojista · entrar no sistema →</a></div>
   </div>
+  {% include "site/_selo_caminhos.html" %}
 </footer>
 
 <div class="lightbox" id="lightbox" onclick="this.classList.remove('on')">

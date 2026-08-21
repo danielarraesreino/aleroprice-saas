@@ -9,6 +9,7 @@ nome: "Hamburgueria do Super"
 tema: neon-noite
 
 site:
+  modelo: craft
   vibe: hamburgueria
   descritor: "Hambúrguer e opção vegana"
   kicker: "PONTE PRETA · CAMPINAS–SP"

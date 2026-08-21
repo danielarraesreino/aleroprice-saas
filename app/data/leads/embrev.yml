@@ -11,6 +11,7 @@ nome: "Embrev Barão"
 tema: boteco-ambar
 
 site:
+  modelo: craft
   hero_foto: "img/demo/embrev/capa.jpg"
   telefone_exibicao: "(19) 99715-3588"
   qtd_avaliacoes: 440

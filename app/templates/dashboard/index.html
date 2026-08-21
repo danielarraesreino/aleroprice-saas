@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}AleroPrice - Dashboard de Lucratividade{% endblock %}
+{% block title %}{{ MARCA }} - Dashboard de Lucratividade{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -109,13 +109,86 @@
 {% endblock %}
 
 {% block content %}
-{% if show_onboarding %}
+{% if show_onboarding and not pode('gestao') %}
+{#
+  Boas-vindas de quem comprou o SITE.
+
+  O onboarding abaixo (o de gestão) dispara quando não há produto nem venda
+  cadastrada — e quem assina o plano Site nunca vai cadastrar produto nenhum.
+  Ou seja: o dono do bar abria o painel que acabou de pagar e era recebido para
+  sempre por "Importar Primeira Nota Fiscal" e "destravar sua gestão
+  financeira", que é outro produto. Aqui ele vê os passos do que comprou.
+#}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-9">
+      <div class="card shadow-lg border-0">
+        <div class="card-body p-4 p-md-5">
+          <h1 class="h2 fw-bold mb-2">Seu site já está no ar 🎉</h1>
+          <p class="lead text-muted mb-4">
+            Falta pouco pra ele ficar com a cara da casa. Três passos, dá pra
+            fazer do celular.
+          </p>
+
+          <div class="list-group list-group-flush mb-4">
+            <a href="{{ url_for('configsite.index') }}"
+               class="list-group-item list-group-item-action d-flex gap-3 py-3">
+              <span class="badge bg-primary rounded-pill align-self-start mt-1">1</span>
+              <span>
+                <strong class="d-block">Ponha a foto e o seu WhatsApp</strong>
+                <small class="text-muted">
+                  A foto de capa é o que segura quem abre o site. O WhatsApp é
+                  pra onde as reservas chegam.
+                </small>
+              </span>
+            </a>
+            <a href="{{ url_for('conteudo.home') }}"
+               class="list-group-item list-group-item-action d-flex gap-3 py-3">
+              <span class="badge bg-primary rounded-pill align-self-start mt-1">2</span>
+              <span>
+                <strong class="d-block">Monte o cardápio</strong>
+                <small class="text-muted">
+                  Nome, preço e foto dos carros-chefe. É o que vira o QR da mesa.
+                </small>
+              </span>
+            </a>
+            <a href="{{ url_for('agenda.index') }}"
+               class="list-group-item list-group-item-action d-flex gap-3 py-3">
+              <span class="badge bg-primary rounded-pill align-self-start mt-1">3</span>
+              <span>
+                <strong class="d-block">Marque o que vai rolar</strong>
+                <small class="text-muted">
+                  Música de quinta, feijoada de sábado: entra na agenda e
+                  aparece no site.
+                </small>
+              </span>
+            </a>
+          </div>
+
+          {% if current_user.restaurante and current_user.restaurante.slug %}
+          <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-primary btn-lg"
+               href="{{ url_for('configsite.index') }}">
+              <i class="fas fa-camera me-2"></i> Começar pela foto
+            </a>
+            <a class="btn btn-outline-secondary btn-lg" target="_blank" rel="noopener"
+               href="{{ url_for('public.landing_slug', slug=current_user.restaurante.slug) }}">
+              <i class="fas fa-external-link-alt me-2"></i> Ver meu site
+            </a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% elif show_onboarding %}
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-10">
             <div class="card shadow-lg border-0">
                 <div class="card-body p-5 text-center">
-                    <h1 class="display-4 text-primary fw-bold mb-4">Bem-vindo ao AleroPrice! 🚀</h1>
+                    <h1 class="display-4 text-primary fw-bold mb-4">Bem-vindo ao {{ MARCA }}! 🚀</h1>
                     <p class="lead mb-5">Siga os passos abaixo para destravar o poder da sua gestão financeira.</p>
 
                     <div class="position-relative m-4">

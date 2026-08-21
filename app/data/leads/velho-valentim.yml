@@ -9,6 +9,7 @@ nome: "Velho Valentim"
 tema: pub-escuro
 
 site:
+  modelo: tradicional
   telefone_exibicao: "(19) 3298-6674"
   endereco: "R. Dr. Heitor Penteado, 1092 - Joaquim Egídio, Campinas - SP, 13108-002"
   qtd_avaliacoes: 705

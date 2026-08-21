@@ -9,6 +9,7 @@ nome: "Tatu Bola Bar"
 tema: boteco-ambar
 
 site:
+  modelo: craft
   vibe: boteco
   descritor: "Boteco de esquina no Cambuí"
   kicker: "CAMBUÍ · CAMPINAS–SP"

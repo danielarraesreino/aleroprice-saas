@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Site · AleroPrice{% endblock %}
+{% block title %}Site · {{ MARCA }}{% endblock %}
 
 {# hero_foto guarda caminho em static OU URL absoluta (Vercel Blob).
    Mesma regra de publico.views._img() e do macro img() de campo/editar.html. #}
@@ -98,6 +98,28 @@
     <div class="form-text">No automático, cada visitante vê conforme o celular dele.</div>
   </div>
 
+  {# Opt-in, nunca ligado por padrão: o rodapé é do bar, e apoio é escolha.
+     O texto diz o que o selo faz e o que ele NÃO faz — nenhuma cobrança extra,
+     nenhum valor sai da mensalidade. Enquanto não houver entidade que possa
+     receber repasse, o selo é vínculo público, não transação. #}
+  <div class="mb-4">
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" id="apoia_caminhos"
+             name="apoia_caminhos" value="1"
+             {% if cfg and cfg.apoia_caminhos %}checked{% endif %}>
+      <label class="form-check-label fw-semibold" for="apoia_caminhos">
+        Mostrar no meu site que apoio o Caminhos Campinas
+      </label>
+    </div>
+    <div class="form-text">
+      Um selo discreto no rodapé do seu site, ligando ao
+      <a href="https://caminhos-cps.social" target="_blank" rel="noopener">Caminhos Campinas</a> —
+      projeto de dados abertos e formação com a população em situação de rua,
+      feito pela mesma gente que monta o seu site. Não custa nada a mais e não
+      muda sua mensalidade. Pode desligar quando quiser.
+    </div>
+  </div>
+
   <div class="mb-4">
     <label class="form-label fw-semibold">Cara do site</label>
     <select class="form-select" name="tema">
@@ -162,11 +184,64 @@
 
   <details class="mb-4">
     <summary class="mb-3">Textos do topo e mais detalhes</summary>
-    {% for campo in defaults.keys() if campo not in essenciais and campo not in avancados %}
+    {% for campo in defaults.keys() if campo not in essenciais and campo not in avancados and campo not in ['callmebot_phone', 'callmebot_apikey'] %}
       {{ campo_texto(campo) }}
     {% endfor %}
-    {% for campo in avancados %}{{ campo_texto(campo) }}{% endfor %}
+    {% for campo in avancados if campo not in ['callmebot_phone', 'callmebot_apikey'] %}{{ campo_texto(campo) }}{% endfor %}
   </details>
+
+  {# Bloco CallMeBot: Notificações de Reservas no WhatsApp com Tutorial #}
+  <div class="card border-success shadow-sm mb-4">
+    <div class="card-header bg-success bg-opacity-10 border-success d-flex align-items-center justify-content-between">
+      <h5 class="mb-0 text-success"><i class="fab fa-whatsapp"></i> Alertas de Reservas no WhatsApp (CallMeBot)</h5>
+      <span class="badge bg-success">100% Gratuito</span>
+    </div>
+    <div class="card-body">
+      <div class="alert alert-light border mb-3">
+        <h6 class="fw-bold mb-1"><i class="fas fa-lightbulb text-warning"></i> Por que usamos o CallMeBot?</h6>
+        <p class="small text-muted mb-0">
+          Escolhemos o CallMeBot porque ele é uma solução <strong>100% gratuita</strong> para envio de mensagens automáticas no WhatsApp. 
+          Diferente de APIs corporativas pagas (que custam de R$ 100 a R$ 300 por mês), o CallMeBot entrega o alerta instantâneo de cada nova reserva diretamente no seu WhatsApp pessoal ou do bar sem custo extra.
+        </p>
+      </div>
+
+      <h6 class="fw-bold mb-2">Como ativar em 3 passos simples:</h6>
+      <ol class="small text-muted ps-3 mb-3">
+        <li class="mb-2">
+          Abra o WhatsApp e envie a mensagem <code>I allow callmebot to send me messages</code> para o número oficial: 
+          <a href="https://wa.me/34644519523?text=I%20allow%20callmebot%20to%20send%20me%20messages" target="_blank" rel="noopener" class="btn btn-sm btn-outline-success ms-1 py-0 px-2">
+            <i class="fab fa-whatsapp"></i> Abrir WhatsApp (+34 644 51 95 23)
+          </a>
+        </li>
+        <li class="mb-2">O robô responderá em segundos confirmando seu registro e entregando a sua <strong>API Key</strong> (código numérico de 6 a 7 dígitos).</li>
+        <li>Preencha os campos abaixo com o seu WhatsApp e a sua API Key recebida, salve a página e clique no botão de teste.</li>
+      </ol>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Seu WhatsApp de Notificação</label>
+          <input type="text" class="form-control" name="callmebot_phone" id="callmebot_phone"
+                 value="{{ cfg.callmebot_phone if cfg and cfg.callmebot_phone else (cfg.whatsapp if cfg and cfg.whatsapp else '') }}"
+                 placeholder="Ex: 5519999998888 (com DDI 55 e DDD)">
+          <div class="form-text">Número que vai receber o alerta a cada nova reserva feita no site.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Sua API Key do CallMeBot</label>
+          <input type="text" class="form-control" name="callmebot_apikey" id="callmebot_apikey"
+                 value="{{ cfg.callmebot_apikey if cfg and cfg.callmebot_apikey else '' }}"
+                 placeholder="Ex: 5724326">
+          <div class="form-text">Código numérico recebido no WhatsApp pelo robô.</div>
+        </div>
+      </div>
+
+      <div class="mt-3 pt-2 border-top d-flex align-items-center gap-2 flex-wrap">
+        <button type="button" class="btn btn-outline-success btn-sm" id="btn-testar-callmebot">
+          <i class="fas fa-paper-plane"></i> Enviar Alerta de Teste
+        </button>
+        <span id="callmebot-teste-resultado" class="small"></span>
+      </div>
+    </div>
+  </div>
 
   <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Salvar identidade</button>
 </form>
@@ -232,6 +307,50 @@
       entrada.value = '';
     }
   });
+
+  /* Teste de Notificação CallMeBot */
+  const btnTestar = document.getElementById('btn-testar-callmebot');
+  const resTeste = document.getElementById('callmebot-teste-resultado');
+  if (btnTestar) {
+    btnTestar.addEventListener('click', async () => {
+      const phoneInput = document.getElementById('callmebot_phone');
+      const apikeyInput = document.getElementById('callmebot_apikey');
+      const phone = phoneInput ? phoneInput.value.trim() : '';
+      const apikey = apikeyInput ? apikeyInput.value.trim() : '';
+
+      if (!phone || !apikey) {
+        resTeste.textContent = 'Preencha o número do WhatsApp e a API Key acima primeiro.';
+        resTeste.className = 'small text-danger';
+        return;
+      }
+
+      btnTestar.disabled = true;
+      btnTestar.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Enviando...';
+      resTeste.textContent = 'Disparando alerta para o seu WhatsApp...';
+      resTeste.className = 'small text-primary';
+
+      try {
+        const resp = await fetch({{ url_for('configsite.testar_callmebot')|tojson }}, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': CSRF
+          },
+          body: JSON.stringify({ callmebot_phone: phone, callmebot_apikey: apikey })
+        });
+        const data = await resp.json();
+        if (!resp.ok || !data.ok) throw new Error(data.erro || 'Falha no envio');
+        resTeste.textContent = '✅ ' + data.mensagem;
+        resTeste.className = 'small text-success fw-semibold';
+      } catch (err) {
+        resTeste.textContent = '❌ ' + err.message;
+        resTeste.className = 'small text-danger';
+      } finally {
+        btnTestar.disabled = false;
+        btnTestar.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Alerta de Teste';
+      }
+    });
+  }
 })();
 </script>
 {% endblock %}

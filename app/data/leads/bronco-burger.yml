@@ -9,6 +9,7 @@ nome: "Bronco Burger"
 tema: neon-noite
 
 site:
+  modelo: craft
   hero_foto: "img/demo/bronco-burger/capa.jpg"
   nota_google: '4,5'
   qtd_avaliacoes: 2757

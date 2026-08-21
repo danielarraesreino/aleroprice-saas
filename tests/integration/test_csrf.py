@@ -328,7 +328,7 @@ def campo(session, client, campo_disco):
     session.add(operador)
     session.commit()
     session.add(Usuario(nome='Vendedor', email='vendedor@alero.test',
-                        senha='segredo123', tipo='admin',
+                        senha='segredo123', tipo='superadmin',
                         restaurant_id=operador.id))
     demo = Restaurante(nome='Boteco da Prévia', slug='boteco-da-previa',
                        tipo_conta='demo')

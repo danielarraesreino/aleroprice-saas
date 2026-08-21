@@ -9,6 +9,7 @@ nome: "Beco 105"
 tema: neon-noite
 
 site:
+  modelo: noturno
   vibe: pub
   descritor: "Bar contemporâneo em Vinhedo"
   kicker: "VINHEDO–SP"

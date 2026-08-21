@@ -11,6 +11,7 @@ nome: "Vidottinho"
 tema: neon-noite
 
 site:
+  modelo: noturno
   hero_foto: "img/demo/vidottinho/capa.jpg"
   telefone_exibicao: "(19) 97106-5890"
   qtd_avaliacoes: 9

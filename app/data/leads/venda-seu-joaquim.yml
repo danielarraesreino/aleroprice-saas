@@ -9,6 +9,7 @@ nome: "Venda Seu Joaquim"
 tema: boteco-ambar
 
 site:
+  modelo: classico
   vibe: boteco
   descritor: "Comida brasileira em Hortolândia"
   kicker: "HORTOLÂNDIA–SP"

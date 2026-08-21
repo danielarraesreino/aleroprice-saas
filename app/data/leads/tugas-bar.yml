@@ -9,6 +9,7 @@ nome: "Tuga's Bar"
 tema: boteco-ambar
 
 site:
+  modelo: classico
   vibe: boteco
   descritor: "Bar e eventos em Sumaré"
   kicker: "SUMARÉ–SP"

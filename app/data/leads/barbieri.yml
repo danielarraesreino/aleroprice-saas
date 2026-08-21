@@ -9,6 +9,7 @@ nome: "Barbieri Futebol & Bar"
 tema: boteco-ambar
 
 site:
+  modelo: classico
   hero_foto: "img/demo/barbieri/capa.jpg"
   instagram_url: "https://www.instagram.com/barbieri_futebolebar/"
   maps_query: "Barbieri Futebol e Bar Campinas"

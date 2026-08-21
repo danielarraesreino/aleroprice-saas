@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ 'Editar' if item else 'Novo' }} {{ t.singular }} · AleroPrice{% endblock %}
+{% block title %}{{ 'Editar' if item else 'Novo' }} {{ t.singular }} · {{ MARCA }}{% endblock %}
 
 {# imagem guarda caminho em static OU URL absoluta (Vercel Blob).
    Mesma regra de publico.views._img() e do macro img() de campo/editar.html. #}

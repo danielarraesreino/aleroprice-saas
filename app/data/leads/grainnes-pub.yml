@@ -9,6 +9,7 @@ nome: "Grainne's Irish Pub"
 tema: pub-escuro
 
 site:
+  modelo: craft
   telefone_exibicao: "(19) 99931-9099"
   endereco: "R. Padre Almeida, 170 - Cambuí, Campinas - SP, 13025-250"
   qtd_avaliacoes: 5530

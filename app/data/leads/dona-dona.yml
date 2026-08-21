@@ -9,6 +9,7 @@ nome: "Pizzaria Dona Dona"
 tema: boteco-ambar
 
 site:
+  modelo: tradicional
   vibe: boteco
   descritor: "Pizzaria clássica em Sumaré"
   kicker: "SUMARÉ–SP · DESDE 1976"

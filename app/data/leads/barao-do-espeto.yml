@@ -9,6 +9,7 @@ nome: "Barão do Espeto"
 tema: boteco-ambar
 
 site:
+  modelo: brasa
   hero_foto: "img/demo/barao-do-espeto/capa.jpg"
   nota_google: '4,4'
   qtd_avaliacoes: 183

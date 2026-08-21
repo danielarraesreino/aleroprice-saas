@@ -12,6 +12,7 @@ nome: "Metropoly Bar"
 tema: neon-noite
 
 site:
+  modelo: craft
   hero_foto: "img/demo/metropoly/capa.jpg"
   telefone_exibicao: "(19) 3289-5360"
   qtd_avaliacoes: 59

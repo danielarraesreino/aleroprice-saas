@@ -90,11 +90,22 @@ def test_site_nao_alcanca_gestao():
 
 
 def test_limite_de_conteudo_so_no_free():
-    assert limite(bar(subscription_tier='site'), 'cardapio') is None
-    assert limite(bar(trial_termina_em=AMANHA), 'cardapio') is None
-    assert limite(bar(), 'cardapio') == 5
+    assert limite(bar(subscription_tier='site'), 'galeria') is None
+    assert limite(bar(trial_termina_em=AMANHA), 'galeria') is None
     assert limite(bar(), 'galeria') == 3
     assert limite(bar(), 'tipo-que-nao-existe') is None
+
+
+def test_cardapio_e_ilimitado_ate_no_free():
+    """O cardápio com QR é entregue inteiro pra todo mundo.
+
+    Era teto de 5 itens no free. Um QR na mesa que abre cinco itens de um
+    cardápio de trinta queima o produto na frente do cliente do cliente — e o
+    cardápio não é o que vende o plano, é o que faz o bar existir no celular de
+    quem já está sentado lá.
+    """
+    for r in (bar(), bar(subscription_tier='site'), bar(trial_termina_em=AMANHA)):
+        assert limite(r, 'cardapio') is None
 
 
 def test_dias_de_trial_restantes():

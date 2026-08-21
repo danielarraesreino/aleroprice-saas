@@ -9,6 +9,7 @@ nome: "Restaurante da Lagoa"
 tema: praia-claro
 
 site:
+  modelo: autoral
   vibe: praia
   descritor: "Vista pra lagoa em Hortolândia"
   kicker: "HORTOLÂNDIA–SP"

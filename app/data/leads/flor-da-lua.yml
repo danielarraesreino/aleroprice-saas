@@ -9,6 +9,7 @@ nome: "Bar Flor da Lua"
 tema: boteco-ambar
 
 site:
+  modelo: classico
   vibe: boteco
   descritor: "Bar de bairro no Taquaral"
   kicker: "TAQUARAL · CAMPINAS–SP"

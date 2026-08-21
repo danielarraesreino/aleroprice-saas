@@ -9,6 +9,7 @@ nome: "Em Brasa Burger"
 tema: neon-noite
 
 site:
+  modelo: brasa
   vibe: hamburgueria
   descritor: "Hambúrguer na brasa em Campinas"
   kicker: "CAMPINAS–SP"

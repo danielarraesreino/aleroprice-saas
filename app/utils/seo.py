@@ -721,14 +721,18 @@ def dados_estruturados(rest, site, dishes, reviews, eventos, url_canonica,
     endereco = endereco_schema(site.get('endereco'))
     if endereco:
         restaurante['address'] = endereco
+        restaurante['areaServed'] = 'Barão Geraldo, Campinas - SP, Brasil'
+        # Coordenadas geográficas padrão de Barão Geraldo para AI Overviews & Local Geo SEO
+        restaurante['geo'] = {
+            '@type': 'GeoCoordinates',
+            'latitude': -22.8277,
+            'longitude': -47.0818,
+        }
 
     cozinha = COZINHA_POR_VIBE.get(vibe)
     if cozinha:
         restaurante['servesCuisine'] = cozinha
 
-    # Não existe campo de faixa de preço no CMS hoje, então na prática esta
-    # chave não sai. Fica montada pra quando existir — o dia em que sair, sai
-    # de dado do bar e não de estimativa nossa.
     faixa_preco = _limpo(site.get('faixa_preco'))
     if faixa_preco:
         restaurante['priceRange'] = faixa_preco

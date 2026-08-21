@@ -9,6 +9,7 @@ nome: "Escuta o Cheiro"
 tema: boteco-ambar
 
 site:
+  modelo: noturno
   telefone_exibicao: "(19) 98810-0800"
   endereco: "R. dos Expedicionários, 544 - Sousas, Campinas - SP, 13106-028"
   qtd_avaliacoes: 650

@@ -9,6 +9,7 @@ nome: "Boteco do Pezão"
 tema: boteco-ambar
 
 site:
+  modelo: craft
   vibe: boteco
   descritor: "Boteco em Santa Genebra"
   kicker: "STA. GENEBRA · CAMPINAS–SP"

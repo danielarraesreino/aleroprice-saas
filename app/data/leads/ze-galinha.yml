@@ -9,6 +9,7 @@ nome: "Bar do Zé Galinha"
 tema: boteco-ambar
 
 site:
+  modelo: craft
   vibe: boteco
   descritor: "Boteco tradicional em Vinhedo"
   kicker: "VINHEDO–SP"

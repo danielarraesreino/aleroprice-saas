@@ -19,14 +19,14 @@ from app.routes.campanha.views import FONTE_VITRINE, VITRINE
 
 @pytest.fixture
 def operador(session):
-    r = Restaurante(nome='Feira de Barão', slug='feira-op')
-    session.add(r)
+    rest = Restaurante(nome='Alero (operador)', slug='alero')
+    session.add(rest)
     session.commit()
-    u = Usuario(nome='Operador', email='op@feiradebarao.com.br',
-                senha='senha-bem-longa', tipo='admin', restaurant_id=r.id)
-    session.add(u)
+    usuario = Usuario(nome='Vendedor', email='vendedor@alero.com',
+                      senha='segredo123', tipo='superadmin', restaurant_id=rest.id)
+    session.add(usuario)
     session.commit()
-    return u
+    return usuario
 
 
 @pytest.fixture

@@ -9,6 +9,7 @@ nome: "Cosvesi Brewpub"
 tema: pub-escuro
 
 site:
+  modelo: craft
   vibe: pub
   descritor: "Cervejaria premiada em Hortolândia"
   kicker: "HORTOLÂNDIA–SP"

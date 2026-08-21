@@ -6,9 +6,15 @@
 <title>Feira de Barão — os bares do bairro, cada um com sua barraca na internet</title>
 <meta name="description" content="A feira que não desmonta: bares de Barão Geraldo com página pronta — foto, nota do Google, endereço e reserva no WhatsApp. A barraca do seu bar pode já estar montada.">
 <link rel="canonical" href="https://feiradebarao.com.br/">
+<link rel="alternate" type="text/markdown" title="LLM Summary" href="/llms.txt">
 <meta property="og:title" content="Feira de Barão — cada bar do bairro com sua barraca na internet">
 <meta property="og:description" content="A feira que não desmonta: os bares de Barão Geraldo com página pronta, montada antes mesmo de o dono pedir. Passa, olha e escolhe a sua.">
 <meta property="og:type" content="website">
+<meta property="og:image" content="{{ og_imagem('og-feira.jpg') }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Barracas de feira iluminadas ao anoitecer numa rua de bairro">
+<meta name="twitter:card" content="summary_large_image">
 <meta property="og:url" content="https://feiradebarao.com.br/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -281,6 +287,48 @@
   .placa-corpo p{color:var(--taupe);font-size:var(--t-micro);line-height:var(--lh-micro)}
 
   /* ---------------- preço: a placa ---------------- */
+  /* ---------------- a conta da mesa vazia ---------------- */
+  /* Controle e resultado lado a lado: o número tem que mudar no campo de visão
+     de quem arrasta, senão a pessoa mexe e não vê o efeito. */
+  .conta-grade{display:flex;flex-direction:column;gap:var(--s-5);
+    margin-top:var(--s-6)}
+  @media(min-width:820px){.conta-grade{display:grid;align-items:start;
+    grid-template-columns:1fr .85fr;gap:var(--s-6)}}
+
+  .conta-controles{display:grid;gap:var(--s-5)}
+  .campo-conta{display:grid;grid-template-columns:1fr auto;gap:var(--s-2) var(--s-4);
+    align-items:center}
+  .campo-conta > span{font-weight:700;font-size:var(--t-micro)}
+  .campo-conta output{font-family:var(--f-display);font-size:1.3rem;color:var(--tomate);
+    font-variant-numeric:tabular-nums;text-align:right;min-width:4.5ch}
+  .campo-conta input[type=range]{grid-column:1 / -1;width:100%;appearance:none;
+    height:3px;background:var(--linha);border-radius:2px;margin:0}
+  .campo-conta input[type=range]::-webkit-slider-thumb{appearance:none;width:26px;
+    height:26px;border-radius:50%;background:var(--tomate);cursor:grab;
+    border:3px solid var(--cartao);box-shadow:0 0 0 1px var(--linha)}
+  .campo-conta input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
+    background:var(--tomate);cursor:grab;border:3px solid var(--cartao)}
+  .campo-conta input[type=range]:focus-visible{outline:3px solid var(--tomate);
+    outline-offset:6px}
+
+  /* Placa de feira: papel pregado, sombra dura, número grande.
+     No celular ela sobe para cima dos controles e gruda no topo: empilhada na
+     ordem do HTML, o dono arrastava o slider e o resultado mudava fora da tela
+     — mexia e não via nada acontecer, que é o oposto do ponto da seção. */
+  .conta-placa{background:var(--cartao);border:2px solid var(--tinta);
+    box-shadow:8px 8px 0 var(--tomate);padding:var(--s-5);
+    order:-1;position:sticky;top:64px;z-index:5}
+  @media(min-width:820px){.conta-placa{order:0;position:static}}
+  .conta-rotulo{font-size:.74rem;font-weight:700;letter-spacing:.13em;
+    text-transform:uppercase;color:var(--taupe)}
+  .conta-num{font-family:var(--f-display);font-size:clamp(2.1rem,1.4rem + 2.6vw,3.1rem);
+    line-height:1;margin-top:var(--s-1);font-variant-numeric:tabular-nums}
+  .conta-num--forte{color:var(--tomate)}
+  .conta-placa hr{border:0;border-top:1px solid var(--linha);margin-block:var(--s-4)}
+  .conta-nota{margin-top:var(--s-3);font-size:var(--t-micro);color:var(--taupe)}
+  .conta-fontes{margin-top:var(--s-6);border-top:1px solid var(--linha);
+    padding-top:var(--s-4);display:grid;gap:var(--s-2);max-width:70ch}
+
   .cartaz-preco{border:2px solid var(--tinta);background:var(--cartao);box-shadow:8px 8px 0 var(--tomate)}
   .cartaz-preco-in{padding:var(--s-6);display:grid;gap:var(--s-4);align-items:center}
   @media(min-width:720px){.cartaz-preco-in{grid-template-columns:auto 1fr}}
@@ -305,6 +353,10 @@
   .rodape-links{display:flex;flex-wrap:wrap;gap:var(--s-4)}
   .rodape-links a{color:var(--taupe);display:inline-block;padding-block:var(--s-3)}
   .rodape-links a:hover{color:var(--tomate)}
+  /* A assinatura do coletivo se separa do resto por uma linha, não por peso:
+     ela informa quem assina, não disputa atenção com a venda. */
+  .assinatura{border-top:1px solid var(--linha);padding-top:var(--s-4);margin-top:var(--s-2)}
+  .assinatura strong{color:var(--tinta)}
 
   /* ---------------- animação (portão .js-anim) ----------------
      Estado inicial escondido SÓ quando a Motion carregou, o usuário aceita
@@ -323,6 +375,7 @@
     <div class="topo-links">
       <a href="#feira">As barracas</a>
       <a href="#como">Como funciona</a>
+      <a href="#conta">Faça a conta</a>
       <a href="#preco">Preço</a>
       <a class="btn btn-zap btn--nav" href="{{ zap_url }}" target="_blank" rel="noopener">Chamar no zap</a>
     </div>
@@ -506,6 +559,18 @@
           celular. Sai o selo de prévia, entra o seu endereço.
         </p>
       </li>
+      {# O passo que fecha a venda de verdade. O site é o que o dono vê; ser
+         achado é o que ele quer. Boa parte destes bares tem ficha no Google
+         com horário errado, sem cardápio e sem link — existe no mapa e some na
+         busca. Arrumar isso é trabalho de uma vez, e é o que o setup entrega. #}
+      <li class="passo" data-reveal>
+        <h3>E o Google acha seu bar</h3>
+        <p>
+          Arrumo sua ficha no Google — horário certo, fotos, cardápio e o link
+          do site no lugar certo. Quem procura “bar em Barão” às dez da noite
+          passa a achar o seu com o cardápio aberto, e não só o endereço.
+        </p>
+      </li>
     </ol>
   </div>
 </section>
@@ -534,6 +599,92 @@
   </div>
 </section>
 
+{#
+  A conta da mesa vazia.
+
+  Vem ANTES do preço de propósito: o dono precisa ter o número dele na cabeça
+  quando ler o nosso. E não promete faturamento — promessa de receita é o que
+  todo vendedor de site faz, e o dono já ouviu. Aqui a matemática é do salão
+  dele: quantas mesas tem, quanto vale cada uma cheia, e o que UMA mesa a mais
+  por noite dá no mês. O número que sai é dele; nós só arrumamos as contas.
+
+  As referências de mercado estão citadas embaixo, com fonte, porque a primeira
+  reação do dono é desconfiar do número — e ele tem razão de desconfiar.
+#}
+{# Os valores de partida saem daqui e do JS, dos MESMOS números — escrevê-los à
+   mão no HTML já rendeu um "R$ 1.161" onde a conta dá R$ 1.169, e a página
+   abria com um número que se corrigia sozinho no primeiro toque. Assim a
+   seção também chega certa para quem tem JS desligado. #}
+{% set d_mesas, d_pessoas, d_ticket, d_noites = 12, 3, 45, 2 %}
+{% set d_mesa = d_pessoas * d_ticket %}
+{% set d_mes = (d_mesa * d_noites * 4.33) | round | int %}
+<section id="conta" class="secao">
+  <div class="wrap">
+    <div class="fluxo" data-reveal>
+      <span class="eyebrow">Faça a conta</span>
+      <h2>Quanto vale uma mesa vazia na sua sexta?</h2>
+      <p>
+        Mexa nos números do seu salão. Nada aqui é chute nosso — é a conta que
+        você já faz de cabeça, escrita.
+      </p>
+    </div>
+
+    <div class="conta-grade" data-reveal>
+      <div class="conta-controles">
+        <label class="campo-conta">
+          <span>Mesas no salão</span>
+          <input type="range" id="c-mesas" min="4" max="40" value="{{ d_mesas }}" step="1">
+          <output id="v-mesas">{{ d_mesas }}</output>
+        </label>
+        <label class="campo-conta">
+          <span>Pessoas por mesa</span>
+          <input type="range" id="c-pessoas" min="2" max="6" value="{{ d_pessoas }}" step="1">
+          <output id="v-pessoas">{{ d_pessoas }}</output>
+        </label>
+        <label class="campo-conta">
+          <span>Consumo por pessoa</span>
+          <input type="range" id="c-ticket" min="20" max="150" value="{{ d_ticket }}" step="5">
+          <output id="v-ticket">R$ {{ d_ticket }}</output>
+        </label>
+        <label class="campo-conta">
+          <span>Noites cheias por semana</span>
+          <input type="range" id="c-noites" min="1" max="7" value="{{ d_noites }}" step="1">
+          <output id="v-noites">{{ d_noites }}</output>
+        </label>
+      </div>
+
+      <div class="conta-placa">
+        <p class="conta-rotulo">Uma mesa cheia vale</p>
+        <p class="conta-num" id="r-mesa">R$ {{ d_mesa }}</p>
+        <hr>
+        <p class="conta-rotulo">Uma mesa a mais por noite cheia, no mês</p>
+        <p class="conta-num conta-num--forte" id="r-mes">R$ {{ "{:,.0f}".format(d_mes).replace(",", ".") }}</p>
+        <p class="conta-nota" id="r-compara">
+          Paga a mensalidade e ainda sobra.
+        </p>
+      </div>
+    </div>
+
+    <div class="conta-fontes" data-reveal>
+      <p class="micro">
+        <strong>De onde vem o resto da conta.</strong>
+        Bar com ficha completa no Google recebe <strong>42% mais pedidos de
+        rota</strong> e <strong>35% mais cliques no site</strong> que bar sem
+        ficha; com foto, mais 35% de clique; com avaliação, 22% mais visita.
+        O WhatsApp já responde por <strong>26% do faturamento</strong> de
+        delivery em bares e restaurantes no Brasil. Numa noite cheia, cada mesa
+        recebe cerca de 3 grupos.
+      </p>
+      <p class="micro">
+        Fontes: Abrasel, pesquisas de SEO local e de giro de mesa (2025–2026).
+        A conta acima usa só os seus números — as porcentagens ficam de fora
+        dela de propósito, porque ninguém pode prometer quanto do movimento do
+        seu bar vem do Google.
+      </p>
+    </div>
+  </div>
+</section>
+
 <section id="preco" class="secao">
   <div class="wrap">
     <div class="fluxo" data-reveal>
@@ -549,6 +700,16 @@
         </p>
         <div class="preco-txt">
           <p>{{ preco_detalhe }}</p>
+          {% if taxa_setup %}
+          {# O setup tem entregável próprio, e é ele que justifica o valor:
+             design exclusivo (não um dos seis modelos) e a configuração do
+             Perfil da Empresa no Google. Agência cobra de R$ 500 a R$ 1.500 por
+             MÊS só para cuidar do perfil; aqui é uma vez. #}
+          <p class="micro">
+            <strong>{{ taxa_setup }}</strong> na montagem — design exclusivo,
+            seu bar configurado no Google e o cardápio no ar.
+          </p>
+          {% endif %}
           <p class="micro">
             Prefere montar sozinho?
             <a href="{{ url_for('public.cadastro') }}">Crie seu site agora →</a>
@@ -556,6 +717,29 @@
         </div>
       </div>
     </div>
+
+    {% if compra and compra.valor %}
+    {# A outra porta, e ela entrega OUTRA coisa.
+       O primeiro ano da compra sai mais barato que assinar; se as duas
+       entregassem o mesmo, ninguém assinaria. O que se compra é o site pronto.
+       O que fica no plano é o que roda todo dia — reserva, agenda, o painel.
+       Por isso o "não vem" está escrito aqui, e não descoberto depois. #}
+    <div class="fluxo" style="margin-top:var(--s-6)" data-reveal>
+      <p class="micro">
+        <strong>Não quer mensalidade?</strong>
+        O site pode ser seu por <strong>{{ compra.valor }}</strong>, de uma vez:
+        {{ compra.inclui | lower }}.{% if compra.renovacao %}
+        Depois do primeiro ano, {{ compra.renovacao }} para manter no ar — ou
+        você leva domínio e site para onde quiser.{% endif %}
+      </p>
+      {% if compra.nao_inclui %}
+      <p class="micro">
+        Nesse caminho não entram: {{ compra.nao_inclui | lower }}.
+        Mudança no site depois de pronto sai por orçamento.
+      </p>
+      {% endif %}
+    </div>
+    {% endif %}
   </div>
 </section>
 
@@ -594,15 +778,96 @@
     <nav class="rodape-links micro" aria-label="Mais páginas">
       <a href="{{ url_for('public.barao') }}">A campanha nos bares</a>
       <a href="{{ url_for('public.cadastro') }}">Criar meu site sozinho</a>
-      <a href="{{ url_for('public.calculadora_roi') }}">Calculadora de desperdício</a>
+      <a href="{{ url_for('public.coletivo') }}">Quem faz estes sites</a>
       <a href="https://bardavila.bar" target="_blank" rel="noopener">Primeiro cliente: bardavila.bar</a>
     </nav>
+
+    {# Quem assina.
+       A Feira é o braço que fatura de um coletivo que faz outras coisas — dados
+       abertos e formação com a população em situação de rua. Isso não é selo de
+       bondade pendurado no rodapé: é a mesma pessoa, e o dono do bar tem o
+       direito de saber para quem está pagando. Sem pedir doação e sem prometer
+       repasse: enquanto não houver entidade que possa receber, prometer seria
+       vender o que não se entrega. #}
+    {% if coletivo %}
+    <div class="assinatura micro">
+      <p>
+        Feito pelo <strong>{{ coletivo.nome }}</strong> — {{ coletivo.lema | lower }}.
+      </p>
+      <nav class="rodape-links" aria-label="Projetos do coletivo">
+        <a href="{{ coletivo.caminhos }}" target="_blank" rel="noopener">Caminhos Campinas</a>
+        <a href="{{ coletivo.vozes }}" target="_blank" rel="noopener">Vozes da Quebrada</a>
+        <a href="{{ coletivo.instagram }}" target="_blank" rel="noopener">Instagram</a>
+        <a href="{{ coletivo.facebook }}" target="_blank" rel="noopener">Facebook</a>
+      </nav>
+    </div>
+    {% endif %}
   </div>
 </footer>
 
 <div class="lona" aria-hidden="true"></div>
 
 <!-- Motion (build vanilla). Versão pinada: `@latest` aqui é roleta em produção. -->
+<script>
+/* A conta da mesa vazia.
+ *
+ * Roda antes da Motion e sem depender dela: isto é conteúdo, não enfeite. Se o
+ * CDN de animação cair, os números continuam de pé — o inverso (a conta viver
+ * dentro do bloco de animação) deixaria a seção com valores errados na tela.
+ *
+ * Sem ida ao servidor: o dono arrasta e o número muda na hora, que é o que
+ * sustenta a brincadeira. Nada do que ele digita sai do aparelho — e por isso
+ * não há campo de e-mail aqui. Pedir e-mail para "ver o resultado" é o truque
+ * que o dono já levou de outros vendedores.
+ */
+(function () {
+  var el = function (id) { return document.getElementById(id); };
+  var mesas = el('c-mesas'), pessoas = el('c-pessoas'),
+      ticket = el('c-ticket'), noites = el('c-noites');
+  if (!mesas || !pessoas || !ticket || !noites) return;
+
+  var brl = new Intl.NumberFormat('pt-BR',
+    { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+
+  /* Mensalidade real, do mesmo lugar que a placa de preço lê. Sem isto o texto
+     de comparação viraria mais um número escrito na mão para desatualizar. */
+  var MENSAL = Number({{ (preco or '')|replace('R$','')|replace('.','')|replace(',','.')|trim|default(0, true) }}) || 0;
+
+  /* 4,33 = semanas por mês (52/12). Usar 4 subestima quase uma noite cheia por
+     mês, e o número deste bloco tem que aguentar conferência na calculadora do
+     celular do dono. */
+  var SEMANAS = 4.33;
+
+  function conta() {
+    var m = +mesas.value, p = +pessoas.value, t = +ticket.value, n = +noites.value;
+    var porMesa = p * t;
+    var porMes = porMesa * n * SEMANAS;
+
+    el('v-mesas').textContent = m;
+    el('v-pessoas').textContent = p;
+    el('v-ticket').textContent = brl.format(t);
+    el('v-noites').textContent = n;
+    el('r-mesa').textContent = brl.format(porMesa);
+    el('r-mes').textContent = brl.format(porMes);
+
+    var nota = el('r-compara');
+    if (MENSAL > 0) {
+      var vezes = porMes / MENSAL;
+      nota.textContent = vezes >= 1.15
+        ? 'Isso paga o plano ' + vezes.toFixed(1).replace('.', ',') +
+          ' vezes — com uma mesa só.'
+        : 'Perto do valor do plano — e essa é UMA mesa das ' + m + ' que você tem.';
+    } else {
+      nota.textContent = 'E isso é uma mesa das ' + m + ' que você tem.';
+    }
+  }
+
+  [mesas, pessoas, ticket, noites].forEach(function (c) {
+    c.addEventListener('input', conta);
+  });
+  conta();
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/motion@13.1.0/dist/motion.js"></script>
 <script>
 (function () {

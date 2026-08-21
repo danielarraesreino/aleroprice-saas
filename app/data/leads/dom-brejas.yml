@@ -9,6 +9,7 @@ nome: "Dom Brejas"
 tema: neon-noite
 
 site:
+  modelo: craft
   telefone_exibicao: "(19) 3291-4752"
   endereco: "Av. Barão de Itapura, 2947 - Taquaral, Campinas - SP, 13073-300"
   qtd_avaliacoes: 3688

@@ -53,6 +53,16 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     """Configuração de produção"""
     DEBUG = False
+
+    # Um dia de cache nos arquivos servidos pelo Flask.
+    #
+    # O `vercel.json` faz rewrite de TUDO para a função Python — inclusive
+    # `/static` —, então cada capa de bar (até 250 KB) era servida pelo Flask
+    # com `no-cache` e rebaixada a cada visita. Quem abre o site do bar no 4G
+    # pagava o download de novo toda vez, e a função rodava para devolver um
+    # arquivo que não muda.
+    SEND_FILE_MAX_AGE_DEFAULT = 86400
+
     # Use variáveis de ambiente em produção
     SECRET_KEY = os.environ.get('SECRET_KEY')
     # HTTPS em produção: cookie de sessão e de "continuar conectado" só viajam

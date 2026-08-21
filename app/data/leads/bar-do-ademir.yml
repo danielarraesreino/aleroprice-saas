@@ -9,6 +9,7 @@ nome: "Bar do Ademir"
 tema: neon-noite
 
 site:
+  modelo: classico
   hero_foto: "img/demo/bar-do-ademir/capa.jpg"
   telefone_exibicao: "(19) 99450-5042"
   qtd_avaliacoes: 922

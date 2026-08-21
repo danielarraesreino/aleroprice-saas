@@ -9,6 +9,7 @@ nome: "Bar do Guiu"
 tema: boteco-ambar
 
 site:
+  modelo: classico
   vibe: boteco
   descritor: "Bar de encontro em Vinhedo"
   kicker: "VINHEDO–SP"

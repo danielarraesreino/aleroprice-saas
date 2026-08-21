@@ -25,17 +25,13 @@ from app.utils.planos import pode, precos
 from app.utils.tenant import limite_excedido
 
 
-def _alerta_whatsapp(texto, phone=None):
+def _alerta_whatsapp(texto, phone=None, apikey=None):
     """Dispara alerta no WhatsApp do bar via CallMeBot (grátis).
 
-    Só age se CALLMEBOT_APIKEY estiver configurado (env). Falha é silenciosa:
-    nunca quebra a reserva — o botão wa.me segue como fallback pro cliente.
-
-    `phone` vem do SiteConfig do tenant. Sem número configurado não há alerta:
-    antes existia um fallback global pro celular do dono do Bar da Vila, o que
-    faria a reserva de um bar novo tocar o telefone de outro cliente.
+    Usa o número e a apikey configurados no SiteConfig do bar (com fallback para env).
+    Falha é silenciosa: nunca quebra a reserva — o botão wa.me segue como fallback pro cliente.
     """
-    apikey = os.environ.get('CALLMEBOT_APIKEY')
+    apikey = apikey or os.environ.get('CALLMEBOT_APIKEY')
     if not apikey or not phone:
         return
     params = urllib.parse.urlencode({'phone': phone, 'text': texto, 'apikey': apikey})
@@ -183,6 +179,12 @@ def _render_landing(rest):
                            url_canonica=endereco_canonico,
                            contato_vendas=os.environ.get('FEIRA_WHATSAPP', ''),
                            email_vendas=os.environ.get('FEIRA_EMAIL', 'contato@feiradebarao.com.br'),
+                           # Selo do Caminhos: só para quem ligou no painel, e
+                           # nunca na prévia — o bar que ainda não é cliente não
+                           # declara apoio a nada em nome de ninguém.
+                           apoia_caminhos=(bool(getattr(cfg, 'apoia_caminhos', False))
+                                           and not getattr(rest, 'eh_demo', False)),
+                           coletivo=_coletivo(),
                            **conteudo)
 
 
@@ -262,6 +264,60 @@ def _bares_da_feira():
     return bares
 
 
+def _preco_publico():
+    """O preço anunciado, num lugar só.
+
+    A landing e o cadastro são a mesma venda em duas telas: quem clica em
+    "montar sozinho" já leu o valor e precisa reencontrá-lo igual na hora de
+    dar o e-mail. Escrever o número no template do cadastro criava a chance de
+    a página prometer um preço e a outra cobrar outro.
+
+    O valor vem de `planos.precos()`, que é quem o sistema usa pra cobrar.
+    Antes esta função lia `FEIRA_PRECO` e `planos.precos()` lia
+    `FEIRA_PRECO_SITE`: duas envs para o mesmo preço, e a vitrine anunciava um
+    número enquanto a cobrança usava outro — a divergência exata que o docstring
+    de `precos()` dizia ter resolvido. `FEIRA_PRECO` continua valendo como
+    sobreposição só da vitrine, para testar discurso sem mexer na cobrança.
+    """
+    from app.utils.planos import precos
+    return {
+        'preco': os.environ.get('FEIRA_PRECO') or precos()['site'],
+        'preco_periodo': os.environ.get('FEIRA_PRECO_PERIODO', 'por mês'),
+        'preco_detalhe': os.environ.get(
+            'FEIRA_PRECO_DETALHE',
+            'Site no ar, reservas, cardápio digital e o sistema de custos completo. '
+            'Sem taxa de setup e sem fidelidade — se não servir, você sai.'
+        ),
+    }
+
+
+def _coletivo():
+    """Quem assina os sites: o Coletivo A Rua Tem Voz e seus outros projetos.
+
+    Num lugar só, e não escrito no rodapé de cada página. São quatro endereços
+    que aparecem em três templates — a landing e a `/barao` já divergiram
+    sozinhas uma vez com o preço (uma lia `FEIRA_PRECO`, a outra
+    `FEIRA_PRECO_SITE`), e link quebrado em três lugares se corrige três vezes.
+
+    `caminhos` é o projeto de dados abertos e formação; `vozes` são as oficinas
+    no Oziel. Ambos do mesmo autor destes sites, e é isso que o rodapé diz.
+    """
+    return {
+        'nome': os.environ.get('COLETIVO_NOME', 'Coletivo A Rua Tem Voz'),
+        'lema': os.environ.get('COLETIVO_LEMA',
+                               'Tecnologia como instrumento de emancipação'),
+        'caminhos': os.environ.get('COLETIVO_CAMINHOS',
+                                   'https://caminhos-cps.social'),
+        'vozes': os.environ.get('COLETIVO_VOZES',
+                                'https://jogoozipa.vercel.app'),
+        'instagram': os.environ.get('COLETIVO_INSTAGRAM',
+                                    'https://instagram.com/coletivoaruatemvoz'),
+        'facebook': os.environ.get('COLETIVO_FACEBOOK',
+                                   'https://facebook.com/coletivoaruatemvoz'),
+        'arroba': os.environ.get('COLETIVO_ARROBA', '@coletivoaruatemvoz'),
+    }
+
+
 def _contexto_produto():
     """Dados comerciais da landing de venda. Vêm de env pra não versionar
     número de telefone nem preço — os dois mudam sem deploy."""
@@ -274,21 +330,40 @@ def _contexto_produto():
                   if com_nota else None)
 
     from app.utils.modelos import opcoes_de_modelo
+    from app.utils.planos import compra_do_site, taxa_de_instalacao
     return {
         'zap_url': f'https://wa.me/{zap}?text={msg}' if zap else '#preco',
-        'preco': os.environ.get('FEIRA_PRECO', 'R$ 197'),
-        'preco_periodo': os.environ.get('FEIRA_PRECO_PERIODO', 'por mês'),
-        'preco_detalhe': os.environ.get(
-            'FEIRA_PRECO_DETALHE',
-            'Site no ar, reservas, cardápio digital e o sistema de custos completo. '
-            'Sem taxa de setup e sem fidelidade — se não servir, você sai.'
-        ),
+        # As duas portas: assinar (mensalidade + setup) ou comprar de uma vez.
+        # Vêm do mesmo módulo que cobra, nunca digitados no template — a landing
+        # e a tela de planos já divergiram sozinhas uma vez (R$ 97 vs R$ 197).
+        'taxa_setup': taxa_de_instalacao(),
+        'compra': compra_do_site(),
+        'coletivo': _coletivo(),
+        **_preco_publico(),
         'bares': bares,
         'total_bares': len(bares),
         'total_avaliacoes': sum(b['avaliacoes'] or 0 for b in bares),
         'nota_media': nota_media,
         'modelos': opcoes_de_modelo(),
     }
+
+
+@bp.route('/coletivo')
+def coletivo():
+    """Quem faz estes sites, e o que mais essa gente faz.
+
+    Existe porque a Feira é o braço que fatura de um coletivo que também mantém
+    o Caminhos Campinas (dados abertos e formação com a população em situação de
+    rua) e o Vozes da Quebrada. O dono do bar que paga tem o direito de saber
+    isso, e é o que nenhum concorrente tem para mostrar.
+
+    O que esta página NÃO faz: pedir doação nem prometer que uma fatia da
+    mensalidade vai para o projeto. Hoje não existe entidade que possa receber
+    esse dinheiro — a própria página de apoio do Caminhos diz que está "em
+    constituição de fundo". Prometer repasse antes disso seria vender o que não
+    se entrega, e essa é a última causa que comporta esse tipo de promessa.
+    """
+    return render_template('produto/coletivo.html', **_contexto_produto())
 
 
 @bp.route('/barao')
@@ -334,6 +409,8 @@ def robots():
         'Disallow: /conteudo/\n'
         'Disallow: /campanha/\n'
         'Allow: /\n'
+        'Allow: /llms.txt\n'
+        'Allow: /llms-full.txt\n'
         f'\nSitemap: https://{request.host or dominio_do_produto()}/sitemap.xml\n'
     )
     return corpo, 200, {'Content-Type': 'text/plain; charset=utf-8'}
@@ -398,6 +475,93 @@ def sitemap():
 
     return '\n'.join(linhas) + '\n', 200, {
         'Content-Type': 'application/xml; charset=utf-8'}
+
+
+@bp.route('/llms.txt')
+@bp.route('/llms-full.txt')
+def llms_txt():
+    """Gera resumo semântico no formato padrão llms.txt para consumo de LLMs e Search Engines de IA
+    (Perplexity, ChatGPT Search, Gemini, Claude, Apple Intelligence).
+    """
+    from app.utils.site_router import dominio_do_produto, tenant_por_host
+    from app.models.modelo_sitecontent import DishCard
+    from app.models.modelo_restaurante import Restaurante
+
+    dono_do_dominio = tenant_por_host(request.host)
+
+    # 1. Se estiver no domínio de um bar específico (ex: bardavila.bar/llms.txt)
+    if dono_do_dominio is not None:
+        rest = dono_do_dominio
+        cfg = getattr(rest, 'site_config', None)
+        nome = rest.nome
+        desc = (cfg.descritor if cfg else None) or (cfg.tagline if cfg else None) or 'Bar e Restaurante em Barão Geraldo, Campinas - SP'
+        endereco = (cfg.endereco if cfg else None) or 'Barão Geraldo, Campinas - SP'
+        horario = (cfg.horario if cfg else None) or 'Consulte o site oficial'
+        whatsapp = (cfg.whatsapp if cfg else None) or (cfg.callmebot_phone if cfg else None) or ''
+        
+        pratos = DishCard.query.filter_by(restaurant_id=rest.id).order_by(DishCard.ordem.asc()).all()
+
+        linhas = [
+            f"# {nome} — Barão Geraldo, Campinas - SP",
+            "",
+            f"> {desc}",
+            "",
+            "## Informações do Estabelecimento",
+            f"- **Nome**: {nome}",
+            f"- **Endereço**: {endereco}",
+            f"- **Horário de Funcionamento**: {horario}",
+            f"- **WhatsApp e Reservas**: {whatsapp}",
+            f"- **Website Oficial**: {url_canonica(rest)}",
+            "",
+            "## Cardápio e Especialidades",
+        ]
+        if pratos:
+            for p in pratos:
+                preco_str = f" — R$ {p.preco}" if p.preco else ""
+                linhas.append(f"- **{p.nome}**{preco_str}: {p.descricao or ''}")
+        else:
+            linhas.append("- Cardápio completo disponível diretamente no site oficial.")
+        
+        linhas.extend([
+            "",
+            "## Acesso e Reservas Online",
+            f"Faça reservas de mesa e consulte o cardápio interativo em: {url_canonica(rest)}",
+        ])
+        return '\n'.join(linhas) + '\n', 200, {'Content-Type': 'text/markdown; charset=utf-8'}
+
+    # 2. Se for no portal principal (feiradebarao.com.br/llms.txt)
+    tenants = _publicavel(Restaurante.clientes()).order_by(Restaurante.nome.asc()).all()
+    linhas = [
+        "# Feira de Barão & AleroPrice — Guia Gastronômico de Barão Geraldo, Campinas - SP",
+        "",
+        "> Portal gastronômico e marketplace de bares, botecos, restaurantes e feirantes de Barão Geraldo (Campinas - SP).",
+        "",
+        "## Sobre o Ecossistema",
+        "- **Região**: Barão Geraldo, Campinas - SP, Brasil",
+        "- **Serviços**: Cardápios digitais atualizados, reservas de mesa via WhatsApp e fichas técnicas de gastronomia local.",
+        f"- **Website Oficial**: https://{dominio_do_produto()}/",
+        "",
+        "## Bares e Restaurantes em Destaque em Barão Geraldo",
+    ]
+
+    for t in tenants:
+        cfg = getattr(t, 'site_config', None)
+        desc = (cfg.descritor if cfg else None) or (cfg.tagline if cfg else None) or 'Bar e Gastronomia'
+        end = (cfg.endereco if cfg else None) or 'Barão Geraldo, Campinas - SP'
+        linhas.append(f"### [{t.nome}]({url_canonica(t)})")
+        linhas.append(f"- **Descrição**: {desc}")
+        linhas.append(f"- **Endereço**: {end}")
+        linhas.append(f"- **Cardápio Digital**: {url_canonica(t)}#cardapio")
+        linhas.append("")
+
+    linhas.extend([
+        "## Links Úteis",
+        f"- Portal: https://{dominio_do_produto()}/",
+        f"- Cadastro de Estabelecimentos: https://{dominio_do_produto()}/cadastro",
+        f"- Sitemap: https://{dominio_do_produto()}/sitemap.xml",
+    ])
+
+    return '\n'.join(linhas) + '\n', 200, {'Content-Type': 'text/markdown; charset=utf-8'}
 
 
 def _marcar_visita(rest):
@@ -534,11 +698,25 @@ def cadastro():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard.index'))
 
+    from app.utils.planos import DIAS_DE_TRIAL
+
+    def tela(**campos):
+        """Todo render do cadastro passa por aqui.
+
+        A página tinha a marca "Alero" e nenhuma palavra sobre preço, enquanto
+        os dois CTAs que levam até ela dizem "Feira de Barão" e mostram o valor.
+        Quem clicava trocava de empresa no meio da compra. O preço e o prazo
+        agora acompanham o formulário, inclusive no re-render de erro — que é
+        justamente quando a pessoa está decidindo se insiste.
+        """
+        return render_template('site/cadastro.html', dias_trial=DIAS_DE_TRIAL,
+                               coletivo=_coletivo(), **_preco_publico(), **campos)
+
     dados = {'nome_bar': '', 'nome': '', 'email': ''}
     if request.method == 'POST':
         if limite_excedido(f'cadastro:{request.remote_addr}', maximo=5, janela_segundos=900):
             flash('Muitas tentativas de cadastro. Aguarde alguns minutos.', 'danger')
-            return render_template('site/cadastro.html', **dados)
+            return tela(**dados)
         nome_bar = (request.form.get('nome_bar') or '').strip()
         nome = (request.form.get('nome') or '').strip() or 'Responsável'
         email = (request.form.get('email') or '').strip().lower()
@@ -558,7 +736,7 @@ def cadastro():
         if erros:
             for e in erros:
                 flash(e, 'danger')
-            return render_template('site/cadastro.html', **dados)
+            return tela(**dados)
 
         # Slug já no cadastro: é o endereço do site do bar (/bar/<slug>) antes
         # de ele ter domínio próprio. Sem isso o cliente sai do signup sem site.
@@ -567,12 +745,14 @@ def cadastro():
         # Antes eram dois commits, e uma falha no meio deixava um tenant órfão
         # (sem admin, mas consumindo o slug em slug_unico).
         try:
-            # Nasce em teste grátis: sem isso a pessoa se cadastra e cai direto
-            # no paywall, sem nunca ver o produto funcionando.
-            from app.utils.planos import DIAS_DE_TRIAL
+            # Nasce sem teste grátis (`FEIRA_DIAS_TRIAL=0`): a prévia já é o
+            # teste — o bar vê o próprio site pronto antes de pagar. A conta
+            # existe, o cardápio com QR funciona, e o que depende de plano
+            # espera o pagamento, que é registrado no Modo Campo.
+            from app.utils.planos import fim_do_trial
             rest = Restaurante(
                 nome=nome_bar, slug=slug_unico(nome_bar),
-                trial_termina_em=date.today() + timedelta(days=DIAS_DE_TRIAL),
+                trial_termina_em=fim_do_trial(),
             )
             db.session.add(rest)
             db.session.flush()  # atribui rest.id sem fechar a transação
@@ -585,14 +765,14 @@ def cadastro():
             db.session.rollback()
             current_app.logger.exception(f"Context: SIGNUP_FALHOU | {nome_bar} | {email}")
             flash('Não deu pra criar a conta agora. Tente de novo em instantes.', 'danger')
-            return render_template('site/cadastro.html', **dados)
+            return tela(**dados)
 
         login_user(admin)
         current_app.logger.info(f"Context: SIGNUP | {nome_bar} | {email} | rid={rest.id}")
         flash('Conta criada! Personalize em Site e Conteúdo, depois veja seu site.', 'success')
         return redirect(url_for('dashboard.index'))
 
-    return render_template('site/cadastro.html', **dados)
+    return tela(**dados)
 
 
 # Identidade/contato padrão (Bar da Vila) — fallback quando o tenant não configurou.
@@ -622,6 +802,8 @@ SITE_DEFAULTS = {
     'qtd_avaliacoes': None,
     'instagram_url': None,
     'facebook_url': None,
+    'callmebot_phone': None,
+    'callmebot_apikey': None,
 }
 
 
@@ -631,8 +813,12 @@ def montar_site(rest):
     Campo vazio fica vazio — o template esconde a seção. Não existe mais
     fallback pra identidade de outro bar.
     """
-    from app.models.modelo_siteconfig import SiteConfig
-    cfg = SiteConfig.query.filter_by(restaurant_id=rest.id).first() if rest else None
+    # Pelo relationship, não por query nova: `_render_landing` já toca em
+    # `rest.site_config` logo depois, e a consulta explícita aqui fazia a mesma
+    # linha ser buscada duas vezes na mesma requisição. Em produção cada ida ao
+    # banco custa a latência da rede — a página do bar somava 11 consultas e
+    # ~2s de TTFB, com 54ms de processamento.
+    cfg = getattr(rest, 'site_config', None) if rest else None
     site = {}
     for chave, padrao in SITE_DEFAULTS.items():
         valor = getattr(cfg, chave, None) if cfg else None
@@ -793,8 +979,11 @@ def reservar():
     texto = '\n'.join(linhas)
 
     # Alerta automático (CallMeBot, best-effort) + link wa.me como fallback.
-    # Ambos usam o número DESTE bar — nunca um número global.
-    _alerta_whatsapp(texto, phone=whatsapp)
+    # Prioriza o número/apikey do CallMeBot configurados no painel pelo dono do bar.
+    cfg = getattr(restaurante, 'site_config', None) if restaurante else None
+    bot_phone = (getattr(cfg, 'callmebot_phone', None) or whatsapp) if cfg else whatsapp
+    bot_apikey = getattr(cfg, 'callmebot_apikey', None) if cfg else None
+    _alerta_whatsapp(texto, phone=bot_phone, apikey=bot_apikey)
     wa_url = ('https://wa.me/' + whatsapp + '?text=' + urllib.parse.quote(texto)) if whatsapp else None
 
     return jsonify({
@@ -803,37 +992,3 @@ def reservar():
         'wa_url': wa_url,
     })
 
-
-@bp.route('/calculadora-roi', methods=['GET', 'POST'])
-def calculadora_roi():
-    """Calculadora de ROI pública (Lead Magnet)"""
-    resultado = None
-    faturamento = None
-    
-    if request.method == 'POST':
-        try:
-            faturamento_str = request.form.get('faturamento_estimado', '0')
-            # Limpar formatação de moeda se houver (R$, pontos, virgulas)
-            faturamento_str = faturamento_str.replace('R$', '').replace('.', '').replace(',', '.')
-            faturamento = float(faturamento_str)
-            
-            # Retention / Lead Capture
-            email = request.form.get('email')
-            if email:
-                # Log for backend processing (Concierge / Marketing)
-                # In production, this goes to Vercel Logs -> Datadog/Splunk or manually extracted
-                from flask import current_app
-                current_app.logger.info(f"Context: LEAD_CALCULADORA_ROI | Email: {email} | Faturamento: {faturamento}")
-            
-            # Estimativa de desperdício (10% - Dado de mercado Abrasel)
-            desperdicio = faturamento * 0.10
-            
-            resultado = {
-                'faturamento': faturamento,
-                'desperdicio': desperdicio,
-                'mensagem': f"Você pode estar perdendo R$ {desperdicio:,.2f} por mês em desperdício invisível."
-            }
-        except ValueError:
-            resultado = {'erro': 'Por favor, insira um valor válido.'}
-            
-    return render_template('public/roi.html', resultado=resultado, faturamento=faturamento)

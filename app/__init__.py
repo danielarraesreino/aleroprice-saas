@@ -5,6 +5,7 @@ from app.config import config
 from app.extensions import db, migrate, csrf
 
 import app.models # Importar todos os modelos para registro
+import os
 import locale
 
 def create_app(config_name='default'):
@@ -90,6 +91,52 @@ def create_app(config_name='default'):
     # bar e ir para o do produto (ver `sistema_fica_no_dominio_do_produto`).
     from app.utils.site_router import url_do_sistema
     app.jinja_env.globals['url_do_sistema'] = url_do_sistema
+
+    # A marca, num lugar só.
+    #
+    # "AleroPrice" estava escrito à mão em 38 lugares e aparecia no título de
+    # toda tela do painel — inclusive para o dono de bar que comprou pelo
+    # feiradebarao.com.br e nunca ouviu esse nome. Quem entra em /app/index
+    # depois de assinar precisa ver a mesma marca da página onde comprou; marca
+    # trocando no meio do produto lê como sistema de outra empresa.
+    app.jinja_env.globals['MARCA'] = os.environ.get('FEIRA_MARCA', 'Feira de Barão')
+
+    def og_imagem(arquivo):
+        """URL absoluta e em https de uma imagem de compartilhamento.
+
+        `url_for(..., _external=True)` monta a partir do esquema da requisição,
+        e atrás do proxy da Vercel isso chega como `http://`. WhatsApp e
+        Facebook descartam og:image que não seja https, então o link voltaria a
+        ser compartilhado sem imagem — que é justamente o que isto conserta.
+        """
+        from app.utils.site_router import dominio_do_produto
+        return f'https://{dominio_do_produto()}/static/img/og/{arquivo}'
+
+    app.jinja_env.globals['og_imagem'] = og_imagem
+
+    @app.context_processor
+    def recursos_do_plano():
+        """`pode('gestao')` em qualquer template, para o tenant de quem está logado.
+
+        O menu do painel listava os 14 itens para todo mundo. Quem assina o
+        plano Site — que é o que se vende de porta em porta — via metade das
+        abas levarem a "faça upgrade": Pratos, Estoque, Notas Fiscais, Previsão,
+        Desperdício, Custos. O dono do bar não lê isso como "existe mais
+        produto"; lê como "comprei algo pela metade", e é a primeira tela que
+        ele vê depois de pagar.
+
+        A regra de plano já existe em `planos.pode` — aqui ela só fica ao
+        alcance do template, sem cada um refazer a conta do próprio jeito.
+        """
+        from flask_login import current_user
+        from app.utils.planos import pode
+
+        def _pode(recurso):
+            if not current_user.is_authenticated:
+                return False
+            return pode(getattr(current_user, 'restaurante', None), recurso)
+
+        return {'pode': _pode}
     
     # Registra os blueprints
     from app.routes.estoque import bp as estoque_bp
@@ -144,7 +191,7 @@ def create_app(config_name='default'):
     # - static: assets
     # - auth.login / auth.logout: fluxo de autenticação
     # - billing.webhook: chamado pelo Stripe sem sessão de usuário
-    # - blueprint 'public': landing / calculadora de ROI (marketing)
+    # - blueprint 'public': landing, cadastro, site do bar (marketing)
     # Substitui a necessidade de @login_required rota a rota e evita que
     # produtos/estoque/nfe/custos/etc. fiquem acessíveis sem login.
     from flask import request, redirect, url_for
@@ -247,6 +294,33 @@ def create_app(config_name='default'):
         slug = partes[1] if len(partes) == 2 and partes[0] == 'bar' else None
         titulo = 'Esse bar não está aqui' if slug else 'Página não encontrada'
         return render_template('site/404.html', slug=slug, titulo=titulo), 404
+
+    @app.errorhandler(500)
+    @app.errorhandler(Exception)
+    def erro_interno(erro):
+        """Loga o traceback numa linha só, porque o log da Vercel corta.
+
+        O traceback que o Flask imprime tem uma linha por quadro, e o coletor da
+        Vercel entrega cada uma como evento separado — na prática só chegava o
+        topo (`wsgi_app`, `full_dispatch_request`), que é igual em todo erro e
+        não diz nada. Diagnosticar a página quebrada em produção virava
+        adivinhação: reproduzir localmente dava 200, e o log não contava o resto.
+
+        Aqui o traceback inteiro vai junto, com ` | ` no lugar da quebra, e
+        prefixado por `Context:` como o resto dos logs do projeto — dá pra achar
+        com `vercel logs | grep ERRO_500` e ler a última linha, que é a causa.
+        """
+        from werkzeug.exceptions import HTTPException
+        if isinstance(erro, HTTPException) and erro.code != 500:
+            return erro  # 404, 403, 405: seguem o fluxo normal
+
+        import traceback
+        linha = ' | '.join(l.strip() for l in
+                           traceback.format_exc().strip().splitlines())
+        app.logger.error(f'Context: ERRO_500 | {request.method} {request.path} '
+                         f'| {linha}')
+        return render_template('site/404.html', slug=None,
+                               titulo='Deu erro do nosso lado'), 500
 
 
     # Registra comandos CLI (ex.: create-tenant para provisionar clientes)

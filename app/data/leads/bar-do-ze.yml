@@ -27,6 +27,7 @@ nome: "Bar do Zé"
 tema: boteco-ambar
 
 site:
+  modelo: classico
   hero_foto: "img/demo/bar-do-ze/capa.jpg"
   vibe: boteco
   descritor: "Boteco de esquina, chope gelado e petisco na brasa"

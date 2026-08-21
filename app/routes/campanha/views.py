@@ -143,6 +143,11 @@ def mosaico():
             'eh_demo': (t.tipo_conta or 'cliente') == 'demo',
             'plano': plano_efetivo(t),
             'vitrine': t.demo_fonte == FONTE_VITRINE,
+            # Qual dos seis o bar recebeu. Vai no cartão porque a campanha
+            # inteira já rodou uma vez com todo mundo no `classico` — os seis
+            # existiam, eram diferentes, e nenhum bar usava outro que não o
+            # primeiro. Aqui isso aparece antes de virar prévia na mão do dono.
+            'modelo': (cfg.modelo if cfg and cfg.modelo else 'classico'),
         })
 
     # Mais avaliações primeiro: é o bar com mais gente passando na porta, e é
