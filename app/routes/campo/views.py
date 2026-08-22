@@ -467,3 +467,18 @@ def qr_mesa(slug):
         'campo/qr_mesa.html', rest=rest, cfg=cfg, pratos=pratos,
         url_cardapio=url_for('public.cardapio', slug=rest.slug, _external=True),
     )
+
+
+@bp.route('/<slug>/marketing')
+def marketing(slug):
+    """Estúdio de Marketing com IA: gera posts e peças publicitárias para o bar."""
+    from app.utils.ai_copy import gerar_pecas_marketing
+    rest = _bar(slug)
+    cfg = _config(rest)
+    itens = DishCard.query.filter_by(restaurant_id=rest.id, ativo=True).limit(6).all()
+    pratos = [{'nome': p.nome, 'preco': p.preco} for p in itens]
+    vibe = getattr(cfg, 'vibe', 'boteco') or 'boteco'
+
+    pecas = gerar_pecas_marketing(nome_bar=rest.nome, pratos=pratos, vibe=vibe)
+    return render_template('campo/marketing.html', rest=rest, cfg=cfg, pecas=pecas)
+

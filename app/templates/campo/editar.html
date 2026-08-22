@@ -276,6 +276,10 @@
      href="{{ url_for('campo.proposta', slug=rest.slug) }}">
     📄 Proposta pronta pra mostrar
   </a>
+  <a class="btn fantasma" style="margin-top:10px;text-decoration:none;border-color:var(--ambar);color:var(--ambar)"
+     href="{{ url_for('campo.marketing', slug=rest.slug) }}">
+    🎨 Peças de Marketing com IA
+  </a>
   {% if cfg.whatsapp %}
     <a class="btn zap" style="margin-top:10px;text-decoration:none"
        href="https://wa.me/{{ cfg.whatsapp }}?text={{ ('Olha o site do ' ~ rest.nome ~ ': ' ~ url_for('public.landing_slug', slug=rest.slug, _external=True))|urlencode }}">

@@ -1,6 +1,6 @@
 {# 
   Demo Dock: Barra Interativa de Demonstração Comercial ao Vivo.
-  Renderizada quando `tenant and tenant.eh_demo` ou `previewando`.
+  Inclui Seletor de Modelos, Assistente de Voz (Concierge IA) e Modal Google Maps.
 #}
 {% if (tenant and tenant.eh_demo) or previewando %}
 <div id="demo-dock-root">
@@ -72,6 +72,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-wrap: wrap;
     }
 
     .btn-dock-cta {
@@ -91,6 +92,28 @@
     .btn-dock-cta:hover {
       background: #ffc466;
       transform: translateY(-1px);
+    }
+
+    .btn-dock-voice {
+      background: linear-gradient(135deg, #e65c00, #f9d423);
+      color: #111 !important;
+      text-decoration: none !important;
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 0 12px rgba(255, 106, 43, 0.5);
+      animation: pulseVoice 2s infinite;
+    }
+    @keyframes pulseVoice {
+      0% { box-shadow: 0 0 4px rgba(255, 106, 43, 0.4); }
+      50% { box-shadow: 0 0 14px rgba(255, 106, 43, 0.8); }
+      100% { box-shadow: 0 0 4px rgba(255, 106, 43, 0.4); }
     }
 
     .btn-dock-info {
@@ -160,13 +183,13 @@
       box-shadow: 0 2px 6px rgba(255, 106, 43, 0.35);
     }
 
-    /* Modal de Explicação Google Maps & Ponta a Ponta */
+    /* Modais */
     .maps-modal-backdrop {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(6px);
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
       z-index: 100000;
       align-items: center;
       justify-content: center;
@@ -209,31 +232,42 @@
       cursor: pointer;
       padding: 0 4px;
     }
-    .maps-step {
-      display: flex;
-      gap: 14px;
-      margin-bottom: 16px;
-    }
-    .maps-step-icon {
-      font-size: 1.5rem;
-      background: rgba(255, 180, 60, 0.15);
-      border-radius: 10px;
-      width: 44px;
-      height: 44px;
+
+    /* Visual do Concierge de Voz */
+    .voice-mic-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff6a2b, #ffb43d);
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-shrink: 0;
+      font-size: 2.2rem;
+      margin: 20px auto;
+      cursor: pointer;
+      border: 3px solid #fff;
+      box-shadow: 0 0 20px rgba(255, 106, 43, 0.6);
+      transition: transform 0.2s ease;
     }
-    .maps-step-text h4 {
-      margin: 0 0 4px;
-      font-size: 0.98rem;
-      color: #fff;
+    .voice-mic-circle:active, .voice-mic-circle.ouvindo {
+      transform: scale(1.1);
+      background: #e60000;
+      box-shadow: 0 0 30px rgba(230, 0, 0, 0.9);
+      animation: pulseRed 1s infinite;
     }
-    .maps-step-text p {
-      margin: 0;
-      font-size: 0.82rem;
-      color: #d1c0a8;
+    @keyframes pulseRed {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+    .voice-status-box {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 180, 60, 0.3);
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 14px;
+      min-height: 80px;
+      font-size: 0.95rem;
       line-height: 1.4;
     }
 
@@ -263,8 +297,11 @@
           <span>Prévia não oficial · {{ site.nome }}</span>
         </div>
         <div class="demo-dock-actions">
+          <button class="btn-dock-voice" onclick="abrirModalVoz()">
+            🎙️ Assistente de Voz (IA)
+          </button>
           <button class="btn-dock-info" onclick="abrirModalMaps()">
-            📍 Como Funciona no Google Maps
+            📍 Google Maps
           </button>
           <a class="btn-dock-cta" href="https://wa.me/{{ site.whatsapp or contato_vendas }}?text={{ ('Olá! Gostei da demonstração do site para o ' ~ site.nome ~ ' e quero ativar pro meu bar.') | urlencode }}" target="_blank" rel="noopener">
             Quero Este Site →
@@ -305,7 +342,45 @@
     </div>
   </div>
 
-  <!-- Modal Interativo Google Maps & Identidade Digital -->
+  <!-- Modal 1: Concierge e Assistente de Voz IA -->
+  <div id="modal-voz" class="maps-modal-backdrop" onclick="fecharModalVoz(event)">
+    <div class="maps-modal-box" onclick="event.stopPropagation()">
+      <div class="maps-modal-header">
+        <div>
+          <h3>🎙️ Concierge por Voz · {{ site.nome }}</h3>
+          <p style="margin:4px 0 0; font-size:0.82rem; color:#b09a7d;">Fale naturalmente para pedir mesa, perguntar pratos ou ouvir o cardápio:</p>
+        </div>
+        <button class="maps-modal-close" onclick="fecharModalVoz()">✕</button>
+      </div>
+
+      <div style="text-align:center;">
+        <button id="btn-gravar-voz" class="voice-mic-circle" type="button" onclick="alternarGravacaoVoz()">
+          🎤
+        </button>
+        <p id="label-voz" style="font-size:0.9rem; font-weight:700; color:#ffb43d; margin: 4px 0 12px;">
+          Toque no microfone e fale (ex.: "Quero mesa para 4 pessoas amanhã às 20h")
+        </p>
+
+        <div style="display:flex; justify-content:center; gap:8px; margin-bottom:12px;">
+          <button class="btn-dock-info" type="button" onclick="ouvirCardapio()">
+            🔊 Ouvir Destaques do Cardápio
+          </button>
+        </div>
+
+        <div id="status-voz" class="voice-status-box">
+          <span style="color:#b09a7d;">Aguardando sua voz... Fale sobre reservas, pratos do dia ou horários.</span>
+        </div>
+
+        <div id="acao-voz-zap" style="margin-top:16px; display:none;">
+          <a id="btn-voz-zap-link" class="btn-dock-cta" style="width:100%; justify-content:center; padding:12px; font-size:1rem;" href="#" target="_blank" rel="noopener">
+            📲 Confirmar Reserva no WhatsApp
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Google Maps & Identidade Digital -->
   <div id="modal-maps" class="maps-modal-backdrop" onclick="fecharModalMaps(event)">
     <div class="maps-modal-box" onclick="event.stopPropagation()">
       <div class="maps-modal-header">
@@ -316,35 +391,35 @@
         <button class="maps-modal-close" onclick="fecharModalMaps()">✕</button>
       </div>
 
-      <div class="maps-step">
-        <div class="maps-step-icon">🔍</div>
-        <div class="maps-step-text">
-          <h4>1. O Freguês busca no Google Maps</h4>
-          <p>Quando alguém busca "bar aberto agora" ou "onde comer em Barão Geraldo", o Google Maps prioriza estabelecimentos com Perfil da Empresa verificado, fotos nítidas e site oficial conectado.</p>
+      <div class="maps-step" style="display:flex; gap:14px; margin-bottom:16px;">
+        <div style="font-size:1.5rem; background:rgba(255,180,60,0.15); border-radius:10px; width:44px; height:44px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">🔍</div>
+        <div>
+          <h4 style="margin:0 0 4px; font-size:0.98rem; color:#fff;">1. O Freguês busca no Google Maps</h4>
+          <p style="margin:0; font-size:0.82rem; color:#d1c0a8; line-height:1.4;">Quando alguém busca "bar aberto agora" em Barão Geraldo, o Maps prioriza estabelecimentos com Perfil da Empresa verificado e site oficial.</p>
         </div>
       </div>
 
-      <div class="maps-step">
-        <div class="maps-step-icon">🍽️</div>
-        <div class="maps-step-text">
-          <h4>2. Botão Oficial de Cardápio no Maps</h4>
-          <p>Configuramos o botão oficial <strong>"Ver Cardápio"</strong> direto na ficha do seu bar no Google Maps. O Google lê os pratos e fotos do seu site via dados estruturados (Menu Schema JSON-LD).</p>
+      <div class="maps-step" style="display:flex; gap:14px; margin-bottom:16px;">
+        <div style="font-size:1.5rem; background:rgba(255,180,60,0.15); border-radius:10px; width:44px; height:44px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">🍽️</div>
+        <div>
+          <h4 style="margin:0 0 4px; font-size:0.98rem; color:#fff;">2. Botão Oficial de Cardápio no Maps</h4>
+          <p style="margin:0; font-size:0.82rem; color:#d1c0a8; line-height:1.4;">O Google indexa pratos, fotos e preços do seu site via dados estruturados (Menu Schema JSON-LD).</p>
         </div>
       </div>
 
-      <div class="maps-step">
-        <div class="maps-step-icon">📲</div>
-        <div class="maps-step-text">
-          <h4>3. Reservas Direto no seu WhatsApp</h4>
-          <p>O cliente não precisa baixar aplicativo nem se cadastrar. Clicou em "Reservar Mesa", a mensagem já chega formatada com data, horário e pessoas no seu WhatsApp.</p>
+      <div class="maps-step" style="display:flex; gap:14px; margin-bottom:16px;">
+        <div style="font-size:1.5rem; background:rgba(255,180,60,0.15); border-radius:10px; width:44px; height:44px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">📲</div>
+        <div>
+          <h4 style="margin:0 0 4px; font-size:0.98rem; color:#fff;">3. Reservas Direto no seu WhatsApp</h4>
+          <p style="margin:0; font-size:0.82rem; color:#d1c0a8; line-height:1.4;">O cliente clica em "Reservar", a mensagem já chega formatada com data, horário e pessoas no seu WhatsApp, sem comissão de app.</p>
         </div>
       </div>
 
-      <div class="maps-step">
-        <div class="maps-step-icon">📊</div>
-        <div class="maps-step-text">
-          <h4>4. Gestão de Custos e CMV Real (Plano Pro)</h4>
-          <p>Além do site no ar, você importa notas fiscais (NF-e) em 1 clique, calcula o custo real de cada receita e recebe alerta no WhatsApp se o fornecedor subir o preço do queijo ou da carne.</p>
+      <div class="maps-step" style="display:flex; gap:14px; margin-bottom:16px;">
+        <div style="font-size:1.5rem; background:rgba(255,180,60,0.15); border-radius:10px; width:44px; height:44px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">📊</div>
+        <div>
+          <h4 style="margin:0 0 4px; font-size:0.98rem; color:#fff;">4. Gestão de Custos e CMV Real (Plano Pro)</h4>
+          <p style="margin:0; font-size:0.82rem; color:#d1c0a8; line-height:1.4;">Importe notas fiscais (NF-e) em 1 clique e receba alertas de aumento de preços de fornecedores.</p>
         </div>
       </div>
 
@@ -374,6 +449,109 @@
       if (!e || e.target.id === 'modal-maps' || (e.target.classList && e.target.classList.contains('maps-modal-close'))) {
         document.getElementById('modal-maps').classList.remove('aberto');
       }
+    }
+    function abrirModalVoz() {
+      document.getElementById('modal-voz').classList.add('aberto');
+    }
+    function fecharModalVoz(e) {
+      if (!e || e.target.id === 'modal-voz' || (e.target.classList && e.target.classList.contains('maps-modal-close'))) {
+        document.getElementById('modal-voz').classList.remove('aberto');
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+      }
+    }
+
+    // --- Motor de Reconhecimento e Síntese de Voz ---
+    let recognizer = null;
+    let gravando = false;
+
+    function falarTexto(texto) {
+      if (!window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(texto);
+      u.lang = 'pt-BR';
+      u.rate = 1.05;
+      window.speechSynthesis.speak(u);
+    }
+
+    function alternarGravacaoVoz() {
+      const btn = document.getElementById('btn-gravar-voz');
+      const label = document.getElementById('label-voz');
+      const statusBox = document.getElementById('status-voz');
+      const zapDiv = document.getElementById('acao-voz-zap');
+
+      zapDiv.style.display = 'none';
+
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRec) {
+        statusBox.innerHTML = '<span style="color:#ff6a2b;">Seu navegador não suporta reconhecimento de voz direto. Digite sua mensagem no WhatsApp!</span>';
+        return;
+      }
+
+      if (gravando) {
+        recognizer.stop();
+        return;
+      }
+
+      recognizer = new SpeechRec();
+      recognizer.lang = 'pt-BR';
+      recognizer.continuous = false;
+      recognizer.interimResults = false;
+
+      recognizer.onstart = function() {
+        gravando = true;
+        btn.classList.add('ouvindo');
+        label.innerText = '🔴 Ouvindo você... Pode falar agora!';
+        statusBox.innerHTML = '<em>Ouvindo sua voz com IA...</em>';
+      };
+
+      recognizer.onresult = async function(event) {
+        const texto = event.results[0][0].transcript;
+        statusBox.innerHTML = `<strong>Você:</strong> "${texto}"<br><em style="color:#ffb43d;">Processando resposta com IA...</em>`;
+        label.innerText = 'Pensando...';
+
+        try {
+          const pathSegments = window.location.pathname.split('/');
+          const slug = pathSegments[pathSegments.indexOf('bar') + 1] || '{{ tenant.slug if tenant else "" }}';
+          const resp = await fetch('/api/concierge-voz', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ texto: texto, slug: slug })
+          });
+          const data = await resp.json();
+          if (data.ok) {
+            statusBox.innerHTML = `<strong>Você:</strong> "${texto}"<br><br><strong>🤖 Concierge:</strong> ${data.resposta_fala}`;
+            falarTexto(data.resposta_fala);
+            if (data.link_whatsapp) {
+              document.getElementById('btn-voz-zap-link').href = data.link_whatsapp;
+              zapDiv.style.display = 'block';
+            }
+          }
+        } catch (err) {
+          statusBox.innerText = 'Erro ao processar sua voz. Tente novamente.';
+        }
+      };
+
+      recognizer.onerror = function() {
+        btn.classList.remove('ouvindo');
+        gravando = false;
+        label.innerText = 'Toque para falar novamente';
+      };
+
+      recognizer.onend = function() {
+        btn.classList.remove('ouvindo');
+        gravando = false;
+        label.innerText = 'Toque no microfone para falar novamente';
+      };
+
+      recognizer.start();
+    }
+
+    function ouvirCardapio() {
+      const statusBox = document.getElementById('status-voz');
+      const nome = '{{ site.nome }}';
+      const texto = `Bem-vindo ao ${nome}! Nosso cardápio conta com porções artesanais preparadas na hora, petiscos clássicos de boteco e chope trincando de gelado. Diga 'quero reservar uma mesa' para garantir seu lugar hoje!`;
+      statusBox.innerHTML = `<strong>🔊 Assistente:</strong> ${texto}`;
+      falarTexto(texto);
     }
   </script>
 </div>

@@ -1,0 +1,124 @@
+{% extends "campo/base.html" %}
+{% block titulo %}Marketing & Peças IA · {{ rest.nome }}{% endblock %}
+
+{% block topo %}
+  <a class="voltar" href="{{ url_for('campo.editar', slug=rest.slug) }}" aria-label="Voltar">‹</a>
+  <h1>Peças de Marketing · {{ rest.nome }}</h1>
+  <a href="{{ url_for('campo.proposta', slug=rest.slug) }}" style="font-size:14px;white-space:nowrap">proposta ↗</a>
+{% endblock %}
+
+{% block conteudo %}
+<style>
+  .card-peca {
+    background: var(--ink-2);
+    border: 1px solid var(--linha);
+    border-radius: var(--raio);
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .card-peca.destaque {
+    border-color: var(--ambar);
+    box-shadow: 0 4px 20px rgba(255, 180, 60, 0.15);
+  }
+  .tag-peca {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(255, 180, 60, 0.18);
+    color: var(--ambar);
+    margin-bottom: 8px;
+  }
+  .copy-box {
+    background: var(--ink);
+    border: 1px solid var(--linha);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--creme);
+    white-space: pre-wrap;
+    margin: 10px 0;
+    user-select: all;
+  }
+  .sugestao-visual {
+    font-size: 12px;
+    color: var(--creme-dim);
+    background: rgba(255, 255, 255, 0.04);
+    padding: 8px 10px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+  }
+  .acoes-peca {
+    display: flex;
+    gap: 8px;
+  }
+  .btn-copiar {
+    flex: 1;
+    background: var(--ambar);
+    color: #1a1206;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+</style>
+
+<div class="bloco">
+  <h2>🎨 Estúdio de Marketing com IA</h2>
+  <p class="nota">
+    Peças publicitárias geradas sob medida para o <strong>{{ rest.nome }}</strong>. 
+    Use no Instagram, Stories e disparos no WhatsApp dos clientes.
+  </p>
+</div>
+
+{% for peca in pecas %}
+<div class="card-peca {{ 'destaque' if loop.first else '' }}">
+  <span class="tag-peca">{{ peca.tipo }}</span>
+  <h3 style="font-size: 16px; margin: 0 0 6px; color: #fff;">{{ peca.titulo }}</h3>
+  
+  <div class="sugestao-visual">
+    📸 <strong>Sugestão Visual:</strong> {{ peca.sugestao_visual }}
+  </div>
+
+  <div class="copy-box" id="copy-{{ loop.index }}">{{ peca.copy }}
+
+{{ peca.hashtags }}</div>
+
+  <div class="acoes-peca">
+    <button class="btn-copiar" type="button" onclick="copiarCopy('copy-{{ loop.index }}', this)">
+      📋 Copiar Texto
+    </button>
+    {% if rest.site_config and rest.site_config.whatsapp %}
+    <a class="btn" style="text-decoration:none; padding: 9px 14px; font-size: 13px; background:#25d366; color:#111; font-weight:700;"
+       href="https://wa.me/{{ rest.site_config.whatsapp }}?text={{ (peca.copy ~ '\n\n' ~ peca.hashtags) | urlencode }}"
+       target="_blank" rel="noopener">
+      📲 Enviar no Zap
+    </a>
+    {% endif %}
+  </div>
+</div>
+{% endfor %}
+
+<div class="bloco" style="text-align:center;">
+  <a class="btn fantasma" href="{{ url_for('campo.proposta', slug=rest.slug) }}">
+    📄 Ver Proposta Comercial deste Bar
+  </a>
+</div>
+
+<script>
+  function copiarCopy(id, btn) {
+    const el = document.getElementById(id);
+    navigator.clipboard.writeText(el.innerText).then(() => {
+      const original = btn.innerText;
+      btn.innerText = '✅ Copiado!';
+      setTimeout(() => { btn.innerText = original; }, 2000);
+    });
+  }
+</script>
+{% endblock %}

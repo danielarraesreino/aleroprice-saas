@@ -937,3 +937,33 @@ def reservar():
         'wa_url': wa_url,
     })
 
+
+@bp.post('/api/concierge-voz')
+def concierge_voz():
+    """Concierge de IA por Voz: responde perguntas, lê cardápio e agenda reservas."""
+    from app.utils.ai_copy import processar_voz_concierge
+    from app.models.modelo_sitecontent import DishCard
+
+    dados = request.get_json(silent=True) or request.form
+    texto = (dados.get('texto') or '').strip()
+    slug = (dados.get('slug') or '').strip()
+
+    rest = tenant_por_slug(slug) if slug else None
+    site = montar_site(rest) if rest else {}
+    nome_bar = site.get('nome') or (rest.nome if rest else 'Nosso Bar')
+
+    pratos = []
+    if rest:
+        itens = DishCard.query.filter_by(restaurant_id=rest.id, ativo=True).limit(8).all()
+        pratos = [{'nome': p.nome, 'preco': p.preco} for p in itens]
+
+    info = {
+        'whatsapp': site.get('whatsapp') or '',
+        'endereco': site.get('endereco') or '',
+        'horario': site.get('horario') or '',
+    }
+
+    resultado = processar_voz_concierge(texto, nome_bar=nome_bar, pratos=pratos, info=info)
+    return jsonify(resultado)
+
+
