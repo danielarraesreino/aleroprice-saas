@@ -159,3 +159,23 @@ def excluir(tipo, item_id):
     db.session.commit()
     flash('Excluído.', 'warning')
     return redirect(url_for('conteudo.index', tipo=tipo))
+
+
+@bp.post('/gerar-descricao-ia')
+@plano_minimo('site')
+def gerar_descricao_ia():
+    """Gera descrição gastronômica com IA para o formulário de pratos."""
+    from flask import jsonify
+    from app.utils.ai_copy import gerar_descricao_prato
+
+    dados = request.get_json(silent=True) or request.form
+    nome = (dados.get('nome') or '').strip()
+    vibe = (dados.get('vibe') or 'boteco').strip()
+    detalhes = (dados.get('detalhes') or '').strip()
+
+    if not nome:
+        return jsonify({'ok': False, 'erro': 'Nome do prato é obrigatório.'}), 400
+
+    descricao = gerar_descricao_prato(nome, vibe=vibe, detalhes=detalhes)
+    return jsonify({'ok': True, 'descricao': descricao})
+
