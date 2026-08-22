@@ -367,20 +367,151 @@
   .conta-fontes{margin-top:var(--s-6);border-top:1px solid var(--linha);
     padding-top:var(--s-4);display:grid;gap:var(--s-2);max-width:70ch}
 
-  .cartaz-preco{border:2px solid var(--tinta);background:var(--cartao);box-shadow:8px 8px 0 var(--tomate)}
-  .cartaz-preco-in{padding:var(--s-6);display:grid;gap:var(--s-4);align-items:center}
-  @media(min-width:720px){.cartaz-preco-in{grid-template-columns:auto 1fr}}
-  .preco-num{
-    font-family:var(--f-display);font-size:var(--t-display);line-height:var(--lh-display);
-    color:var(--tomate);font-variant-numeric:tabular-nums;text-transform:uppercase;
+  /* ---------------- grade de 3 planos com ancoragem ---------------- */
+  .tabela-planos{
+    display:grid;
+    gap:var(--s-5);
+    align-items:stretch;
+    grid-template-columns:1fr;
   }
-  .preco-num small{
-    display:block;margin-top:var(--s-2);
-    font-family:var(--f-corpo);font-size:var(--t-micro);font-weight:500;
-    letter-spacing:var(--track);text-transform:uppercase;color:var(--taupe);
+  @media(min-width:860px){
+    .tabela-planos{
+      grid-template-columns:repeat(3,1fr);
+    }
   }
-  .preco-txt > * + *{margin-top:var(--s-2)}
-  .preco-txt p{color:var(--taupe)}
+
+  .card-plano{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    background:var(--cartao);
+    border:1.5px solid var(--linha);
+    border-radius:var(--r);
+    padding:var(--s-6);
+    box-shadow:4px 4px 0 var(--linha);
+    transition:transform .15s var(--e-padrao),box-shadow .15s var(--e-padrao);
+  }
+  .card-plano:hover{
+    transform:translateY(-4px);
+    box-shadow:6px 6px 0 var(--linha);
+  }
+
+  .card-plano--destaque{
+    border:2px solid var(--tinta);
+    background:#fffcf5;
+    box-shadow:8px 8px 0 var(--tomate);
+  }
+  @media(min-width:860px){
+    .card-plano--destaque{
+      transform:scale(1.03);
+      z-index:2;
+    }
+    .card-plano--destaque:hover{
+      transform:scale(1.03) translateY(-4px);
+      box-shadow:12px 12px 0 var(--tomate);
+    }
+  }
+
+  .plano-badge-topo{
+    position:absolute;
+    top:-14px;
+    left:50%;
+    transform:translateX(-50%);
+    background:var(--tomate);
+    color:var(--cartao);
+    font-family:var(--f-corpo);
+    font-size:0.75rem;
+    font-weight:700;
+    letter-spacing:var(--track);
+    text-transform:uppercase;
+    padding:4px 14px;
+    border:1.5px solid var(--tinta);
+    white-space:nowrap;
+  }
+
+  .card-plano-topo{
+    border-bottom:1px solid var(--linha);
+    padding-bottom:var(--s-4);
+    margin-bottom:var(--s-4);
+  }
+  .plano-tag{
+    display:inline-block;
+    font-size:var(--t-micro);
+    font-weight:700;
+    letter-spacing:var(--track);
+    text-transform:uppercase;
+    color:var(--taupe);
+    margin-bottom:var(--s-1);
+  }
+  .plano-tag--destaque{color:var(--tomate)}
+  .plano-titulo{
+    font-family:var(--f-display);
+    font-size:var(--t-h2);
+    line-height:1;
+    color:var(--tinta);
+  }
+  .plano-preco{
+    margin-top:var(--s-2);
+    font-family:var(--f-display);
+    font-size:clamp(2rem,1.4rem + 1.8vw,2.75rem);
+    line-height:1;
+    color:var(--tinta);
+  }
+  .plano-preco--destaque{color:var(--tomate)}
+  .plano-preco small{
+    font-family:var(--f-corpo);
+    font-size:var(--t-micro);
+    font-weight:500;
+    color:var(--taupe);
+  }
+  .plano-sub{
+    margin-top:var(--s-3);
+    font-size:var(--t-micro);
+    color:var(--taupe);
+    line-height:1.4;
+  }
+
+  .plano-vantagens{
+    list-style:none;
+    display:grid;
+    gap:var(--s-3);
+    font-size:var(--t-micro);
+    line-height:1.45;
+    flex:1;
+    margin-bottom:var(--s-6);
+  }
+  .plano-vantagens li{
+    display:flex;
+    gap:var(--s-2);
+    align-items:flex-start;
+  }
+  .plano-vantagens li::before{
+    content:"✓";
+    color:var(--verde);
+    font-weight:700;
+    font-size:1.1rem;
+    line-height:1;
+    flex:none;
+  }
+  .plano-vantagens li.plano-incluso-nao{
+    color:var(--taupe);
+    opacity:0.75;
+  }
+  .plano-vantagens li.plano-incluso-nao::before{
+    content:"✕";
+    color:var(--tomate);
+  }
+
+  .plano-cta{margin-top:auto}
+  .w-100{width:100%}
+
+  .planos-notas{
+    margin-top:var(--s-6);
+    border-top:1px solid var(--linha);
+    padding-top:var(--s-4);
+    display:grid;
+    gap:var(--s-2);
+  }
 
   .fechar{text-align:center}
   .fechar h2{font-size:var(--t-h1);line-height:var(--lh-h1)}
@@ -726,58 +857,109 @@
 <section id="preco" class="secao">
   <div class="wrap">
     <div class="fluxo" data-reveal>
-      <span class="eyebrow">Preço de feira</span>
-      <h2>Uma placa, sem letra miúda</h2>
-    </div>
-    <div class="cartaz-preco sobe">
-      <div class="lona" aria-hidden="true"></div>
-      <div class="cartaz-preco-in">
-        <p class="preco-num num">
-          {{ preco }}
-          <small>{{ preco_periodo }}</small>
-        </p>
-        <div class="preco-txt">
-          <p>{{ preco_detalhe }}</p>
-          {% if taxa_setup %}
-          {# O setup tem entregável próprio, e é ele que justifica o valor:
-             design exclusivo (não um dos seis modelos) e a configuração do
-             Perfil da Empresa no Google. Agência cobra de R$ 500 a R$ 1.500 por
-             MÊS só para cuidar do perfil; aqui é uma vez. #}
-          <p class="micro">
-            <strong>{{ taxa_setup }}</strong> na montagem — design exclusivo,
-            seu bar configurado no Google e o cardápio no ar.
-          </p>
-          {% endif %}
-          <p class="micro">
-            Prefere montar sozinho?
-            <a href="{{ url_for('public.cadastro') }}">Crie seu site agora →</a>
-          </p>
-        </div>
-      </div>
+      <span class="eyebrow">Planos & Preços</span>
+      <h2>Sem pegadinha: escolha o tamanho do seu bar</h2>
+      <p class="lead">
+        Seu site fica pronto, rápido e com tudo o que você precisa para encher a casa e controlar seu lucro.
+      </p>
     </div>
 
-    {% if compra and compra.valor %}
-    {# A outra porta, e ela entrega OUTRA coisa.
-       O primeiro ano da compra sai mais barato que assinar; se as duas
-       entregassem o mesmo, ninguém assinaria. O que se compra é o site pronto.
-       O que fica no plano é o que roda todo dia — reserva, agenda, o painel.
-       Por isso o "não vem" está escrito aqui, e não descoberto depois. #}
-    <div class="fluxo" style="margin-top:var(--s-6)" data-reveal>
+    <div class="tabela-planos sobe" data-reveal>
+      
+      <!-- 1. Plano Site (Presença & Reservas) -->
+      <div class="card-plano">
+        <div class="card-plano-topo">
+          <span class="plano-tag">Presença & Reservas</span>
+          <h3 class="plano-titulo">Site</h3>
+          <p class="plano-preco">
+            <span class="num">{{ preco_site }}</span>
+            <small>/mês</small>
+          </p>
+          <p class="plano-sub">Para o bar que quer ser achado no Google e receber reservas no WhatsApp.</p>
+        </div>
+        <ul class="plano-vantagens">
+          <li><strong>Site exclusivo</strong> com domínio próprio (ex.: seubar.bar)</li>
+          <li><strong>Cardápio digital</strong> com QR Code de mesa ilimitado</li>
+          <li><strong>Reservas no WhatsApp</strong> com alerta instantâneo</li>
+          <li><strong>Agenda de shows</strong> e promoções da semana</li>
+          <li><strong>Edição fácil</strong> direto do celular</li>
+          <li class="plano-incluso-nao">Sem gestão de custos de pratos (CMV)</li>
+        </ul>
+        <div class="plano-cta">
+          <a class="btn btn-ghost w-100" href="{{ zap_url }}" target="_blank" rel="noopener">Quero o Site</a>
+        </div>
+      </div>
+
+      <!-- 2. Plano Pro (O Mais Escolhido / Âncora Ideal) -->
+      <div class="card-plano card-plano--destaque">
+        <div class="plano-badge-topo">★ MAIS ESCOLHIDO · GESTÃO & LUCRO</div>
+        <div class="card-plano-topo">
+          <span class="plano-tag plano-tag--destaque">Site + Sistema de Custos</span>
+          <h3 class="plano-titulo">Pro</h3>
+          <p class="plano-preco plano-preco--destaque">
+            <span class="num">{{ preco_pro }}</span>
+            <small>/mês</small>
+          </p>
+          <p class="plano-sub">Para quem quer presença online e controle absoluto do lucro de cada prato.</p>
+        </div>
+        <ul class="plano-vantagens">
+          <li><strong>Tudo do Plano Site incluso</strong></li>
+          <li><strong>Ficha Técnica e CMV real</strong> de cada item do cardápio</li>
+          <li><strong>Importação automática de NF-e</strong> (leitura de XML)</li>
+          <li><strong>Alerta de aumento de preço</strong> dos fornecedores no Zap</li>
+          <li><strong>Controle de estoque</strong> e prevenção de desperdício</li>
+          <li><strong>Relatórios de lucratividade</strong> claros, sem planilhas</li>
+        </ul>
+        <div class="plano-cta">
+          <a class="btn btn-zap w-100" href="{{ zap_url }}" target="_blank" rel="noopener">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.2 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.4-.7-2.9-1.1-4.7-4-4.9-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5s.8 1.9.8 2c.1.1.1.3 0 .5l-.3.5c-.2.2-.3.4-.1.7.1.3.7 1.2 1.5 1.9 1.1.9 2 1.2 2.2 1.4.3.1.5.1.6-.1.2-.2.7-.8.9-1.1.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.2 1.3Z"/></svg>
+            Quero o Plano Pro
+          </a>
+        </div>
+      </div>
+
+      <!-- 3. Compra do Site (A Âncora Alta / Sem Mensalidade) -->
+      <div class="card-plano">
+        <div class="card-plano-topo">
+          <span class="plano-tag">Sem Mensalidade</span>
+          <h3 class="plano-titulo">Compra Única</h3>
+          <p class="plano-preco">
+            <span class="num">{{ compra.valor }}</span>
+            <small>à vista</small>
+          </p>
+          <p class="plano-sub">Para quem quer apenas o site pronto, sem assinatura mensal.</p>
+        </div>
+        <ul class="plano-vantagens">
+          <li><strong>Site pronto</strong> e publicado no seu domínio</li>
+          <li><strong>Cardápio digital</strong> com QR Code</li>
+          <li><strong>Perfil da Empresa</strong> configurado no Google Maps</li>
+          <li><strong>1 ano de domínio e hospedagem</strong> inclusos</li>
+          <li class="plano-incluso-nao">Sem sistema de reservas no WhatsApp</li>
+          <li class="plano-incluso-nao">Sem painel de gestão de custos ou NF-e</li>
+          <li><small style="color:var(--taupe)">Renovação de {{ compra.renovacao }} a partir do 2º ano</small></li>
+        </ul>
+        <div class="plano-cta">
+          <a class="btn btn-ghost w-100" href="{{ zap_url }}" target="_blank" rel="noopener">Comprar à Vista</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Notas da Seção -->
+    <div class="planos-notas sobe" data-reveal>
+      {% if taxa_setup %}
       <p class="micro">
-        <strong>Não quer mensalidade?</strong>
-        O site pode ser seu por <strong>{{ compra.valor }}</strong>, de uma vez:
-        {{ compra.inclui | lower }}.{% if compra.renovacao %}
-        Depois do primeiro ano, {{ compra.renovacao }} para manter no ar — ou
-        você leva domínio e site para onde quiser.{% endif %}
-      </p>
-      {% if compra.nao_inclui %}
-      <p class="micro">
-        Nesse caminho não entram: {{ compra.nao_inclui | lower }}.
-        Mudança no site depois de pronto sai por orçamento.
+        <strong>Taxa única de montagem: {{ taxa_setup }}</strong> — inclui design exclusivo personalizado, fotos da casa e configuração completa do Perfil da Empresa no Google Maps.
       </p>
       {% endif %}
+      <p class="micro">
+        <strong>Sem fidelidade e sem multas:</strong> você cancela a assinatura quando quiser com um toque.
+      </p>
+      <p class="micro">
+        Prefere montar você mesmo? <a href="{{ url_for('public.cadastro') }}">Crie sua conta agora →</a>
+      </p>
     </div>
-    {% endif %}
+
   </div>
 </section>
 
@@ -786,9 +968,8 @@
     <span class="eyebrow" data-reveal>Sem burocracia</span>
     <h2 data-reveal>Passa na banca</h2>
     <p class="lead" data-reveal>
-      Sou eu que atendo: a pé, de bar em bar, com a prévia aberta no celular.
-      Chama que eu passo no seu balcão — e você decide olhando pra ela,
-      não pra uma promessa.
+      A gente atende de bar em bar, com a demonstração aberta no celular.
+      Chame a gente no WhatsApp para ver o site do seu bar pronto no balcão.
     </p>
     <div class="hero-cta">
       <a class="btn btn-zap" href="{{ zap_url }}" target="_blank" rel="noopener">
@@ -796,10 +977,6 @@
         Chamar no WhatsApp
       </a>
     </div>
-    <p class="micro">
-      Enquanto isso, quem procura seu bar no Google à noite segue sem achar
-      horário, cardápio nem reserva.
-    </p>
   </div>
 </section>
 
@@ -807,39 +984,15 @@
 
 <footer class="secao">
   <div class="wrap fluxo">
-    <p><strong>FEIRA DE BARÃO</strong> · feita a pé em Barão Geraldo, Campinas–SP</p>
+    <p><strong>FEIRA DE BARÃO</strong> · Tecnologia e Presença Digital para Gastronomia e Bares de Barão Geraldo, Campinas–SP</p>
     <p class="micro">
-      Projeto independente — vizinho e freguês da feira da Praça do Coco, sem
-      vínculo com ela nem com o Google. Toda prévia usa dado público, não entra
-      em buscador e sai do ar a pedido do bar.
+      Plataforma completa de sites para bares, cardápios digitais com QR Code e gestão de custos gastronômicos.
     </p>
     <nav class="rodape-links micro" aria-label="Mais páginas">
       <a href="{{ url_for('public.barao') }}">A campanha nos bares</a>
-      <a href="{{ url_for('public.cadastro') }}">Criar meu site sozinho</a>
-      <a href="{{ url_for('public.coletivo') }}">Quem faz estes sites</a>
-      <a href="https://bardavila.bar" target="_blank" rel="noopener">Primeiro cliente: bardavila.bar</a>
+      <a href="{{ url_for('public.cadastro') }}">Criar meu site</a>
+      <a href="https://bardavila.bar" target="_blank" rel="noopener">Cliente modelo: bardavila.bar</a>
     </nav>
-
-    {# Quem assina.
-       A Feira é o braço que fatura de um coletivo que faz outras coisas — dados
-       abertos e formação com a população em situação de rua. Isso não é selo de
-       bondade pendurado no rodapé: é a mesma pessoa, e o dono do bar tem o
-       direito de saber para quem está pagando. Sem pedir doação e sem prometer
-       repasse: enquanto não houver entidade que possa receber, prometer seria
-       vender o que não se entrega. #}
-    {% if coletivo %}
-    <div class="assinatura micro">
-      <p>
-        Feito pelo <strong>{{ coletivo.nome }}</strong> — {{ coletivo.lema | lower }}.
-      </p>
-      <nav class="rodape-links" aria-label="Projetos do coletivo">
-        <a href="{{ coletivo.caminhos }}" target="_blank" rel="noopener">Caminhos Campinas</a>
-        <a href="{{ coletivo.vozes }}" target="_blank" rel="noopener">Vozes da Quebrada</a>
-        <a href="{{ coletivo.instagram }}" target="_blank" rel="noopener">Instagram</a>
-        <a href="{{ coletivo.facebook }}" target="_blank" rel="noopener">Facebook</a>
-      </nav>
-    </div>
-    {% endif %}
   </div>
 </footer>
 

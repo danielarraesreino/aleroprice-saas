@@ -490,19 +490,8 @@
 
 <footer>
   <div class="wrap">
-    <p><b>Feira de Barão</b> · Barão Geraldo, Campinas/SP</p>
-    <p>Projeto independente: não temos vínculo com a Feira de Barão nem com o Google.</p>
+    <p><b>Feira de Barão</b> · Tecnologia e Presença Digital para Gastronomia em Barão Geraldo, Campinas/SP</p>
     <p>Já no ar: <a href="https://bardavila.bar" target="_blank" rel="noopener">bardavila.bar</a></p>
-    {# Mesma assinatura da landing: esta é a página que vai no WhatsApp do dono,
-       e é onde ele decide se confia. Saber quem está do outro lado pesa. #}
-    {% if coletivo %}
-    <p class="assinatura">
-      Feito pelo <b>{{ coletivo.nome }}</b> —
-      <a href="{{ coletivo.caminhos }}" target="_blank" rel="noopener">Caminhos Campinas</a> ·
-      <a href="{{ coletivo.vozes }}" target="_blank" rel="noopener">Vozes da Quebrada</a> ·
-      <a href="{{ coletivo.instagram }}" target="_blank" rel="noopener">{{ coletivo.arroba }}</a>
-    </p>
-    {% endif %}
   </div>
 </footer>
 

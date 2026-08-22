@@ -195,12 +195,6 @@
     </div>
 
     <div class="pe">Já tem barraca? <a href="{{ url_for('auth.login') }}">Entrar</a></div>
-    {# Quem está entregando o e-mail merece saber para quem. #}
-    {% if coletivo %}
-    <div class="pe pe--coletivo">
-      Feito pelo <a href="{{ coletivo.caminhos }}" target="_blank" rel="noopener">{{ coletivo.nome }}</a>
-    </div>
-    {% endif %}
   </div>
 </body>
 </html>

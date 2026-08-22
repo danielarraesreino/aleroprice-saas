@@ -184,7 +184,6 @@ def _render_landing(rest):
                            # declara apoio a nada em nome de ninguém.
                            apoia_caminhos=(bool(getattr(cfg, 'apoia_caminhos', False))
                                            and not getattr(rest, 'eh_demo', False)),
-                           coletivo=_coletivo(),
                            **conteudo)
 
 
@@ -285,36 +284,8 @@ def _preco_publico():
         'preco_periodo': os.environ.get('FEIRA_PRECO_PERIODO', 'por mês'),
         'preco_detalhe': os.environ.get(
             'FEIRA_PRECO_DETALHE',
-            'Site no ar, reservas, cardápio digital e o sistema de custos completo. '
-            'Sem taxa de setup e sem fidelidade — se não servir, você sai.'
+            'Site no ar, reservas, cardápio digital e gestão.'
         ),
-    }
-
-
-def _coletivo():
-    """Quem assina os sites: o Coletivo A Rua Tem Voz e seus outros projetos.
-
-    Num lugar só, e não escrito no rodapé de cada página. São quatro endereços
-    que aparecem em três templates — a landing e a `/barao` já divergiram
-    sozinhas uma vez com o preço (uma lia `FEIRA_PRECO`, a outra
-    `FEIRA_PRECO_SITE`), e link quebrado em três lugares se corrige três vezes.
-
-    `caminhos` é o projeto de dados abertos e formação; `vozes` são as oficinas
-    no Oziel. Ambos do mesmo autor destes sites, e é isso que o rodapé diz.
-    """
-    return {
-        'nome': os.environ.get('COLETIVO_NOME', 'Coletivo A Rua Tem Voz'),
-        'lema': os.environ.get('COLETIVO_LEMA',
-                               'Tecnologia como instrumento de emancipação'),
-        'caminhos': os.environ.get('COLETIVO_CAMINHOS',
-                                   'https://caminhos-cps.social'),
-        'vozes': os.environ.get('COLETIVO_VOZES',
-                                'https://jogoozipa.vercel.app'),
-        'instagram': os.environ.get('COLETIVO_INSTAGRAM',
-                                    'https://instagram.com/coletivoaruatemvoz'),
-        'facebook': os.environ.get('COLETIVO_FACEBOOK',
-                                   'https://facebook.com/coletivoaruatemvoz'),
-        'arroba': os.environ.get('COLETIVO_ARROBA', '@coletivoaruatemvoz'),
     }
 
 
@@ -330,15 +301,15 @@ def _contexto_produto():
                   if com_nota else None)
 
     from app.utils.modelos import opcoes_de_modelo
-    from app.utils.planos import compra_do_site, taxa_de_instalacao
+    from app.utils.planos import compra_do_site, taxa_de_instalacao, precos
+    tab_precos = precos()
     return {
         'zap_url': f'https://wa.me/{zap}?text={msg}' if zap else '#preco',
-        # As duas portas: assinar (mensalidade + setup) ou comprar de uma vez.
-        # Vêm do mesmo módulo que cobra, nunca digitados no template — a landing
-        # e a tela de planos já divergiram sozinhas uma vez (R$ 97 vs R$ 197).
         'taxa_setup': taxa_de_instalacao(),
         'compra': compra_do_site(),
-        'coletivo': _coletivo(),
+        'precos': tab_precos,
+        'preco_site': tab_precos['site'],
+        'preco_pro': tab_precos['pro'],
         **_preco_publico(),
         'bares': bares,
         'total_bares': len(bares),
@@ -348,37 +319,11 @@ def _contexto_produto():
     }
 
 
-@bp.route('/coletivo')
-def coletivo():
-    """Quem faz estes sites, e o que mais essa gente faz.
-
-    Existe porque a Feira é o braço que fatura de um coletivo que também mantém
-    o Caminhos Campinas (dados abertos e formação com a população em situação de
-    rua) e o Vozes da Quebrada. O dono do bar que paga tem o direito de saber
-    isso, e é o que nenhum concorrente tem para mostrar.
-
-    O que esta página NÃO faz: pedir doação nem prometer que uma fatia da
-    mensalidade vai para o projeto. Hoje não existe entidade que possa receber
-    esse dinheiro — a própria página de apoio do Caminhos diz que está "em
-    constituição de fundo". Prometer repasse antes disso seria vender o que não
-    se entrega, e essa é a última causa que comporta esse tipo de promessa.
-    """
-    return render_template('produto/coletivo.html', **_contexto_produto())
-
-
 @bp.route('/barao')
 def barao():
     """Landing da campanha "Bares de Barão": a página que o vendedor manda no
-    WhatsApp do dono de bar de Barão Geraldo e abre na mesa.
-
-    Público por ser `public.*` (allowlist do guard global). Contato e preços
-    vêm de env — `_contexto_produto()` pro WhatsApp e `planos.precos()` pros
-    dois planos (Site/Pro) — pra nada de comercial ficar hardcoded em template.
-    """
-    tabela = precos()
-    return render_template('produto/barao.html',
-                           preco_site=tabela['site'], preco_pro=tabela['pro'],
-                           **_contexto_produto())
+    WhatsApp do dono de bar de Barão Geraldo e abre na mesa."""
+    return render_template('produto/barao.html', **_contexto_produto())
 
 
 @bp.route('/robots.txt')
@@ -710,7 +655,7 @@ def cadastro():
         justamente quando a pessoa está decidindo se insiste.
         """
         return render_template('site/cadastro.html', dias_trial=DIAS_DE_TRIAL,
-                               coletivo=_coletivo(), **_preco_publico(), **campos)
+                               **_preco_publico(), **campos)
 
     dados = {'nome_bar': '', 'nome': '', 'email': ''}
     if request.method == 'POST':

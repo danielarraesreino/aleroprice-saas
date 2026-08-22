@@ -203,14 +203,18 @@
     <li>A conta vira <strong>sua</strong>, criada na hora, com seu e-mail e senha</li>
     <li>Suas fotos oficiais substituem as da prévia</li>
     <li>O site sai do modo prévia: o aviso some e ele passa a aparecer no Google</li>
+    {% if dias_trial and dias_trial > 0 %}
     <li><strong>{{ dias_trial }} dias de teste grátis</strong> antes da primeira mensalidade</li>
+    {% else %}
+    <li><strong>Sem fidelidade:</strong> você avalia o resultado e só continua se fizer sentido pro seu bar</li>
+    {% endif %}
   </ul>
 </div>
 
 <div class="no-print">
   {% if dados.whatsapp %}
   <a class="btn zap" style="text-decoration:none;margin-bottom:10px"
-     href="https://wa.me/{{ dados.whatsapp }}?text={{ ('Olá! Montamos o site do ' ~ dados.nome ~ ' — dá uma olhada: ' ~ url_previa ~ ' — Planos: Site ' ~ precos.site ~ '/mês ou Pro ' ~ precos.pro ~ '/mês, com ' ~ dias_trial ~ ' dias de teste grátis. Quer que eu deixe no seu nome?')|urlencode }}">
+     href="https://wa.me/{{ dados.whatsapp }}?text={{ ('Olá! Montamos o site do ' ~ dados.nome ~ ' — dá uma olhada: ' ~ url_previa ~ ' — Planos: Site ' ~ precos.site ~ '/mês ou Pro ' ~ precos.pro ~ '/mês, sem fidelidade. Quer que eu deixe no seu nome?')|urlencode }}">
     Mandar a proposta no WhatsApp dele
   </a>
   {% endif %}

@@ -214,6 +214,8 @@ def webhook():
 
     tipo = event['type']
     objeto = event['data']['object']
+    if hasattr(objeto, 'to_dict'):
+        objeto = objeto.to_dict()
 
     if tipo == 'checkout.session.completed':
         restaurant_id = objeto.get('client_reference_id')

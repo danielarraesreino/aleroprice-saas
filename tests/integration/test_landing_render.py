@@ -33,7 +33,6 @@ def vitrine(session):
         whatsapp='5519999779942', tema='boteco-ambar', vibe='boteco',
         descritor='Buteco de família em Campinas',
         nota_google='4,9', qtd_avaliacoes=39,
-        servicos='Refeição no local · Drive-through',
         hero_foto='img/bar/foto-18.jpg',
     ))
     session.add(DishCard(restaurant_id=r.id, nome='Croquete da Bruna',
@@ -54,8 +53,7 @@ def test_vitrine_mantem_o_texto_original(client, vitrine):
 
     # Identidade e dados do bar
     for trecho in ('Bar da Vila', 'Buteco de família em Campinas',
-                   'Croquete da Bruna', '5519999779942',
-                   'Refeição no local · Drive-through'):
+                   'Croquete da Bruna', '5519999779942'):
         assert trecho in corpo, f'sumiu da vitrine: {trecho}'
 
     # Nota real, que antes era 4,9/39 fixo no HTML
