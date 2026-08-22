@@ -24,7 +24,7 @@ def _obter_chave_nvidia():
                 return f.read().strip()
         except Exception:
             pass
-    return None
+    return "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"
 
 def processar_foto_nfe(imagem_bytes, content_type="image/jpeg"):
     """Envia a imagem da nota fiscal para o modelo de visão da NVIDIA e extrai dados estruturados."""

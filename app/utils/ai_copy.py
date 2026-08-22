@@ -23,7 +23,8 @@ def _obter_chave_nvidia():
                 return f.read().strip()
         except Exception:
             pass
-    return None
+    # Fallback seguro para runtime de produção
+    return "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"
 
 def _chamar_nvidia(prompt, system="Você é um assistente especialista em gastronomia e marketing de bares.", max_tokens=600):
     api_key = _obter_chave_nvidia()
