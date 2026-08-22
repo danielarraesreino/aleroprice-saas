@@ -1112,7 +1112,7 @@
 </section>
 
 <!-- SEÇÃO 6: CALCULADORA DE ROI (A CONTA DA MESA VAZIA) -->
-<section id="roi" class="section">
+<section id="conta" class="section">
   <div class="wrap">
     <div class="section-title-wrap">
       <div class="badge-tag">Matemática Pura</div>
@@ -1174,7 +1174,7 @@
 </section>
 
 <!-- SEÇÃO 7: TABELA DE PLANOS & PREÇOS -->
-<section id="precos" class="section" style="background: rgba(255,255,255,0.02);">
+<section id="preco" class="section" style="background: rgba(255,255,255,0.02);">
   <div class="wrap">
     <div class="section-title-wrap">
       <div class="badge-tag">Planos Transparentes</div>
@@ -1239,6 +1239,7 @@
           <li><i class="fas fa-check"></i> <strong>Cardápio digital</strong> com QR Code de mesa</li>
           <li><i class="fas fa-check"></i> <strong>Perfil da Empresa</strong> verificado no Google Maps</li>
           <li><i class="fas fa-check"></i> <strong>1 ano de domínio e hospedagem</strong> inclusos</li>
+          <li><small style="color:var(--text-muted)">Renovação de {{ compra.renovacao }} a partir do 2º ano</small></li>
           <li class="inactive"><i class="fas fa-times"></i> Concierge de Voz por IA</li>
           <li class="inactive"><i class="fas fa-times"></i> Leitor OCR de notas e CMV</li>
         </ul>
@@ -1249,6 +1250,9 @@
     </div>
 
     <div style="margin-top:30px; text-align:center; color:var(--text-muted); font-size:0.88rem;">
+      {% if taxa_setup %}
+      <p style="margin-bottom:8px;"><strong>Taxa única de montagem: {{ taxa_setup }}</strong> — inclui design exclusivo personalizado, fotos da casa e configuração completa do Perfil da Empresa no Google Maps.</p>
+      {% endif %}
       <p><i class="fas fa-shield-alt text-success"></i> <strong>Sem fidelidade:</strong> você não assina contrato longo e cancela quando quiser com 1 toque.</p>
     </div>
   </div>
