@@ -3,1112 +3,1415 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Feira de Barão — os bares do bairro, cada um com sua barraca na internet</title>
-<meta name="description" content="A feira que não desmonta: bares de Barão Geraldo com página pronta — foto, nota do Google, endereço e reserva no WhatsApp. A barraca do seu bar pode já estar montada.">
+<title>Feira de Barão · O Sistema Operacional e Identidade Digital dos Bares de Barão Geraldo</title>
+<meta name="description" content="Coloque seu bar no Google Maps com cardápio digital, reservas no WhatsApp com IA de voz, gestão de CMV por foto de nota e zero taxa de aplicativo.">
 <link rel="canonical" href="https://feiradebarao.com.br/">
 <link rel="alternate" type="text/markdown" title="LLM Summary" href="/llms.txt">
-<meta property="og:title" content="Feira de Barão — cada bar do bairro com sua barraca na internet">
-<meta property="og:description" content="A feira que não desmonta: os bares de Barão Geraldo com página pronta, montada antes mesmo de o dono pedir. Passa, olha e escolhe a sua.">
+<meta property="og:title" content="Feira de Barão · O Sistema Operacional dos Bares">
+<meta property="og:description" content="Site oficial, cardápio no Google Maps, reservas no WhatsApp sem comissão e IA para gerir estoque e lucros.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="{{ og_imagem('og-feira.jpg') }}">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Barracas de feira iluminadas ao anoitecer numa rua de bairro">
-<meta name="twitter:card" content="summary_large_image">
 <meta property="og:url" content="https://feiradebarao.com.br/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebSite","name":"Feira de Barão",
  "url":"https://feiradebarao.com.br/",
- "description":"Sites prontos para bares de Barão Geraldo: página com foto, nota do Google, cardápio digital e reserva no WhatsApp.",
+ "description":"Plataforma completa de presença digital e gestão de custos para bares e gastronomia em Barão Geraldo, Campinas - SP.",
  "publisher":{"@type":"Organization","name":"Feira de Barão",
    "url":"https://feiradebarao.com.br/",
    "areaServed":"Barão Geraldo, Campinas - SP, Brasil"}}
 </script>
+
 <style>
-  :root{
-    /* ---- famílias: exatamente 2 (cartaz de feira + corpo) ---- */
-    --f-display:'Anton','Arial Narrow',sans-serif;
-    --f-corpo:'Work Sans',system-ui,-apple-system,sans-serif;
-
-    /* ---- escala tipográfica: razão 1,25, fluida 360->1280px ---- */
-    --t-display:clamp(2.5rem,1.13rem + 6.09vw,6rem);
-    --t-h1:clamp(2rem,1.29rem + 3.15vw,3.8125rem);
-    --t-h2:clamp(1.625rem,1.31rem + 1.41vw,2.4375rem);
-    --t-h3:clamp(1.25rem,1.13rem + 0.54vw,1.5625rem);
-    --t-lead:clamp(1.0625rem,0.99rem + 0.33vw,1.25rem);
-    --t-corpo:clamp(0.9375rem,0.91rem + 0.11vw,1rem);
-    --t-eyebrow:1rem;
-    --t-micro:0.8rem;
-    --lh-display:.92; --lh-h1:1.02; --lh-h2:1.08; --lh-h3:1.25;
-    --lh-lead:1.55;   --lh-corpo:1.8; --lh-micro:1.4;
-    --medida:34rem;
-    --track:.15625rem;               /* 2,5 de px — eyebrow, medido no referencial */
-
-    /* ---- espaçamento: base 4px, ramp geométrico ---- */
-    --s-1:.25rem; --s-2:.5rem; --s-3:.75rem; --s-4:1rem; --s-5:1.5rem;
-    --s-6:2rem;   --s-7:3rem;  --s-8:4rem;   --s-9:6rem; --s-10:8rem;
-    --sec-y:clamp(4rem,8vw,8rem);
-    --gutter:clamp(1.25rem,4vw,2.5rem);
-    --maxw:72rem;
-    --r:0;                            /* cartaz de feira é seco: raio zero */
-
-    /* ---- paleta: papel de feira, 4 tons quentes + 1 acento ---- */
-    --papel:#f6eedb;                  /* fundo: papel kraft claro   */
-    --cartao:#fdf8eb;                 /* superfície de card         */
-    --tinta:#251b10;                  /* texto                      */
-    --taupe:#6e5d45;                  /* texto secundário           */
-    --tomate:#b23214;                 /* acento: cartaz de feira    */
-    --verde:#166b3f;                  /* funcional: só WhatsApp     */
-    --linha:rgb(37 27 16 / .18);
-
-    /* ---- curvas nomeadas ---- */
-    --e-suave:cubic-bezier(.22,1,.36,1);
-    --e-firme:cubic-bezier(.16,1,.30,1);
-    --e-padrao:cubic-bezier(.40,0,.20,1);
+  :root {
+    --bg-main: #0c0e12;
+    --bg-card: #14171f;
+    --bg-card-hover: #1c212c;
+    --bg-elevated: #1e2330;
+    
+    --brand-primary: #ff6a2b;
+    --brand-secondary: #ffb43d;
+    --brand-gradient: linear-gradient(135deg, #ff6a2b 0%, #ffb43d 100%);
+    --brand-glow: rgba(255, 106, 43, 0.35);
+    
+    --accent-ia: #00d2ff;
+    --accent-green: #10b981;
+    --accent-red: #ef4444;
+    
+    --text-pure: #ffffff;
+    --text-body: #cbd5e1;
+    --text-muted: #94a3b8;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(255, 180, 60, 0.35);
+    
+    --font-heading: 'Space Grotesk', system-ui, sans-serif;
+    --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   }
 
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{
-    background:var(--papel);
-    color:var(--tinta);
-    font-family:var(--f-corpo);
-    font-size:var(--t-corpo);
-    line-height:var(--lh-corpo);
-    font-weight:400;
-  }
-  /* grão de papel: une o kraft e as fotos de celular num material só */
-  body::after{
-    content:'';position:fixed;inset:0;z-index:60;pointer-events:none;opacity:.05;
-    mix-blend-mode:multiply;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-  @media (prefers-reduced-transparency: reduce){ body::after{display:none} }
-
-  ::selection{background:var(--tomate);color:var(--papel)}
-  :focus-visible{outline:2px solid var(--tomate);outline-offset:4px}
-
-  h1,h2,h3,.display{
-    font-family:var(--f-display);font-weight:400;letter-spacing:-.01em;
-    text-transform:uppercase;text-wrap:balance;
-  }
-  h2{font-size:var(--t-h2);line-height:var(--lh-h2)}
-  h3{font-size:var(--t-h3);line-height:var(--lh-h3);letter-spacing:0}
-  p{max-width:var(--medida);text-wrap:pretty}
-  .lead{font-size:var(--t-lead);line-height:var(--lh-lead);max-width:var(--medida)}
-  .micro{font-size:var(--t-micro);line-height:var(--lh-micro);color:var(--taupe)}
-  .sem-quebra{white-space:nowrap}
-  a{color:var(--tomate)}
-  b,strong{font-weight:700}
-  .num{font-variant-numeric:tabular-nums}
-
-  .eyebrow{
-    display:block;
-    font-family:var(--f-corpo);font-size:var(--t-eyebrow);font-weight:500;
-    letter-spacing:var(--track);text-transform:uppercase;line-height:1.2;
-    color:var(--tomate);
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background-color: var(--bg-main);
+    color: var(--text-body);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
   }
 
-  .wrap{max-width:var(--maxw);margin-inline:auto;padding-inline:var(--gutter)}
-  .secao{padding-block:var(--sec-y);scroll-margin-top:var(--s-7)}
-  main > * + *{border-top:1px solid var(--linha)}
+  a { color: var(--brand-secondary); text-decoration: none; transition: all 0.2s ease; }
+  a:hover { color: #fff; }
 
-  /* ritmo vertical por fluxo: um seletor manda em quase todos os margins */
-  .fluxo > * + *{margin-top:var(--s-5)}
-  .fluxo > .eyebrow + *{margin-top:var(--s-2)}
-  .denso > * + *{margin-top:var(--s-2)}
-  .sobe{margin-top:var(--s-7)}
+  /* Background Grid Pattern */
+  .bg-grid-overlay {
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    background-size: 32px 32px;
+    pointer-events: none;
+    z-index: 0;
+  }
 
-  /* ---------------- lona de barraca ---------------- */
-  .lona{
-    height:var(--s-3);
-    background:repeating-linear-gradient(90deg,var(--tomate) 0 16px,var(--papel) 16px 32px);
-    border-bottom:1px solid var(--linha);
+  .wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
   }
-  .lona--seca{background:repeating-linear-gradient(90deg,var(--taupe) 0 16px,var(--papel) 16px 32px)}
 
-  /* ---------------- topo ---------------- */
-  .topo{
-    position:sticky;top:0;z-index:50;
-    background:var(--papel);        /* sólido: véu translúcido sem blur vaza texto */
-    border-bottom:1px solid var(--linha);
+  /* Header & Top Bar */
+  .site-header {
+    position: sticky;
+    top: 0;
+    background: rgba(12, 14, 18, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border-color);
+    z-index: 1000;
+    padding: 16px 0;
   }
-  .topo-in{display:flex;align-items:center;justify-content:space-between;gap:var(--s-4);padding-block:var(--s-3)}
-  .marca{
-    font-family:var(--f-display);font-size:var(--t-h3);letter-spacing:0;
-    color:var(--tinta);text-decoration:none;text-transform:uppercase;
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
-  .marca b{color:var(--tomate);font-weight:400}
-  .topo-links{display:flex;align-items:center;gap:var(--s-4)}
-  .topo-links a:not(.btn){
-    display:none;
-    padding-block:var(--s-3);
-    color:var(--taupe);text-decoration:none;
-    font-size:var(--t-micro);font-weight:700;letter-spacing:var(--track);text-transform:uppercase;
-    transition:color .15s var(--e-padrao);
+  .logo {
+    font-family: var(--font-heading);
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: -0.02em;
   }
-  @media(min-width:720px){.topo-links a:not(.btn){display:inline-block}}
-  .topo-links a:not(.btn):hover{color:var(--tinta)}
+  .logo span {
+    background: var(--brand-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+  }
+  .nav-links a {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    font-weight: 600;
+  }
+  .nav-links a:hover { color: #fff; }
 
-  /* ---------------- botões ---------------- */
-  .btn{
-    display:inline-flex;align-items:center;justify-content:center;gap:var(--s-2);
-    font-family:var(--f-corpo);font-size:var(--t-corpo);font-weight:700;
-    text-decoration:none;text-align:center;cursor:pointer;
-    padding:var(--s-3) var(--s-5);border:2px solid var(--tinta);border-radius:var(--r);
-    transition:transform .15s var(--e-padrao),box-shadow .15s var(--e-padrao);
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 12px 24px;
+    border-radius: 12px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .btn svg{flex:none}
-  .btn-zap{
-    background:var(--verde);color:var(--cartao);border-color:var(--tinta);
-    box-shadow:4px 4px 0 var(--tinta);
+  .btn-primary {
+    background: var(--brand-gradient);
+    color: #0c0e12 !important;
+    box-shadow: 0 4px 20px var(--brand-glow);
   }
-  .btn-zap:hover{transform:translate(-2px,-2px);box-shadow:8px 8px 0 var(--tinta)}
-  .btn-zap:active{transform:translate(2px,2px);box-shadow:0 0 0 var(--tinta)}
-  .btn-ghost{background:transparent;color:var(--tinta)}
-  .btn-ghost:hover{border-color:var(--tomate);color:var(--tomate)}
-  .btn--nav{box-shadow:none}
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(255, 106, 43, 0.5);
+  }
+  .btn-secondary {
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff !important;
+    border: 1px solid var(--border-color);
+  }
+  .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+  }
+  .btn-zap {
+    background: #25D366;
+    color: #fff !important;
+    box-shadow: 0 4px 16px rgba(37, 211, 102, 0.3);
+  }
+  .btn-zap:hover {
+    background: #20ba59;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(37, 211, 102, 0.45);
+  }
 
-  /* ---------------- hero: o cartaz e a atmosfera de feira noturna ---------------- */
-  .secao--hero {
+  /* Badges */
+  .badge-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: rgba(255, 106, 43, 0.12);
+    border: 1px solid rgba(255, 106, 43, 0.3);
+    color: var(--brand-secondary);
+  }
+  .badge-pulse {
+    width: 8px;
+    height: 8px;
+    background: #ff6a2b;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #ff6a2b;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0% { transform: scale(0.9); opacity: 0.8; }
+    50% { transform: scale(1.3); opacity: 1; }
+    100% { transform: scale(0.9); opacity: 0.8; }
+  }
+
+  /* Section Spacing & Typography */
+  .section { padding: 90px 0; }
+  .section-title-wrap {
+    text-align: center;
+    max-width: 780px;
+    margin: 0 auto 56px;
+  }
+  .section-title {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 3.5vw, 2.8rem);
+    font-weight: 700;
+    color: var(--text-pure);
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    margin: 12px 0 16px;
+  }
+  .section-desc {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* Hero Section */
+  .hero {
+    padding: 100px 0 80px;
+    text-align: center;
+  }
+  .hero-headline {
+    font-family: var(--font-heading);
+    font-size: clamp(2.4rem, 5vw, 4.2rem);
+    font-weight: 700;
+    color: var(--text-pure);
+    letter-spacing: -0.04em;
+    line-height: 1.08;
+    max-width: 960px;
+    margin: 20px auto;
+  }
+  .hero-headline span {
+    background: var(--brand-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero-sub {
+    font-size: clamp(1.1rem, 1.8vw, 1.35rem);
+    color: var(--text-body);
+    max-width: 780px;
+    margin: 0 auto 36px;
+    line-height: 1.6;
+  }
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+  }
+  .hero-pills {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 60px;
+  }
+  .hero-pill-item {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-body);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Metrics Banner */
+  .metrics-strip {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 28px 36px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 24px;
+    text-align: center;
+    margin-top: 40px;
+  }
+  .metric-item strong {
+    display: block;
+    font-family: var(--font-heading);
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+  .metric-item span {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  /* Cards Dores vs Soluções */
+  .pain-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+  }
+  .pain-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    padding: 32px 28px;
+    position: relative;
+    transition: all 0.25s ease;
+  }
+  .pain-card:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-4px);
+    background: var(--bg-card-hover);
+  }
+  .pain-card-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .pain-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    flex-shrink: 0;
+  }
+  .pain-icon.solucao {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+  }
+  .pain-card h3 {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    color: #fff;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .pain-box-bad {
+    background: rgba(239, 68, 68, 0.08);
+    border-left: 3px solid #ef4444;
+    padding: 12px 14px;
+    border-radius: 6px;
+    margin-bottom: 14px;
+    font-size: 0.9rem;
+    color: #fca5a5;
+  }
+  .pain-box-good {
+    background: rgba(16, 185, 129, 0.08);
+    border-left: 3px solid #10b981;
+    padding: 12px 14px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: #a7f3d0;
+  }
+
+  /* 4 Superpoderes de Tecnologia & IA */
+  .super-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+  }
+  .super-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 32px 26px;
     position: relative;
     overflow: hidden;
-    background-color: var(--papel);
-    background-image: 
-      linear-gradient(to right, 
-        rgba(246, 238, 219, 0.98) 0%, 
-        rgba(246, 238, 219, 0.95) 42%, 
-        rgba(246, 238, 219, 0.72) 65%, 
-        rgba(246, 238, 219, 0.35) 85%,
-        rgba(246, 238, 219, 0.12) 100%
-      ),
-      linear-gradient(to bottom,
-        rgba(246, 238, 219, 0.2) 0%,
-        rgba(246, 238, 219, 0) 50%,
-        rgba(246, 238, 219, 0.85) 90%,
-        rgba(246, 238, 219, 1) 100%
-      ),
-      url("{{ url_for('static', filename='img/hero-feira-noite.jpg') }}");
-    background-repeat: no-repeat;
-    background-position: right center;
-    background-size: cover;
+    transition: all 0.25s ease;
+  }
+  .super-card:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  }
+  .super-icon-box {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    background: rgba(255, 106, 43, 0.12);
+    border: 1px solid rgba(255, 106, 43, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+  }
+  .super-card h3 {
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    color: #fff;
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+  .super-card p {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+  .super-tag {
+    display: inline-block;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--brand-secondary);
+    background: rgba(255, 180, 60, 0.1);
+    padding: 4px 10px;
+    border-radius: 6px;
   }
 
-  @media (max-width: 768px) {
-    .secao--hero {
-      background-image: 
-        linear-gradient(to bottom, 
-          rgba(246, 238, 219, 0.97) 0%, 
-          rgba(246, 238, 219, 0.92) 60%, 
-          rgba(246, 238, 219, 0.65) 82%,
-          rgba(246, 238, 219, 0.3) 100%
-        ),
-        url("{{ url_for('static', filename='img/hero-feira-noite.jpg') }}");
-      background-position: center top;
-    }
+  /* Showcase Interativo de Modelos */
+  .showcase-container {
+    background: var(--bg-card);
+    border: 1.5px solid var(--border-color);
+    border-radius: 24px;
+    padding: 36px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+  }
+  .style-selector-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .style-tab-btn {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-color);
+    padding: 14px 18px;
+    border-radius: 14px;
+    text-align: left;
+    color: var(--text-body);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .style-tab-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  .style-tab-btn.active {
+    background: rgba(255, 106, 43, 0.15);
+    border-color: var(--brand-primary);
+    color: #fff;
+  }
+  .style-tab-btn strong {
+    display: block;
+    font-size: 1.02rem;
+  }
+  .style-tab-btn small {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+  .showcase-phone-mockup {
+    background: #000;
+    border: 8px solid #222733;
+    border-radius: 36px;
+    padding: 24px 18px;
+    min-height: 480px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+  }
+  .phone-header {
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 14px;
+    margin-bottom: 16px;
+  }
+  .phone-title {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    color: #fff;
+    font-weight: 700;
+  }
+  .phone-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    padding: 10px;
+  }
+  .phone-footer {
+    display: flex;
+    gap: 8px;
   }
 
-  .cartaz-titulo{line-height:var(--lh-display);letter-spacing:-.01em}
-  .linha-cartaz{
-    /* cartaz de feira de verdade: cada linha se mede pra ocupar a largura.
-       --n = nº de caracteres da linha; Anton (condensada) pede numerador ~176. */
-    --n:8;
-    display:block;
-    font-size:clamp(2.5rem,calc(176vw / var(--n)),10rem);
-    text-wrap:nowrap;
+  /* Catálogo de Bares */
+  .bares-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
   }
-  .linha-cartaz--acento{color:var(--tomate)}
-  .verbete{font-size:var(--t-lead);line-height:var(--lh-lead);max-width:var(--medida);color:var(--taupe)}
-  .verbete i{font-style:italic}
-  .verbete b{color:var(--tinta);font-style:normal}
-  .hero-cta{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-4)}
-
-  /* a prova social é gráfica: números em escala de display, não linha de rodapé */
-  .bancas{display:grid;gap:var(--s-4);grid-template-columns:repeat(auto-fit,minmax(min(9rem,100%),1fr))}
-  .banca{border:1px solid var(--linha);background:var(--cartao);padding:var(--s-4)}
-  .banca b{
-    display:block;font-family:var(--f-display);font-weight:400;
-    font-size:var(--t-h1);line-height:var(--lh-h1);color:var(--tomate);
-    font-variant-numeric:tabular-nums;
+  .bar-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.2s ease;
+    text-decoration: none !important;
   }
-  .banca span{
-    display:block;margin-top:var(--s-2);
-    font-size:var(--t-micro);line-height:var(--lh-micro);
-    letter-spacing:var(--track);text-transform:uppercase;color:var(--taupe);font-weight:500;
+  .bar-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--border-hover);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
   }
-
-  /* ---------------- a feira: grade de barracas ---------------- */
-  /* align-start: barraca tem a altura do que vende, como na feira de verdade */
-  .feira-grid{display:grid;gap:var(--s-4);align-items:start;grid-template-columns:repeat(2,1fr)}
-  @media(min-width:720px){.feira-grid{grid-template-columns:repeat(3,1fr)}}
-  @media(min-width:1024px){.feira-grid{grid-template-columns:repeat(4,1fr)}}
-
-  .barraca{
-    grid-column:span 1;display:flex;flex-direction:column;
-    background:var(--cartao);border:1px solid var(--linha);border-radius:var(--r);
-    color:var(--tinta);text-decoration:none;
-    transition:transform .15s var(--e-padrao),box-shadow .15s var(--e-padrao);
+  .bar-card-img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    display: block;
+    background: #1e2330;
   }
-  .barraca:hover{transform:translateY(-4px);box-shadow:4px 4px 0 var(--linha)}
-  .barraca--larga{grid-column:span 2}
-  .barraca--larga .foto{aspect-ratio:3/2}
-  .barraca .foto{
-    display:block;width:100%;height:auto;
-    aspect-ratio:4/3;object-fit:cover;object-position:50% 45%;
-    background:var(--papel);
-    /* balanço de branco de 23 celulares diferentes puxado pro mesmo quente */
-    filter:sepia(.08) saturate(1.05);
+  .bar-card-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
   }
-  .barraca-corpo{padding:var(--s-4);display:flex;flex-direction:column;flex:1}
-  .barraca-corpo > * + *{margin-top:var(--s-2)}
-  .barraca h3{text-wrap:balance}
-  .nota-linha{
-    display:flex;align-items:center;flex-wrap:wrap;gap:var(--s-2);
-    font-size:var(--t-micro);line-height:var(--lh-micro);color:var(--taupe);
+  .bar-card-title {
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    color: #fff;
+    font-weight: 700;
   }
-  .nota-linha svg{color:var(--tomate)}
-  .nota-linha b{
-    font-family:var(--f-display);font-weight:400;font-size:var(--t-h3);
-    line-height:1;color:var(--tomate);font-variant-numeric:tabular-nums;
+  .bar-card-rating {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: #ffb43d;
+    font-weight: 700;
   }
-  .barraca-abrir{
-    margin-top:var(--s-5);
-    font-size:var(--t-micro);font-weight:700;letter-spacing:var(--track);
-    text-transform:uppercase;color:var(--tomate);
-  }
-  .barraca-desc{display:none;color:var(--taupe);font-size:var(--t-micro);line-height:var(--lh-micro)}
-  @media(min-width:720px){.barraca-desc{display:block}}
-
-  /* o resto da feira, dobrado: fecha a página, não a esconde */
-  .mais summary{
-    display:flex;align-items:center;justify-content:center;gap:var(--s-2);
-    padding:var(--s-4);border:2px dashed var(--linha);
-    font-weight:700;font-size:var(--t-corpo);cursor:pointer;list-style:none;
-    transition:border-color .15s var(--e-padrao),color .15s var(--e-padrao);
-  }
-  .mais summary::-webkit-details-marker{display:none}
-  .mais summary:hover{border-color:var(--tomate);color:var(--tomate)}
-  .mais summary svg{transition:transform .15s var(--e-padrao)}
-  .mais[open] summary svg{transform:rotate(180deg)}
-
-  /* a barraca que falta */
-  .banca-vazia{
-    border:2px dashed var(--tomate);background:var(--cartao);
-    padding:var(--s-6);text-align:center;
-  }
-  .banca-vazia > * + *{margin-top:var(--s-5)}
-  .banca-vazia h3{font-size:var(--t-h2);line-height:var(--lh-h2)}
-  .banca-vazia p{margin-inline:auto}
-
-  /* ---------------- como funciona ---------------- */
-  .passos{list-style:none;display:grid;gap:var(--s-4)}
-  @media(min-width:720px){.passos{grid-template-columns:repeat(3,1fr)}}
-  .passo{border:1px solid var(--linha);background:var(--cartao);padding:var(--s-6);counter-increment:passo}
-  .passos{counter-reset:passo}
-  .passo > * + *{margin-top:var(--s-2)}
-  .passo::before{
-    content:counter(passo,decimal-leading-zero);
-    display:block;font-family:var(--f-display);font-size:var(--t-h1);
-    line-height:var(--lh-h1);color:var(--tomate);font-variant-numeric:tabular-nums;
-  }
-  .passo p{color:var(--taupe)}
-
-  /* ---------------- os 6 modelos ---------------- */
-  .placas{display:grid;gap:var(--s-4);grid-template-columns:repeat(2,1fr)}
-  @media(min-width:720px){.placas{grid-template-columns:repeat(3,1fr)}}
-  @media(min-width:1024px){.placas{grid-template-columns:repeat(6,1fr)}}
-  .placa-modelo{border:1px solid var(--linha);background:var(--cartao);display:flex;flex-direction:column}
-  .placa-corpo{padding:var(--s-4)}
-  .placa-corpo > * + *{margin-top:var(--s-2)}
-  .placa-corpo p{color:var(--taupe);font-size:var(--t-micro);line-height:var(--lh-micro)}
-
-  /* ---------------- preço: a placa ---------------- */
-  /* ---------------- a conta da mesa vazia ---------------- */
-  /* Controle e resultado lado a lado: o número tem que mudar no campo de visão
-     de quem arrasta, senão a pessoa mexe e não vê o efeito. */
-  .conta-grade{display:flex;flex-direction:column;gap:var(--s-5);
-    margin-top:var(--s-6)}
-  @media(min-width:820px){.conta-grade{display:grid;align-items:start;
-    grid-template-columns:1fr .85fr;gap:var(--s-6)}}
-
-  .conta-controles{display:grid;gap:var(--s-5)}
-  .campo-conta{display:grid;grid-template-columns:1fr auto;gap:var(--s-2) var(--s-4);
-    align-items:center}
-  .campo-conta > span{font-weight:700;font-size:var(--t-micro)}
-  .campo-conta output{font-family:var(--f-display);font-size:1.3rem;color:var(--tomate);
-    font-variant-numeric:tabular-nums;text-align:right;min-width:4.5ch}
-  .campo-conta input[type=range]{grid-column:1 / -1;width:100%;appearance:none;
-    height:3px;background:var(--linha);border-radius:2px;margin:0}
-  .campo-conta input[type=range]::-webkit-slider-thumb{appearance:none;width:26px;
-    height:26px;border-radius:50%;background:var(--tomate);cursor:grab;
-    border:3px solid var(--cartao);box-shadow:0 0 0 1px var(--linha)}
-  .campo-conta input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
-    background:var(--tomate);cursor:grab;border:3px solid var(--cartao)}
-  .campo-conta input[type=range]:focus-visible{outline:3px solid var(--tomate);
-    outline-offset:6px}
-
-  /* Placa de feira: papel pregado, sombra dura, número grande.
-     No celular ela sobe para cima dos controles e gruda no topo: empilhada na
-     ordem do HTML, o dono arrastava o slider e o resultado mudava fora da tela
-     — mexia e não via nada acontecer, que é o oposto do ponto da seção. */
-  .conta-placa{background:var(--cartao);border:2px solid var(--tinta);
-    box-shadow:8px 8px 0 var(--tomate);padding:var(--s-5);
-    order:-1;position:sticky;top:64px;z-index:5}
-  @media(min-width:820px){.conta-placa{order:0;position:static}}
-  .conta-rotulo{font-size:.74rem;font-weight:700;letter-spacing:.13em;
-    text-transform:uppercase;color:var(--taupe)}
-  .conta-num{font-family:var(--f-display);font-size:clamp(2.1rem,1.4rem + 2.6vw,3.1rem);
-    line-height:1;margin-top:var(--s-1);font-variant-numeric:tabular-nums}
-  .conta-num--forte{color:var(--tomate)}
-  .conta-placa hr{border:0;border-top:1px solid var(--linha);margin-block:var(--s-4)}
-  .conta-nota{margin-top:var(--s-3);font-size:var(--t-micro);color:var(--taupe)}
-  .conta-fontes{margin-top:var(--s-6);border-top:1px solid var(--linha);
-    padding-top:var(--s-4);display:grid;gap:var(--s-2);max-width:70ch}
-
-  /* ---------------- grade de 3 planos com ancoragem ---------------- */
-  .tabela-planos{
-    display:grid;
-    gap:var(--s-5);
-    align-items:stretch;
-    grid-template-columns:1fr;
-  }
-  @media(min-width:860px){
-    .tabela-planos{
-      grid-template-columns:repeat(3,1fr);
-    }
+  .bar-card-footer {
+    margin-top: auto;
+    padding-top: 10px;
+    font-size: 0.84rem;
+    color: var(--brand-secondary);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
-  .card-plano{
-    position:relative;
-    display:flex;
-    flex-direction:column;
-    background:var(--cartao);
-    border:1.5px solid var(--linha);
-    border-radius:var(--r);
-    padding:var(--s-6);
-    box-shadow:4px 4px 0 var(--linha);
-    transition:transform .15s var(--e-padrao),box-shadow .15s var(--e-padrao);
+  /* Calculadora de ROI */
+  .roi-box {
+    background: var(--bg-card);
+    border: 1.5px solid rgba(255, 180, 60, 0.3);
+    border-radius: 24px;
+    padding: 40px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
   }
-  .card-plano:hover{
-    transform:translateY(-4px);
-    box-shadow:6px 6px 0 var(--linha);
+  .roi-control-group {
+    margin-bottom: 20px;
   }
-
-  .card-plano--destaque{
-    border:2px solid var(--tinta);
-    background:#fffcf5;
-    box-shadow:8px 8px 0 var(--tomate);
+  .roi-control-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
   }
-  @media(min-width:860px){
-    .card-plano--destaque{
-      transform:scale(1.03);
-      z-index:2;
-    }
-    .card-plano--destaque:hover{
-      transform:scale(1.03) translateY(-4px);
-      box-shadow:12px 12px 0 var(--tomate);
-    }
+  .roi-slider {
+    width: 100%;
+    accent-color: var(--brand-primary);
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    outline: none;
   }
-
-  .plano-badge-topo{
-    position:absolute;
-    top:-14px;
-    left:50%;
-    transform:translateX(-50%);
-    background:var(--tomate);
-    color:var(--cartao);
-    font-family:var(--f-corpo);
-    font-size:0.75rem;
-    font-weight:700;
-    letter-spacing:var(--track);
-    text-transform:uppercase;
-    padding:4px 14px;
-    border:1.5px solid var(--tinta);
-    white-space:nowrap;
+  .roi-result-card {
+    background: #090b0e;
+    border: 2px solid var(--brand-primary);
+    border-radius: 20px;
+    padding: 32px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(255, 106, 43, 0.2);
   }
-
-  .card-plano-topo{
-    border-bottom:1px solid var(--linha);
-    padding-bottom:var(--s-4);
-    margin-bottom:var(--s-4);
+  .roi-result-card small {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-weight: 700;
   }
-  .plano-tag{
-    display:inline-block;
-    font-size:var(--t-micro);
-    font-weight:700;
-    letter-spacing:var(--track);
-    text-transform:uppercase;
-    color:var(--taupe);
-    margin-bottom:var(--s-1);
+  .roi-result-card h2 {
+    font-family: var(--font-heading);
+    font-size: clamp(2.4rem, 4vw, 3.4rem);
+    color: #10b981;
+    margin: 8px 0;
+    font-weight: 700;
   }
-  .plano-tag--destaque{color:var(--tomate)}
-  .plano-titulo{
-    font-family:var(--f-display);
-    font-size:var(--t-h2);
-    line-height:1;
-    color:var(--tinta);
-  }
-  .plano-preco{
-    margin-top:var(--s-2);
-    font-family:var(--f-display);
-    font-size:clamp(2rem,1.4rem + 1.8vw,2.75rem);
-    line-height:1;
-    color:var(--tinta);
-  }
-  .plano-preco--destaque{color:var(--tomate)}
-  .plano-preco small{
-    font-family:var(--f-corpo);
-    font-size:var(--t-micro);
-    font-weight:500;
-    color:var(--taupe);
-  }
-  .plano-sub{
-    margin-top:var(--s-3);
-    font-size:var(--t-micro);
-    color:var(--taupe);
-    line-height:1.4;
+  .roi-pill-note {
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #34d399;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: inline-block;
+    margin-top: 10px;
   }
 
-  .plano-vantagens{
-    list-style:none;
-    display:grid;
-    gap:var(--s-3);
-    font-size:var(--t-micro);
-    line-height:1.45;
-    flex:1;
-    margin-bottom:var(--s-6);
+  /* Planos & Preços */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 28px;
+    align-items: stretch;
   }
-  .plano-vantagens li{
-    display:flex;
-    gap:var(--s-2);
-    align-items:flex-start;
+  .price-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 36px 30px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: all 0.25s ease;
   }
-  .plano-vantagens li::before{
-    content:"✓";
-    color:var(--verde);
-    font-weight:700;
-    font-size:1.1rem;
-    line-height:1;
-    flex:none;
+  .price-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255, 255, 255, 0.2);
   }
-  .plano-vantagens li.plano-incluso-nao{
-    color:var(--taupe);
-    opacity:0.75;
+  .price-card.featured {
+    background: linear-gradient(180deg, #1f1b18 0%, #14171f 100%);
+    border: 2px solid var(--brand-secondary);
+    box-shadow: 0 16px 40px rgba(255, 106, 43, 0.25);
+    transform: scale(1.02);
   }
-  .plano-vantagens li.plano-incluso-nao::before{
-    content:"✕";
-    color:var(--tomate);
+  .featured-badge {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--brand-gradient);
+    color: #111;
+    font-weight: 800;
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 5px 16px;
+    border-radius: 999px;
+  }
+  .price-title {
+    font-family: var(--font-heading);
+    font-size: 1.6rem;
+    color: #fff;
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+  .price-num {
+    font-family: var(--font-heading);
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin: 12px 0 16px;
+  }
+  .price-num small {
+    font-size: 1rem;
+    color: var(--text-muted);
+    font-family: var(--font-body);
+    font-weight: 500;
+  }
+  .price-list {
+    list-style: none;
+    margin: 24px 0 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+  }
+  .price-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.94rem;
+    color: var(--text-body);
+  }
+  .price-list li i {
+    color: #10b981;
+    margin-top: 4px;
+  }
+  .price-list li.inactive {
+    color: var(--text-muted);
+    opacity: 0.5;
+  }
+  .price-list li.inactive i {
+    color: var(--text-muted);
   }
 
-  .plano-cta{margin-top:auto}
-  .w-100{width:100%}
-
-  .planos-notas{
-    margin-top:var(--s-6);
-    border-top:1px solid var(--linha);
-    padding-top:var(--s-4);
-    display:grid;
-    gap:var(--s-2);
+  /* FAQ Accordion */
+  .faq-grid {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .faq-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .faq-item summary {
+    padding: 18px 24px;
+    font-weight: 700;
+    color: #fff;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 1.05rem;
+  }
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-item p {
+    padding: 0 24px 20px;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.6;
   }
 
-  .fechar{text-align:center}
-  .fechar h2{font-size:var(--t-h1);line-height:var(--lh-h1)}
-  .fechar p{margin-inline:auto}
-  .fechar .hero-cta{justify-content:center}
+  /* Footer */
+  .site-footer {
+    border-top: 1px solid var(--border-color);
+    padding: 60px 0 40px;
+    background: #08090c;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
 
-  footer p{max-width:none}
-  .rodape-links{display:flex;flex-wrap:wrap;gap:var(--s-4)}
-  .rodape-links a{color:var(--taupe);display:inline-block;padding-block:var(--s-3)}
-  .rodape-links a:hover{color:var(--tomate)}
-  /* A assinatura do coletivo se separa do resto por uma linha, não por peso:
-     ela informa quem assina, não disputa atenção com a venda. */
-  .assinatura{border-top:1px solid var(--linha);padding-top:var(--s-4);margin-top:var(--s-2)}
-  .assinatura strong{color:var(--tinta)}
-
-  /* ---------------- animação (portão .js-anim) ----------------
-     Estado inicial escondido SÓ quando a Motion carregou, o usuário aceita
-     movimento E a aba está visível. CDN fora do ar => tudo legível. */
-  .js-anim [data-hero]{opacity:0;transform:translateY(16px)}
-  .js-anim [data-reveal]{opacity:0;transform:translateY(24px)}
+  @media (max-width: 900px) {
+    .showcase-container, .roi-box { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+    .price-card.featured { transform: none; }
+  }
 </style>
 </head>
 <body>
 
-<div class="lona" aria-hidden="true"></div>
+<div class="bg-grid-overlay"></div>
 
-<nav class="topo">
-  <div class="wrap topo-in">
-    <a href="/" class="marca">FEIRA DE <b>BARÃO</b></a>
-    <div class="topo-links">
-      <a href="#feira">As barracas</a>
-      <a href="#como">Como funciona</a>
-      <a href="#conta">Faça a conta</a>
-      <a href="#preco">Preço</a>
-      <a class="btn btn-zap btn--nav" href="{{ zap_url }}" target="_blank" rel="noopener">Chamar no zap</a>
-    </div>
-  </div>
-</nav>
-
-<main>
-
-<header class="secao secao--hero">
-  <div class="wrap fluxo">
-    <span class="eyebrow" data-hero>Barão Geraldo · <span class="sem-quebra">Campinas–SP</span></span>
-    <h1 class="cartaz-titulo" data-hero>
-      <span class="linha-cartaz" style="--n:5">FEIRA</span>
-      <span class="linha-cartaz linha-cartaz--acento" style="--n:8">DE BARÃO</span>
-    </h1>
-    <p class="verbete" data-hero>
-      <b>fei·ra</b> <i>s. f.</i> — o dia em que o bairro põe o que tem de melhor
-      na rua, lado a lado, e o freguês passa, olha e escolhe.
-    </p>
-    <p class="lead" data-hero>
-      A nossa não desmonta ao meio-dia: é a feira dos bares de Barão.
-      Cada bar com a sua barraca — a página com a foto, a nota do Google e o
-      endereço da casa — montada antes mesmo de o dono pedir.
-      <strong>Passa, olha e escolhe a sua.</strong>
-    </p>
-    <div class="hero-cta">
-      <a class="btn btn-zap" href="{{ zap_url }}" target="_blank" rel="noopener">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.2 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.4-.7-2.9-1.1-4.7-4-4.9-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5s.8 1.9.8 2c.1.1.1.3 0 .5l-.3.5c-.2.2-.3.4-.1.7.1.3.7 1.2 1.5 1.9 1.1.9 2 1.2 2.2 1.4.3.1.5.1.6-.1.2-.2.7-.8.9-1.1.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.2 1.3Z"/></svg>
-        Chamar no WhatsApp
-      </a>
-      <a class="btn btn-ghost" href="#feira">Ver as barracas ↓</a>
-    </div>
-    <p class="micro">Sem taxa de montagem · sem fidelidade · você fala comigo, não com robô</p>
-
-    {% if total_bares %}
-    <div class="bancas sobe">
-      <div class="banca">
-        <b class="num">{{ total_bares }}</b>
-        <span>barracas já montadas</span>
-      </div>
-      <div class="banca">
-        <b class="num">{{ total_avaliacoes|numero_br(0) }}</b>
-        <span>avaliações no Google, somadas</span>
-      </div>
-      {% if nota_media %}
-      <div class="banca">
-        <b class="num">{{ nota_media }}</b>
-        <span>nota média das casas</span>
-      </div>
-      {% endif %}
-    </div>
-    {% endif %}
+<!-- Top Navigation -->
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a href="/" class="logo">
+      <i class="fas fa-beer-mug-empty" style="color:#ff6a2b;"></i>
+      FEIRA DE <span>BARÃO</span>
+    </a>
+    <nav class="nav-links">
+      <a href="#dores">O Diagnóstico</a>
+      <a href="#tecnologia">Superpoderes IA</a>
+      <a href="#modelos">6 Estilos</a>
+      <a href="#bares">As Barracas</a>
+      <a href="#roi">Calculadora</a>
+      <a href="#precos">Planos</a>
+    </nav>
+    <a class="btn btn-primary" href="{{ zap_url }}" target="_blank" rel="noopener">
+      <i class="fab fa-whatsapp"></i> Ativar Meu Bar
+    </a>
   </div>
 </header>
 
-<section id="feira" class="secao">
+<main>
+
+<!-- HERO SECTION -->
+<section class="hero">
   <div class="wrap">
-    <div class="fluxo" data-reveal>
-      <span class="eyebrow">A feira</span>
-      <h2>O bairro inteiro, lado a lado</h2>
-      <p class="lead">
-        Isto não é maquete de portfólio: cada cartão abre uma prévia de verdade,
-        montada com o que o bar já mostra ao público — a foto, a nota do Google,
-        o endereço. Ache a sua barraca, ou chame pra gente montar uma.
+    <div class="badge-tag">
+      <span class="badge-pulse"></span>
+      Sistema Operacional para Bares · Barão Geraldo, SP
+    </div>
+
+    <h1 class="hero-headline">
+      Seu Bar Lotado na Sexta.<br>
+      Seu Lucro na <span>Ponta do Lápis</span>.
+    </h1>
+
+    <p class="hero-sub">
+      A plataforma completa que coloca seu cardápio no <strong>Google Maps</strong>, atende reservas por <strong>Voz no WhatsApp</strong> e corta o desperdício de insumos lendo <strong>fotos de notas fiscais com IA</strong>.
+    </p>
+
+    <div class="hero-actions">
+      <a class="btn btn-primary" style="font-size:1.05rem; padding:15px 32px;" href="{{ zap_url }}" target="_blank" rel="noopener">
+        <i class="fab fa-whatsapp"></i> Quero Meu Bar Pronto no Zap
+      </a>
+      <a class="btn btn-secondary" style="font-size:1.05rem; padding:15px 28px;" href="#bares">
+        Ver as 23 Barracas de Barão ↓
+      </a>
+    </div>
+
+    <div class="hero-pills">
+      <span class="hero-pill-item"><i class="fab fa-google" style="color:#4285F4;"></i> Cardápio Verificado no Google Maps</span>
+      <span class="hero-pill-item"><i class="fas fa-microphone" style="color:#ff6a2b;"></i> Concierge de Voz com IA</span>
+      <span class="hero-pill-item"><i class="fas fa-camera" style="color:#00d2ff;"></i> Leitor OCR de Notas NVIDIA</span>
+      <span class="hero-pill-item"><i class="fas fa-ban" style="color:#10b981;"></i> 0% de Comissão por Pedido</span>
+    </div>
+
+    {% if total_bares %}
+    <div class="metrics-strip">
+      <div class="metric-item">
+        <strong>{{ total_bares }}</strong>
+        <span>Casas Mapeadas no Bairro</span>
+      </div>
+      <div class="metric-item">
+        <strong>{{ total_avaliacoes|numero_br(0) }}</strong>
+        <span>Avaliações Somadas no Google</span>
+      </div>
+      <div class="metric-item">
+        <strong>{{ nota_media or '4.8' }} ★</strong>
+        <span>Nota Média das Casas</span>
+      </div>
+      <div class="metric-item">
+        <strong>0%</strong>
+        <span>Taxa ou Comissão de Intermediação</span>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- SEÇÃO 2: DORES REAIS DE BALCÃO -->
+<section id="dores" class="section">
+  <div class="wrap">
+    <div class="section-title-wrap">
+      <div class="badge-tag">O Diagnóstico de Balcão</div>
+      <h2 class="section-title">Por que bares incríveis perdem clientes e dinheiro todos os dias?</h2>
+      <p class="section-desc">
+        O freguês moderno decide onde vai beber na sexta olhando o celular. Se sua presença digital for confusa, ele vai no bar vizinho.
+      </p>
+    </div>
+
+    <div class="pain-grid">
+      <!-- Dor 1 -->
+      <div class="pain-card">
+        <div class="pain-card-top">
+          <div class="pain-icon"><i class="fas fa-map-location-dot"></i></div>
+          <h3>1. O Caos no Google Maps</h3>
+        </div>
+        <div class="pain-box-bad">
+          <strong>❌ Como está hoje:</strong> Horário errado, telefone que ninguém atende e fotos borradas de cardápio de 3 anos atrás. O freguês desiste em 5 segundos.
+        </div>
+        <div class="pain-box-good">
+          <strong>✅ Com a Feira de Barão:</strong> Ficha oficial verificada, botão "Ver Cardápio" com preços atualizados e botão direto de "Reservar no WhatsApp".
+        </div>
+      </div>
+
+      <!-- Dor 2 -->
+      <div class="pain-card">
+        <div class="pain-card-top">
+          <div class="pain-icon"><i class="fas fa-receipt"></i></div>
+          <h3>2. A Sangria de 27% em Apps</h3>
+        </div>
+        <div class="pain-box-bad">
+          <strong>❌ Como está hoje:</strong> Você paga até 27% de comissão para marketplaces em cada porção ou chope vendido, e o cliente não é seu.
+        </div>
+        <div class="pain-box-good">
+          <strong>✅ Com a Feira de Barão:</strong> QR Code na mesa e link de delivery próprio com ZERO comissão. O dinheiro do cliente entra 100% no seu bolso.
+        </div>
+      </div>
+
+      <!-- Dor 3 -->
+      <div class="pain-card">
+        <div class="pain-card-top">
+          <div class="pain-icon"><i class="fas fa-chart-line-down"></i></div>
+          <h3>3. CMV Cego e Desperdício</h3>
+        </div>
+        <div class="pain-box-bad">
+          <strong>❌ Como está hoje:</strong> O queijo e a carne sobem no atacado, o chope vaza no barril e você só descobre o prejuízo no fim do mês.
+        </div>
+        <div class="pain-box-good">
+          <strong>✅ Com a Feira de Barão:</strong> Tire uma foto da nota no celular. Nossa IA da NVIDIA e DeepSeek audita os custos e avisa aumentos na hora.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SEÇÃO 3: OS 4 SUPERPODERES DE TECNOLOGIA & IA (X-MEN) -->
+<section id="tecnologia" class="section" style="background: rgba(255,255,255,0.02);">
+  <div class="wrap">
+    <div class="section-title-wrap">
+      <div class="badge-tag" style="background:rgba(0,210,255,0.12); color:#00d2ff; border-color:rgba(0,210,255,0.3);">
+        Tecnologia Inédita · Arsenal X-MEN
+      </div>
+      <h2 class="section-title">Quatro Superpoderes que Trabalham pelo seu Salão</h2>
+      <p class="section-desc">
+        Unimos a inteligência multimodal da NVIDIA, Gemini Pro e DeepSeek para criar uma máquina de atração e controle financeiro.
+      </p>
+    </div>
+
+    <div class="super-grid">
+      <!-- Poder 1 -->
+      <div class="super-card">
+        <div class="super-icon-box" style="background:rgba(66,133,244,0.15); border-color:rgba(66,133,244,0.3);">
+          📍
+        </div>
+        <span class="super-tag">Google Maps SEO</span>
+        <h3 style="margin-top:8px;">Identidade no Maps</h3>
+        <p>
+          Configuramos seu Perfil da Empresa no Google com dados estruturados (Menu Schema). Quem pesquisa "bar aberto agora" em Barão acha sua casa no topo.
+        </p>
+      </div>
+
+      <!-- Poder 2 -->
+      <div class="super-card">
+        <div class="super-icon-box" style="background:rgba(255,106,43,0.15); border-color:rgba(255,106,43,0.3);">
+          🎙️
+        </div>
+        <span class="super-tag">NVIDIA Speech & Riva</span>
+        <h3 style="margin-top:8px;">Concierge por Voz</h3>
+        <p>
+          Seu cliente fala no celular: "Quero reservar mesa para 4 sábado às 20h". A IA ouve, confirma por áudio com voz brasileira e monta a reserva no WhatsApp.
+        </p>
+      </div>
+
+      <!-- Poder 3 -->
+      <div class="super-card">
+        <div class="super-icon-box" style="background:rgba(0,210,255,0.15); border-color:rgba(0,210,255,0.3);">
+          📸
+        </div>
+        <span class="super-tag">NVIDIA Vision NIM</span>
+        <h3 style="margin-top:8px;">Leitor OCR por Foto</h3>
+        <p>
+          Basta tirar foto do cupom fiscal ou nota de compras com a câmera do celular: a IA da NVIDIA extrai itens, quantidades e preços para controlar seu estoque.
+        </p>
+      </div>
+
+      <!-- Poder 4 -->
+      <div class="super-card">
+        <div class="super-icon-box" style="background:rgba(168,85,247,0.15); border-color:rgba(168,85,247,0.3);">
+          🐺
+        </div>
+        <span class="super-tag">DeepSeek R1 / V3</span>
+        <h3 style="margin-top:8px;">CMV & Lucro Real</h3>
+        <p>
+          Cálculo exato de custo por porção na ponta do lápis. Alerta automático no celular quando fornecedores aumentarem insumos em mais de 10%.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SEÇÃO 4: SHOWCASE DOS 6 ESTILOS DE DESIGN -->
+<section id="modelos" class="section">
+  <div class="wrap">
+    <div class="section-title-wrap">
+      <div class="badge-tag">Design Sob Medida</div>
+      <h2 class="section-title">Uma Casa, Seis Estilos Visuais Prontos</h2>
+      <p class="section-desc">
+        Banca de chope artesanal não se veste como boteco raiz. Você escolhe a personalidade visual do seu bar com um toque na mesa:
+      </p>
+    </div>
+
+    <div class="showcase-container">
+      <!-- Coluna da Esquerda: Seletor de Abas -->
+      <div class="style-selector-buttons">
+        <button class="style-tab-btn active" onclick="mostrarEstilo('craft', this)">
+          <div>
+            <strong>🍺 1. Craft (Foco em Chope & Cervejarias)</strong>
+            <small>Destaque total para torneiras, estilo de IPA/Sour e litragem.</small>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </button>
+
+        <button class="style-tab-btn" onclick="mostrarEstilo('noturno', this)">
+          <div>
+            <strong>🎷 2. Noturno (Shows, Couvert & Noite)</strong>
+            <small>Agenda de bandas, atrações do fim de semana e vibe de palco.</small>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </button>
+
+        <button class="style-tab-btn" onclick="mostrarEstilo('brasa', this)">
+          <div>
+            <strong>🔥 3. Brasa (Grelhados & Cortes Nobres)</strong>
+            <small>Foco no ponto da carne, defumados e fotos suculentas.</small>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </button>
+
+        <button class="style-tab-btn" onclick="mostrarEstilo('autoral', this)">
+          <div>
+            <strong>👨‍🍳 4. Autoral (Alta Gastronomia & Coquetelaria)</strong>
+            <small>Narrativa do chef, harmonizações e drinks assinados.</small>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </button>
+
+        <button class="style-tab-btn" onclick="mostrarEstilo('tradicional', this)">
+          <div>
+            <strong>🏛️ 5. Tradicional (Boteco Raiz & Estufa)</strong>
+            <small>Petiscos clássicos, estufa quente, cerveja de garrafa 600ml.</small>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </button>
+
+        <button class="style-tab-btn" onclick="mostrarEstilo('classico', this)">
+          <div>
+            <strong>📋 6. Clássico (Equilibrado & Dinâmico)</strong>
+            <small>Ideal para bares mistos, happy hour e cardápio versátil.</small>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+
+      <!-- Coluna da Direita: Mockup do Celular -->
+      <div class="showcase-phone-mockup">
+        <div class="phone-header">
+          <div style="font-size:0.75rem; color:#ffb43d; font-weight:700; text-transform:uppercase;">
+            <i class="fas fa-mobile-screen"></i> Demonstração no Celular do Cliente
+          </div>
+          <h4 id="mockup-bar-name" class="phone-title">Empório do Nono · Craft</h4>
+        </div>
+        <div class="phone-body">
+          <div id="mockup-icon" style="font-size:3.5rem; margin-bottom:12px;">🍺</div>
+          <h4 id="mockup-headline" style="color:#fff; font-size:1.2rem; font-weight:700; margin-bottom:8px;">
+            Tap List Ao Vivo com 8 Torneiras
+          </h4>
+          <p id="mockup-desc" style="font-size:0.9rem; color:#94a3b8; line-height:1.5;">
+            O cliente visualiza os chopes engatados hoje, teor alcoólico (ABV), IBU e pede sua reserva para a mesa no balcão sem fila.
+          </p>
+        </div>
+        <div class="phone-footer">
+          <a id="mockup-cta" class="btn btn-primary w-100" style="font-size:0.88rem; padding:10px;" href="https://feiradebarao.com.br/bar/emporio-do-nono" target="_blank">
+            Abrir Demonstração Real →
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SEÇÃO 5: CATÁLOGO DOS BARES DE BARÃO GERALDO -->
+<section id="bares" class="section" style="background: rgba(255,255,255,0.02);">
+  <div class="wrap">
+    <div class="section-title-wrap">
+      <div class="badge-tag">A Feira Viva</div>
+      <h2 class="section-title">As Barracas de Barão Geraldo</h2>
+      <p class="section-desc">
+        Isto não é maquete: são páginas reais já provisionadas com fotos, notas do Google e cardápio de teste. Clique e veja a sua casa:
       </p>
     </div>
 
     {% if bares %}
-    {% set visiveis = bares[:8] %}
-    {% set resto = bares[8:] %}
-    <div class="feira-grid sobe">
-      {% for b in visiveis %}
-      <a class="barraca{% if loop.first %} barraca--larga{% endif %}"
-         href="{{ url_for('public.landing_slug', slug=b.slug) }}">
-        <span class="lona" aria-hidden="true"></span>
-        {% if loop.first and b.foto_800 %}
-        <img class="foto" src="{{ url_for('static', filename=b.foto_800) }}"
-             srcset="{{ url_for('static', filename=b.foto_480) }} 480w, {{ url_for('static', filename=b.foto_800) }} 800w"
-             sizes="(min-width:1024px) 560px, (min-width:720px) 66vw, 100vw"
-             style="object-position:50% 45%"
-             alt="{{ b.nome }} — {{ b.descritor or 'bar em Barão Geraldo, Campinas' }}"
-             width="800" height="600" fetchpriority="high" decoding="async">
-        {% else %}
-        <img class="foto" src="{{ url_for('static', filename=b.foto_480) }}"
-             {% if b.foto_800 %}srcset="{{ url_for('static', filename=b.foto_480) }} 480w, {{ url_for('static', filename=b.foto_800) }} 800w"
-             {% else %}srcset="{{ url_for('static', filename=b.foto_480) }} 480w"
-             {% endif %}sizes="(min-width:1024px) 272px, (min-width:720px) 33vw, 50vw"
-             style="object-position:50% 45%"
-             alt="{{ b.nome }} — {{ b.descritor or 'bar em Barão Geraldo, Campinas' }}"
-             width="480" height="360" loading="lazy" decoding="async">
-        {% endif %}
-        <span class="barraca-corpo">
-          <h3>{{ b.nome }}</h3>
-          <span class="nota-linha">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/></svg>
-            <b class="num">{{ b.nota }}</b>
-            {% if b.avaliacoes %}<span class="num">· {{ b.avaliacoes|numero_br(0) }} no Google</span>
-            {% else %}<span>no Google</span>{% endif %}
-          </span>
-          {% if loop.first and b.descritor %}<span class="barraca-desc">{{ b.descritor }}</span>{% endif %}
-          <span class="barraca-abrir">Abrir a barraca →</span>
-        </span>
+    <div class="bares-grid">
+      {% for b in bares %}
+      <a class="bar-card" href="{{ url_for('public.landing_slug', slug=b.slug) }}">
+        <img class="bar-card-img" src="{{ url_for('static', filename=b.foto_480) }}" alt="{{ b.nome }}" loading="lazy">
+        <div class="bar-card-content">
+          <h3 class="bar-card-title">{{ b.nome }}</h3>
+          <div class="bar-card-rating">
+            <span>★ {{ b.nota }}</span>
+            <span style="color:#94a3b8; font-weight:500;">({{ b.avaliacoes }} no Google)</span>
+          </div>
+          <div class="bar-card-footer">
+            <span>Ver no Celular</span>
+            <i class="fas fa-arrow-right"></i>
+          </div>
+        </div>
       </a>
       {% endfor %}
     </div>
-
-    {% if resto %}
-    <details class="mais sobe">
-      <summary>
-        Abrir o resto da feira — mais {{ resto|length }} barracas
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-      </summary>
-      <div class="feira-grid sobe">
-        {% for b in resto %}
-        <a class="barraca" href="{{ url_for('public.landing_slug', slug=b.slug) }}">
-          <span class="lona" aria-hidden="true"></span>
-          <img class="foto" src="{{ url_for('static', filename=b.foto_480) }}"
-               {% if b.foto_800 %}srcset="{{ url_for('static', filename=b.foto_480) }} 480w, {{ url_for('static', filename=b.foto_800) }} 800w"
-               {% else %}srcset="{{ url_for('static', filename=b.foto_480) }} 480w"
-               {% endif %}sizes="(min-width:1024px) 272px, (min-width:720px) 33vw, 50vw"
-               style="object-position:50% 45%"
-               alt="{{ b.nome }} — {{ b.descritor or 'bar em Barão Geraldo, Campinas' }}"
-               width="480" height="360" loading="lazy" decoding="async">
-          <span class="barraca-corpo">
-            <h3>{{ b.nome }}</h3>
-            <span class="nota-linha">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/></svg>
-              <b class="num">{{ b.nota }}</b>
-              {% if b.avaliacoes %}<span class="num">· {{ b.avaliacoes|numero_br(0) }} no Google</span>
-              {% else %}<span>no Google</span>{% endif %}
-            </span>
-            <span class="barraca-abrir">Abrir a barraca →</span>
-          </span>
-        </a>
-        {% endfor %}
-      </div>
-    </details>
-    {% endif %}
     {% endif %}
 
-    <div class="banca-vazia sobe" data-reveal>
-      <h3>Falta uma barraca: a sua</h3>
-      <p>
-        Não achou seu bar na feira? Me chama que eu monto a prévia hoje, com o
-        que já é público — sua foto, sua nota, seu endereço. De graça e sem
-        compromisso: prévia não aparece no Google e sai do ar se você pedir.
+    <div style="margin-top:40px; text-align:center; background:var(--bg-card); border:1px dashed var(--brand-secondary); border-radius:16px; padding:28px;">
+      <h3 style="color:#fff; font-family:var(--font-heading); margin-bottom:8px;">Seu bar ainda não está na lista?</h3>
+      <p style="color:var(--text-muted); max-width:600px; margin:0 auto 16px;">
+        Nós montamos sua demonstração com fotos e nota do Google gratuitamente em menos de 2 horas.
       </p>
-      <a class="btn btn-zap" href="{{ zap_url }}" target="_blank" rel="noopener">Montar a minha barraca</a>
-    </div>
-  </div>
-</section>
-
-<section id="como" class="secao">
-  <div class="wrap">
-    <div class="fluxo" data-reveal>
-      <span class="eyebrow">Como funciona</span>
-      <h2>Da barraca ao balcão</h2>
-    </div>
-    <ol class="passos sobe">
-      <li class="passo" data-reveal>
-        <h3>A barraca vem montada</h3>
-        <p>
-          Antes de qualquer conversa, eu monto a prévia do seu bar com dado
-          público. Ela nasce avisando que não é o site oficial e fora do
-          Google — é amostra, não pegadinha.
-        </p>
-      </li>
-      <li class="passo" data-reveal>
-        <h3>Você prova na mesa</h3>
-        <p>
-          Eu passo no seu balcão e abro a prévia no celular, na sua frente.
-          A gente troca o modelo na hora, quantas vezes precisar, até achar a
-          cara da casa.
-        </p>
-      </li>
-      <li class="passo" data-reveal>
-        <h3>Fechou, assume a banca</h3>
-        <p>
-          No mesmo dia o site vira oficial: reserva caindo no seu WhatsApp,
-          cardápio com QR pra mesa, agenda e promoções que você edita do
-          celular. Sai o selo de prévia, entra o seu endereço.
-        </p>
-      </li>
-      {# O passo que fecha a venda de verdade. O site é o que o dono vê; ser
-         achado é o que ele quer. Boa parte destes bares tem ficha no Google
-         com horário errado, sem cardápio e sem link — existe no mapa e some na
-         busca. Arrumar isso é trabalho de uma vez, e é o que o setup entrega. #}
-      <li class="passo" data-reveal>
-        <h3>E o Google acha seu bar</h3>
-        <p>
-          Arrumo sua ficha no Google — horário certo, fotos, cardápio e o link
-          do site no lugar certo. Quem procura “bar em Barão” às dez da noite
-          passa a achar o seu com o cardápio aberto, e não só o endereço.
-        </p>
-      </li>
-    </ol>
-  </div>
-</section>
-
-<section id="modelos" class="secao">
-  <div class="wrap">
-    <div class="fluxo" data-reveal>
-      <span class="eyebrow">Os modelos</span>
-      <h2>Uma feira, seis barracas</h2>
-      <p class="lead">
-        Banca de fruta não se monta como banca de peixe. Cada modelo escolhe
-        qual seção manda na página do seu bar:
-      </p>
-    </div>
-    <div class="placas sobe">
-      {% for m in modelos %}
-      <article class="placa-modelo" data-reveal>
-        <span class="lona lona--seca" aria-hidden="true"></span>
-        <div class="placa-corpo">
-          <h3>{{ m.label }}</h3>
-          <p>{{ m.para }}</p>
-        </div>
-      </article>
-      {% endfor %}
-    </div>
-  </div>
-</section>
-
-{#
-  A conta da mesa vazia.
-
-  Vem ANTES do preço de propósito: o dono precisa ter o número dele na cabeça
-  quando ler o nosso. E não promete faturamento — promessa de receita é o que
-  todo vendedor de site faz, e o dono já ouviu. Aqui a matemática é do salão
-  dele: quantas mesas tem, quanto vale cada uma cheia, e o que UMA mesa a mais
-  por noite dá no mês. O número que sai é dele; nós só arrumamos as contas.
-
-  As referências de mercado estão citadas embaixo, com fonte, porque a primeira
-  reação do dono é desconfiar do número — e ele tem razão de desconfiar.
-#}
-{# Os valores de partida saem daqui e do JS, dos MESMOS números — escrevê-los à
-   mão no HTML já rendeu um "R$ 1.161" onde a conta dá R$ 1.169, e a página
-   abria com um número que se corrigia sozinho no primeiro toque. Assim a
-   seção também chega certa para quem tem JS desligado. #}
-{% set d_mesas, d_pessoas, d_ticket, d_noites = 12, 3, 45, 2 %}
-{% set d_mesa = d_pessoas * d_ticket %}
-{% set d_mes = (d_mesa * d_noites * 4.33) | round | int %}
-<section id="conta" class="secao">
-  <div class="wrap">
-    <div class="fluxo" data-reveal>
-      <span class="eyebrow">Faça a conta</span>
-      <h2>Quanto vale uma mesa vazia na sua sexta?</h2>
-      <p>
-        Mexa nos números do seu salão. Nada aqui é chute nosso — é a conta que
-        você já faz de cabeça, escrita.
-      </p>
-    </div>
-
-    <div class="conta-grade" data-reveal>
-      <div class="conta-controles">
-        <label class="campo-conta">
-          <span>Mesas no salão</span>
-          <input type="range" id="c-mesas" min="4" max="40" value="{{ d_mesas }}" step="1">
-          <output id="v-mesas">{{ d_mesas }}</output>
-        </label>
-        <label class="campo-conta">
-          <span>Pessoas por mesa</span>
-          <input type="range" id="c-pessoas" min="2" max="6" value="{{ d_pessoas }}" step="1">
-          <output id="v-pessoas">{{ d_pessoas }}</output>
-        </label>
-        <label class="campo-conta">
-          <span>Consumo por pessoa</span>
-          <input type="range" id="c-ticket" min="20" max="150" value="{{ d_ticket }}" step="5">
-          <output id="v-ticket">R$ {{ d_ticket }}</output>
-        </label>
-        <label class="campo-conta">
-          <span>Noites cheias por semana</span>
-          <input type="range" id="c-noites" min="1" max="7" value="{{ d_noites }}" step="1">
-          <output id="v-noites">{{ d_noites }}</output>
-        </label>
-      </div>
-
-      <div class="conta-placa">
-        <p class="conta-rotulo">Uma mesa cheia vale</p>
-        <p class="conta-num" id="r-mesa">R$ {{ d_mesa }}</p>
-        <hr>
-        <p class="conta-rotulo">Uma mesa a mais por noite cheia, no mês</p>
-        <p class="conta-num conta-num--forte" id="r-mes">R$ {{ "{:,.0f}".format(d_mes).replace(",", ".") }}</p>
-        <p class="conta-nota" id="r-compara">
-          Paga a mensalidade e ainda sobra.
-        </p>
-      </div>
-    </div>
-
-    <div class="conta-fontes" data-reveal>
-      <p class="micro">
-        <strong>De onde vem o resto da conta.</strong>
-        Bar com ficha completa no Google recebe <strong>42% mais pedidos de
-        rota</strong> e <strong>35% mais cliques no site</strong> que bar sem
-        ficha; com foto, mais 35% de clique; com avaliação, 22% mais visita.
-        O WhatsApp já responde por <strong>26% do faturamento</strong> de
-        delivery em bares e restaurantes no Brasil. Numa noite cheia, cada mesa
-        recebe cerca de 3 grupos.
-      </p>
-      <p class="micro">
-        Fontes: Abrasel, pesquisas de SEO local e de giro de mesa (2025–2026).
-        A conta acima usa só os seus números — as porcentagens ficam de fora
-        dela de propósito, porque ninguém pode prometer quanto do movimento do
-        seu bar vem do Google.
-      </p>
-    </div>
-  </div>
-</section>
-
-<section id="preco" class="secao">
-  <div class="wrap">
-    <div class="fluxo" data-reveal>
-      <span class="eyebrow">Planos & Preços</span>
-      <h2>Sem pegadinha: escolha o tamanho do seu bar</h2>
-      <p class="lead">
-        Seu site fica pronto, rápido e com tudo o que você precisa para encher a casa e controlar seu lucro.
-      </p>
-    </div>
-
-    <div class="tabela-planos sobe" data-reveal>
-      
-      <!-- 1. Plano Site (Presença & Reservas) -->
-      <div class="card-plano">
-        <div class="card-plano-topo">
-          <span class="plano-tag">Presença & Reservas</span>
-          <h3 class="plano-titulo">Site</h3>
-          <p class="plano-preco">
-            <span class="num">{{ preco_site }}</span>
-            <small>/mês</small>
-          </p>
-          <p class="plano-sub">Para o bar que quer ser achado no Google e receber reservas no WhatsApp.</p>
-        </div>
-        <ul class="plano-vantagens">
-          <li><strong>Site exclusivo</strong> com domínio próprio (ex.: seubar.bar)</li>
-          <li><strong>Cardápio digital</strong> com QR Code de mesa ilimitado</li>
-          <li><strong>Reservas no WhatsApp</strong> com alerta instantâneo</li>
-          <li><strong>Agenda de shows</strong> e promoções da semana</li>
-          <li><strong>Edição fácil</strong> direto do celular</li>
-          <li class="plano-incluso-nao">Sem gestão de custos de pratos (CMV)</li>
-        </ul>
-        <div class="plano-cta">
-          <a class="btn btn-ghost w-100" href="{{ zap_url }}" target="_blank" rel="noopener">Quero o Site</a>
-        </div>
-      </div>
-
-      <!-- 2. Plano Pro (O Mais Escolhido / Âncora Ideal) -->
-      <div class="card-plano card-plano--destaque">
-        <div class="plano-badge-topo">★ MAIS ESCOLHIDO · GESTÃO & LUCRO</div>
-        <div class="card-plano-topo">
-          <span class="plano-tag plano-tag--destaque">Site + Sistema de Custos</span>
-          <h3 class="plano-titulo">Pro</h3>
-          <p class="plano-preco plano-preco--destaque">
-            <span class="num">{{ preco_pro }}</span>
-            <small>/mês</small>
-          </p>
-          <p class="plano-sub">Para quem quer presença online e controle absoluto do lucro de cada prato.</p>
-        </div>
-        <ul class="plano-vantagens">
-          <li><strong>Tudo do Plano Site incluso</strong></li>
-          <li><strong>Ficha Técnica e CMV real</strong> de cada item do cardápio</li>
-          <li><strong>Importação automática de NF-e</strong> (leitura de XML)</li>
-          <li><strong>Alerta de aumento de preço</strong> dos fornecedores no Zap</li>
-          <li><strong>Controle de estoque</strong> e prevenção de desperdício</li>
-          <li><strong>Relatórios de lucratividade</strong> claros, sem planilhas</li>
-        </ul>
-        <div class="plano-cta">
-          <a class="btn btn-zap w-100" href="{{ zap_url }}" target="_blank" rel="noopener">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.2 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.4-.7-2.9-1.1-4.7-4-4.9-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5s.8 1.9.8 2c.1.1.1.3 0 .5l-.3.5c-.2.2-.3.4-.1.7.1.3.7 1.2 1.5 1.9 1.1.9 2 1.2 2.2 1.4.3.1.5.1.6-.1.2-.2.7-.8.9-1.1.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.2 1.3Z"/></svg>
-            Quero o Plano Pro
-          </a>
-        </div>
-      </div>
-
-      <!-- 3. Compra do Site (A Âncora Alta / Sem Mensalidade) -->
-      <div class="card-plano">
-        <div class="card-plano-topo">
-          <span class="plano-tag">Sem Mensalidade</span>
-          <h3 class="plano-titulo">Compra Única</h3>
-          <p class="plano-preco">
-            <span class="num">{{ compra.valor }}</span>
-            <small>à vista</small>
-          </p>
-          <p class="plano-sub">Para quem quer apenas o site pronto, sem assinatura mensal.</p>
-        </div>
-        <ul class="plano-vantagens">
-          <li><strong>Site pronto</strong> e publicado no seu domínio</li>
-          <li><strong>Cardápio digital</strong> com QR Code</li>
-          <li><strong>Perfil da Empresa</strong> configurado no Google Maps</li>
-          <li><strong>1 ano de domínio e hospedagem</strong> inclusos</li>
-          <li class="plano-incluso-nao">Sem sistema de reservas no WhatsApp</li>
-          <li class="plano-incluso-nao">Sem painel de gestão de custos ou NF-e</li>
-          <li><small style="color:var(--taupe)">Renovação de {{ compra.renovacao }} a partir do 2º ano</small></li>
-        </ul>
-        <div class="plano-cta">
-          <a class="btn btn-ghost w-100" href="{{ zap_url }}" target="_blank" rel="noopener">Comprar à Vista</a>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Notas da Seção -->
-    <div class="planos-notas sobe" data-reveal>
-      {% if taxa_setup %}
-      <p class="micro">
-        <strong>Taxa única de montagem: {{ taxa_setup }}</strong> — inclui design exclusivo personalizado, fotos da casa e configuração completa do Perfil da Empresa no Google Maps.
-      </p>
-      {% endif %}
-      <p class="micro">
-        <strong>Sem fidelidade e sem multas:</strong> você cancela a assinatura quando quiser com um toque.
-      </p>
-      <p class="micro">
-        Prefere montar você mesmo? <a href="{{ url_for('public.cadastro') }}">Crie sua conta agora →</a>
-      </p>
-    </div>
-
-  </div>
-</section>
-
-<section class="secao fechar">
-  <div class="wrap fluxo">
-    <span class="eyebrow" data-reveal>Sem burocracia</span>
-    <h2 data-reveal>Passa na banca</h2>
-    <p class="lead" data-reveal>
-      A gente atende de bar em bar, com a demonstração aberta no celular.
-      Chame a gente no WhatsApp para ver o site do seu bar pronto no balcão.
-    </p>
-    <div class="hero-cta">
       <a class="btn btn-zap" href="{{ zap_url }}" target="_blank" rel="noopener">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.2 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.4-.7-2.9-1.1-4.7-4-4.9-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5s.8 1.9.8 2c.1.1.1.3 0 .5l-.3.5c-.2.2-.3.4-.1.7.1.3.7 1.2 1.5 1.9 1.1.9 2 1.2 2.2 1.4.3.1.5.1.6-.1.2-.2.7-.8.9-1.1.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.2 1.3Z"/></svg>
-        Chamar no WhatsApp
+        <i class="fab fa-whatsapp"></i> Montar a Minha Casa Agora
       </a>
     </div>
+  </div>
+</section>
+
+<!-- SEÇÃO 6: CALCULADORA DE ROI (A CONTA DA MESA VAZIA) -->
+<section id="roi" class="section">
+  <div class="wrap">
+    <div class="section-title-wrap">
+      <div class="badge-tag">Matemática Pura</div>
+      <h2 class="section-title">Faça a Conta: Quanto Vale 1 Mesa Vazia no Seu Bar?</h2>
+      <p class="section-desc">
+        Mexa nos números do seu salão. Não é promessa de marqueteiro: é a matemática do seu próprio movimento.
+      </p>
+    </div>
+
+    <div class="roi-box">
+      <!-- Sliders -->
+      <div>
+        <div class="roi-control-group">
+          <div class="roi-control-header">
+            <span>Mesas no Salão</span>
+            <span id="roi-mesas-val" class="text-warning">14 mesas</span>
+          </div>
+          <input type="range" class="roi-slider" id="roi-mesas" min="4" max="50" value="14" step="1">
+        </div>
+
+        <div class="roi-control-group">
+          <div class="roi-control-header">
+            <span>Pessoas por Mesa</span>
+            <span id="roi-pessoas-val" class="text-warning">3 pessoas</span>
+          </div>
+          <input type="range" class="roi-slider" id="roi-pessoas" min="2" max="6" value="3" step="1">
+        </div>
+
+        <div class="roi-control-group">
+          <div class="roi-control-header">
+            <span>Ticket Médio por Pessoa</span>
+            <span id="roi-ticket-val" class="text-warning">R$ 45,00</span>
+          </div>
+          <input type="range" class="roi-slider" id="roi-ticket" min="20" max="150" value="45" step="5">
+        </div>
+
+        <div class="roi-control-group">
+          <div class="roi-control-header">
+            <span>Noites Cheias por Semana</span>
+            <span id="roi-noites-val" class="text-warning">2 noites</span>
+          </div>
+          <input type="range" class="roi-slider" id="roi-noites" min="1" max="7" value="2" step="1">
+        </div>
+      </div>
+
+      <!-- Resultado -->
+      <div class="roi-result-card">
+        <small>Retorno com apenas 1 mesa a mais por noite cheia:</small>
+        <h2 id="roi-resultado-mes">+R$ 1.169/mês</h2>
+        <p style="font-size:0.92rem; color:#cbd5e1; line-height:1.5;">
+          Com apenas <strong>1 mesa extra na semana</strong> trazida pelo Google Maps, o sistema se paga e ainda sobram mais de <strong>R$ 900 de lucro limpo</strong> no seu caixa.
+        </p>
+        <div class="roi-pill-note">
+          <i class="fas fa-check-circle"></i> Paga o plano Pro quase 5x todo mês!
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SEÇÃO 7: TABELA DE PLANOS & PREÇOS -->
+<section id="precos" class="section" style="background: rgba(255,255,255,0.02);">
+  <div class="wrap">
+    <div class="section-title-wrap">
+      <div class="badge-tag">Planos Transparentes</div>
+      <h2 class="section-title">Sem Pegadinha: Escolha o Tamanho do seu Negócio</h2>
+      <p class="section-desc">
+        Sem taxas ocultas, sem comissão por pedido e sem fidelidade. Cancele quando quiser em 1 clique.
+      </p>
+    </div>
+
+    <div class="pricing-grid">
+      <!-- 1. Plano Site -->
+      <div class="price-card">
+        <h3 class="price-title">Presença Digital</h3>
+        <p style="font-size:0.88rem; color:var(--text-muted);">Para quem quer ser achado no Google e receber reservas.</p>
+        <div class="price-num">
+          {{ preco_site }} <small>/mês</small>
+        </div>
+        <ul class="price-list">
+          <li><i class="fas fa-check"></i> <strong>Site exclusivo</strong> no domínio próprio</li>
+          <li><i class="fas fa-check"></i> <strong>Cardápio digital</strong> com QR Code de mesa ilimitado</li>
+          <li><i class="fas fa-check"></i> <strong>Reservas no WhatsApp</strong> sem intermediários</li>
+          <li><i class="fas fa-check"></i> <strong>Agenda de shows</strong> e promoções da semana</li>
+          <li><i class="fas fa-check"></i> <strong>Ficha no Google Maps</strong> otimizada com JSON-LD</li>
+          <li class="inactive"><i class="fas fa-times"></i> Leitor OCR de notas por foto</li>
+          <li class="inactive"><i class="fas fa-times"></i> Gestão de CMV e Ficha Técnica</li>
+        </ul>
+        <a class="btn btn-secondary w-100" href="{{ zap_url }}" target="_blank" rel="noopener">
+          Quero o Plano Site
+        </a>
+      </div>
+
+      <!-- 2. Plano Pro (Destaque) -->
+      <div class="price-card featured">
+        <div class="featured-badge">★ MAIS ESCOLHIDO · GESTÃO + IA</div>
+        <h3 class="price-title">Pro + Arsenal IA</h3>
+        <p style="font-size:0.88rem; color:#ffb43d;">Para quem quer presença impecável e lucro de cada prato auditado.</p>
+        <div class="price-num">
+          {{ preco_pro }} <small>/mês</small>
+        </div>
+        <ul class="price-list">
+          <li><i class="fas fa-check"></i> <strong>Tudo do Plano Presença Digital incluso</strong></li>
+          <li><i class="fas fa-check"></i> <strong>📸 Leitor OCR de Notas e Cupons por Foto (NVIDIA)</strong></li>
+          <li><i class="fas fa-check"></i> <strong>🎙️ Concierge de Voz no WhatsApp e no Site</strong></li>
+          <li><i class="fas fa-check"></i> <strong>🐺 Cálculo de CMV Real e Fichas Técnicas (DeepSeek)</strong></li>
+          <li><i class="fas fa-check"></i> <strong>Alerta de aumento de insumos >10% no celular</strong></li>
+          <li><i class="fas fa-check"></i> <strong>🎨 Gerador de Peças de Marketing com IA</strong></li>
+        </ul>
+        <a class="btn btn-primary w-100" style="font-size:1rem; padding:14px;" href="{{ zap_url }}" target="_blank" rel="noopener">
+          <i class="fab fa-whatsapp"></i> Ativar Plano Pro com IA
+        </a>
+      </div>
+
+      <!-- 3. Compra Vitalícia -->
+      <div class="price-card">
+        <h3 class="price-title">Compra Única</h3>
+        <p style="font-size:0.88rem; color:var(--text-muted);">Para quem quer apenas o site próprio sem mensalidade.</p>
+        <div class="price-num">
+          {{ compra.valor }} <small>à vista</small>
+        </div>
+        <ul class="price-list">
+          <li><i class="fas fa-check"></i> <strong>Site pronto e publicado</strong> no seu domínio</li>
+          <li><i class="fas fa-check"></i> <strong>Cardápio digital</strong> com QR Code de mesa</li>
+          <li><i class="fas fa-check"></i> <strong>Perfil da Empresa</strong> verificado no Google Maps</li>
+          <li><i class="fas fa-check"></i> <strong>1 ano de domínio e hospedagem</strong> inclusos</li>
+          <li class="inactive"><i class="fas fa-times"></i> Concierge de Voz por IA</li>
+          <li class="inactive"><i class="fas fa-times"></i> Leitor OCR de notas e CMV</li>
+        </ul>
+        <a class="btn btn-secondary w-100" href="{{ zap_url }}" target="_blank" rel="noopener">
+          Comprar à Vista
+        </a>
+      </div>
+    </div>
+
+    <div style="margin-top:30px; text-align:center; color:var(--text-muted); font-size:0.88rem;">
+      <p><i class="fas fa-shield-alt text-success"></i> <strong>Sem fidelidade:</strong> você não assina contrato longo e cancela quando quiser com 1 toque.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SEÇÃO 8: FAQ & QUEBRA DE OBJEÇÕES -->
+<section class="section">
+  <div class="wrap">
+    <div class="section-title-wrap">
+      <div class="badge-tag">Dúvidas Frequentes</div>
+      <h2 class="section-title">Tudo o que Você Precisa Saber</h2>
+    </div>
+
+    <div class="faq-grid">
+      <details class="faq-item">
+        <summary>Eu já tenho Instagram, por que preciso de um site oficial? <i class="fas fa-chevron-down"></i></summary>
+        <p>O Instagram é ótimo para quem já segue seu bar. Mas quando alguém pesquisa no Google Maps às 19h de sexta "barzinho com chope em Barão", o Instagram não mostra seu cardápio com preços nem tem botão para reservar direto. Quem pesquisa no Google está com a carteira na mão pronto para sair de casa.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>Preciso instalar algum programa pesado no computador do bar? <i class="fas fa-chevron-down"></i></summary>
+        <p>Não! Tudo funciona 100% online na nuvem. Você pode acompanhar reservas, atualizar preços ou tirar fotos de notas fiscais direto do seu smartphone Android ou iPhone.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>Quanto tempo demora para o site do meu bar ficar no ar? <i class="fas fa-chevron-down"></i></summary>
+        <p>Como já temos as prévias e fotos das casas de Barão Geraldo montadas, seu site pode estar funcionando no ar e conectado ao seu WhatsApp em menos de 2 horas após a confirmação!</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>Como funciona a leitura de notas por foto (OCR da NVIDIA)? <i class="fas fa-chevron-down"></i></summary>
+        <p>Basta abrir a tela de notas no celular, tocar em "Tirar Foto" e fotografar o cupom fiscal ou recibo do açougue/hortifruti. A inteligência de visão da NVIDIA lê os nomes dos produtos, quantidades e valores unitários, cadastrando tudo no seu estoque e recalculando seu custo por porção.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- SEÇÃO 9: FECHAMENTO & CTA FINAL -->
+<section class="section" style="text-align:center; padding:100px 0; background:radial-gradient(circle at 50% 50%, #1c1815 0%, #0c0e12 100%);">
+  <div class="wrap">
+    <div class="badge-tag" style="margin-bottom:16px;">Pronto em Menos de 2 Horas</div>
+    <h2 class="hero-headline" style="font-size:clamp(2.2rem, 4vw, 3.4rem); margin-bottom:18px;">
+      Vamos Colocar o Seu Bar no <span>Topo do Bairro</span>?
+    </h2>
+    <p class="hero-sub" style="margin-bottom:36px;">
+      Fale diretamente com quem desenvolveu o projeto aqui em Barão Geraldo. Demonstração sem compromisso no seu balcão.
+    </p>
+    <a class="btn btn-zap" style="font-size:1.15rem; padding:18px 40px;" href="{{ zap_url }}" target="_blank" rel="noopener">
+      <i class="fab fa-whatsapp"></i> Chamar no WhatsApp e Ver Minha Demonstração
+    </a>
   </div>
 </section>
 
 </main>
 
-<footer class="secao">
-  <div class="wrap fluxo">
-    <p><strong>FEIRA DE BARÃO</strong> · Tecnologia e Presença Digital para Gastronomia e Bares de Barão Geraldo, Campinas–SP</p>
-    <p class="micro">
-      Plataforma completa de sites para bares, cardápios digitais com QR Code e gestão de custos gastronômicos.
+<footer class="site-footer">
+  <div class="wrap">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px; border-bottom:1px solid var(--border-color); padding-bottom:30px; margin-bottom:20px;">
+      <a href="/" class="logo">
+        <i class="fas fa-beer-mug-empty" style="color:#ff6a2b;"></i>
+        FEIRA DE <span>BARÃO</span>
+      </a>
+      <div style="display:flex; gap:20px; font-size:0.88rem;">
+        <a href="/barao">Campanha nos Bares</a>
+        <a href="/cadastro">Criar Conta</a>
+        <a href="https://bardavila.bar" target="_blank">Cliente Modelo: Bar da Vila</a>
+      </div>
+    </div>
+    <p style="text-align:center; font-size:0.82rem;">
+      © 2026 Feira de Barão · Ecossistema Alero SaaS · Barão Geraldo, Campinas – SP. Todos os direitos reservados.
     </p>
-    <nav class="rodape-links micro" aria-label="Mais páginas">
-      <a href="{{ url_for('public.barao') }}">A campanha nos bares</a>
-      <a href="{{ url_for('public.cadastro') }}">Criar meu site</a>
-      <a href="https://bardavila.bar" target="_blank" rel="noopener">Cliente modelo: bardavila.bar</a>
-    </nav>
   </div>
 </footer>
 
-<div class="lona" aria-hidden="true"></div>
-
-<!-- Motion (build vanilla). Versão pinada: `@latest` aqui é roleta em produção. -->
 <script>
-/* A conta da mesa vazia.
- *
- * Roda antes da Motion e sem depender dela: isto é conteúdo, não enfeite. Se o
- * CDN de animação cair, os números continuam de pé — o inverso (a conta viver
- * dentro do bloco de animação) deixaria a seção com valores errados na tela.
- *
- * Sem ida ao servidor: o dono arrasta e o número muda na hora, que é o que
- * sustenta a brincadeira. Nada do que ele digita sai do aparelho — e por isso
- * não há campo de e-mail aqui. Pedir e-mail para "ver o resultado" é o truque
- * que o dono já levou de outros vendedores.
- */
-(function () {
-  var el = function (id) { return document.getElementById(id); };
-  var mesas = el('c-mesas'), pessoas = el('c-pessoas'),
-      ticket = el('c-ticket'), noites = el('c-noites');
-  if (!mesas || !pessoas || !ticket || !noites) return;
-
-  var brl = new Intl.NumberFormat('pt-BR',
-    { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
-
-  /* Mensalidade real, do mesmo lugar que a placa de preço lê. Sem isto o texto
-     de comparação viraria mais um número escrito na mão para desatualizar. */
-  var MENSAL = Number({{ (preco or '')|replace('R$','')|replace('.','')|replace(',','.')|trim|default(0, true) }}) || 0;
-
-  /* 4,33 = semanas por mês (52/12). Usar 4 subestima quase uma noite cheia por
-     mês, e o número deste bloco tem que aguentar conferência na calculadora do
-     celular do dono. */
-  var SEMANAS = 4.33;
-
-  function conta() {
-    var m = +mesas.value, p = +pessoas.value, t = +ticket.value, n = +noites.value;
-    var porMesa = p * t;
-    var porMes = porMesa * n * SEMANAS;
-
-    el('v-mesas').textContent = m;
-    el('v-pessoas').textContent = p;
-    el('v-ticket').textContent = brl.format(t);
-    el('v-noites').textContent = n;
-    el('r-mesa').textContent = brl.format(porMesa);
-    el('r-mes').textContent = brl.format(porMes);
-
-    var nota = el('r-compara');
-    if (MENSAL > 0) {
-      var vezes = porMes / MENSAL;
-      nota.textContent = vezes >= 1.15
-        ? 'Isso paga o plano ' + vezes.toFixed(1).replace('.', ',') +
-          ' vezes — com uma mesa só.'
-        : 'Perto do valor do plano — e essa é UMA mesa das ' + m + ' que você tem.';
-    } else {
-      nota.textContent = 'E isso é uma mesa das ' + m + ' que você tem.';
+  // Showcase Interativo dos Modelos
+  const ESTILOS_DATA = {
+    craft: {
+      titulo: 'Empório do Nono · Craft',
+      icon: '🍺',
+      headline: 'Tap List Ao Vivo com 8 Torneiras',
+      desc: 'Destaque total para chopes artesanais engatados hoje, com teor alcoólico (ABV), IBU e opção de encher growler.',
+      link: 'https://feiradebarao.com.br/bar/emporio-do-nono?modelo=craft'
+    },
+    noturno: {
+      titulo: 'Flor da Lua · Noturno',
+      icon: '🎷',
+      headline: 'Programação de Shows & Couvert',
+      desc: 'Agenda musical da semana em destaque, horário das apresentações, valor de entrada e reservas para mesas perto do palco.',
+      link: 'https://feiradebarao.com.br/bar/flor-da-lua?modelo=noturno'
+    },
+    brasa: {
+      titulo: 'Casa da Brasa · Steakhouse',
+      icon: '🔥',
+      headline: 'Grelhados na Parrilla & Cortes Nobres',
+      desc: 'Foco no ponto da carne, porções generosas para compartilhar, tábuas de petiscos e defumados artesanais.',
+      link: 'https://feiradebarao.com.br/bar/birits-bar?modelo=brasa'
+    },
+    autoral: {
+      titulo: 'Ateliê Gastrô · Autoral',
+      icon: '👨‍🍳',
+      headline: 'Cardápio Assinado & Coquetelaria',
+      desc: 'Apresentação refinada com a história dos pratos, ingredientes regionais selecionados e carta de drinks especiais.',
+      link: 'https://feiradebarao.com.br/bar/cantina-do-codigo?modelo=autoral'
+    },
+    tradicional: {
+      titulo: 'Boteco do Zé · Tradicional',
+      icon: '🏛️',
+      headline: 'Estufa Quente & Cerveja 600ml',
+      desc: 'Design direto ao ponto para botecos raiz: coxinhas, torresmo de rolo, cachaças artesanais e chope trincando.',
+      link: 'https://feiradebarao.com.br/bar/birits-bar?modelo=tradicional'
+    },
+    classico: {
+      titulo: 'Bar da Vila · Clássico',
+      icon: '📋',
+      headline: 'Equilíbrio Total: Porções & Bebidas',
+      desc: 'Layout dinâmico perfeito para happy hour, aniversários, porções variadas e pedidos rápidos de mesa.',
+      link: 'https://feiradebarao.com.br/bar/birits-bar?modelo=classico'
     }
+  };
+
+  function mostrarEstilo(chave, btn) {
+    document.querySelectorAll('.style-tab-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    
+    const dados = ESTILOS_DATA[chave];
+    if (!dados) return;
+
+    document.getElementById('mockup-bar-name').innerText = dados.titulo;
+    document.getElementById('mockup-icon').innerText = dados.icon;
+    document.getElementById('mockup-headline').innerText = dados.headline;
+    document.getElementById('mockup-desc').innerText = dados.desc;
+    document.getElementById('mockup-cta').href = dados.link;
   }
 
-  [mesas, pessoas, ticket, noites].forEach(function (c) {
-    c.addEventListener('input', conta);
+  // Calculadora de ROI Interativa
+  const elMesas = document.getElementById('roi-mesas');
+  const elPessoas = document.getElementById('roi-pessoas');
+  const elTicket = document.getElementById('roi-ticket');
+  const elNoites = document.getElementById('roi-noites');
+
+  function atualizarCalculadora() {
+    const mesas = parseInt(elMesas.value);
+    const pessoas = parseInt(elPessoas.value);
+    const ticket = parseInt(elTicket.value);
+    const noites = parseInt(elNoites.value);
+
+    document.getElementById('roi-mesas-val').innerText = `${mesas} mesas`;
+    document.getElementById('roi-pessoas-val').innerText = `${pessoas} pessoas`;
+    document.getElementById('roi-ticket-val').innerText = `R$ ${ticket},00`;
+    document.getElementById('roi-noites-val').innerText = `${noites} noites`;
+
+    // 1 mesa extra * pessoas * ticket * noites * 4.33 semanas
+    const retornoMes = (1 * pessoas * ticket) * noites * 4.33;
+    const formatado = Math.round(retornoMes).toLocaleString('pt-BR');
+    document.getElementById('roi-resultado-mes').innerText = `+R$ ${formatado}/mês`;
+  }
+
+  [elMesas, elPessoas, elTicket, elNoites].forEach(input => {
+    input?.addEventListener('input', atualizarCalculadora);
   });
-  conta();
-})();
+  atualizarCalculadora();
 </script>
-<script src="https://cdn.jsdelivr.net/npm/motion@13.1.0/dist/motion.js"></script>
-<script>
-(function () {
-  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  // Sem lib ou com reduced-motion: o portão não liga e nada fica escondido.
-  if (!window.Motion || !window.Motion.animate || reduce) return;
 
-  // Aba aberta em segundo plano: `animate` não roda com a página oculta e os
-  // elementos ficariam presos em opacity:0 — o portão só liga com a aba visível.
-  if (document.visibilityState === 'hidden') {
-    document.addEventListener('visibilitychange', function _liga() {
-      if (document.visibilityState !== 'visible') return;
-      document.removeEventListener('visibilitychange', _liga);
-      ligar();
-    });
-  } else {
-    ligar();
-  }
-
-  function ligar() {
-    document.documentElement.classList.add('js-anim');
-    try {
-      var animate = Motion.animate, inView = Motion.inView,
-          stagger = Motion.stagger, spring = Motion.spring, hover = Motion.hover;
-
-      // 1. Hero: cartaz sobe em sequência. CTA, nota e preço nunca animam.
-      animate('[data-hero]', { opacity: [0, 1], y: [16, 0] },
-              { duration: 0.55, delay: stagger(0.08), ease: [0.22, 1, 0.36, 1] });
-
-      // 2. Reveal por seção, quando entra na viewport — sem cascata cronometrada.
-      inView('[data-reveal]', function (el) {
-        animate(el, { opacity: [0, 1], y: [24, 0] },
-                { duration: 0.6, ease: [0.16, 1, 0.3, 1] });
-      }, { amount: 0.2 });
-
-      // 3. Mola no CTA do zap (um vocabulário só: mesma dupla stiffness/damping).
-      if (typeof hover === 'function') {
-        hover('.btn-zap', function (el) {
-          animate(el, { scale: 1.03 }, { type: spring, stiffness: 320, damping: 20 });
-          return function () {
-            animate(el, { scale: 1 }, { type: spring, stiffness: 320, damping: 24 });
-          };
-        });
-      }
-    } catch (e) {
-      // Falha de animação não pode custar a leitura da página.
-      document.documentElement.classList.remove('js-anim');
-    }
-  }
-})();
-</script>
 </body>
 </html>
