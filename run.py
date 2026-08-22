@@ -41,21 +41,67 @@ if __name__ == '__main__':
 # We also want to ensure migrations run here
 with app.app_context():
     try:
-        # Emergency fix: Create tables if they don't exist
-        # This is needed because initial migration seems to assume tables exist
         db.create_all()
         print("db.create_all() executed successfully.")
         
-        try:
-            # upgrade()
-            print("Database migration skipped (using create_all).")
-        except Exception as e:
-            print(f"Migration step failed (might conflict with create_all, but tables should be there): {e}")
-
-        # Debug: List tables to confirm migration worked
-        from sqlalchemy import inspect
+        # Garante que novas colunas adicionadas aos modelos existam no banco em produção
+        from sqlalchemy import text, inspect
         inspector = inspect(db.engine)
-        print(f"Tables in DB: {inspector.get_table_names()}")
+        tabelas = inspector.get_table_names()
+        
+        if 'site_config' in tabelas:
+            cols = {c['name'] for c in inspector.get_columns('site_config')}
+            novas = [
+                ('callmebot_phone', 'VARCHAR(20)'),
+                ('callmebot_apikey', 'VARCHAR(50)'),
+                ('nota_google', 'VARCHAR(10)'),
+                ('qtd_avaliacoes', 'INTEGER'),
+                ('tema_modo', "VARCHAR(10) DEFAULT 'auto'"),
+                ('modelo', "VARCHAR(30) DEFAULT 'classico'"),
+                ('vibe', "VARCHAR(30) DEFAULT 'boteco'"),
+                ('tema', "VARCHAR(30) DEFAULT 'boteco-ambar'"),
+                ('descritor', 'VARCHAR(80)'),
+                ('hero_foto', 'VARCHAR(300)'),
+                ('apoia_caminhos', 'BOOLEAN DEFAULT FALSE'),
+            ]
+            for col_nome, col_tipo in novas:
+                if col_nome not in cols:
+                    try:
+                        db.session.execute(text(f'ALTER TABLE site_config ADD COLUMN {col_nome} {col_tipo}'))
+                        db.session.commit()
+                        print(f"Auto-migração: site_config.{col_nome} adicionada.")
+                    except Exception as col_err:
+                        db.session.rollback()
+                        print(f"Auto-migração site_config.{col_nome}: {col_err}")
+
+        if 'restaurante' in tabelas:
+            cols_r = {c['name'] for c in inspector.get_columns('restaurante')}
+            novas_r = [
+                ('slug', 'VARCHAR(120)'),
+                ('dominio', 'VARCHAR(120)'),
+                ('tipo_conta', 'VARCHAR(20)'),
+                ('demo_expira_em', 'DATE'),
+                ('demo_visitas', 'INTEGER DEFAULT 0'),
+                ('demo_primeira_visita', 'DATE'),
+                ('demo_fonte', 'VARCHAR(40)'),
+                ('trial_termina_em', 'DATE'),
+                ('plano_ate', 'DATE'),
+                ('subscription_status', 'VARCHAR(20)'),
+                ('subscription_tier', 'VARCHAR(20)'),
+                ('stripe_customer_id', 'VARCHAR(100)'),
+                ('stripe_subscription_id', 'VARCHAR(100)'),
+                ('pricing_strategy', 'VARCHAR(50)'),
+            ]
+            for col_nome, col_tipo in novas_r:
+                if col_nome not in cols_r:
+                    try:
+                        db.session.execute(text(f'ALTER TABLE restaurante ADD COLUMN {col_nome} {col_tipo}'))
+                        db.session.commit()
+                        print(f"Auto-migração: restaurante.{col_nome} adicionada.")
+                    except Exception as col_err:
+                        db.session.rollback()
+                        print(f"Auto-migração restaurante.{col_nome}: {col_err}")
+
     except Exception as e:
         print(f"Database initialization failed: {e}")
 
