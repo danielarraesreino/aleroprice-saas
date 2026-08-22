@@ -156,6 +156,7 @@ def create_app(config_name='default'):
     from app.routes.conteudo import bp as conteudo_bp
     from app.routes.campanha import bp as campanha_bp
     from app.routes.campo import bp as campo_bp
+    from app.routes.agentes import bp as agentes_bp
 
     app.register_blueprint(estoque_bp, url_prefix='/estoque')
     app.register_blueprint(fornecedores_bp, url_prefix='/fornecedores')
@@ -172,6 +173,7 @@ def create_app(config_name='default'):
     app.register_blueprint(configsite_bp, url_prefix='/config-site')
     app.register_blueprint(conteudo_bp, url_prefix='/conteudo')
     app.register_blueprint(campanha_bp, url_prefix='/campanha')
+    app.register_blueprint(agentes_bp, url_prefix='/agentes')
     # Ferramenta de venda presencial do operador, não feature de cliente.
     app.register_blueprint(campo_bp, url_prefix='/campo')
     # Sistema/dashboard fica ATRÁS do login, em /app. A landing pública ocupa '/'.

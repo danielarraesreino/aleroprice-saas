@@ -75,6 +75,10 @@
                         <a class="nav-link {% if 'campo' in request.endpoint %}active{% endif %}"
                             href="{{ url_for('campo.index') }}">📱 Campo</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'agentes' in request.endpoint %}active{% endif %}"
+                            href="{{ url_for('agentes.index') }}">🧬 X-Men IA</a>
+                    </li>
                     {% endif %}
                     {# Daqui pra baixo é o produto de gestão de custos (plano Pro).
                        Escondido de quem tem só o site: antes, metade do menu do

@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block title %}QG dos Agentes X-MEN · Alero SaaS{% endblock %}
+
+{% block extra_css %}
+<style>
+  .qg-hero {
+    background: radial-gradient(circle at 50% 20%, #1a1b2f 0%, #0c0d14 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 28px;
+    color: #fff;
+    margin-bottom: 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+  .card-mutante {
+    background: #141522;
+    border: 1.5px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 20px;
+    height: 100%;
+    transition: transform 0.2s, box-shadow 0.2s;
+    color: #e2e8f0;
+  }
+  .card-mutante:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+  }
+  .card-profx { border-top: 4px solid #00d2ff; }
+  .card-ciclope { border-top: 4px solid #ff3344; }
+  .card-magneto { border-top: 4px solid #a855f7; }
+
+  .avatar-badge {
+    font-size: 2.2rem;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    margin-bottom: 14px;
+  }
+  .skill-badge {
+    display: inline-block;
+    font-size: 11px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    padding: 3px 8px;
+    margin: 2px 2px 2px 0;
+    color: #cbd5e1;
+  }
+  .fluxo-box {
+    background: #0f172a;
+    border: 1px dashed rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 18px;
+    margin-top: 24px;
+  }
+  .console-box {
+    background: #0b0c10;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    padding: 20px;
+    color: #fff;
+    margin-top: 24px;
+  }
+  .msg-agente {
+    background: rgba(255, 255, 255, 0.04);
+    border-left: 3px solid #00d2ff;
+    border-radius: 8px;
+    padding: 14px;
+    margin-top: 14px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <!-- Top Banner -->
+  <div class="qg-hero text-center">
+    <div class="d-inline-flex align-items-center gap-2 px-3 py-1 mb-2 rounded-pill" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); font-size:12px; letter-spacing:0.08em; text-transform:uppercase;">
+      <span>🧬 Danger Room · Central de Agentes X-MEN</span>
+    </div>
+    <h1 class="display-6 fw-bold mb-2">Quem é Quem no Arsenal de IA</h1>
+    <p class="text-secondary mx-auto" style="max-width: 650px;">
+      Três motores de inteligência trabalhando em sincronia para transformar o Bar da Vila e a Feira de Barão em uma máquina de vendas, atração de clientes e gestão de lucro.
+    </p>
+  </div>
+
+  <!-- Cards dos 3 Mutantes -->
+  <div class="row g-4">
+    <!-- Professor X -->
+    <div class="col-lg-4">
+      <div class="card-mutante card-profx">
+        <div class="avatar-badge">🧠</div>
+        <h4 class="fw-bold text-white mb-1">Professor X</h4>
+        <div class="text-info small fw-bold mb-2">Gemini Pro · Antigravity</div>
+        <p class="small text-muted mb-3">
+          <strong>Líder & Orquestrador Geral:</strong> Comanda a estratégia de vendas, lê a mente do cliente, gera os pitch decks e guia o fechamento de contratos de dono pra dono.
+        </p>
+        <div class="mb-3">
+          <div class="text-uppercase small text-secondary fw-bold mb-1" style="font-size:10px;">Superpoderes & Skills:</div>
+          <span class="skill-badge">Orquestração dos Agentes</span>
+          <span class="skill-badge">Pitch Decks de Balcão</span>
+          <span class="skill-badge">Quebra de Objeções</span>
+          <span class="skill-badge">Estratégia de Google Maps</span>
+        </div>
+        <div class="text-success small fw-bold"><i class="fas fa-check-circle"></i> No Ar (Cérebro Central)</div>
+      </div>
+    </div>
+
+    <!-- Ciclope -->
+    <div class="col-lg-4">
+      <div class="card-mutante card-ciclope">
+        <div class="avatar-badge">⚡</div>
+        <h4 class="fw-bold text-white mb-1">Ciclope</h4>
+        <div class="text-danger small fw-bold mb-2">NVIDIA NIM · Llama 3.3 & Vision</div>
+        <p class="small text-muted mb-3">
+          <strong>Visão Óptica & Voz Concierge:</strong> Dispara o raio óptico para ler notas e cupons fiscais por foto (OCR), além de atender por voz e gerar marketing instantâneo.
+        </p>
+        <div class="mb-3">
+          <div class="text-uppercase small text-secondary fw-bold mb-1" style="font-size:10px;">Superpoderes & Skills:</div>
+          <span class="skill-badge">Visão OCR de Notas/Cupons</span>
+          <span class="skill-badge">Concierge de Voz em Tempo Real</span>
+          <span class="skill-badge">Redator Gastronômico Instantâneo</span>
+          <span class="skill-badge">Peças Publicitárias Instagram</span>
+        </div>
+        <div class="text-success small fw-bold"><i class="fas fa-check-circle"></i> No Ar (Visão & Áudio)</div>
+      </div>
+    </div>
+
+    <!-- Magneto -->
+    <div class="col-lg-4">
+      <div class="card-mutante card-magneto">
+        <div class="avatar-badge">🐺</div>
+        <h4 class="fw-bold text-white mb-1">Magneto / Wolverine</h4>
+        <div class="text-warning small fw-bold mb-2">DeepSeek R1 & V3</div>
+        <p class="small text-muted mb-3">
+          <strong>Mestre dos Números de Ferro:</strong> Raciocínio lógico profundo para calcular o CMV real no centavo, estancar desperdício de chope e auditar notas fiscais.
+        </p>
+        <div class="mb-3">
+          <div class="text-uppercase small text-secondary fw-bold mb-1" style="font-size:10px;">Superpoderes & Skills:</div>
+          <span class="skill-badge">Cálculo de CMV & Lucro Real</span>
+          <span class="skill-badge">Auditoria de Insumos & Inflação</span>
+          <span class="skill-badge">Matemática de ROI na Ponta do Lápis</span>
+          <span class="skill-badge">Código Backend & Banco de Dados</span>
+        </div>
+        <div class="text-success small fw-bold"><i class="fas fa-check-circle"></i> No Ar (Finanças & Lógica)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Diagrama de Comunicação: Quem Acessa Quem -->
+  <div class="fluxo-box">
+    <h5 class="fw-bold text-white mb-3"><i class="fas fa-network-wired text-info"></i> Mapa de Orquestração: Quem Acessa Quem</h5>
+    <div class="row text-center align-items-center g-3">
+      <div class="col-md-3">
+        <div class="p-3 rounded bg-dark border border-secondary">
+          <strong class="d-block text-white">1. Você / Vendedor</strong>
+          <small class="text-muted">Abre a prévia ou envia comando</small>
+        </div>
+      </div>
+      <div class="col-md-1 text-info fs-4">➔</div>
+      <div class="col-md-4">
+        <div class="p-3 rounded bg-dark border border-info">
+          <strong class="d-block text-info">2. 🧠 Professor X (Gemini)</strong>
+          <small class="text-muted">Orquestra a estratégia e delega para os mutantes</small>
+        </div>
+      </div>
+      <div class="col-md-1 text-danger fs-4">➔</div>
+      <div class="col-md-3">
+        <div class="p-3 rounded bg-dark border border-danger mb-2">
+          <strong class="d-block text-danger">⚡ Ciclope (NVIDIA)</strong>
+          <small class="text-muted">OCR de fotos & Voz</small>
+        </div>
+        <div class="p-3 rounded bg-dark border border-warning">
+          <strong class="d-block text-warning">🐺 Magneto (DeepSeek)</strong>
+          <small class="text-muted">CMV & ROI de Ferro</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Console de Comando Interativo -->
+  <div class="console-box">
+    <h5 class="fw-bold text-white mb-2"><i class="fas fa-terminal text-warning"></i> Console de Consulta aos Agentes X-MEN</h5>
+    <p class="small text-secondary mb-3">Selecione um dos agentes e envie uma ordem ou dúvida para testar em tempo real:</p>
+
+    <div class="row g-2 mb-3">
+      <div class="col-md-4">
+        <select id="select-agente" class="form-select bg-dark text-white border-secondary">
+          <option value="professor_x" selected>🧠 Professor X (Estratégia & Vendas)</option>
+          <option value="ciclope">⚡ Ciclope (Visão, OCR & Marketing)</option>
+          <option value="magneto">🐺 Magneto (CMV, Finanças & Lógica)</option>
+        </select>
+      </div>
+      <div class="col-md-8">
+        <div class="input-group">
+          <input id="prompt-input" type="text" class="form-control bg-dark text-white border-secondary" placeholder="Ex: Como fechar um bar de chope hoje em Barão Geraldo?">
+          <button id="btn-enviar-agente" class="btn btn-warning font-weight-bold" type="button">
+            <i class="fas fa-paper-plane"></i> Enviar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Área de Resposta -->
+    <div id="area-resposta" style="display:none;">
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <span id="resp-avatar" class="fs-4"></span>
+        <strong id="resp-nome" class="text-white"></strong>
+      </div>
+      <div id="resp-conteudo" class="msg-agente"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('btn-enviar-agente')?.addEventListener('click', async function() {
+    const agente = document.getElementById('select-agente').value;
+    const promptInput = document.getElementById('prompt-input');
+    const prompt = promptInput.value.trim();
+    if (!prompt) return;
+
+    const btn = this;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Consultando...';
+    btn.disabled = true;
+
+    try {
+      const resp = await fetch('{{ url_for("agentes.consultar") }}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({ agente: agente, prompt: prompt })
+      });
+      const data = await resp.json();
+      if (data.ok) {
+        document.getElementById('area-resposta').style.display = 'block';
+        document.getElementById('resp-avatar').innerText = data.avatar;
+        document.getElementById('resp-nome').innerText = data.nome_agente;
+        document.getElementById('resp-conteudo').innerHTML = data.resposta.replace(/\n/g, '<br>');
+      } else {
+        alert(data.erro || 'Erro ao consultar agente.');
+      }
+    } catch (e) {
+      alert('Erro de conexão com o agente.');
+    } finally {
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    }
+  });
+</script>
+{% endblock %}
