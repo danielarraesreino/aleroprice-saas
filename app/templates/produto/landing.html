@@ -97,41 +97,52 @@
   .site-header {
     position: sticky;
     top: 0;
-    background: rgba(246, 238, 219, 0.95);
+    background: rgba(246, 238, 219, 0.98);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1.5px solid var(--linha);
     z-index: 1000;
-    padding: 14px 0;
+    padding: 10px 0;
   }
   .header-inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 16px;
   }
   .logo {
-    font-family: var(--font-cartaz);
-    font-size: 1.5rem;
-    letter-spacing: 0.02em;
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    letter-spacing: -0.02em;
     color: var(--tinta);
     text-transform: uppercase;
-    display: flex;
+    font-weight: 800;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    line-height: 1;
   }
-  .logo b { color: var(--tomate); font-weight: 400; }
+  .logo span { color: var(--tomate); }
   
   .nav-links {
     display: flex;
     align-items: center;
-    gap: 24px;
+    gap: 14px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
   }
+  .nav-links::-webkit-scrollbar { display: none; }
   .nav-links a {
     color: var(--taupe);
-    font-size: 0.88rem;
+    font-size: 0.78rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    padding: 4px 6px;
   }
   .nav-links a:hover { color: var(--tomate); }
 
@@ -520,17 +531,17 @@
   <div class="wrap header-inner">
     <a href="/" class="logo">
       <i class="fas fa-beer-mug-empty" style="color:var(--tomate);"></i>
-      FEIRA DE <b>BARÃO</b>
+      FEIRA DE <span>BARÃO</span>
     </a>
     <nav class="nav-links">
-      <a href="#dossie">O Dossiê Vivo</a>
-      <a href="#pracacoco">A Praça do Coco</a>
-      <a href="#bares">As 23 Barracas</a>
+      <a href="#dossie">O Dossiê</a>
+      <a href="#pracacoco">Praça do Coco</a>
+      <a href="#bares">23 Barracas</a>
       <a href="#tecnologia">Superpoderes IA</a>
       <a href="#conta">Calculadora</a>
-      <a href="#preco">Planos & Preço</a>
+      <a href="#preco">Planos</a>
     </nav>
-    <a class="btn btn-zap" href="{{ zap_url }}" target="_blank" rel="noopener">
+    <a class="btn btn-zap" style="padding:8px 18px; font-size:0.85rem; white-space:nowrap; flex-shrink:0;" href="{{ zap_url }}" target="_blank" rel="noopener">
       <i class="fab fa-whatsapp"></i> Falar com o Daniel
     </a>
   </div>
@@ -583,6 +594,7 @@
     <!-- PARADA 1: ABERTURA DO DISTRITO -->
     <div class="story-step step-center" data-lat="-22.8250" data-lng="-47.0860" data-zoom="14">
       <div class="story-card-box">
+        <img class="story-photo-thumb" src="{{ url_for('static', filename='img/dossie/barao-geraldo.jpg') }}" alt="Fazenda Santa Genebra e Barão Geraldo de Rezende">
         <span class="story-step-tag">Capítulo 1 · As Raízes</span>
         <h2 class="story-card-title">O Chão que Brotou Café e Boemia</h2>
         <p class="story-card-desc">
@@ -597,6 +609,7 @@
     <!-- PARADA 2: A PRAÇA DO COCO (PRAÇA IRMÃ CARMELA STECCHI) -->
     <div id="pracacoco" class="story-step step-right" data-lat="-22.8227" data-lng="-47.0872" data-zoom="17">
       <div class="story-card-box">
+        <img class="story-photo-thumb" src="{{ url_for('static', filename='img/dossie/praca-do-coco.jpg') }}" alt="Praça do Coco e Feira de Artesanato">
         <span class="story-step-tag">Capítulo 2 · O Coração Comunitário</span>
         <h2 class="story-card-title">A Praça do Coco & A Feira Viva</h2>
         <p class="story-card-desc">
@@ -611,6 +624,7 @@
     <!-- PARADA 3: O CENTRO & EMPÓRIO DO NONO -->
     <div class="story-step step-left" data-lat="-22.8248" data-lng="-47.0838" data-zoom="17">
       <div class="story-card-box">
+        <img class="story-photo-thumb" src="{{ url_for('static', filename='img/dossie/emporio-do-nono.jpg') }}" alt="Empório do Nono e mesa de acepipes">
         <span class="story-step-tag">Capítulo 3 · Os Pioneiros do Balcão</span>
         <h2 class="story-card-title">Empório do Nono (1999)</h2>
         <p class="story-card-desc">
@@ -625,6 +639,7 @@
     <!-- PARADA 4: A VILA SANTA ISABEL & BAR DA VILA -->
     <div class="story-step step-right" data-lat="-22.8285" data-lng="-47.0792" data-zoom="17">
       <div class="story-card-box">
+        <img class="story-photo-thumb" src="{{ url_for('static', filename='img/dossie/bar-da-vila.jpg') }}" alt="Bar da Vila na Vila Santa Isabel">
         <span class="story-step-tag">Capítulo 4 · A Boemia das Ruas Calmas</span>
         <h2 class="story-card-title">Bar da Vila · Santa Isabel</h2>
         <p class="story-card-desc">
@@ -639,6 +654,7 @@
     <!-- PARADA 5: AS 23 BARRACAS DO DISTRITO -->
     <div class="story-step step-center" data-lat="-22.8250" data-lng="-47.0860" data-zoom="14">
       <div class="story-card-box" style="border-color:var(--verde-zap);">
+        <img class="story-photo-thumb" src="{{ url_for('static', filename='img/dossie/unicamp-campus.jpg') }}" alt="Unicamp e as 23 casas de Barão">
         <span class="story-step-tag" style="color:var(--verde-zap);">Capítulo 5 · A Rede Completa</span>
         <h2 class="story-card-title">As 23 Barracas Conectadas</h2>
         <p class="story-card-desc">
