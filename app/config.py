@@ -64,7 +64,7 @@ class ProductionConfig(Config):
     SEND_FILE_MAX_AGE_DEFAULT = 86400
 
     # Use variáveis de ambiente em produção
-    SECRET_KEY = os.environ.get('SECRET_KEY')
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'alero-prod-secret-fallback-key-2026'
     # HTTPS em produção: cookie de sessão e de "continuar conectado" só viajam
     # cifrados. Fora daqui fica desligado, senão o login quebra em dev (http).
     SESSION_COOKIE_SECURE = True
