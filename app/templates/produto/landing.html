@@ -668,10 +668,104 @@
     text-align: center;
   }
 
-  @media(max-width: 768px) {
+  /* ========================================================
+     RESPONSIVIDADE MULTI-DISPOSITIVO (MOBILE, TABLET, DESKTOP)
+     ======================================================== */
+  @media (max-width: 1024px) {
+    .wrap { padding: 0 18px; }
+    .nav-dossie { gap: 8px; }
+    .nav-dossie a { font-size: 0.74rem; padding: 4px 6px; }
+    .grid-tech-powers { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 768px) {
     .nav-dossie { display: none; }
-    .story-step { justify-content: center !important; }
-    .story-chapter-card { max-width: 100%; margin: 0 12px; }
+    .site-header { padding: 10px 0; }
+    .header-inner { gap: 8px; }
+    .logo-topo { font-size: 1.15rem; }
+    
+    .hero-dossie { padding: 44px 0 34px; }
+    .manchete-cartaz { font-size: clamp(2.1rem, 7.5vw, 3.2rem); margin-bottom: 14px; }
+    .gravata-lead { font-size: 1.02rem; margin-bottom: 22px; }
+    .meta-reportagem { gap: 12px; font-size: 0.8rem; }
+    
+    .barra-memoria-inner {
+      flex-direction: column;
+      text-align: center;
+      gap: 12px;
+    }
+    .barra-memoria-inner > div {
+      width: 100%;
+      justify-content: center;
+      display: flex;
+      gap: 8px;
+    }
+    .barra-memoria-inner .btn {
+      flex: 1;
+      font-size: 0.82rem;
+      padding: 8px 10px;
+    }
+
+    /* Scrollytelling Mobile */
+    .scrolly-map-sticky {
+      height: 100vh;
+      top: 0;
+      pointer-events: none; /* Garante que o scroll no celular nunca fique preso no Leaflet */
+    }
+    .scrolly-content-overlay {
+      margin-top: -100vh;
+      padding-bottom: 60px;
+    }
+    .story-step {
+      min-height: 88vh;
+      padding: 16px 0;
+      justify-content: center !important;
+    }
+    .story-chapter-card {
+      max-width: calc(100vw - 28px);
+      margin: 0 auto;
+      padding: 22px 18px;
+      border-radius: 16px;
+    }
+    .chapter-title { font-size: 1.65rem; }
+    .chapter-photo { height: 160px; }
+    .chapter-body { font-size: 0.9rem; line-height: 1.6; }
+    .depoimento-box { font-size: 0.84rem; padding: 10px 12px; }
+
+    /* Seções */
+    .full-bleed-section { padding: 50px 0; }
+    .timeline-grid { grid-template-columns: 1fr; gap: 14px; margin-top: 24px; }
+    .secao-mural { padding: 50px 0 !important; }
+    .secao-bares { padding: 50px 0; }
+    .grid-23-bares { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+    .bar-img-thumb { height: 120px; }
+    .bar-info-box { padding: 10px; }
+    .bar-title-kraft { font-size: 1.05rem; }
+    .bar-nota-linha { font-size: 0.78rem; }
+    .secao-tecnologia { padding: 50px 0; }
+    .grid-tech-powers { grid-template-columns: 1fr; gap: 14px; }
+    .card-tech-power { padding: 20px 18px; }
+
+    .secao-conta { padding: 50px 0; }
+    .secao-planos { padding: 50px 0; }
+    .tabela-planos-grid { grid-template-columns: 1fr; gap: 20px; }
+    .card-plano-kraft { padding: 26px 20px; }
+
+    /* Modal */
+    .modal-box {
+      padding: 24px 18px;
+      max-width: 95vw;
+      border-radius: 16px;
+    }
+    .modal-box h3 { font-size: 1.6rem; }
+    .form-control { font-size: 16px; } /* Impede zoom no iOS */
+  }
+
+  @media (max-width: 420px) {
+    .logo-topo { font-size: 1.02rem; }
+    .btn { padding: 8px 14px; font-size: 0.84rem; }
+    .grid-23-bares { grid-template-columns: 1fr; }
+    .bar-img-thumb { height: 160px; }
   }
 </style>
 </head>
