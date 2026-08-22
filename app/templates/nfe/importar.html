@@ -1,67 +1,97 @@
 {% extends "base.html" %}
 
-{% block title %}Importar NFe{% endblock %}
+{% block title %}Importar Nota Fiscal / Cupom OCR{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <h2>Importar Nota Fiscal Eletrônica</h2>
-
-    <div class="card mt-4">
-        <div class="card-body">
-            <!-- Standard form submission compatible with Flask backend -->
-            <form id="nfeForm" method="POST" enctype="multipart/form-data">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div class="mb-3">
-                    <label for="xmlFile" class="form-label">Arquivo XML da NFe</label>
-                    <input type="file" class="form-control" id="xmlFile" name="xml_file" accept=".xml" required>
-                    <small class="form-text text-muted">Selecione o arquivo XML da Nota Fiscal Eletrônica
-                        (NF-e).</small>
-                </div>
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-file-upload"></i> Importar
-                </button>
-            </form>
-        </div>
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2><i class="fas fa-file-invoice-dollar text-warning"></i> Entrada de Notas & Cupons</h2>
+        <span class="badge bg-warning text-dark px-3 py-2"><i class="fas fa-eye"></i> OCR NVIDIA Vision Ativo</span>
     </div>
 
-    <!-- Mobile Help -->
-    <div class="card mt-4 mb-4 border-warning">
-        <div class="card-body">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <h5 class="card-title text-warning"><i class="fas fa-mobile-alt"></i> Dificuldade pelo celular?</h5>
-                    <p class="card-text">
-                        Sabemos que alguns sistemas de celular não facilitam o download do XML.
-                        Você pode nos enviar o XML direto pelo WhatsApp ou E-mail que processamos para você.
-                    </p>
+    <div class="row">
+        <!-- Opção 1: OCR por Foto do Celular -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm h-100 border-warning">
+                <div class="card-header bg-warning text-dark font-weight-bold">
+                    <i class="fas fa-camera"></i> <strong>Opção 1 · Foto da Nota ou Cupom (OCR IA)</strong>
                 </div>
-                <div class="col-md-4 text-end">
-                    <a href="https://wa.me/5511999999999?text=Ol%C3%A1%2C%20estou%20no%20celular%20e%20preciso%20de%20ajuda%20para%20importar%20minha%20NFE%20para%20o%20{{ MARCA }}."
-                        target="_blank" class="btn btn-outline-success">
-                        <i class="fab fa-whatsapp"></i> Enviar por Zap
-                    </a>
-                    <a href="mailto:suporte@aleroprice.com.br" class="btn btn-outline-secondary ms-2">
-                        <i class="fas fa-envelope"></i> Email
-                    </a>
+                <div class="card-body d-flex flex-column justify-content-between">
+                    <div>
+                        <p class="card-text text-muted">
+                            Tire uma foto nítida do cupom fiscal, recibo do açougue ou nota de compras. A IA da NVIDIA lê os produtos, preços e atualiza o estoque e CMV automaticamente.
+                        </p>
+                        <form method="POST" enctype="multipart/form-data" id="formFoto">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="mb-3">
+                                <label for="fotoInput" class="form-label font-weight-bold">Tirar foto ou escolher imagem:</label>
+                                <input type="file" class="form-control" id="fotoInput" name="xml_file" accept="image/*" capture="environment" required>
+                                <small class="form-text text-muted">Formatos: JPG, PNG, WEBP.</small>
+                            </div>
+                            <button type="submit" class="btn btn-warning w-100 font-weight-bold" id="btnFoto">
+                                <i class="fas fa-magic"></i> Ler Nota com OCR da NVIDIA
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Opção 2: Arquivo XML Oficial -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm h-100 border-primary">
+                <div class="card-header bg-primary text-white font-weight-bold">
+                    <i class="fas fa-file-code"></i> <strong>Opção 2 · Arquivo XML da NF-e</strong>
+                </div>
+                <div class="card-body d-flex flex-column justify-content-between">
+                    <div>
+                        <p class="card-text text-muted">
+                            Envie o arquivo <code>.xml</code> padrão emitido pelo seu fornecedor para importação eletrônica exata com chaves da SEFAZ.
+                        </p>
+                        <form method="POST" enctype="multipart/form-data">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="mb-3">
+                                <label for="xmlFile" class="form-label font-weight-bold">Arquivo XML da NF-e:</label>
+                                <input type="file" class="form-control" id="xmlFile" name="xml_file" accept=".xml" required>
+                                <small class="form-text text-muted">Selecione o arquivo .xml da NF-e.</small>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-file-upload"></i> Importar Arquivo XML
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Instructions -->
-    <div class="card mt-4 border-left-info shadow">
+    <!-- Instruções e Como Funciona -->
+    <div class="card mt-2 border-left-info shadow-sm">
         <div class="card-body">
-            <h5 class="card-title text-info"><i class="fas fa-info-circle"></i> Como funciona</h5>
-            <p>
-                Ao importar um arquivo XML:
-            </p>
-            <ul>
-                <li>O sistema lerá os dados da nota fiscal (número, série, data, totais).</li>
-                <li>Verificará se o fornecedor já existe (pelo CNPJ) e o criará se necessário.</li>
-                <li>Verificará cada produto pelo código. Se não existir, será cadastrado automaticamente.</li>
-                <li>O estoque dos produtos será atualizado automaticamente com as quantidades da nota.</li>
-            </ul>
+            <h5 class="card-title text-info"><i class="fas fa-info-circle"></i> O que acontece ao importar:</h5>
+            <div class="row text-muted">
+                <div class="col-md-4 mb-2">
+                    <strong>1. Cadastro de Insumos:</strong><br>
+                    Produtos novos são criados automaticamente no seu cardápio de insumos.
+                </div>
+                <div class="col-md-4 mb-2">
+                    <strong>2. Atualização de CMV:</strong><br>
+                    O custo unitário de cada receita é recalculado com o preço real pago.
+                </div>
+                <div class="col-md-4 mb-2">
+                    <strong>3. Alerta de Inflação:</strong><br>
+                    Se o fornecedor aumentar o preço de algum ingrediente em mais de 10%, você recebe um aviso.
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+  document.getElementById('formFoto')?.addEventListener('submit', function() {
+    const btn = document.getElementById('btnFoto');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando Imagem com OCR NVIDIA...';
+    btn.disabled = true;
+  });
+</script>
 {% endblock %}

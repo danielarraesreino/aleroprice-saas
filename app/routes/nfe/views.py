@@ -128,11 +128,29 @@ def importar():
             flash('Nenhum arquivo selecionado!', 'danger')
             return render_template('nfe/importar.html')
         
-        if not arquivo.filename.lower().endswith('.xml'):
-            flash('Apenas arquivos XML são permitidos!', 'danger')
+        nome_arq = arquivo.filename.lower()
+        eh_imagem = any(nome_arq.endswith(ext) for ext in ['.jpg', '.jpeg', '.png', '.webp', '.pdf'])
+        eh_xml = nome_arq.endswith('.xml')
+
+        if not eh_xml and not eh_imagem:
+            flash('Envie um arquivo XML ou uma foto da nota fiscal/cupom (JPG, PNG, WEBP)!', 'danger')
             return render_template('nfe/importar.html')
-        
+
         try:
+            if eh_imagem:
+                from app.utils.nfe_ocr import processar_foto_nfe
+                img_bytes = arquivo.read()
+                content_type = arquivo.mimetype or 'image/jpeg'
+                ocr_data = processar_foto_nfe(img_bytes, content_type=content_type)
+                if not ocr_data.get('ok'):
+                    flash(f'Erro no leitor OCR de foto: {ocr_data.get("erro")}', 'danger')
+                    return render_template('nfe/importar.html')
+
+                nova_nota = importar_nfe_ocr(ocr_data, arquivo.filename, restaurant_id)
+                nova_nota.atualizar_estoque()
+                flash(f'Nota/Cupom lido com sucesso via OCR de Visão da NVIDIA! Total: R$ {nova_nota.valor_total:.2f}', 'success')
+                return redirect(url_for('nfe.visualizar', id=nova_nota.id))
+
             # Ler o conteúdo do XML
             xml_content = arquivo.read().decode('utf-8')
             
@@ -143,38 +161,20 @@ def importar():
             restaurante = Restaurante.query.get(restaurant_id)
             if restaurante and restaurante.cnpj:
                 dest_cnpj = nfe_data.destinatario.cnpj
-                # Remover pontuação para comparação
                 if dest_cnpj:
                     dest_cnpj_limpo = re.sub(r'\D', '', dest_cnpj)
                     rest_cnpj_limpo = re.sub(r'\D', '', restaurante.cnpj)
-                    
                     if dest_cnpj_limpo != rest_cnpj_limpo:
                         flash(f'Bloqueio de Segurança: Esta nota fiscal é destinada ao CNPJ {dest_cnpj}, mas o seu restaurante é {restaurante.cnpj}.', 'danger')
                         return render_template('nfe/importar.html')
             
-            # Verificar se a NF-e já existe no sistema (para este tenant ou globalmente? Chave é unica globalmente normaly, mas vamos filtrar por tenant por segurança)
-            # Na verdade, a chave deve ser única. Se outro tenant importou a mesma nota, algo está errado (mesma nota em dois restaurantes?).
-            # Vamos assumir que se existe, bloqueia. Mas para evitar colisão entre tenants se houver dados compartilhados errados, filtrar por tenant é bom, 
-            # mas chave de acesso é única no mundo. Se já existe no DB, não importa o tenant, já foi importada?
-            # Se for multi-tenancy real em SCHEMA compartilhado, a chave deve ser unique PER TENANT?
-            # Não, uma nota fiscal é destinada a UM CNPJ destinatário. Se os tenants tem CNPJs diferentes, nunca colidirá.
-            # Se tenants compartilham CNPJ (filiais), a nota é a mesma.
-            # Vamos filtrar por existencia.
-            nota_existente = NFNota.query.filter_by(chave_acesso=nfe_data.chave_acesso).first() # Check global ou tenant?
-            # Se filtrar por tenant:
-            # nota_existente = NFNota.query.filter_by(chave_acesso=nfe_data.chave_acesso, restaurant_id=restaurant_id).first()
-            # Se já existir em OUTRO tenant, permitimos importar de novo? Talvez sim, se for um sistema multi-loja.
-            # Vamos filtrar por tenant para isolamento.
             nota_existente = NFNota.query.filter_by(chave_acesso=nfe_data.chave_acesso, restaurant_id=restaurant_id).first()
-            
             if nota_existente:
                 flash(f'Nota fiscal {nfe_data.numero}/{nfe_data.serie} já importada anteriormente!', 'warning')
                 return redirect(url_for('nfe.visualizar', id=nota_existente.id))
             
             # Importar a NF-e
             nova_nota = importar_nfe(nfe_data, xml_content, restaurant_id)
-            
-            # Atualizar estoque com base nos itens da NF-e
             nova_nota.atualizar_estoque()
             
             flash(f'Nota fiscal {nfe_data.numero}/{nfe_data.serie} importada com sucesso!', 'success')
@@ -184,10 +184,9 @@ def importar():
              flash(f'Erro de Validação: {str(ve)}', 'warning')
              return render_template('nfe/importar.html')
         except Exception as e:
-            # Logar erro real no console para debug
             import traceback
             traceback.print_exc()
-            flash(f'Não conseguimos ler esta nota. Verifique se é um XML de NFE válido (Erro: {str(e)})', 'danger')
+            flash(f'Não conseguimos processar esta nota: {str(e)}', 'danger')
             return render_template('nfe/importar.html')
     
     return render_template('nfe/importar.html')
@@ -518,6 +517,95 @@ def importar_nfe(nfe_data, xml_content, restaurant_id):
         flash(msg, 'warning')
     
     return nota
+
+
+def importar_nfe_ocr(ocr_data, imagem_nome, restaurant_id):
+    """Importa os dados extraídos por OCR (NVIDIA Vision) para o banco de dados"""
+    cnpj_limpo = re.sub(r'\D', '', str(ocr_data.get('cnpj') or ''))
+    if not cnpj_limpo or len(cnpj_limpo) < 11:
+        cnpj_limpo = "00000000000000"
+
+    fornecedor_nome = ocr_data.get('fornecedor') or "Fornecedor Local (Foto)"
+
+    fornecedor = Fornecedor.query.filter_by(cnpj=cnpj_limpo, restaurant_id=restaurant_id).first()
+    if not fornecedor:
+        fornecedor = Fornecedor(
+            cnpj=cnpj_limpo,
+            razao_social=fornecedor_nome,
+            restaurant_id=restaurant_id
+        )
+        db.session.add(fornecedor)
+        db.session.flush()
+
+    data_emissao_str = str(ocr_data.get('data_emissao') or '')
+    try:
+        data_emissao = datetime.strptime(data_emissao_str[:10], '%Y-%m-%d')
+    except Exception:
+        data_emissao = datetime.now()
+
+    chave_acesso = "OCR_" + datetime.now().strftime('%Y%m%d%H%M%S') + "_" + str(restaurant_id)
+    numero_nota = str(ocr_data.get('numero_nota') or '1')
+    valor_total = float(ocr_data.get('valor_total') or 0)
+
+    nota = NFNota(
+        chave_acesso=chave_acesso,
+        numero=numero_nota,
+        serie="OCR",
+        data_emissao=data_emissao,
+        valor_total=valor_total,
+        valor_produtos=valor_total,
+        valor_frete=0.0,
+        valor_seguro=0.0,
+        valor_desconto=0.0,
+        valor_impostos=0.0,
+        fornecedor_id=fornecedor.id,
+        xml_data=f"<!-- Importado via NVIDIA Vision OCR: {imagem_nome} -->",
+        restaurant_id=restaurant_id
+    )
+    db.session.add(nota)
+    db.session.flush()
+
+    for idx, item in enumerate(ocr_data.get('itens', []), start=1):
+        descricao = (item.get('descricao') or 'Item sem nome').strip()
+        codigo = str(item.get('codigo') or f'OCR_{abs(hash(descricao)) % 10000}')
+        unidade = (item.get('unidade') or 'UN').upper()[:6]
+        quantidade = float(item.get('quantidade') or 1.0)
+        valor_unitario = float(item.get('valor_unitario') or 0.0)
+        valor_total_item = float(item.get('valor_total') or (quantidade * valor_unitario))
+
+        produto = Produto.query.filter_by(codigo=codigo, restaurant_id=restaurant_id).first()
+        if not produto:
+            produto = Produto.query.filter_by(nome=descricao, restaurant_id=restaurant_id).first()
+
+        if not produto:
+            produto = Produto(
+                codigo=codigo,
+                nome=descricao,
+                unidade=unidade,
+                preco_custo=valor_unitario,
+                quantidade_estoque=0,
+                fornecedor_id=fornecedor.id,
+                restaurant_id=restaurant_id
+            )
+            db.session.add(produto)
+            db.session.flush()
+
+        nf_item = NFItem(
+            nota_id=nota.id,
+            num_item=idx,
+            codigo=codigo,
+            descricao=descricao,
+            unidade=unidade,
+            quantidade=quantidade,
+            valor_unitario=valor_unitario,
+            valor_total=valor_total_item,
+            produto_id=produto.id
+        )
+        db.session.add(nf_item)
+
+    db.session.commit()
+    return nota
+
 
 # API Endpoints
 @bp.route('/api/notas')
