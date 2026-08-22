@@ -3,29 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Feira de Barão · O Dossiê Cultural & Identidade Digital dos Bares de Barão Geraldo</title>
-<meta name="description" content="A feira que não desmonta: as histórias, a boemia e a identidade digital dos bares de Barão Geraldo. Cardápio no Google Maps, reservas no WhatsApp e gestão de CMV.">
+<title>Feira de Barão · O Dossiê Cultural & Memória Viva de Barão Geraldo</title>
+<meta name="description" content="Grande reportagem multimídia sobre as origens, a boemia, a Unicamp, a Praça do Coco e a identidade digital dos bares e restaurantes de Barão Geraldo.">
 <link rel="canonical" href="https://feiradebarao.com.br/">
 <link rel="alternate" type="text/markdown" title="LLM Summary" href="/llms.txt">
-<meta property="og:title" content="Feira de Barão · O Dossiê Cultural & Identidade Digital dos Bares">
-<meta property="og:description" content="As histórias, a Praça do Coco, a tradição dos botecos e o sistema digital que coloca seu bar no Google Maps com zero taxa de app.">
-<meta property="og:type" content="website">
+<meta property="og:title" content="Feira de Barão · O Grande Dossiê Cultural & Gastronômico">
+<meta property="og:description" content="As raízes no café, a ferrovia Funilense, a chegada da Unicamp, a Feira da Praça do Coco e o mapa vivo dos bares e restaurantes de Barão Geraldo.">
+<meta property="og:type" content="article">
 <meta property="og:image" content="{{ og_imagem('og-feira.jpg') }}">
 <meta property="og:url" content="https://feiradebarao.com.br/">
 
-<!-- Fontes: Anton (Cartaz Nobre) + Plus Jakarta Sans / Work Sans (Leitura Confortável) -->
+<!-- Tipografia: Anton (Manchetes de Cartaz) + Plus Jakarta Sans (Leitura Editorial) + Space Grotesk -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Space+Grotesk:wght@600;700&family=Work+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <!-- Leaflet.js para o Scrollytelling de Mapa -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebSite","name":"Feira de Barão",
+{"@context":"https://schema.org","@type":"ReportageNewsArticle",
+ "headline":"Feira de Barão: O Grande Dossiê Cultural e Gastronômico de Barão Geraldo",
  "url":"https://feiradebarao.com.br/",
- "description":"Dossiê gastronômico e plataforma de presença digital para os bares de Barão Geraldo, Campinas - SP.",
+ "description":"Investigação histórica e mapeamento multimídia de Barão Geraldo, da Fazenda Santa Genebra e Unicamp à Feira da Praça do Coco.",
  "publisher":{"@type":"Organization","name":"Feira de Barão",
    "url":"https://feiradebarao.com.br/",
    "areaServed":"Barão Geraldo, Campinas - SP, Brasil"}}
@@ -33,67 +34,71 @@
 
 <style>
   :root {
-    /* Paleta Orgânica de Barão: Kraft, Tinta, Tomate de Cartaz e Ouro */
+    /* Paleta Orgânica e Editorial de Barão */
     --papel: #f6eedb;
-    --papel-escuro: #ebe0c8;
-    --cartao: #fdf8eb;
-    --tinta: #251b10;
-    --taupe: #6e5d45;
-    --tomate: #b23214;
-    --laranja: #ff6a2b;
-    --ambar: #ffb43d;
+    --papel-escuro: #eae0c8;
+    --papel-claro: #fcf8ee;
+    --cartao: #ffffff;
+    --tinta: #241c14;
+    --taupe: #695842;
+    --tomate: #b33215;
+    --laranja: #e85d22;
+    --ambar: #f59e0b;
     --verde-zap: #166b3f;
-    --linha: rgba(37, 27, 16, 0.15);
-
-    --bg-dark: #0f1117;
-    --bg-dark-card: #161922;
-    --border-dark: rgba(255, 255, 255, 0.08);
+    --verde-oliva: #4a5d3c;
+    --linha: rgba(36, 28, 20, 0.14);
 
     --font-cartaz: 'Anton', 'Arial Narrow', sans-serif;
     --font-heading: 'Space Grotesk', system-ui, sans-serif;
-    --font-corpo: 'Plus Jakarta Sans', 'Work Sans', system-ui, sans-serif;
+    --font-corpo: 'Plus Jakarta Sans', -apple-system, sans-serif;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
   body {
     background-color: var(--papel);
     color: var(--tinta);
     font-family: var(--font-corpo);
     font-size: 16px;
-    line-height: 1.65;
+    line-height: 1.7;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
   }
 
-  /* Grão sutil de papel kraft */
+  /* Grão de textura de jornal / papel antigo */
   body::after {
     content: '';
     position: fixed;
     inset: 0;
     z-index: 9999;
     pointer-events: none;
-    opacity: 0.035;
+    opacity: 0.032;
     mix-blend-mode: multiply;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
   a { color: var(--tomate); text-decoration: none; transition: all 0.2s ease; }
   a:hover { color: var(--laranja); }
 
   /* Lona de Feira Tradicional */
-  .lona {
+  .lona-topo {
     height: 12px;
     background: repeating-linear-gradient(90deg, var(--tomate) 0 16px, var(--papel) 16px 32px);
     border-bottom: 1px solid var(--linha);
   }
 
   .wrap {
-    max-width: 1200px;
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  .wrap-narrow {
+    max-width: 820px;
     margin: 0 auto;
     padding: 0 24px;
   }
 
-  /* Top Navigation */
+  /* Top Header Fixo */
   .site-header {
     position: sticky;
     top: 0;
@@ -102,7 +107,7 @@
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1.5px solid var(--linha);
     z-index: 1000;
-    padding: 10px 0;
+    padding: 12px 0;
   }
   .header-inner {
     display: flex;
@@ -110,7 +115,7 @@
     justify-content: space-between;
     gap: 16px;
   }
-  .logo {
+  .logo-topo {
     font-family: var(--font-heading);
     font-size: 1.3rem;
     letter-spacing: -0.02em;
@@ -122,39 +127,41 @@
     gap: 8px;
     white-space: nowrap;
     flex-shrink: 0;
-    line-height: 1;
   }
-  .logo span { color: var(--tomate); }
-  
-  .nav-links {
+  .logo-topo span { color: var(--tomate); }
+
+  .nav-dossie {
     display: flex;
     align-items: center;
-    gap: 14px;
-    flex-wrap: nowrap;
+    gap: 12px;
     overflow-x: auto;
     scrollbar-width: none;
   }
-  .nav-links::-webkit-scrollbar { display: none; }
-  .nav-links a {
+  .nav-dossie::-webkit-scrollbar { display: none; }
+  .nav-dossie a {
     color: var(--taupe);
     font-size: 0.78rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
     white-space: nowrap;
-    padding: 4px 6px;
+    padding: 4px 8px;
+    border-radius: 6px;
   }
-  .nav-links a:hover { color: var(--tomate); }
+  .nav-dossie a:hover {
+    color: var(--tomate);
+    background: rgba(179, 50, 21, 0.06);
+  }
 
-  /* Botões */
+  /* Botões de Ação */
   .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     font-weight: 700;
-    font-size: 0.95rem;
-    padding: 12px 24px;
+    font-size: 0.92rem;
+    padding: 10px 22px;
     border-radius: 999px;
     cursor: pointer;
     border: none;
@@ -164,19 +171,29 @@
   .btn-tomate {
     background: var(--tomate);
     color: #fff !important;
-    box-shadow: 0 4px 14px rgba(178, 50, 20, 0.3);
+    box-shadow: 0 4px 14px rgba(179, 50, 21, 0.25);
   }
   .btn-tomate:hover {
-    background: #8e260e;
+    background: #8e250e;
     transform: translateY(-2px);
   }
   .btn-zap {
     background: var(--verde-zap);
     color: #fff !important;
-    box-shadow: 0 4px 14px rgba(22, 107, 63, 0.3);
+    box-shadow: 0 4px 14px rgba(22, 107, 63, 0.25);
   }
   .btn-zap:hover {
     background: #0f4f2e;
+    transform: translateY(-2px);
+  }
+  .btn-colab {
+    background: #241c14;
+    color: #f6eedb !important;
+    border: 1.5px solid #241c14;
+  }
+  .btn-colab:hover {
+    background: #453728;
+    color: #fff !important;
     transform: translateY(-2px);
   }
   .btn-fantasma {
@@ -185,156 +202,227 @@
     border: 1.5px solid var(--linha);
   }
   .btn-fantasma:hover {
-    background: rgba(37, 27, 16, 0.05);
+    background: rgba(36, 28, 20, 0.05);
     border-color: var(--tinta);
   }
 
-  /* Hero Section Cultural & Editorial */
+  /* HERO DA GRANDE REPORTAGEM */
   .hero-dossie {
-    padding: 80px 0 60px;
+    padding: 70px 0 50px;
     text-align: center;
     border-bottom: 1.5px solid var(--linha);
+    background: radial-gradient(circle at center 20%, rgba(255,255,255,0.4) 0%, transparent 70%);
   }
-  .eyebrow {
-    font-family: var(--font-corpo);
-    font-size: 0.92rem;
-    font-weight: 700;
-    letter-spacing: 0.15em;
+  .chapeu-dossie {
+    font-size: 0.84rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--tomate);
-    display: block;
-    margin-bottom: 12px;
+    display: inline-block;
+    margin-bottom: 14px;
+    border-bottom: 2px solid var(--tomate);
+    padding-bottom: 2px;
   }
-  .cartaz-headline {
+  .manchete-cartaz {
     font-family: var(--font-cartaz);
-    font-size: clamp(2.8rem, 6.5vw, 5.2rem);
+    font-size: clamp(2.8rem, 6.2vw, 5rem);
     line-height: 0.96;
     letter-spacing: -0.01em;
     text-transform: uppercase;
     color: var(--tinta);
-    max-width: 980px;
+    max-width: 960px;
     margin: 0 auto 20px;
   }
-  .cartaz-headline b { color: var(--tomate); font-weight: 400; }
-  .lead-dossie {
+  .manchete-cartaz b { color: var(--tomate); font-weight: 400; }
+  .gravata-lead {
     font-size: clamp(1.1rem, 1.8vw, 1.3rem);
     color: var(--taupe);
     max-width: 820px;
-    margin: 0 auto 32px;
+    margin: 0 auto 30px;
     line-height: 1.6;
+    font-weight: 400;
   }
-  .hero-pills-bar {
+  .meta-reportagem {
     display: flex;
     justify-content: center;
-    gap: 12px;
+    align-items: center;
+    gap: 20px;
+    font-size: 0.85rem;
+    color: var(--taupe);
+    margin-top: 24px;
     flex-wrap: wrap;
-    margin-top: 28px;
-  }
-  .hero-pill-kraft {
-    background: var(--cartao);
-    border: 1px solid var(--linha);
-    padding: 6px 14px;
-    border-radius: 999px;
-    font-size: 0.84rem;
-    font-weight: 700;
-    color: var(--tinta);
   }
 
+  /* BARRA DE COLABORAÇÃO & MEMÓRIA ABERTA */
+  .barra-memoria-aberta {
+    background: #241c14;
+    color: #f6eedb;
+    padding: 16px 0;
+    border-bottom: 1.5px solid var(--linha);
+  }
+  .barra-memoria-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .barra-memoria-texto {
+    font-size: 0.92rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .barra-memoria-texto i { color: var(--ambar); font-size: 1.2rem; }
+
   /* ----------------------------------------------------
-     SCROLLYTELLING COM MAPA INTERATIVO (O GRANDE DOSSIÊ)
+     SCROLLYTELLING COM MAPA & FULL-BLEED MULTIMÍDIA
      ---------------------------------------------------- */
   .scrolly-container {
     position: relative;
     border-bottom: 1.5px solid var(--linha);
   }
-  
-  /* Mapa Fixo no Fundo (Sticky) */
+
+  /* Mapa Fixo (Sticky) */
   .scrolly-map-sticky {
     position: sticky;
     top: 60px;
     width: 100%;
     height: calc(100vh - 60px);
     z-index: 10;
-    filter: sepia(35%) contrast(95%) brightness(95%);
+    filter: sepia(40%) contrast(90%) brightness(95%);
     background: var(--papel-escuro);
   }
 
-  /* Camada de Cartões que Rola por Cima do Mapa */
+  /* Camada dos Capítulos Narrativos */
   .scrolly-content-overlay {
     position: relative;
     z-index: 20;
-    pointer-events: none; /* Deixa cliques passarem para o mapa fora dos cards */
-    padding-bottom: 120px;
+    pointer-events: none;
+    padding-bottom: 140px;
   }
 
   .story-step {
-    min-height: 90vh;
+    min-height: 95vh;
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    padding: 40px 0;
+    padding: 50px 0;
     pointer-events: none;
   }
-  .story-step.step-right {
-    justify-content: flex-end;
-  }
-  .story-step.step-center {
-    justify-content: center;
-  }
+  .story-step.step-right { justify-content: flex-end; }
+  .story-step.step-center { justify-content: center; }
 
-  .story-card-box {
-    background: rgba(253, 248, 235, 0.96);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+  .story-chapter-card {
+    background: rgba(253, 248, 235, 0.97);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border: 2px solid var(--tomate);
     border-radius: 18px;
-    padding: 32px 28px;
-    max-width: 460px;
+    padding: 34px 30px;
+    max-width: 520px;
     width: 100%;
-    box-shadow: 0 16px 40px rgba(37, 27, 16, 0.25);
+    box-shadow: 0 20px 48px rgba(36, 28, 20, 0.28);
     color: var(--tinta);
     pointer-events: auto;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
-  .story-card-box:hover {
+  .story-chapter-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 20px 50px rgba(37, 27, 16, 0.35);
+    box-shadow: 0 26px 56px rgba(36, 28, 20, 0.36);
   }
 
-  .story-step-tag {
+  .chapter-number {
     font-size: 0.78rem;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.14em;
     color: var(--tomate);
     margin-bottom: 6px;
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
-  .story-card-title {
+  .chapter-title {
     font-family: var(--font-cartaz);
-    font-size: 1.8rem;
-    line-height: 1.05;
+    font-size: 2.1rem;
+    line-height: 1.02;
     text-transform: uppercase;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
     color: var(--tinta);
   }
-  .story-card-desc {
-    font-size: 0.95rem;
-    color: var(--taupe);
-    line-height: 1.6;
-    margin-bottom: 16px;
-  }
-  .story-photo-thumb {
+  .chapter-photo {
     width: 100%;
-    height: 190px;
+    height: 220px;
     object-fit: cover;
-    border-radius: 10px;
-    margin-bottom: 14px;
-    border: 1px solid var(--linha);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    border: 1.5px solid var(--linha);
     background: #dfd3ba;
   }
+  .chapter-body {
+    font-size: 0.96rem;
+    color: var(--tinta);
+    line-height: 1.68;
+    margin-bottom: 18px;
+  }
+  .chapter-body p { margin-bottom: 12px; }
+  .chapter-body p:last-child { margin-bottom: 0; }
 
-  /* Seção dos 23 Bares em Grade */
+  /* Citações / Memória Oral */
+  .depoimento-box {
+    background: rgba(179, 50, 21, 0.05);
+    border-left: 3px solid var(--tomate);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 14px 0;
+    font-style: italic;
+    font-size: 0.9rem;
+    color: var(--taupe);
+  }
+  .depoimento-autor {
+    display: block;
+    font-style: normal;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--tomate);
+    margin-top: 6px;
+  }
+
+  /* FULL-BLEED MEDIA BREAKOUT (Grandes Imagens Documentais) */
+  .full-bleed-section {
+    position: relative;
+    padding: 80px 0;
+    background: #1a1612;
+    color: #f6eedb;
+    border-bottom: 1.5px solid var(--linha);
+  }
+  .timeline-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-top: 40px;
+  }
+  .timeline-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .timeline-year {
+    font-family: var(--font-cartaz);
+    font-size: 1.8rem;
+    color: var(--ambar);
+    margin-bottom: 6px;
+  }
+  .timeline-desc {
+    font-size: 0.88rem;
+    color: #d1c7b7;
+    line-height: 1.5;
+  }
+
+  /* SEÇÃO DOS 23 BARES / REDE COMUNITÁRIA */
   .secao-bares {
     padding: 80px 0;
     border-bottom: 1.5px solid var(--linha);
@@ -358,7 +446,7 @@
   .bar-card-kraft:hover {
     transform: translateY(-4px);
     border-color: var(--tomate);
-    box-shadow: 0 10px 24px rgba(37, 27, 16, 0.15);
+    box-shadow: 0 12px 28px rgba(36, 28, 20, 0.14);
   }
   .bar-img-thumb {
     width: 100%;
@@ -388,9 +476,9 @@
     color: var(--tomate);
   }
 
-  /* Seção de Tecnologia & Bar OS */
+  /* INFRAESTRUTURA BAR OS & TECNOLOGIA */
   .secao-tecnologia {
-    background: #12141a;
+    background: #11141a;
     color: #cbd5e1;
     padding: 90px 0;
     border-bottom: 1.5px solid var(--linha);
@@ -408,15 +496,14 @@
     line-height: 1.15;
     margin-bottom: 14px;
   }
-
   .grid-tech-powers {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 22px;
   }
   .card-tech-power {
-    background: var(--bg-dark-card);
-    border: 1px solid var(--border-dark);
+    background: #171b24;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 18px;
     padding: 28px 24px;
   }
@@ -443,9 +530,17 @@
     line-height: 1.55;
   }
 
-  /* Calculadora de ROI e Planos */
+  /* CALCULADORA DE ROI */
+  .secao-conta {
+    padding: 80px 0;
+    background: var(--papel-claro);
+    border-bottom: 1.5px solid var(--linha);
+  }
+
+  /* TABELA DE PLANOS */
   .secao-planos {
     padding: 80px 0;
+    border-bottom: 1.5px solid var(--linha);
   }
   .tabela-planos-grid {
     display: grid;
@@ -464,7 +559,7 @@
   }
   .card-plano-kraft.destaque {
     border-color: var(--tomate);
-    box-shadow: 0 12px 32px rgba(178, 50, 20, 0.2);
+    box-shadow: 0 12px 32px rgba(179, 50, 21, 0.2);
   }
   .plano-badge-topo {
     position: absolute;
@@ -505,7 +600,66 @@
     opacity: 0.6;
   }
 
-  /* Footer */
+  /* MODAL DE COLABORAÇÃO & HISTÓRIAS */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 15, 10, 0.75);
+    backdrop-filter: blur(8px);
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-backdrop.ativo { display: flex; }
+  .modal-box {
+    background: var(--papel);
+    border: 2.5px solid var(--tomate);
+    border-radius: 20px;
+    max-width: 600px;
+    width: 100%;
+    padding: 36px 30px;
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+  }
+  .modal-close {
+    position: absolute;
+    top: 16px;
+    right: 18px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--tinta);
+    cursor: pointer;
+  }
+  .form-group {
+    margin-bottom: 16px;
+  }
+  .form-group label {
+    display: block;
+    font-weight: 700;
+    font-size: 0.88rem;
+    margin-bottom: 6px;
+    color: var(--tinta);
+  }
+  .form-control {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1.5px solid var(--linha);
+    background: #fff;
+    font-family: var(--font-corpo);
+    font-size: 0.95rem;
+  }
+  .form-control:focus {
+    outline: none;
+    border-color: var(--tomate);
+  }
+
+  /* Rodapé */
   .site-footer {
     border-top: 1.5px solid var(--linha);
     padding: 60px 0 40px;
@@ -516,156 +670,295 @@
   }
 
   @media(max-width: 768px) {
-    .nav-links { display: none; }
+    .nav-dossie { display: none; }
     .story-step { justify-content: center !important; }
-    .story-card-box { max-width: 100%; margin: 0 12px; }
+    .story-chapter-card { max-width: 100%; margin: 0 12px; }
   }
 </style>
 </head>
 <body>
 
-<div class="lona"></div>
+<div class="lona-topo"></div>
 
-<!-- Navegação Superior -->
+<!-- Top Header Fixo -->
 <header class="site-header">
   <div class="wrap header-inner">
-    <a href="/" class="logo">
+    <a href="/" class="logo-topo">
       <i class="fas fa-beer-mug-empty" style="color:var(--tomate);"></i>
       FEIRA DE <span>BARÃO</span>
     </a>
-    <nav class="nav-links">
-      <a href="#dossie">O Dossiê</a>
-      <a href="#pracacoco">Praça do Coco</a>
+    <nav class="nav-dossie">
+      <a href="#dossie">O Dossiê Vivo</a>
+      <a href="#linha-do-tempo">Linha do Tempo</a>
+      <a href="#pracacoco">A Praça do Coco</a>
       <a href="#bares">23 Barracas</a>
-      <a href="#tecnologia">Superpoderes IA</a>
+      <a href="#tecnologia">Infraestrutura IA</a>
       <a href="#conta">Calculadora</a>
       <a href="#preco">Planos</a>
     </nav>
-    <a class="btn btn-zap" style="padding:8px 18px; font-size:0.85rem; white-space:nowrap; flex-shrink:0;" href="{{ zap_url }}" target="_blank" rel="noopener">
-      <i class="fab fa-whatsapp"></i> Falar com o Daniel
-    </a>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <button class="btn btn-colab" style="padding:7px 16px; font-size:0.82rem;" onclick="abrirModalColaboracao()">
+        <i class="fas fa-feather"></i> Contar História
+      </button>
+      <a class="btn btn-zap" style="padding:7px 16px; font-size:0.82rem; white-space:nowrap;" href="{{ zap_url }}" target="_blank" rel="noopener">
+        <i class="fab fa-whatsapp"></i> Falar com o Daniel
+      </a>
+    </div>
   </div>
 </header>
 
+<!-- BARRA DE MEMÓRIA ABERTA & COLABORAÇÃO -->
+<div class="barra-memoria-aberta">
+  <div class="wrap barra-memoria-inner">
+    <div class="barra-memoria-texto">
+      <i class="fas fa-book-open"></i>
+      <span><strong>Dossiê Aberto à Comunidade:</strong> Você tem um causo, foto antiga ou correção histórica de Barão Geraldo?</span>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-fantasma" style="color:#f6eedb !important; border-color:rgba(255,255,255,0.3); padding:6px 14px; font-size:0.8rem;" onclick="abrirModalColaboracao('correcao')">
+        <i class="fas fa-pen"></i> Sugerir Correção
+      </button>
+      <button class="btn btn-tomate" style="padding:6px 14px; font-size:0.8rem;" onclick="abrirModalColaboracao('historia')">
+        <i class="fas fa-plus-circle"></i> Enviar Meu Relato
+      </button>
+    </div>
+  </div>
+</div>
+
 <main>
 
-<!-- HERO PRINCIPAL: O DOSSIÊ CULTURAL & GASTRONÔMICO -->
+<!-- HERO PRINCIPAL DA GRANDE REPORTAGEM -->
 <section class="hero-dossie">
   <div class="wrap">
-    <span class="eyebrow">Barão Geraldo · Campinas–SP · Memória & Gastronomia</span>
-    <h1 class="cartaz-headline">
+    <span class="chapeu-dossie">Grande Reportagem Multimídia · Barão Geraldo, Campinas–SP</span>
+    <h1 class="manchete-cartaz">
       A Feira que <b>Não Desmonta</b>.<br>
-      As Histórias e os Bares de Barão.
+      A Memória Viva de Barão Geraldo.
     </h1>
-    <p class="lead-dossie">
-      Do café da Fazenda Santa Genebra e a fundação da Unicamp aos causos de balcão da Praça do Coco: 
-      um mapeamento vivo do distrito, conectando as <strong>23 casas gastronômicas</strong> ao Google Maps, 
-      com reservas no WhatsApp e tecnologia que protege a nossa tradição.
+    <p class="gravata-lead">
+      Das águas do Rio Atibaia e os trilhos do trem Funilense à primavera acadêmica de Zeferino Vaz e o aroma de pastel da Praça do Coco: 
+      um dossiê imersivo sobre o distrito que fez do boteco a extensão da universidade e conectou suas <strong>23 casas gastronômicas</strong> em uma rede viva.
     </p>
 
     <div style="display:flex; justify-content:center; gap:14px; flex-wrap:wrap;">
       <a class="btn btn-tomate" href="#dossie">
-        <i class="fas fa-compass"></i> Iniciar Viagem no Mapa ↓
+        <i class="fas fa-compass"></i> Iniciar Jornada no Mapa ↓
+      </a>
+      <a class="btn btn-colab" onclick="abrirModalColaboracao('historia')">
+        <i class="fas fa-comment-dots"></i> Contar uma Memória do Bairro
       </a>
       <a class="btn btn-fantasma" href="#bares">
         Ver as 23 Barracas Digitais
       </a>
     </div>
 
-    <div class="hero-pills-bar">
-      <span class="hero-pill-kraft"><i class="fas fa-tree text-success"></i> Da Santa Genebra à Unicamp</span>
-      <span class="hero-pill-kraft"><i class="fas fa-store text-danger"></i> Feira da Praça do Coco (2002)</span>
-      <span class="hero-pill-kraft"><i class="fas fa-beer-mug-empty" style="color:#b23214;"></i> O Chope dos Pioneiros</span>
-      <span class="hero-pill-kraft"><i class="fas fa-robot text-primary"></i> Infraestrutura Bar OS & IA</span>
+    <div class="meta-reportagem">
+      <span><i class="fas fa-calendar-alt text-danger"></i> Pesquisa & Dossiê Vivo · 2026</span>
+      <span><i class="fas fa-map-marker-alt text-danger"></i> Distrito de Barão Geraldo</span>
+      <span><i class="fas fa-users text-danger"></i> Construção Coletiva com Moradores e Bares</span>
     </div>
   </div>
 </section>
 
 <!-- ========================================================
-     O GRANDE DOSSIÊ COM MAP SCROLLYTELLING INTERATIVO
+     O GRANDE DOSSIÊ MULTIMÍDIA COM MAP SCROLLYTELLING
      ======================================================== -->
 <section id="dossie" class="scrolly-container">
   <!-- 1. O Mapa Fixo de Barão Geraldo no Fundo -->
   <div id="mapa-scrolly" class="scrolly-map-sticky"></div>
 
-  <!-- 2. Os Cartões Narrativos que Passam por Cima -->
+  <!-- 2. A Camada dos 6 Capítulos Narrativos que Deslizam -->
   <div class="wrap scrolly-content-overlay">
 
-    <!-- PARADA 1: ABERTURA DO DISTRITO -->
-    <div class="story-step step-center" data-lat="-22.8250" data-lng="-47.0860" data-zoom="14">
-      <div class="story-card-box">
-        <img class="story-photo-thumb" src="{{ url_for('static', filename='img/dossie/barao-geraldo.jpg') }}" alt="Fazenda Santa Genebra e Barão Geraldo de Rezende">
-        <span class="story-step-tag">Capítulo 1 · As Raízes</span>
-        <h2 class="story-card-title">O Chão que Brotou Café e Boemia</h2>
-        <p class="story-card-desc">
-          No século XIX, o engenheiro e cafeicultor <strong>Geraldo Ribeiro de Sousa Rezende</strong> (o Barão Geraldo de Rezende) fundava a histórica Fazenda Santa Genebra. Em 1953 o distrito nascia oficialmente, e em 1966 a chegada da <strong>Unicamp por Zeferino Vaz</strong> transformou o vilarejo rural no maior centro de inteligência do interior — onde as teses sempre foram debatidas na mesa de boteco.
-        </p>
-        <div style="font-size:0.82rem; color:var(--tomate); font-weight:700;">
-          ↓ Role a página para viajar até a Praça do Coco
+    <!-- CAPÍTULO 1: OS CAMINHOS DO CAFÉ & A FERROVIA FUNILENSE -->
+    <div class="story-step step-left" data-lat="-22.8220" data-lng="-47.0980" data-zoom="14">
+      <div class="story-chapter-card">
+        <span class="chapter-number"><i class="fas fa-landmark"></i> Capítulo I · As Raízes do Chão</span>
+        <h2 class="chapter-title">O Café, a Mata e os Trilhos do Trem</h2>
+        <img class="chapter-photo" src="{{ url_for('static', filename='img/dossie/barao-geraldo.jpg') }}" alt="Fazenda Santa Genebra e Barão Geraldo de Rezende">
+        <div class="chapter-body">
+          <p>
+            No final do século XIX, a paisagem de Barão Geraldo era desenhada pelo vale verde do Rio Atibaia e pela pujança da <strong>Fazenda Santa Genebra</strong>, de propriedade do engenheiro e cafeicultor <strong>Geraldo Ribeiro de Sousa Rezende</strong> (o Barão Geraldo de Rezende, 1846–1907).
+          </p>
+          <p>
+            Em 1899, a chegada dos trilhos da lendária <strong>Estrada de Ferro Funilense</strong> conectou a produção agrícola à Estação Guanabara em Campinas, trazendo colonos, trabalhadores e os primeiros armazéns de beira de linha.
+          </p>
+        </div>
+        <div class="depoimento-box">
+          “O apito do trem Funilense marcava a hora do almoço nas fazendas e a chegada das notícias que vinham da cidade.”
+          <span class="depoimento-autor">— Memória de colonos da Fazenda Santa Genebra</span>
+        </div>
+        <div style="font-size:0.82rem; color:var(--tomate); font-weight:700; margin-top:8px;">
+          ↓ Role para ver a chegada dos colonos e a emancipação
         </div>
       </div>
     </div>
 
-    <!-- PARADA 2: A PRAÇA DO COCO (PRAÇA IRMÃ CARMELA STECCHI) -->
-    <div id="pracacoco" class="story-step step-right" data-lat="-22.8227" data-lng="-47.0872" data-zoom="17">
-      <div class="story-card-box">
-        <img class="story-photo-thumb" src="{{ url_for('static', filename='img/dossie/praca-do-coco.jpg') }}" alt="Praça do Coco e Feira de Artesanato">
-        <span class="story-step-tag">Capítulo 2 · O Coração Comunitário</span>
-        <h2 class="story-card-title">A Praça do Coco & A Feira Viva</h2>
-        <p class="story-card-desc">
-          Oficialmente <em>Praça Irmã Carmela Stecchi</em>. Em 1999, o comerciante <strong>Seu Valdir dos Santos</strong> começou a vender água de coco em uma Kombi na praça até então vazia. Com seus filhos Vagner e Regiane, revitalizou o espaço. Em <strong>2002</strong> nascia a <em>Feira de Cultura e Arte de Barão Geraldo</em>, consagrando o pastel frito na hora, o artesanato autoral e o encontro de famílias todo fim de semana.
-        </p>
-        <div style="font-size:0.82rem; color:var(--tomate); font-weight:700;">
-          ↓ Próxima parada: O balcão do Empório do Nono
+    <!-- CAPÍTULO 2: A TERRA VERMELHA, OS COLONOS E A EMANCIPAÇÃO (1953) -->
+    <div class="story-step step-right" data-lat="-22.8250" data-lng="-47.0860" data-zoom="15">
+      <div class="story-chapter-card">
+        <span class="chapter-number"><i class="fas fa-users"></i> Capítulo II · A Vila e os Armazéns</span>
+        <h2 class="chapter-title">A Terra dos Imigrantes & A Lei de 1953</h2>
+        <div class="chapter-body">
+          <p>
+            Com a transição da mão de obra, famílias de imigrantes italianos e portugueses fixaram raízes no solo fértil. Surgiram os primeiros armazéns de secos e molhados, ferrarias e capelas comunitárias.
+          </p>
+          <p>
+            Em <strong>30 de dezembro de 1953</strong>, através da Lei Estadual nº 2.456, o vilarejo foi elevado oficialmente à categoria de <strong>Distrito de Barão Geraldo</strong>, consolidando sua identidade própria e o traçado das primeiras ruas de paralelepípedo e terra batida.
+          </p>
+        </div>
+        <div class="depoimento-box">
+          “O armazém era o jornal do bairro. Comprava-se querosene, fumo de corda, queijo curado e ali se decidia a vida comunitária.”
+          <span class="depoimento-autor">— Registro oral dos pioneiros do comércio</span>
+        </div>
+        <div style="font-size:0.82rem; color:var(--tomate); font-weight:700; margin-top:8px;">
+          ↓ Role para descobrir a chegada da indústria no vale
         </div>
       </div>
     </div>
 
-    <!-- PARADA 3: O CENTRO & EMPÓRIO DO NONO -->
-    <div class="story-step step-left" data-lat="-22.8248" data-lng="-47.0838" data-zoom="17">
-      <div class="story-card-box">
-        <img class="story-photo-thumb" src="{{ url_for('static', filename='img/dossie/emporio-do-nono.jpg') }}" alt="Empório do Nono e mesa de acepipes">
-        <span class="story-step-tag">Capítulo 3 · Os Pioneiros do Balcão</span>
-        <h2 class="story-card-title">Empório do Nono (1999)</h2>
-        <p class="story-card-desc">
-          Fundado por <strong>Júnior Pattaro</strong> na Av. Albino de Oliveira, o Nono é uma instituição: as históricas <em>Segundas de Chorinho</em>, a serpentina onde o chope desce impecável e a mesa de acepipes com mais de 40 frios e conservas que unem professores, poetas e moradores da velha guarda.
-        </p>
-        <a class="btn btn-tomate" style="width:100%; font-size:0.88rem; padding:10px;" href="https://feiradebarao.com.br/bar/emporio-do-nono" target="_blank">
-          <i class="fas fa-beer-mug-empty"></i> Abrir a Barraca do Nono →
+    <!-- CAPÍTULO 3: A CHEGADA DA RHODIA & AS VILAS OPERÁRIAS -->
+    <div class="story-step step-left" data-lat="-22.8050" data-lng="-47.1100" data-zoom="14">
+      <div class="story-chapter-card">
+        <span class="chapter-number"><i class="fas fa-industry"></i> Capítulo III · A Fábrica na Beira do Rio</span>
+        <h2 class="chapter-title">A Estrada da Rhodia & As Vilas</h2>
+        <div class="chapter-body">
+          <p>
+            Na década de 1940, a instalação do parque químico da <strong>Rhodia</strong> às margens do Rio Atibaia provocou uma nova onda de povoamento. Técnicos, químicos e operários vieram residir no distrito.
+          </p>
+          <p>
+            Nasceram núcleos como a <em>Vila Rhodia</em> e o loteamento da <em>Vila Santa Isabel</em>, desenhando as estradas sinuosas e arborizadas que hoje abrigam a gastronomia de refúgio e chácaras tradicionais.
+          </p>
+        </div>
+        <div style="font-size:0.82rem; color:var(--tomate); font-weight:700; margin-top:8px;">
+          ↓ Role para a revolução universitária da Unicamp
+        </div>
+      </div>
+    </div>
+
+    <!-- CAPÍTULO 4: A PRIMAVERA ACADÊMICA & CULTURAL (1966) -->
+    <div class="story-step step-right" data-lat="-22.8184" data-lng="-47.0647" data-zoom="15">
+      <div class="story-chapter-card">
+        <span class="chapter-number"><i class="fas fa-graduation-cap"></i> Capítulo IV · A Revolução do Saber</span>
+        <h2 class="chapter-title">Zeferino Vaz, a Unicamp & O Boteco Pensante</h2>
+        <img class="chapter-photo" src="{{ url_for('static', filename='img/dossie/unicamp-campus.jpg') }}" alt="Praça da Paz e campus da Unicamp">
+        <div class="chapter-body">
+          <p>
+            Em <strong>1966</strong>, o médico e visionário <strong>Zeferino Vaz</strong> fundava a <strong>Unicamp</strong> em uma antiga gleba doada por fazendeiros. Cientistas, filósofos e artistas exilados e de várias partes do mundo desembarcaram em Barão Geraldo.
+          </p>
+          <p>
+            Nasceu uma cultura ímpar: o surgimento do célebre <strong>Lume Teatro</strong>, o movimento de música instrumental, e a tradição dos <em>"botecos pensantes"</em>, onde teses de doutorado e manifestos artísticos eram rascunhados em guardanapos de papel com chope gelado.
+          </p>
+        </div>
+        <div class="depoimento-box">
+          “Em Barão Geraldo, a melhor aula de física e de teatro sempre terminava na mesa do bar, com uma porção de acepipes e conversa sem pressa.”
+          <span class="depoimento-autor">— Prof. Emérito da Unicamp</span>
+        </div>
+        <div style="font-size:0.82rem; color:var(--tomate); font-weight:700; margin-top:8px;">
+          ↓ Role para a história da Praça do Coco
+        </div>
+      </div>
+    </div>
+
+    <!-- CAPÍTULO 5: A PRAÇA DO COCO & A FEIRA VIVA (1999–2002) -->
+    <div id="pracacoco" class="story-step step-left" data-lat="-22.8227" data-lng="-47.0872" data-zoom="17">
+      <div class="story-chapter-card">
+        <span class="chapter-number"><i class="fas fa-store"></i> Capítulo V · O Coração Comunitário</span>
+        <h2 class="chapter-title">A Praça do Coco & A Feira de Barão</h2>
+        <img class="chapter-photo" src="{{ url_for('static', filename='img/dossie/praca-do-coco.jpg') }}" alt="Praça do Coco e Feira de Artesanato">
+        <div class="chapter-body">
+          <p>
+            Oficialmente batizada de <em>Praça Irmã Carmela Stecchi</em>. Em <strong>1999</strong>, o comerciante <strong>Seu Valdir dos Santos</strong> estacionou sua Kombi para vender água de coco e caldo de cana em um terreno baldio. Com os filhos Vagner e Regiane, cuidou, plantou árvores e revitalizou o espaço.
+          </p>
+          <p>
+            Em <strong>2002</strong>, artistas e moradores criaram a <strong>Feira de Arte e Cultura de Barão Geraldo</strong>. O pastel crocante, a tapioca, o artesanato em cerâmica e as apresentações de circo e chorinho tornaram a praça o ponto sagrado de encontro das famílias e aposentados.
+          </p>
+        </div>
+        <div class="depoimento-box">
+          “A praça não tinha nada além de poeira. A gente trouxe a Kombi de coco, os artesãos trouxeram a arte, e o povo de Barão fez o resto.”
+          <span class="depoimento-autor">— Seu Valdir dos Santos (Pioneiro da Praça do Coco)</span>
+        </div>
+        <div style="font-size:0.82rem; color:var(--tomate); font-weight:700; margin-top:8px;">
+          ↓ Role para ver os pioneiros do balcão e a rede completa
+        </div>
+      </div>
+    </div>
+
+    <!-- CAPÍTULO 6: OS GUARDIÕES DO BALCÃO & A REDE CONECTADA -->
+    <div class="story-step step-right" data-lat="-22.8248" data-lng="-47.0838" data-zoom="16">
+      <div class="story-chapter-card" style="border-color:var(--verde-zap);">
+        <span class="chapter-number" style="color:var(--verde-zap);"><i class="fas fa-beer-mug-empty"></i> Capítulo VI · A Tradição Viva</span>
+        <h2 class="chapter-title">Os Pioneiros do Balcão & A Feira Digital</h2>
+        <img class="chapter-photo" src="{{ url_for('static', filename='img/dossie/emporio-do-nono.jpg') }}" alt="Empório do Nono e balcão tradicional">
+        <div class="chapter-body">
+          <p>
+            Casas como o <strong>Empório do Nono</strong> (fundado em 1999 por Júnior Pattaro na Albino de Oliveira com as históricas <em>Segundas de Chorinho</em>) e o <strong>Botequim de Barão</strong> na Santa Isabel mantêm viva a arte da hospitalidade: serpentina de gelo, comida de estufa e acolhimento.
+          </p>
+          <p>
+            Mapeamos as <strong>23 casas gastronômicas</strong> do distrito para garantir que essa história não seja engolida pelos algoritmos. Cada bar agora tem presença no Google Maps, cardápio digital próprio e reservas sem intermediários.
+          </p>
+        </div>
+        <a class="btn btn-zap" style="width:100%; font-size:0.88rem; padding:12px;" href="#bares">
+          <i class="fas fa-compass"></i> Explorar as 23 Barracas no Catálogo ↓
         </a>
       </div>
     </div>
 
-    <!-- PARADA 4: A BOEMIA DA AV. SANTA ISABEL & BOTEQUIM DE BARÃO -->
-    <div class="story-step step-right" data-lat="-22.8256" data-lng="-47.0853" data-zoom="17">
-      <div class="story-card-box">
-        <img class="story-photo-thumb" src="{{ url_for('static', filename='img/dossie/botequim-de-barao.jpg') }}" alt="Botequim de Barão na Av. Santa Isabel">
-        <span class="story-step-tag">Capítulo 4 · A Boemia da Santa Isabel</span>
-        <h2 class="story-card-title">Botequim de Barão</h2>
-        <p class="story-card-desc">
-          Na Av. Santa Isabel, o <strong>Botequim de Barão</strong> é referência da boemia universitária e dos moradores: samba de raiz, estufa com comida de boteco tradicional, chope trincando e noites que reúnem todas as tribos de Barão Geraldo.
-        </p>
-        <a class="btn btn-tomate" style="width:100%; font-size:0.88rem; padding:10px;" href="https://feiradebarao.com.br/bar/botequim-de-barao" target="_blank">
-          <i class="fas fa-beer-mug-empty"></i> Abrir a Barraca do Botequim →
-        </a>
-      </div>
+  </div>
+</section>
+
+<!-- ========================================================
+     LINHA DO TEMPO HISTÓRICA DE BARÃO GERALDO
+     ======================================================== -->
+<section id="linha-do-tempo" class="full-bleed-section">
+  <div class="wrap">
+    <div style="text-align:center; max-width:800px; margin:0 auto;">
+      <span style="font-size:0.82rem; font-weight:800; text-transform:uppercase; letter-spacing:0.16em; color:var(--ambar);">Cronologia Documental</span>
+      <h2 style="font-family:var(--font-cartaz); font-size:clamp(2.4rem, 4.5vw, 3.6rem); text-transform:uppercase; margin-top:6px; color:#fff;">
+        A Linha do Tempo de Barão Geraldo
+      </h2>
+      <p style="color:#d1c7b7; font-size:1.05rem; margin-top:8px;">
+        Mais de um século de história moldando o distrito mais acolhedor e intelectual do interior de São Paulo.
+      </p>
     </div>
 
-    <!-- PARADA 5: AS 23 BARRACAS DO DISTRITO -->
-    <div class="story-step step-center" data-lat="-22.8250" data-lng="-47.0860" data-zoom="14">
-      <div class="story-card-box" style="border-color:var(--verde-zap);">
-        <img class="story-photo-thumb" src="{{ url_for('static', filename='img/dossie/unicamp-campus.jpg') }}" alt="Unicamp e as 23 casas de Barão">
-        <span class="story-step-tag" style="color:var(--verde-zap);">Capítulo 5 · A Rede Completa</span>
-        <h2 class="story-card-title">As 23 Barracas Conectadas</h2>
-        <p class="story-card-desc">
-          Mapeamos e provisionamos as 23 principais casas de Barão Geraldo. Cada cartão na lista abaixo abre o site real do bar com fotos, cardápio digital e o Assistente de Voz Concierge ativo no balcão.
-        </p>
-        <a class="btn btn-zap" style="width:100%; font-size:0.88rem; padding:10px;" href="#bares">
-          <i class="fas fa-list"></i> Explorar Catálogo dos Bares ↓
-        </a>
+    <div class="timeline-grid">
+      <div class="timeline-card">
+        <div class="timeline-year">1870–1907</div>
+        <h4 style="color:#fff; margin-bottom:6px;">Fazenda Santa Genebra</h4>
+        <p class="timeline-desc">Geraldo Ribeiro de Sousa Rezende (o Barão de Rezende) consolida a cafeicultura e a preservação da mata nativa.</p>
+      </div>
+
+      <div class="timeline-card">
+        <div class="timeline-year">1899</div>
+        <h4 style="color:#fff; margin-bottom:6px;">Estrada de Ferro Funilense</h4>
+        <p class="timeline-desc">Inauguração do ramal ferroviário ligando Campinas a Cosmópolis, cortando o vilarejo com a Estação Barão Geraldo.</p>
+      </div>
+
+      <div class="timeline-card">
+        <div class="timeline-year">1953</div>
+        <h4 style="color:#fff; margin-bottom:6px;">Criação do Distrito</h4>
+        <p class="timeline-desc">A Lei Estadual nº 2.456 de 30 de dezembro de 1953 cria oficialmente o Distrito de Paz de Barão Geraldo.</p>
+      </div>
+
+      <div class="timeline-card">
+        <div class="timeline-year">1966</div>
+        <h4 style="color:#fff; margin-bottom:6px;">Fundação da Unicamp</h4>
+        <p class="timeline-desc">Zeferino Vaz instala a universidade, atraindo intelectuais do mundo inteiro e forjando a boemia dos "botecos pensantes".</p>
+      </div>
+
+      <div class="timeline-card">
+        <div class="timeline-year">1999</div>
+        <h4 style="color:#fff; margin-bottom:6px;">A Kombi da Praça do Coco</h4>
+        <p class="timeline-desc">Seu Valdir dos Santos inicia a venda de água de coco na Praça Irmã Carmela Stecchi, revitalizando o coração do bairro.</p>
+      </div>
+
+      <div class="timeline-card">
+        <div class="timeline-year">2002</div>
+        <h4 style="color:#fff; margin-bottom:6px;">Feira de Arte e Cultura</h4>
+        <p class="timeline-desc">Artistas e artesãos oficializam a Feira da Praça do Coco aos fins de semana, unindo pastel, cerâmica e chorinho.</p>
       </div>
     </div>
-
   </div>
 </section>
 
@@ -675,12 +968,12 @@
 <section id="bares" class="secao-bares">
   <div class="wrap">
     <div style="text-align:center; max-width:750px; margin:0 auto;">
-      <span class="eyebrow">A Feira das Casas</span>
+      <span class="chapeu-dossie">A Feira que Não Desmonta</span>
       <h2 style="font-family:var(--font-cartaz); font-size:2.8rem; text-transform:uppercase; margin-bottom:12px;">
         As 23 Barracas de Barão Geraldo
       </h2>
       <p style="color:var(--taupe); font-size:1.05rem;">
-        Clique em qualquer casa para abrir a demonstração com cardápio, fotos e o Concierge de Voz ao vivo:
+        Toque em qualquer casa para abrir a demonstração real com fotos, cardápio digital e o Concierge de Voz ao vivo no balcão:
       </p>
     </div>
 
@@ -714,10 +1007,10 @@
 <section id="tecnologia" class="secao-tecnologia">
   <div class="wrap">
     <div class="tech-title-wrap">
-      <span class="eyebrow" style="color:var(--ambar);">A Infraestrutura Digital</span>
+      <span style="font-size:0.82rem; font-weight:800; text-transform:uppercase; letter-spacing:0.16em; color:var(--ambar);">Infraestrutura Comunitária</span>
       <h2 class="tech-headline">Como a Nossa Tecnologia Protege a Gastronomia de Barão</h2>
       <p style="color:#94a3b8; font-size:1.08rem;">
-        Desenvolvemos um sistema operacional próprio para que os bares do bairro continuem cheios no fim de semana, com lucro protegido e sem comissões abusivas de aplicativos.
+        Desenvolvemos um sistema operacional próprio para que os bares do bairro continuem cheios no fim de semana, com lucro auditado e sem pagar comissões abusivas a grandes plataformas.
       </p>
     </div>
 
@@ -726,28 +1019,28 @@
       <div class="card-tech-power">
         <div class="tech-icon-box">📍</div>
         <h4>Cardápio no Google Maps</h4>
-        <p>Indexação com dados estruturados (Menu Schema). Quem busca "bar aberto agora" em Barão Geraldo acha seu cardápio com preços e fotos direto na busca.</p>
+        <p>Indexação nativa com Menu Schema. Quem pesquisa "bar aberto agora em Barão Geraldo" acha seu cardápio com preços e fotos direto na busca.</p>
       </div>
 
       <!-- 2. Concierge de Voz -->
       <div class="card-tech-power">
         <div class="tech-icon-box">🎙️</div>
-        <h4>Concierge de Voz (NVIDIA)</h4>
-        <p>O cliente fala no celular para pedir mesa e a IA responde em áudio com voz brasileira, agendando a reserva diretamente no WhatsApp do bar.</p>
+        <h4>Concierge de Voz (NVIDIA Riva)</h4>
+        <p>O cliente envia áudio no WhatsApp para reservar mesa e a inteligência de voz brasileira atende com naturalidade e confirma no sistema.</p>
       </div>
 
       <!-- 3. OCR por Foto -->
       <div class="card-tech-power">
         <div class="tech-icon-box">📸</div>
         <h4>Leitor de Notas por Foto</h4>
-        <p>Basta tirar foto do cupom fiscal ou nota do açougue/hortifruti: a visão computacional da NVIDIA cadastra os ingredientes e recalcula o custo na hora.</p>
+        <p>Tire foto do cupom do açougue ou hortifruti com a câmera do celular: a visão computacional da NVIDIA lança os insumos no estoque na hora.</p>
       </div>
 
       <!-- 4. CMV Real -->
       <div class="card-tech-power">
         <div class="tech-icon-box">🐺</div>
         <h4>CMV & Alerta de Inflação</h4>
-        <p>Raciocínio lógico profundo com DeepSeek: controle de desperdício de chope e alerta no WhatsApp se o fornecedor aumentar insumos em mais de 10%.</p>
+        <p>Raciocínio lógico com DeepSeek: acompanhe o custo exato de cada porção e receba alerta no celular se o fornecedor aumentar preços em mais de 10%.</p>
       </div>
     </div>
   </div>
@@ -756,15 +1049,15 @@
 <!-- ========================================================
      A CONTA DA MESA VAZIA & CALCULADORA DE ROI
      ======================================================== -->
-<section id="conta" class="secao-planos" style="background:var(--cartao); border-bottom:1.5px solid var(--linha);">
+<section id="conta" class="secao-conta">
   <div class="wrap">
     <div style="text-align:center; max-width:750px; margin:0 auto 40px;">
-      <span class="eyebrow">Faça a Conta</span>
+      <span class="chapeu-dossie">Matemática de Balcão</span>
       <h2 style="font-family:var(--font-cartaz); font-size:2.8rem; text-transform:uppercase; margin-bottom:12px;">
         Quanto Vale 1 Mesa Vazia no Seu Bar?
       </h2>
       <p style="color:var(--taupe); font-size:1.05rem;">
-        Mexa nos números do seu salão. Não é promessa mágica: é a matemática do seu próprio movimento.
+        Mexa nos números do seu salão. Não é promessa mágica: é a matemática do seu próprio movimento em Barão Geraldo.
       </p>
     </div>
 
@@ -824,7 +1117,7 @@
 <section id="preco" class="secao-planos">
   <div class="wrap">
     <div style="text-align:center; max-width:750px; margin:0 auto;">
-      <span class="eyebrow">Planos Sem Pegadinhas</span>
+      <span class="chapeu-dossie">Planos Sem Pegadinhas</span>
       <h2 style="font-family:var(--font-cartaz); font-size:2.8rem; text-transform:uppercase; margin-bottom:12px;">
         Escolha o Modelo do Seu Bar
       </h2>
@@ -903,49 +1196,103 @@
 </section>
 
 <!-- ========================================================
-     FECHAMENTO COM O CONVITE DE BALCÃO
+     FECHAMENTO & CONVITE PARA A COMUNIDADE
      ======================================================== -->
 <section style="text-align:center; padding:80px 0; border-top:1.5px solid var(--linha); background:var(--papel-escuro);">
   <div class="wrap">
-    <span class="eyebrow">Vamos Conversar no Seu Balcão?</span>
+    <span class="chapeu-dossie">Construído em Barão Geraldo</span>
     <h2 style="font-family:var(--font-cartaz); font-size:clamp(2.4rem, 5vw, 3.8rem); text-transform:uppercase; margin-bottom:16px;">
-      Coloque o Seu Bar no Mapa da Feira
+      Vamos Conversar no Seu Balcão?
     </h2>
-    <p style="color:var(--taupe); font-size:1.1rem; max-width:700px; margin:0 auto 30px;">
-      Eu sou o Daniel, moro aqui em Barão Geraldo e levo a demonstração do seu bar pronta no celular até a sua mesa. Sem compromisso e sem enrolação.
+    <p style="color:var(--taupe); font-size:1.1rem; max-width:720px; margin:0 auto 30px;">
+      Eu sou o Daniel, moro aqui em Barão Geraldo e criei o projeto para valorizar a história e os negócios da nossa comunidade. Levo a demonstração pronta no celular até o seu bar.
     </p>
-    <a class="btn btn-zap" style="font-size:1.1rem; padding:16px 36px;" href="{{ zap_url }}" target="_blank" rel="noopener">
-      <i class="fab fa-whatsapp"></i> Chamar no WhatsApp e Ver Minha Casa Pronta
-    </a>
+    <div style="display:flex; justify-content:center; gap:14px; flex-wrap:wrap;">
+      <a class="btn btn-zap" style="font-size:1.05rem; padding:14px 32px;" href="{{ zap_url }}" target="_blank" rel="noopener">
+        <i class="fab fa-whatsapp"></i> Chamar no WhatsApp
+      </a>
+      <button class="btn btn-colab" style="font-size:1.05rem; padding:14px 32px;" onclick="abrirModalColaboracao('historia')">
+        <i class="fas fa-feather"></i> Contar uma História do Bairro
+      </button>
+    </div>
   </div>
 </section>
 
 </main>
 
+<!-- ========================================================
+     MODAL INTERATIVO: MEMÓRIA ABERTA & COLABORAÇÃO
+     ======================================================== -->
+<div id="modal-colaboracao" class="modal-backdrop">
+  <div class="modal-box">
+    <button class="modal-close" onclick="fecharModalColaboracao()">&times;</button>
+    <div style="text-align:center; margin-bottom:20px;">
+      <span class="chapeu-dossie">Memória Coletiva</span>
+      <h3 id="modal-titulo" style="font-family:var(--font-cartaz); font-size:2rem; text-transform:uppercase; margin-top:4px;">
+        Conte Sua História de Barão Geraldo
+      </h3>
+      <p id="modal-subtitulo" style="color:var(--taupe); font-size:0.92rem;">
+        Seu relato fará parte do acervo documental permanente da Feira de Barão.
+      </p>
+    </div>
+
+    <form id="form-colaboracao" onsubmit="enviarColaboracao(event)">
+      <div class="form-group">
+        <label for="colab-nome">Seu Nome / Como quer ser identificado:</label>
+        <input type="text" id="colab-nome" class="form-control" placeholder="Ex: Maria Antonia / Moradora desde 1982" required>
+      </div>
+
+      <div class="form-group">
+        <label for="colab-tipo">Tipo de Contribuição:</label>
+        <select id="colab-tipo" class="form-control">
+          <option value="historia">Causo / Memória Afetiva do Bairro</option>
+          <option value="correcao">Correção Histórica / Documental</option>
+          <option value="foto">Tenho Foto Antiga de Família no Bairro</option>
+          <option value="bar">História de um Bar / Estabelecimento</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="colab-texto">Seu Relato / Detalhes:</label>
+        <textarea id="colab-texto" class="form-control" rows="4" placeholder="Conte o que você viveu, o que lembra da infância, da Praça do Coco, da Unicamp ou dos velhos armazéns..." required></textarea>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:20px;">
+        <button type="button" class="btn btn-fantasma" onclick="fecharModalColaboracao()">Cancelar</button>
+        <button type="submit" class="btn btn-tomate">
+          <i class="fas fa-paper-plane"></i> Enviar para o Dossiê
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <footer class="site-footer">
   <div class="wrap">
     <p style="font-weight:700; color:var(--tinta); font-family:var(--font-cartaz); font-size:1.2rem; margin-bottom:6px;">
-      FEIRA DE BARÃO · MEMÓRIA & IDENTIDADE DIGITAL GASTRONÔMICA
+      FEIRA DE BARÃO · O GRANDE DOSSIÊ HISTÓRICO & GASTRONÔMICO
     </p>
-    <p>Barão Geraldo, Campinas – SP · Desenvolvido com carinho para os bares e a comunidade local.</p>
+    <p>Distrito de Barão Geraldo, Campinas – SP · Construído com carinho para a memória e os comércios da nossa comunidade.</p>
   </div>
 </footer>
 
-<div class="lona"></div>
+<div class="lona-topo"></div>
 
 <!-- ========================================================
-     SCRIPTS DE MAP SCROLLYTELLING & ROI
+     SCRIPTS DE MAP SCROLLYTELLING, MODAL & CALCULADORA
      ======================================================== -->
 <script>
   // Inicialização do Leaflet Map
   let map = null;
-  let currentMarker = null;
   let allMarkers = [];
 
   const PONTOS_HISTORICOS = [
-    { id: 'pracacoco', lat: -22.8227, lng: -47.0872, nome: 'Praça do Coco (Praça Irmã Carmela Stecchi)', desc: 'Feira de Arte e Artesanato (2002)' },
-    { id: 'nono', lat: -22.8248, lng: -47.0838, nome: 'Empório do Nono', desc: 'Fundado em 1999 por Júnior Pattaro' },
-    { id: 'botequim', lat: -22.8256, lng: -47.0853, nome: 'Botequim de Barão', desc: 'Av. Santa Isabel · Boemia & Samba' }
+    { id: 'santagenebra', lat: -22.8220, lng: -47.0980, nome: 'Fazenda Santa Genebra & Trem Funilense (1899)', desc: 'Barão Geraldo de Rezende e a cafeicultura' },
+    { id: 'centro1953', lat: -22.8250, lng: -47.0860, nome: 'Centro Histórico & Emancipação (1953)', desc: 'Os antigos armazéns e a lei de criação do distrito' },
+    { id: 'rhodia', lat: -22.8050, lng: -47.1100, nome: 'Estrada da Rhodia & Rio Atibaia (1940s)', desc: 'As vilas operárias e a gastronomia de refúgio' },
+    { id: 'unicamp', lat: -22.8184, lng: -47.0647, nome: 'Unicamp & Praça da Paz (1966)', desc: 'Zeferino Vaz, a efervescência acadêmica e artística' },
+    { id: 'pracacoco', lat: -22.8227, lng: -47.0872, nome: 'Praça do Coco (Praça Irmã Carmela Stecchi)', desc: 'Seu Valdir (1999) e a Feira de Artesanato (2002)' },
+    { id: 'nono', lat: -22.8248, lng: -47.0838, nome: 'Empório do Nono (1999)', desc: 'Júnior Pattaro · Segundas de Chorinho & Acepipes' }
   ];
 
   function initMap() {
@@ -953,13 +1300,13 @@
     if (!mapEl) return;
 
     map = L.map('mapa-scrolly', {
-      center: [-22.8250, -47.0860],
+      center: [-22.8220, -47.0980],
       zoom: 14,
       scrollWheelZoom: false,
       zoomControl: true
     });
 
-    // Tiles do OpenStreetMap estilizados
+    // Tiles do OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors',
       maxZoom: 18
@@ -968,7 +1315,7 @@
     // Ícone personalizado em Tomate
     const iconeTomate = L.divIcon({
       className: 'custom-pin',
-      html: '<div style="background:#b23214; color:#fff; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; border:2.5px solid #fff; box-shadow:0 4px 12px rgba(0,0,0,0.4);">📍</div>',
+      html: '<div style="background:#b33215; color:#fff; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; border:2.5px solid #fff; box-shadow:0 4px 12px rgba(0,0,0,0.4);">📍</div>',
       iconSize: [34, 34],
       iconAnchor: [17, 34]
     });
@@ -980,7 +1327,7 @@
     });
   }
 
-  // IntersectionObserver para Scrollytelling dos Passos
+  // IntersectionObserver para Scrollytelling dos Capítulos
   function setupScrollytelling() {
     const steps = document.querySelectorAll('.story-step');
     if (!steps.length || !map) return;
@@ -994,17 +1341,52 @@
 
           if (lat && lng && map) {
             map.flyTo([lat, lng], zoom, {
-              duration: 1.5,
+              duration: 1.6,
               easeLinearity: 0.25
             });
           }
         }
       });
     }, {
-      threshold: 0.5
+      threshold: 0.45
     });
 
     steps.forEach(s => observer.observe(s));
+  }
+
+  // Modal de Colaboração
+  function abrirModalColaboracao(tipo = 'historia') {
+    const modal = document.getElementById('modal-colaboracao');
+    const selectTipo = document.getElementById('colab-tipo');
+    const titulo = document.getElementById('modal-titulo');
+    const subtitulo = document.getElementById('modal-subtitulo');
+
+    if (tipo === 'correcao') {
+      selectTipo.value = 'correcao';
+      titulo.innerText = 'Sugerir Correção ou Enviar Documento';
+      subtitulo.innerText = 'Ajude-nos a manter o rigor histórico de Barão Geraldo.';
+    } else {
+      selectTipo.value = 'historia';
+      titulo.innerText = 'Conte Sua História de Barão Geraldo';
+      subtitulo.innerText = 'Seu relato fará parte do acervo documental permanente da Feira de Barão.';
+    }
+
+    modal.classList.add('ativo');
+  }
+
+  function fecharModalColaboracao() {
+    document.getElementById('modal-colaboracao').classList.remove('ativo');
+  }
+
+  function enviarColaboracao(e) {
+    e.preventDefault();
+    const nome = document.getElementById('colab-nome').value;
+    const tipo = document.getElementById('colab-tipo').value;
+    const texto = document.getElementById('colab-texto').value;
+
+    const msgZap = encodeURIComponent(`Olá Daniel! Gostaria de colaborar com o Dossiê de Barão Geraldo.\n\n*Nome:* ${nome}\n*Tipo:* ${tipo}\n*Relato:* ${texto}`);
+    window.open(`https://wa.me/5519999779942?text=${msgZap}`, '_blank');
+    fecharModalColaboracao();
   }
 
   // Calculadora de ROI
