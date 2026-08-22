@@ -588,21 +588,7 @@
 </head>
 <body>
 
-{% if tenant and tenant.eh_demo %}
-{# Prévia comercial: o bar ainda não é cliente e não pediu este site. Dizer isso
-   em alto e bom som é o que separa "demonstração" de "clone não autorizado".
-   O botão de assumir é o CTA da campanha; o de remoção é obrigação nossa. #}
-<div class="previa" role="complementary" id="previa">
-  <span>
-    <b>Prévia não oficial</b> — feita pelo Feira de Barão como demonstração.
-    Não é o site oficial de {{ site.nome }}.
-  </span>
-  <a href="https://wa.me/{{ site.whatsapp or contato_vendas }}?text={{ ('Quero assumir o site de ' ~ site.nome) | urlencode }}">Quero este site</a>
-  <a href="mailto:{{ email_vendas }}?subject={{ ('Remover prévia: ' ~ site.nome) | urlencode }}"
-     style="background:transparent;color:#f3e7d2;border:1px solid rgba(243,231,210,.35)">Pedir remoção</a>
-  <button class="fechar" onclick="document.getElementById('previa').remove();document.body.style.paddingBottom='0'">✕</button>
-</div>
-{% endif %}
+{% include "site/_demo_dock.html" %}
 
 {# Dois <nav> na página (este e o menu do celular): cada um precisa do próprio
    rótulo, senão o leitor de tela anuncia "navegação" duas vezes sem dizer

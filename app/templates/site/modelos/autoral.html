@@ -847,17 +847,7 @@
 </head>
 <body data-heroina="cardapio" data-leitura="alternado" data-foto="sangria-alternada">
 
-{% if tenant and tenant.eh_demo %}
-{# Prévia comercial: este bar ainda não é cliente e não pediu o site. Dizer isso
-   em alto e bom som é o que separa demonstração de clone não autorizado. #}
-<div class="previa" role="complementary" id="previa">
-  <span><b>Prévia não oficial</b> — demonstração feita pelo Feira de Barão.
-    Não é o site oficial de {{ site.nome }}.</span>
-  <a href="https://wa.me/{{ contato_vendas or site.whatsapp }}?text={{ ('Quero assumir o site de ' ~ site.nome) | urlencode }}">Quero este site</a>
-  <a class="vazado" href="mailto:{{ email_vendas }}?subject={{ ('Remover prévia: ' ~ site.nome) | urlencode }}">Pedir remoção</a>
-  <button class="fechar" onclick="document.getElementById('previa').remove();document.body.style.paddingBottom='0'" aria-label="Fechar aviso">✕</button>
-</div>
-{% endif %}
+{% include "site/_demo_dock.html" %}
 
 <header class="masthead">
   <div class="interno">

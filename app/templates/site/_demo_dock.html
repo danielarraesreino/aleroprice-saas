@@ -1,0 +1,380 @@
+{# 
+  Demo Dock: Barra Interativa de Demonstração Comercial ao Vivo.
+  Renderizada quando `tenant and tenant.eh_demo` ou `previewando`.
+#}
+{% if (tenant and tenant.eh_demo) or previewando %}
+<div id="demo-dock-root">
+  <style>
+    #demo-dock-root {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 99999;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      pointer-events: none;
+    }
+
+    .demo-dock-container {
+      pointer-events: auto;
+      max-width: 960px;
+      margin: 0 auto 12px;
+      padding: 0 12px;
+    }
+
+    .demo-dock-bar {
+      background: rgba(18, 14, 10, 0.95);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1.5px solid rgba(255, 180, 60, 0.45);
+      border-radius: 16px;
+      padding: 10px 14px;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.06);
+      color: #f3e7d2;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .demo-dock-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.82rem;
+    }
+
+    .demo-dock-tag {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      color: #ffb43d;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-size: 0.76rem;
+    }
+    .demo-dock-pulse {
+      width: 8px;
+      height: 8px;
+      background: #ff6a2b;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #ff6a2b;
+      animation: pulseDemo 1.5s infinite;
+    }
+    @keyframes pulseDemo {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+
+    .demo-dock-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-dock-cta {
+      background: #ffb43d;
+      color: #140f0a !important;
+      text-decoration: none !important;
+      font-weight: 800;
+      font-size: 0.82rem;
+      padding: 6px 14px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+      box-shadow: 0 2px 8px rgba(255, 180, 60, 0.3);
+    }
+    .btn-dock-cta:hover {
+      background: #ffc466;
+      transform: translateY(-1px);
+    }
+
+    .btn-dock-info {
+      background: rgba(255, 255, 255, 0.1);
+      color: #f3e7d2 !important;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      text-decoration: none !important;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-dock-info:hover {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    /* Seletor de layouts em pills */
+    .demo-dock-selector {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+    .demo-dock-selector::-webkit-scrollbar { display: none; }
+
+    .selector-label {
+      font-size: 0.74rem;
+      color: #b09a7d;
+      text-transform: uppercase;
+      font-weight: 700;
+      white-space: nowrap;
+      margin-right: 4px;
+    }
+
+    .dock-pill {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #e5d5be;
+      text-decoration: none !important;
+      font-size: 0.76rem;
+      font-weight: 600;
+      padding: 5px 11px;
+      border-radius: 8px;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.12s ease;
+      cursor: pointer;
+    }
+    .dock-pill:hover {
+      background: rgba(255, 180, 60, 0.18);
+      border-color: rgba(255, 180, 60, 0.4);
+      color: #fff;
+    }
+    .dock-pill.ativo {
+      background: #ff6a2b;
+      border-color: #ff6a2b;
+      color: #fff;
+      font-weight: 700;
+      box-shadow: 0 2px 6px rgba(255, 106, 43, 0.35);
+    }
+
+    /* Modal de Explicação Google Maps & Ponta a Ponta */
+    .maps-modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(6px);
+      z-index: 100000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      pointer-events: auto;
+    }
+    .maps-modal-backdrop.aberto {
+      display: flex;
+    }
+    .maps-modal-box {
+      background: #1e1811;
+      border: 2px solid #ffb43d;
+      border-radius: 18px;
+      max-width: 620px;
+      width: 100%;
+      color: #f3e7d2;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+      padding: 24px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .maps-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+    .maps-modal-header h3 {
+      font-size: 1.25rem;
+      margin: 0;
+      color: #ffb43d;
+    }
+    .maps-modal-close {
+      background: none;
+      border: none;
+      color: #b09a7d;
+      font-size: 1.4rem;
+      cursor: pointer;
+      padding: 0 4px;
+    }
+    .maps-step {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .maps-step-icon {
+      font-size: 1.5rem;
+      background: rgba(255, 180, 60, 0.15);
+      border-radius: 10px;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .maps-step-text h4 {
+      margin: 0 0 4px;
+      font-size: 0.98rem;
+      color: #fff;
+    }
+    .maps-step-text p {
+      margin: 0;
+      font-size: 0.82rem;
+      color: #d1c0a8;
+      line-height: 1.4;
+    }
+
+    body {
+      padding-bottom: 110px !important;
+    }
+    @media(max-width: 600px) {
+      body {
+        padding-bottom: 140px !important;
+      }
+      .demo-dock-top {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .demo-dock-actions {
+        justify-content: space-between;
+      }
+    }
+  </style>
+
+  <div class="demo-dock-container">
+    <div class="demo-dock-bar">
+      <!-- Linha 1: Identificação e Ações Rápidas -->
+      <div class="demo-dock-top">
+        <div class="demo-dock-tag">
+          <span class="demo-dock-pulse"></span>
+          <span>Prévia não oficial · {{ site.nome }}</span>
+        </div>
+        <div class="demo-dock-actions">
+          <button class="btn-dock-info" onclick="abrirModalMaps()">
+            📍 Como Funciona no Google Maps
+          </button>
+          <a class="btn-dock-cta" href="https://wa.me/{{ site.whatsapp or contato_vendas }}?text={{ ('Olá! Gostei da demonstração do site para o ' ~ site.nome ~ ' e quero ativar pro meu bar.') | urlencode }}" target="_blank" rel="noopener">
+            Quero Este Site →
+          </a>
+        </div>
+      </div>
+
+      <!-- Linha 2: Seletor de Estilos / Modelos na Mesa -->
+      <div class="demo-dock-selector">
+        <span class="selector-label">Design:</span>
+        <button class="dock-pill {{ 'ativo' if modelo_atual == 'classico' }}" onclick="trocarModelo('classico')">
+          📋 Clássico
+        </button>
+        <button class="dock-pill {{ 'ativo' if modelo_atual == 'craft' }}" onclick="trocarModelo('craft')">
+          🍺 Craft (Chope)
+        </button>
+        <button class="dock-pill {{ 'ativo' if modelo_atual == 'noturno' }}" onclick="trocarModelo('noturno')">
+          🎷 Noturno (Shows)
+        </button>
+        <button class="dock-pill {{ 'ativo' if modelo_atual == 'brasa' }}" onclick="trocarModelo('brasa')">
+          🔥 Brasa (Grelhados)
+        </button>
+        <button class="dock-pill {{ 'ativo' if modelo_atual == 'autoral' }}" onclick="trocarModelo('autoral')">
+          👨‍🍳 Autoral (Gastrô)
+        </button>
+        <button class="dock-pill {{ 'ativo' if modelo_atual == 'tradicional' }}" onclick="trocarModelo('tradicional')">
+          🏛️ Tradicional (Raiz)
+        </button>
+
+        <span class="selector-label" style="margin-left: 8px;">Modo:</span>
+        <button class="dock-pill {{ 'ativo' if modo_atual == 'claro' }}" onclick="trocarModo('claro')">
+          ☀️ Claro
+        </button>
+        <button class="dock-pill {{ 'ativo' if modo_atual == 'escuro' }}" onclick="trocarModo('escuro')">
+          🌙 Escuro
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Interativo Google Maps & Identidade Digital -->
+  <div id="modal-maps" class="maps-modal-backdrop" onclick="fecharModalMaps(event)">
+    <div class="maps-modal-box" onclick="event.stopPropagation()">
+      <div class="maps-modal-header">
+        <div>
+          <h3>📍 Sua Identidade Digital no Google Maps</h3>
+          <p style="margin:4px 0 0; font-size:0.82rem; color:#b09a7d;">Como transformamos pesquisas no Google em mesas cheias no seu bar:</p>
+        </div>
+        <button class="maps-modal-close" onclick="fecharModalMaps()">✕</button>
+      </div>
+
+      <div class="maps-step">
+        <div class="maps-step-icon">🔍</div>
+        <div class="maps-step-text">
+          <h4>1. O Freguês busca no Google Maps</h4>
+          <p>Quando alguém busca "bar aberto agora" ou "onde comer em Barão Geraldo", o Google Maps prioriza estabelecimentos com Perfil da Empresa verificado, fotos nítidas e site oficial conectado.</p>
+        </div>
+      </div>
+
+      <div class="maps-step">
+        <div class="maps-step-icon">🍽️</div>
+        <div class="maps-step-text">
+          <h4>2. Botão Oficial de Cardápio no Maps</h4>
+          <p>Configuramos o botão oficial <strong>"Ver Cardápio"</strong> direto na ficha do seu bar no Google Maps. O Google lê os pratos e fotos do seu site via dados estruturados (Menu Schema JSON-LD).</p>
+        </div>
+      </div>
+
+      <div class="maps-step">
+        <div class="maps-step-icon">📲</div>
+        <div class="maps-step-text">
+          <h4>3. Reservas Direto no seu WhatsApp</h4>
+          <p>O cliente não precisa baixar aplicativo nem se cadastrar. Clicou em "Reservar Mesa", a mensagem já chega formatada com data, horário e pessoas no seu WhatsApp.</p>
+        </div>
+      </div>
+
+      <div class="maps-step">
+        <div class="maps-step-icon">📊</div>
+        <div class="maps-step-text">
+          <h4>4. Gestão de Custos e CMV Real (Plano Pro)</h4>
+          <p>Além do site no ar, você importa notas fiscais (NF-e) em 1 clique, calcula o custo real de cada receita e recebe alerta no WhatsApp se o fornecedor subir o preço do queijo ou da carne.</p>
+        </div>
+      </div>
+
+      <div style="margin-top: 20px; text-align: center;">
+        <a class="btn-dock-cta" style="width: 100%; justify-content: center; padding: 10px 18px; font-size: 0.95rem;" href="https://wa.me/{{ site.whatsapp or contato_vendas }}?text={{ ('Quero configurar a presença do ' ~ site.nome ~ ' no Google Maps e no site oficial!') | urlencode }}" target="_blank" rel="noopener">
+          Falar com o Especialista no WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function trocarModelo(m) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('modelo', m);
+      window.location.href = url.toString();
+    }
+    function trocarModo(modo) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('modo', modo);
+      window.location.href = url.toString();
+    }
+    function abrirModalMaps() {
+      document.getElementById('modal-maps').classList.add('aberto');
+    }
+    function fecharModalMaps(e) {
+      if (!e || e.target.id === 'modal-maps' || (e.target.classList && e.target.classList.contains('maps-modal-close'))) {
+        document.getElementById('modal-maps').classList.remove('aberto');
+      }
+    }
+  </script>
+</div>
+{% endif %}

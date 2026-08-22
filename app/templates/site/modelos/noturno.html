@@ -805,20 +805,7 @@
 </head>
 <body data-heroina="agenda" data-leitura="cartaz" data-foto="duotone">
 
-{% if tenant and tenant.eh_demo %}
-{# Prévia comercial: o bar ainda não é cliente e não pediu este site. Dizer isso
-   em alto e bom som é o que separa "demonstração" de "clone não autorizado". #}
-<div class="previa" role="complementary" id="previa">
-  <span>
-    <b>Prévia não oficial</b> — feita pelo Feira de Barão como demonstração.
-    Não é o site oficial de {{ nome_bar }}.
-  </span>
-  <a href="https://wa.me/{{ contato_vendas or site.whatsapp }}?text={{ ('Quero assumir o site de ' ~ nome_bar) | urlencode }}">Quero este site</a>
-  <a href="mailto:{{ email_vendas }}?subject={{ ('Remover prévia: ' ~ nome_bar) | urlencode }}"
-     style="background:transparent;color:#f2f0ea;border:1px solid rgba(242,240,234,.35)">Pedir remoção</a>
-  <button class="fechar" onclick="document.getElementById('previa').remove();document.body.style.paddingBottom='0'">✕</button>
-</div>
-{% endif %}
+{% include "site/_demo_dock.html" %}
 
 {# ---------- MARQUISE: a fita de luzes da fachada ---------- #}
 {% set fita = (site.subline.split('·') if site.subline and '·' in site.subline else copy.marquee) %}
