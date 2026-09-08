@@ -730,7 +730,7 @@ def gerar_previsao():
         # Mapear valores previstos para as datas
         for i, data in enumerate(datas_previsao):
             if i < len(previsao):
-                valor = previsao[len(valores) + i]  # pegar os valores da previsão (após dados históricos)
+                valor = previsao[min(len(valores) + i, len(previsao) - 1)]  # pegar os valores da previsão (após dados históricos)
                 
                 # Aplicar fatores de sazonalidade de volta se foram usados
                 if usar_sazonalidade:
@@ -991,6 +991,87 @@ def criar_fator_sazonalidade():
     ).order_by(Prato.nome).all()
     
     return render_template('previsao/criar_fator_sazonalidade.html',
+                          pratos=pratos,
+                          itens_cardapio=itens_cardapio)
+
+
+@bp.route('/sazonalidade/editar/<int:id>', methods=['GET', 'POST'])
+def editar_fator_sazonalidade(id):
+    """Edita um fator de sazonalidade existente."""
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        abort(403)
+
+    fator = FatorSazonalidade.query.filter_by(id=id, restaurant_id=restaurant_id).first_or_404()
+
+    if request.method == 'POST':
+        tipo_item = request.form.get('tipo_item')  # 'cardapio_item', 'prato' ou 'geral'
+        item_id = request.form.get('item_id', type=int)
+        tipo_sazonalidade = request.form.get('tipo_sazonalidade')  # 'mes', 'dia_semana' ou 'evento'
+        mes = request.form.get('mes', type=int)
+        dia_semana = request.form.get('dia_semana', type=int)
+        evento = request.form.get('evento')
+        valor_fator = request.form.get('fator', type=float)
+        descricao = request.form.get('descricao')
+
+        if not tipo_sazonalidade or not valor_fator:
+            flash('Tipo de sazonalidade e fator são obrigatórios!', 'danger')
+            return redirect(url_for('previsao.editar_fator_sazonalidade', id=id))
+
+        if tipo_sazonalidade == 'mes' and not mes:
+            flash('O mês é obrigatório para sazonalidade mensal!', 'danger')
+            return redirect(url_for('previsao.editar_fator_sazonalidade', id=id))
+        elif tipo_sazonalidade == 'dia_semana' and dia_semana is None:
+            flash('O dia da semana é obrigatório para sazonalidade semanal!', 'danger')
+            return redirect(url_for('previsao.editar_fator_sazonalidade', id=id))
+        elif tipo_sazonalidade == 'evento' and not evento:
+            flash('O nome do evento é obrigatório para sazonalidade por evento!', 'danger')
+            return redirect(url_for('previsao.editar_fator_sazonalidade', id=id))
+
+        # Verifica o item (se não for 'geral') e se pertence ao tenant.
+        cardapio_item_id = None
+        prato_id = None
+
+        if tipo_item == 'cardapio_item':
+            if not item_id:
+                flash('Item de cardápio é obrigatório!', 'danger')
+                return redirect(url_for('previsao.editar_fator_sazonalidade', id=id))
+            if not CardapioItem.query.join(CardapioSecao).join(Cardapio).filter(
+                CardapioItem.id == item_id,
+                Cardapio.restaurant_id == restaurant_id
+            ).first():
+                flash('Item inválido!', 'danger')
+                return redirect(url_for('previsao.editar_fator_sazonalidade', id=id))
+            cardapio_item_id = item_id
+        elif tipo_item == 'prato':
+            if not item_id:
+                flash('Prato é obrigatório!', 'danger')
+                return redirect(url_for('previsao.editar_fator_sazonalidade', id=id))
+            if not Prato.query.filter_by(id=item_id, restaurant_id=restaurant_id).first():
+                flash('Prato inválido!', 'danger')
+                return redirect(url_for('previsao.editar_fator_sazonalidade', id=id))
+            prato_id = item_id
+
+        fator.mes = mes if tipo_sazonalidade == 'mes' else None
+        fator.dia_semana = dia_semana if tipo_sazonalidade == 'dia_semana' else None
+        fator.evento = evento if tipo_sazonalidade == 'evento' else None
+        fator.cardapio_item_id = cardapio_item_id
+        fator.prato_id = prato_id
+        fator.fator = valor_fator
+        fator.descricao = descricao
+
+        db.session.commit()
+        flash('Fator de sazonalidade atualizado com sucesso!', 'success')
+        return redirect(url_for('previsao.listar_fatores_sazonalidade'))
+
+    pratos = Prato.query.filter_by(restaurant_id=restaurant_id).order_by(Prato.nome).all()
+    itens_cardapio = CardapioItem.query.join(CardapioSecao).join(Cardapio).join(Prato).filter(
+        Cardapio.ativo == True,
+        Cardapio.restaurant_id == restaurant_id
+    ).order_by(Prato.nome).all()
+
+    return render_template('previsao/editar_fator_sazonalidade.html',
+                          fator=fator,
                           pratos=pratos,
                           itens_cardapio=itens_cardapio)
 

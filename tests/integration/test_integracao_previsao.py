@@ -1,143 +1,169 @@
-import pytest
-import json
-from datetime import datetime, timedelta
-from app.models.modelo_previsao import HistoricoVendas, PrevisaoDemanda, FatorSazonalidade
-from app.models.modelo_produto import Produto
+"""Testes de integração do módulo de previsão (rotas atuais).
 
-# FOLLOW-UP (estabilização): estes testes usam campos obsoletos de Produto/
-# HistoricoVendas (preco_custo, preco_venda, codigo_barras, data_venda, valor)
-# e exercitam fluxos de rota de /previsao que exigem cliente autenticado e
-# provavelmente mudaram. Precisam de reescrita contra os modelos/rotas atuais.
-# Skip até lá para manter a suíte verde e sem ruído.
-pytestmark = pytest.mark.skip(
-    reason="Fixture usa campos obsoletos e asserts de rota desatualizados. "
-           "Reescrever contra modelos/rotas atuais. Follow-up de estabilização."
+Cobrem: histórico de vendas, registro manual de venda, geração e visualização
+de previsão, fatores de sazonalidade e importação de CSV (com baixa de estoque).
+"""
+import io
+import pytest
+from datetime import date, timedelta
+
+from app.models.modelo_previsao import (
+    HistoricoVendas,
+    PrevisaoDemanda,
+    FatorSazonalidade,
 )
+from app.models.modelo_prato import Prato
+
 
 @pytest.fixture
-def setup_produto_e_historico(session):
-    """Fixture para criar produto e histu00f3rico de vendas para testes"""
-    # Criar um produto de teste
-    produto = Produto(
-        nome="Produto Teste",
-        descricao="Produto para testes de integração",
-        unidade="un",
-        preco_custo=10.0,
-        preco_venda=20.0,
-        codigo_barras="123456789",
-        estoque_minimo=5,
-        estoque_atual=15
+def prato_ativo(session, restaurant):
+    prato = Prato(
+        nome='Arroz com Feijão',
+        descricao='Prato tradicional',
+        categoria='Pratos Principais',
+        rendimento=1,
+        unidade_rendimento='kg',
+        porcoes_rendimento=1,
+        preco_venda=15.0,
+        ativo=True,
+        restaurant_id=restaurant.id,
     )
-    session.add(produto)
+    session.add(prato)
     session.commit()
-    
-    # Criar histórico de vendas para o produto
+    return prato
+
+
+@pytest.fixture
+def prato_com_historico(session, prato_ativo):
+    """Prato + 30 dias de histórico (a rota de previsão exige >= 5 pontos)."""
     for i in range(30):
-        venda = HistoricoVendas(
-            data_venda=datetime.now().date() - timedelta(days=i),
-            produto_id=produto.id,
-            quantidade=10 + (i % 5),  # Variando a quantidade
-            valor=produto.preco_venda * (10 + (i % 5))
-        )
-        session.add(venda)
+        session.add(HistoricoVendas(
+            data=date.today() - timedelta(days=i),
+            prato_id=prato_ativo.id,
+            quantidade=10 + (i % 5),
+            valor_unitario=15.0,
+            valor_total=(10 + (i % 5)) * 15.0,
+            restaurant_id=prato_ativo.restaurant_id,
+        ))
     session.commit()
-    
-    return produto
+    return prato_ativo
 
-def test_fluxo_previsao_completo(client, session, setup_produto_e_historico):
-    """Testa o fluxo completo de geração de previsão de demanda"""
-    produto = setup_produto_e_historico
-    
-    # 1. Verificar se o histórico de vendas está disponível
-    response = client.get('/previsao/historico')
-    assert response.status_code == 200
-    assert b'Hist\xc3\xb3rico de Vendas' in response.data
-    
-    # 2. Gerar uma previsão
-    data_inicio = datetime.now().date()
-    data_fim = data_inicio + timedelta(days=7)
-    data = {
-        'produto_id': produto.id,
-        'data_inicio': data_inicio.strftime('%Y-%m-%d'),
-        'data_fim': data_fim.strftime('%Y-%m-%d'),
-        'metodo': 'média_móvel'
-    }
-    response = client.post('/previsao/gerar-previsao', data=data, follow_redirects=True)
-    assert response.status_code == 200
-    
-    # 3. Verificar se a previsão foi gerada e está na lista
-    response = client.get('/previsao/previsoes')
-    assert response.status_code == 200
-    assert b'Previs\xc3\xb5es Geradas' in response.data
-    assert bytes(produto.nome, 'utf-8') in response.data
-    
-    # 4. Verificar se podemos visualizar a previsão gerada
-    previsao = session.query(PrevisaoDemanda).filter_by(produto_id=produto.id).first()
+
+def test_listar_historico(auth_client, session, prato_com_historico):
+    resp = auth_client.get('/previsao/historico')
+    assert resp.status_code == 200
+    total = session.query(HistoricoVendas).filter_by(
+        prato_id=prato_com_historico.id).count()
+    assert total == 30
+
+
+def test_registrar_venda(auth_client, session, prato_com_historico):
+    antes = session.query(HistoricoVendas).filter_by(
+        prato_id=prato_com_historico.id).count()
+    resp = auth_client.post('/previsao/historico/registrar', data={
+        'data': date.today().strftime('%Y-%m-%d'),
+        'tipo_item': 'prato',
+        'item_id': prato_com_historico.id,
+        'quantidade': 5,
+        'valor_unitario': 15.0,
+    }, follow_redirects=True)
+    assert resp.status_code == 200
+    depois = session.query(HistoricoVendas).filter_by(
+        prato_id=prato_com_historico.id).count()
+    assert depois == antes + 1
+
+
+def test_gerar_e_visualizar_previsao(auth_client, session, prato_com_historico):
+    resp = auth_client.post('/previsao/previsao/gerar', data={
+        'tipo_item': 'prato',
+        'item_id': prato_com_historico.id,
+        'data_inicio': date.today().strftime('%Y-%m-%d'),
+        'data_fim': (date.today() + timedelta(days=7)).strftime('%Y-%m-%d'),
+        'metodo': 'media_movel',
+        'dias_projecao': 7,
+    }, follow_redirects=True)
+    assert resp.status_code == 200
+    previsao = session.query(PrevisaoDemanda).filter_by(
+        prato_id=prato_com_historico.id).first()
     assert previsao is not None
-    
-    response = client.get(f'/previsao/previsao/{previsao.id}')
-    assert response.status_code == 200
-    assert b'Detalhes da Previs\xc3\xa3o' in response.data
-    
-    # 5. Adicionar um fator de sazonalidade e verificar seu impacto
-    data = {
-        'tipo': 'dia_semana',
-        'valor': 1.2,
-        'descricao': 'Segunda-feira'
-    }
-    response = client.post('/previsao/criar-fator-sazonalidade', data=data, follow_redirects=True)
-    assert response.status_code == 200
-    
-    # 6. Gerar nova previsão considerando o fator sazonal
-    data = {
-        'produto_id': produto.id,
-        'data_inicio': data_inicio.strftime('%Y-%m-%d'),
-        'data_fim': data_fim.strftime('%Y-%m-%d'),
-        'metodo': 'média_móvel',
-        'considerar_sazonalidade': 'on'
-    }
-    response = client.post('/previsao/gerar-previsao', data=data, follow_redirects=True)
-    assert response.status_code == 200
-    
-    # 7. Verificar se temos agora duas previsões
-    previsoes = session.query(PrevisaoDemanda).filter_by(produto_id=produto.id).all()
-    assert len(previsoes) == 2
 
-def test_importacao_exportacao_historico(client, session, setup_produto_e_historico):
-    """Testa o fluxo de importação e exportação de histórico de vendas"""
-    produto = setup_produto_e_historico
-    
-    # 1. Exportar histórico
-    response = client.get('/previsao/exportar-historico')
-    assert response.status_code == 200
-    assert b'Exportar Hist\xc3\xb3rico de Vendas' in response.data
-    
-    # Simulando uma exportação (normalmente geraria um arquivo)
-    vendas = session.query(HistoricoVendas).filter_by(produto_id=produto.id).all()
-    assert len(vendas) > 0
-    
-    # 2. Testar a página de importação
-    response = client.get('/previsao/importar-historico')
-    assert response.status_code == 200
-    assert b'Importar Hist\xc3\xb3rico de Vendas' in response.data
-    
-    # Não podemos testar o upload de arquivo real aqui, mas verificamos a interface
+    resp = auth_client.get(f'/previsao/previsao/visualizar/{previsao.id}')
+    assert resp.status_code == 200
 
-def test_analise_dados_historicos(client, session, setup_produto_e_historico):
-    """Testa a análise de dados históricos de vendas"""
-    produto = setup_produto_e_historico
-    
-    # 1. Verificar médias de venda
-    vendas = session.query(HistoricoVendas).filter_by(produto_id=produto.id).all()
-    assert len(vendas) == 30  # Conforme criado no fixture
-    
-    # 2. Calcular média manualmente para comparar
-    total_quantidade = sum(venda.quantidade for venda in vendas)
-    media_quantidade = total_quantidade / len(vendas)
-    
-    # 3. Verificar dashboard que deve mostrar estatísticas
-    response = client.get('/previsao/')
-    assert response.status_code == 200
-    
-    # Presumindo que o dashboard mostra estatísticas gerais
-    assert b'Dashboard de Previs\xc3\xa3o' in response.data
+
+def test_listar_previsoes(auth_client, session, prato_com_historico):
+    auth_client.post('/previsao/previsao/gerar', data={
+        'tipo_item': 'prato',
+        'item_id': prato_com_historico.id,
+        'data_inicio': date.today().strftime('%Y-%m-%d'),
+        'data_fim': (date.today() + timedelta(days=7)).strftime('%Y-%m-%d'),
+        'metodo': 'media_movel',
+        'dias_projecao': 7,
+    }, follow_redirects=True)
+    resp = auth_client.get('/previsao/previsoes')
+    assert resp.status_code == 200
+
+
+def test_criar_fator_sazonalidade(auth_client, session, prato_com_historico):
+    resp = auth_client.post('/previsao/sazonalidade/criar', data={
+        'tipo_item': 'prato',
+        'item_id': prato_com_historico.id,
+        'tipo_sazonalidade': 'mes',
+        'mes': 12,
+        'fator': 1.2,
+        'descricao': 'Dezembro',
+    }, follow_redirects=True)
+    assert resp.status_code == 200
+    fator = session.query(FatorSazonalidade).filter_by(
+        prato_id=prato_com_historico.id).first()
+    assert fator is not None
+    assert fator.fator == pytest.approx(1.2)
+
+
+def test_importar_historico_csv(auth_client, session, prato_ativo):
+    csv_content = 'data;produto;quantidade;valor\n'
+    csv_content += f'{date.today().strftime("%Y-%m-%d")};Arroz com Feijão;5;15.00\n'
+    data = {'arquivo_csv': (io.BytesIO(csv_content.encode('utf-8')), 'vendas.csv')}
+    resp = auth_client.post('/previsao/historico/importar', data=data,
+                            content_type='multipart/form-data',
+                            follow_redirects=True)
+    assert resp.status_code == 200
+    venda = session.query(HistoricoVendas).filter_by(
+        prato_id=prato_ativo.id).first()
+    assert venda is not None
+
+
+def test_editar_fator_sazonalidade(auth_client, session, prato_com_historico):
+    """Edita um fator de sazonalidade via rota (GET form + POST update)."""
+    auth_client.post('/previsao/sazonalidade/criar', data={
+        'tipo_sazonalidade': 'mes',
+        'mes': 12,
+        'tipo_item': 'prato',
+        'item_id': prato_com_historico.id,
+        'fator': 1.2,
+        'descricao': 'Dezembro',
+    }, follow_redirects=True)
+
+    fator = session.query(FatorSazonalidade).filter_by(
+        prato_id=prato_com_historico.id).first()
+    assert fator is not None
+
+    resp = auth_client.get(f'/previsao/sazonalidade/editar/{fator.id}')
+    assert resp.status_code == 200
+
+    resp = auth_client.post(f'/previsao/sazonalidade/editar/{fator.id}', data={
+        'tipo_sazonalidade': 'evento',
+        'evento': 'Natal',
+        'tipo_item': 'prato',
+        'item_id': prato_com_historico.id,
+        'fator': 0.8,
+        'descricao': 'Natal atualizado',
+    }, follow_redirects=True)
+    assert resp.status_code == 200
+
+    session.expire_all()
+    fator = session.query(FatorSazonalidade).filter_by(id=fator.id).first()
+    assert fator.mes is None
+    assert fator.evento == 'Natal'
+    assert fator.fator == pytest.approx(0.8)
+    assert fator.descricao == 'Natal atualizado'

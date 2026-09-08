@@ -1,6 +1,12 @@
 import os
 from datetime import timedelta
 
+from dotenv import load_dotenv
+
+# Carrega as chaves do .env (gitignorado) antes das classes abaixo lerem os
+# os.environ.get(...). Caminho explícito até a raiz do projeto.
+load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
+
 class Config:
     """Configuração base da aplicação"""
     # Configuração do Flask
@@ -63,18 +69,16 @@ class ProductionConfig(Config):
     # arquivo que não muda.
     SEND_FILE_MAX_AGE_DEFAULT = 86400
 
-    # Use variáveis de ambiente em produção
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'alero-prod-secret-fallback-key-2026'
+    # Segredos e banco são exigidos em produção — a checagem (fail fast) acontece
+    # no create_app, não aqui, para não quebrar o import do módulo em dev/teste.
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+
     # HTTPS em produção: cookie de sessão e de "continuar conectado" só viajam
     # cifrados. Fora daqui fica desligado, senão o login quebra em dev (http).
     SESSION_COOKIE_SECURE = True
     REMEMBER_COOKIE_SECURE = True
+
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
-    # Prevent SQLite in production to avoid Read-Only FS errors
-    if not SQLALCHEMY_DATABASE_URI:
-        # Fallback to in-memory SQLite if no DB provided (just to allow boot, data will be lost)
-        # Or better: don't set a default that writes to disk
-        SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     if SQLALCHEMY_DATABASE_URI and SQLALCHEMY_DATABASE_URI.startswith('postgres://'):
         SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace('postgres://', 'postgresql://', 1)
 

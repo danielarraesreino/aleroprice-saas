@@ -9,6 +9,7 @@ from flask import render_template, request, jsonify
 from flask_login import login_required
 from app.routes.agentes import bp
 from app.utils.ai_copy import _chamar_nvidia
+from app.utils import ai_gateway
 import os
 import json
 import urllib.request
@@ -59,6 +60,18 @@ XMEN_AGENTS = {
 }
 
 def _consultar_deepseek(prompt):
+    # 1) Gateway local (fonte única)
+    system = "Você é o Agente Magneto (DeepSeek), mestre do raciocínio lógico e financeiro para gastronomia. Seja analítico e preciso com números."
+    texto = ai_gateway.chat_completions(
+        ai_gateway.GATEWAY_MODEL_DEEPSEEK,
+        [{"role": "system", "content": system}, {"role": "user", "content": prompt}],
+        temperature=0.5,
+        max_tokens=800,
+    )
+    if texto is not None:
+        return texto
+
+    # 2) Fallback: DeepSeek direto
     key = os.environ.get("DEEPSEEK_API_KEY")
     if not key:
         key_file = os.path.expanduser("~/.deepseek_key")

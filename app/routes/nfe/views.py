@@ -568,7 +568,7 @@ def importar_nfe_ocr(ocr_data, imagem_nome, restaurant_id):
     for idx, item in enumerate(ocr_data.get('itens', []), start=1):
         descricao = (item.get('descricao') or 'Item sem nome').strip()
         codigo = str(item.get('codigo') or f'OCR_{abs(hash(descricao)) % 10000}')
-        unidade = (item.get('unidade') or 'UN').upper()[:6]
+        unidade = (item.get('unidade') or 'UN').upper()[:5]
         quantidade = float(item.get('quantidade') or 1.0)
         valor_unitario = float(item.get('valor_unitario') or 0.0)
         valor_total_item = float(item.get('valor_total') or (quantidade * valor_unitario))
@@ -582,8 +582,7 @@ def importar_nfe_ocr(ocr_data, imagem_nome, restaurant_id):
                 codigo=codigo,
                 nome=descricao,
                 unidade=unidade,
-                preco_custo=valor_unitario,
-                quantidade_estoque=0,
+                preco_unitario=valor_unitario,
                 fornecedor_id=fornecedor.id,
                 restaurant_id=restaurant_id
             )
@@ -591,14 +590,12 @@ def importar_nfe_ocr(ocr_data, imagem_nome, restaurant_id):
             db.session.flush()
 
         nf_item = NFItem(
-            nota_id=nota.id,
+            nf_nota_id=nota.id,
             num_item=idx,
-            codigo=codigo,
-            descricao=descricao,
-            unidade=unidade,
             quantidade=quantidade,
             valor_unitario=valor_unitario,
             valor_total=valor_total_item,
+            unidade_medida=unidade,
             produto_id=produto.id
         )
         db.session.add(nf_item)

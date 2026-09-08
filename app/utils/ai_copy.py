@@ -10,6 +10,8 @@ import urllib.parse
 import urllib.request
 import urllib.error
 
+from app.utils import ai_gateway
+
 NVIDIA_URL = "https://integrate.api.nvidia.com/v1/chat/completions"
 
 def _obter_chave_nvidia():
@@ -23,10 +25,21 @@ def _obter_chave_nvidia():
                 return f.read().strip()
         except Exception:
             pass
-    # Fallback seguro para runtime de produção
-    return "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"
+    # Sem chave configurada -> não chamar o provider (sem fallback hardcoded).
+    return None
 
 def _chamar_nvidia(prompt, system="Você é um assistente especialista em gastronomia e marketing de bares.", max_tokens=600):
+    # 1) Gateway local (fonte única)
+    texto = ai_gateway.chat_completions(
+        ai_gateway.GATEWAY_MODEL_TEXT,
+        [{"role": "system", "content": system}, {"role": "user", "content": prompt}],
+        temperature=0.5,
+        max_tokens=max_tokens,
+    )
+    if texto is not None:
+        return texto
+
+    # 2) Fallback: NVIDIA NIM direto
     api_key = _obter_chave_nvidia()
     if not api_key:
         return None

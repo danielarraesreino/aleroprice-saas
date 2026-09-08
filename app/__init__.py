@@ -26,6 +26,14 @@ def create_app(config_name='default'):
         
     app = Flask(__name__, **params)
     app.config.from_object(config[config_name])
+
+    # Fail fast em produção: segredo e banco não podem ter fallback (subir com
+    # segredo conhecido ou banco em memória é pior que não subir).
+    if config_name == 'production':
+        if not app.config.get('SECRET_KEY'):
+            raise RuntimeError('SECRET_KEY é obrigatória em produção.')
+        if not app.config.get('SQLALCHEMY_DATABASE_URI'):
+            raise RuntimeError('DATABASE_URL é obrigatória em produção (não usar SQLite).')
     # Guardado para gates que dependem do ambiente (ex.: billing recusa o modo
     # mock em produção). Sem isso, não há como distinguir prod de dev em runtime.
     app.config['CONFIG_NAME'] = config_name

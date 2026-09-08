@@ -34,6 +34,20 @@ ALVOS = [
     ('categoria_desperdicio', 'nome', 'uq_categoria_desp_nome_restaurant'),
 ]
 
+# LIMITAÇÃO CONHECIDA (SQLite dev): quando o unique global antigo veio de um
+# `unique=True` na coluna, o SQLite o materializa como auto-index SEM nome.
+# `_uniques_de` (abaixo) só enxerga os nomeados, então essa anônima passa
+# batido e sobra ao lado da composite nova — quebrando o 2º bar com o mesmo
+# prato/produto/categoria. No Postgres (produção) a constraint é nomeada e a
+# migration remove corretamente. Remover auto-index anônimo do SQLite exige
+# recriar a tabela com FK fora de transação — risco alto num único migration
+# que roda nos dois dialetos. Para um banco dev nesse estado, o caminho seguro
+# é recriá-lo (o schema atual do modelo já só tem a composite):
+#     cp instance/alerodb.sqlite instance/alerodb.sqlite.bak  # antes!
+#     venv/bin/python -c "from app import create_app; from app.extensions import db; \
+#         a=create_app('development'); ctx=a.app_context(); ctx.push(); db.drop_all(); db.create_all()"
+# (banco dev só tem dados de demonstração, todos re-semeáveis.)
+
 
 def _inspetor():
     return sa.inspect(op.get_bind())

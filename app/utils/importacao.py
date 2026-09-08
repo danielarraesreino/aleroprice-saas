@@ -9,7 +9,7 @@ import pandas as pd
 from datetime import date
 from app.models.modelo_prato import Prato, PratoInsumo
 from app.models.modelo_produto import Produto
-from app.models.modelo_estoque import MovimentacaoEstoque
+from app.models.modelo_estoque import EstoqueMovimentacao
 from app.extensions import db
 
 
@@ -184,25 +184,32 @@ class ImportadorVendas:
             if not prato:
                 return False
             
+            # Prato sem rendimento definido não tem como ratear os insumos.
+            if not prato.porcoes_rendimento:
+                return False
+
             # Obter insumos do prato
             insumos = PratoInsumo.query.filter_by(prato_id=prato_id).all()
-            
+
             for insumo in insumos:
-                # Calcular quantidade consumida por porção
-                qtd_por_porcao = insumo.quantidade / prato.porcoes_rendimento
-                
-                # Quantidade total consumida
-                qtd_consumida = qtd_por_porcao * quantidade_vendida
-                
-                # Criar movimentação de estoque (saída)
-                movimentacao = MovimentacaoEstoque(
+                if not insumo.produto:
+                    continue
+
+                # Quantidade consumida por porção e total consumido.
+                qtd_consumida = (insumo.quantidade / prato.porcoes_rendimento) * quantidade_vendida
+
+                # Baixa o estoque do insumo (levanta ValueError se insuficiente).
+                insumo.produto.atualizar_estoque(qtd_consumida, 'saída')
+
+                # Registra a movimentação de saída.
+                movimentacao = EstoqueMovimentacao(
                     produto_id=insumo.produto_id,
-                    tipo='saida',
+                    tipo='saída',
                     quantidade=qtd_consumida,
-                    motivo=f'Venda de {quantidade_vendida}x {prato.nome}',
-                    restaurant_id=self.restaurant_id
+                    observacao=f'Venda de {quantidade_vendida}x {prato.nome}',
+                    restaurant_id=self.restaurant_id,
                 )
-                
+
                 db.session.add(movimentacao)
             
             db.session.commit()

@@ -7,41 +7,9 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
     <style>
-        .form-container {
-            background-color: #f8f9fa;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .form-title {
-            border-bottom: 2px solid #e9ecef;
-            padding-bottom: 15px;
-            margin-bottom: 25px;
-        }
-        .fator-range {
-            width: 100%;
-        }
-        .fator-value {
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-        .fator-value-positivo {
-            color: #28a745;
-        }
-        .fator-value-negativo {
-            color: #dc3545;
-        }
-        .fator-value-neutro {
-            color: #6c757d;
-        }
-        .badge-tipo {
-            background-color: #17a2b8;
-            color: white;
-            font-size: 1rem;
-            padding: 8px 15px;
-            margin-bottom: 15px;
-            display: inline-block;
-        }
+        .form-container { background-color: #f8f9fa; padding: 25px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .form-title { border-bottom: 2px solid #e9ecef; padding-bottom: 15px; margin-bottom: 25px; }
+        .fator-value { font-size: 1.5rem; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -53,102 +21,103 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav mr-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('dashboard.index') }}">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('pratos.index') }}">Pratos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('estoque.index') }}">Estoque</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('cardapios.index') }}">Cardápios</a>
-                    </li>
-                    <li class="nav-item active">
-                        <a class="nav-link" href="{{ url_for('previsao.index') }}">Previsão</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('desperdicio.index') }}">Desperdício</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard.index') }}">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('pratos.index') }}">Pratos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('estoque.index') }}">Estoque</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('cardapios.index') }}">Cardápios</a></li>
+                    <li class="nav-item active"><a class="nav-link" href="{{ url_for('previsao.index') }}">Previsão</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('desperdicio.index') }}">Desperdício</a></li>
                 </ul>
             </div>
         </div>
     </nav>
 
     <div class="container mt-4">
-        <div class="row mb-4">
-            <div class="col-12">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="{{ url_for('previsao.index') }}">Previsão</a></li>
                         <li class="breadcrumb-item"><a href="{{ url_for('previsao.listar_fatores_sazonalidade') }}">Fatores de Sazonalidade</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Editar Fator</li>
+                        <li class="breadcrumb-item active">Editar Fator</li>
                     </ol>
                 </nav>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-8 offset-md-2">
                 <div class="form-container">
                     <h2 class="form-title">Editar Fator de Sazonalidade</h2>
-                    <p class="text-muted">Atualize os dados do fator de sazonalidade</p>
-
                     <form method="post" action="{{ url_for('previsao.editar_fator_sazonalidade', id=fator.id) }}">
-                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <div class="text-center mb-4">
-                            <span class="badge badge-tipo">{{ fator.tipo|replace('_', ' ')|title }}</span>
-                            <input type="hidden" name="tipo" value="{{ fator.tipo }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <div class="form-group">
+                            <label for="tipo_sazonalidade">Tipo de Sazonalidade *</label>
+                            <select class="form-control" id="tipo_sazonalidade" name="tipo_sazonalidade" required>
+                                <option value="mes" {% if fator.mes %}selected{% endif %}>Mês</option>
+                                <option value="dia_semana" {% if fator.dia_semana is not none %}selected{% endif %}>Dia da Semana</option>
+                                <option value="evento" {% if fator.evento %}selected{% endif %}>Evento Especial</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="campo-mes">
+                            <label for="mes">Mês *</label>
+                            <select class="form-control" id="mes" name="mes">
+                                <option value="">Selecione...</option>
+                                {% for m in range(1, 13) %}<option value="{{ m }}" {% if fator.mes == m %}selected{% endif %}>{{ m }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group" id="campo-dia-semana" style="display:none">
+                            <label for="dia_semana">Dia da Semana *</label>
+                            <select class="form-control" id="dia_semana" name="dia_semana">
+                                <option value="">Selecione...</option>
+                                <option value="0" {% if fator.dia_semana == 0 %}selected{% endif %}>Segunda-feira</option>
+                                <option value="1" {% if fator.dia_semana == 1 %}selected{% endif %}>Terça-feira</option>
+                                <option value="2" {% if fator.dia_semana == 2 %}selected{% endif %}>Quarta-feira</option>
+                                <option value="3" {% if fator.dia_semana == 3 %}selected{% endif %}>Quinta-feira</option>
+                                <option value="4" {% if fator.dia_semana == 4 %}selected{% endif %}>Sexta-feira</option>
+                                <option value="5" {% if fator.dia_semana == 5 %}selected{% endif %}>Sábado</option>
+                                <option value="6" {% if fator.dia_semana == 6 %}selected{% endif %}>Domingo</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="campo-evento" style="display:none">
+                            <label for="evento">Evento *</label>
+                            <input type="text" class="form-control" id="evento" name="evento" value="{{ fator.evento or '' }}" placeholder="Ex: Natal, Carnaval, Dia dos Namorados">
                         </div>
 
                         <div class="form-group">
-                            <label for="nome">Nome do Fator *</label>
-                            <input type="text" class="form-control" id="nome" name="nome" value="{{ fator.nome }}" required>
+                            <label for="tipo_item">Aplica a</label>
+                            <select class="form-control" id="tipo_item" name="tipo_item">
+                                <option value="geral" {% if not fator.prato_id and not fator.cardapio_item_id %}selected{% endif %}>Geral (todos os itens)</option>
+                                <option value="prato" {% if fator.prato_id %}selected{% endif %}>Um prato específico</option>
+                                <option value="cardapio_item" {% if fator.cardapio_item_id %}selected{% endif %}>Um item de cardápio</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="campo-item" style="display:none">
+                            <label for="item_id">Item</label>
+                            <select class="form-control" id="item-prato" name="item_id">
+                                <option value="">Selecione um prato...</option>
+                                {% for p in pratos %}<option value="{{ p.id }}" {% if fator.prato_id == p.id %}selected{% endif %}>{{ p.nome }}</option>{% endfor %}
+                            </select>
+                            <select class="form-control" id="item-cardapio" name="item_id" style="display:none">
+                                <option value="">Selecione um item de cardápio...</option>
+                                {% for it in itens_cardapio %}<option value="{{ it.id }}" {% if fator.cardapio_item_id == it.id %}selected{% endif %}>{{ it.prato.nome if it.prato else it.id }}</option>{% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="fator-range">Valor do Fator *</label>
+                            <input type="range" class="custom-range" id="fator-range" min="0.5" max="1.5" step="0.01" value="{{ fator.fator }}">
+                            <div id="fator-display" class="fator-value">0%</div>
+                            <input type="hidden" id="fator" name="fator" value="{{ fator.fator }}">
+                            <small class="form-text text-muted">Maior que 1 aumenta a demanda; menor que 1 reduz.</small>
                         </div>
 
                         <div class="form-group">
                             <label for="descricao">Descrição</label>
-                            <textarea class="form-control" id="descricao" name="descricao" rows="2">{{ fator.descricao }}</textarea>
-                            <small class="form-text text-muted">Uma breve descrição deste fator (opcional)</small>
+                            <textarea class="form-control" id="descricao" name="descricao" rows="2">{{ fator.descricao or '' }}</textarea>
                         </div>
 
-                        <div class="form-group">
-                            <label for="fator">Valor do Fator *</label>
-                            <div class="row align-items-center">
-                                <div class="col-md-8">
-                                    <input type="range" class="custom-range fator-range" id="fator-range" min="0.5" max="1.5" step="0.01" value="{{ fator.fator }}">
-                                </div>
-                                <div class="col-md-4 text-center">
-                                    <div id="fator-display" class="fator-value 
-                                        {% if fator.fator > 1 %}fator-value-positivo
-                                        {% elif fator.fator < 1 %}fator-value-negativo
-                                        {% else %}fator-value-neutro{% endif %}
-                                    ">
-                                        {% if fator.fator > 1 %}+{% endif %}{{ ((fator.fator - 1) * 100)|int }}%
-                                    </div>
-                                    <input type="hidden" id="fator" name="fator" value="{{ fator.fator }}">
-                                </div>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <small class="text-danger">-50%</small>
-                                <small class="text-muted">Neutro</small>
-                                <small class="text-success">+50%</small>
-                            </div>
-                            <small class="form-text text-muted mt-2">Quanto este fator aumenta ou diminui a demanda</small>
-                        </div>
-
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle"></i> Um fator maior que 1 (percentual positivo) indica aumento na demanda, enquanto um fator menor que 1 (percentual negativo) indica redução.
-                        </div>
-
-                        <div class="form-group text-right mt-4">
-                            <a href="{{ url_for('previsao.listar_fatores_sazonalidade') }}" class="btn btn-secondary">
-                                <i class="fas fa-times"></i> Cancelar
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> Salvar Alterações
-                            </button>
+                        <div class="form-group text-right">
+                            <a href="{{ url_for('previsao.listar_fatores_sazonalidade') }}" class="btn btn-secondary">Cancelar</a>
+                            <button type="submit" class="btn btn-primary">Salvar Alterações</button>
                         </div>
                     </form>
                 </div>
@@ -160,26 +129,31 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
+        function atualizarCampos() {
+            var tipo = $('#tipo_sazonalidade').val();
+            $('#campo-mes').toggle(tipo === 'mes');
+            $('#campo-dia-semana').toggle(tipo === 'dia_semana');
+            $('#campo-evento').toggle(tipo === 'evento');
+        }
+        function atualizarItem() {
+            var t = $('#tipo_item').val();
+            $('#campo-item').toggle(t !== 'geral');
+            $('#item-prato').toggle(t === 'prato').prop('disabled', t !== 'prato');
+            $('#item-cardapio').toggle(t === 'cardapio_item').prop('disabled', t !== 'cardapio_item');
+        }
+        function atualizarFator() {
+            var v = parseFloat($('#fator-range').val());
+            $('#fator').val(v);
+            var pct = ((v - 1) * 100).toFixed(0);
+            $('#fator-display').text((pct > 0 ? '+' : '') + pct + '%');
+        }
         $(document).ready(function() {
-            // Atualizar valor do fator ao mover o slider
-            $('#fator-range').on('input', function() {
-                var valor = parseFloat($(this).val());
-                $('#fator').val(valor);
-                
-                var percentual = ((valor - 1) * 100).toFixed(0);
-                var sinal = percentual > 0 ? '+' : '';
-                $('#fator-display').text(sinal + percentual + '%');
-                
-                // Atualizar classe de cor
-                $('#fator-display').removeClass('fator-value-positivo fator-value-negativo fator-value-neutro');
-                if (valor > 1) {
-                    $('#fator-display').addClass('fator-value-positivo');
-                } else if (valor < 1) {
-                    $('#fator-display').addClass('fator-value-negativo');
-                } else {
-                    $('#fator-display').addClass('fator-value-neutro');
-                }
-            });
+            atualizarCampos();
+            atualizarItem();
+            atualizarFator();
+            $('#tipo_sazonalidade').change(atualizarCampos);
+            $('#tipo_item').change(atualizarItem);
+            $('#fator-range').on('input', atualizarFator);
         });
     </script>
 </body>

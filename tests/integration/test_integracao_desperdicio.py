@@ -1,224 +1,148 @@
+"""Testes de integração do módulo de desperdício (rotas atuais).
+
+Cobrem o fluxo real: criar categoria, registrar desperdício, listar, criar e
+visualizar metas e gerar relatórios/exportação. Usam `auth_client` (login como
+admin do restaurante de teste) e as rotas registradas em `/desperdicio`.
+"""
 import pytest
-import json
-from datetime import datetime, timedelta
-from app.models.modelo_desperdicio import CategoriaDesperdicio, RegistroDesperdicio, MetaDesperdicio
+from datetime import date, timedelta
+
+from app.models.modelo_desperdicio import (
+    CategoriaDesperdicio,
+    RegistroDesperdicio,
+    MetaDesperdicio,
+)
 from app.models.modelo_produto import Produto
 
-# FOLLOW-UP (estabilização): estes testes exercitam URLs/campos de uma versão
-# anterior das rotas de desperdício (ex.: /desperdicio/criar-categoria,
-# r.valor) que hoje retornam 404 ou não existem. As fixtures já foram
-# modernizadas (campos corretos + restaurant_id + auth_client), mas os asserts
-# de fluxo de rota precisam ser reescritos contra as rotas atuais. Skip até lá.
-pytestmark = pytest.mark.skip(
-    reason="Route-flow asserts contra rotas antigas (404). Fixtures já modernizadas; "
-           "reescrever asserts contra rotas atuais. Follow-up de estabilização."
-)
 
 @pytest.fixture
-def setup_categoria_e_produtos(session, restaurant):
-    """Fixture para criar categorias de desperdu00edcio e produtos para testes"""
-    # Criar categorias de desperdu00edcio
-    categorias = [
-        CategoriaDesperdicio(nome="Expirado", descricao="Produtos vencidos", cor="#FF0000", restaurant_id=restaurant.id),
-        CategoriaDesperdicio(nome="Sobra", descricao="Sobra de produu00e7u00e3o", cor="#FFA500", restaurant_id=restaurant.id),
-        CategoriaDesperdicio(nome="Dano", descricao="Produtos danificados", cor="#FFFF00", restaurant_id=restaurant.id)
-    ]
-
-    for categoria in categorias:
-        session.add(categoria)
-    session.commit()
-
-    # Criar produtos de teste
-    produtos = [
-        Produto(
-            nome="Produto A",
-            descricao="Produto A para testes",
-            unidade="kg",
-            preco_unitario=20.0,
-            codigo="111222333",
-            estoque_minimo=10,
-            estoque_atual=30,
-            restaurant_id=restaurant.id
-        ),
-        Produto(
-            nome="Produto B",
-            descricao="Produto B para testes",
-            unidade="un",
-            preco_unitario=5.0,
-            codigo="444555666",
-            estoque_minimo=5,
-            estoque_atual=15,
-            restaurant_id=restaurant.id
-        )
-    ]
-    
-    for produto in produtos:
-        session.add(produto)
-    session.commit()
-    
-    return {"categorias": categorias, "produtos": produtos}
-
-@pytest.fixture
-def setup_registros_desperdicio(session, restaurant, setup_categoria_e_produtos):
-    """Fixture para criar registros de desperdu00edcio para testes"""
-    dados = setup_categoria_e_produtos
-    categorias = dados["categorias"]
-    produtos = dados["produtos"]
-    
-    # Criar registros de desperdu00edcio para cada combinau00e7u00e3o de categoria e produto
-    registros = []
-    for i, categoria in enumerate(categorias):
-        for j, produto in enumerate(produtos):
-            for dia in range(10):  # Criar registros para os u00faltimos 10 dias
-                registro = RegistroDesperdicio(
-                    categoria_id=categoria.id,
-                    produto_id=produto.id,
-                    restaurant_id=restaurant.id,
-                    quantidade=float(1 + (i + j) % 5),  # Variar a quantidade
-                    unidade=produto.unidade,
-                    valor_estimado=float(produto.preco_unitario) * float(1 + (i + j) % 5),
-                    data_registro=datetime.now().date() - timedelta(days=dia),
-                    descricao=f"Registro de teste para {categoria.nome} e {produto.nome}"
-                )
-                session.add(registro)
-                registros.append(registro)
-    
-    # Criar uma meta de reduu00e7u00e3o de desperdu00edcio
-    meta = MetaDesperdicio(
-        categoria_id=categorias[0].id,  # Meta para a primeira categoria
+def categoria(session, restaurant):
+    cat = CategoriaDesperdicio(
+        nome='Vencimento',
+        descricao='Produtos vencidos',
+        cor='#FF0000',
+        ativo=True,
         restaurant_id=restaurant.id,
-        valor_inicial=1000.0,
-        valor_meta=800.0,
+    )
+    session.add(cat)
+    session.commit()
+    return cat
+
+
+@pytest.fixture
+def produto(session, restaurant):
+    prod = Produto(
+        nome='Arroz',
+        descricao='Arroz branco',
+        unidade='kg',
+        preco_unitario=5.0,
+        estoque_minimo=10.0,
+        estoque_atual=50.0,
+        categoria='Grãos',
+        restaurant_id=restaurant.id,
+    )
+    session.add(prod)
+    session.commit()
+    return prod
+
+
+@pytest.fixture
+def registro(session, categoria, produto):
+    reg = RegistroDesperdicio(
+        categoria_id=categoria.id,
+        produto_id=produto.id,
+        quantidade=2.5,
+        unidade='kg',
+        valor_estimado=12.5,
+        motivo='Vencido',
+        responsavel='QA',
+        local='Estoque',
+        restaurant_id=produto.restaurant_id,
+    )
+    session.add(reg)
+    session.commit()
+    return reg
+
+
+def test_criar_categoria(auth_client, session, restaurant):
+    resp = auth_client.post('/desperdicio/categoria/criar', data={
+        'nome': 'Sobra de produção',
+        'descricao': 'Sobra de preparo',
+        'cor': '#FFA500',
+    }, follow_redirects=True)
+    assert resp.status_code == 200
+    cat = session.query(CategoriaDesperdicio).filter_by(
+        nome='Sobra de produção', restaurant_id=restaurant.id).first()
+    assert cat is not None
+
+
+def test_registrar_desperdicio(auth_client, session, categoria, produto):
+    resp = auth_client.post('/desperdicio/registro/criar', data={
+        'categoria_id': categoria.id,
+        'tipo_item': 'produto',
+        'item_id': produto.id,
+        'quantidade': 1.5,
+        'unidade': 'kg',
+        'valor_estimado': 7.5,
+        'motivo': 'Vencido',
+        'responsavel': 'QA',
+        'local': 'Estoque',
+    }, follow_redirects=True)
+    assert resp.status_code == 200
+    reg = session.query(RegistroDesperdicio).filter_by(
+        produto_id=produto.id, restaurant_id=produto.restaurant_id).first()
+    assert reg is not None
+    assert reg.quantidade == 1.5
+
+
+def test_listar_registros(auth_client, registro):
+    resp = auth_client.get('/desperdicio/registros')
+    assert resp.status_code == 200
+
+
+def test_criar_meta(auth_client, session, categoria):
+    resp = auth_client.post('/desperdicio/meta/criar', data={
+        'descricao': 'Reduzir vencidos',
+        'data_inicio': date.today().strftime('%Y-%m-%d'),
+        'data_fim': (date.today() + timedelta(days=60)).strftime('%Y-%m-%d'),
+        'categoria_id': categoria.id,
+        'valor_inicial': 500.0,
+        'meta_reducao_percentual': 20.0,
+        'responsavel': 'QA',
+    }, follow_redirects=True)
+    assert resp.status_code == 200
+    meta = session.query(MetaDesperdicio).filter_by(
+        descricao='Reduzir vencidos', restaurant_id=categoria.restaurant_id).first()
+    assert meta is not None
+    # valor_meta é derivado: 500 * (1 - 0.20)
+    assert meta.valor_meta == pytest.approx(400.0)
+
+
+def test_listar_e_visualizar_meta(auth_client, session, categoria):
+    meta = MetaDesperdicio(
+        descricao='Meta QA',
+        data_inicio=date.today(),
+        data_fim=date.today() + timedelta(days=30),
+        categoria_id=categoria.id,
+        valor_inicial=100.0,
+        valor_meta=80.0,
         meta_reducao_percentual=20.0,
-        data_inicio=datetime.now().date(),
-        data_fim=datetime.now().date() + timedelta(days=30),
-        descricao="Meta de reduu00e7u00e3o para testes"
+        restaurant_id=categoria.restaurant_id,
     )
     session.add(meta)
     session.commit()
-    
-    return {"categorias": categorias, "produtos": produtos, "registros": registros, "meta": meta}
 
-def test_fluxo_desperdicio_completo(auth_client, session, setup_registros_desperdicio):
-    """Testa o fluxo completo de monitoramento de desperdu00edcio"""
-    dados = setup_registros_desperdicio
-    categorias = dados["categorias"]
-    produtos = dados["produtos"]
-    
-    # 1. Verificar se as categorias estu00e3o disponu00edveis
-    response = auth_client.get('/desperdicio/categorias')
-    assert response.status_code == 200
-    for categoria in categorias:
-        assert bytes(categoria.nome, 'utf-8') in response.data
-    
-    # 2. Criar uma nova categoria
-    nova_categoria = {
-        'nome': 'Nova Categoria',
-        'descricao': 'Categoria criada pelo teste de integrau00e7u00e3o',
-        'cor': '#AABBCC'
-    }
-    response = auth_client.post('/desperdicio/criar-categoria', data=nova_categoria, follow_redirects=True)
-    assert response.status_code == 200
-    
-    # 3. Verificar se a nova categoria foi criada
-    response = auth_client.get('/desperdicio/categorias')
-    assert bytes(nova_categoria['nome'], 'utf-8') in response.data
-    
-    # 4. Registrar um novo desperdu00edcio
-    categoria = categorias[0]
-    produto = produtos[0]
-    novo_registro = {
-        'categoria_id': categoria.id,
-        'produto_id': produto.id,
-        'quantidade': 3.5,
-        'unidade': produto.unidade,
-        'valor': produto.preco_unitario * 3.5,
-        'data_registro': datetime.now().strftime('%Y-%m-%d'),
-        'observacao': 'Registro criado pelo teste de integrau00e7u00e3o'
-    }
-    response = auth_client.post('/desperdicio/registrar', data=novo_registro, follow_redirects=True)
-    assert response.status_code == 200
-    
-    # 5. Verificar se o registro foi criado
-    response = auth_client.get('/desperdicio/registros')
-    assert bytes('Registro criado pelo teste de integra', 'utf-8') in response.data or bytes(categoria.nome, 'utf-8') in response.data
-    
-    # 6. Verificar as metas de reduu00e7u00e3o
-    response = auth_client.get('/desperdicio/metas')
-    assert response.status_code == 200
-    assert b'Meta de redu\xc3\xa7\xc3\xa3o para testes' in response.data or bytes(str(20.0), 'utf-8') in response.data
-    
-    # 7. Criar uma nova meta
-    nova_meta = {
-        'categoria_id': categorias[1].id,
-        'valor_inicial': 500.0,
-        'percentual_reducao': 15.0,
-        'data_inicio': datetime.now().strftime('%Y-%m-%d'),
-        'data_fim': (datetime.now() + timedelta(days=60)).strftime('%Y-%m-%d'),
-        'descricao': 'Nova meta criada pelo teste'
-    }
-    response = auth_client.post('/desperdicio/criar-meta', data=nova_meta, follow_redirects=True)
-    assert response.status_code == 200
-    
-    # 8. Verificar relatórios
-    response = auth_client.get('/desperdicio/relatorios')
-    assert response.status_code == 200
-    assert b'Relat\xc3\xb3rios de Desperd\xc3\xadcio' in response.data
+    resp = auth_client.get('/desperdicio/metas')
+    assert resp.status_code == 200
 
-def test_analise_dados_desperdicio(auth_client, session, setup_registros_desperdicio):
-    """Testa a anu00e1lise de dados de desperdu00edcio"""
-    dados = setup_registros_desperdicio
-    categorias = dados["categorias"]
-    registros = dados["registros"]
-    
-    # 1. Verificar o dashboard que deve mostrar estatu00edsticas
-    response = auth_client.get('/desperdicio/')
-    assert response.status_code == 200
-    assert b'Dashboard de Desperd\xc3\xadcio' in response.data
-    
-    # 2. Verificar se podemos filtrar registros por categoria
-    categoria = categorias[0]
-    response = auth_client.get(f'/desperdicio/registros?categoria_id={categoria.id}')
-    assert response.status_code == 200
-    
-    # 3. Calcular alguns dados manualmente para comparau00e7u00e3o
-    registros_categoria = [r for r in registros if r.categoria_id == categoria.id]
-    assert len(registros_categoria) > 0
-    
-    total_valor = sum(r.valor for r in registros_categoria)
-    
-    # 4. Verificar exportau00e7u00e3o de registros
-    response = auth_client.get('/desperdicio/exportar-registros')
-    assert response.status_code == 200
-    assert b'Exportar Registros de Desperd\xc3\xadcio' in response.data
+    resp = auth_client.get(f'/desperdicio/meta/visualizar/{meta.id}')
+    assert resp.status_code == 200
 
-def test_progresso_metas_desperdicio(auth_client, session, setup_registros_desperdicio):
-    """Testa o acompanhamento do progresso das metas de desperdu00edcio"""
-    dados = setup_registros_desperdicio
-    categorias = dados["categorias"]
-    meta = dados["meta"]
-    
-    # 1. Verificar a pu00e1gina de metas
-    response = auth_client.get('/desperdicio/metas')
-    assert response.status_code == 200
-    
-    # 2. Verificar a visualizau00e7u00e3o detalhada de uma meta
-    response = auth_client.get(f'/desperdicio/meta/{meta.id}')
-    assert response.status_code == 200
-    assert b'Detalhes da Meta' in response.data or bytes(meta.descricao, 'utf-8') in response.data
-    
-    # 3. Calcular progresso manualmente
-    categoria_id = meta.categoria_id
-    data_inicio = meta.data_inicio
-    data_fim = meta.data_fim
-    
-    registros_periodo = session.query(RegistroDesperdicio).filter(
-        RegistroDesperdicio.categoria_id == categoria_id,
-        RegistroDesperdicio.data_registro >= data_inicio,
-        RegistroDesperdicio.data_registro <= data_fim
-    ).all()
-    
-    total_valor_periodo = sum(r.valor for r in registros_periodo)
-    
-    # O progresso da meta deve ser mostrado na pu00e1gina de detalhes
-    # Mas como nu00e3o podemos verificar o conteúdo exato, apenas verificamos se a pu00e1gina carrega
+
+def test_relatorios_e_exportacao(auth_client, registro):
+    resp = auth_client.get('/desperdicio/relatorios')
+    assert resp.status_code == 200
+
+    resp = auth_client.get('/desperdicio/exportar/registros')
+    assert resp.status_code == 200
+    assert resp.mimetype == 'text/csv'

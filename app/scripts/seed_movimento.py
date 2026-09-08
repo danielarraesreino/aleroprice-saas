@@ -124,6 +124,42 @@ PERFIS = {
         # Terça do espeto (dia fraco puxado na promoção) e caldo no domingo frio.
         'promos': [(1, 'Espetinho de carne', 2.0), (6, 'Caldo de mocotó', 1.7)],
     },
+    'demo-avaliacao': {
+        'cardapio': 'Cardápio Demo Avaliação',
+        # Mesmo ritmo do bar-da-vila: fecha segunda, pico quinta-sábado.
+        'fator_dia': {0: 0.0, 1: 0.70, 2: 0.85, 3: 1.05, 4: 1.50, 5: 1.70, 6: 1.15},
+        'mix': {
+            'Croquete da Bruna (6 un)': 12,
+            'Costelinha com farofa e ora-pro-nóbis': 8,
+            'Frango a passarinho': 10,
+            'Porção de batata frita': 14,
+            'Mandioca frita com bacon': 7,
+            'Carbonara da casa': 5,
+            'Calabresa acebolada': 9,
+            'Prato do dia': 22,
+            'Lanche da Vila': 11,
+            'Cerveja long neck': 60,
+            'Chopp (500ml)': 40,
+            'Refrigerante lata': 18,
+        },
+        'periodo': {'Prato do dia': 'tarde'},
+        'secoes': [
+            ('Petiscos e Porções', 1, [
+                'Croquete da Bruna (6 un)', 'Frango a passarinho',
+                'Porção de batata frita', 'Mandioca frita com bacon',
+                'Calabresa acebolada',
+            ]),
+            ('Pratos', 2, [
+                'Costelinha com farofa e ora-pro-nóbis', 'Carbonara da casa',
+                'Prato do dia',
+            ]),
+            ('Lanches', 3, ['Lanche da Vila']),
+            ('Bebidas', 4, ['Cerveja long neck', 'Chopp (500ml)', 'Refrigerante lata']),
+        ],
+        'destaques': {'Croquete da Bruna (6 un)',
+                      'Costelinha com farofa e ora-pro-nóbis'},
+        'promos': [(2, 'Lanche da Vila', 1.8), (4, 'Chopp (500ml)', 1.6)],
+    },
 }
 
 CATEGORIAS_DESPERDICIO = [

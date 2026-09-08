@@ -216,7 +216,7 @@ def seed(slug, escala=ESCALA_PADRAO):
     # --- pratos + ficha técnica ---
     n_pratos = 0
     for nome, categoria, preco, margem, porcoes, insumos in PRATOS:
-        prato = Prato.query.filter_by(nome=nome).first()   # nome é unique global
+        prato = Prato.query.filter_by(nome=nome, restaurant_id=rid).first()   # nome é unique POR restaurante
         if prato is None:
             prato = Prato(
                 nome=nome, categoria=categoria, preco_venda=_dec(preco),

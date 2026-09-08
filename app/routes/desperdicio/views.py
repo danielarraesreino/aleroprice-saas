@@ -368,6 +368,7 @@ def criar_meta():
             categoria_id=categoria_id,
             produto_id=produto_id,
             valor_inicial=valor_inicial,
+            valor_meta=valor_inicial * (1 - meta_reducao_percentual / 100),
             meta_reducao_percentual=meta_reducao_percentual,
             acoes_propostas=acoes_propostas,
             responsavel=responsavel,
@@ -403,12 +404,10 @@ def editar_meta(id):
         categoria_id = request.form.get('categoria_id', type=int)
         produto_id = request.form.get('produto_id', type=int)
         valor_inicial = request.form.get('valor_inicial', type=float)
-        valor_atual = request.form.get('valor_atual', type=float)
         meta_reducao_percentual = request.form.get('meta_reducao_percentual', type=float)
         acoes_propostas = request.form.get('acoes_propostas')
         responsavel = request.form.get('responsavel')
         ativo = 'ativo' in request.form
-        concluido = 'concluido' in request.form
         
         # Validações básicas
         if not descricao or not data_inicio or not data_fim or not valor_inicial or not meta_reducao_percentual:
@@ -440,12 +439,11 @@ def editar_meta(id):
         meta.categoria_id = categoria_id
         meta.produto_id = produto_id
         meta.valor_inicial = valor_inicial
-        meta.valor_atual = valor_atual
+        meta.valor_meta = valor_inicial * (1 - meta_reducao_percentual / 100)
         meta.meta_reducao_percentual = meta_reducao_percentual
         meta.acoes_propostas = acoes_propostas
         meta.responsavel = responsavel
         meta.ativo = ativo
-        meta.concluido = concluido
         
         db.session.commit()
         
@@ -476,7 +474,7 @@ def visualizar_meta(id):
         if reducao_almejada > 0:
             progresso = min(100, (reducao_atual / reducao_almejada) * 100)
     
-    return render_template('desperdicio/visualizar_meta.html', meta=meta, progresso=progresso)
+    return render_template('desperdicio/visualizar_meta.html', meta=meta, progresso=progresso, hoje=date.today())
 
 
 @bp.route('/relatorios')
