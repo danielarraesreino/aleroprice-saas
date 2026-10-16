@@ -1,3 +1,6 @@
+import time as _time
+_t_boot = _time.perf_counter()
+
 from app import create_app, db
 from flask_migrate import upgrade
 
@@ -30,6 +33,7 @@ elif os.environ.get('VERCEL') or os.environ.get('RAILWAY_ENVIRONMENT'):
 else:
     config_name = 'default'
 app = create_app(config_name)
+_t_app = _time.perf_counter()
 
 if __name__ == '__main__':
     with app.app_context():
@@ -42,6 +46,7 @@ if __name__ == '__main__':
 with app.app_context():
     try:
         db.create_all()
+        _t_create_all = _time.perf_counter()
         print("db.create_all() executed successfully.")
         
         # Garante que novas colunas adicionadas aos modelos existam no banco em produção
@@ -104,6 +109,17 @@ with app.app_context():
 
     except Exception as e:
         print(f"Database initialization failed: {e}")
+
+# Quanto custa cada fase do cold start (lido nos logs da Vercel). A primeira
+# visita depois de o site ficar parado levava ~9s e sem isto não dá para saber
+# se o tempo vai no import do app, no create_all ou no banco acordando.
+try:
+    _t_fim = _time.perf_counter()
+    print(f"BOOT_TIMING import+create_app={_t_app - _t_boot:.2f}s "
+          f"create_all={_t_create_all - _t_app:.2f}s "
+          f"colunas={_t_fim - _t_create_all:.2f}s total={_t_fim - _t_boot:.2f}s")
+except NameError:
+    pass
 
 # Ferramentas destrutivas (/admin-dev/db, /seed-vegan, /reset-db) vivem em um
 # blueprint isolado, que só é registrado fora de produção, com
