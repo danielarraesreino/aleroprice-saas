@@ -64,13 +64,16 @@ class TestRegistrarPagamento:
 
     def test_pagar_limpa_cancelamento(self):
         # plano_efetivo trata 'canceled' como vencido mesmo com data no futuro.
+        # Datas relativas: `plano_efetivo` confere contra date.today(), e com
+        # data fixa o plano "vencia" sozinho quando o calendário passava dela.
         r = bar(subscription_status='canceled')
-        registrar_pagamento(r, meses=1, hoje=date(2026, 8, 15))
+        registrar_pagamento(r, meses=1, hoje=date.today())
         assert plano_efetivo(r) == 'site'
 
     def test_pagar_encerra_o_trial(self):
-        r = bar(trial_termina_em=date(2026, 8, 20))
-        registrar_pagamento(r, meses=1, hoje=date(2026, 8, 15))
+        hoje = date.today()
+        r = bar(trial_termina_em=hoje + timedelta(days=5))
+        registrar_pagamento(r, meses=1, hoje=hoje)
         assert r.trial_termina_em is None
         assert plano_efetivo(r) == 'site'
 
@@ -90,12 +93,13 @@ class TestRegistrarPagamento:
 
     def test_pago_sobrevive_ao_fim_do_trial(self):
         """O caso que motivou a função: pagou, trial acabou, site congelou."""
-        r = bar(trial_termina_em=date(2026, 8, 1),
+        hoje = date.today()
+        r = bar(trial_termina_em=hoje - timedelta(days=14),
                 plano_ate=None, subscription_tier='free')
         assert plano_efetivo(r) == 'free'  # antes de anotar o pagamento
-        registrar_pagamento(r, meses=12, hoje=date(2026, 8, 15))
+        registrar_pagamento(r, meses=12, hoje=hoje)
         assert plano_efetivo(r) == 'site'
-        assert r.plano_ate == date(2027, 8, 15)
+        assert r.plano_ate == _soma_meses(hoje, 12)
 
 
 class TestConversaoNaoDaPlanoDeGraca:
