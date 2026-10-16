@@ -20,11 +20,23 @@ pelo piloto "Bar da Vila".
 Monetização: plano `free` vs `pro` via Stripe, com A/B de estratégia de preço
 (`standard` vs `volume_based`).
 
+**Em produção hoje (out/2026) o produto é só o site + o admin do site.** A
+gestão de custos (estoque, NF-e, pratos, cardápios, custos, previsão,
+desperdício, agentes) está **desligada**: `GESTAO_ATIVA` (env, padrão `0`) não
+registra esses blueprints, `pode('gestao')` devolve False e `/app` vira a home
+"Seu site" (só `dashboard.index` e `dashboard.upgrade` respondem). Motivo e
+lista do que está quebrado: [`docs/AVALIACAO_GESTAO_2026-10.md`](docs/AVALIACAO_GESTAO_2026-10.md).
+Religar = `GESTAO_ATIVA=1` + instalar `requirements-gestao.txt`.
+
+Os domínios `feiradebarao.com.br` e `bardavila.bar` ficam no projeto Vercel
+**`aleroprice-bardavila`** (não no `aleroprice-saas`); os dois fazem deploy do
+mesmo repo a cada push.
+
 ## Stack
 
 - Flask 2.3 (app factory em `app/__init__.py:create_app`), Flask-SQLAlchemy 3.1, Flask-Migrate/Alembic, Flask-Login
 - Postgres em produção (`DATABASE_URL`), SQLite em dev (`instance/alerodb.sqlite`)
-- pandas/numpy (dashboard, previsão, importação de vendas), `thefuzz` (match de nome de prato), `xmltodict` + `pydantic` (parser NF-e), `openpyxl` (xlsx)
+- Só na gestão (`requirements-gestao.txt`): pandas/numpy (previsão, importação, exports), `thefuzz` (match de nome de prato), `xmltodict` + `pydantic` (parser NF-e), `openpyxl` (xlsx). `requirements.txt` é o do site, enxuto para caber na Vercel
 - Stripe (billing), Sentry (opcional, ativa só se `SENTRY_DSN` existir)
 - Deploy: Render/qualquer container (`Procfile`, `render.yaml`) — Vercel existe (`api/index.py`, `vercel.json`) mas é o caminho ruim pra essa stack (FS read-only, pandas pesado)
 
@@ -105,7 +117,8 @@ flask create-tenant --restaurante "Bar da Vila" --email dono@x.com --nome "Gusta
 # migrations
 flask db migrate -m "descricao" && flask db upgrade
 
-# testes
+# testes (requirements-dev.txt já inclui o da gestão; a config `testing` liga
+# a gestão, `testing_site` é o produto como roda em produção)
 pytest tests/unit tests/integration      # rápido
 pytest tests/e2e                         # Playwright, precisa do app no ar
 ```

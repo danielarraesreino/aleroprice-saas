@@ -15,6 +15,12 @@ class Config:
     # Configuração do SQLAlchemy
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///alerodb.sqlite'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # Gestão de custos/estoque/NF-e/previsão desligada por padrão: o produto
+    # vendido é o site + o admin do site. Ligada, ela também precisa das
+    # dependências de requirements-gestao.txt (pandas, numpy...). Avaliação que
+    # motivou desligar: docs/AVALIACAO_GESTAO_2026-10.md.
+    GESTAO_ATIVA = os.environ.get('GESTAO_ATIVA') == '1'
     
     # Configurações padrão
     ESTOQUE_ALERTA_PERCENTUAL = 0.2  # Alerta quando estoque < 20% do mínimo
@@ -55,6 +61,13 @@ class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     WTF_CSRF_ENABLED = False
+    # A suíte existente cobre a gestão; o produto só-site tem a config abaixo.
+    GESTAO_ATIVA = True
+
+
+class TestingSiteConfig(TestingConfig):
+    """Testes do produto como roda em produção: sem a gestão."""
+    GESTAO_ATIVA = False
 
 class ProductionConfig(Config):
     """Configuração de produção"""
@@ -93,6 +106,7 @@ class ProductionConfig(Config):
 config = {
     'development': DevelopmentConfig,
     'testing': TestingConfig,
+    'testing_site': TestingSiteConfig,
     'production': ProductionConfig,
     'default': DevelopmentConfig
 }

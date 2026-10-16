@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, request, jsonify, current_app, Response
+from flask import render_template, redirect, url_for, request, jsonify, current_app, Response, abort
 from flask_login import login_required
 from app.extensions import db
 from sqlalchemy import func, desc, extract, and_, or_, case, cast, Float
@@ -12,8 +12,6 @@ from app.routes.dashboard import bp
 from datetime import datetime, date, timedelta
 from app.utils.tenant import get_current_restaurant_id
 import os
-import pandas as pd
-import numpy as np
 import json
 import calendar
 import io
@@ -538,6 +536,18 @@ def obter_dados_matriz_bcg(data_inicio, data_fim, restaurant_id):
         'media_lucratividade': media_lucratividade
     }
 
+# Sem a gestão (GESTAO_ATIVA desligada) o dashboard vira só a casa do dono do
+# site: a home "Seu site" e a página de Planos. Relatórios e APIs de
+# lucratividade leem dados de gestão que o produto não coleta, então somem.
+_SEM_GESTAO = {'dashboard.index', 'dashboard.upgrade'}
+
+
+@bp.before_request
+def _so_o_site_sem_gestao():
+    if not current_app.config['GESTAO_ATIVA'] and request.endpoint not in _SEM_GESTAO:
+        abort(404)
+
+
 @bp.route('/upgrade')
 def upgrade():
     """Página de Upgrade/Planos.
@@ -568,6 +578,9 @@ def index():
     restaurant_id = get_current_restaurant_id()
     if not restaurant_id:
         return redirect(url_for('auth.login'))
+
+    if not current_app.config['GESTAO_ATIVA']:
+        return render_template('dashboard/index.html', show_onboarding=True)
 
     try:
         # --- EMPTY STATE CHECK (ONBOARDING) ---

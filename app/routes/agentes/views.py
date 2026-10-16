@@ -5,7 +5,7 @@ Mapeamento dos Personagens X-Men:
 - ⚡ CICLOPE (NVIDIA NIM): Visão Óptica (OCR de Notas), Voz (Concierge) & Copy.
 - 🐺 MAGNETO (DeepSeek R1/V3): Raciocínio Profundo, Cálculos Matemáticos de CMV e Estoque.
 """
-from flask import render_template, request, jsonify
+from flask import abort, render_template, request, jsonify
 from flask_login import login_required
 from app.routes.agentes import bp
 from app.utils.ai_copy import _chamar_nvidia
@@ -108,6 +108,15 @@ def _consultar_deepseek(prompt):
             return data["choices"][0]["message"]["content"].strip()
     except Exception as e:
         return f"Erro ao consultar DeepSeek: {str(e)}"
+
+@bp.before_request
+def _so_operador():
+    # Chama LLM pago: o menu já era só do operador, mas a rota aceitava
+    # qualquer tenant logado — e cada um podia gastar os créditos.
+    from app.utils.operador import e_operador
+    if not e_operador():
+        abort(404)
+
 
 @bp.route('/')
 @login_required

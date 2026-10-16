@@ -139,24 +139,20 @@ def create_app(config_name='default'):
         from flask_login import current_user
         from app.utils.planos import pode
 
+        gestao_ativa = app.config['GESTAO_ATIVA']
+
         def _pode(recurso):
             if not current_user.is_authenticated:
                 return False
+            # Gestão desligada no deploy: nenhum plano vê o que não está lá.
+            if not gestao_ativa and recurso in ('gestao', 'relatorios'):
+                return False
             return pode(getattr(current_user, 'restaurante', None), recurso)
 
-        return {'pode': _pode}
+        return {'pode': _pode, 'gestao_ativa': gestao_ativa}
     
     # Registra os blueprints
-    from app.routes.estoque import bp as estoque_bp
-    from app.routes.fornecedores import bp as fornecedores_bp
-    from app.routes.nfe import bp as nfe_bp
-    from app.routes.pratos import bp as pratos_bp
-    from app.routes.produtos import bp as produtos_bp
-    from app.routes.cardapios import bp as cardapios_bp
-    from app.routes.desperdicio import bp as desperdicio_bp
-    from app.routes.previsao import bp as previsao_bp
     from app.routes.dashboard import bp as dashboard_bp
-    from app.routes.custos import bp as custos_bp
     from app.routes.reservas import bp as reservas_bp
     from app.routes.agenda import bp as agenda_bp
     from app.routes.promocoes import bp as promocoes_bp
@@ -164,27 +160,45 @@ def create_app(config_name='default'):
     from app.routes.conteudo import bp as conteudo_bp
     from app.routes.campanha import bp as campanha_bp
     from app.routes.campo import bp as campo_bp
-    from app.routes.agentes import bp as agentes_bp
 
-    app.register_blueprint(estoque_bp, url_prefix='/estoque')
-    app.register_blueprint(fornecedores_bp, url_prefix='/fornecedores')
-    app.register_blueprint(nfe_bp, url_prefix='/nfe')
-    app.register_blueprint(pratos_bp, url_prefix='/pratos')
-    app.register_blueprint(produtos_bp, url_prefix='/produtos')
-    app.register_blueprint(cardapios_bp, url_prefix='/cardapios')
-    app.register_blueprint(desperdicio_bp, url_prefix='/desperdicio')
-    app.register_blueprint(previsao_bp, url_prefix='/previsao')
-    app.register_blueprint(custos_bp, url_prefix='/custos')
+    # Gestão (custos, estoque, NF-e, previsão...) só com GESTAO_ATIVA. O import
+    # fica dentro do `if` de propósito: são esses módulos que puxam pandas,
+    # numpy, xmltodict e pydantic, e sem eles o deploy cabe no limite da Vercel
+    # (sem reinstalar dependências a cada cold start).
+    if app.config['GESTAO_ATIVA']:
+        from app.routes.estoque import bp as estoque_bp
+        from app.routes.fornecedores import bp as fornecedores_bp
+        from app.routes.nfe import bp as nfe_bp
+        from app.routes.pratos import bp as pratos_bp
+        from app.routes.produtos import bp as produtos_bp
+        from app.routes.cardapios import bp as cardapios_bp
+        from app.routes.desperdicio import bp as desperdicio_bp
+        from app.routes.previsao import bp as previsao_bp
+        from app.routes.custos import bp as custos_bp
+        from app.routes.agentes import bp as agentes_bp
+
+        app.register_blueprint(estoque_bp, url_prefix='/estoque')
+        app.register_blueprint(fornecedores_bp, url_prefix='/fornecedores')
+        app.register_blueprint(nfe_bp, url_prefix='/nfe')
+        app.register_blueprint(pratos_bp, url_prefix='/pratos')
+        app.register_blueprint(produtos_bp, url_prefix='/produtos')
+        app.register_blueprint(cardapios_bp, url_prefix='/cardapios')
+        app.register_blueprint(desperdicio_bp, url_prefix='/desperdicio')
+        app.register_blueprint(previsao_bp, url_prefix='/previsao')
+        app.register_blueprint(custos_bp, url_prefix='/custos')
+        app.register_blueprint(agentes_bp, url_prefix='/agentes')
+
     app.register_blueprint(reservas_bp, url_prefix='/reservas')
     app.register_blueprint(agenda_bp, url_prefix='/agenda')
     app.register_blueprint(promocoes_bp, url_prefix='/promocoes')
     app.register_blueprint(configsite_bp, url_prefix='/config-site')
     app.register_blueprint(conteudo_bp, url_prefix='/conteudo')
     app.register_blueprint(campanha_bp, url_prefix='/campanha')
-    app.register_blueprint(agentes_bp, url_prefix='/agentes')
     # Ferramenta de venda presencial do operador, não feature de cliente.
     app.register_blueprint(campo_bp, url_prefix='/campo')
     # Sistema/dashboard fica ATRÁS do login, em /app. A landing pública ocupa '/'.
+    # Sempre registrado: sem a gestão, /app é a home "Seu site" do dono e
+    # /app/upgrade a página de Planos (billing e paywall apontam para lá).
     app.register_blueprint(dashboard_bp, url_prefix='/app')
     
     from app.routes.billing import bp as billing_bp
