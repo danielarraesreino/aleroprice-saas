@@ -128,6 +128,42 @@ try:
 except NameError:
     pass
 
+
+# Diagnóstico de latência por requisição (barata, fica ligada):
+# - `Server-Timing: app;dur=…` diz quanto o Flask levou (visível no curl e no
+#   DevTools), separando o tempo do app do tempo de rede/borda;
+# - `DB_CONNECT` no log a cada conexão NOVA com o Postgres. Página de barraca
+#   levava ~2s com a função quente e nenhuma conexão do app ficava aberta no
+#   Neon entre requisições — isto mostra se cada uma reconecta e quanto custa.
+from flask import g as _g, request as _request
+from sqlalchemy import event as _event
+
+
+@app.before_request
+def _marcar_inicio():
+    _g._t0 = _time.perf_counter()
+
+
+@app.after_request
+def _server_timing(resp):
+    t0 = getattr(_g, '_t0', None)
+    if t0 is not None:
+        resp.headers['Server-Timing'] = f'app;dur={(_time.perf_counter() - t0) * 1000:.0f}'
+    return resp
+
+
+with app.app_context():
+    @_event.listens_for(db.engine, 'do_connect')
+    def _antes_de_conectar(dialect, conn_rec, cargs, cparams):
+        conn_rec.info['_t_conn'] = _time.perf_counter()
+
+    @_event.listens_for(db.engine, 'connect')
+    def _conectou(dbapi_conn, conn_rec):
+        t = conn_rec.info.pop('_t_conn', None)
+        if t is not None:
+            print(f"DB_CONNECT {(_time.perf_counter() - t) * 1000:.0f}ms "
+                  f"path={_request.path if _request else '-'}")
+
 # Ferramentas destrutivas (/admin-dev/db, /seed-vegan, /reset-db) vivem em um
 # blueprint isolado, que só é registrado fora de produção, com
 # ENABLE_ADMIN_ENDPOINTS=1 e ADMIN_DEV_TOKEN definidos. Habilitar em produção
