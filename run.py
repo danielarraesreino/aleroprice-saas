@@ -43,72 +43,79 @@ if __name__ == '__main__':
 # Vercel entry point
 # This part is executed by Vercel's WSGI server
 # We also want to ensure migrations run here
-with app.app_context():
-    try:
-        db.create_all()
-        _t_create_all = _time.perf_counter()
-        print("db.create_all() executed successfully.")
+# Alinhar o schema (create_all + colunas novas) custa ~7s contra o Neon: era
+# 87% do cold start de produção (medido em 16/10/2026: create_all=5.1s,
+# colunas=1.7s, de 7.8s). Em produção o schema muda só com deploy de model
+# novo, e aí basta /bootstrap-demo?action=schema (`_sincronizar_schema`) — ou
+# SCHEMA_NO_BOOT=1 num deploy. Dev e testes seguem alinhando a cada boot.
+_t_create_all = _time.perf_counter()
+if config_name != 'production' or os.environ.get('SCHEMA_NO_BOOT') == '1':
+    with app.app_context():
+        try:
+            db.create_all()
+            _t_create_all = _time.perf_counter()
+            print("db.create_all() executed successfully.")
         
-        # Garante que novas colunas adicionadas aos modelos existam no banco em produção
-        from sqlalchemy import text, inspect
-        inspector = inspect(db.engine)
-        tabelas = inspector.get_table_names()
+            # Garante que novas colunas adicionadas aos modelos existam no banco em produção
+            from sqlalchemy import text, inspect
+            inspector = inspect(db.engine)
+            tabelas = inspector.get_table_names()
         
-        if 'site_config' in tabelas:
-            cols = {c['name'] for c in inspector.get_columns('site_config')}
-            novas = [
-                ('callmebot_phone', 'VARCHAR(20)'),
-                ('callmebot_apikey', 'VARCHAR(50)'),
-                ('nota_google', 'VARCHAR(10)'),
-                ('qtd_avaliacoes', 'INTEGER'),
-                ('tema_modo', "VARCHAR(10) DEFAULT 'auto'"),
-                ('modelo', "VARCHAR(30) DEFAULT 'classico'"),
-                ('vibe', "VARCHAR(30) DEFAULT 'boteco'"),
-                ('tema', "VARCHAR(30) DEFAULT 'boteco-ambar'"),
-                ('descritor', 'VARCHAR(80)'),
-                ('hero_foto', 'VARCHAR(300)'),
-                ('apoia_caminhos', 'BOOLEAN DEFAULT FALSE'),
-            ]
-            for col_nome, col_tipo in novas:
-                if col_nome not in cols:
-                    try:
-                        db.session.execute(text(f'ALTER TABLE site_config ADD COLUMN {col_nome} {col_tipo}'))
-                        db.session.commit()
-                        print(f"Auto-migração: site_config.{col_nome} adicionada.")
-                    except Exception as col_err:
-                        db.session.rollback()
-                        print(f"Auto-migração site_config.{col_nome}: {col_err}")
+            if 'site_config' in tabelas:
+                cols = {c['name'] for c in inspector.get_columns('site_config')}
+                novas = [
+                    ('callmebot_phone', 'VARCHAR(20)'),
+                    ('callmebot_apikey', 'VARCHAR(50)'),
+                    ('nota_google', 'VARCHAR(10)'),
+                    ('qtd_avaliacoes', 'INTEGER'),
+                    ('tema_modo', "VARCHAR(10) DEFAULT 'auto'"),
+                    ('modelo', "VARCHAR(30) DEFAULT 'classico'"),
+                    ('vibe', "VARCHAR(30) DEFAULT 'boteco'"),
+                    ('tema', "VARCHAR(30) DEFAULT 'boteco-ambar'"),
+                    ('descritor', 'VARCHAR(80)'),
+                    ('hero_foto', 'VARCHAR(300)'),
+                    ('apoia_caminhos', 'BOOLEAN DEFAULT FALSE'),
+                ]
+                for col_nome, col_tipo in novas:
+                    if col_nome not in cols:
+                        try:
+                            db.session.execute(text(f'ALTER TABLE site_config ADD COLUMN {col_nome} {col_tipo}'))
+                            db.session.commit()
+                            print(f"Auto-migração: site_config.{col_nome} adicionada.")
+                        except Exception as col_err:
+                            db.session.rollback()
+                            print(f"Auto-migração site_config.{col_nome}: {col_err}")
 
-        if 'restaurante' in tabelas:
-            cols_r = {c['name'] for c in inspector.get_columns('restaurante')}
-            novas_r = [
-                ('slug', 'VARCHAR(120)'),
-                ('dominio', 'VARCHAR(120)'),
-                ('tipo_conta', 'VARCHAR(20)'),
-                ('demo_expira_em', 'DATE'),
-                ('demo_visitas', 'INTEGER DEFAULT 0'),
-                ('demo_primeira_visita', 'DATE'),
-                ('demo_fonte', 'VARCHAR(40)'),
-                ('trial_termina_em', 'DATE'),
-                ('plano_ate', 'DATE'),
-                ('subscription_status', 'VARCHAR(20)'),
-                ('subscription_tier', 'VARCHAR(20)'),
-                ('stripe_customer_id', 'VARCHAR(100)'),
-                ('stripe_subscription_id', 'VARCHAR(100)'),
-                ('pricing_strategy', 'VARCHAR(50)'),
-            ]
-            for col_nome, col_tipo in novas_r:
-                if col_nome not in cols_r:
-                    try:
-                        db.session.execute(text(f'ALTER TABLE restaurante ADD COLUMN {col_nome} {col_tipo}'))
-                        db.session.commit()
-                        print(f"Auto-migração: restaurante.{col_nome} adicionada.")
-                    except Exception as col_err:
-                        db.session.rollback()
-                        print(f"Auto-migração restaurante.{col_nome}: {col_err}")
+            if 'restaurante' in tabelas:
+                cols_r = {c['name'] for c in inspector.get_columns('restaurante')}
+                novas_r = [
+                    ('slug', 'VARCHAR(120)'),
+                    ('dominio', 'VARCHAR(120)'),
+                    ('tipo_conta', 'VARCHAR(20)'),
+                    ('demo_expira_em', 'DATE'),
+                    ('demo_visitas', 'INTEGER DEFAULT 0'),
+                    ('demo_primeira_visita', 'DATE'),
+                    ('demo_fonte', 'VARCHAR(40)'),
+                    ('trial_termina_em', 'DATE'),
+                    ('plano_ate', 'DATE'),
+                    ('subscription_status', 'VARCHAR(20)'),
+                    ('subscription_tier', 'VARCHAR(20)'),
+                    ('stripe_customer_id', 'VARCHAR(100)'),
+                    ('stripe_subscription_id', 'VARCHAR(100)'),
+                    ('pricing_strategy', 'VARCHAR(50)'),
+                ]
+                for col_nome, col_tipo in novas_r:
+                    if col_nome not in cols_r:
+                        try:
+                            db.session.execute(text(f'ALTER TABLE restaurante ADD COLUMN {col_nome} {col_tipo}'))
+                            db.session.commit()
+                            print(f"Auto-migração: restaurante.{col_nome} adicionada.")
+                        except Exception as col_err:
+                            db.session.rollback()
+                            print(f"Auto-migração restaurante.{col_nome}: {col_err}")
 
-    except Exception as e:
-        print(f"Database initialization failed: {e}")
+        except Exception as e:
+            print(f"Database initialization failed: {e}")
 
 # Quanto custa cada fase do cold start (lido nos logs da Vercel). A primeira
 # visita depois de o site ficar parado levava ~9s e sem isto não dá para saber

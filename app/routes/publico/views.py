@@ -5,7 +5,7 @@ from datetime import datetime, date, timedelta
 
 from flask import (
     Blueprint, render_template, request, jsonify, current_app, abort,
-    redirect, url_for, flash,
+    redirect, url_for, flash, make_response,
 )
 
 from app.extensions import db
@@ -199,7 +199,16 @@ def landing():
         rest = tenant_por_host(host)
         if rest:
             return _render_landing(rest)
-    return render_template('produto/landing.html', **_contexto_produto())
+    resp = make_response(render_template('produto/landing.html', **_contexto_produto()))
+    # A vitrine é igual para todo visitante (sem formulário com token, sem nada
+    # de quem está logado), então a borda da Vercel pode servi-la pronta: o
+    # visitante não espera o cold start da função (~9s) nem o banco acordar.
+    # Depois de 5 min a borda segue entregando a cópia e renova em segundo
+    # plano. Só para quem chega sem cookie de sessão, para nenhuma resposta com
+    # sessão ir parar no cache.
+    if current_app.config['SESSION_COOKIE_NAME'] not in request.cookies:
+        resp.headers['Cache-Control'] = 'public, s-maxage=300, stale-while-revalidate=86400'
+    return resp
 
 
 def _bares_da_feira():

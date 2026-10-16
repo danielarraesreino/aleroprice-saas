@@ -125,7 +125,8 @@ pytest tests/e2e                         # Playwright, precisa do app no ar
 
 ## Armadilhas conhecidas (dívida real, não teoria)
 
-- `run.py` roda `db.create_all()` **no import**, e as migrations Alembic ficam comentadas nesse caminho. Schema em produção pode divergir do histórico de migrations.
+- `run.py` alinha o schema (`db.create_all()` + colunas novas) **no import só fora de produção**. Em produção isso custava ~7s de cada cold start e saiu do boot: depois de deploy com model/coluna nova, rode `/bootstrap-demo?token=…&action=schema` (precisa `SEED_TOKEN` setada no `aleroprice-bardavila`) ou suba com `SCHEMA_NO_BOOT=1`. Migrations Alembic seguem fora desse caminho, então o schema de produção pode divergir do histórico.
+- A home do produto (`public.landing` no domínio do produto, visitante sem sessão) sai com `s-maxage=300, stale-while-revalidate` e é servida pela borda da Vercel: mudanças na vitrine (ex.: barraca desligada) podem levar alguns minutos para aparecer.
 - `billing/success` marca `subscription_tier='pro'` **sem verificar a sessão no Stripe** (otimista). O webhook (`billing.webhook`) não faz a ativação — o handler de `checkout.session.completed` é um `pass`.
 - Com `STRIPE_SECRET_KEY` contendo `test_PLACEHOLDER`, o checkout e o webhook entram em modo mock: o checkout vira sucesso simulado direto.
 - `Config.SECRET_KEY` tem fallback hardcoded (`'uma-chave-secreta-dificil-de-adivinhar'`); só `ProductionConfig` exige env.

@@ -42,3 +42,25 @@ def test_barraca_desligada_sai_da_vitrine(client, session):
     session.commit()
     assert f'/bar/{SLUG}' not in client.get('/').get_data(as_text=True)
     assert client.get(f'/bar/{SLUG}').status_code == 404
+
+
+def test_vitrine_anonima_vai_para_o_cache_da_borda(client, session):
+    resp = client.get('/')
+    assert 's-maxage=' in resp.headers.get('Cache-Control', '')
+    assert 'Set-Cookie' not in resp.headers      # nada de sessão no cache
+
+
+def test_vitrine_com_sessao_nao_vai_para_o_cache(client, session):
+    client.set_cookie('session', 'qualquer', domain='localhost')
+    resp = client.get('/')
+    assert 's-maxage' not in resp.headers.get('Cache-Control', '')
+
+
+def test_site_do_bar_no_dominio_proprio_nao_vai_para_o_cache(client, session):
+    """O site do bar tem formulário de reserva com token: não pode ser cache."""
+    session.add(Restaurante(nome='Bar Proprio', slug='bar-proprio',
+                            dominio='barproprio.com.br'))
+    session.commit()
+    resp = client.get('/', headers={'Host': 'barproprio.com.br'})
+    assert resp.status_code == 200
+    assert 's-maxage' not in resp.headers.get('Cache-Control', '')
