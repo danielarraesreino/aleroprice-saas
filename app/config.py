@@ -82,6 +82,13 @@ class ProductionConfig(Config):
     if SQLALCHEMY_DATABASE_URI and SQLALCHEMY_DATABASE_URI.startswith('postgres://'):
         SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace('postgres://', 'postgresql://', 1)
 
+    # O Postgres gerenciado derruba conexão ociosa (e o compute dorme). A função
+    # serverless reaproveita a conexão do pool entre requisições e a primeira
+    # consulta depois da pausa morria com "SSL connection has been closed
+    # unexpectedly" — 500 na home e no /bar/<slug>. pre_ping testa antes de usar
+    # e reabre; recycle descarta conexão velha antes do servidor matá-la.
+    SQLALCHEMY_ENGINE_OPTIONS = {'pool_pre_ping': True, 'pool_recycle': 280}
+
 # Dicionário com as configurações disponíveis
 config = {
     'development': DevelopmentConfig,
