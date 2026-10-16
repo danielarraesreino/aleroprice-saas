@@ -48,6 +48,8 @@ def test_vitrine_anonima_vai_para_o_cache_da_borda(client, session):
     resp = client.get('/')
     assert 's-maxage=' in resp.headers.get('Cache-Control', '')
     assert 'Set-Cookie' not in resp.headers      # nada de sessão no cache
+    # Com `Vary: Cookie` a Vercel não guarda a resposta (medido: só MISS).
+    assert 'Cookie' not in resp.headers.get('Vary', '')
 
 
 def test_vitrine_com_sessao_nao_vai_para_o_cache(client, session):

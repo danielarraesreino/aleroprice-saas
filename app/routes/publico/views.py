@@ -5,7 +5,7 @@ from datetime import datetime, date, timedelta
 
 from flask import (
     Blueprint, render_template, request, jsonify, current_app, abort,
-    redirect, url_for, flash, make_response,
+    redirect, url_for, flash, make_response, session,
 )
 
 from app.extensions import db
@@ -208,6 +208,11 @@ def landing():
     # sessão ir parar no cache.
     if current_app.config['SESSION_COOKIE_NAME'] not in request.cookies:
         resp.headers['Cache-Control'] = 'public, s-maxage=300, stale-while-revalidate=86400'
+        # O context processor do Flask-Login lê a sessão em todo
+        # render_template, e sessão lida faz o Flask mandar `Vary: Cookie` —
+        # com isso a Vercel nunca guardava a vitrine (só MISS). Aqui não há
+        # cookie e a página não depende de sessão: nada a variar.
+        session.accessed = False
     return resp
 
 
