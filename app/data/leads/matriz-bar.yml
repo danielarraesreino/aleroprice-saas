@@ -18,6 +18,7 @@ site:
   tagline: "Chopp claro e escuro, torresmo em rolo e caneca suada."
   subline: "CHOPP · TORRESMO · ESPETOS"
   cidade_uf: "Hortolândia–SP"
+  telefone_exibicao: "(19) 3289-2899"
 
 # Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
 #   hero_foto: img/demo/matriz-bar/capa.jpg

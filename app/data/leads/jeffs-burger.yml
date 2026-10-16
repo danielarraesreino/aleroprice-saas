@@ -18,6 +18,7 @@ site:
   tagline: "Prensado, generoso e madrugada adentro."
   subline: "PRENSADO · HOT DOG · MADRUGADA"
   cidade_uf: "Campinas–SP"
+  telefone_exibicao: "(19) 3255-4606"
 
 # Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
 #   hero_foto: img/demo/jeffs-burger/capa.jpg

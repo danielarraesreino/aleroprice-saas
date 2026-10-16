@@ -17,6 +17,7 @@ ativo: false
 tema: pub-escuro
 
 site:
+  modelo: noturno
   vibe: boteco
   descritor: "Café, cultura e bar em Barão"
   kicker: "BARÃO GERALDO · CAMPINAS–SP"

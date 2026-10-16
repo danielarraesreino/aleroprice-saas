@@ -21,6 +21,7 @@ site:
   tagline: "Desde 1937 no Centro: tradição que não precisa de apresentação."
   subline: "TRADIÇÃO · CHOPP · CENTRO"
   cidade_uf: "Centro, Campinas–SP"
+  telefone_exibicao: "(19) 3231-2830"
 
 # Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
 #   hero_foto: img/demo/giovannetti/capa.jpg
