@@ -260,3 +260,15 @@ def test_lead_sem_ativo_continua_publicando(client, session, lead):
     demos.aplicar_todos()
     assert Restaurante.query.filter_by(slug='boteco-do-teste').one().ativo is True
     assert client.get('/bar/boteco-do-teste').status_code == 200
+
+
+def test_reaplicar_nao_religa_previa_desligada_no_botao(client, session, lead):
+    """Fora do ar pelo Modo Campo continua fora: o arquivo não decide por cima."""
+    demos.aplicar_todos()
+    rest = Restaurante.query.filter_by(slug='boteco-do-teste').one()
+    rest.ativo = False
+    session.commit()
+
+    demos.aplicar_todos()
+    assert Restaurante.query.filter_by(slug='boteco-do-teste').one().ativo is False
+    assert client.get('/bar/boteco-do-teste').status_code == 404

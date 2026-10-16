@@ -140,9 +140,10 @@ class TestConversaoNaoDaPlanoDeGraca:
 
 
 class TestExpiracaoDaPrevia:
-    """O prazo da prévia era escrito e nunca lido — ver `_publicavel`."""
+    """O prazo da prévia não tira mais do ar: quem decide é o botão do Modo
+    Campo (`ativo`) — ver `_publicavel`."""
 
-    def test_demo_vencida_some_do_site_publico(self, app, session):
+    def test_demo_vencida_continua_no_ar(self, app, session):
         from app.utils.site_router import tenant_por_slug
         ontem = date.today() - timedelta(days=1)
         r = Restaurante(nome='Bar Vencido', slug='bar-vencido')
@@ -150,7 +151,16 @@ class TestExpiracaoDaPrevia:
         r.demo_expira_em = ontem
         session.add(r)
         session.commit()
-        assert tenant_por_slug('bar-vencido') is None
+        assert tenant_por_slug('bar-vencido') is not None
+
+    def test_demo_desligada_some_do_site_publico(self, app, session):
+        from app.utils.site_router import tenant_por_slug
+        r = Restaurante(nome='Bar Desligado', slug='bar-desligado')
+        r.tipo_conta = 'demo'
+        r.ativo = False
+        session.add(r)
+        session.commit()
+        assert tenant_por_slug('bar-desligado') is None
 
     def test_demo_no_prazo_continua(self, app, session):
         from app.utils.site_router import tenant_por_slug

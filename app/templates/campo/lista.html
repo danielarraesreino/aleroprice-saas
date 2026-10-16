@@ -55,13 +55,16 @@
   <p class="nota" id="contagem">{{ linhas|length }} bares</p>
 </div>
 
+{# A linha é flex (nome + botão), e display inline venceria o [hidden] da busca. #}
+<style>#lista li[hidden]{display:none !important}</style>
 <ul id="lista" style="list-style:none;padding:0;margin:0">
 {% for l in linhas %}
-  <li data-nome="{{ l.nome|lower }}" data-pronto="{{ 'sim' if l.pronto else 'nao' }}">
+  <li data-nome="{{ l.nome|lower }}" data-pronto="{{ 'sim' if l.pronto else 'nao' }}"
+      style="display:flex;align-items:stretch;gap:8px;margin-bottom:8px">
     <a href="{{ url_for('campo.editar', slug=l.slug) }}"
-       style="display:flex;align-items:center;gap:12px;padding:15px 16px;margin-bottom:8px;
+       style="flex:1;min-width:0;display:flex;align-items:center;gap:12px;padding:15px 16px;
               background:var(--ink-2);border:1px solid var(--linha);border-radius:var(--raio);
-              color:var(--creme);text-decoration:none">
+              color:var(--creme);text-decoration:none;{{ '' if l.no_ar else 'opacity:.55' }}">
       <span aria-hidden="true"
             style="width:9px;height:9px;border-radius:50%;flex:none;
                    background:{{ 'var(--verde)' if l.pronto else ('var(--ambar)' if l.tem_foto else 'var(--linha)') }}"></span>
@@ -75,6 +78,19 @@
       </span>
       <span aria-hidden="true" style="color:var(--creme-dim)">›</span>
     </a>
+    {# Único controle de publicação: o site do bar só sai do ar por aqui. #}
+    <form method="post" action="{{ url_for('campo.no_ar', slug=l.slug) }}" style="margin:0;display:flex">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" aria-pressed="{{ 'true' if l.no_ar else 'false' }}"
+              aria-label="{{ l.nome }}: {{ 'no ar, tocar para desligar' if l.no_ar else 'fora do ar, tocar para ligar' }}"
+              style="min-width:64px;border-radius:var(--raio);cursor:pointer;font-family:inherit;
+                     font-size:13px;font-weight:700;letter-spacing:.06em;
+                     background:{{ 'var(--verde)' if l.no_ar else 'transparent' }};
+                     color:{{ '#0d1a0f' if l.no_ar else 'var(--creme-dim)' }};
+                     border:1px solid {{ 'var(--verde)' if l.no_ar else 'var(--linha)' }}">
+        {{ 'ON' if l.no_ar else 'OFF' }}
+      </button>
+    </form>
   </li>
 {% endfor %}
 </ul>

@@ -201,7 +201,14 @@ def aplicar_lead(caminho):
     # Google marca "permanentemente fechado") voltava a ter site publicado no
     # nome dela — além de reentrar no roteiro e custar um deslocamento à toa.
     # Apagar o lead não serve: a próxima varredura o recriaria.
-    rest.ativo = dados.get('ativo', True) is not False
+    #
+    # Fora isso, no/fora do ar é decisão do operador (botão do Modo Campo). Por
+    # isso reaplicar o arquivo não religa prévia que ele desligou à mão: só a
+    # prévia nova nasce no ar.
+    if dados.get('ativo', True) is False:
+        rest.ativo = False
+    elif rest.ativo is None:
+        rest.ativo = True
     rest.demo_expira_em = _expira_em(dados)
     rest.demo_fonte = (dados.get('demo') or {}).get('fonte')
 

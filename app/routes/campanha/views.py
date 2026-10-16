@@ -46,7 +46,7 @@ def index():
             'fonte': t.demo_fonte,
             'visitas': t.demo_visitas or 0,
             'aberta_em': t.demo_primeira_visita,
-            'expira': t.demo_expira_em,
+            'no_ar': t.ativo is not False,
             'reservas': reservas_por_tenant.get(t.id, 0),
         })
 

@@ -766,3 +766,24 @@ def test_sem_convite_configurado_o_campo_nem_aparece(client, demo, monkeypatch):
     corpo = client.get(f'/campo/{demo.slug}/proposta').get_data(as_text=True)
 
     assert 'código de convite' not in corpo.lower()
+
+
+# --------------------------------------------------------------- no ar / fora do ar
+
+def test_botao_desliga_e_religa_o_site_do_bar(client, operador, demo):
+    entrar(client)
+    assert client.get(f'/bar/{demo.slug}').status_code == 200
+
+    client.post(f'/campo/{demo.slug}/no-ar')
+    assert Restaurante.query.get(demo.id).ativo is False
+    assert client.get(f'/bar/{demo.slug}').status_code == 404
+    assert 'OFF' in client.get('/campo/').get_data(as_text=True)
+
+    client.post(f'/campo/{demo.slug}/no-ar')
+    assert Restaurante.query.get(demo.id).ativo is True
+    assert client.get(f'/bar/{demo.slug}').status_code == 200
+
+
+def test_botao_no_ar_e_so_do_operador(client, demo):
+    assert client.post(f'/campo/{demo.slug}/no-ar').status_code in (302, 404)
+    assert Restaurante.query.get(demo.id).ativo is not False

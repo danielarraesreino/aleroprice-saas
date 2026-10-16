@@ -29,7 +29,16 @@ def test_barraca_com_previa_no_ar_aparece_e_abre(client, session):
     assert client.get(f'/bar/{SLUG}').status_code == 200
 
 
-def test_barraca_com_previa_vencida_sai_da_vitrine(client, session):
+def test_prazo_vencido_nao_tira_do_ar(client, session):
+    """Não existe mais vencimento automático: só o botão do Modo Campo tira."""
     _demo(session, date.today() - timedelta(days=1))
+    assert f'/bar/{SLUG}' in client.get('/').get_data(as_text=True)
+    assert client.get(f'/bar/{SLUG}').status_code == 200
+
+
+def test_barraca_desligada_sai_da_vitrine(client, session):
+    r = _demo(session, None)
+    r.ativo = False
+    session.commit()
     assert f'/bar/{SLUG}' not in client.get('/').get_data(as_text=True)
     assert client.get(f'/bar/{SLUG}').status_code == 404

@@ -88,6 +88,7 @@ def index():
             # Pronto para mostrar = tem foto e tem nota. É o que faz a prévia
             # parecer o bar dele em vez de um modelo com o nome trocado.
             'pronto': bool(cfg and cfg.hero_foto and cfg.nota_google),
+            'no_ar': b.ativo is not False,
         })
 
     resumo = {
@@ -96,6 +97,19 @@ def index():
         'clientes': sum(1 for l in linhas if l['tipo'] != 'demo'),
     }
     return render_template('campo/lista.html', linhas=linhas, resumo=resumo)
+
+
+@bp.post('/<slug>/no-ar')
+def no_ar(slug):
+    """Liga ou desliga o site do bar (/bar/<slug> e a vitrine da home).
+
+    É o único controle de publicação: não há prazo que tire do ar sozinho.
+    """
+    rest = _bar(slug)
+    rest.ativo = rest.ativo is False
+    db.session.commit()
+    flash(f'{rest.nome}: {"no ar" if rest.ativo else "fora do ar"}.', 'success')
+    return redirect(url_for('campo.index'))
 
 
 @bp.route('/<slug>')
@@ -380,8 +394,6 @@ def proposta(slug):
         taxa_setup=dominios.taxa_de_instalacao(),
         url_previa=url_for('public.landing_slug', slug=rest.slug, _external=True),
         e_demo=(rest.tipo_conta or 'cliente') == 'demo',
-        expira_em=rest.demo_expira_em,
-        dias_validade=demos.DIAS_VALIDADE_PADRAO,
         dias_trial=DIAS_DE_TRIAL,
     )
 
