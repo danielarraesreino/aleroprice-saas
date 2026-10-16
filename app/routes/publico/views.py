@@ -257,6 +257,16 @@ def _bares_da_feira():
                 os.path.join(static_dir, 'img', 'feira', f'{slug}-800.jpg'))) else None,
         })
 
+    # Barraca só vai pra vitrine se o /bar/<slug> dela abre. O arquivo diz o
+    # que existe; quem diz o que está no ar é o banco (`_publicavel`, que tira
+    # prévia vencida). Sem este corte a home anunciava 23 barracas e todas
+    # davam 404 assim que o prazo das demos passou.
+    if bares:
+        no_ar = {r.slug for r in _publicavel(
+            Restaurante.query.filter(Restaurante.slug.in_([b['slug'] for b in bares]))
+        )}
+        bares = [b for b in bares if b['slug'] in no_ar]
+
     # Quem tem mais avaliação abre a feira: volume é o argumento (1.951 pesa
     # mais que qualquer adjetivo), e a ordem fica estável entre deploys.
     bares.sort(key=lambda b: (-(b['avaliacoes'] or 0), b['nome']))
