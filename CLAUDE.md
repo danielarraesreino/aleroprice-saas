@@ -32,6 +32,12 @@ Os domínios `feiradebarao.com.br` e `bardavila.bar` ficam no projeto Vercel
 **`aleroprice-bardavila`** (não no `aleroprice-saas`); os dois fazem deploy do
 mesmo repo a cada push.
 
+A função roda em **`gru1` (São Paulo)** por `regions` no `vercel.json`, colada no
+banco Neon (`alerosaas`, sa-east-1). Em `iad1` (padrão) cada ida ao banco custava
+~180 ms e a página de barraca levava ~2 s; em `gru1`, ~50 ms. Não mude a região
+sem mudar o banco junto. `Server-Timing: app;dur=…` e o log `DB_CONNECT` (em
+`run.py`) servem para conferir.
+
 ## Stack
 
 - Flask 2.3 (app factory em `app/__init__.py:create_app`), Flask-SQLAlchemy 3.1, Flask-Migrate/Alembic, Flask-Login
