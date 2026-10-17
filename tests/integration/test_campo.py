@@ -835,3 +835,11 @@ def test_logout_dentro_do_admin_apaga_o_vinculo_com_o_operador(client, operador,
     client.get('/auth/logout')
     entrar(client, 'dono@cliente.com')
     assert client.post('/campo/voltar').status_code == 404
+
+
+def test_menu_do_operador_segue_o_perfil_e_nao_o_tenant(client, operador, cliente_com_admin):
+    entrar(client)
+    assert 'Campanha' in client.get('/app/', follow_redirects=True).get_data(as_text=True)
+    client.get('/auth/logout')
+    entrar(client, 'dono@cliente.com')
+    assert 'Campanha' not in client.get('/app/', follow_redirects=True).get_data(as_text=True)
