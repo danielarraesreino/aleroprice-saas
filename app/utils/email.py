@@ -7,6 +7,7 @@ sai e as funções devolvem False: quem chama decide o que dizer.
 """
 import json
 import os
+import urllib.error
 import urllib.request
 
 from flask import current_app
@@ -23,6 +24,10 @@ def _post(url, corpo, chave):
     try:
         with urllib.request.urlopen(req, timeout=10) as resp:
             return 200 <= resp.status < 300
+    except urllib.error.HTTPError as e:
+        # O corpo diz o motivo (ex.: atributo inexistente, template inválido).
+        current_app.logger.error(f'Brevo falhou: {e} {e.read()[:300]!r}')
+        return False
     except Exception as e:  # noqa: BLE001 — falha do Brevo não derruba a tela
         current_app.logger.error(f'Brevo falhou: {e}')
         return False
@@ -62,11 +67,14 @@ def salvar_contato(email, atributos, lista_env, dupla_confirmacao=False,
         return False
     template = os.environ.get('BREVO_TEMPLATE_DOI', '')
     if dupla_confirmacao and template.isdigit() and redirecionar:
-        return _post(f'{URL_CONTATOS}/doubleOptinConfirmation', {
+        if _post(f'{URL_CONTATOS}/doubleOptinConfirmation', {
             'email': email, 'attributes': atributos,
             'includeListIds': [int(lista)], 'templateId': int(template),
             'redirectionUrl': redirecionar,
-        }, chave)
+        }, chave):
+            return True
+        # Dupla confirmação recusada (template mal configurado, p.ex.): o lead
+        # não se perde — entra direto, com o consentimento do formulário.
     return _post(URL_CONTATOS, {
         'email': email, 'attributes': atributos,
         'listIds': [int(lista)], 'updateEnabled': True,
