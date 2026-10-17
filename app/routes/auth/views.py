@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, session
 from flask_login import login_user, logout_user, login_required, current_user
 from app.models.usuario import Usuario
 
@@ -38,6 +38,7 @@ def login():
         # `lembrar` vem marcado por padrão no form. Sem cookie persistente o
         # login morre quando o navegador do celular descarta a aba — o que
         # acontece toda vez que se abre a câmera no meio de uma visita.
+        session.pop('operador_id', None)     # login novo não herda "abrir admin"
         login_user(usuario, remember=bool(request.form.get('lembrar')))
         next_page = request.args.get('next')
         if not next_page or not next_page.startswith('/'):
@@ -50,5 +51,9 @@ def login():
 @bp.route('/logout')
 @login_required
 def logout():
+    # Sair de dentro do admin de um bar (campo.abrir_admin) encerra também o
+    # vínculo com o operador: senão o próximo login neste navegador herdaria
+    # o botão "voltar ao meu admin".
+    session.pop('operador_id', None)
     logout_user()
     return redirect(url_for('auth.login'))

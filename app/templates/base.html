@@ -145,6 +145,17 @@
     </nav>
 
     <!-- Main Content -->
+    {% if session.get('operador_id') %}
+    {# Operador dentro do admin de um bar (campo.abrir_admin): sem esta faixa
+       fica fácil esquecer que se está mexendo no site do cliente. #}
+    <div class="alert alert-warning rounded-0 mb-0 py-2 d-flex justify-content-center align-items-center gap-3">
+        <span>Você está no admin de <strong>{{ current_user.restaurante.nome if current_user.restaurante else 'um bar' }}</strong>, como o dono vê.</span>
+        <form method="post" action="{{ url_for('campo.voltar') }}" class="m-0">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-sm btn-dark">Voltar ao meu admin</button>
+        </form>
+    </div>
+    {% endif %}
     <div class="container mt-4">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}

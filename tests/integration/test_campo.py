@@ -787,3 +787,51 @@ def test_botao_desliga_e_religa_o_site_do_bar(client, operador, demo):
 def test_botao_no_ar_e_so_do_operador(client, demo):
     assert client.post(f'/campo/{demo.slug}/no-ar').status_code in (302, 404)
     assert Restaurante.query.get(demo.id).ativo is not False
+
+
+# --------------------------------------------------------------- abrir admin do bar
+
+@pytest.fixture
+def cliente_com_admin(session):
+    r = Restaurante(nome='Bar do Cliente', slug='bar-do-cliente', tipo_conta='cliente',
+                    subscription_tier='site')
+    session.add(r)
+    session.commit()
+    session.add(Usuario(nome='Dono', email='dono@cliente.com', senha='segredo123',
+                        tipo='admin', restaurant_id=r.id))
+    session.commit()
+    return r
+
+
+def test_operador_abre_o_admin_do_bar_e_volta(client, operador, cliente_com_admin):
+    entrar(client)
+    assert 'ADMIN' in client.get('/campo/').get_data(as_text=True)
+
+    resp = client.post(f'/campo/{cliente_com_admin.slug}/abrir-admin')
+    assert '/app' in resp.headers['Location']
+    painel = client.get('/app/', follow_redirects=True).get_data(as_text=True)
+    assert 'Bar do Cliente' in painel and 'Voltar ao meu admin' in painel
+    assert client.get('/campo/').status_code == 404      # agora é o dono, não operador
+
+    resp = client.post('/campo/voltar')
+    assert '/campo' in resp.headers['Location']
+    assert client.get('/campo/').status_code == 200
+
+
+def test_dono_nao_abre_admin_de_outro_bar(client, cliente_com_admin, demo):
+    entrar(client, 'dono@cliente.com')
+    assert client.post(f'/campo/{demo.slug}/abrir-admin').status_code == 404
+
+
+def test_voltar_sem_ter_entrado_pelo_operador_nao_eleva(client, cliente_com_admin):
+    entrar(client, 'dono@cliente.com')
+    assert client.post('/campo/voltar').status_code == 404
+
+
+def test_logout_dentro_do_admin_apaga_o_vinculo_com_o_operador(client, operador,
+                                                               cliente_com_admin):
+    entrar(client)
+    client.post(f'/campo/{cliente_com_admin.slug}/abrir-admin')
+    client.get('/auth/logout')
+    entrar(client, 'dono@cliente.com')
+    assert client.post('/campo/voltar').status_code == 404

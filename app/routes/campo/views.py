@@ -14,7 +14,7 @@ import os
 import secrets
 
 from flask import (
-    abort, flash, jsonify, redirect, render_template, request, url_for, Response,
+    abort, current_app, flash, jsonify, redirect, render_template, request, url_for, Response,
 )
 
 from app.extensions import db
@@ -71,8 +71,13 @@ def index():
     if not e_operador():
         abort(404)
 
+    from app.models.usuario import Usuario
+
     bares = Restaurante.query.order_by(Restaurante.nome).all()
     configs = {c.restaurant_id: c for c in SiteConfig.query.all()}
+    # Bar com admin ativo ganha o botão "abrir admin" (ver `abrir_admin`).
+    com_admin = {rid for (rid,) in db.session.query(Usuario.restaurant_id)
+                 .filter(Usuario.tipo == 'admin', Usuario.ativo.isnot(False))}
 
     linhas = []
     for b in bares:
@@ -89,6 +94,7 @@ def index():
             # parecer o bar dele em vez de um modelo com o nome trocado.
             'pronto': bool(cfg and cfg.hero_foto and cfg.nota_google),
             'no_ar': b.ativo is not False,
+            'tem_admin': b.id in com_admin,
         })
 
     resumo = {
@@ -109,6 +115,51 @@ def no_ar(slug):
     rest.ativo = rest.ativo is False
     db.session.commit()
     flash(f'{rest.nome}: {"no ar" if rest.ativo else "fora do ar"}.', 'success')
+    return redirect(url_for('campo.index'))
+
+
+@bp.post('/<slug>/abrir-admin')
+def abrir_admin(slug):
+    """O operador entra no admin do bar como o dono o vê.
+
+    Troca o usuário logado pelo admin do bar e guarda na sessão quem é o
+    operador, para `voltar` desfazer. Assim o operador cuida do site de quem
+    não usa o painel e enxerga exatamente o que o cliente enxerga — sem senha
+    do cliente e sem caminho paralelo de permissão no resto do código.
+    """
+    from flask import session
+    from flask_login import current_user, login_user
+    from app.models.usuario import Usuario
+
+    rest = _bar(slug)                       # só operador passa daqui
+    dono = (Usuario.query
+            .filter_by(restaurant_id=rest.id, tipo='admin')
+            .filter(Usuario.ativo.isnot(False))
+            .order_by(Usuario.id).first())
+    if dono is None:
+        flash(f'{rest.nome} não tem admin cadastrado.', 'warning')
+        return redirect(url_for('campo.index'))
+
+    operador_id = current_user.id
+    current_app.logger.info(f'Context: ABRIR_ADMIN | operador={operador_id} | bar={rest.slug}')
+    login_user(dono)
+    session['operador_id'] = operador_id
+    return redirect(url_for('dashboard.index'))
+
+
+@bp.post('/voltar')
+def voltar():
+    """Sai do admin do bar e volta para a conta do operador."""
+    from flask import session
+    from flask_login import login_user
+    from app.models.usuario import Usuario
+
+    operador = Usuario.query.get(session.pop('operador_id', None) or 0)
+    # Só volta para quem é operador de fato: a sessão é assinada, mas a conta
+    # pode ter perdido o perfil entre a entrada e a saída.
+    if operador is None or not e_operador(operador):
+        abort(404)
+    login_user(operador)
     return redirect(url_for('campo.index'))
 
 
