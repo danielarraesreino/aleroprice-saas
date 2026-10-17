@@ -1,0 +1,66 @@
+{# Inscrição na lista "Comunidade Barão" (Brevo). Serve à home cacheada da Feira
+   e às páginas dos bares: o token de CSRF vem de /novidades/token na hora do
+   envio, nunca do HTML. Cores herdadas de quem inclui (currentColor).
+   Parâmetro opcional: `novidades_bar` = slug do bar (vira ORIGEM=bar:<slug>). #}
+<div class="novidades-box" style="max-width:520px;margin:28px auto;padding:20px 18px;border:1px solid currentColor;border-radius:12px;text-align:left;font-size:.95rem;">
+  <p style="font-weight:700;margin:0 0 4px;">Receba as novidades dos bares de Barão</p>
+  <p style="margin:0 0 14px;opacity:.8;font-size:.88rem;">Promoções, música ao vivo e eventos da Feira. Um e-mail de vez em quando, sem spam.</p>
+  <form class="form-novidades" novalidate>
+    <input type="hidden" name="bar" value="{{ novidades_bar or '' }}">
+    <input type="text" name="site" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;">
+    <label style="display:block;margin-bottom:8px;">
+      <span style="display:block;font-size:.82rem;">Nome</span>
+      <input type="text" name="nome" maxlength="80" autocomplete="name" style="width:100%;padding:10px;border-radius:8px;border:1px solid currentColor;background:transparent;color:inherit;font-size:16px;">
+    </label>
+    <label style="display:block;margin-bottom:8px;">
+      <span style="display:block;font-size:.82rem;">E-mail</span>
+      <input type="email" name="email" required maxlength="254" autocomplete="email" autocapitalize="none" style="width:100%;padding:10px;border-radius:8px;border:1px solid currentColor;background:transparent;color:inherit;font-size:16px;">
+    </label>
+    <label style="display:block;margin-bottom:10px;">
+      <span style="display:block;font-size:.82rem;">WhatsApp (opcional)</span>
+      <input type="tel" name="telefone" maxlength="30" autocomplete="tel" style="width:100%;padding:10px;border-radius:8px;border:1px solid currentColor;background:transparent;color:inherit;font-size:16px;">
+    </label>
+    <label style="display:flex;gap:8px;align-items:flex-start;font-size:.82rem;margin-bottom:12px;">
+      <input type="checkbox" name="consentimento" value="sim" required style="margin-top:3px;">
+      <span>Aceito receber as novidades da Feira de Barão por e-mail. Posso sair quando quiser pelo link em cada e-mail.</span>
+    </label>
+    <button type="submit" style="width:100%;padding:12px;border-radius:8px;border:2px solid currentColor;background:transparent;color:inherit;font-weight:700;cursor:pointer;">Quero receber</button>
+    <p class="novidades-msg" role="status" aria-live="polite" style="margin:10px 0 0;font-size:.88rem;"></p>
+  </form>
+</div>
+<script>
+(function () {
+  var forms = document.querySelectorAll('.form-novidades:not([data-pronto])');
+  forms.forEach(function (form) {
+    form.setAttribute('data-pronto', '1');
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var msg = form.querySelector('.novidades-msg');
+      var botao = form.querySelector('button[type=submit]');
+      if (!form.email.value || form.email.value.indexOf('@') < 0) { msg.textContent = 'Confira o e-mail.'; return; }
+      if (!form.consentimento.checked) { msg.textContent = 'Marque que aceita receber as novidades.'; return; }
+      botao.disabled = true;
+      msg.textContent = 'Enviando…';
+      fetch('{{ url_for("public.novidades_token") }}', {credentials: 'same-origin'})
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          return fetch('{{ url_for("public.novidades") }}', {
+            method: 'POST', credentials: 'same-origin', body: new FormData(form),
+            headers: {'X-CSRFToken': d.token, 'Accept': 'application/json'}
+          });
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d.ok) {
+            form.reset();
+            msg.textContent = d.msg;
+          } else {
+            msg.textContent = d.erro || 'Não deu certo. Tente de novo.';
+          }
+        })
+        .catch(function () { msg.textContent = 'Não deu certo. Tente de novo.'; })
+        .finally(function () { botao.disabled = false; });
+    });
+  });
+})();
+</script>

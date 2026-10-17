@@ -738,10 +738,73 @@ def cadastro():
 
         login_user(admin)
         current_app.logger.info(f"Context: SIGNUP | {nome_bar} | {email} | rid={rest.id}")
+        # Lead B2B no Brevo. Relação comercial iniciada por eles: sem dupla
+        # confirmação. Falha (ou Brevo não configurado) não atrapalha o cadastro.
+        from app.utils.email import salvar_contato
+        salvar_contato(email, {'NOME': nome, 'BAR': nome_bar, 'ORIGEM': 'cadastro'},
+                       'BREVO_LISTA_DONOS')
         flash('Conta criada! Personalize em Site e Conteúdo, depois veja seu site.', 'success')
         return redirect(url_for('dashboard.index'))
 
     return tela(**dados)
+
+
+@bp.route('/novidades/token')
+def novidades_token():
+    """Token de CSRF para o formulário de novidades.
+
+    A home da Feira sai cacheada na borda, igual para todo visitante, então não
+    pode carregar token de sessão no HTML. O formulário pede o token aqui, na
+    hora de enviar — e esta resposta nunca é cacheada.
+    """
+    from flask_wtf.csrf import generate_csrf
+    resp = jsonify(token=generate_csrf())
+    resp.headers['Cache-Control'] = 'no-store'
+    return resp
+
+
+@bp.route('/novidades', methods=['POST'])
+def novidades():
+    """Inscrição de morador/frequentador na lista "Comunidade Barão" do Brevo.
+
+    Consentimento explícito (checkbox) + dupla confirmação por e-mail quando o
+    template está configurado. `site` é um honeypot: robô preenche, gente não vê.
+    """
+    from app.utils.email import salvar_contato
+
+    if request.form.get('site'):
+        return jsonify(ok=True, msg='Pronto!')
+    if limite_excedido(f'novidades:{request.remote_addr}', maximo=5, janela_segundos=900):
+        return jsonify(ok=False, erro='Muitas tentativas. Tente de novo mais tarde.'), 429
+    email = (request.form.get('email') or '').strip().lower()
+    nome = (request.form.get('nome') or '').strip()[:80]
+    telefone = (request.form.get('telefone') or '').strip()[:30]
+    if '@' not in email or '.' not in email.split('@')[-1] or len(email) > 254:
+        return jsonify(ok=False, erro='Confira o e-mail.'), 400
+    if request.form.get('consentimento') != 'sim':
+        return jsonify(ok=False, erro='Marque que aceita receber as novidades.'), 400
+
+    # Origem só de um conjunto conhecido: "home" ou "bar:<slug existente>".
+    origem = 'home'
+    slug = (request.form.get('bar') or '').strip()
+    bar = tenant_por_slug(slug) if slug else None
+    if bar is not None:
+        origem = f'bar:{bar.slug}'
+
+    atributos = {'NOME': nome, 'ORIGEM': origem,
+                 'CONSENTIMENTO': datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}
+    if telefone:
+        atributos['TELEFONE'] = telefone
+    if bar is not None:
+        atributos['BAR'] = bar.nome
+    salvar_contato(email, atributos, 'BREVO_LISTA_COMUNIDADE', dupla_confirmacao=True,
+                   redirecionar=url_for('public.landing', _external=True))
+    current_app.logger.info(f'Context: NOVIDADES | origem={origem}')
+    # Mesma resposta se o Brevo falhar: quem se inscreve não tem o que fazer
+    # com o erro, e o log já registrou.
+    if os.environ.get('BREVO_TEMPLATE_DOI', '').isdigit():
+        return jsonify(ok=True, msg='Pronto! Confira seu e-mail e clique no link para confirmar.')
+    return jsonify(ok=True, msg='Pronto! Você vai receber as novidades da Feira.')
 
 
 # Identidade/contato padrão (Bar da Vila) — fallback quando o tenant não configurou.

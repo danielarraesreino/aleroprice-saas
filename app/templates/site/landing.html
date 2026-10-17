@@ -968,6 +968,7 @@
     </div>
     <div><a class="lojista" href="{{ url_do_sistema() }}">Área do lojista · entrar no sistema →</a></div>
   </div>
+  {% with novidades_bar = tenant.slug if tenant else '' %}{% include "site/_novidades.html" %}{% endwith %}
   {% include "site/_selo_caminhos.html" %}
 </footer>
 
