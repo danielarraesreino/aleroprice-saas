@@ -1,0 +1,35 @@
+{# E-mail de troca de senha. Tabelas e estilo inline: é o que Gmail/Outlook respeitam. #}
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Crie uma senha nova</title></head>
+<body style="margin:0;padding:0;background:#f6eedb;">
+<span style="display:none;max-height:0;overflow:hidden;">Seu link para criar uma senha nova vale por 30 minutos.</span>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f6eedb;padding:32px 12px;">
+  <tr><td align="center">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#fcf8ee;border:1px solid #e3d7bb;border-radius:14px;overflow:hidden;font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;color:#241c14;">
+      <tr><td style="height:8px;background:repeating-linear-gradient(90deg,#b33215 0 16px,#f6eedb 16px 32px);background-color:#b33215;font-size:0;line-height:0;">&nbsp;</td></tr>
+      <tr><td style="padding:28px 32px 8px;">
+        <p style="margin:0;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#b33215;font-weight:700;">Feira de Barão</p>
+        <h1 style="margin:10px 0 0;font-size:26px;line-height:1.2;font-weight:800;">Crie uma senha nova</h1>
+      </td></tr>
+      <tr><td style="padding:12px 32px 4px;font-size:16px;line-height:1.6;">
+        <p style="margin:0 0 14px;">Oi, {{ nome }}.</p>
+        <p style="margin:0 0 22px;">Recebemos um pedido para trocar a senha do painel do seu site. É só tocar no botão:</p>
+      </td></tr>
+      <tr><td align="center" style="padding:0 32px 24px;">
+        <a href="{{ link }}" style="display:inline-block;background:#b33215;color:#ffffff;text-decoration:none;font-weight:700;font-size:16px;padding:14px 30px;border-radius:10px;">Criar senha nova</a>
+        <p style="margin:12px 0 0;font-size:13px;color:#695842;">O link vale por 30 minutos e só funciona uma vez.</p>
+      </td></tr>
+      <tr><td style="padding:0 32px 26px;font-size:13px;line-height:1.6;color:#695842;">
+        <p style="margin:0 0 8px;">Se o botão não abrir, copie este endereço no navegador:</p>
+        <p style="margin:0;word-break:break-all;"><a href="{{ link }}" style="color:#b33215;">{{ link }}</a></p>
+      </td></tr>
+      <tr><td style="padding:18px 32px;background:#eae0c8;font-size:13px;line-height:1.5;color:#695842;">
+        Não foi você que pediu? Ignore este e-mail: sua senha continua a mesma.<br>
+        <span style="color:#241c14;font-weight:700;">Feira de Barão</span> · Barão Geraldo, Campinas
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>

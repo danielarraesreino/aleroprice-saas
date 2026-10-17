@@ -106,10 +106,8 @@ def esqueci():
             token = _assinador().dumps({'id': usuario.id, 'h': usuario.senha[-16:]})
             link = url_for('auth.redefinir', token=token, _external=True)
             enviar_email(usuario.email, 'Crie uma senha nova',
-                         f'<p>Oi, {usuario.nome}.</p>'
-                         f'<p>Para criar uma senha nova, abra este link (vale por 30 minutos):</p>'
-                         f'<p><a href="{link}">{link}</a></p>'
-                         '<p>Se não foi você que pediu, ignore este e-mail: sua senha continua a mesma.</p>')
+                         render_template('email/redefinir_senha.html',
+                                         nome=usuario.nome, link=link))
         flash(_MENSAGEM_ENVIO, 'info')
         return redirect(url_for('auth.login'))
     return render_template('auth/esqueci.html')
