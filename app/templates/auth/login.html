@@ -14,11 +14,11 @@
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="mb-3">
                         <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" name="email" required>
+                        <input type="email" class="form-control" id="email" name="email" autocomplete="username" autocapitalize="none" required>
                     </div>
                     <div class="mb-3">
                         <label for="senha" class="form-label">Senha</label>
-                        <input type="password" class="form-control" id="senha" name="senha" required>
+                        {% with campo_id='senha', autocomplete='current-password', minimo=None %}{% include 'auth/_campo_senha.html' %}{% endwith %}
                     </div>
                     <div class="form-check mb-3">
                         <input type="checkbox" class="form-check-input" id="lembrar"
@@ -31,6 +31,7 @@
                         <button type="submit" class="btn btn-primary">Entrar</button>
                     </div>
                 </form>
+                <p class="text-center mt-3 mb-0"><a href="{{ url_for('auth.esqueci') }}">Esqueci minha senha</a></p>
                 <hr>
                 <p class="text-center mb-0">Ainda não tem conta?
                    <a href="{{ url_for('public.cadastro') }}">Criar grátis</a></p>

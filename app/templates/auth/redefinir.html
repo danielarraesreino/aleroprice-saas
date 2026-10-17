@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Senha nova - {{ MARCA }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-4">
+        <div class="card mt-5">
+            <div class="card-header text-center"><h4>Crie uma senha nova</h4></div>
+            <div class="card-body">
+                <form method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label for="senha" class="form-label">Senha nova (mínimo 8 caracteres)</label>
+                        {% with campo_id='senha', autocomplete='new-password', minimo=8 %}{% include 'auth/_campo_senha.html' %}{% endwith %}
+                    </div>
+                    <div class="d-grid"><button type="submit" class="btn btn-primary">Salvar senha</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

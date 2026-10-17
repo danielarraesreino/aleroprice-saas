@@ -224,6 +224,7 @@ def create_app(config_name='default'):
     # 'bootstrap_demo' (run.py) é gated por SEED_TOKEN — só existe quando a env
     # var está setada, e valida o token em tempo constante antes de escrever.
     PUBLIC_ENDPOINTS = {'static', 'auth.login', 'auth.logout', 'billing.webhook',
+                        'auth.esqueci', 'auth.redefinir',
                         'bootstrap_demo'}
 
     # O domínio do cliente é dele: ali mora o site do bar e nada mais.
