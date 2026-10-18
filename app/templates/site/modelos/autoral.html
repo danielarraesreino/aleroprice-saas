@@ -1353,11 +1353,17 @@
     document.getElementById('indice').classList.add('aberto');
     document.getElementById('btnIndice').setAttribute('aria-expanded','true');
     document.body.style.overflow='hidden';
+    // foco entra no índice, senão o Tab continua atrás do painel aberto
+    var primeiro = document.querySelector('#indice a, #indice button');
+    if(primeiro) setTimeout(function(){ primeiro.focus(); }, 50);
   }
   function fecharIndice(){
-    document.getElementById('indice').classList.remove('aberto');
+    var indice = document.getElementById('indice');
+    var estavaAberto = indice.classList.contains('aberto');
+    indice.classList.remove('aberto');
     document.getElementById('btnIndice').setAttribute('aria-expanded','false');
     document.body.style.overflow='';
+    if(estavaAberto) document.getElementById('btnIndice').focus();
   }
   document.addEventListener('keydown',function(e){if(e.key==='Escape')fecharIndice();});
 

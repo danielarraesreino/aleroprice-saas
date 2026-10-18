@@ -655,7 +655,7 @@
     align-items:center;justify-content:center;padding:20px}
   .lupa.on{display:flex}
   .lupa img{max-width:94vw;max-height:86vh;border:10px solid #fffaf0;box-shadow:0 24px 60px rgba(0,0,0,.6);filter:var(--sepia)}
-  .lupa .x{position:absolute;top:14px;right:18px;color:#f6eddd;font-size:2rem;cursor:pointer;line-height:1}
+  .lupa .x{position:absolute;top:10px;right:12px;color:#f6eddd;font-size:2rem;cursor:pointer;line-height:1;background:none;border:0;min-width:44px;min-height:44px}
 
   /* ---------- RESERVA: livro de reservas, campos em linha pautada ---------- */
   .reserva-grade{display:grid;grid-template-columns:1fr;gap:28px;margin-top:26px}
@@ -1331,8 +1331,9 @@
 </footer>
 
 {% if gallery %}
-<div class="lupa" id="lupa" onclick="this.classList.remove('on')">
-  <span class="x" aria-hidden="true">✕</span>
+<div class="lupa" id="lupa" role="dialog" aria-modal="true" aria-label="Foto ampliada"
+     onclick="if(event.target===this) fecharLupa()">
+  <button type="button" class="x" id="lupa-fechar" aria-label="Fechar" onclick="fecharLupa()">✕</button>
   <img id="lupa-img" src="" alt="Foto ampliada da casa — {{ site.nome }}"
        loading="lazy" decoding="async">
 </div>
@@ -1392,16 +1393,24 @@
     }
   }
 
+  var origemLupa = null;
   function ampliar(src){
     var l = document.getElementById('lupa');
     if(!l) return;
+    origemLupa = document.activeElement;
     document.getElementById('lupa-img').src = src;
     l.classList.add('on');
+    document.getElementById('lupa-fechar').focus();
+  }
+  function fecharLupa(){
+    var l = document.getElementById('lupa');
+    if(!l || !l.classList.contains('on')) return;
+    l.classList.remove('on');
+    if(origemLupa) origemLupa.focus();
   }
   document.addEventListener('keydown', function(e){
     if(e.key === 'Escape'){
-      var l = document.getElementById('lupa');
-      if(l) l.classList.remove('on');
+      fecharLupa();
       if(document.getElementById('folha').classList.contains('aberta')) abrirMenu(true);
     }
   });

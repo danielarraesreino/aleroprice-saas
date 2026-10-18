@@ -487,6 +487,7 @@ def sitemap():
         # A landing de venda é a única página deste host que é nossa. Sitemap
         # sem nenhuma URL do próprio host é ignorado pelo Google.
         paginas.append((f'https://{dominio_do_produto()}/', None))
+        paginas.append((f'https://{dominio_do_produto()}/site-para-bar-em-campinas', None))
 
     from app.models.modelo_sitecontent import DishCard
     for tenant in _tenants_do_sitemap(dono_do_dominio):

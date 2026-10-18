@@ -14,7 +14,7 @@
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="mb-3">
                         <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" name="email" autocomplete="username" autocapitalize="none" required>
+                        <input type="email" class="form-control form-control-lg" id="email" name="email" autocomplete="username" autocapitalize="none" required>
                     </div>
                     <div class="mb-3">
                         <label for="senha" class="form-label">Senha</label>
@@ -28,7 +28,7 @@
                         </label>
                     </div>
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">Entrar</button>
+                        <button type="submit" class="btn btn-primary" style="min-height:44px">Entrar</button>
                     </div>
                 </form>
                 <p class="text-center mt-3 mb-0"><a href="{{ url_for('auth.esqueci') }}">Esqueci minha senha</a></p>

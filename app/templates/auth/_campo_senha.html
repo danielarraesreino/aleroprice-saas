@@ -1,7 +1,7 @@
 {# Campo de senha com o olho para conferir o que foi digitado (no celular a
    senha errada por um dedo escorregado é o motivo mais comum de "não entra"). #}
 <div class="input-group">
-    <input type="password" class="form-control" id="{{ campo_id }}" name="senha"
+    <input type="password" class="form-control form-control-lg" id="{{ campo_id }}" name="senha"
            autocomplete="{{ autocomplete }}" required {% if minimo %}minlength="{{ minimo }}"{% endif %}>
     <button class="btn btn-outline-secondary" type="button" aria-label="Mostrar senha"
             aria-pressed="false"

@@ -169,3 +169,8 @@ def test_llms_do_portal_nao_lista_bar_de_dominio_proprio(client, bares):
 def test_llms_do_bar_nao_carimba_barao_geraldo(client, bares):
     texto = client.get('/llms.txt', headers={'Host': CLIENTE}).get_data(as_text=True)
     assert 'Barão Geraldo' not in texto.splitlines()[0]
+
+
+def test_sitemap_do_portal_tem_a_pagina_de_venda(client, bares):
+    xml = client.get('/sitemap.xml', headers={'Host': PRODUTO}).get_data(as_text=True)
+    assert f'https://{PRODUTO}/site-para-bar-em-campinas' in xml
