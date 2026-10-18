@@ -377,7 +377,29 @@ def _contexto_produto():
 def barao():
     """Landing da campanha "Bares de Barão": a página que o vendedor manda no
     WhatsApp do dono de bar de Barão Geraldo e abre na mesa."""
-    return render_template('produto/barao.html', **_contexto_produto())
+    return render_template('produto/barao.html', campinas=False, **_contexto_produto())
+
+
+# Perguntas da página indexável — só o que o produto faz hoje.
+FAQ_PARA_BARES = [
+    ('Precisa instalar aplicativo?',
+     'Não. O cliente reserva pelo site e o aviso chega no WhatsApp do bar. Você edita o site pelo celular.'),
+    ('Vocês cobram comissão por reserva ou pedido?',
+     'Não. É uma mensalidade fixa, sem comissão por mesa.'),
+    ('O perfil do Google continua sendo meu?',
+     'Sim. A gente configura horário, fotos, cardápio e o link do site no seu Perfil da Empresa; o perfil segue no seu nome.'),
+    ('Tem fidelidade?', 'Não. Se não servir, você cancela.'),
+]
+
+
+@bp.route('/site-para-bar-em-campinas')
+def para_bares():
+    """Mesma página de venda, indexável e para Campinas inteira: é a busca
+    local sem concorrente ("site para bar em campinas", "cardápio no google
+    maps"). /barao segue noindex, como link de campanha."""
+    resp = make_response(render_template('produto/barao.html', campinas=True,
+                                         faq=FAQ_PARA_BARES, **_contexto_produto()))
+    return _na_borda(resp)
 
 
 @bp.route('/robots.txt')

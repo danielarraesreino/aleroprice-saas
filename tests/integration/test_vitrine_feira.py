@@ -77,3 +77,19 @@ def test_previa_espiada_nao_vai_para_o_cache(client, session):
     session.commit()
     resp = client.get('/bar/bar-espiado?modelo=noturno')
     assert 's-maxage' not in resp.headers.get('Cache-Control', '')
+
+
+def test_pagina_para_bares_indexavel_sem_prometer_gestao(client, session):
+    html = client.get('/site-para-bar-em-campinas').get_data(as_text=True)
+    assert 'noindex' not in html and 'rel="canonical"' in html
+    assert '"FAQPage"' in html and 'Campinas' in html
+    assert 'Em breve' in html and 'Quero o Pro' not in html
+    barao = client.get('/barao').get_data(as_text=True)
+    assert 'noindex' in barao and 'Quero o Pro' not in barao
+
+
+def test_home_mostra_horario_da_feira_e_nao_promete_gestao(client, session):
+    html = client.get('/').get_data(as_text=True)
+    assert 'Sábado' in html and 'Domingo' in html and '"Event"' in html
+    assert 'MAIS ESCOLHIDO' not in html and 'lucro limpo' not in html
+    assert '/site-para-bar-em-campinas' in html
