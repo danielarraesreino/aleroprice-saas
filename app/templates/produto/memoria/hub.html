@@ -21,6 +21,7 @@
 <h1>Memória Viva de Barão Geraldo</h1>
 <p style="max-width:720px">Do café da Fazenda Santa Genebra aos trilhos da Funilense, da leiteria do Plínio Aveniente à Unicamp e à Praça do Coco. Cada verbete tem fonte e um ponto no mapa — e qualquer pessoa pode mandar foto, causo ou correção. Toda memória publicada sai com o nome de quem mandou.</p>
 {% if zap %}<div class="acoes"><a class="btn btn-zap" href="{{ zap }}" target="_blank" rel="noopener">Mandar memória ou foto pelo WhatsApp</a></div>{% endif %}
+{% if zap %}<div class="provoca" style="margin-top:14px">{% for chamada, link in memoria_provocacoes[:2] %}<a href="{{ link }}" target="_blank" rel="noopener">{{ chamada }} <span aria-hidden="true">→</span></a>{% endfor %}</div>{% endif %}
 
 <h2>O mapa da memória</h2>
 <div id="mapa-memoria" role="region" aria-label="Mapa com os lugares da memória de Barão Geraldo"></div>
@@ -41,14 +42,14 @@
 <h2 id="mural">Mural da Memória</h2>
 <div class="grade">
   {% for m in mural %}
-  <blockquote>“{{ m.texto }}”<br><span class="credito">— {{ m.nome }}{% if m.quando %}, {{ m.quando }}{% endif %}{% if m.fonte_url %} · <a href="{{ m.fonte_url }}" rel="noopener">fonte</a>{% endif %}</span></blockquote>
+  <blockquote>“{{ m.texto }}”<br><span class="credito"><strong>{{ m.nome }}</strong>{% if m.quando %} · {{ m.quando }}{% endif %}{% if m.fonte_url %}<br>Fonte: <a href="{{ m.fonte_url }}" rel="noopener">{{ mem.fonte_rotulo(m.fonte_url) }}</a>{% endif %}</span></blockquote>
   {% endfor %}
 </div>
 {% if zap %}
 <h2>Você tem isso guardado?</h2>
 <div class="provoca">
-  {% for chamada in ['Tem foto da Praça do Coco antes de 2000?', 'Seu avô ou sua avó trabalhou na Rhodia ou no Funilense?', 'Qual foi o primeiro bar que você frequentou em Barão?', 'Qual a foto mais antiga que você tem da Albino de Oliveira?'] %}
-  <a href="{{ zap }}" target="_blank" rel="noopener">{{ chamada }} <span aria-hidden="true">→</span></a>
+  {% for chamada, link in memoria_provocacoes %}
+  <a href="{{ link }}" target="_blank" rel="noopener">{{ chamada }} <span aria-hidden="true">→</span></a>
   {% endfor %}
 </div>
 {% endif %}

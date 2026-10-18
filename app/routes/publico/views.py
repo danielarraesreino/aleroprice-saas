@@ -387,6 +387,10 @@ def _contexto_memoria():
             'Oi! Quero mandar uma memória/foto de Barão Geraldo para o Mural.\n\n'
             'Nome para o crédito:\nQuando foi:\nO que aconteceu:\n\n'
             'Autorizo publicar no feiradebarao.com.br com meu nome.'),
+        'memoria_provocacoes': [
+            (q, _zap_memoria(f'Oi! Sobre "{q}"\n\nO que eu tenho:\nNome para o crédito:\n\n'
+                             'Autorizo publicar no feiradebarao.com.br com meu nome.'))
+            for q in mem.PROVOCACOES],
     }
 
 

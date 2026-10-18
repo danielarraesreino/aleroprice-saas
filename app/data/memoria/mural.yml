@@ -1,47 +1,47 @@
 # Gerado por scripts/importar_memoria.py a partir dos rascunhos revisados.
 # Pode editar à mão; ao reimportar, este arquivo é sobrescrito.
 - texto: No 22 Barão era um deserto! Só uma chave com uma guarita, 2 ou 3 vendas
-  nome: Humberto Barbieri, segundo o blog História de Barão Geraldo
-  quando: sobre 1922, em entrevista ao autor
+  nome: Humberto Barbieri
+  quando: entrevista de 1992, sobre 1922
   verbete: estacao-barao-geraldo
   fonte_url: https://historiadebaraogeraldo.wordpress.com/2021/03/27/funilense-a-mae-esquecida-de-barao-e-das-cidades-ao-norte-de-campinas/
 - texto: Oito horas ele subia e no começo da noite ele voltava
-  nome: Amyr Moda, segundo o blog História de Barão Geraldo
-  quando: sobre o trem por volta de 1918
+  nome: Amyr Moda
+  quando: lembrança do trem, por volta de 1918
   verbete: vendo-o-trem-passar
   fonte_url: https://historiadebaraogeraldo.wordpress.com/2021/03/27/funilense-a-mae-esquecida-de-barao-e-das-cidades-ao-norte-de-campinas/
 - texto: A gente varria, fazia montinhos, abanava, ensacava e colocava na carroça
-  nome: Antônio Páttaro, segundo o blog História de Barão Geraldo
-  quando: sobre a colheita na Colônia Xadrez, anos 1920
+  nome: Antônio Páttaro
+  quando: lembrança da colheita no Xadrez, anos 1920
   verbete: colonia-xadrez
   fonte_url: https://historiadebaraogeraldo.wordpress.com/2021/09/22/a-colonia-xadrez-e-outras-antes-da-formacao-de-barao-geraldo/
 - texto: A terra era muito ruim. Não produzia. Dava muito pouco.
-  nome: Humberto Barbieri, segundo o blog História de Barão Geraldo
-  quando: sobre o Xadrez em 1922, entrevista de 1992
+  nome: Humberto Barbieri
+  quando: entrevista de 1992, sobre o Xadrez em 1922
   verbete: colonia-xadrez
   fonte_url: https://historiadebaraogeraldo.wordpress.com/2021/09/22/a-colonia-xadrez-e-outras-antes-da-formacao-de-barao-geraldo/
 - texto: Lembro sempre que ele ia buscar água na bica da Areia Molhada
-  nome: Plínio Aveniente Jr., segundo o blog História de Barão Geraldo
-  quando: lembrança do pai, entrevista de 1992
+  nome: Plínio Aveniente Jr.
+  quando: entrevista de 1992, lembrando o pai
   verbete: plinio-aveniente
   fonte_url: https://historiadebaraogeraldo.wordpress.com/2015/08/26/mini-biografia-de-plinio-aveniente/
 - texto: Vieram todos meio parentes, unidos!
   nome: Rosa Pacci
-  quando: entrevista gravada para o Centro de Memória da Unicamp, 1992
+  quando: entrevista de 1992 ao Centro de Memória da Unicamp
   verbete: imigrantes-mesmo-navio-mesma-fazenda
   fonte_url: https://historiadebaraogeraldo.wordpress.com/2020/08/30/mesmo-navio-mesma-fazenda-os-imigrantes-antes-da-formacao-de-barao/
 - texto: Aquela que pagava melhor eles iam.
   nome: Páscoa Ferrari Páttaro
-  quando: entrevista a Warney Smith, 1992-1995
+  quando: entrevista entre 1992 e 1995
   verbete: antonio-pattaro-e-pascoa-ferrari
   fonte_url: https://historiadebaraogeraldo.wordpress.com/2020/08/30/mesmo-navio-mesma-fazenda-os-imigrantes-antes-da-formacao-de-barao/
 - texto: A terra era muito ruim. Não produzia. Dava muito pouco.
   nome: Humberto Barbieri
-  quando: entrevista a Warney Smith, 1992
+  quando: entrevista de 1992
   verbete: origem-de-barao-geraldo
   fonte_url: https://historiadebaraogeraldo.wordpress.com/2020/06/27/barao-geraldo-100-anos/
 - texto: Era um lugar perdido, com muito mato e capim catingueiro.
   nome: Giuseppe Soprano, lembrado pela filha Rosa Pacci
-  quando: sobre o sítio comprado em 1918; relato gravado em 1992
+  quando: relato de 1992, sobre o sítio comprado em 1918
   verbete: imigrantes-mesmo-navio-mesma-fazenda
   fonte_url: https://historiadebaraogeraldo.wordpress.com/2020/06/27/barao-geraldo-100-anos/

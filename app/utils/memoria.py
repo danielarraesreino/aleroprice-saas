@@ -22,6 +22,24 @@ CATEGORIAS = {
     'causo': 'Causos',
 }
 
+# Chamadas do Mural: cada uma abre o WhatsApp da Feira já com a pergunta.
+PROVOCACOES = [
+    'Tem foto da Praça do Coco antes de 2000?',
+    'Seu avô ou sua avó trabalhou na Rhodia ou no Funilense?',
+    'Qual foi o primeiro bar que você frequentou em Barão?',
+    'Qual a foto mais antiga que você tem da Albino de Oliveira?',
+]
+
+FONTES = {
+    'historiadebaraogeraldo.wordpress.com': 'Blog História de Barão Geraldo (Warney Smith)',
+    'wikipedia.org': 'Wikipédia',
+}
+
+
+def fonte_rotulo(url):
+    """Nome da fonte para a linha de crédito ("Fonte: …")."""
+    return next((rotulo for dominio, rotulo in FONTES.items() if dominio in (url or '')), 'fonte')
+
 
 def _ler(nome):
     caminho = os.path.join(DIR_MEMORIA, nome)

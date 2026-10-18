@@ -124,15 +124,15 @@
       {% for m in memoria_mural %}
       <blockquote style="margin:0; background:var(--cartao); border:1.5px solid var(--linha); border-left:4px solid var(--tomate); border-radius:14px; padding:18px 20px;">
         <p style="font-style:italic; margin:0 0 10px;">“{{ m.texto }}”</p>
-        <footer style="font-size:0.82rem; color:var(--taupe);">{{ m.nome }}{% if m.quando %} · {{ m.quando }}{% endif %}{% if m.fonte_url %} · <a href="{{ m.fonte_url }}" rel="noopener">fonte</a>{% endif %}</footer>
+        <footer style="font-size:0.82rem; color:var(--taupe);"><strong>{{ m.nome }}</strong>{% if m.quando %} · {{ m.quando }}{% endif %}{% if m.fonte_url %}<br>Fonte: <a href="{{ m.fonte_url }}" rel="noopener">{{ mem.fonte_rotulo(m.fonte_url) }}</a>{% endif %}</footer>
       </blockquote>
       {% endfor %}
     </div>
     {% endif %}
     {% if zap_memoria %}
     <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:12px;">
-      {% for chamada in ['Tem foto da Praça do Coco antes de 2000?', 'Seu avô ou sua avó trabalhou na Rhodia ou no Funilense?', 'Qual foi o primeiro bar que você frequentou em Barão?', 'Qual a foto mais antiga que você tem da Albino de Oliveira?'] %}
-      <a href="{{ zap_memoria }}" target="_blank" rel="noopener" style="display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:56px; padding:14px 16px; border:2px dashed var(--tomate); border-radius:12px; text-decoration:none; color:var(--tinta); font-weight:700; background:var(--papel-claro);">{{ chamada }} <i class="fab fa-whatsapp" aria-hidden="true" style="color:var(--verde-zap);"></i></a>
+      {% for chamada, link in memoria_provocacoes %}
+      <a href="{{ link }}" target="_blank" rel="noopener" style="display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:56px; padding:14px 16px; border:2px dashed var(--tomate); border-radius:12px; text-decoration:none; color:var(--tinta); font-weight:700; background:var(--papel-claro);">{{ chamada }} <i class="fab fa-whatsapp" aria-hidden="true" style="color:var(--verde-zap);"></i></a>
       {% endfor %}
     </div>
     {% endif %}
@@ -146,7 +146,7 @@
   <div class="wrap barra-memoria-inner">
     <div class="barra-memoria-texto">
       <i class="fas fa-book-open"></i>
-      <span><strong>Dossiê Aberto à Comunidade:</strong> Você tem um causo, foto antiga ou correção histórica de Barão Geraldo?</span>
+      <span>{% if zap_memoria %}<a href="{{ memoria_provocacoes[0][1] }}" target="_blank" rel="noopener" style="color:inherit;"><strong>{{ memoria_provocacoes[0][0] }}</strong></a> <a href="{{ memoria_provocacoes[1][1] }}" target="_blank" rel="noopener" style="color:inherit;">{{ memoria_provocacoes[1][0] }}</a> Manda pra gente: sai com o seu nome.{% else %}<strong>Dossiê Aberto à Comunidade:</strong> Você tem um causo, foto antiga ou correção histórica de Barão Geraldo?{% endif %}</span>
     </div>
     <div style="display:flex; gap:10px;">
       <button class="btn btn-fantasma" style="color:#f6eedb !important; border-color:rgba(255,255,255,0.3); padding:6px 14px; font-size:0.8rem;" onclick="abrirModalColaboracao('correcao')">
