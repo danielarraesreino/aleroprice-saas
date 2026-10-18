@@ -23,7 +23,7 @@
 <h2 style="font-size:1.4rem">Onde fica</h2>
 <p>{{ v.lugar.nome }}{% if v.lugar.aproximado %} <span class="credito">(local aproximado{% if v.nota_lugar %}: {{ v.nota_lugar }}{% endif %})</span>{% endif %}</p>
 <div class="acoes">
-  <a class="btn" href="{{ mem.link_mapa(v.lugar) }}" target="_blank" rel="noopener">Ver no mapa ↗</a>
+  <a class="btn btn-fantasma" href="{{ mem.link_mapa(v.lugar) }}" target="_blank" rel="noopener">Ver no mapa ↗</a>
   <a class="btn btn-tomate" href="{{ mem.link_street_view(v.lugar) }}" target="_blank" rel="noopener">Street View agora ↗</a>
 </div>
 {% set embed = mem.embed_street_view(v.lugar) %}
