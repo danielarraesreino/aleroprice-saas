@@ -23,7 +23,11 @@
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Work+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{# topo e menu da Feira (o mesmo da home e da Memória); o <style> abaixo vem
+   depois e manda no resto da página #}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/feira.css') }}">
 {#
   Esta página era uma terceira identidade.
 
@@ -88,17 +92,6 @@
   .some{position:relative;white-space:nowrap}
   .some::after{content:"";position:absolute;left:0;right:0;top:52%;height:.09em;
     background:var(--tomate);transform:rotate(-1.4deg)}
-
-  /* ---- topo ---- */
-  .topo{position:sticky;top:0;z-index:40;background:rgb(246 238 219 / .93);
-    backdrop-filter:blur(8px);border-bottom:1px solid var(--linha)}
-  .topo-in{max-width:var(--maxw);margin-inline:auto;padding:var(--s-3) var(--s-5);
-    display:flex;align-items:center;justify-content:space-between;gap:var(--s-4)}
-  .marca{font-family:var(--f-display);font-size:1.15rem;letter-spacing:.02em;
-    color:var(--tinta);text-decoration:none}
-  .marca b{color:var(--tomate);font-weight:400}
-  .topo-zap{font-size:var(--t-micro);font-weight:700;color:var(--verde);text-decoration:none}
-  .topo-zap:hover{text-decoration:underline}
 
   /* ---- botões ---- */
   .btn-zap{display:inline-flex;align-items:center;gap:var(--s-2);
@@ -237,18 +230,17 @@
   .barra-zap .btn-zap{flex:1;justify-content:center}
   @media(min-width:720px){.barra-zap{display:none}}
 
+  /* Topo da Feira: os botões da página (acima) não valem dentro dele */
+  .site-header,.menu-mobile-drawer{font-family:var(--font-corpo);line-height:normal}
+  .site-header .btn{white-space:nowrap;border-radius:999px;box-shadow:none;font-family:inherit;letter-spacing:0}
+
   /* Nada nasce escondido: as classes de animação só entram se o JS assumir. */
   .js-anim [data-hero],.js-anim [data-reveal]{opacity:0}
 </style>
 </head>
 <body>
 
-<div class="topo">
-  <div class="topo-in">
-    <a class="marca" href="#topo">Bares <b>de Barão</b></a>
-    <a class="topo-zap" href="{{ zap_url }}">Chamar no zap</a>
-  </div>
-</div>
+{% with na_home = false %}{% include 'produto/_topo.html' %}{% endwith %}
 
 <header class="hero" id="topo">
   <div class="wrap">
@@ -270,7 +262,7 @@
   </div>
 </header>
 
-<main>
+<main id="conteudo" tabindex="-1">
 
   <!-- 2. prova viva -->
   <section class="secao">
