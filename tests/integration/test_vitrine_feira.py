@@ -58,11 +58,22 @@ def test_vitrine_com_sessao_nao_vai_para_o_cache(client, session):
     assert 's-maxage' not in resp.headers.get('Cache-Control', '')
 
 
-def test_site_do_bar_no_dominio_proprio_nao_vai_para_o_cache(client, session):
-    """O site do bar tem formulário de reserva com token: não pode ser cache."""
+def test_site_do_bar_no_dominio_proprio_vai_para_o_cache_sem_sessao(client, session):
+    """O formulário de reserva busca o token na hora de enviar, então a página
+    do bar é igual para todo visitante e pode sair da borda — sem cookie de
+    sessão e sem token embutido."""
     session.add(Restaurante(nome='Bar Proprio', slug='bar-proprio',
                             dominio='barproprio.com.br'))
     session.commit()
     resp = client.get('/', headers={'Host': 'barproprio.com.br'})
     assert resp.status_code == 200
+    assert 's-maxage' in resp.headers.get('Cache-Control', '')
+    assert 'Set-Cookie' not in resp.headers
+    assert 'Cookie' not in resp.headers.get('Vary', '')
+
+
+def test_previa_espiada_nao_vai_para_o_cache(client, session):
+    session.add(Restaurante(nome='Bar Espiado', slug='bar-espiado'))
+    session.commit()
+    resp = client.get('/bar/bar-espiado?modelo=noturno')
     assert 's-maxage' not in resp.headers.get('Cache-Control', '')

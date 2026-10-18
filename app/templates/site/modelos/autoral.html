@@ -776,7 +776,8 @@
     font-size:var(--t-micro);font-weight:600;letter-spacing:var(--tk-micro);
     line-height:var(--lh-micro);text-transform:uppercase}
   .rodape-links a{color:var(--tinta-2);border-bottom:1px solid var(--linha);
-    padding-bottom:var(--s-1);transition:color .25s,border-color .25s}
+    padding-bottom:var(--s-1);transition:color .25s,border-color .25s;
+    display:inline-flex;align-items:center;min-height:var(--alvo)}
   .rodape-links a:hover{color:var(--acento);border-color:var(--acento)}
 
   /* ---------- WhatsApp discreto ---------- */
@@ -810,6 +811,10 @@
     .js .rev,.js-anim [data-hero]{opacity:1;transform:none}
   }
 
+  /* "Pular para o conteúdo": fora da tela até receber foco pelo Tab. */
+  .pular{position:absolute;left:12px;top:-80px;z-index:1000;padding:12px 18px;
+    background:var(--tinta);color:var(--papel);font-size:var(--t-micro);letter-spacing:var(--tk-micro);text-transform:uppercase}
+  .pular:focus{top:12px}
   /* Selo de demonstração: só aparece em prévia, quando a casa ainda não tem
      agenda própria e o site mostra o recurso com exemplo. */
   .selo-exemplo{display:inline-block;vertical-align:middle;margin-left:var(--s-2);
@@ -846,6 +851,8 @@
 {% endif %}
 </head>
 <body data-heroina="cardapio" data-leitura="alternado" data-foto="sangria-alternada">
+
+<a class="pular" href="#topo">Pular para o conteúdo</a>
 
 {% include "site/_demo_dock.html" %}
 
@@ -1002,6 +1009,10 @@
       </article>
       {% endfor %}
     </div>
+    {# A página do cardápio (a do QR da mesa) só aparecia no JSON-LD. #}
+    {% if tenant and tenant.slug %}
+    <p class="rev" style="margin-top:var(--s-6)"><a class="link-seta" href="{{ url_for('public.cardapio', slug=tenant.slug) }}">Ver cardápio completo →</a></p>
+    {% endif %}
   </div>
 </section>
 {% endif %}
@@ -1106,14 +1117,14 @@
         {# Galeria é foto misturada (celular de quatro pessoas diferentes), então
            vale o default do sistema: 50% 45%. Não é 50% 50% de propósito —
            foto de bar tirada no celular quase sempre tem teto sobrando. #}
-        <img src="{{ g.img }}" alt="{{ (g.legenda ~ ' — ' ~ site.nome) if g.legenda else (site.nome ~ ' — foto da casa ' ~ loop.index) }}"
+        <img src="{{ g.img }}" alt="{{ (g.legenda ~ ' — ' ~ site.nome) if g.legenda else (site.nome ~ ' — foto ' ~ loop.index) }}"
              style="object-position:{{ g.pos | default('50% 45%') }}"
              width="800" height="600" loading="lazy" decoding="async">
         {% if g.legenda %}<figcaption>{{ g.legenda }}</figcaption>{% endif %}
       </figure>
       {% endif %}{% endfor %}
     </div>
-    {% if gallery|length > 6 and site.instagram_url %}
+    {% if gallery|length > 6 and site.instagram_url and site.instagram_url.startswith('https://') %}
     <a class="link-seta galeria-mais" href="{{ site.instagram_url }}" target="_blank" rel="noopener">Ver mais fotos no Instagram →</a>
     {% endif %}
   </div>
@@ -1174,10 +1185,10 @@
         {# Servido pelo domínio do bar, o backend resolve o tenant pelo Host.
            Em /bar/<slug> (prévias) o Host é o do produto — daí este campo. #}
         <input type="hidden" name="slug" value="{{ tenant.slug if tenant else '' }}">
-        {# O POST sai por fetch, mas com FormData(form): o FormData carrega este campo
-           junto com o resto. Tirar daqui abre o formulário de reserva pra POST
-           forjado de qualquer site. O mesmo token vai no header X-CSRFToken. #}
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {# Sem token de CSRF no HTML, de propósito: chamar csrf_token() aqui
+           gravava sessão e a página do bar não podia ser cacheada na borda. O
+           `enviarReserva` busca o token em /novidades/token na hora do envio e
+           manda no header X-CSRFToken (mesmo caminho do _novidades.html). #}
         <div class="campo">
           <label for="ar-nome">Seu nome</label>
           <input id="ar-nome" name="nome" type="text" autocomplete="name" placeholder="Como te chamamos?" required>
@@ -1296,8 +1307,10 @@
     <div class="rodape-nome">{{ site.nome }}</div>
     <div class="rodape-linha">{% if site.cidade_uf %}{{ site.cidade_uf }} · {% endif %}{{ copy.rodape }}</div>
     <div class="rodape-links">
-      {% if site.instagram_url %}<a href="{{ site.instagram_url }}" target="_blank" rel="noopener">Instagram</a>{% endif %}
-      {% if site.facebook_url %}<a href="{{ site.facebook_url }}" target="_blank" rel="noopener">Facebook</a>{% endif %}
+      {# Rede social só com https:// — o campo é texto livre e um "javascript:"
+         ali viraria script no clique. #}
+      {% if site.instagram_url and site.instagram_url.startswith('https://') %}<a href="{{ site.instagram_url }}" target="_blank" rel="noopener">Instagram</a>{% endif %}
+      {% if site.facebook_url and site.facebook_url.startswith('https://') %}<a href="{{ site.facebook_url }}" target="_blank" rel="noopener">Facebook</a>{% endif %}
       {% if site.maps_query %}<a href="https://www.google.com/maps/search/?api=1&query={{ site.maps_query }}" target="_blank" rel="noopener">Como chegar</a>{% endif %}
       <a href="{{ url_do_sistema() }}">Área do lojista</a>
     </div>
@@ -1362,7 +1375,13 @@
     var form=ev.target, btn=form.querySelector('button[type=submit]'), msg=document.getElementById('reservaMsg');
     btn.disabled=true; var txt=btn.textContent; btn.textContent='Enviando…';
     msg.className='reserva-msg';
-    fetch('{{ url_for("public.reservar") }}',{method:'POST',body:new FormData(form),headers:{'Accept':'application/json', 'X-CSRFToken': '{{ csrf_token() }}'}})
+    // Token de CSRF pedido na hora (a página não carrega sessão, pra poder
+    // ser cacheada na borda) e mandado no header X-CSRFToken.
+    fetch('{{ url_for("public.novidades_token") }}',{credentials:'same-origin'})
+      .then(function(r){return r.json();})
+      .then(function(t){
+        return fetch('{{ url_for("public.reservar") }}',{method:'POST',credentials:'same-origin',body:new FormData(form),headers:{'Accept':'application/json','X-CSRFToken':t.token}});
+      })
       .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
       .then(function(res){
         if(res.ok && res.j.ok){

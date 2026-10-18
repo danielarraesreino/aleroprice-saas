@@ -1,9 +1,16 @@
 {# 
   Demo Dock: Barra Interativa de Demonstração Comercial ao Vivo.
   Inclui Seletor de Modelos, Assistente de Voz (Concierge IA) e Modal Google Maps.
+
+  Nasce recolhido num chip "Personalizar ▲": aberto ele cobria ~20% da tela do
+  celular e escondia o WhatsApp do bar. A altura real do dock vai pra
+  `--dock-h` (ResizeObserver) e é ela que empurra o rodapé e o botão flutuante
+  de WhatsApp — nada de padding fixo chutado.
+  Sem <h3>/<h4> aqui dentro: o dock vem antes do <h1> da página e bagunçava o
+  sumário de headings (os títulos dos modais são <p> com classe).
 #}
 {% if (tenant and tenant.eh_demo) or previewando %}
-<div id="demo-dock-root">
+<div id="demo-dock-root" class="recolhido">
   <style>
     #demo-dock-root {
       position: fixed;
@@ -20,6 +27,44 @@
       max-width: 960px;
       margin: 0 auto 12px;
       padding: 0 12px;
+    }
+
+    /* Recolhido: só o chip. Aberto: só a barra. */
+    #demo-dock-root.recolhido .demo-dock-bar { display: none; }
+    #demo-dock-root:not(.recolhido) .dock-chip { display: none; }
+    #demo-dock-root.recolhido .demo-dock-container { width: max-content; max-width: calc(100% - 96px); margin: 0 0 12px; }
+    .dock-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 48px;
+      padding: 0 18px;
+      border-radius: 999px;
+      border: 1.5px solid rgba(255, 180, 60, 0.6);
+      background: rgba(18, 14, 10, 0.95);
+      color: #f3e7d2;
+      font: inherit;
+      font-size: 0.86rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      max-width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .dock-chip b { color: #ffb43d; }
+    .btn-dock-recolher {
+      background: none;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #f3e7d2;
+      border-radius: 999px;
+      min-height: 44px;
+      padding: 0 14px;
+      font: inherit;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
     }
 
     .demo-dock-bar {
@@ -82,6 +127,7 @@
       font-weight: 800;
       font-size: 0.82rem;
       padding: 6px 14px;
+      min-height: 44px;
       border-radius: 999px;
       display: inline-flex;
       align-items: center;
@@ -101,6 +147,7 @@
       font-size: 0.78rem;
       font-weight: 800;
       padding: 6px 12px;
+      min-height: 44px;
       border-radius: 999px;
       border: none;
       cursor: pointer;
@@ -124,6 +171,7 @@
       font-size: 0.78rem;
       font-weight: 600;
       padding: 5px 10px;
+      min-height: 44px;
       border-radius: 999px;
       cursor: pointer;
       display: inline-flex;
@@ -146,7 +194,7 @@
     .demo-dock-selector::-webkit-scrollbar { display: none; }
 
     .selector-label {
-      font-size: 0.74rem;
+      font-size: .75rem;
       color: #b09a7d;
       text-transform: uppercase;
       font-weight: 700;
@@ -162,6 +210,8 @@
       font-size: 0.76rem;
       font-weight: 600;
       padding: 5px 11px;
+      min-height: 44px;   /* alvo de toque: as pílulas tinham 26px */
+      flex: 0 0 auto;
       border-radius: 8px;
       white-space: nowrap;
       display: inline-flex;
@@ -175,9 +225,10 @@
       border-color: rgba(255, 180, 60, 0.4);
       color: #fff;
     }
+    /* #c2410c: branco sobre o laranja antigo (#ff6a2b) dava 2,86:1. */
     .dock-pill.ativo {
-      background: #ff6a2b;
-      border-color: #ff6a2b;
+      background: #c2410c;
+      border-color: #c2410c;
       color: #fff;
       font-weight: 700;
       box-shadow: 0 2px 6px rgba(255, 106, 43, 0.35);
@@ -219,10 +270,17 @@
       padding-bottom: 12px;
       margin-bottom: 16px;
     }
-    .maps-modal-header h3 {
+    .maps-modal-titulo {
       font-size: 1.25rem;
+      font-weight: 700;
       margin: 0;
       color: #ffb43d;
+    }
+    .maps-passo-titulo {
+      margin: 0 0 4px;
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: #fff;
     }
     .maps-modal-close {
       background: none;
@@ -230,7 +288,9 @@
       color: #b09a7d;
       font-size: 1.4rem;
       cursor: pointer;
-      padding: 0 4px;
+      width: 44px;
+      height: 44px;
+      flex: 0 0 auto;
     }
 
     /* Visual do Concierge de Voz */
@@ -271,13 +331,16 @@
       line-height: 1.4;
     }
 
+    /* Altura real do dock (medida no JS): o fim da página e o WhatsApp
+       flutuante do bar (.wa no clássico, .zap no noturno, .zap-fixo nos
+       outros) ficam sempre acima dele. */
     body {
-      padding-bottom: 110px !important;
+      padding-bottom: calc(var(--dock-h, 64px) + 8px) !important;
+    }
+    .wa, .zap, .zap-fixo {
+      bottom: calc(var(--dock-h, 64px) + 12px) !important;
     }
     @media(max-width: 600px) {
-      body {
-        padding-bottom: 140px !important;
-      }
       .demo-dock-top {
         flex-direction: column;
         align-items: stretch;
@@ -289,7 +352,10 @@
   </style>
 
   <div class="demo-dock-container">
-    <div class="demo-dock-bar">
+    <button type="button" class="dock-chip" id="dockChip" onclick="alternarDock(true)" aria-expanded="false" aria-controls="dockBar">
+      <span class="demo-dock-pulse"></span><span><b>Prévia</b> · Personalizar ▲</span>
+    </button>
+    <div class="demo-dock-bar" id="dockBar">
       <!-- Linha 1: Identificação e Ações Rápidas -->
       <div class="demo-dock-top">
         <div class="demo-dock-tag">
@@ -306,6 +372,7 @@
           <a class="btn-dock-cta" href="https://wa.me/{{ site.whatsapp or contato_vendas }}?text={{ ('Olá! Gostei da demonstração do site para o ' ~ site.nome ~ ' e quero ativar pro meu bar.') | urlencode }}" target="_blank" rel="noopener">
             Quero Este Site →
           </a>
+          <button type="button" class="btn-dock-recolher" id="dockRecolher" onclick="alternarDock(false)" aria-controls="dockBar">Recolher ▼</button>
         </div>
       </div>
 
@@ -344,13 +411,13 @@
 
   <!-- Modal 1: Concierge e Assistente de Voz IA -->
   <div id="modal-voz" class="maps-modal-backdrop" onclick="fecharModalVoz(event)">
-    <div class="maps-modal-box" onclick="event.stopPropagation()">
+    <div class="maps-modal-box" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-voz" onclick="event.stopPropagation()">
       <div class="maps-modal-header">
         <div>
-          <h3>🎙️ Concierge por Voz · {{ site.nome }}</h3>
+          <p class="maps-modal-titulo" id="titulo-modal-voz">🎙️ Concierge por Voz · {{ site.nome }}</p>
           <p style="margin:4px 0 0; font-size:0.82rem; color:#b09a7d;">Fale naturalmente para pedir mesa, perguntar pratos ou ouvir o cardápio:</p>
         </div>
-        <button class="maps-modal-close" onclick="fecharModalVoz()">✕</button>
+        <button class="maps-modal-close" onclick="fecharModalVoz()" aria-label="Fechar">✕</button>
       </div>
 
       <div style="text-align:center;">
@@ -382,19 +449,19 @@
 
   <!-- Modal 2: Google Maps & Identidade Digital -->
   <div id="modal-maps" class="maps-modal-backdrop" onclick="fecharModalMaps(event)">
-    <div class="maps-modal-box" onclick="event.stopPropagation()">
+    <div class="maps-modal-box" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-maps" onclick="event.stopPropagation()">
       <div class="maps-modal-header">
         <div>
-          <h3>📍 Sua Identidade Digital no Google Maps</h3>
+          <p class="maps-modal-titulo" id="titulo-modal-maps">📍 Sua Identidade Digital no Google Maps</p>
           <p style="margin:4px 0 0; font-size:0.82rem; color:#b09a7d;">Como transformamos pesquisas no Google em mesas cheias no seu bar:</p>
         </div>
-        <button class="maps-modal-close" onclick="fecharModalMaps()">✕</button>
+        <button class="maps-modal-close" onclick="fecharModalMaps()" aria-label="Fechar">✕</button>
       </div>
 
       <div class="maps-step" style="display:flex; gap:14px; margin-bottom:16px;">
         <div style="font-size:1.5rem; background:rgba(255,180,60,0.15); border-radius:10px; width:44px; height:44px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">🔍</div>
         <div>
-          <h4 style="margin:0 0 4px; font-size:0.98rem; color:#fff;">1. O Freguês busca no Google Maps</h4>
+          <p class="maps-passo-titulo">1. O Freguês busca no Google Maps</p>
           <p style="margin:0; font-size:0.82rem; color:#d1c0a8; line-height:1.4;">Quando alguém busca "bar aberto agora" em Barão Geraldo, o Maps prioriza estabelecimentos com Perfil da Empresa verificado e site oficial.</p>
         </div>
       </div>
@@ -402,7 +469,7 @@
       <div class="maps-step" style="display:flex; gap:14px; margin-bottom:16px;">
         <div style="font-size:1.5rem; background:rgba(255,180,60,0.15); border-radius:10px; width:44px; height:44px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">🍽️</div>
         <div>
-          <h4 style="margin:0 0 4px; font-size:0.98rem; color:#fff;">2. Botão Oficial de Cardápio no Maps</h4>
+          <p class="maps-passo-titulo">2. Botão Oficial de Cardápio no Maps</p>
           <p style="margin:0; font-size:0.82rem; color:#d1c0a8; line-height:1.4;">O Google indexa pratos, fotos e preços do seu site via dados estruturados (Menu Schema JSON-LD).</p>
         </div>
       </div>
@@ -410,7 +477,7 @@
       <div class="maps-step" style="display:flex; gap:14px; margin-bottom:16px;">
         <div style="font-size:1.5rem; background:rgba(255,180,60,0.15); border-radius:10px; width:44px; height:44px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">📲</div>
         <div>
-          <h4 style="margin:0 0 4px; font-size:0.98rem; color:#fff;">3. Reservas Direto no seu WhatsApp</h4>
+          <p class="maps-passo-titulo">3. Reservas Direto no seu WhatsApp</p>
           <p style="margin:0; font-size:0.82rem; color:#d1c0a8; line-height:1.4;">O cliente clica em "Reservar", a mensagem já chega formatada com data, horário e pessoas no seu WhatsApp, sem comissão de app.</p>
         </div>
       </div>
@@ -418,7 +485,7 @@
       <div class="maps-step" style="display:flex; gap:14px; margin-bottom:16px;">
         <div style="font-size:1.5rem; background:rgba(255,180,60,0.15); border-radius:10px; width:44px; height:44px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">📊</div>
         <div>
-          <h4 style="margin:0 0 4px; font-size:0.98rem; color:#fff;">4. Gestão de Custos e CMV Real (Plano Pro)</h4>
+          <p class="maps-passo-titulo">4. Gestão de Custos e CMV Real (Plano Pro)</p>
           <p style="margin:0; font-size:0.82rem; color:#d1c0a8; line-height:1.4;">Importe notas fiscais (NF-e) em 1 clique e receba alertas de aumento de preços de fornecedores.</p>
         </div>
       </div>
@@ -442,23 +509,68 @@
       url.searchParams.set('modo', modo);
       window.location.href = url.toString();
     }
+    // --- Dock recolhível ---
+    // Aberto/recolhido sobrevive à troca de modelo (que recarrega a página):
+    // o vendedor abre uma vez e continua comparando.
+    function alternarDock(abrir) {
+      const raiz = document.getElementById('demo-dock-root');
+      raiz.classList.toggle('recolhido', !abrir);
+      document.getElementById('dockChip').setAttribute('aria-expanded', abrir ? 'true' : 'false');
+      try { sessionStorage.setItem('fdb-dock', abrir ? 'aberto' : 'recolhido'); } catch (e) {}
+      medirDock();
+      document.getElementById(abrir ? 'dockRecolher' : 'dockChip').focus();
+    }
+    function medirDock() {
+      const raiz = document.getElementById('demo-dock-root');
+      document.documentElement.style.setProperty('--dock-h', raiz.offsetHeight + 'px');
+    }
+    (function () {
+      let aberto = false;
+      try { aberto = sessionStorage.getItem('fdb-dock') === 'aberto'; } catch (e) {}
+      const raiz = document.getElementById('demo-dock-root');
+      raiz.classList.toggle('recolhido', !aberto);
+      document.getElementById('dockChip').setAttribute('aria-expanded', aberto ? 'true' : 'false');
+      medirDock();
+      if (window.ResizeObserver) new ResizeObserver(medirDock).observe(raiz);
+      else window.addEventListener('resize', medirDock);
+    })();
+
+    // --- Modais: foco entra no "Fechar" e volta pra quem abriu ---
+    let origemModal = null;
+    function abrirModal(id) {
+      origemModal = document.activeElement;
+      const m = document.getElementById(id);
+      m.classList.add('aberto');
+      m.querySelector('.maps-modal-close').focus();
+    }
+    function fecharModal(id) {
+      const m = document.getElementById(id);
+      if (!m.classList.contains('aberto')) return;
+      m.classList.remove('aberto');
+      if (origemModal && origemModal.focus) origemModal.focus();
+    }
     function abrirModalMaps() {
-      document.getElementById('modal-maps').classList.add('aberto');
+      abrirModal('modal-maps');
     }
     function fecharModalMaps(e) {
       if (!e || e.target.id === 'modal-maps' || (e.target.classList && e.target.classList.contains('maps-modal-close'))) {
-        document.getElementById('modal-maps').classList.remove('aberto');
+        fecharModal('modal-maps');
       }
     }
     function abrirModalVoz() {
-      document.getElementById('modal-voz').classList.add('aberto');
+      abrirModal('modal-voz');
     }
     function fecharModalVoz(e) {
       if (!e || e.target.id === 'modal-voz' || (e.target.classList && e.target.classList.contains('maps-modal-close'))) {
-        document.getElementById('modal-voz').classList.remove('aberto');
+        fecharModal('modal-voz');
         if (window.speechSynthesis) window.speechSynthesis.cancel();
       }
     }
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape') return;
+      fecharModalMaps();
+      fecharModalVoz();
+    });
 
     // --- Motor de Reconhecimento e Síntese de Voz ---
     let recognizer = null;
@@ -512,9 +624,13 @@
         try {
           const pathSegments = window.location.pathname.split('/');
           const slug = pathSegments[pathSegments.indexOf('bar') + 1] || '{{ tenant.slug if tenant else "" }}';
+          // POST sem token de CSRF levava 400; o token vem de /novidades/token
+          // na hora, como na reserva (a página não carrega sessão).
+          const tk = await (await fetch('{{ url_for("public.novidades_token") }}', { credentials: 'same-origin' })).json();
           const resp = await fetch('/api/concierge-voz', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': tk.token },
             body: JSON.stringify({ texto: texto, slug: slug })
           });
           const data = await resp.json();

@@ -379,7 +379,8 @@ def endereco_schema(texto):
     if achou_cep:
         cep = f'{achou_cep.group(1)}-{achou_cep.group(2)}'
         resto = (resto[:achou_cep.start()] + resto[achou_cep.end():])
-    resto = resto.strip(' ,;-–—')
+    # "·" sobra quando o CEP vem depois de um ponto médio ("SP · 13100-486").
+    resto = resto.strip(' ,;-–—·')
 
     achou_uf = _UF_NO_FIM.search(resto)
     if not achou_uf or achou_uf.group(1).upper() not in _UFS:
@@ -721,13 +722,13 @@ def dados_estruturados(rest, site, dishes, reviews, eventos, url_canonica,
     endereco = endereco_schema(site.get('endereco'))
     if endereco:
         restaurante['address'] = endereco
-        restaurante['areaServed'] = 'Barão Geraldo, Campinas - SP, Brasil'
-        # Coordenadas geográficas padrão de Barão Geraldo para AI Overviews & Local Geo SEO
-        restaurante['geo'] = {
-            '@type': 'GeoCoordinates',
-            'latitude': -22.8277,
-            'longitude': -47.0818,
-        }
+        # Área e coordenadas só do que o endereço de verdade diz. Antes iam
+        # fixas as de Barão Geraldo para todo bar — o Bar da Vila (Vila Lemos)
+        # aparecia para o Google e as IAs num lugar onde não está. Sem
+        # coordenada real, melhor nenhuma: o Google geocodifica o endereço.
+        if endereco.get('addressLocality'):
+            restaurante['areaServed'] = ', '.join(
+                p for p in (endereco['addressLocality'], endereco.get('addressRegion')) if p)
 
     cozinha = COZINHA_POR_VIBE.get(vibe)
     if cozinha:

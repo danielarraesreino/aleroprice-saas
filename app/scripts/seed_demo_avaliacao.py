@@ -24,7 +24,9 @@ SLUG = 'demo-avaliacao'
 NOME = 'Demo Avaliação'
 CNPJ = '00000000000191'
 EMAIL = 'demo@alero.com.br'
-SENHA = 'Alero#Demo2026'
+# Senha aleatória a cada execução e mostrada uma vez: o repositório é público,
+# senha escrita aqui seria senha de todo mundo.
+SENHA = __import__('secrets').token_urlsafe(12)
 DIAS = 90
 
 

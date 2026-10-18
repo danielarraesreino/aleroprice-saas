@@ -126,6 +126,7 @@ def index():
 @plano_minimo('site')
 def testar_callmebot():
     """Envia uma mensagem de teste para o WhatsApp do bar via CallMeBot."""
+    import os
     import urllib.parse
     import urllib.request
     
@@ -136,8 +137,9 @@ def testar_callmebot():
     cfg = SiteConfig.query.filter_by(restaurant_id=rid).first()
     
     # Pode receber do form do teste ou do SiteConfig salvo
-    phone = (request.form.get('callmebot_phone') or request.json.get('callmebot_phone') if request.is_json else None)
-    apikey = (request.form.get('callmebot_apikey') or request.json.get('callmebot_apikey') if request.is_json else None)
+    corpo = request.get_json(silent=True) or {}
+    phone = request.form.get('callmebot_phone') or corpo.get('callmebot_phone')
+    apikey = request.form.get('callmebot_apikey') or corpo.get('callmebot_apikey')
     
     if not phone and cfg:
         phone = cfg.callmebot_phone or cfg.whatsapp

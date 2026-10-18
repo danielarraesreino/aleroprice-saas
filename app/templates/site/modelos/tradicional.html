@@ -276,11 +276,11 @@
   .marca b{font-family:"Playfair Display",Georgia,serif;font-weight:700;font-size:1.12rem;letter-spacing:.01em;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:52vw}
   .marca span{font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.2em;
-    font-size:.63rem;color:var(--tinta-suave)}
+    font-size:.75rem;color:var(--tinta-suave)}
   .barra-links{display:none}
   .barra-ctrls{display:flex;align-items:center;gap:8px;flex-shrink:0}
   .btn-icone{
-    width:38px;height:38px;display:grid;place-items:center;cursor:pointer;
+    width:44px;height:44px;display:grid;place-items:center;cursor:pointer;
     background:transparent;border:1px solid var(--linha-forte);border-radius:2px;
     color:var(--tinta);font-size:1rem;line-height:1;font-family:"Alegreya Sans SC",serif;
   }
@@ -306,7 +306,8 @@
   @media(min-width:900px){
     .barra-links{display:flex;gap:22px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
     .barra-links a{font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.14em;font-size:.82rem;
-      color:var(--tinta-suave);padding-bottom:2px;border-bottom:1px solid transparent}
+      color:var(--tinta-suave);padding-bottom:2px;border-bottom:1px solid transparent;
+      display:inline-flex;align-items:center;min-height:44px}
     .barra-links a:hover{color:var(--tinta);border-bottom-color:var(--esmalte)}
     .barra-links .entrar{color:var(--esmalte)}
     .marca b{font-size:1.3rem;max-width:none}
@@ -329,7 +330,7 @@
   .capa .env{display:flex;flex-direction:column;align-items:center;text-align:center}
   .kicker{
     font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.28em;
-    font-size:.7rem;color:var(--tinta-suave);margin-bottom:18px;text-align:center;
+    font-size:.75rem;color:var(--tinta-suave);margin-bottom:18px;text-align:center;
     display:flex;align-items:center;justify-content:center;gap:12px;max-width:100%;
   }
   .kicker::before,.kicker::after{content:"";height:1px;width:26px;background:var(--ornamento);flex:none}
@@ -346,7 +347,7 @@
   }
   .fundacao .desde{
     display:block;font-family:"Alegreya Sans SC",serif;text-transform:uppercase;
-    letter-spacing:.42em;font-size:.72rem;color:var(--tinta-suave);margin-bottom:2px;
+    letter-spacing:.42em;font-size:.75rem;color:var(--tinta-suave);margin-bottom:2px;
   }
   .fundacao .ano{
     display:block;font-family:"Playfair Display",serif;font-weight:900;color:var(--esmalte);
@@ -384,7 +385,7 @@
   /* foto de capa emoldurada — nada de banner sangrando na tela inteira */
   .capa-foto{margin:36px auto 0;max-width:560px;width:100%}
   .role{font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.24em;
-    font-size:.66rem;color:var(--tinta-suave);margin:30px 0 6px;text-align:center}
+    font-size:.75rem;color:var(--tinta-suave);margin:30px 0 6px;text-align:center}
 
   /* ---------- MOLDURAS ---------- */
   .moldura{
@@ -400,7 +401,7 @@
   .moldura img{filter:var(--sepia);width:100%;object-position:var(--pos)}
   .moldura figcaption{
     font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.14em;
-    font-size:.68rem;color:var(--tinta-suave);text-align:center;padding:10px 4px 2px;
+    font-size:.75rem;color:var(--tinta-suave);text-align:center;padding:10px 4px 2px;
   }
   /* fita crepe segurando a foto */
   .moldura::before{
@@ -429,7 +430,7 @@
   .sec[data-band="alt"]{background:var(--papel-2)}
   .cabeca{max-width:38em}
   .eyebrow{font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.26em;
-    font-size:.7rem;color:var(--esmalte);margin-bottom:8px}
+    font-size:.75rem;color:var(--esmalte);margin-bottom:8px}
   .h2{font-family:"Playfair Display",Georgia,serif;font-weight:900;
     font-size:clamp(1.85rem,7vw,3.1rem);line-height:1.04;letter-spacing:-.01em;overflow-wrap:break-word}
   .h2 em{font-style:italic;font-weight:700;color:var(--madeira)}
@@ -540,7 +541,7 @@
   .prato p{color:var(--tinta-suave);font-size:.98rem;margin-top:4px}
   .carimbo{
     display:inline-block;margin-top:8px;padding:3px 9px;font-family:"Alegreya Sans SC",serif;
-    text-transform:uppercase;letter-spacing:.14em;font-size:.64rem;color:var(--esmalte);
+    text-transform:uppercase;letter-spacing:.14em;font-size:.75rem;color:var(--esmalte);
     border:1px solid var(--esmalte);border-radius:2px;transform:rotate(-1.5deg);
   }
   .prato.daqui{background:var(--esmalte-fundo);padding-left:14px;padding-right:14px;
@@ -564,11 +565,11 @@
   .cartaz:nth-child(even){transform:rotate(.8deg)}
   .cartaz:nth-child(odd){transform:rotate(-.6deg)}
   .cartaz .rot{font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.2em;
-    font-size:.68rem;color:var(--tinta-suave)}
+    font-size:.75rem;color:var(--tinta-suave)}
   .cartaz h3{font-family:"Playfair Display",serif;font-weight:900;font-size:1.5rem;line-height:1.05;margin:6px 0 8px}
   .cartaz p{color:var(--tinta-suave);font-size:.98rem}
   .cartaz .val{margin-top:12px;font-family:"Alegreya Sans SC",serif;text-transform:uppercase;
-    letter-spacing:.14em;font-size:.68rem;color:var(--tinta-suave)}
+    letter-spacing:.14em;font-size:.75rem;color:var(--tinta-suave)}
   .cartaz.hoje{border:2px solid var(--esmalte)}
   .cartaz.hoje .rot{color:var(--esmalte);font-weight:700}
   .cartaz.hoje::after{
@@ -586,10 +587,10 @@
     font-family:"Alegreya Sans SC",serif;line-height:1;border-radius:2px;
   }
   .data-placa .d{display:block;font-size:1.6rem;font-weight:700}
-  .data-placa .m{display:block;font-size:.66rem;letter-spacing:.2em;margin-top:3px}
+  .data-placa .m{display:block;font-size:.75rem;letter-spacing:.2em;margin-top:3px}
   .agenda h3{font-family:"Playfair Display",serif;font-weight:700;font-size:1.15rem}
   .agenda .quando{font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.16em;
-    font-size:.7rem;color:var(--tinta-suave);margin:3px 0 4px}
+    font-size:.75rem;color:var(--tinta-suave);margin:3px 0 4px}
   .agenda .desc{color:var(--tinta-suave);font-size:.96rem}
 
   /* ---------- LIVRO DE VISITAS ---------- */
@@ -618,7 +619,7 @@
   .reputacao .qtd b{font-weight:900;color:var(--esmalte)}
   .reputacao .onde{
     display:block;font-family:"Alegreya Sans SC",serif;text-transform:uppercase;
-    letter-spacing:.2em;font-size:.7rem;color:var(--tinta-suave);margin-top:9px;
+    letter-spacing:.2em;font-size:.75rem;color:var(--tinta-suave);margin-top:9px;
   }
   .visitas{display:grid;grid-template-columns:1fr;gap:18px;margin-top:32px}
   @media(min-width:760px){.visitas{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}}
@@ -630,7 +631,7 @@
   .visita .est{color:var(--esmalte);letter-spacing:.18em;font-size:.9rem}
   .visita p{font-style:italic;font-size:1.02rem;margin:8px 0 10px;line-height:28px}
   .visita .quem{font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.16em;
-    font-size:.72rem;color:var(--tinta-suave)}
+    font-size:.75rem;color:var(--tinta-suave)}
 
   /* ---------- ÁLBUM ----------
      Seis fotos, não dezesseis: o banco guarda o acervo inteiro, a parede mostra
@@ -644,10 +645,10 @@
   .album .moldura:nth-child(3n+2){transform:rotate(.9deg)}
   .album .moldura:nth-child(3n){transform:rotate(-.4deg)}
   .album img{aspect-ratio:4/3;object-fit:cover;object-position:var(--pos);max-height:190px}
-  .album figcaption{font-size:.6rem;padding:8px 2px 0;letter-spacing:.1em}
+  .album figcaption{font-size:.75rem;padding:8px 2px 0;letter-spacing:.1em}
   .album-mais{
     font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.2em;
-    font-size:.7rem;color:var(--tinta-suave);margin-top:22px;text-align:center;
+    font-size:.75rem;color:var(--tinta-suave);margin-top:22px;text-align:center;
   }
   .lupa{position:fixed;inset:0;z-index:120;background:rgba(20,12,6,.93);display:none;
     align-items:center;justify-content:center;padding:20px}
@@ -661,10 +662,10 @@
   .livro{background:var(--moldura);border:1px solid var(--linha);box-shadow:0 12px 30px var(--sombra);
     padding:clamp(20px,4vw,30px)}
   .livro-topo{font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.2em;
-    font-size:.7rem;color:var(--tinta-suave);border-bottom:3px double var(--linha-forte);padding-bottom:10px;margin-bottom:18px}
+    font-size:.75rem;color:var(--tinta-suave);border-bottom:3px double var(--linha-forte);padding-bottom:10px;margin-bottom:18px}
   .campo{margin-bottom:16px}
   .campo label{display:block;font-family:"Alegreya Sans SC",serif;text-transform:uppercase;
-    letter-spacing:.16em;font-size:.68rem;color:var(--tinta-suave);margin-bottom:4px}
+    letter-spacing:.16em;font-size:.75rem;color:var(--tinta-suave);margin-bottom:4px}
   .campo input,.campo textarea{
     width:100%;background:transparent;border:none;border-bottom:1px solid var(--linha-forte);
     padding:8px 2px;color:var(--tinta);font-family:"Lora",Georgia,serif;font-size:1rem;border-radius:0;
@@ -688,7 +689,7 @@
   .dados li:first-child{border-top:1px dotted var(--linha)}
   .dados .em{font-size:1.1rem;width:26px;flex:none;text-align:center;filter:grayscale(.2)}
   .dados b{display:block;font-family:"Alegreya Sans SC",serif;text-transform:uppercase;
-    letter-spacing:.16em;font-size:.68rem;color:var(--tinta-suave)}
+    letter-spacing:.16em;font-size:.75rem;color:var(--tinta-suave)}
   .convite{background:var(--papel-3);border:1px solid var(--linha);padding:28px 24px;
     display:flex;flex-direction:column;gap:14px;justify-content:center}
   .convite h3{font-family:"Playfair Display",serif;font-weight:900;font-size:1.6rem;line-height:1.1}
@@ -698,15 +699,15 @@
   footer{border-top:3px double var(--linha-forte);padding:40px 0 46px;text-align:center;background:var(--papel-2)}
   footer .assina{font-family:"Playfair Display",serif;font-weight:900;font-size:1.7rem}
   footer .desde-rodape{font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.3em;
-    font-size:.7rem;color:var(--tinta-suave);margin-top:6px}
+    font-size:.75rem;color:var(--tinta-suave);margin-top:6px}
   footer .recado-rodape{color:var(--tinta-suave);margin-top:14px;font-style:italic}
   .redes{display:flex;gap:12px;justify-content:center;margin-top:20px}
-  .redes a{width:40px;height:40px;display:grid;place-items:center;border:1px solid var(--linha-forte);
+  .redes a{width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--linha-forte);
     border-radius:2px;color:var(--tinta)}
   .redes a:hover{background:var(--esmalte);border-color:var(--esmalte);color:var(--esmalte-texto)}
   .redes svg{width:19px;height:19px;fill:currentColor}
-  .lojista{display:inline-block;margin-top:20px;font-family:"Alegreya Sans SC",serif;text-transform:uppercase;
-    letter-spacing:.18em;font-size:.7rem;color:var(--tinta-suave);border-bottom:1px solid var(--linha)}
+  .lojista{display:inline-flex;align-items:center;min-height:44px;margin-top:20px;font-family:"Alegreya Sans SC",serif;text-transform:uppercase;
+    letter-spacing:.18em;font-size:.75rem;color:var(--tinta-suave);border-bottom:1px solid var(--linha)}
   .lojista:hover{color:var(--esmalte);border-color:var(--esmalte)}
 
   /* ---------- ZAP FIXO ---------- */
@@ -714,7 +715,7 @@
     position:fixed;right:16px;bottom:16px;z-index:70;display:inline-flex;align-items:center;gap:8px;
     padding:11px 15px;background:#1f7a45;color:#fff;border:1px solid rgba(0,0,0,.2);border-radius:2px;
     box-shadow:0 8px 22px rgba(0,0,0,.3);font-family:"Alegreya Sans SC",serif;text-transform:uppercase;
-    letter-spacing:.16em;font-size:.74rem;
+    letter-spacing:.16em;font-size:.75rem;
   }
   .zap-fixo svg{width:19px;height:19px;fill:currentColor}
   .zap-fixo:hover{background:#176035}
@@ -742,10 +743,14 @@
     [data-hero]{opacity:1}
   }
 
+  /* "Pular para o conteúdo": fora da tela até receber foco pelo Tab. */
+  .pular{position:absolute;left:12px;top:-80px;z-index:1000;padding:12px 18px;
+    background:var(--esmalte);color:var(--esmalte-texto);font-family:"Alegreya Sans SC",serif;letter-spacing:.14em;text-transform:uppercase}
+  .pular:focus{top:12px}
   /* Selo de demonstração: só aparece em prévia, quando a casa ainda não tem
      agenda própria e o site mostra o recurso com exemplo. */
   .selo-exemplo{display:inline-block;vertical-align:middle;margin-left:8px;
-    padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;
+    padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700;
     letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;
     background:rgba(255,255,255,.14);color:inherit;opacity:.85;
     border:1px solid currentColor}
@@ -764,7 +769,7 @@
   }
   .previa b{color:var(--esmalte)}
   .previa a{background:var(--esmalte);color:var(--esmalte-texto);padding:7px 14px;border-radius:2px;
-    font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.14em;font-size:.72rem;white-space:nowrap}
+    font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.14em;font-size:.75rem;white-space:nowrap}
   .previa .fechar{background:none;border:1px solid var(--linha-forte);color:var(--tinta);
     border-radius:2px;padding:6px 11px;cursor:pointer;font:inherit}
   body{padding-bottom:92px}
@@ -774,6 +779,8 @@
 {% endif %}
 </head>
 <body data-heroina="historia" data-leitura="linha-tempo" data-foto="moldura-sepia">
+
+<a class="pular" href="#topo">Pular para o conteúdo</a>
 
 {% include "site/_demo_dock.html" %}
 
@@ -971,6 +978,10 @@
       </li>
       {% endfor %}
     </ul>
+    {# A página do cardápio (a do QR da mesa) só aparecia no JSON-LD. #}
+    {% if tenant and tenant.slug %}
+    <p class="revelar" style="margin-top:28px;text-align:center"><a class="btn vazado" href="{{ url_for('public.cardapio', slug=tenant.slug) }}">Ver cardápio completo</a></p>
+    {% endif %}
   </div>
 </section>
 {% endif %}
@@ -1141,10 +1152,10 @@
         <div class="livro-topo">Livro de reservas{% if ano %} · desde {{ ano }}{% endif %}</div>
         {# Servido em /bar/<slug>, o Host é o do produto — daí este campo. #}
         <input type="hidden" name="slug" value="{{ tenant.slug if tenant else '' }}">
-        {# O POST sai por fetch, mas com FormData(form): o FormData carrega este campo
-           junto com o resto. Tirar daqui abre o formulário de reserva pra POST
-           forjado de qualquer site. O mesmo token vai no header X-CSRFToken. #}
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {# Sem token de CSRF no HTML, de propósito: chamar csrf_token() aqui
+           gravava sessão e a página do bar não podia ser cacheada na borda. O
+           `enviarReserva` busca o token em /novidades/token na hora do envio e
+           manda no header X-CSRFToken (mesmo caminho do _novidades.html). #}
         <div class="campo">
           <label for="tr-nome">Nome</label>
           <input id="tr-nome" name="nome" type="text" autocomplete="name" placeholder="Como te chamamos?" required>
@@ -1296,14 +1307,18 @@
       {% else %}{{ descritor }}{% endif %}
     </div>
     <p class="recado-rodape">{{ copy.rodape }}</p>
-    {% if site.instagram_url or site.facebook_url %}
+    {# Rede social só com https:// — o campo é texto livre e um "javascript:"
+       ali viraria script no clique. #}
+    {% set insta_ok = site.instagram_url and site.instagram_url.startswith('https://') %}
+    {% set face_ok = site.facebook_url and site.facebook_url.startswith('https://') %}
+    {% if insta_ok or face_ok %}
     <div class="redes">
-      {% if site.instagram_url %}
+      {% if insta_ok %}
       <a href="{{ site.instagram_url }}" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2c3.2 0 3.6 0 4.9.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.86s0 3.6-.07 4.86c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.86.07s-3.6 0-4.86-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23C2.2 15.6 2.2 15.2 2.2 12s0-3.6.07-4.86c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.4 2.2 8.8 2.2 12 2.2zm0 1.98c-3.15 0-3.52.01-4.76.07-.9.04-1.39.2-1.71.32-.43.17-.74.37-1.06.69-.32.32-.52.63-.69 1.06-.12.32-.28.81-.32 1.71-.06 1.24-.07 1.61-.07 4.76s.01 3.52.07 4.76c.04.9.2 1.39.32 1.71.17.43.37.74.69 1.06.32.32.63.52 1.06.69.32.12.81.28 1.71.32 1.24.06 1.61.07 4.76.07s3.52-.01 4.76-.07c.9-.04 1.39-.2 1.71-.32.43-.17.74-.37 1.06-.69.32-.32.52-.63.69-1.06.12-.32.28-.81.32-1.71.06-1.24.07-1.61.07-4.76s-.01-3.52-.07-4.76c-.04-.9-.2-1.39-.32-1.71-.17-.43-.37-.74-.69-1.06-.32-.32-.63-.52-1.06-.69-.32-.12-.81-.28-1.71-.32-1.24-.06-1.61-.07-4.76-.07zm0 3.38a4.44 4.44 0 1 1 0 8.88 4.44 4.44 0 0 1 0-8.88zm0 7.32a2.88 2.88 0 1 0 0-5.76 2.88 2.88 0 0 0 0 5.76zm5.65-7.52a1.04 1.04 0 1 1-2.08 0 1.04 1.04 0 0 1 2.08 0z"/></svg>
       </a>
       {% endif %}
-      {% if site.facebook_url %}
+      {% if face_ok %}
       <a href="{{ site.facebook_url }}" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z"/></svg>
       </a>
@@ -1392,11 +1407,18 @@
     var rotulo = btn.textContent;
     btn.textContent = 'Enviando…';
     msg.className = 'recado';
-    fetch('{{ url_for("public.reservar") }}', {
-      method: 'POST',
-      body: new FormData(form),
-      headers: {'Accept': 'application/json', 'X-CSRFToken': '{{ csrf_token() }}'}
-    })
+    // Token de CSRF pedido na hora (a página não carrega sessão, pra poder
+    // ser cacheada na borda) e mandado no header X-CSRFToken.
+    fetch('{{ url_for("public.novidades_token") }}', {credentials: 'same-origin'})
+      .then(function(r){ return r.json(); })
+      .then(function(t){
+        return fetch('{{ url_for("public.reservar") }}', {
+          method: 'POST',
+          credentials: 'same-origin',
+          body: new FormData(form),
+          headers: {'Accept': 'application/json', 'X-CSRFToken': t.token}
+        });
+      })
       .then(function(r){ return r.json().then(function(j){ return {ok: r.ok, j: j}; }); })
       .then(function(res){
         if(res.ok && res.j.ok){

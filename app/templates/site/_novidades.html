@@ -20,8 +20,10 @@
       <span style="display:block;font-size:.82rem;">WhatsApp (opcional)</span>
       <input type="tel" name="telefone" maxlength="30" autocomplete="tel" style="width:100%;padding:10px;border-radius:8px;border:1px solid currentColor;background:transparent;color:inherit;font-size:16px;">
     </label>
-    <label style="display:flex;gap:8px;align-items:flex-start;font-size:.82rem;margin-bottom:12px;">
-      <input type="checkbox" name="consentimento" value="sim" required style="margin-top:3px;">
+    {# Caixa de 20px e a frase inteira clicável (está dentro do <label>): a
+       caixa nativa de 13px era o menor alvo de toque da página. #}
+    <label style="display:flex;gap:10px;align-items:flex-start;font-size:.82rem;margin-bottom:12px;min-height:44px;cursor:pointer;">
+      <input type="checkbox" name="consentimento" value="sim" required style="width:20px;height:20px;flex:0 0 auto;margin:0;cursor:pointer;">
       <span>Aceito receber as novidades da Feira de Barão por e-mail. Posso sair quando quiser pelo link em cada e-mail.</span>
     </label>
     <button type="submit" style="width:100%;padding:12px;border-radius:8px;border:2px solid currentColor;background:transparent;color:inherit;font-weight:700;cursor:pointer;">Quero receber</button>

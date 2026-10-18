@@ -3,33 +3,49 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Feira de Barão · O Dossiê Cultural & Memória Viva de Barão Geraldo</title>
-<meta name="description" content="Grande reportagem multimídia sobre as origens, a boemia, a Unicamp, a Praça do Coco e a identidade digital dos bares e restaurantes de Barão Geraldo.">
+<title>Bares e botecos de Barão Geraldo (Campinas) · Feira de Barão</title>
+<meta name="description" content="Os bares e botecos de Barão Geraldo, em Campinas, com nota do Google, fotos e cardápio — e a história do distrito: a ferrovia Funilense, a Unicamp e a Praça do Coco.">
 <link rel="canonical" href="https://feiradebarao.com.br/">
 <link rel="alternate" type="text/markdown" title="LLM Summary" href="/llms.txt">
-<meta property="og:title" content="Feira de Barão · O Grande Dossiê Cultural & Gastronômico">
+<meta property="og:title" content="Bares e botecos de Barão Geraldo (Campinas) · Feira de Barão">
 <meta property="og:description" content="As raízes no café, a ferrovia Funilense, a chegada da Unicamp, a Feira da Praça do Coco e o mapa vivo dos bares e restaurantes de Barão Geraldo.">
-<meta property="og:type" content="article">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
 <meta property="og:image" content="{{ og_imagem('og-feira.jpg') }}">
 <meta property="og:url" content="https://feiradebarao.com.br/">
+<meta name="twitter:card" content="summary_large_image">
 
 <!-- Tipografia: Anton (Manchetes de Cartaz) + Plus Jakarta Sans (Leitura Editorial) + Space Grotesk -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Space+Grotesk:wght@600;700&family=Work+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<!-- Leaflet.js para o Scrollytelling de Mapa (CDN cdnjs estável) -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<!-- Leaflet.js para o Scrollytelling de Mapa (CDN cdnjs estável). O mapa fica
+     a ~40% da página: nada aqui pode segurar a primeira pintura. O CSS entra
+     como `print` e vira `all` quando chega; o JS vem com `defer` e o mapa só
+     é montado quando o dossiê se aproxima da tela (`IntersectionObserver`). -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" media="print" onload="this.media='all'">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 
+{# WebSite + Organization + a lista dos bares da vitrine: é o formato que
+   buscador e LLM citam para "bares em Barão Geraldo". Sem nota nem avaliação
+   no schema: a nota é do Google, não coletada aqui. #}
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"ReportageNewsArticle",
- "headline":"Feira de Barão: O Grande Dossiê Cultural e Gastronômico de Barão Geraldo",
- "url":"https://feiradebarao.com.br/",
- "description":"Investigação histórica e mapeamento multimídia de Barão Geraldo, da Fazenda Santa Genebra e Unicamp à Feira da Praça do Coco.",
- "publisher":{"@type":"Organization","name":"Feira de Barão",
-   "url":"https://feiradebarao.com.br/",
-   "areaServed":"Barão Geraldo, Campinas - SP, Brasil"}}
+{"@context":"https://schema.org","@graph":[
+ {"@type":"WebSite","@id":"https://feiradebarao.com.br/#site",
+  "url":"https://feiradebarao.com.br/","name":"Feira de Barão","inLanguage":"pt-BR",
+  "publisher":{"@id":"https://feiradebarao.com.br/#org"}},
+ {"@type":"Organization","@id":"https://feiradebarao.com.br/#org",
+  "name":"Feira de Barão","url":"https://feiradebarao.com.br/",
+  "areaServed":"Barão Geraldo, Campinas - SP, Brasil"},
+ {"@type":"ItemList","name":"Bares e botecos de Barão Geraldo",
+  "numberOfItems":{{ bares|length }},
+  "itemListElement":[{% for b in bares %}
+   {"@type":"ListItem","position":{{ loop.index }},
+    "item":{"@type":"BarOrPub","name":{{ b.nome|tojson }},
+     "url":{{ url_for('public.landing_slug', slug=b.slug, _external=True)|tojson }}}}{{ ',' if not loop.last }}{% endfor %}
+  ]}
+]}
 </script>
 
 <style>
@@ -54,7 +70,26 @@
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
+  /* Rolagem suave só para quem não pediu menos movimento ao sistema. */
+  @media (prefers-reduced-motion: no-preference) {
+    html { scroll-behavior: smooth; }
+  }
+  /* Foco visível de teclado em tudo (no lugar do `outline:none` antigo). */
+  :focus-visible { outline: 3px solid currentColor; outline-offset: 2px; }
+
+  /* "Pular para o conteúdo": fora da tela até receber foco pelo Tab. */
+  .pular-conteudo {
+    position: absolute;
+    left: 12px;
+    top: -60px;
+    z-index: 10002;
+    background: var(--tinta);
+    color: var(--papel);
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+  }
+  .pular-conteudo:focus { top: 12px; color: var(--papel); }
   body {
     background-color: var(--papel);
     color: var(--tinta);
@@ -129,14 +164,13 @@
   }
   .logo-topo span { color: var(--tomate); }
 
+  /* Só 4 itens (Dossiê, Barracas, Planos, Contato): cabem inteiros. O resto
+     das seções fica na gaveta e no rodapé — nada de faixa rolável escondida. */
   .nav-dossie {
     display: flex;
     align-items: center;
     gap: 12px;
-    overflow-x: auto;
-    scrollbar-width: none;
   }
-  .nav-dossie::-webkit-scrollbar { display: none; }
   .nav-dossie a {
     color: var(--taupe);
     font-size: 0.78rem;
@@ -151,6 +185,21 @@
     color: var(--tomate);
     background: rgba(179, 50, 21, 0.06);
   }
+
+  /* CTA do dono de bar: sempre no topo, leva aos planos. */
+  .cta-dono {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: 999px;
+    border: 1.5px solid var(--tomate);
+    color: var(--tomate);
+    font-size: 0.82rem;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+  .cta-dono:hover { background: var(--tomate); color: #fff; }
 
   /* Botões de Ação */
   .btn {
@@ -274,6 +323,15 @@
     gap: 10px;
   }
   .barra-memoria-texto i { color: var(--ambar); font-size: 1.2rem; }
+  .barra-memoria-aberta .btn { min-height: 44px; }
+
+  /* Zoom do mapa com alvo de toque de 44px */
+  .scrolly-map-sticky .leaflet-bar a.leaflet-control-zoom-in,
+  .scrolly-map-sticky .leaflet-bar a.leaflet-control-zoom-out {
+    width: 44px;
+    height: 44px;
+    line-height: 44px;
+  }
 
   /* ----------------------------------------------------
      SCROLLYTELLING COM MAPA & FULL-BLEED MULTIMÍDIA
@@ -517,7 +575,7 @@
     font-size: 1.6rem;
     margin-bottom: 16px;
   }
-  .card-tech-power h4 {
+  .card-tech-power h3 {
     font-family: var(--font-heading);
     font-size: 1.2rem;
     color: #fff;
@@ -626,8 +684,10 @@
   }
   .modal-close {
     position: absolute;
-    top: 16px;
-    right: 18px;
+    top: 8px;
+    right: 8px;
+    width: 44px;
+    height: 44px;
     background: none;
     border: none;
     font-size: 1.5rem;
@@ -654,7 +714,6 @@
     font-size: 0.95rem;
   }
   .form-control:focus {
-    outline: none;
     border-color: var(--tomate);
   }
 
@@ -667,6 +726,22 @@
     font-size: 0.88rem;
     text-align: center;
   }
+  .rodape-nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px 6px;
+    margin: 18px 0;
+  }
+  .rodape-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 10px;
+    color: var(--taupe);
+    font-weight: 600;
+  }
+  .rodape-nav a:hover { color: var(--tomate); }
 
   /* ========================================================
      RESPONSIVIDADE MULTI-DISPOSITIVO (MOBILE, TABLET, DESKTOP)
@@ -705,6 +780,7 @@
       font-size: 0.82rem;
       padding: 8px 10px;
     }
+    .modal-box h3 { padding: 0 36px; } /* não passa por baixo do × */
 
     /* Scrollytelling Mobile */
     .scrolly-map-sticky {
@@ -794,12 +870,34 @@
     display: flex;
     flex-direction: column;
     box-shadow: -10px 0 35px rgba(0,0,0,0.35);
-    transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    /* Fechada, a gaveta some também para o teclado e o leitor de tela
+       (`visibility:hidden`); a visibilidade só muda depois do deslize. */
+    visibility: hidden;
+    transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s linear 0.3s;
     overflow-y: auto;
     padding: 24px 20px;
   }
   .menu-mobile-drawer.aberto {
     right: 0;
+    visibility: visible;
+    transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s;
+  }
+  .drawer-fechar {
+    width: 44px;
+    height: 44px;
+    background: none;
+    border: none;
+    font-size: 1.6rem;
+    color: var(--tinta);
+    cursor: pointer;
+  }
+  /* Clientes da Feira: o bar que já é cliente, antes das prévias */
+  .clientes-feira { margin-top: 36px; }
+  .clientes-feira h3 {
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    text-align: center;
+    margin-bottom: 4px;
   }
   .menu-mobile-backdrop {
     position: fixed;
@@ -829,6 +927,9 @@
     font-size: 0.94rem;
     color: var(--tinta);
     border: 1px solid transparent;
+    /* Não `all`: com `all` a visibilidade herdada da gaveta também anima e o
+       link segue invisível (e sem foco) no instante em que a gaveta abre. */
+    transition-property: color, background-color, border-color;
   }
   .drawer-links a:hover {
     background: rgba(179, 50, 21, 0.08);
@@ -842,10 +943,22 @@
     font-size: 1.05rem;
   }
 
+  @media (max-width: 1180px) {
+    .header-desktop-actions .btn-colab { display: none; }
+  }
+
   @media (max-width: 900px) {
     .nav-dossie { display: none; }
     .header-desktop-actions { display: none !important; }
-    .btn-menu-mobile { display: inline-flex; }
+    .btn-menu-mobile { display: inline-flex; min-height: 44px; }
+  }
+
+  @media (max-width: 480px) {
+    /* Logo + "Sou dono de bar →" + menu na mesma linha de 375 px */
+    .logo-topo > i { display: none; }
+    .btn-menu-mobile { min-width: 44px; padding: 6px 10px; }
+    .btn-menu-mobile span { display: none; }
+    .cta-dono { padding: 0 10px; font-size: 0.74rem; }
   }
 
   @media (max-width: 420px) {
@@ -858,6 +971,8 @@
 </head>
 <body>
 
+<a class="pular-conteudo" href="#conteudo">Pular para o conteúdo</a>
+
 <div class="lona-topo"></div>
 
 <!-- Top Header Fixo -->
@@ -867,16 +982,13 @@
       <i class="fas fa-beer-mug-empty" style="color:var(--tomate);"></i>
       FEIRA DE <span>BARÃO</span>
     </a>
-    <nav class="nav-dossie">
-      <a href="#dossie">O Dossiê Vivo</a>
-      <a href="#linha-do-tempo">Linha do Tempo</a>
-      <a href="#pracacoco">A Praça do Coco</a>
-      <a href="#mural">Mural da Memória</a>
-      <a href="#bares">23 Barracas</a>
-      <a href="#tecnologia">Infraestrutura IA</a>
-      <a href="#conta">Calculadora</a>
+    <nav class="nav-dossie" aria-label="Seções principais">
+      <a href="#dossie">Dossiê</a>
+      <a href="#bares">Barracas</a>
       <a href="#preco">Planos</a>
+      <a href="#contato">Contato</a>
     </nav>
+    <a class="cta-dono" href="#preco">Sou dono de bar →</a>
     <div class="header-desktop-actions" style="display:flex; gap:10px; align-items:center;">
       <button class="btn btn-colab" style="padding:7px 16px; font-size:0.82rem;" onclick="abrirModalColaboracao()">
         <i class="fas fa-feather"></i> Contar História
@@ -900,18 +1012,19 @@
       <i class="fas fa-beer-mug-empty" style="color:var(--tomate);"></i>
       FEIRA DE <span>BARÃO</span>
     </div>
-    <button onclick="fecharMenuMobile()" aria-label="Fechar menu" style="background:none; border:none; font-size:1.6rem; color:var(--tinta); cursor:pointer; padding:4px;">&times;</button>
+    <button type="button" class="drawer-fechar" onclick="fecharMenuMobile()" aria-label="Fechar menu">&times;</button>
   </div>
 
   <ul class="drawer-links">
-    <li><a href="#dossie" onclick="fecharMenuMobile()"><i class="fas fa-book-open"></i> O Dossiê Vivo (6 Capítulos)</a></li>
-    <li><a href="#linha-do-tempo" onclick="fecharMenuMobile()"><i class="fas fa-history"></i> Linha do Tempo (1870–Hoje)</a></li>
-    <li><a href="#pracacoco" onclick="fecharMenuMobile()"><i class="fas fa-store"></i> A Praça do Coco</a></li>
-    <li><a href="#mural" onclick="fecharMenuMobile()"><i class="fas fa-comments"></i> Mural da Memória Viva</a></li>
-    <li><a href="#bares" onclick="fecharMenuMobile()"><i class="fas fa-beer-mug-empty"></i> 23 Barracas Digitais</a></li>
-    <li><a href="#tecnologia" onclick="fecharMenuMobile()"><i class="fas fa-microchip"></i> Tecnologia & Bar OS</a></li>
-    <li><a href="#conta" onclick="fecharMenuMobile()"><i class="fas fa-calculator"></i> Calculadora de ROI</a></li>
-    <li><a href="#preco" onclick="fecharMenuMobile()"><i class="fas fa-tags"></i> Planos & Preços</a></li>
+    <li><a href="#dossie" onclick="fecharMenuMobile(false)"><i class="fas fa-book-open"></i> O Dossiê Vivo (6 Capítulos)</a></li>
+    <li><a href="#linha-do-tempo" onclick="fecharMenuMobile(false)"><i class="fas fa-history"></i> Linha do Tempo (1870–Hoje)</a></li>
+    <li><a href="#pracacoco" onclick="fecharMenuMobile(false)"><i class="fas fa-store"></i> A Praça do Coco</a></li>
+    <li><a href="#mural" onclick="fecharMenuMobile(false)"><i class="fas fa-comments"></i> Mural da Memória Viva</a></li>
+    <li><a href="#bares" onclick="fecharMenuMobile(false)"><i class="fas fa-beer-mug-empty"></i> {{ total_bares }} Barracas Digitais</a></li>
+    <li><a href="#tecnologia" onclick="fecharMenuMobile(false)"><i class="fas fa-microchip"></i> Tecnologia & Bar OS</a></li>
+    <li><a href="#conta" onclick="fecharMenuMobile(false)"><i class="fas fa-calculator"></i> Calculadora de ROI</a></li>
+    <li><a href="#preco" onclick="fecharMenuMobile(false)"><i class="fas fa-tags"></i> Planos & Preços</a></li>
+    <li><a href="#contato" onclick="fecharMenuMobile(false)"><i class="fas fa-handshake"></i> Contato</a></li>
   </ul>
 
   <div style="margin-top:auto; display:flex; flex-direction:column; gap:10px; padding-top:16px; border-top:1.5px solid var(--linha);">
@@ -924,7 +1037,43 @@
   </div>
 </aside>
 
-<!-- BARRA DE MEMÓRIA ABERTA & COLABORAÇÃO -->
+<main id="conteudo" tabindex="-1">
+
+<!-- HERO PRINCIPAL DA GRANDE REPORTAGEM -->
+<section class="hero-dossie">
+  <div class="wrap">
+    <span class="chapeu-dossie">Barão Geraldo, Campinas–SP · Memória & Gastronomia</span>
+    <h1 class="manchete-cartaz">
+      A Feira que <b>Não Desmonta</b>.<br>
+      A Memória Viva de Barão Geraldo.
+    </h1>
+    <p class="gravata-lead">
+      Das águas do Rio Atibaia e os trilhos do trem Funilense à primavera acadêmica de Zeferino Vaz e o aroma de pastel da Praça do Coco: 
+      um dossiê imersivo sobre o distrito que fez do boteco a extensão da universidade e conectou suas <strong>{{ total_bares }} casas gastronômicas</strong> em uma rede viva.
+    </p>
+
+    <div style="display:flex; justify-content:center; gap:14px; flex-wrap:wrap;">
+      <a class="btn btn-tomate" href="#dossie">
+        <i class="fas fa-compass"></i> Iniciar Jornada no Mapa ↓
+      </a>
+      <button type="button" class="btn btn-colab" onclick="abrirModalColaboracao('historia')">
+        <i class="fas fa-comment-dots"></i> Contar uma Memória do Bairro
+      </button>
+      <a class="btn btn-fantasma" href="#bares">
+        Ver as {{ total_bares }} Barracas Digitais
+      </a>
+    </div>
+
+    <div class="meta-reportagem">
+      <span><i class="fas fa-calendar-alt text-danger"></i> Pesquisa & Dossiê Vivo · 2026</span>
+      <span><i class="fas fa-map-marker-alt text-danger"></i> Distrito de Barão Geraldo</span>
+      <span><i class="fas fa-users text-danger"></i> Construção Coletiva com Moradores e Bares</span>
+    </div>
+  </div>
+</section>
+
+<!-- BARRA DE MEMÓRIA ABERTA & COLABORAÇÃO (depois do hero: no celular ela
+     ocupava a primeira dobra inteira antes da manchete) -->
 <div class="barra-memoria-aberta">
   <div class="wrap barra-memoria-inner">
     <div class="barra-memoria-texto">
@@ -942,41 +1091,6 @@
   </div>
 </div>
 
-<main>
-
-<!-- HERO PRINCIPAL DA GRANDE REPORTAGEM -->
-<section class="hero-dossie">
-  <div class="wrap">
-    <span class="chapeu-dossie">Barão Geraldo, Campinas–SP · Memória & Gastronomia</span>
-    <h1 class="manchete-cartaz">
-      A Feira que <b>Não Desmonta</b>.<br>
-      A Memória Viva de Barão Geraldo.
-    </h1>
-    <p class="gravata-lead">
-      Das águas do Rio Atibaia e os trilhos do trem Funilense à primavera acadêmica de Zeferino Vaz e o aroma de pastel da Praça do Coco: 
-      um dossiê imersivo sobre o distrito que fez do boteco a extensão da universidade e conectou suas <strong>23 casas gastronômicas</strong> em uma rede viva.
-    </p>
-
-    <div style="display:flex; justify-content:center; gap:14px; flex-wrap:wrap;">
-      <a class="btn btn-tomate" href="#dossie">
-        <i class="fas fa-compass"></i> Iniciar Jornada no Mapa ↓
-      </a>
-      <a class="btn btn-colab" onclick="abrirModalColaboracao('historia')">
-        <i class="fas fa-comment-dots"></i> Contar uma Memória do Bairro
-      </a>
-      <a class="btn btn-fantasma" href="#bares">
-        Ver as 23 Barracas Digitais
-      </a>
-    </div>
-
-    <div class="meta-reportagem">
-      <span><i class="fas fa-calendar-alt text-danger"></i> Pesquisa & Dossiê Vivo · 2026</span>
-      <span><i class="fas fa-map-marker-alt text-danger"></i> Distrito de Barão Geraldo</span>
-      <span><i class="fas fa-users text-danger"></i> Construção Coletiva com Moradores e Bares</span>
-    </div>
-  </div>
-</section>
-
 <!-- ========================================================
      O GRANDE DOSSIÊ MULTIMÍDIA COM MAP SCROLLYTELLING
      ======================================================== -->
@@ -992,7 +1106,7 @@
       <div class="story-chapter-card">
         <span class="chapter-number"><i class="fas fa-landmark"></i> Capítulo I · As Raízes do Chão</span>
         <h2 class="chapter-title">O Café, a Mata e os Trilhos do Trem</h2>
-        <img class="chapter-photo" src="{{ url_for('static', filename='img/dossie/barao-geraldo.jpg') }}" alt="Fazenda Santa Genebra e Barão Geraldo de Rezende">
+        <img class="chapter-photo" src="{{ url_for('static', filename='img/dossie/barao-geraldo.jpg') }}" width="800" height="500" loading="lazy" decoding="async" alt="Fazenda Santa Genebra e Barão Geraldo de Rezende">
         <div class="chapter-body">
           <p>
             No final do século XIX, a paisagem de Barão Geraldo era desenhada pelo vale verde do Rio Atibaia e pela pujança da <strong>Fazenda Santa Genebra</strong>, de propriedade do engenheiro e cafeicultor <strong>Geraldo Ribeiro de Sousa Rezende</strong> (o Barão Geraldo de Rezende, 1846–1907).
@@ -1058,7 +1172,7 @@
       <div class="story-chapter-card">
         <span class="chapter-number"><i class="fas fa-graduation-cap"></i> Capítulo IV · A Revolução do Saber</span>
         <h2 class="chapter-title">Zeferino Vaz, a Unicamp & O Boteco Pensante</h2>
-        <img class="chapter-photo" src="{{ url_for('static', filename='img/dossie/unicamp-campus.jpg') }}" alt="Praça da Paz e campus da Unicamp">
+        <img class="chapter-photo" src="{{ url_for('static', filename='img/dossie/unicamp-campus.jpg') }}" width="800" height="500" loading="lazy" decoding="async" alt="Praça da Paz e campus da Unicamp">
         <div class="chapter-body">
           <p>
             Em <strong>1966</strong>, o médico e visionário <strong>Zeferino Vaz</strong> fundava a <strong>Unicamp</strong> em uma antiga gleba doada por fazendeiros. Cientistas, filósofos e artistas exilados e de várias partes do mundo desembarcaram em Barão Geraldo.
@@ -1082,7 +1196,7 @@
       <div class="story-chapter-card">
         <span class="chapter-number"><i class="fas fa-store"></i> Capítulo V · O Coração Comunitário</span>
         <h2 class="chapter-title">A Praça do Coco & A Feira de Barão</h2>
-        <img class="chapter-photo" src="{{ url_for('static', filename='img/dossie/praca-do-coco.jpg') }}" alt="Praça do Coco e Feira de Artesanato">
+        <img class="chapter-photo" src="{{ url_for('static', filename='img/dossie/praca-do-coco.jpg') }}" width="800" height="500" loading="lazy" decoding="async" alt="Praça do Coco e Feira de Artesanato">
         <div class="chapter-body">
           <p>
             Oficialmente batizada de <em>Praça Irmã Carmela Stecchi</em>. Em <strong>1999</strong>, o comerciante <strong>Seu Valdir dos Santos</strong> estacionou sua Kombi para vender água de coco e caldo de cana em um terreno baldio. Com os filhos Vagner e Regiane, cuidou, plantou árvores e revitalizou o espaço.
@@ -1106,17 +1220,17 @@
       <div class="story-chapter-card" style="border-color:var(--verde-zap);">
         <span class="chapter-number" style="color:var(--verde-zap);"><i class="fas fa-beer-mug-empty"></i> Capítulo VI · A Tradição Viva</span>
         <h2 class="chapter-title">Os Pioneiros do Balcão & A Feira Digital</h2>
-        <img class="chapter-photo" src="{{ url_for('static', filename='img/dossie/emporio-do-nono.jpg') }}" alt="Empório do Nono e balcão tradicional">
+        <img class="chapter-photo" src="{{ url_for('static', filename='img/dossie/emporio-do-nono.jpg') }}" width="800" height="500" loading="lazy" decoding="async" alt="Empório do Nono e balcão tradicional">
         <div class="chapter-body">
           <p>
             Casas como o <strong>Empório do Nono</strong> (fundado em 1999 por Júnior Pattaro na Albino de Oliveira com as históricas <em>Segundas de Chorinho</em>) e o <strong>Botequim de Barão</strong> na Santa Isabel mantêm viva a arte da hospitalidade: serpentina de gelo, comida de estufa e acolhimento.
           </p>
           <p>
-            Mapeamos as <strong>23 casas gastronômicas</strong> do distrito para garantir que essa história não seja engolida pelos algoritmos. Cada bar agora tem presença no Google Maps, cardápio digital próprio e reservas sem intermediários.
+            Mapeamos as <strong>{{ total_bares }} casas gastronômicas</strong> do distrito para garantir que essa história não seja engolida pelos algoritmos. Cada bar agora tem presença no Google Maps, cardápio digital próprio e reservas sem intermediários.
           </p>
         </div>
         <a class="btn btn-zap" style="width:100%; font-size:0.88rem; padding:12px;" href="#bares">
-          <i class="fas fa-compass"></i> Explorar as 23 Barracas no Catálogo ↓
+          <i class="fas fa-compass"></i> Explorar as {{ total_bares }} Barracas no Catálogo ↓
         </a>
       </div>
     </div>
@@ -1142,37 +1256,37 @@
     <div class="timeline-grid">
       <div class="timeline-card">
         <div class="timeline-year">1870–1907</div>
-        <h4 style="color:#fff; margin-bottom:6px;">Fazenda Santa Genebra</h4>
+        <h3 style="color:#fff; font-size:1rem; margin-bottom:6px;">Fazenda Santa Genebra</h3>
         <p class="timeline-desc">Geraldo Ribeiro de Sousa Rezende (o Barão de Rezende) consolida a cafeicultura e a preservação da mata nativa.</p>
       </div>
 
       <div class="timeline-card">
         <div class="timeline-year">1899</div>
-        <h4 style="color:#fff; margin-bottom:6px;">Estrada de Ferro Funilense</h4>
+        <h3 style="color:#fff; font-size:1rem; margin-bottom:6px;">Estrada de Ferro Funilense</h3>
         <p class="timeline-desc">Inauguração do ramal ferroviário ligando Campinas a Cosmópolis, cortando o vilarejo com a Estação Barão Geraldo.</p>
       </div>
 
       <div class="timeline-card">
         <div class="timeline-year">1953</div>
-        <h4 style="color:#fff; margin-bottom:6px;">Criação do Distrito</h4>
+        <h3 style="color:#fff; font-size:1rem; margin-bottom:6px;">Criação do Distrito</h3>
         <p class="timeline-desc">A Lei Estadual nº 2.456 de 30 de dezembro de 1953 cria oficialmente o Distrito de Paz de Barão Geraldo.</p>
       </div>
 
       <div class="timeline-card">
         <div class="timeline-year">1966</div>
-        <h4 style="color:#fff; margin-bottom:6px;">Fundação da Unicamp</h4>
+        <h3 style="color:#fff; font-size:1rem; margin-bottom:6px;">Fundação da Unicamp</h3>
         <p class="timeline-desc">Zeferino Vaz instala a universidade, atraindo intelectuais do mundo inteiro e forjando a boemia dos "botecos pensantes".</p>
       </div>
 
       <div class="timeline-card">
         <div class="timeline-year">1999</div>
-        <h4 style="color:#fff; margin-bottom:6px;">A Kombi da Praça do Coco</h4>
+        <h3 style="color:#fff; font-size:1rem; margin-bottom:6px;">A Kombi da Praça do Coco</h3>
         <p class="timeline-desc">Seu Valdir dos Santos inicia a venda de água de coco na Praça Irmã Carmela Stecchi, revitalizando o coração do bairro.</p>
       </div>
 
       <div class="timeline-card">
         <div class="timeline-year">2002</div>
-        <h4 style="color:#fff; margin-bottom:6px;">Feira de Arte e Cultura</h4>
+        <h3 style="color:#fff; font-size:1rem; margin-bottom:6px;">Feira de Arte e Cultura</h3>
         <p class="timeline-desc">Artistas e artesãos oficializam a Feira da Praça do Coco aos fins de semana, unindo pastel, cerâmica e chorinho.</p>
       </div>
     </div>
@@ -1195,13 +1309,15 @@
     </div>
 
     <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:24px;">
+      {# conferir origem: os três relatos abaixo não têm fonte registrada. Os
+         nomes próprios saíram até alguém confirmar quem falou (e autorizar). #}
       <!-- Card 1: Memória da Praça -->
       <div style="background:var(--cartao); border:1.5px solid var(--linha); border-radius:16px; padding:24px; display:flex; flex-direction:column; box-shadow:0 6px 18px rgba(36,28,20,0.06);">
         <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
           <div style="width:40px; height:40px; border-radius:50%; background:rgba(179,50,21,0.1); color:var(--tomate); display:flex; align-items:center; justify-content:center; font-size:1.1rem;">🥥</div>
           <div>
-            <h4 style="font-size:0.95rem; font-weight:700; color:var(--tinta);">Dona Helena Santos</h4>
-            <small style="color:var(--taupe);">Frequentadora da Praça do Coco desde 1999</small>
+            <h3 style="font-size:0.95rem; font-weight:700; color:var(--tinta);">Frequentadora da Praça do Coco</h3>
+            <small style="color:var(--taupe);">Desde 1999</small>
           </div>
         </div>
         <p style="font-size:0.9rem; color:var(--tinta); line-height:1.6; font-style:italic; flex:1;">
@@ -1215,7 +1331,7 @@
         <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
           <div style="width:40px; height:40px; border-radius:50%; background:rgba(22,107,63,0.1); color:var(--verde-zap); display:flex; align-items:center; justify-content:center; font-size:1.1rem;">🎭</div>
           <div>
-            <h4 style="font-size:0.95rem; font-weight:700; color:var(--tinta);">Prof. Marcos Ribeiro</h4>
+            <h3 style="font-size:0.95rem; font-weight:700; color:var(--tinta);">Professor</h3>
             <small style="color:var(--taupe);">Instituto de Artes da Unicamp</small>
           </div>
         </div>
@@ -1230,22 +1346,22 @@
         <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
           <div style="width:40px; height:40px; border-radius:50%; background:rgba(245,158,11,0.1); color:var(--ambar); display:flex; align-items:center; justify-content:center; font-size:1.1rem;">🚂</div>
           <div>
-            <h4 style="font-size:0.95rem; font-weight:700; color:var(--tinta);">Seu Antonio Moretti</h4>
-            <small style="color:var(--taupe);">Família pioneira da Fazenda Santa Genebra</small>
+            <h3 style="font-size:0.95rem; font-weight:700; color:var(--tinta);">Morador de família pioneira</h3>
+            <small style="color:var(--taupe);">Fazenda Santa Genebra</small>
           </div>
         </div>
         <p style="font-size:0.9rem; color:var(--tinta); line-height:1.6; font-style:italic; flex:1;">
           “Meu avô trabalhou na linha do Funilense. O trem parava na Estação Barão Geraldo trazendo sacas de café e levando os colonos para a cidade. É uma história que não pode se perder.”
         </p>
-        <span style="font-size:0.78rem; font-weight:700; color:var(--ambar); margin-top:14px;"><i class="fas fa-tag"></i> Trem Funilense · Ferrovia</span>
+        <span style="font-size:0.78rem; font-weight:700; color:#b45309; margin-top:14px;"><i class="fas fa-tag"></i> Trem Funilense · Ferrovia</span>
       </div>
 
       <!-- Card 4: Convite Interativo para o Visitante Enviar -->
       <div style="background:var(--papel-escuro); border:2px dashed var(--tomate); border-radius:16px; padding:24px; display:flex; flex-direction:column; justify-content:center; text-align:center;">
         <i class="fas fa-camera-retro" style="font-size:2.2rem; color:var(--tomate); margin-bottom:12px;"></i>
-        <h4 style="font-family:var(--font-cartaz); font-size:1.4rem; text-transform:uppercase; color:var(--tinta); margin-bottom:6px;">
+        <h3 style="font-family:var(--font-cartaz); font-size:1.4rem; text-transform:uppercase; color:var(--tinta); margin-bottom:6px;">
           Envie Sua Foto ou Vídeo
-        </h4>
+        </h3>
         <p style="font-size:0.88rem; color:var(--taupe); margin-bottom:16px;">
           Tem uma foto antiga no bairro, um registro em vídeo ou um causo? Compartilhe com o acervo permanente!
         </p>
@@ -1265,18 +1381,42 @@
     <div style="text-align:center; max-width:750px; margin:0 auto;">
       <span class="chapeu-dossie">A Feira que Não Desmonta</span>
       <h2 style="font-family:var(--font-cartaz); font-size:2.8rem; text-transform:uppercase; margin-bottom:12px;">
-        As 23 Barracas de Barão Geraldo
+        As {{ total_bares }} Barracas de Barão Geraldo
       </h2>
       <p style="color:var(--taupe); font-size:1.05rem;">
         Toque em qualquer casa para abrir a demonstração real com fotos, cardápio digital e o Concierge de Voz ao vivo no balcão:
       </p>
     </div>
 
+    {# Cliente pagante na frente das prévias, com link para o endereço canônico
+       dele: é a página da casa que o Google indexa (as prévias são noindex). #}
+    {% if clientes_destaque %}
+    <div class="clientes-feira">
+      <h3>Clientes da Feira</h3>
+      <div class="grid-23-bares" style="margin-top:16px;">
+        {% for c in clientes_destaque %}
+        <a class="bar-card-kraft" href="{{ c.url }}">
+          {% if c.foto %}
+          <img class="bar-img-thumb" src="{{ c.foto if c.foto.startswith(('http', '/')) else url_for('static', filename=c.foto) }}" alt="{{ c.nome }}" width="480" height="360" loading="lazy" decoding="async">
+          {% endif %}
+          <div class="bar-info-box">
+            <h4 class="bar-title-kraft">{{ c.nome }}</h4>
+            <div style="margin-top:auto; font-size:0.82rem; font-weight:700; color:var(--tomate); display:flex; justify-content:space-between; align-items:center; padding-top:8px;">
+              <span>Visitar o site</span>
+              <i class="fas fa-arrow-right"></i>
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
     {% if bares %}
     <div class="grid-23-bares">
       {% for b in bares %}
       <a class="bar-card-kraft" href="{{ url_for('public.landing_slug', slug=b.slug) }}">
-        <img class="bar-img-thumb" src="{{ url_for('static', filename=b.foto_480) }}" alt="{{ b.nome }}" loading="lazy">
+        <img class="bar-img-thumb" src="{{ url_for('static', filename=b.foto_480) }}" alt="{{ b.nome }}" width="480" height="360" loading="lazy" decoding="async">
         <div class="bar-info-box">
           <h3 class="bar-title-kraft">{{ b.nome }}</h3>
           <div class="bar-nota-linha">
@@ -1313,28 +1453,28 @@
       <!-- 1. Google Maps -->
       <div class="card-tech-power">
         <div class="tech-icon-box">📍</div>
-        <h4>Cardápio no Google Maps</h4>
+        <h3>Cardápio no Google Maps</h3>
         <p>Indexação nativa com Menu Schema. Quem pesquisa "bar aberto agora em Barão Geraldo" acha seu cardápio com preços e fotos direto na busca.</p>
       </div>
 
       <!-- 2. Concierge de Voz -->
       <div class="card-tech-power">
         <div class="tech-icon-box">🎙️</div>
-        <h4>Concierge de Voz (NVIDIA Riva)</h4>
+        <h3>Concierge de Voz (NVIDIA Riva)</h3>
         <p>O cliente envia áudio no WhatsApp para reservar mesa e a inteligência de voz brasileira atende com naturalidade e confirma no sistema.</p>
       </div>
 
       <!-- 3. OCR por Foto -->
       <div class="card-tech-power">
         <div class="tech-icon-box">📸</div>
-        <h4>Leitor de Notas por Foto</h4>
+        <h3>Leitor de Notas por Foto</h3>
         <p>Tire foto do cupom do açougue ou hortifruti com a câmera do celular: a visão computacional da NVIDIA lança os insumos no estoque na hora.</p>
       </div>
 
       <!-- 4. CMV Real -->
       <div class="card-tech-power">
         <div class="tech-icon-box">🐺</div>
-        <h4>CMV & Alerta de Inflação</h4>
+        <h3>CMV & Alerta de Inflação</h3>
         <p>Raciocínio lógico com DeepSeek: acompanhe o custo exato de cada porção e receba alerta no celular se o fornecedor aumentar preços em mais de 10%.</p>
       </div>
     </div>
@@ -1361,7 +1501,7 @@
       <div>
         <div style="margin-bottom:18px;">
           <div style="display:flex; justify-content:space-between; font-weight:700; color:var(--tinta); margin-bottom:6px;">
-            <span>Mesas no Salão</span>
+            <label for="roi-mesas">Mesas no Salão</label>
             <span id="roi-mesas-val" style="color:var(--tomate);">14 mesas</span>
           </div>
           <input type="range" style="width:100%; accent-color:var(--tomate);" id="roi-mesas" min="4" max="50" value="14" step="1">
@@ -1369,7 +1509,7 @@
 
         <div style="margin-bottom:18px;">
           <div style="display:flex; justify-content:space-between; font-weight:700; color:var(--tinta); margin-bottom:6px;">
-            <span>Pessoas por Mesa</span>
+            <label for="roi-pessoas">Pessoas por Mesa</label>
             <span id="roi-pessoas-val" style="color:var(--tomate);">3 pessoas</span>
           </div>
           <input type="range" style="width:100%; accent-color:var(--tomate);" id="roi-pessoas" min="2" max="6" value="3" step="1">
@@ -1377,7 +1517,7 @@
 
         <div style="margin-bottom:18px;">
           <div style="display:flex; justify-content:space-between; font-weight:700; color:var(--tinta); margin-bottom:6px;">
-            <span>Consumo Médio por Pessoa</span>
+            <label for="roi-ticket">Consumo Médio por Pessoa</label>
             <span id="roi-ticket-val" style="color:var(--tomate);">R$ 45,00</span>
           </div>
           <input type="range" style="width:100%; accent-color:var(--tomate);" id="roi-ticket" min="20" max="150" value="45" step="5">
@@ -1385,7 +1525,7 @@
 
         <div style="margin-bottom:18px;">
           <div style="display:flex; justify-content:space-between; font-weight:700; color:var(--tinta); margin-bottom:6px;">
-            <span>Noites Cheias por Semana</span>
+            <label for="roi-noites">Noites Cheias por Semana</label>
             <span id="roi-noites-val" style="color:var(--tomate);">2 noites</span>
           </div>
           <input type="range" style="width:100%; accent-color:var(--tomate);" id="roi-noites" min="1" max="7" value="2" step="1">
@@ -1486,6 +1626,7 @@
       <p style="margin-bottom:6px;"><strong>Taxa única de montagem: {{ taxa_setup }}</strong> — inclui design exclusivo personalizado, fotos da casa e configuração completa do Perfil da Empresa no Google Maps.</p>
       {% endif %}
       <p><i class="fas fa-shield-alt text-success"></i> <strong>Sem fidelidade:</strong> você não assina contrato longo e cancela quando quiser com 1 toque.</p>
+      <p style="margin-top:14px;"><a href="{{ url_for('public.cadastro') }}" style="font-weight:700;">Prefere começar sozinho? Crie a conta do seu bar →</a></p>
     </div>
   </div>
 </section>
@@ -1493,7 +1634,7 @@
 <!-- ========================================================
      FECHAMENTO & CONVITE PARA A COMUNIDADE
      ======================================================== -->
-<section style="text-align:center; padding:80px 0; border-top:1.5px solid var(--linha); background:var(--papel-escuro);">
+<section id="contato" style="text-align:center; padding:80px 0; border-top:1.5px solid var(--linha); background:var(--papel-escuro);">
   <div class="wrap">
     <span class="chapeu-dossie">Construído em Barão Geraldo</span>
     <h2 style="font-family:var(--font-cartaz); font-size:clamp(2.4rem, 5vw, 3.8rem); text-transform:uppercase; margin-bottom:16px;">
@@ -1523,8 +1664,8 @@
      MODAL INTERATIVO: MEMÓRIA ABERTA & COLABORAÇÃO
      ======================================================== -->
 <div id="modal-colaboracao" class="modal-backdrop">
-  <div class="modal-box">
-    <button class="modal-close" onclick="fecharModalColaboracao()">&times;</button>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+    <button type="button" class="modal-close" onclick="fecharModalColaboracao()" aria-label="Fechar">&times;</button>
     <div style="text-align:center; margin-bottom:20px;">
       <span class="chapeu-dossie">Memória Coletiva</span>
       <h3 id="modal-titulo" style="font-family:var(--font-cartaz); font-size:2rem; text-transform:uppercase; margin-top:4px;">
@@ -1579,6 +1720,18 @@
       FEIRA DE BARÃO · O GRANDE DOSSIÊ HISTÓRICO & GASTRONÔMICO
     </p>
     <p>Distrito de Barão Geraldo, Campinas – SP · Construído com carinho para a memória e os comércios da nossa comunidade.</p>
+    <nav class="rodape-nav" aria-label="Todas as seções">
+      <a href="#dossie">O Dossiê Vivo</a>
+      <a href="#linha-do-tempo">Linha do Tempo</a>
+      <a href="#pracacoco">A Praça do Coco</a>
+      <a href="#mural">Mural da Memória</a>
+      <a href="#bares">Barracas</a>
+      <a href="#tecnologia">Infraestrutura IA</a>
+      <a href="#conta">Calculadora</a>
+      <a href="#preco">Planos</a>
+      <a href="#contato">Contato</a>
+    </nav>
+    <p><a href="{{ url_for('auth.login') }}" style="color:var(--taupe); text-decoration:underline; display:inline-flex; align-items:center; min-height:44px;">Entrar</a></p>
   </div>
 </footer>
 
@@ -1626,13 +1779,13 @@
       // Ícone personalizado em Tomate
       const iconeTomate = L.divIcon({
         className: 'custom-pin',
-        html: '<div style="background:#b33215; color:#fff; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; border:2.5px solid #fff; box-shadow:0 4px 12px rgba(0,0,0,0.4);">📍</div>',
+        html: '<div aria-hidden="true" style="background:#b33215; color:#fff; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; border:2.5px solid #fff; box-shadow:0 4px 12px rgba(0,0,0,0.4);">📍</div>',
         iconSize: [34, 34],
         iconAnchor: [17, 34]
       });
 
       PONTOS_HISTORICOS.forEach(p => {
-        const m = L.marker([p.lat, p.lng], { icon: iconeTomate }).addTo(map);
+        const m = L.marker([p.lat, p.lng], { icon: iconeTomate, title: p.nome, alt: p.nome }).addTo(map);
         m.bindPopup(`<strong>${p.nome}</strong><br><small>${p.desc}</small>`);
         allMarkers.push(m);
       });
@@ -1668,7 +1821,9 @@
     steps.forEach(s => observer.observe(s));
   }
 
-  // Modal de Colaboração
+  // Modal de Colaboração. Guarda quem abriu para devolver o foco ao fechar.
+  let focoAntesDoModal = null;
+
   function abrirModalColaboracao(tipo = 'historia') {
     const modal = document.getElementById('modal-colaboracao');
     const selectTipo = document.getElementById('colab-tipo');
@@ -1689,27 +1844,43 @@
       subtitulo.innerText = 'Seu relato fará parte do acervo documental permanente da Feira de Barão.';
     }
 
+    focoAntesDoModal = document.activeElement;
     modal.classList.add('ativo');
+    document.getElementById('colab-nome').focus();
   }
 
   function fecharModalColaboracao() {
-    document.getElementById('modal-colaboracao').classList.remove('ativo');
+    const modal = document.getElementById('modal-colaboracao');
+    if (!modal.classList.contains('ativo')) return;
+    modal.classList.remove('ativo');
+    if (focoAntesDoModal) focoAntesDoModal.focus();
   }
 
-  // Gaveta de menu (celular)
+  // Gaveta de menu (celular). Ao abrir, o foco vai para o 1º link; ao fechar
+  // pelo ×, pelo fundo ou pelo Esc, volta para o botão MENU. Pelos links da
+  // gaveta não volta: o foco segue para a seção escolhida.
   function toggleMenuMobile() {
-    const aberto = document.getElementById('menu-mobile-drawer').classList.toggle('aberto');
-    document.getElementById('menu-mobile-backdrop').classList.toggle('aberto', aberto);
-    document.querySelector('.btn-menu-mobile').setAttribute('aria-expanded', aberto);
+    const drawer = document.getElementById('menu-mobile-drawer');
+    if (drawer.classList.contains('aberto')) return fecharMenuMobile();
+    drawer.classList.add('aberto');
+    document.getElementById('menu-mobile-backdrop').classList.add('aberto');
+    document.querySelector('.btn-menu-mobile').setAttribute('aria-expanded', 'true');
+    drawer.querySelector('.drawer-links a').focus();
   }
 
-  function fecharMenuMobile() {
-    document.getElementById('menu-mobile-drawer').classList.remove('aberto');
+  function fecharMenuMobile(voltarFoco = true) {
+    const drawer = document.getElementById('menu-mobile-drawer');
+    if (!drawer.classList.contains('aberto')) return;
+    drawer.classList.remove('aberto');
     document.getElementById('menu-mobile-backdrop').classList.remove('aberto');
-    document.querySelector('.btn-menu-mobile').setAttribute('aria-expanded', 'false');
+    const botao = document.querySelector('.btn-menu-mobile');
+    botao.setAttribute('aria-expanded', 'false');
+    if (voltarFoco) botao.focus();
   }
 
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharMenuMobile(); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { fecharModalColaboracao(); fecharMenuMobile(); }
+  });
 
   function enviarColaboracao(e) {
     e.preventDefault();
@@ -1758,10 +1929,23 @@
     input?.addEventListener('input', atualizarCalculadora);
   });
 
+  // O Leaflet chega com `defer` (já está pronto no DOMContentLoaded), mas o
+  // mapa só é montado quando o dossiê está a uma tela de distância.
   window.addEventListener('DOMContentLoaded', () => {
-    initMap();
-    setupScrollytelling();
     atualizarCalculadora();
+    const dossie = document.getElementById('dossie');
+    if (!dossie || !('IntersectionObserver' in window)) {
+      initMap();
+      setupScrollytelling();
+      return;
+    }
+    const vigia = new IntersectionObserver((entries) => {
+      if (!entries.some(e => e.isIntersecting)) return;
+      vigia.disconnect();
+      initMap();
+      setupScrollytelling();
+    }, { rootMargin: '100% 0px' });
+    vigia.observe(dossie);
   });
 </script>
 

@@ -285,14 +285,16 @@ def test_reserva_pelo_formulario_do_site_continua_funcionando(app, client, sessi
         html = pagina(client, url)
         assert MODELOS[modelo]['arquivo'] in renderizados, \
             f'{modelo} caiu no fallback: renderizou {renderizados}'
-        # o JS não roda aqui, então o teste confere as duas amarrações que ele
-        # depende: o campo que o FormData(form) recolhe e o header do fetch
+        # A página do bar vai para o cache da borda e não leva token: o JS
+        # busca em /novidades/token na hora de enviar e manda no header.
+        # O teste confere as duas amarrações e repete o caminho do navegador.
         assert 'X-CSRFToken' in html, f'{modelo}: o fetch da reserva perdeu o header'
-        token = token_do_html(html, onde=url)
+        assert '/novidades/token' in html, f'{modelo}: a reserva não busca o token'
+        assert 'name="csrf_token"' not in html, f'{modelo}: token de sessão no HTML cacheável'
+        token = client.get('/novidades/token').get_json()['token']
 
-        dados = reserva_valida(bar_publico.slug)
-        dados['csrf_token'] = token          # o que o FormData(form) carrega
-        resp = client.post('/reservar', data=dados)
+        resp = client.post('/reservar', data=reserva_valida(bar_publico.slug),
+                           headers={'X-CSRFToken': token})
 
     assert resp.status_code == 200, resp.get_data(as_text=True)[:400]
     assert resp.get_json()['ok'] is True
@@ -302,7 +304,7 @@ def test_reserva_aceita_o_token_pelo_header(app, client, bar_publico):
     """Os modelos mandam o mesmo token em `X-CSRFToken`. O header é o caminho
     de quem trocar o FormData por JSON depois."""
     with csrf_ligado(app):
-        token = token_da_pagina(client, f'/bar/{bar_publico.slug}')
+        token = client.get('/novidades/token').get_json()['token']
         resp = client.post('/reservar', data=reserva_valida(bar_publico.slug),
                            headers={'X-CSRFToken': token})
 

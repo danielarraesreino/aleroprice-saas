@@ -196,13 +196,14 @@
   .nav-logo{display:inline-flex;align-items:center;gap:9px;font-family:"Bebas Neue",sans-serif;letter-spacing:2px;font-size:1.4rem;color:var(--amber)}
   .nav-logo img{width:30px;height:30px;border-radius:7px;box-shadow:0 0 14px rgba(255,180,60,.35)}
   .theme-toggle{
-    display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;
+    display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;
     border:1px solid rgba(255,180,60,.4);border-radius:999px;background:transparent;cursor:pointer;
     color:var(--amber);font-size:1.05rem;line-height:1;transition:all .25s;
   }
   .theme-toggle:hover{background:var(--amber);color:var(--ink);box-shadow:0 0 20px rgba(255,180,60,.5)}
   .nav-links{display:flex;gap:26px;align-items:center;font-family:"Bebas Neue",sans-serif;letter-spacing:1.5px;font-size:1.02rem}
-  .nav-links a{color:var(--cream-dim);transition:color .25s}
+  .nav-links a{color:var(--cream-dim);transition:color .25s;
+    display:inline-flex;align-items:center;min-height:44px}   /* alvo de toque de 44px no tablet */
   .nav-links a:hover{color:var(--amber)}
   .nav-cta{
     border:1px solid rgba(255,180,60,.45);border-radius:999px;padding:7px 16px;color:var(--amber)!important;
@@ -212,7 +213,8 @@
   .nav-ctrls{display:flex;align-items:center;gap:10px}
 
   /* ---------- MENU CANECA (mobile) ---------- */
-  .mug-btn{display:none;position:relative;width:46px;height:46px;padding:0;border:none;background:transparent;cursor:pointer}
+  .mug-btn{display:none;position:relative;min-width:46px;height:46px;padding:0;border:none;background:transparent;cursor:pointer;
+    align-items:center;gap:8px;font-family:"Bebas Neue",sans-serif;letter-spacing:2px;font-size:1.05rem;color:var(--amber)}
   .mug-btn img{width:40px;height:40px;border-radius:9px;box-shadow:0 0 14px rgba(255,180,60,.4);
     transform-origin:60% 100%;transition:transform .5s cubic-bezier(.5,1.7,.5,1)}
   .mug-btn.open img{transform:rotate(-26deg) translateY(-2px)}       /* caneca inclina p/ despejar */
@@ -229,10 +231,16 @@
     position:fixed;left:0;right:0;top:0;z-index:45;padding:84px 24px 30px;
     background:linear-gradient(180deg,#ffbf4d 0%,#ff9a2f 52%,#e8631a 100%);   /* chopp */
     border-radius:0 0 28px 28px;box-shadow:0 26px 60px rgba(0,0,0,.45);
-    transform:translateY(-101%);transition:transform .6s cubic-bezier(.55,0,.2,1);
+    transform:translateY(-101%);visibility:hidden;
+    transition:transform .6s cubic-bezier(.55,0,.2,1),visibility 0s .6s;
     display:block!important;                 /* nunca herdar flex do seletor nav{} */
   }
-  .mobile-menu.open{transform:translateY(0)}
+  /* `visibility` junto com o transform: fechado, o menu só saía da tela e os
+     links continuavam no Tab — o teclado andava por itens invisíveis. */
+  /* Abre com visibility imediata (o foco vai pro 1º link no mesmo instante) e
+     só esconde depois que o chopp termina de subir — padrão do brasa. */
+  .mobile-menu.open{transform:translateY(0);visibility:visible;
+    transition:transform .6s cubic-bezier(.55,0,.2,1),visibility 0s 0s}
   /* espuma na frente do líquido (borda de baixo) */
   .mobile-menu::after{content:"";position:absolute;left:0;right:0;bottom:-11px;height:22px;
     background:
@@ -262,7 +270,7 @@
 
   @media(max-width:760px){
     .nav-links{display:none}
-    .mug-btn{display:inline-block}
+    .mug-btn{display:inline-flex}
   }
   @media(min-width:761px){
     .mobile-menu,.menu-scrim{display:none}
@@ -362,7 +370,7 @@
     transition:transform .3s, border-color .3s, box-shadow .3s;
   }
   .dish:hover{transform:translateY(-8px);border-color:rgba(255,180,60,.5);box-shadow:0 20px 50px rgba(0,0,0,.5)}
-  .dish .photo{height:190px;background-size:cover;background-position:center;transition:transform .5s}
+  .dish .photo{display:block;width:100%;height:190px;object-fit:cover;transition:transform .5s}
   .dish:hover .photo{transform:scale(1.07)}
   .dish .body{padding:22px 22px 26px}
   .dish h3{font-family:"Anton",sans-serif;text-transform:uppercase;letter-spacing:.5px;font-size:1.35rem;color:var(--cream)}
@@ -380,7 +388,7 @@
   }
   .dish p{color:var(--cream-dim);font-size:.96rem;margin-top:8px}
   .dish .star-tag{position:absolute;top:14px;right:14px;z-index:2;font-family:"Bebas Neue",sans-serif;letter-spacing:1px;
-    font-size:.72rem;color:var(--ink);background:var(--amber);padding:4px 11px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.4)}
+    font-size:.75rem;color:var(--ink);background:var(--amber);padding:4px 11px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.4)}
   .dish.hot{border-color:rgba(255,106,43,.5);box-shadow:0 0 0 1px rgba(255,106,43,.25),0 20px 50px rgba(255,106,43,.15)}
 
   /* história — 2 col */
@@ -396,7 +404,7 @@
   .fam-card b{font-family:"Bebas Neue",sans-serif;letter-spacing:1.5px;font-size:1.25rem;color:var(--cream)}
   .fam-card small{color:var(--cream-dim)}
   .fam-photo{width:100%;border-radius:16px;border:1px solid rgba(255,180,60,.2);margin-bottom:6px;
-    box-shadow:0 16px 40px rgba(0,0,0,.5);object-fit:cover;aspect-ratio:4/3}
+    box-shadow:0 16px 40px rgba(0,0,0,.5);object-fit:cover;aspect-ratio:4/3;height:auto}
 
   /* galeria — grade compacta e curta de propósito.
      Foto de altura livre empilhada em coluna (o `columns` antigo) virava scroll
@@ -409,11 +417,15 @@
   .gallery img{width:100%;height:100%;display:block;aspect-ratio:4/3;object-fit:cover;
     transition:transform .5s, filter .4s;filter:saturate(.98)}
   .gallery figure:hover img{transform:scale(1.06);filter:saturate(1.15) brightness(1.05)}
+  /* O botão é o que põe a foto no Tab e no Enter/Espaço; visualmente some. */
+  .gallery button{display:block;width:100%;height:100%;padding:0;border:0;background:none;cursor:pointer;color:inherit}
+  .gallery button:focus-visible{outline:3px solid var(--amber);outline-offset:-3px}
   .lightbox{position:fixed;inset:0;z-index:100;background:rgba(8,5,3,.94);display:none;
     align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px)}
   .lightbox.on{display:flex}
   .lightbox img{max-width:94vw;max-height:88vh;border-radius:12px;box-shadow:0 30px 80px rgba(0,0,0,.7)}
-  .lightbox .x{position:absolute;top:20px;right:26px;color:var(--cream);font-size:2.4rem;cursor:pointer;font-family:"Bebas Neue"}
+  .lightbox .x{position:absolute;top:14px;right:18px;width:48px;height:48px;display:grid;place-items:center;
+    background:none;border:0;color:var(--cream);font-size:2.4rem;cursor:pointer;font-family:"Bebas Neue"}
 
   /* avaliações */
   .rev-head{display:flex;align-items:end;justify-content:space-between;gap:20px;flex-wrap:wrap}
@@ -474,6 +486,9 @@
   .field input,.field textarea{width:100%;background:rgba(0,0,0,.28);border:1px solid rgba(255,180,60,.25);
     border-radius:12px;padding:12px 14px;color:var(--cream);font-family:"Fraunces",Georgia,serif;font-size:1rem}
   .field input:focus,.field textarea:focus{outline:none;border-color:var(--amber);box-shadow:0 0 0 3px rgba(255,180,60,.18)}
+  /* O halo âmbar a 18% some no fundo escuro: quem navega por teclado ganha
+     contorno de verdade (mesmo padrão do brasa e do tradicional). */
+  .field input:focus-visible,.field textarea:focus-visible{outline:3px solid currentColor;outline-offset:2px}
   .field textarea{resize:vertical;min-height:64px}
   .field input::-webkit-calendar-picker-indicator{filter:invert(.7) sepia(1) saturate(4) hue-rotate(-10deg)}
   .reserva-msg{margin-top:4px;font-family:"Bebas Neue",sans-serif;letter-spacing:1px;padding:12px 14px;border-radius:12px;display:none;font-size:1.05rem}
@@ -535,7 +550,7 @@
   .socials a:hover{background:var(--amber);color:var(--ink);box-shadow:0 0 22px rgba(255,180,60,.5);transform:translateY(-3px)}
   .socials svg{width:22px;height:22px;fill:currentColor}
   :root[data-theme="light"] .socials a{border-color:rgba(150,90,25,.4)}
-  .lojista{display:inline-block;margin-top:20px;font-family:"Bebas Neue",sans-serif;letter-spacing:2px;
+  .lojista{display:inline-flex;align-items:center;min-height:44px;margin-top:20px;font-family:"Bebas Neue",sans-serif;letter-spacing:2px;
     color:var(--cream-dim);border:1px solid rgba(246,233,210,.2);border-radius:999px;padding:8px 18px;transition:all .25s}
   .lojista:hover{color:var(--amber);border-color:var(--amber)}
 
@@ -558,10 +573,14 @@
   .js-anim .neon{transform:translateY(16px)}
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
 
+  /* "Pular para o conteúdo": fora da tela até receber foco pelo Tab. */
+  .pular{position:absolute;left:12px;top:-80px;z-index:1000;padding:12px 18px;border-radius:999px;
+    background:var(--amber);color:var(--ink);font-family:"Bebas Neue",sans-serif;letter-spacing:1.5px}
+  .pular:focus{top:12px}
   /* Selo de demonstração: só aparece em prévia, quando a casa ainda não tem
      agenda própria e o site mostra o recurso com exemplo. */
   .selo-exemplo{display:inline-block;vertical-align:middle;margin-left:8px;
-    padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;
+    padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700;
     letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;
     background:rgba(255,255,255,.14);color:inherit;opacity:.85;
     border:1px solid currentColor}
@@ -588,6 +607,19 @@
 </head>
 <body>
 
+{# Derivados WebP de 400 e 800px ficam ao lado das fotos de static/img/bar/
+   (foto-5.jpg -> foto-5-400.webp, foto-5-800.webp). O card de 157px no celular
+   baixava o JPEG de 1200px. Só essa pasta tem derivados: foto do Vercel Blob ou
+   de outro bar sai com a URL original (o `src` continua valendo para todos). #}
+{% macro fontes(url, tamanhos) -%}
+{%- if url and url.startswith('/static/img/bar/foto-') and url.endswith('.jpg') -%}
+{%- set base = url[:-4] -%}
+srcset="{{ base }}-400.webp 400w, {{ base }}-800.webp 800w" sizes="{{ tamanhos }}"
+{%- endif -%}
+{%- endmacro %}
+
+<a class="pular" href="#topo">Pular para o conteúdo</a>
+
 {% include "site/_demo_dock.html" %}
 
 {# Dois <nav> na página (este e o menu do celular): cada um precisa do próprio
@@ -603,18 +635,21 @@
     {% if reviews or site.nota_google %}<a href="#avaliacoes">Avaliações</a>{% endif %}
     {% if gallery %}<a href="#galeria">Galeria</a>{% endif %}
     {% if eventos %}<a href="#agenda">Agenda</a>{% endif %}
-    <a href="#reservar">Reservar</a>
     <a href="#contato">Contato</a>
-    <a class="nav-cta" href="{{ url_do_sistema() }}">Entrar no sistema</a>
+    {# O CTA do menu é a reserva: o freguês não tem conta no sistema. O acesso
+       do dono fica só no rodapé ("Área do lojista"). #}
+    <a class="nav-cta" href="#reservar">Reservar</a>
   </div>
   <div class="nav-ctrls">
     <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema claro/escuro" title="Alternar tema"><span id="theme-ic">☀</span></button>
-    <button class="mug-btn" id="mugBtn" onclick="toggleMenu()" aria-label="Abrir menu" aria-expanded="false">
+    {# A caneca sozinha não dizia que era menu: a palavra vai junto e vira o
+       nome acessível do botão. #}
+    <button class="mug-btn" id="mugBtn" onclick="toggleMenu()" aria-expanded="false" aria-controls="mobileMenu">
       {# Os dois ícones do topo ficam acima da dobra e são de 30/40px: entram
          sem `loading="lazy"` de propósito (adiar imagem visível na primeira
          tela é o uso errado do lazy) e com width/height pra não empurrar o
          layout quando carregam. #}
-      <img src="{{ url_for('static', filename='img/favicon-64.png') }}" alt="Menu do {{ site.nome }}" width="40" height="40" decoding="async">
+      <img src="{{ url_for('static', filename='img/favicon-64.png') }}" alt="" width="40" height="40" decoding="async"><span>Menu</span>
     </button>
   </div>
 </nav>
@@ -622,14 +657,13 @@
 <!-- MENU CANECA (mobile): a caneca derrama o chopp e revela os itens -->
 <div class="menu-scrim" id="menuScrim" onclick="toggleMenu()"></div>
 <div class="mobile-menu" id="mobileMenu" role="navigation" aria-label="Menu principal">
-  {% if dishes %}<a href="#cardapio" onclick="toggleMenu()">Cardápio</a>{% endif %}
-  {% if team or gallery %}<a href="#historia" onclick="toggleMenu()">História</a>{% endif %}
-  {% if reviews or site.nota_google %}<a href="#avaliacoes" onclick="toggleMenu()">Avaliações</a>{% endif %}
-  {% if gallery %}<a href="#galeria" onclick="toggleMenu()">Galeria</a>{% endif %}
-  {% if eventos %}<a href="#agenda" onclick="toggleMenu()">Agenda</a>{% endif %}
-  <a href="#reservar" onclick="toggleMenu()">Reservar</a>
-  <a href="#contato" onclick="toggleMenu()">Contato</a>
-  <a class="mm-cta" href="{{ url_do_sistema() }}">Entrar no sistema</a>
+  {% if dishes %}<a href="#cardapio" onclick="toggleMenu(this)">Cardápio</a>{% endif %}
+  {% if team or gallery %}<a href="#historia" onclick="toggleMenu(this)">História</a>{% endif %}
+  {% if reviews or site.nota_google %}<a href="#avaliacoes" onclick="toggleMenu(this)">Avaliações</a>{% endif %}
+  {% if gallery %}<a href="#galeria" onclick="toggleMenu(this)">Galeria</a>{% endif %}
+  {% if eventos %}<a href="#agenda" onclick="toggleMenu(this)">Agenda</a>{% endif %}
+  <a href="#contato" onclick="toggleMenu(this)">Contato</a>
+  <a class="mm-cta" href="#reservar" onclick="toggleMenu(this)">Reservar</a>
 </div>
 
 {# <main> = o conteúdo do bar. Ficam de fora o banner de prévia, os dois menus,
@@ -644,10 +678,11 @@
      estoura BuildError e o site do cliente novo devolve 500. #}
   <div class="hero-bg"{% if site.hero_foto %} style="background-image:url('{{ url_for('static', filename=site.hero_foto) }}')"{% endif %}></div>
   <div class="embers" id="embers"></div>
-  <div class="kicker" data-hero>{{ site.kicker }}</div>
-  <h1 class="neon"><span class="b">{{ site.hero_linha1 }}</span><span class="b">{{ site.hero_linha2 }}</span></h1>
-  <p class="tagline" data-hero>{{ site.tagline }}</p>
-  <p class="subline" data-hero>{{ site.subline }}</p>
+  {# Bar sem cadastro completo: sem os guards o letreiro dizia "None None". #}
+  {% if site.kicker %}<div class="kicker" data-hero>{{ site.kicker }}</div>{% endif %}
+  <h1 class="neon"><span class="b">{{ site.hero_linha1 or site.nome }}</span>{% if site.hero_linha2 %}<span class="b">{{ site.hero_linha2 }}</span>{% endif %}</h1>
+  {% if site.tagline %}<p class="tagline" data-hero>{{ site.tagline }}</p>{% endif %}
+  {% if site.subline %}<p class="subline" data-hero>{{ site.subline }}</p>{% endif %}
   {# Selo discreto de prova social no topo. Sem selo escrito, a nota do Google
      monta o texto sozinha; sem nota nenhuma, o selo não existe (badge só com
      estrelas e um "None" do lado era o que aparecia antes). #}
@@ -657,10 +692,14 @@
     {%- else %} {{ site.nota_google }} no Google{% if site.qtd_avaliacoes %} · {{ site.qtd_avaliacoes }} avaliações{% endif %}
     {%- endif %}</div>
   {% endif %}
+  {# Cada botão só com o dado dele: sem o guard, prévia sem WhatsApp ou sem
+     endereço publicava wa.me/None e um mapa procurando "None". #}
+  {% if site.whatsapp or site.maps_query %}
   <div class="cta-row" data-hero>
-    <a class="btn btn-primary" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener">Chamar no WhatsApp</a>
-    <a class="btn btn-ghost" href="https://www.google.com/maps/search/?api=1&query={{ site.maps_query }}" target="_blank" rel="noopener">Como chegar</a>
+    {% if site.whatsapp %}<a class="btn btn-primary" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener">Chamar no WhatsApp</a>{% endif %}
+    {% if site.maps_query %}<a class="btn btn-ghost" href="https://www.google.com/maps/search/?api=1&query={{ site.maps_query }}" target="_blank" rel="noopener">Como chegar</a>{% endif %}
   </div>
+  {% endif %}
   <div class="scroll-hint">{{ copy.scroll }}</div>
 </header>
 
@@ -715,11 +754,10 @@
       {% for d in dishes %}
       <div class="dish reveal{% if d.destaque %} hot{% endif %}">
         {% if d.tag %}<span class="star-tag">{{ d.tag }}</span>{% endif %}
-        {# Foto do prato entra como background (o corte 4/3 do card depende
-           disso). `role="img"` + rótulo é o que dá a esse pixel o mesmo nome
-           que um <img alt> teria; a URL da foto o Google recebe pelo
-           `MenuItem.image` do JSON-LD. #}
-        {% if d.img %}<div class="photo" role="img" aria-label="{{ d.nome }}, prato do {{ site.nome }}" style="background-image:url('{{ d.img }}')"></div>{% endif %}
+        {# Foto do prato como <img> (o corte do card é `object-fit:cover`):
+           background-image não tem lazy nem srcset, e o celular baixava as
+           quatro fotos de 1200px no load. #}
+        {% if d.img %}<img class="photo" src="{{ d.img }}" {{ fontes(d.img, '(max-width:560px) 100vw, 400px') }} alt="{{ d.nome }}, prato do {{ site.nome }}" width="400" height="300" loading="lazy" decoding="async">{% endif %}
         <div class="body">
           {# Preço na mesma linha do nome, alinhado à direita: é a primeira
              pergunta de quem lê cardápio, e o `{% if %}` antes do filtro é
@@ -734,6 +772,11 @@
       </div>
       {% endfor %}
     </div>
+    {# A página de cardápio (a do QR da mesa) só era citada no JSON-LD: nenhum
+       link levava até ela. Relativo de propósito, fica no domínio do bar. #}
+    {% if tenant and tenant.slug %}
+    <p class="reveal" style="margin-top:34px;text-align:center"><a class="btn btn-ghost" href="{{ url_for('public.cardapio', slug=tenant.slug) }}">Ver cardápio completo</a></p>
+    {% endif %}
   </div>
 </section>
 {% endif %}
@@ -749,7 +792,7 @@
         <p>{{ copy.historia.texto }}</p>
       </div>
       <div class="family reveal">
-        {% if gallery %}<img class="fam-photo" src="{{ gallery[0].img }}" alt="{{ (gallery[0].legenda ~ ' — ' ~ site.nome) if gallery[0].legenda else ('A casa e a equipe do ' ~ site.nome) }}" loading="lazy" decoding="async">{% endif %}
+        {% if gallery %}<img class="fam-photo" src="{{ gallery[0].img }}" {{ fontes(gallery[0].img, '(max-width:820px) 100vw, 520px') }} alt="{{ (gallery[0].legenda ~ ' — ' ~ site.nome) if gallery[0].legenda else ('A casa e a equipe do ' ~ site.nome) }}" width="800" height="600" loading="lazy" decoding="async">{% endif %}
         {% for m in team %}
         <div class="fam-card"><div class="av">{{ m.emoji }}</div><div><b>{{ m.nome }}</b>{% if m.papel %}<small>{{ m.papel }}</small>{% endif %}</div></div>
         {% endfor %}
@@ -851,9 +894,13 @@
     <div class="gallery reveal">
       {% for g in gallery %}{% if loop.index <= 6 %}
       {# `lb(this)` em vez de `lb(src)`: assim a foto ampliada leva junto o
-         mesmo alt da miniatura, em vez de cair no texto genérico do lightbox. #}
-      <figure onclick="lb(this)">
-        <img src="{{ g.img }}" alt="{{ (g.legenda ~ ' — ' ~ site.nome) if g.legenda else (site.nome ~ ' — foto da casa ' ~ loop.index) }}" loading="lazy" decoding="async">
+         mesmo alt da miniatura, em vez de cair no texto genérico do lightbox.
+         O <button> é o que abre a foto pelo teclado (a <figure> clicável não
+         recebia foco). O lightbox amplia o JPEG original, não o derivado. #}
+      <figure>
+        <button type="button" onclick="lb(this)" aria-haspopup="dialog">
+          <img src="{{ g.img }}" {{ fontes(g.img, '(max-width:820px) 50vw, 380px') }} alt="{{ (g.legenda ~ ' — ' ~ site.nome) if g.legenda else (site.nome ~ ' — foto ' ~ loop.index) }}" width="800" height="600" loading="lazy" decoding="async">
+        </button>
       </figure>
       {% endif %}{% endfor %}
     </div>
@@ -884,10 +931,10 @@
         {# Quando o site é servido pelo domínio do bar, o backend resolve o tenant
            pelo Host. Em /bar/<slug> (demos) o Host é o do produto — daí este campo. #}
         <input type="hidden" name="slug" value="{{ tenant.slug if tenant else '' }}">
-        {# O POST sai por fetch, mas com FormData(form): o FormData carrega este campo
-           junto com o resto. Tirar daqui abre o formulário de reserva pra POST
-           forjado de qualquer site. O mesmo token vai no header X-CSRFToken. #}
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {# Sem token de CSRF no HTML, de propósito: chamar csrf_token() aqui
+           gravava sessão e a página do bar não podia ser cacheada na borda. O
+           `enviarReserva` busca o token em /novidades/token na hora do envio e
+           manda no header X-CSRFToken (mesmo caminho do _novidades.html). #}
         <div class="field">
           <label for="rf-nome">Seu nome</label>
           <input id="rf-nome" name="nome" type="text" autocomplete="name" placeholder="Como te chamamos?" required>
@@ -937,16 +984,17 @@
     </div>
     <div class="contact">
       <ul class="info-list reveal">
-        <li><span class="em">📍</span><span><b>Endereço</b>{{ site.endereco }}</span></li>
-        <li><span class="em">🕐</span><span><b>Horário</b>{{ site.horario }}</span></li>
-        <li><span class="em">📞</span><span><b>Telefone / WhatsApp</b>{{ site.telefone_exibicao }}</span></li>
+        {# Cada linha só com o dado: a prévia sem cadastro mostrava "None". #}
+        {% if site.endereco %}<li><span class="em">📍</span><span><b>Endereço</b>{{ site.endereco }}</span></li>{% endif %}
+        {% if site.horario %}<li><span class="em">🕐</span><span><b>Horário</b>{{ site.horario }}</span></li>{% endif %}
+        {% if site.telefone_exibicao %}<li><span class="em">📞</span><span><b>Telefone / WhatsApp</b>{{ site.telefone_exibicao }}</span></li>{% endif %}
         {% if site.servicos %}<li><span class="em">🍴</span><span><b>Serviços</b>{{ site.servicos }}</span></li>{% endif %}
       </ul>
       <div class="map-cta reveal">
         <h3>{{ copy.cta.titulo }}</h3>
         <p style="color:var(--cream-dim)">{{ copy.cta.linha }}</p>
-        <a class="btn btn-primary" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener" style="text-align:center">Falar no WhatsApp</a>
-        <a class="btn btn-ghost" href="https://www.google.com/maps/search/?api=1&query={{ site.maps_query }}" target="_blank" rel="noopener" style="text-align:center">Abrir no mapa</a>
+        {% if site.whatsapp %}<a class="btn btn-primary" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener" style="text-align:center">Falar no WhatsApp</a>{% endif %}
+        {% if site.maps_query %}<a class="btn btn-ghost" href="https://www.google.com/maps/search/?api=1&query={{ site.maps_query }}" target="_blank" rel="noopener" style="text-align:center">Abrir no mapa</a>{% endif %}
       </div>
     </div>
   </div>
@@ -958,27 +1006,41 @@
   <div class="wrap">
     <div class="fneon">{{ site.nome }}</div>
     <small>{% if site.cidade_uf %}{{ site.cidade_uf }} · {% endif %}{{ copy.rodape }}</small>
+    {# Rede social só com endereço https:// — o campo é texto livre e um
+       "javascript:" ali viraria script no clique. Sem nenhuma, sem a fileira. #}
+    {% set insta_ok = site.instagram_url and site.instagram_url.startswith('https://') %}
+    {% set face_ok = site.facebook_url and site.facebook_url.startswith('https://') %}
+    {% if insta_ok or face_ok %}
     <div class="socials">
+      {% if insta_ok %}
       <a href="{{ site.instagram_url }}" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram">
         <svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.9.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.86s0 3.6-.07 4.86c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.86.07s-3.6 0-4.86-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23C2.2 15.6 2.2 15.2 2.2 12s0-3.6.07-4.86c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.4 2.2 8.8 2.2 12 2.2zm0 1.98c-3.15 0-3.52.01-4.76.07-.9.04-1.39.2-1.71.32-.43.17-.74.37-1.06.69-.32.32-.52.63-.69 1.06-.12.32-.28.81-.32 1.71-.06 1.24-.07 1.61-.07 4.76s.01 3.52.07 4.76c.04.9.2 1.39.32 1.71.17.43.37.74.69 1.06.32.32.63.52 1.06.69.32.12.81.28 1.71.32 1.24.06 1.61.07 4.76.07s3.52-.01 4.76-.07c.9-.04 1.39-.2 1.71-.32.43-.17.74-.37 1.06-.69.32-.32.52-.63.69-1.06.12-.32.28-.81.32-1.71.06-1.24.07-1.61.07-4.76s-.01-3.52-.07-4.76c-.04-.9-.2-1.39-.32-1.71-.17-.43-.37-.74-.69-1.06-.32-.32-.63-.52-1.06-.69-.32-.12-.81-.28-1.71-.32-1.24-.06-1.61-.07-4.76-.07zm0 3.38a4.44 4.44 0 1 1 0 8.88 4.44 4.44 0 0 1 0-8.88zm0 7.32a2.88 2.88 0 1 0 0-5.76 2.88 2.88 0 0 0 0 5.76zm5.65-7.52a1.04 1.04 0 1 1-2.08 0 1.04 1.04 0 0 1 2.08 0z"/></svg>
       </a>
+      {% endif %}
+      {% if face_ok %}
       <a href="{{ site.facebook_url }}" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook">
         <svg viewBox="0 0 24 24"><path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z"/></svg>
       </a>
+      {% endif %}
     </div>
-    <div><a class="lojista" href="{{ url_do_sistema() }}">Área do lojista · entrar no sistema →</a></div>
+    {% endif %}
+    <div><a class="lojista" href="{{ url_do_sistema() }}">Área do lojista</a></div>
   </div>
   {% with novidades_bar = tenant.slug if tenant else '' %}{% include "site/_novidades.html" %}{% endwith %}
   {% include "site/_selo_caminhos.html" %}
 </footer>
 
-<div class="lightbox" id="lightbox" onclick="this.classList.remove('on')">
-  <span class="x">✕</span><img id="lightbox-img" src="" alt="Foto do {{ site.nome }}" decoding="async">
+{# Fechado é display:none (fora do Tab). Aberto: diálogo modal com botão de
+   fechar de verdade; clique fora ou Esc também fecham. #}
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Foto ampliada" onclick="if(event.target===this)lbFechar()">
+  <button type="button" class="x" id="lightbox-x" onclick="lbFechar()" aria-label="Fechar">✕</button><img id="lightbox-img" src="" alt="Foto do {{ site.nome }}" decoding="async">
 </div>
 
+{% if site.whatsapp %}
 <a class="wa" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener" aria-label="WhatsApp">
   <svg viewBox="0 0 24 24"><path d="M.06 24l1.68-6.13A11.9 11.9 0 0 1 .16 11.9C.16 5.34 5.5.02 12.06.02a11.8 11.8 0 0 1 8.4 3.49 11.8 11.8 0 0 1 3.48 8.4c0 6.56-5.34 11.89-11.9 11.89a11.9 11.9 0 0 1-5.7-1.45L.06 24zM6.6 20.15c1.68.998 3.28 1.6 5.44 1.6 5.45 0 9.89-4.43 9.89-9.88 0-5.46-4.43-9.89-9.88-9.89-5.46 0-9.89 4.43-9.89 9.89 0 2.27.6 3.98 1.7 5.7l-1 3.65 3.65-.97zM17.5 14.3c-.07-.12-.27-.2-.57-.35-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.08.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2-1.41.25-.7.25-1.29.17-1.42z"/></svg>
 </a>
+{% endif %}
 
 <script>
   var TEMA_KEY='fdb-theme-{{ tenant.slug if tenant and tenant.slug else "site" }}';
@@ -1000,8 +1062,10 @@
   document.addEventListener('DOMContentLoaded',function(){
     if(document.documentElement.getAttribute('data-theme')==='light')document.getElementById('theme-ic').textContent='☾';
   });
-  function toggleMenu(){
-    var open=document.getElementById('mobileMenu').classList.toggle('open');
+  // `link` = o item do menu que fechou (ele já leva o foco até a seção).
+  function toggleMenu(link){
+    var menu=document.getElementById('mobileMenu');
+    var open=menu.classList.toggle('open');
     document.getElementById('menuScrim').classList.toggle('open',open);
     var mug=document.getElementById('mugBtn');
     mug.classList.toggle('open',open);
@@ -1009,6 +1073,10 @@
     // re-dispara o pingo a cada abertura
     if(open){mug.classList.remove('open');void mug.offsetWidth;mug.classList.add('open');}
     document.body.style.overflow=open?'hidden':'';
+    // Foco acompanha o menu (como no brasa): abre no 1º link, fecha no botão.
+    // Fechar por um link não devolve o foco — o link já levou à seção.
+    if(open){var p=menu.querySelector('a');if(p)p.focus();}
+    else if(!link){mug.focus();}
   }
   // data mínima = hoje no seletor de reserva
   (function(){
@@ -1020,7 +1088,13 @@
     var form=ev.target, btn=form.querySelector('button[type=submit]'), msg=document.getElementById('reservaMsg');
     btn.disabled=true; var txt=btn.textContent; btn.textContent='Enviando…';
     msg.className='reserva-msg';
-    fetch('{{ url_for("public.reservar") }}',{method:'POST',body:new FormData(form),headers:{'Accept':'application/json','X-CSRFToken':'{{ csrf_token() }}'}})
+    // Token de CSRF pedido na hora (a página não carrega sessão, pra poder
+    // ser cacheada na borda) e mandado no header X-CSRFToken.
+    fetch('{{ url_for("public.novidades_token") }}',{credentials:'same-origin'})
+      .then(function(r){return r.json();})
+      .then(function(t){
+        return fetch('{{ url_for("public.reservar") }}',{method:'POST',credentials:'same-origin',body:new FormData(form),headers:{'Accept':'application/json','X-CSRFToken':t.token}});
+      })
       .then(function(r){return r.json().then(function(j){return {ok:r.ok,j:j};});})
       .then(function(res){
         if(res.ok && res.j.ok){
@@ -1044,14 +1118,28 @@
   }
   // Aceita a <figure> clicada (leva o alt da miniatura junto) ou, por
   // compatibilidade, a URL crua — assim nada quebra se alguém chamar lb('x.jpg').
+  var lbOrigem=null;
   function lb(origem){
     var b=document.getElementById('lightbox'), alvo=document.getElementById('lightbox-img');
     var mini=(origem && origem.querySelector) ? origem.querySelector('img') : null;
     alvo.src = mini ? mini.src : origem;
     if(mini && mini.alt) alvo.alt = mini.alt;
     b.classList.add('on');
+    // Foco entra no "Fechar" e volta pra foto clicada quando o diálogo fecha.
+    lbOrigem=(origem && origem.focus) ? origem : null;
+    document.getElementById('lightbox-x').focus();
   }
-  document.addEventListener('keydown',function(e){if(e.key==='Escape')document.getElementById('lightbox').classList.remove('on');});
+  function lbFechar(){
+    var b=document.getElementById('lightbox');
+    if(!b.classList.contains('on')) return;
+    b.classList.remove('on');
+    if(lbOrigem) lbOrigem.focus();
+  }
+  document.addEventListener('keydown',function(e){
+    if(e.key!=='Escape') return;
+    lbFechar();
+    if(document.getElementById('mobileMenu').classList.contains('open')) toggleMenu();
+  });
 (function(){
   // embers
   var host=document.getElementById('embers');

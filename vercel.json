@@ -2,30 +2,34 @@
   "regions": [
     "gru1"
   ],
-  "rewrites": [
+  "routes": [
     {
-      "source": "/(.*)",
-      "destination": "api/index.py"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/static/img/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400"
-        }
-      ]
+      "src": "/(.*)",
+      "headers": {
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "X-Frame-Options": "SAMEORIGIN",
+        "Permissions-Policy": "camera=(), geolocation=(), microphone=(self)"
+      },
+      "continue": true
     },
     {
-      "source": "/static/(.*)\\.(css|js|ico|woff2)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400"
-        }
-      ]
+      "src": "/static/img/(.*)",
+      "dest": "/app/static/img/$1",
+      "headers": {
+        "Cache-Control": "public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400"
+      }
+    },
+    {
+      "src": "/static/(.*\\.(?:css|js|ico|woff2|svg|webp|png|jpg))",
+      "dest": "/app/static/$1",
+      "headers": {
+        "Cache-Control": "public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400"
+      }
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/api/index.py"
     }
   ]
 }

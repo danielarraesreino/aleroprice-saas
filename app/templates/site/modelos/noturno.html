@@ -101,12 +101,12 @@
   })();
 </script>
 {# Motion (ex-Framer Motion), build vanilla — versão pinada, sem @latest.
-   Carrega no <head>, antes da primeira pintura, por um motivo: o gate abaixo
-   precisa saber se a lib existe ANTES de o hero pintar. Se ele rodasse no fim
-   do <body>, o cartaz apareceria e só então sumiria pra animar — piscada feia.
-   Falha de CDN aqui não custa nada: o gate não acha window.Motion, a classe
-   .js-anim não entra e a página fica 100% visível e legível, só sem animação. #}
-<script src="https://cdn.jsdelivr.net/npm/motion@13.1.0/dist/motion.js"></script>
+   Com `defer`: 47 KB de terceiro não seguram mais a primeira pintura. O gate
+   abaixo carimba .js-anim já no <head> (o cartaz nasce no estado inicial, sem
+   piscar) e a animação lá embaixo só roda no DOMContentLoaded, quando o script
+   deferido já executou. Se a lib não veio (CDN fora do ar), a classe sai ali
+   mesmo e a página fica 100% visível e legível, só sem animação. #}
+<script defer src="https://cdn.jsdelivr.net/npm/motion@13.1.0/dist/motion.js"></script>
 <script>
   (function(){
     try{
@@ -117,7 +117,7 @@
       // caso simplesmente não animamos — página estática e inteira é sempre
       // melhor que página bonita e vazia.
       var escondida = document.visibilityState === 'hidden';
-      if(window.Motion && !reduz && !escondida){
+      if(!reduz && !escondida){
         /* Aba em segundo plano não liga o portão.
            Ctrl+clique, link aberto do WhatsApp, sessão restaurada: a aba nasce
            oculta, e o navegador não roda animação em aba oculta. Como todo estado
@@ -185,7 +185,7 @@
       --cream:#14141b;
       --cream-dim:#5c584e;
       --amber:#4c6a00;
-      --ember:#cf0b52;
+      --ember:#b80a49;
       --gold:#7b8f24;
       --neon:#4c6a00;
       --green:#2f7a52;
@@ -206,7 +206,7 @@
     --cream:#14141b;
     --cream-dim:#5c584e;
     --amber:#4c6a00;
-    --ember:#cf0b52;
+    --ember:#b80a49;
     --gold:#7b8f24;
     --neon:#4c6a00;
     --green:#2f7a52;
@@ -345,18 +345,18 @@
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
   .aovivo{display:inline-flex;align-items:center;gap:6px;color:var(--ember);
-    font-family:var(--cond);font-weight:700;letter-spacing:.14em;font-size:.7rem;text-transform:uppercase}
+    font-family:var(--cond);font-weight:700;letter-spacing:.14em;font-size:.75rem;text-transform:uppercase}
   .aovivo .bola{width:7px;height:7px;border-radius:50%;background:var(--ember);animation:bater 1.9s ease-in-out infinite}
   @keyframes bater{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
   .barra-fim{display:flex;align-items:center;gap:8px}
   .links{display:none}
   .icone{
-    width:34px;height:34px;display:grid;place-items:center;
+    width:44px;height:44px;display:grid;place-items:center;
     border:1px solid var(--linha);background:transparent;cursor:pointer;line-height:1;font-size:.95rem;
   }
   .icone:hover{border-color:var(--amber);color:var(--amber)}
   .btn-menu{
-    border:1px solid var(--linha);background:transparent;cursor:pointer;padding:8px 13px;
+    min-height:44px;border:1px solid var(--linha);background:transparent;cursor:pointer;padding:8px 13px;
     font-family:var(--cond);font-weight:800;text-transform:uppercase;letter-spacing:.16em;font-size:.82rem;
   }
   .btn-menu:hover{background:var(--amber);color:var(--ink);border-color:var(--amber)}
@@ -365,10 +365,14 @@
   .painel{
     position:fixed;inset:0;z-index:90;background:var(--ink);
     padding:16px var(--pad) 30px;display:flex;flex-direction:column;
-    transform:translateY(-100%);transition:transform .5s cubic-bezier(.6,0,.2,1);
+    transform:translateY(-100%);visibility:hidden;
+    transition:transform .5s cubic-bezier(.6,0,.2,1),visibility 0s .5s;
     overflow-y:auto;
   }
-  .painel.on{transform:none}
+  /* `visibility` é o que tira o painel fechado do Tab (antes só subia pra
+     fora da tela, com aria-hidden e links focáveis — inclusive no desktop). */
+  .painel.on{transform:none;visibility:visible;
+    transition:transform .5s cubic-bezier(.6,0,.2,1),visibility 0s 0s}
   .painel-topo{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
   .painel nav{display:flex;flex-direction:column;counter-reset:mm}
   .painel nav a{
@@ -443,7 +447,7 @@
   .proximo .dia .n{display:block;font-size:clamp(3.4rem,17vw,5.4rem)}
   .proximo .dia .m{display:block;font-size:clamp(.85rem,3.4vw,1.05rem);letter-spacing:.18em;margin-top:6px}
   .proximo .quem{min-width:0}
-  .proximo .rot{opacity:.72}
+  .proximo .rot{opacity:.9}   /* .72 dava 3,6:1 no claro; .9 passa de 4,5 */
   .proximo h2{
     font-family:var(--display);text-transform:uppercase;line-height:.94;
     font-size:clamp(1.35rem,6.4vw,2.4rem);margin:6px 0 4px;overflow-wrap:anywhere;
@@ -465,7 +469,7 @@
   .btn-linha{border-color:var(--linha);color:var(--cream)}
   .btn-linha:hover{border-color:var(--amber);color:var(--amber);transform:translateY(-2px)}
   .desce{margin-top:26px;font-family:var(--cond);font-weight:700;letter-spacing:.2em;
-    text-transform:uppercase;font-size:.74rem;color:var(--cream-dim)}
+    text-transform:uppercase;font-size:.75rem;color:var(--cream-dim)}
 
   /* ===================== LINE-UP (agenda) ===================== */
   .cab{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px}
@@ -480,7 +484,7 @@
     color:var(--amber);transition:color .2s ease;
   }
   .fila .data .n{display:block;font-size:2.5rem}
-  .fila .data .m{display:block;font-size:.72rem;letter-spacing:.12em;margin-top:5px}
+  .fila .data .m{display:block;font-size:.75rem;letter-spacing:.12em;margin-top:5px}
   .fila .info{min-width:0}
   .fila h3{
     font-family:var(--display);text-transform:uppercase;font-size:1.06rem;
@@ -488,13 +492,13 @@
   }
   .fila .meta{
     font-family:var(--cond);font-weight:700;text-transform:uppercase;letter-spacing:.12em;
-    font-size:.74rem;color:var(--cream-dim);margin-top:5px;
+    font-size:.75rem;color:var(--cream-dim);margin-top:5px;
   }
   .fila .meta em{font-style:normal;color:var(--ember)}
   .fila .desc{color:var(--cream-dim);font-size:.9rem;margin-top:6px}
   .fila .vai{
     grid-column:2;font-family:var(--cond);font-weight:800;text-transform:uppercase;
-    letter-spacing:.14em;font-size:.74rem;color:var(--ember);margin-top:8px;
+    letter-spacing:.14em;font-size:.75rem;color:var(--ember);margin-top:8px;
   }
   .fila:hover,.fila:focus-visible{background:var(--amber);color:var(--ink);outline:none;padding-left:10px}
   .fila:hover .data,.fila:focus-visible .data,
@@ -512,12 +516,12 @@
   }
   .canhoto .rot{color:var(--ember)}
   .canhoto.hoje{border-style:solid;border-color:var(--amber);background:var(--amber);color:var(--ink)}
-  .canhoto.hoje .rot{color:var(--ink);opacity:.72}
-  .canhoto.hoje .val{color:var(--ink);opacity:.72}
+  .canhoto.hoje .rot{color:var(--ink);opacity:.9}
+  .canhoto.hoje .val{color:var(--ink);opacity:.9}
   .canhoto h3{font-family:var(--display);text-transform:uppercase;font-size:1.2rem;line-height:1.05;margin:8px 0 6px;overflow-wrap:anywhere}
   .canhoto p{font-size:.95rem}
   .canhoto .val{margin-top:10px;font-family:var(--cond);font-weight:700;letter-spacing:.1em;
-    text-transform:uppercase;font-size:.74rem;color:var(--cream-dim)}
+    text-transform:uppercase;font-size:.75rem;color:var(--cream-dim)}
   .pisca{animation:pisca 2.6s ease-in-out infinite}
   @keyframes pisca{0%,100%{box-shadow:0 0 0 0 var(--ember)}50%{box-shadow:6px 6px 0 0 var(--ember)}}
 
@@ -538,7 +542,7 @@
     font-size:1.28rem;line-height:1.05;letter-spacing:.01em}
   .prato .etq{
     font-family:var(--cond);font-weight:800;text-transform:uppercase;letter-spacing:.12em;
-    font-size:.66rem;background:var(--ember);color:var(--ink);padding:3px 7px 2px;
+    font-size:.75rem;background:var(--ember);color:var(--ink);padding:3px 7px 2px;
   }
   /* `margin-left:auto` fecha a linha do balcão com o preço na direita. Quando
      nome + selo estouram a largura, o `flex-wrap` do .prato-topo desce o preço
@@ -573,6 +577,9 @@
     margin-top:clamp(22px,4vw,34px);
   }
   .folha figure{position:relative;margin:0;min-width:0}
+  /* o botão em volta da foto só existe pro teclado: visualmente some */
+  .folha .abre-foto{display:block;width:100%;padding:0;border:0;background:none;color:inherit;cursor:pointer}
+  .folha .abre-foto:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
   /* EIXO 5 — TRATAMENTO DE FOTO: DUOTONE.
      Foto de casa noturna chega com balanço de branco brigando entre si —
      uma amarelada do refletor, outra azulada do celular. O duotone joga
@@ -582,7 +589,7 @@
      É o oposto do `autoral`, que nunca trata cor porque a foto é comida. */
   .folha figure{isolation:isolate;background:var(--ink)}
   .folha img{
-    width:100%;aspect-ratio:4/3;max-height:160px;object-fit:cover;
+    width:100%;height:auto;aspect-ratio:4/3;max-height:160px;object-fit:cover;
     object-position:var(--pos);
     filter:var(--foto-mini);transition:filter .45s ease;cursor:pointer;
     border:1px solid var(--linha);
@@ -596,18 +603,19 @@
   .folha figure:hover img{filter:var(--foto-hover)}
   .folha figcaption{
     font-family:var(--cond);font-weight:700;text-transform:uppercase;letter-spacing:.12em;
-    font-size:.68rem;color:var(--cream-dim);margin-top:6px;
+    font-size:.75rem;color:var(--cream-dim);margin-top:6px;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
   .folha .idx{color:var(--ember);margin-right:6px}
   .acervo{font-family:var(--cond);font-weight:700;letter-spacing:.18em;text-transform:uppercase;
-    font-size:.7rem;color:var(--cream-dim);margin-top:2px}
+    font-size:.75rem;color:var(--cream-dim);margin-top:2px}
 
   .luz{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.94);display:none;
     align-items:center;justify-content:center;padding:20px}
   .luz.on{display:flex}
   .luz img{max-width:94vw;max-height:86vh;object-fit:contain}
-  .luz .x{position:absolute;top:14px;right:18px;font-family:var(--cond);font-weight:800;
+  .luz .x{position:absolute;top:10px;right:12px;width:48px;height:48px;display:grid;place-items:center;
+    background:none;border:0;font-family:var(--cond);font-weight:800;
     font-size:1.7rem;color:#fff;cursor:pointer;line-height:1}
 
   /* ===================== AVALIAÇÕES (recortes) ===================== */
@@ -666,12 +674,14 @@
     max-width:50%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .campo{margin-bottom:14px}
   .campo label{display:block;font-family:var(--cond);font-weight:700;text-transform:uppercase;
-    letter-spacing:.16em;font-size:.72rem;color:var(--cream-dim);margin-bottom:4px}
+    letter-spacing:.16em;font-size:.75rem;color:var(--cream-dim);margin-bottom:4px}
   .campo input,.campo textarea{
     width:100%;background:transparent;border:0;border-bottom:2px solid var(--linha);
     border-radius:0;padding:9px 2px;color:var(--cream);font-family:var(--corpo);font-size:1rem;
   }
   .campo input:focus,.campo textarea:focus{outline:none;border-bottom-color:var(--amber)}
+  /* Só a cor da linha de baixo mudava: pouco pra quem navega por teclado. */
+  .campo input:focus-visible,.campo textarea:focus-visible{outline:3px solid currentColor;outline-offset:2px}
   .campo textarea{resize:vertical;min-height:56px}
   .dupla{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   .aviso{margin-top:12px;padding:11px 13px;display:none;font-family:var(--cond);
@@ -704,10 +714,10 @@
   @supports not ((-webkit-text-stroke:1px red)){.assinatura{color:var(--cream-dim)}}
   .rodape-linha{color:var(--cream-dim);font-size:.9rem;margin-top:14px}
   .redes{display:flex;gap:10px;margin-top:18px}
-  .redes a{width:40px;height:40px;display:grid;place-items:center;border:1px solid var(--linha);color:var(--cream)}
+  .redes a{width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--linha);color:var(--cream)}
   .redes a:hover{background:var(--amber);color:var(--ink);border-color:var(--amber)}
   .redes svg{width:19px;height:19px;fill:currentColor}
-  .lojista{display:inline-block;margin-top:20px;font-family:var(--cond);font-weight:700;
+  .lojista{display:inline-flex;align-items:center;min-height:44px;margin-top:20px;font-family:var(--cond);font-weight:700;
     text-transform:uppercase;letter-spacing:.14em;font-size:.76rem;color:var(--cream-dim);
     border-bottom:1px solid var(--linha);padding-bottom:3px}
   .lojista:hover{color:var(--amber);border-color:var(--amber)}
@@ -744,6 +754,7 @@
       display:flex;align-items:center;gap:22px;
       font-family:var(--cond);font-weight:700;text-transform:uppercase;letter-spacing:.14em;font-size:.82rem;
     }
+    .links a{display:inline-flex;align-items:center;min-height:44px}
     .links a:hover{color:var(--amber)}
     .btn-menu{display:none}
     .casa{grid-template-columns:1fr 1fr;gap:44px;align-items:center}
@@ -769,10 +780,16 @@
     .js-anim .rv,.js-anim [data-hero]{opacity:1!important;transform:none!important}
   }
 
+  /* "Pular para o conteúdo": fora da tela até receber foco pelo Tab. */
+  .pular{position:absolute;left:12px;top:-80px;z-index:1000;padding:12px 18px;
+    background:var(--amber);color:var(--ink);font-family:var(--cond);font-weight:800;
+    text-transform:uppercase;letter-spacing:.12em}
+  .pular:focus{top:12px}
+
   /* Selo de demonstração: só aparece em prévia, quando a casa ainda não tem
      agenda própria e o site mostra o recurso com exemplo. */
   .selo-exemplo{display:inline-block;vertical-align:middle;margin-left:8px;
-    padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;
+    padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700;
     letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;
     background:rgba(255,255,255,.14);color:inherit;opacity:.85;
     border:1px solid currentColor}
@@ -804,6 +821,8 @@
 {% endif %}
 </head>
 <body data-heroina="agenda" data-leitura="cartaz" data-foto="duotone">
+
+<a class="pular" href="#topo">Pular para o conteúdo</a>
 
 {% include "site/_demo_dock.html" %}
 
@@ -844,20 +863,20 @@
   </div>
 </div>
 
-<div class="painel" id="painel" role="dialog" aria-modal="true" aria-label="Menu do site" aria-hidden="true">
+<div class="painel" id="painel" role="dialog" aria-modal="true" aria-label="Menu do site">
   <div class="painel-topo">
     <span class="rot">{{ nome_bar|upper }}</span>
     <button class="icone" onclick="abrirMenu()" aria-label="Fechar menu">✕</button>
   </div>
   <nav aria-label="Menu do site">
-    {% if eventos %}<a href="#agenda" onclick="abrirMenu()">Agenda</a>{% endif %}
-    {% if promocoes %}<a href="#promocoes" onclick="abrirMenu()">Promoções</a>{% endif %}
-    {% if dishes %}<a href="#cardapio" onclick="abrirMenu()">Cardápio</a>{% endif %}
-    {% if gallery %}<a href="#galeria" onclick="abrirMenu()">Galeria</a>{% endif %}
-    {% if reviews or site.nota_google %}<a href="#avaliacoes" onclick="abrirMenu()">Avaliações</a>{% endif %}
-    {% if team or gallery %}<a href="#historia" onclick="abrirMenu()">A casa</a>{% endif %}
-    <a href="#reservar" onclick="abrirMenu()">Reservar</a>
-    <a href="#contato" onclick="abrirMenu()">Contato</a>
+    {% if eventos %}<a href="#agenda" onclick="abrirMenu(this)">Agenda</a>{% endif %}
+    {% if promocoes %}<a href="#promocoes" onclick="abrirMenu(this)">Promoções</a>{% endif %}
+    {% if dishes %}<a href="#cardapio" onclick="abrirMenu(this)">Cardápio</a>{% endif %}
+    {% if gallery %}<a href="#galeria" onclick="abrirMenu(this)">Galeria</a>{% endif %}
+    {% if reviews or site.nota_google %}<a href="#avaliacoes" onclick="abrirMenu(this)">Avaliações</a>{% endif %}
+    {% if team or gallery %}<a href="#historia" onclick="abrirMenu(this)">A casa</a>{% endif %}
+    <a href="#reservar" onclick="abrirMenu(this)">Reservar</a>
+    <a href="#contato" onclick="abrirMenu(this)">Contato</a>
   </nav>
   <a class="btn btn-linha entrar" href="{{ url_do_sistema() }}">Entrar no sistema</a>
 </div>
@@ -965,6 +984,10 @@
       </div>
       {% endfor %}
     </div>
+    {# A página do cardápio (a do QR da mesa) só aparecia no JSON-LD. #}
+    {% if tenant and tenant.slug %}
+    <p class="rv" style="margin-top:24px"><a class="btn btn-linha" href="{{ url_for('public.cardapio', slug=tenant.slug) }}">Ver cardápio completo</a></p>
+    {% endif %}
   </div>
 </section>
 {% endif %}
@@ -1033,8 +1056,10 @@
       {% if loop.index <= 6 %}
       <figure>
         {% set legenda_foto = nome_bar ~ ' — ' ~ (g.legenda or 'ambiente da casa') %}
-        <img src="{{ g.img }}" alt="{{ legenda_foto }}" loading="lazy" decoding="async"
-             onclick="ampliar('{{ g.img }}', this.alt)">
+        {# <button> em volta: a foto abre também por Tab + Enter. #}
+        <button type="button" class="abre-foto" onclick="ampliar('{{ g.img }}', this.querySelector('img').alt, this)" aria-haspopup="dialog">
+          <img src="{{ g.img }}" alt="{{ legenda_foto }}" width="800" height="600" loading="lazy" decoding="async">
+        </button>
         <figcaption><span class="idx">{{ '%02d' % loop.index }}</span>{{ g.legenda or nome_bar }}</figcaption>
       </figure>
       {% endif %}
@@ -1189,10 +1214,10 @@
         {# Quando o site é servido pelo domínio do bar, o backend resolve o tenant
            pelo Host. Em /bar/<slug> (prévias) o Host é o do produto — daí o campo. #}
         <input type="hidden" name="slug" value="{{ tenant.slug if tenant else '' }}">
-        {# O POST sai por fetch, mas com FormData(form): o FormData carrega este campo
-           junto com o resto. Tirar daqui abre o formulário de reserva pra POST
-           forjado de qualquer site. O mesmo token vai no header X-CSRFToken. #}
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {# Sem token de CSRF no HTML, de propósito: chamar csrf_token() aqui
+           gravava sessão e a página do bar não podia ser cacheada na borda. O
+           `enviarReserva` busca o token em /novidades/token na hora do envio e
+           manda no header X-CSRFToken (mesmo caminho do _novidades.html). #}
         <div class="ficha-topo">
           <span class="rot">Reserva de mesa</span>
           <span class="casa-nome">{{ nome_bar }}</span>
@@ -1283,14 +1308,18 @@
   <div class="wrap">
     <div class="assinatura" style="--n:{{ [nome_bar|length, 6]|max }}">{{ nome_bar|upper }}</div>
     <div class="rodape-linha">{% if site.cidade_uf %}{{ site.cidade_uf }} · {% endif %}{{ copy.rodape }}</div>
-    {% if site.instagram_url or site.facebook_url %}
+    {# Rede social só com https:// — o campo é texto livre e um "javascript:"
+       ali viraria script no clique. #}
+    {% set insta_ok = site.instagram_url and site.instagram_url.startswith('https://') %}
+    {% set face_ok = site.facebook_url and site.facebook_url.startswith('https://') %}
+    {% if insta_ok or face_ok %}
     <div class="redes">
-      {% if site.instagram_url %}
+      {% if insta_ok %}
       <a href="{{ site.instagram_url }}" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram">
         <svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.9.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.86s0 3.6-.07 4.86c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.86.07s-3.6 0-4.86-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23C2.2 15.6 2.2 15.2 2.2 12s0-3.6.07-4.86c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.4 2.2 8.8 2.2 12 2.2zm0 1.98c-3.15 0-3.52.01-4.76.07-.9.04-1.39.2-1.71.32-.43.17-.74.37-1.06.69-.32.32-.52.63-.69 1.06-.12.32-.28.81-.32 1.71-.06 1.24-.07 1.61-.07 4.76s.01 3.52.07 4.76c.04.9.2 1.39.32 1.71.17.43.37.74.69 1.06.32.32.63.52 1.06.69.32.12.81.28 1.71.32 1.24.06 1.61.07 4.76.07s3.52-.01 4.76-.07c.9-.04 1.39-.2 1.71-.32.43-.17.74-.37 1.06-.69.32-.32.52-.63.69-1.06.12-.32.28-.81.32-1.71.06-1.24.07-1.61.07-4.76s-.01-3.52-.07-4.76c-.04-.9-.2-1.39-.32-1.71-.17-.43-.37-.74-.69-1.06-.32-.32-.63-.52-1.06-.69-.32-.12-.81-.28-1.71-.32-1.24-.06-1.61-.07-4.76-.07zm0 3.38a4.44 4.44 0 1 1 0 8.88 4.44 4.44 0 0 1 0-8.88zm0 7.32a2.88 2.88 0 1 0 0-5.76 2.88 2.88 0 0 0 0 5.76zm5.65-7.52a1.04 1.04 0 1 1-2.08 0 1.04 1.04 0 0 1 2.08 0z"/></svg>
       </a>
       {% endif %}
-      {% if site.facebook_url %}
+      {% if face_ok %}
       <a href="{{ site.facebook_url }}" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook">
         <svg viewBox="0 0 24 24"><path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z"/></svg>
       </a>
@@ -1304,8 +1333,8 @@
 </footer>
 
 {% if gallery %}
-<div class="luz" id="luz" onclick="this.classList.remove('on')">
-  <span class="x" role="button" aria-label="Fechar">✕</span>
+<div class="luz" id="luz" role="dialog" aria-modal="true" aria-label="Foto ampliada" onclick="if(event.target===this)fecharLuz()">
+  <button type="button" class="x" id="luz-x" onclick="fecharLuz()" aria-label="Fechar">✕</button>
   {# O alt é reescrito por ampliar() com a legenda da foto clicada; este aqui é
      o estado inicial, quando nenhuma foi aberta ainda. #}
   <img id="luz-img" src="" alt="{{ nome_bar }} — foto ampliada da casa" decoding="async">
@@ -1340,15 +1369,21 @@
     pintarIcone();
   }
 
-  function abrirMenu(){
+  // `link` = o item do painel que fechou (ele já leva até a seção).
+  function abrirMenu(link){
     var p = document.getElementById('painel');
+    var botao = document.getElementById('btn-menu');
     var aberto = p.classList.toggle('on');
-    p.setAttribute('aria-hidden', aberto ? 'false' : 'true');
-    document.getElementById('btn-menu').setAttribute('aria-expanded', aberto ? 'true' : 'false');
+    botao.setAttribute('aria-expanded', aberto ? 'true' : 'false');
     document.body.style.overflow = aberto ? 'hidden' : '';
+    // Foco acompanha o painel (padrão do brasa): entra no 1º link ao abrir e
+    // volta pro botão "Menu" ao fechar.
+    if(aberto){ var a = p.querySelector('nav a'); if(a) a.focus(); }
+    else if(!link){ botao.focus(); }
   }
 
-  function ampliar(src, alt){
+  var luzOrigem = null;
+  function ampliar(src, alt, origem){
     var l = document.getElementById('luz');
     if(!l) return;
     var img = document.getElementById('luz-img');
@@ -1357,12 +1392,20 @@
     // leitor de tela anunciaria a legenda genérica para qualquer foto.
     if(alt) img.alt = alt;
     l.classList.add('on');
+    // Foco no "Fechar"; ao fechar, volta pra foto que abriu.
+    luzOrigem = origem || null;
+    document.getElementById('luz-x').focus();
+  }
+  function fecharLuz(){
+    var l = document.getElementById('luz');
+    if(!l || !l.classList.contains('on')) return;
+    l.classList.remove('on');
+    if(luzOrigem) luzOrigem.focus();
   }
 
   document.addEventListener('keydown', function(e){
     if(e.key !== 'Escape') return;
-    var l = document.getElementById('luz');
-    if(l) l.classList.remove('on');
+    fecharLuz();
     if(document.getElementById('painel').classList.contains('on')) abrirMenu();
   });
 
@@ -1386,11 +1429,18 @@
     var txt = btn.textContent;
     btn.textContent = 'Enviando…';
     msg.className = 'aviso';
-    fetch('{{ url_for("public.reservar") }}', {
-      method: 'POST',
-      body: new FormData(form),
-      headers: {'Accept': 'application/json', 'X-CSRFToken': '{{ csrf_token() }}'}
-    })
+    // Token de CSRF pedido na hora (a página não carrega sessão, pra poder
+    // ser cacheada na borda) e mandado no header X-CSRFToken.
+    fetch('{{ url_for("public.novidades_token") }}', {credentials: 'same-origin'})
+      .then(function(r){ return r.json(); })
+      .then(function(t){
+        return fetch('{{ url_for("public.reservar") }}', {
+          method: 'POST',
+          credentials: 'same-origin',
+          body: new FormData(form),
+          headers: {'Accept': 'application/json', 'X-CSRFToken': t.token}
+        });
+      })
       .then(function(r){ return r.json().then(function(j){ return {ok: r.ok, j: j}; }); })
       .then(function(res){
         if(res.ok && res.j.ok){
@@ -1427,9 +1477,12 @@
      do ar) ou o usuário pediu menos movimento, .js-anim não está no <html> —
      nada aqui roda e nada ficou escondido. Só transform e opacity: tudo no
      compositor, sem reflow, 60fps em celular fraco. */
-  (function(){
+  // DOMContentLoaded: só aí o motion.js (defer) já rodou.
+  document.addEventListener('DOMContentLoaded', function(){
     var raiz = document.documentElement;
-    if(!window.Motion || !raiz.classList.contains('js-anim')) return;
+    // Lib não veio: tira o gate e a página aparece inteira, parada.
+    if(!window.Motion){ raiz.classList.remove('js-anim'); return; }
+    if(!raiz.classList.contains('js-anim')) return;
     var animate = Motion.animate, inView = Motion.inView,
         stagger = Motion.stagger, spring = Motion.spring, hover = Motion.hover;
 
@@ -1479,7 +1532,7 @@
     }catch(e){
       raiz.classList.remove('js-anim');
     }
-  })();
+  });
 </script>
 </body>
 </html>

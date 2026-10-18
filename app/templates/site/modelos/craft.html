@@ -127,17 +127,18 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 {# Motion (build vanilla, ex-Framer Motion). Versão pinada: `@latest` num site
    de cliente é deixar terceiro publicar código novo na página do bar sem aviso.
-   Fica no <head> de propósito — o estado inicial do hero (opacidade 0) precisa
-   valer ANTES da primeira pintura, senão o nome do bar aparece e some. #}
-<script src="https://cdn.jsdelivr.net/npm/motion@13.1.0/dist/motion.js"></script>
+   Com `defer`: 47 KB de terceiro não seguram mais a primeira pintura. O estado
+   inicial do hero continua valendo ANTES dela — o gate abaixo carimba .js-anim
+   já no <head> — e a animação lá embaixo só roda no DOMContentLoaded, quando o
+   script deferido já executou. #}
+<script defer src="https://cdn.jsdelivr.net/npm/motion@13.1.0/dist/motion.js"></script>
 <script>
-  /* Gate único de TODA animação. Só entra se a lib respondeu de verdade E o
-     usuário aceita movimento. CDN fora do ar, bloqueado por firewall ou
-     prefers-reduced-motion => a classe não entra => nenhuma regra de estado
-     inicial casa => a página do bar fica 100% legível e visível. */
+  /* Gate único de TODA animação. Entra se o usuário aceita movimento; se a lib
+     não responder (CDN fora do ar, bloqueado por firewall), o DOMContentLoaded
+     lá embaixo tira a classe => nenhuma regra de estado inicial casa => a
+     página do bar fica 100% legível e visível. */
   (function(){
     try{
-      if(!window.Motion) return;
       if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       /* Aba em segundo plano não liga o portão.
          Ctrl+clique, link aberto do WhatsApp, sessão restaurada: a aba nasce
@@ -224,7 +225,7 @@
       --wood:#fbf9f4;
       --cream:#191713;
       --cream-dim:#5f5a50;
-      --amber:#9c5c0b;
+      --amber:#8a5009;   /* #9c5c0b dava 4,15:1 no ink-2 */
       --ember:#8a3f12;
       --gold:#8a6d12;
       --neon:#a4700f;
@@ -250,7 +251,7 @@
     --wood:#fbf9f4;
     --cream:#191713;
     --cream-dim:#5f5a50;
-    --amber:#9c5c0b;
+    --amber:#8a5009;
     --ember:#8a3f12;
     --gold:#8a6d12;
     --neon:#a4700f;
@@ -312,21 +313,22 @@
   .nav-dir{display:flex;align-items:center;gap:8px;flex:0 0 auto}
   .nav-links{display:none}
   .btn-icone{
-    width:38px;height:38px;display:grid;place-items:center;padding:0;cursor:pointer;
+    width:44px;height:44px;display:grid;place-items:center;padding:0;cursor:pointer;
     background:transparent;border:1px solid var(--linha-forte);color:var(--fg);
     font-size:.95rem;line-height:1;transition:border-color .2s,color .2s,background .2s;
   }
   .btn-icone:hover{border-color:var(--amber);color:var(--amber)}
   .nav-entrar{
-    display:none;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;
+    display:none;font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;
     border:1px solid var(--linha-forte);padding:10px 14px;color:var(--fg);transition:all .2s;
   }
   .nav-entrar:hover{border-color:var(--amber);color:var(--amber)}
   @media(min-width:900px){
     nav{padding:12px 32px}
     .nav-links{display:flex;align-items:center;gap:22px}
-    .nav-links a{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--fg-dim);
-      transition:color .2s;position:relative;padding-bottom:3px}
+    .nav-links a{font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;color:var(--fg-dim);
+      transition:color .2s;position:relative;padding-bottom:3px;
+      display:inline-flex;align-items:center;min-height:44px}
     .nav-links a::after{content:"";position:absolute;left:0;right:100%;bottom:0;height:1px;
       background:var(--amber);transition:right .25s}
     .nav-links a:hover{color:var(--fg)}
@@ -340,16 +342,18 @@
     position:fixed;inset:0;z-index:70;background:var(--bg);
     padding:76px 18px 32px;overflow-y:auto;
     transform:translateY(-100%);visibility:hidden;
-    transition:transform .38s cubic-bezier(.3,.8,.3,1),visibility .38s;
+    transition:transform .38s cubic-bezier(.3,.8,.3,1),visibility 0s .38s;
   }
-  .painel.aberto{transform:none;visibility:visible}
+  /* visibility imediata ao abrir: o foco entra no 1º link no mesmo instante */
+  .painel.aberto{transform:none;visibility:visible;
+    transition:transform .38s cubic-bezier(.3,.8,.3,1),visibility 0s 0s}
   .painel a{display:flex;align-items:baseline;gap:14px;padding:15px 0;
     border-bottom:1px solid var(--linha);font-family:"Barlow Condensed","Arial Narrow",sans-serif;
     text-transform:uppercase;font-weight:700;font-size:1.85rem;letter-spacing:.03em;line-height:1}
-  .painel a i{font-style:normal;font-family:"JetBrains Mono",monospace;font-size:.7rem;
+  .painel a i{font-style:normal;font-family:"JetBrains Mono",monospace;font-size:.75rem;
     color:var(--amber);letter-spacing:.1em;flex:0 0 auto}
   .painel .fechar{position:absolute;top:11px;right:18px}
-  .painel .painel-pe{margin-top:22px;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;
+  .painel .painel-pe{min-height:44px;margin-top:22px;font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;
     color:var(--fg-dim);border-bottom:none;font-family:"JetBrains Mono",monospace;font-weight:400}
 
   /* ------------------------------------------------------------ hero */
@@ -366,11 +370,22 @@
     background:
       repeating-linear-gradient(90deg,var(--linha) 0 1px,transparent 1px 34px),
       linear-gradient(160deg,var(--bg-2),var(--bg) 70%)}
+  /* No claro o fundo sem foto era creme e o véu a 45% deixava o âmbar do
+     kicker em ~2,8:1. O hero é escuro nos dois temas (ver --hero-*): sem foto
+     também. */
+  :root[data-theme="light"] .hero-fundo{background:
+      repeating-linear-gradient(90deg,rgba(236,228,214,.16) 0 1px,transparent 1px 34px),
+      linear-gradient(160deg,#1b1915,#0e0d0b 70%)}
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]) .hero-fundo{background:
+      repeating-linear-gradient(90deg,rgba(236,228,214,.16) 0 1px,transparent 1px 34px),
+      linear-gradient(160deg,#1b1915,#0e0d0b 70%)}
+  }
   .hero-veu{position:absolute;inset:0;
     background:linear-gradient(180deg,var(--veu-2) 0%,var(--veu-1) 24%,var(--veu-m) 50%,var(--veu-2) 85%)}
   .hero-corpo{position:relative;z-index:2;padding-bottom:26px;
     text-shadow:0 2px 16px rgba(0,0,0,.55)}
-  .hero-kicker{font-size:.66rem;letter-spacing:.26em;text-transform:uppercase;color:var(--hero-amber);
+  .hero-kicker{font-size:.75rem;letter-spacing:.26em;text-transform:uppercase;color:var(--hero-amber);
     display:flex;align-items:center;gap:10px}
   .hero-kicker::before{content:"";width:26px;height:1px;background:var(--hero-amber);flex:0 0 auto}
   .hero-nome{font-family:"Barlow Condensed","Arial Narrow",sans-serif;text-transform:uppercase;
@@ -382,7 +397,7 @@
   /* selo discreto de reputação: chip de ficha técnica, não banner de anúncio */
   .hero-nota{display:inline-flex;align-items:center;gap:9px;margin-top:16px;
     padding:7px 12px;border:1px solid rgba(246,239,225,.34);background:rgba(8,9,8,.5);
-    font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.16em;
+    font-family:"JetBrains Mono",monospace;font-size:.75rem;letter-spacing:.16em;
     text-transform:uppercase;color:var(--hero-dim)}
   .hero-nota b{color:var(--hero-fg);font-size:.9rem;font-weight:700;letter-spacing:.04em}
   .hero-nota .estrelas{font-size:.82rem}
@@ -402,7 +417,7 @@
     color:var(--amber);font-weight:400}
   .hero-nota .estrelas i{color:rgba(246,239,225,.32)}
   .hero-nota .estrelas b{color:var(--hero-amber)}
-  .hero-rolar{margin-top:24px;font-size:.66rem;letter-spacing:.24em;text-transform:uppercase;
+  .hero-rolar{margin-top:24px;font-size:.75rem;letter-spacing:.24em;text-transform:uppercase;
     color:var(--hero-dim)}
   /* faixa de dados colada no rodapé do hero: ficha técnica da casa */
   .hero-specs{position:relative;z-index:2;border-top:1px solid rgba(236,228,214,.22);
@@ -410,7 +425,7 @@
   .hero-specs ul{display:grid;grid-template-columns:1fr;padding:0}
   .hero-specs li{padding:11px 0;border-bottom:1px solid rgba(236,228,214,.12)}
   .hero-specs li:last-child{border-bottom:none}
-  .hero-specs .k{display:block;font-size:.6rem;letter-spacing:.24em;
+  .hero-specs .k{display:block;font-size:.75rem;letter-spacing:.24em;
     text-transform:uppercase;color:var(--hero-amber)}
   .hero-specs .v{display:block;font-size:.86rem;color:var(--hero-fg);margin-top:3px;line-height:1.35}
   @media(min-width:760px){
@@ -422,7 +437,7 @@
   /* --------------------------------------------------------- botões */
   .btn{
     display:inline-flex;align-items:center;justify-content:center;gap:8px;
-    font-family:"JetBrains Mono",monospace;font-size:.72rem;font-weight:500;
+    font-family:"JetBrains Mono",monospace;font-size:.75rem;font-weight:500;
     letter-spacing:.18em;text-transform:uppercase;padding:14px 20px;cursor:pointer;
     border:1px solid var(--amber);background:var(--amber);color:var(--btn-fg);
     transition:transform .18s,background .2s,color .2s,border-color .2s;
@@ -439,7 +454,7 @@
   .ticker{border-top:1px solid var(--linha);border-bottom:1px solid var(--linha);
     background:var(--bg-2);overflow:hidden;white-space:nowrap;padding:10px 0}
   .ticker .trilho{display:inline-block;animation:desliza 34s linear infinite;
-    font-family:"JetBrains Mono",monospace;font-size:.72rem;letter-spacing:.22em;
+    font-family:"JetBrains Mono",monospace;font-size:.75rem;letter-spacing:.22em;
     text-transform:uppercase;color:var(--fg-dim)}
   .ticker b{color:var(--fg);font-weight:500}
   .ticker i{color:var(--amber);font-style:normal;margin:0 12px}
@@ -485,7 +500,7 @@
       grid-column:2;margin-top:var(--s-5);
     }
   }
-  .eyebrow{font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.3em;
+  .eyebrow{font-family:"JetBrains Mono",monospace;font-size:.75rem;letter-spacing:.3em;
     text-transform:uppercase;color:var(--amber);display:block}
   .h2{font-family:"Barlow Condensed","Arial Narrow",sans-serif;text-transform:uppercase;
     font-weight:700;line-height:.92;letter-spacing:.005em;margin-top:10px;
@@ -513,7 +528,7 @@
     column-gap:12px;padding:18px 0;border-bottom:1px solid var(--linha);
     transition:background .2s;
   }
-  .tap-num{grid-area:num;font-family:"JetBrains Mono",monospace;font-size:.74rem;
+  .tap-num{grid-area:num;font-family:"JetBrains Mono",monospace;font-size:.75rem;
     color:var(--fg-dim);padding-top:.42rem;letter-spacing:.06em}
   /* A linha nome+preço ocupa a área "nome" do grid: duas caixas na mesma
      célula se sobreporiam, então quem entra na grade é o wrapper. */
@@ -531,7 +546,7 @@
     white-space:nowrap;color:var(--amber)}
   .tap-desc{grid-area:desc;color:var(--fg-dim);font-size:.92rem;margin-top:6px;max-width:60ch}
   .tap-tag{grid-area:tag;justify-self:start;margin-top:10px;
-    font-family:"JetBrains Mono",monospace;font-size:.66rem;font-weight:700;letter-spacing:.2em;
+    font-family:"JetBrains Mono",monospace;font-size:.75rem;font-weight:700;letter-spacing:.2em;
     text-transform:uppercase;color:var(--amber);border-left:2px solid var(--amber);padding:2px 0 2px 9px}
   .tap-foto{grid-area:foto;margin-top:14px;width:100%;max-width:220px;
     border:1px solid var(--linha);overflow:hidden;
@@ -553,7 +568,7 @@
   /* ------------------------------------------------------ promoções */
   .quadro{border-top:1px solid var(--linha-forte)}
   .oferta{padding:18px 0;border-bottom:1px solid var(--linha);display:grid;gap:6px}
-  .oferta .rotulo{font-family:"JetBrains Mono",monospace;font-size:.64rem;letter-spacing:.22em;
+  .oferta .rotulo{font-family:"JetBrains Mono",monospace;font-size:.75rem;letter-spacing:.22em;
     text-transform:uppercase;color:var(--fg-dim)}
   .oferta.hoje{border-left:2px solid var(--green);padding-left:12px;margin-left:-14px}
   .oferta.hoje .rotulo{color:var(--green);font-weight:700;animation:respira 2.6s ease-in-out infinite}
@@ -561,7 +576,7 @@
   .oferta h3{font-family:"Barlow Condensed","Arial Narrow",sans-serif;text-transform:uppercase;
     font-weight:700;font-size:clamp(1.4rem,6vw,2rem);line-height:1}
   .oferta p{color:var(--fg-dim);font-size:.94rem;max-width:60ch}
-  .oferta .val{font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.14em;
+  .oferta .val{font-family:"JetBrains Mono",monospace;font-size:.75rem;letter-spacing:.14em;
     text-transform:uppercase;color:var(--amber)}
 
   /* ------------------------------------------------------- a casa */
@@ -581,9 +596,9 @@
   .grade{border-top:1px solid var(--linha-forte)}
   .linha-ev{display:grid;grid-template-columns:5.4rem 1fr;column-gap:14px;
     padding:16px 0;border-bottom:1px solid var(--linha)}
-  .linha-ev .quando{font-family:"JetBrains Mono",monospace;font-size:.72rem;color:var(--amber);
+  .linha-ev .quando{font-family:"JetBrains Mono",monospace;font-size:.75rem;color:var(--amber);
     letter-spacing:.08em;line-height:1.5}
-  .linha-ev .quando span{display:block;color:var(--fg-dim);font-size:.66rem;letter-spacing:.16em}
+  .linha-ev .quando span{display:block;color:var(--fg-dim);font-size:.75rem;letter-spacing:.16em}
   .linha-ev h3{font-family:"Barlow Condensed","Arial Narrow",sans-serif;text-transform:uppercase;
     font-weight:700;font-size:clamp(1.3rem,5.5vw,1.8rem);line-height:1.05}
   .linha-ev p{color:var(--fg-dim);font-size:.92rem;margin-top:4px;max-width:60ch}
@@ -600,7 +615,7 @@
     border:1px solid var(--linha-forte)}
   .equipe b{font-family:"Barlow Condensed","Arial Narrow",sans-serif;text-transform:uppercase;
     font-weight:700;font-size:1.15rem;letter-spacing:.03em;display:block;line-height:1.1}
-  .equipe small{font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.14em;
+  .equipe small{font-family:"JetBrains Mono",monospace;font-size:.75rem;letter-spacing:.14em;
     text-transform:uppercase;color:var(--fg-dim)}
   @media(min-width:860px){
     .historia{grid-template-columns:1fr 1fr;gap:44px;align-items:start}
@@ -618,7 +633,7 @@
     letter-spacing:.1em;vertical-align:baseline;font-weight:400}
   .nota-lado{display:grid;gap:11px;min-width:0}
   .nota-estrelas{font-size:1.5rem}
-  .nota-legenda{font-family:"JetBrains Mono",monospace;font-size:.72rem;letter-spacing:.2em;
+  .nota-legenda{font-family:"JetBrains Mono",monospace;font-size:.75rem;letter-spacing:.2em;
     text-transform:uppercase;color:var(--fg)}
   .nota-legenda b{color:var(--amber);font-weight:700}
   /* Medidor com elemento real (não pseudo): o Motion precisa de algo pra
@@ -631,10 +646,10 @@
   .notas{display:grid;gap:0;margin-top:26px;border-top:1px solid var(--linha)}
   .nota{padding:20px 0;border-bottom:1px solid var(--linha)}
   .nota .cab{display:flex;align-items:center;gap:12px}
-  .nota .pontos{font-family:"JetBrains Mono",monospace;font-size:.68rem;letter-spacing:.14em;
+  .nota .pontos{font-family:"JetBrains Mono",monospace;font-size:.75rem;letter-spacing:.14em;
     color:var(--amber);flex:0 0 auto}
   .nota p{margin-top:12px;font-size:1rem;color:var(--fg);max-width:62ch}
-  .nota .quem{margin-top:10px;font-family:"JetBrains Mono",monospace;font-size:.66rem;
+  .nota .quem{margin-top:10px;font-family:"JetBrains Mono",monospace;font-size:.75rem;
     letter-spacing:.18em;text-transform:uppercase;color:var(--fg-dim)}
   @media(min-width:480px){
     .nota-topo{grid-template-columns:auto 1fr;gap:28px;padding:26px 24px}
@@ -665,12 +680,12 @@
   .chapa figure:hover img{filter:none;transform:scale(1.05)}
   .chapa figcaption{position:absolute;left:0;right:0;bottom:0;padding:14px 8px 6px;
     background:linear-gradient(180deg,transparent,rgba(6,7,6,.86));color:#ece4d6;
-    font-family:"JetBrains Mono",monospace;font-size:.58rem;letter-spacing:.12em;
+    font-family:"JetBrains Mono",monospace;font-size:.75rem;letter-spacing:.12em;
     text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .chapa-num{position:absolute;top:0;left:0;z-index:2;padding:4px 7px;
     background:rgba(6,7,6,.7);color:var(--neon);font-family:"JetBrains Mono",monospace;
-    font-size:.58rem;letter-spacing:.1em}
-  .chapa-pe{margin-top:12px;font-family:"JetBrains Mono",monospace;font-size:.62rem;
+    font-size:.75rem;letter-spacing:.1em}
+  .chapa-pe{margin-top:12px;font-family:"JetBrains Mono",monospace;font-size:.75rem;
     letter-spacing:.18em;text-transform:uppercase;color:var(--fg-dim)}
   .chapa-pe a{color:var(--amber);border-bottom:1px solid var(--linha-forte);padding-bottom:2px}
   .chapa-pe a:hover{border-color:var(--amber)}
@@ -686,11 +701,11 @@
   .reserva{display:grid;gap:26px}
   .ficha{border:1px solid var(--linha-forte);background:var(--painel);padding:20px}
   .ficha-topo{display:flex;justify-content:space-between;align-items:center;gap:10px;
-    font-family:"JetBrains Mono",monospace;font-size:.62rem;letter-spacing:.2em;
+    font-family:"JetBrains Mono",monospace;font-size:.75rem;letter-spacing:.2em;
     text-transform:uppercase;color:var(--fg-dim);border-bottom:1px solid var(--linha);
     padding-bottom:10px;margin-bottom:16px}
   .campo{margin-bottom:14px}
-  .campo label{display:block;font-family:"JetBrains Mono",monospace;font-size:.62rem;
+  .campo label{display:block;font-family:"JetBrains Mono",monospace;font-size:.75rem;
     letter-spacing:.2em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
   .campo input,.campo textarea{
     width:100%;min-width:0;background:var(--bg);border:1px solid var(--linha-forte);border-radius:0;
@@ -702,7 +717,7 @@
   /* Em tela muito estreita (360px pra baixo) o campo de data tem largura
      mínima nativa e estoura as duas colunas — aí vira uma por linha. */
   @media(max-width:359px){.par{grid-template-columns:1fr}}
-  .aviso{margin-top:12px;padding:12px;font-family:"JetBrains Mono",monospace;font-size:.72rem;
+  .aviso{margin-top:12px;padding:12px;font-family:"JetBrains Mono",monospace;font-size:.75rem;
     line-height:1.5;display:none;border:1px solid transparent}
   .aviso.ok{display:block;border-color:var(--green);color:var(--green)}
   .aviso.err{display:block;border-color:var(--ember);color:var(--ember)}
@@ -718,7 +733,7 @@
   .contato{display:grid;gap:26px}
   .dados{border-top:1px solid var(--linha-forte)}
   .dados li{padding:14px 0;border-bottom:1px solid var(--linha)}
-  .dados .k{display:block;font-family:"JetBrains Mono",monospace;font-size:.62rem;
+  .dados .k{display:block;font-family:"JetBrains Mono",monospace;font-size:.75rem;
     letter-spacing:.22em;text-transform:uppercase;color:var(--amber)}
   .dados .v{display:block;margin-top:4px;font-size:.98rem}
   .chamada{border:1px solid var(--linha-forte);background:var(--painel);padding:24px;
@@ -732,15 +747,15 @@
   footer{border-top:1px solid var(--linha);padding:34px 0 46px;margin-top:10px}
   .rodape-nome{font-family:"Barlow Condensed","Arial Narrow",sans-serif;text-transform:uppercase;
     font-weight:700;font-size:clamp(2rem,12vw,3.4rem);line-height:.9;letter-spacing:.01em}
-  .rodape-linha{margin-top:10px;font-family:"JetBrains Mono",monospace;font-size:.66rem;
+  .rodape-linha{margin-top:10px;font-family:"JetBrains Mono",monospace;font-size:.75rem;
     letter-spacing:.16em;text-transform:uppercase;color:var(--fg-dim)}
   .sociais{display:flex;gap:10px;margin-top:20px}
-  .sociais a{width:40px;height:40px;display:grid;place-items:center;border:1px solid var(--linha-forte);
+  .sociais a{width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--linha-forte);
     color:var(--fg);transition:all .2s}
   .sociais a:hover{border-color:var(--amber);color:var(--amber)}
   .sociais svg{width:19px;height:19px;fill:currentColor}
-  .lojista{display:inline-block;margin-top:22px;font-family:"JetBrains Mono",monospace;
-    font-size:.64rem;letter-spacing:.18em;text-transform:uppercase;color:var(--fg-dim);
+  .lojista{display:inline-flex;align-items:center;min-height:44px;margin-top:22px;font-family:"JetBrains Mono",monospace;
+    font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;color:var(--fg-dim);
     border-bottom:1px solid var(--linha-forte);padding-bottom:3px}
   .lojista:hover{color:var(--amber);border-color:var(--amber)}
 
@@ -788,8 +803,13 @@
 
   /* Selo de demonstração: só aparece em prévia, quando a casa ainda não tem
      agenda própria e o site mostra o recurso com exemplo. */
+  /* "Pular para o conteúdo": fora da tela até receber foco pelo Tab. */
+  .pular{position:absolute;left:12px;top:-80px;z-index:1000;padding:12px 18px;
+    background:var(--amber);color:var(--btn-fg);font-family:"JetBrains Mono",monospace;
+    font-size:.8rem;letter-spacing:.12em;text-transform:uppercase}
+  .pular:focus{top:12px}
   .selo-exemplo{display:inline-block;vertical-align:middle;margin-left:8px;
-    padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;
+    padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700;
     letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;
     background:rgba(255,255,255,.14);color:inherit;opacity:.85;
     border:1px solid currentColor}
@@ -801,7 +821,7 @@
 <style>
   .previa{position:fixed;left:0;right:0;bottom:0;z-index:200;
     background:#141613;border-top:2px solid var(--amber,#e0902a);color:#ece4d6;
-    font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.72rem;line-height:1.5;
+    font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.75rem;line-height:1.5;
     padding:11px 14px;display:flex;gap:10px;align-items:center;justify-content:center;
     flex-wrap:wrap;text-align:center}
   .previa b{color:var(--amber,#e0902a)}
@@ -831,6 +851,8 @@
 {% endif %}
 </head>
 <body data-heroina="cardapio" data-leitura="duas-colunas" data-foto="moldura">
+
+<a class="pular" href="#topo">Pular para o conteúdo</a>
 
 {% include "site/_demo_dock.html" %}
 
@@ -866,15 +888,15 @@
 
 <div class="painel" id="painelMenu" role="dialog" aria-modal="true" aria-label="Menu de navegação">
   <button class="btn-icone fechar" onclick="alternarMenu()" aria-label="Fechar menu"><span aria-hidden="true">✕</span></button>
-  {% if dishes %}<a href="#cardapio" onclick="alternarMenu()"><i>01</i>Torneiras</a>{% endif %}
-  {% if promocoes %}<a href="#promocoes" onclick="alternarMenu()"><i>02</i>Ofertas</a>{% endif %}
-  {% if eventos %}<a href="#agenda" onclick="alternarMenu()"><i>03</i>Agenda</a>{% endif %}
-  <a href="#balcao" onclick="alternarMenu()"><i>04</i>O balcão</a>
-  {% if team or gallery %}<a href="#historia" onclick="alternarMenu()"><i>05</i>Origem</a>{% endif %}
-  {% if reviews or site.nota_google %}<a href="#avaliacoes" onclick="alternarMenu()"><i>06</i>Notas</a>{% endif %}
-  {% if gallery %}<a href="#galeria" onclick="alternarMenu()"><i>07</i>Fotos</a>{% endif %}
-  <a href="#reservar" onclick="alternarMenu()"><i>08</i>Reserva</a>
-  <a href="#contato" onclick="alternarMenu()"><i>09</i>Contato</a>
+  {% if dishes %}<a href="#cardapio" onclick="alternarMenu(this)"><i>01</i>Torneiras</a>{% endif %}
+  {% if promocoes %}<a href="#promocoes" onclick="alternarMenu(this)"><i>02</i>Ofertas</a>{% endif %}
+  {% if eventos %}<a href="#agenda" onclick="alternarMenu(this)"><i>03</i>Agenda</a>{% endif %}
+  <a href="#balcao" onclick="alternarMenu(this)"><i>04</i>O balcão</a>
+  {% if team or gallery %}<a href="#historia" onclick="alternarMenu(this)"><i>05</i>Origem</a>{% endif %}
+  {% if reviews or site.nota_google %}<a href="#avaliacoes" onclick="alternarMenu(this)"><i>06</i>Notas</a>{% endif %}
+  {% if gallery %}<a href="#galeria" onclick="alternarMenu(this)"><i>07</i>Fotos</a>{% endif %}
+  <a href="#reservar" onclick="alternarMenu(this)"><i>08</i>Reserva</a>
+  <a href="#contato" onclick="alternarMenu(this)"><i>09</i>Contato</a>
   <a class="painel-pe" href="{{ url_do_sistema() }}">Área do lojista → entrar no sistema</a>
 </div>
 
@@ -1050,7 +1072,7 @@
     </div>
     {% if gallery|length > 6 %}
     <p class="chapa-pe">
-      Mostrando 6 de {{ gallery|length }} fotos{% if site.instagram_url %} ·
+      Mostrando 6 de {{ gallery|length }} fotos{% if site.instagram_url and site.instagram_url.startswith('https://') %} ·
       <a href="{{ site.instagram_url }}" target="_blank" rel="noopener">ver todas no Instagram</a>{% endif %}
     </p>
     {% endif %}
@@ -1209,10 +1231,10 @@
         {# Servido pelo domínio do bar, o backend resolve o tenant pelo Host.
            Em /bar/<slug> (prévias) o Host é o do produto — daí este campo. #}
         <input type="hidden" name="slug" value="{{ tenant.slug if tenant else '' }}">
-        {# O POST sai por fetch, mas com FormData(form): o FormData carrega este campo
-           junto com o resto. Tirar daqui abre o formulário de reserva pra POST
-           forjado de qualquer site. O mesmo token vai no header X-CSRFToken. #}
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {# Sem token de CSRF no HTML, de propósito: chamar csrf_token() aqui
+           gravava sessão e a página do bar não podia ser cacheada na borda. O
+           `enviarReserva` busca o token em /novidades/token na hora do envio e
+           manda no header X-CSRFToken (mesmo caminho do _novidades.html). #}
         <div class="campo">
           <label for="rf-nome">Nome</label>
           <input id="rf-nome" name="nome" type="text" autocomplete="name" placeholder="Como te chamamos?" required>
@@ -1287,6 +1309,10 @@
       </li>
       {% endfor %}
     </ol>
+    {# A página do cardápio (a do QR da mesa) só aparecia no JSON-LD. #}
+    {% if tenant and tenant.slug %}
+    <p class="rev" style="margin-top:24px"><a class="btn" href="{{ url_for('public.cardapio', slug=tenant.slug) }}">Ver cardápio completo</a></p>
+    {% endif %}
   </div>
 </section>
 {% endif %}
@@ -1297,14 +1323,18 @@
     <div class="escala" aria-hidden="true" style="margin-bottom:24px"></div>
     <div class="rodape-nome">{{ site.nome }}</div>
     <div class="rodape-linha">{% if site.cidade_uf %}{{ site.cidade_uf }} · {% endif %}{{ copy.rodape }}</div>
-    {% if site.instagram_url or site.facebook_url %}
+    {# Rede social só com https:// — o campo é texto livre e um "javascript:"
+       ali viraria script no clique. #}
+    {% set insta_ok = site.instagram_url and site.instagram_url.startswith('https://') %}
+    {% set face_ok = site.facebook_url and site.facebook_url.startswith('https://') %}
+    {% if insta_ok or face_ok %}
     <div class="sociais">
-      {% if site.instagram_url %}
+      {% if insta_ok %}
       <a href="{{ site.instagram_url }}" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2c3.2 0 3.6 0 4.9.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.86s0 3.6-.07 4.86c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.86.07s-3.6 0-4.86-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23C2.2 15.6 2.2 15.2 2.2 12s0-3.6.07-4.86c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.4 2.2 8.8 2.2 12 2.2zm0 1.98c-3.15 0-3.52.01-4.76.07-.9.04-1.39.2-1.71.32-.43.17-.74.37-1.06.69-.32.32-.52.63-.69 1.06-.12.32-.28.81-.32 1.71-.06 1.24-.07 1.61-.07 4.76s.01 3.52.07 4.76c.04.9.2 1.39.32 1.71.17.43.37.74.69 1.06.32.32.63.52 1.06.69.32.12.81.28 1.71.32 1.24.06 1.61.07 4.76.07s3.52-.01 4.76-.07c.9-.04 1.39-.2 1.71-.32.43-.17.74-.37 1.06-.69.32-.32.52-.63.69-1.06.12-.32.28-.81.32-1.71.06-1.24.07-1.61.07-4.76s-.01-3.52-.07-4.76c-.04-.9-.2-1.39-.32-1.71-.17-.43-.37-.74-.69-1.06-.32-.32-.63-.52-1.06-.69-.32-.12-.81-.28-1.71-.32-1.24-.06-1.61-.07-4.76-.07zm0 3.38a4.44 4.44 0 1 1 0 8.88 4.44 4.44 0 0 1 0-8.88zm0 7.32a2.88 2.88 0 1 0 0-5.76 2.88 2.88 0 0 0 0 5.76zm5.65-7.52a1.04 1.04 0 1 1-2.08 0 1.04 1.04 0 0 1 2.08 0z"/></svg>
       </a>
       {% endif %}
-      {% if site.facebook_url %}
+      {% if face_ok %}
       <a href="{{ site.facebook_url }}" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z"/></svg>
       </a>
@@ -1349,12 +1379,16 @@
   pintarIconeTema();
 
   /* ------------------------------------------------------------ menu */
-  function alternarMenu(){
+  // `link` = o item do painel que fechou (ele já leva até a seção).
+  function alternarMenu(link){
     var painel = document.getElementById('painelMenu');
     var botao = document.getElementById('btnMenu');
     var aberto = painel.classList.toggle('aberto');
     botao.setAttribute('aria-expanded', aberto ? 'true' : 'false');
     document.body.style.overflow = aberto ? 'hidden' : '';
+    // Foco entra no 1º link ao abrir e volta pro botão ao fechar.
+    if (aberto) { var a = painel.querySelector('a'); if (a) a.focus(); }
+    else if (!link) { botao.focus(); }
   }
   document.addEventListener('keydown', function (ev){
     if (ev.key === 'Escape' && document.getElementById('painelMenu').classList.contains('aberto')) {
@@ -1384,11 +1418,18 @@
     var txt = btn.textContent;
     btn.textContent = 'Enviando…';
     msg.className = 'aviso';
-    fetch('{{ url_for("public.reservar") }}', {
-      method: 'POST',
-      body: new FormData(form),
-      headers: { 'Accept': 'application/json', 'X-CSRFToken': '{{ csrf_token() }}' }
-    })
+    // Token de CSRF pedido na hora (a página não carrega sessão, pra poder
+    // ser cacheada na borda) e mandado no header X-CSRFToken.
+    fetch('{{ url_for("public.novidades_token") }}', { credentials: 'same-origin' })
+      .then(function (r){ return r.json(); })
+      .then(function (t){
+        return fetch('{{ url_for("public.reservar") }}', {
+          method: 'POST',
+          credentials: 'same-origin',
+          body: new FormData(form),
+          headers: { 'Accept': 'application/json', 'X-CSRFToken': t.token }
+        });
+      })
       .then(function (r){ return r.json().then(function (j){ return { ok: r.ok, j: j }; }); })
       .then(function (res){
         if (res.ok && res.j.ok) {
@@ -1419,10 +1460,15 @@
   }
 
   /* ----------------------------------------------------- revelação */
+  /* DOMContentLoaded: só aí o motion.js (defer) já rodou. Lib ausente tira o
+     gate antes de qualquer um dos dois blocos abaixo decidir o caminho. */
+  document.addEventListener('DOMContentLoaded', function (){
+    if (!window.Motion) document.documentElement.classList.remove('js-anim');
+  });
   /* Caminho de fallback: vale quando o Motion não carregou. Com a lib no ar
      quem revela é o Motion.inView lá embaixo — os dois juntos escreveriam
      opacity/transform no mesmo elemento e a revelação piscaria. */
-  (function(){
+  document.addEventListener('DOMContentLoaded', function (){
     if (document.documentElement.classList.contains('js-anim')) return;
     var alvos = document.querySelectorAll('.rev');
     var reduzido = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1439,7 +1485,7 @@
       el.style.transitionDelay = (i % 5 * 55) + 'ms';
       io.observe(el);
     });
-  })();
+  });
 
   /* ------------------------------------------------------- animação */
   /* Só roda com `.js-anim` — carimbada no <head> depois de confirmar que o
@@ -1447,7 +1493,7 @@
      transform e opacity (compositor, 60fps no celular do cliente).
      Personalidade do modelo: nada de quique. É quadro de torneiras — a coisa
      ENTRA firme, curta e reta, como giz batendo na lousa. */
-  (function(){
+  document.addEventListener('DOMContentLoaded', function (){
     if (!document.documentElement.classList.contains('js-anim')) return;
 
     var animate = Motion.animate, inView = Motion.inView,
@@ -1504,7 +1550,7 @@
         animate(el, { scale: 1, y: 0 }, { type: spring, stiffness: 380, damping: 24 });
       };
     });
-  })();
+  });
 </script>
 </body>
 </html>

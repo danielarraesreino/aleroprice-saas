@@ -27,6 +27,13 @@ def create_app(config_name='default'):
     app = Flask(__name__, **params)
     app.config.from_object(config[config_name])
 
+    # Na Vercel o Flask só vê o proxy (todo visitante era 127.0.0.1), e os
+    # limites por IP viravam um limite único para o mundo inteiro: um script
+    # bloqueava as reservas de todos. O IP real vem no X-Forwarded-For.
+    if os.environ.get('VERCEL'):
+        from werkzeug.middleware.proxy_fix import ProxyFix
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+
     # Fail fast em produção: segredo e banco não podem ter fallback (subir com
     # segredo conhecido ou banco em memória é pior que não subir).
     if config_name == 'production':
@@ -252,6 +259,10 @@ def create_app(config_name='default'):
         # o `Menu.url` do JSON-LD (que aponta pro domínio do bar) virava um
         # redirecionamento pra outro host, que o Google trata como sinal fraco.
         'public.cardapio',
+        # O que a própria página do bar chama: token do formulário (reserva e
+        # novidades), inscrição, QR de avaliação e o resumo para IAs.
+        'public.novidades_token', 'public.novidades', 'public.avaliar',
+        'public.llms_txt',
     }
 
     @app.before_request
@@ -283,6 +294,24 @@ def create_app(config_name='default'):
         destino = f'https://{dominio_do_produto()}{request.full_path.rstrip("?")}'
         return redirect(destino, code=302)
 
+    from sqlalchemy.exc import OperationalError
+
+    @app.errorhandler(OperationalError)
+    def banco_caiu_no_meio(erro):
+        """Conexão que o Neon derrubou ao suspender o compute ("SSL connection
+        has been closed unexpectedly"): o visitante via erro 500 justo na
+        primeira visita depois de um tempo parado — Googlebot no sitemap
+        incluído. Descarta o pool e repete o GET uma vez; o `_r=1` impede laço.
+        """
+        db.session.rollback()
+        db.engine.dispose()
+        if request.method == 'GET' and not request.args.get('_r'):
+            from urllib.parse import urlencode
+            args = request.args.to_dict(flat=False)
+            args['_r'] = ['1']
+            return redirect(f'{request.path}?{urlencode(args, doseq=True)}', code=307)
+        raise erro
+
     @app.before_request
     def require_login():
         endpoint = request.endpoint
@@ -292,6 +321,11 @@ def create_app(config_name='default'):
             return
         if not current_user.is_authenticated:
             return redirect(url_for('auth.login', next=request.path))
+        if not current_user.is_active:
+            # Conta desativada com sessão ainda aberta: sai na próxima página.
+            from flask_login import logout_user
+            logout_user()
+            return redirect(url_for('auth.login'))
 
     # CSRF depois do guard de login — a ordem é o comportamento.
     #

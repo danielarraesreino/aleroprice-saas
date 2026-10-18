@@ -28,11 +28,20 @@ def login():
         return redirect(_destino_depois_do_login())
 
     if request.method == 'POST':
+        from app.utils.tenant import limite_excedido
+
         email = request.form['email']
         senha = request.form['senha']
+        # Por e-mail e por IP: segura a força bruta numa conta (a do
+        # superadmin abre todos os bares) e o chute em muitas contas.
+        if (limite_excedido(f'login-ip:{request.remote_addr}', maximo=20, janela_segundos=900)
+                or limite_excedido(f'login:{email.strip().lower()}', maximo=8, janela_segundos=900)):
+            flash('Muitas tentativas. Aguarde alguns minutos.', 'warning')
+            return redirect(url_for('auth.login'))
         usuario = Usuario.query.filter_by(email=email).first()
 
-        if usuario is None or not usuario.verificar_senha(senha):
+        if (usuario is None or not usuario.is_active
+                or not usuario.verificar_senha(senha)):
             flash('Email ou senha inválidos', 'danger')
             return redirect(url_for('auth.login'))
 
@@ -41,8 +50,11 @@ def login():
         # acontece toda vez que se abre a câmera no meio de uma visita.
         session.pop('operador_id', None)     # login novo não herda "abrir admin"
         login_user(usuario, remember=bool(request.form.get('lembrar')))
-        next_page = request.args.get('next')
-        if not next_page or not next_page.startswith('/'):
+        next_page = request.args.get('next') or ''
+        # Só caminho deste site: "//golpe.com" e "/\\golpe.com" também começam
+        # com "/" e o navegador os trata como outro domínio (open redirect).
+        if (not next_page.startswith('/') or next_page.startswith('//')
+                or '\\' in next_page):
             next_page = _destino_depois_do_login()
         return redirect(next_page)
 

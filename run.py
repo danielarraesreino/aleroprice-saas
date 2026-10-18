@@ -242,7 +242,9 @@ if _seed_token:
     @app.route('/bootstrap-demo', strict_slashes=False)
     @csrf.exempt
     def bootstrap_demo():
-        if not hmac.compare_digest(request.args.get('token', ''), _seed_token):
+        # Header primeiro: token na query vai parar no log de acesso da Vercel.
+        enviado = request.headers.get('X-Seed-Token') or request.args.get('token', '')
+        if not hmac.compare_digest(enviado, _seed_token):
             abort(404)  # token errado = endpoint não existe
 
         acao = request.args.get('action', 'status')
@@ -478,12 +480,16 @@ if _seed_token:
                 log.append(f'bar-da-vila: tenant criado id={vila.id}')
         _tornar_pro(vila)
         db.session.commit()
+        # Senha aleatória, mostrada só nesta resposta: o repositório é público
+        # e senha escrita no código era a senha de qualquer um.
+        import secrets
+        _senha_nova = secrets.token_urlsafe(12)
         if Usuario.query.filter_by(email='admin@teste.com').first() is None:
             db.session.add(Usuario(nome='Gustavo', email='admin@teste.com',
-                                   senha='bardavila123', tipo='admin',
+                                   senha=_senha_nova, tipo='admin',
                                    restaurant_id=vila.id))
             db.session.commit()
-            log.append('bar-da-vila: admin admin@teste.com criado')
+            log.append(f'bar-da-vila: admin admin@teste.com criado, senha={_senha_nova}')
 
         # 3. Bar do Zé: cria tenant + admin se não existir (não há CLI em prod).
         ze = Restaurante.query.filter_by(slug='bar-do-ze').first()
@@ -496,9 +502,9 @@ if _seed_token:
         db.session.commit()
         if Usuario.query.filter_by(email='ze@bardoze.com').first() is None:
             db.session.add(Usuario(nome='José', email='ze@bardoze.com',
-                                   senha='bardoze123', tipo='admin', restaurant_id=ze.id))
+                                   senha=_senha_nova, tipo='admin', restaurant_id=ze.id))
             db.session.commit()
-            log.append('bar-do-ze: admin ze@bardoze.com criado')
+            log.append(f'bar-do-ze: admin ze@bardoze.com criado, senha={_senha_nova}')
 
         # 4. Catálogo + movimento dos dois. Seeds idempotentes; movimento com
         #    reset só limpa a janela do próprio tenant.

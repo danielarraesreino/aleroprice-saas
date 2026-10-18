@@ -134,7 +134,7 @@
   .desc{margin:6px 0 0; font-size:15px; color:var(--cream-dim); overflow-wrap:anywhere}
   .tag{
     display:inline-block; margin-top:8px; padding:3px 9px; border-radius:999px;
-    font-family:ui-sans-serif,system-ui,sans-serif; font-size:10px; font-weight:700;
+    font-family:ui-sans-serif,system-ui,sans-serif; font-size:12px; font-weight:700;
     letter-spacing:.1em; text-transform:uppercase;
     color:var(--ink); background:var(--amber);
   }
@@ -212,10 +212,14 @@
              lista pula sob o dedo no meio da leitura. A primeira entra sem
              `lazy` (está na primeira tela); o resto espera a rolagem.
 
-             `alt` vazio de propósito: o nome do prato vem logo ao lado, em
-             texto. Repeti-lo aqui faria o leitor de tela anunciar o mesmo
-             prato duas vezes antes de chegar ao preço. #}
-          <img class="foto" src="{{ d.img }}" alt=""
+             `alt` com o nome do prato: fora da página a foto viaja sozinha
+             (Google Imagens, resumo de IA) e `alt=""` não dizia o que era.
+
+             Foto de static/img/bar/ tem derivado WebP de 400px ao lado
+             (foto-5.jpg -> foto-5-400.webp): a miniatura de 84px baixava o
+             JPEG de 1200px. Foto de outra origem (Vercel Blob) vai como está. #}
+          {% set webp = d.img[:-4] ~ '-400.webp' if d.img.startswith('/static/img/bar/foto-') and d.img.endswith('.jpg') else None %}
+          <img class="foto" src="{{ webp or d.img }}" alt="{{ d.nome }}"
                width="84" height="84" decoding="async"
                {% if not (primeiro_grupo and loop.first) %}loading="lazy"{% endif %}>
           {% endif %}

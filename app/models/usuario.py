@@ -34,6 +34,12 @@ class Usuario(UserMixin, db.Model):
         """Verifica se a senha fornecida está correta"""
         return check_password_hash(self.senha, senha)
     
+    @property
+    def is_active(self):
+        """Conta desativada não entra. O `UserMixin` devolve sempre True, e
+        `ativo=False` no banco não impedia o login de ninguém."""
+        return self.ativo is not False
+
     def is_admin(self):
         """Verifica se o usuário é um administrador do seu tenant"""
         return self.tipo in ('admin', 'superadmin')

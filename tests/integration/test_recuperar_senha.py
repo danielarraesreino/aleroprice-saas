@@ -66,3 +66,20 @@ def test_senha_curta_e_recusada(client, dono, enviados):
 def test_token_falso_nao_entra(client, session):
     resp = client.get('/auth/redefinir/token-falso')
     assert '/auth/esqueci' in resp.headers['Location']
+
+
+def test_login_nao_redireciona_para_outro_site(client, dono):
+    for destino in ('//golpe.com/x', '/\\golpe.com', 'https://golpe.com'):
+        resp = client.post(f'/auth/login?next={destino}',
+                           data={'email': 'dono@senha.com', 'senha': 'antiga-123'})
+        assert resp.status_code == 302
+        assert 'golpe' not in resp.headers['Location']
+        client.get('/auth/logout')
+
+
+def test_conta_desativada_nao_entra(client, dono, session):
+    dono.ativo = False
+    session.commit()
+    resp = client.post('/auth/login', data={'email': 'dono@senha.com', 'senha': 'antiga-123'},
+                       follow_redirects=True)
+    assert 'inválidos' in resp.get_data(as_text=True)

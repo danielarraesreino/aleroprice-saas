@@ -168,7 +168,7 @@ def _render_landing(rest):
     ))
     meta_desc = seo.meta_descricao(site, rest)
 
-    return render_template(_template_do_modelo(modelo_atual),
+    resp = make_response(render_template(_template_do_modelo(modelo_atual),
                            eventos=eventos, promocoes=promocoes,
                            site=site, tema_css=css_do_tema(tema),
                            tema_cor=cor_do_tema(tema), tenant=rest, copy=copy,
@@ -184,7 +184,16 @@ def _render_landing(rest):
                            # declara apoio a nada em nome de ninguém.
                            apoia_caminhos=(bool(getattr(cfg, 'apoia_caminhos', False))
                                            and not getattr(rest, 'eh_demo', False)),
-                           **conteudo)
+                           **conteudo))
+    # Mesma regra da vitrine: visitante sem sessão recebe a cópia da borda da
+    # Vercel e não espera cold start nem o banco acordar. A página não carrega
+    # token de sessão (o formulário busca em /novidades/token na hora de
+    # enviar). Prévia espiada (?modelo=, ?tema=) não entra no cache.
+    if (current_app.config['SESSION_COOKIE_NAME'] not in request.cookies
+            and not previewando and not request.args):
+        resp.headers['Cache-Control'] = 'public, s-maxage=300, stale-while-revalidate=86400'
+        session.accessed = False
+    return resp
 
 
 @bp.route('/')
@@ -1052,8 +1061,11 @@ def concierge_voz():
     from app.utils.ai_copy import processar_voz_concierge
     from app.models.modelo_sitecontent import DishCard
 
+    # Cada chamada gasta a cota de IA do projeto: limite por IP e texto curto.
+    if limite_excedido(f'concierge:{request.remote_addr}', maximo=20, janela_segundos=300):
+        return jsonify({'resposta': 'Muitas perguntas seguidas. Tente de novo em instantes.'}), 429
     dados = request.get_json(silent=True) or request.form
-    texto = (dados.get('texto') or '').strip()
+    texto = (dados.get('texto') or '').strip()[:300]
     slug = (dados.get('slug') or '').strip()
 
     rest = tenant_por_slug(slug) if slug else None

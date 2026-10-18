@@ -51,9 +51,19 @@
       <p>Essa página não existe ou saiu do ar.</p>
     {% endif %}
 
+    {# Veio de dentro do site de um bar (/bar/<slug>/cardapio, por exemplo)? O
+       caminho de volta é o site dele, não a home da Feira. Em /bar/<slug>
+       puro o bar é que não existe — aí não há pra onde voltar. #}
+    {% set partes = request.path.strip('/').split('/') %}
+    {% set bar_slug = partes[1] if partes|length > 2 and partes[0] == 'bar' and partes[1] else None %}
     <div class="acoes">
+      {% if bar_slug %}
+      <a class="btn btn-primario" href="{{ url_for('public.landing_slug', slug=bar_slug) }}">Voltar ao site do bar</a>
+      <a class="btn btn-secundario" href="{{ url_for('public.landing') }}">Ir para a home</a>
+      {% else %}
       <a class="btn btn-primario" href="{{ url_for('public.landing') }}">Ir para a home</a>
       <a class="btn btn-secundario" href="{{ url_for('public.cadastro') }}">Criar meu site</a>
+      {% endif %}
     </div>
   </main>
 </body>

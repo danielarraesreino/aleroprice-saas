@@ -33,3 +33,6 @@ scripts/saida/
 .env.local
 .deepseek_key
 AleroPrice/
+
+# Leads de outros projetos (dados de terceiros, nunca versionar)
+app/data/leads_juridico/
