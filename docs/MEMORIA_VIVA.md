@@ -74,6 +74,27 @@ cada sessão: o que foi feito, o que ficou pendente e os próximos passos.
   e o `llms.txt` do portal foi reescrito. Os dados da feira ficam em `FEIRA`
   (`app/routes/publico/views.py`).
 
+**Notas depois da sessão 3** (reauditorias em `auditoria/reauditoria-*.md`):
+
+| Área | Antes | Agora |
+|---|---|---|
+| SEO / IA | 5,5 | 7,0 |
+| Desempenho | 7 | 8,5 |
+| Segurança | 5 | 7 |
+| Operação | 6 | 7 |
+| UI/UX | 6,5 | 7,5 |
+| Acessibilidade | 6 | 8 |
+| Responsividade | 7 | 8,5 |
+| Posicionamento de venda | — | 4,5 (antes das correções da oferta) |
+
+Publicado depois das reauditorias:
+- `37dd245`: redirect do login com caractere de controle, cardápio na borda,
+  varreduras barradas na Vercel, Speed Insights e Analytics.
+- `f780575`: página indexável `/site-para-bar-em-campinas` com FAQ; Pro como
+  lista de espera também no `/barao`.
+- `f3aa699`: menu do modelo tradicional, "Entrar no sistema" fora dos menus do
+  freguês, cadastro acessível, `aria-pressed` no dock.
+
 ## Pendências que dependem do dono do projeto
 
 1. **Urgente:** desativar no Neon as contas com senha que vazou no GitHub
@@ -100,8 +121,8 @@ cada sessão: o que foi feito, o que ficou pendente e os próximos passos.
 ## Próximos passos (ordem)
 
 1. Consolidar a reauditoria com os plugins e corrigir o que ela apontar.
-2. LP B2B "Site + cardápio + reserva + Google para bar em Campinas", com o caso
-   do Bar da Vila. É a keyword local sem concorrência.
+2. ~~LP B2B~~ feita (`/site-para-bar-em-campinas`). Falta: incluir no
+   sitemap e citar um caso real com números quando houver.
 3. Guia "Feira de Barão / Praça do Coco" com schema Event (depende da pendência 7).
 4. Hub "Bares em Barão Geraldo" indexável, à medida que as prévias virarem
    clientes.
