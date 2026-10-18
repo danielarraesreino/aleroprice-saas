@@ -1,0 +1,1395 @@
+# Gerado por scripts/importar_memoria.py a partir dos rascunhos revisados.
+# Pode editar à mão; ao reimportar, este arquivo é sobrescrito.
+- slug: funilense-mae-esquecida
+  titulo: A Funilense, a mãe esquecida
+  periodo: 1899 a 1960
+  ano: 1899
+  categoria: linha-do-tempo
+  capitulo: 2
+  lugar:
+    nome: Prédio da antiga Estação Barão Geraldo (fundos da Rua Nura Mussi de Camargo Penteado)
+    lat: -22.8315813
+    lng: -47.0789575
+    aproximado: true
+  nota_lugar: O ponto é o da Rua Nura Mussi de Camargo Penteado, a chamada rua do Cartório. O prédio de
+    1926 ainda está de pé nos fundos dessa rua, perto do Terminal Barão Geraldo. Os trilhos foram arrancados
+    e o leito virou rua.
+  resumo: A ferrovia de Campinas ao Funil foi inaugurada em 18 de setembro de 1899 e deu origem a Barão
+    Geraldo e a várias cidades ao norte de Campinas. Em Barão quase ninguém lembra dela.
+  texto:
+  - A ideia da estrada de ferro nasceu nos anos 1870, entre fazendeiros do Club da Lavoura de Campinas
+    como João Manuel de Almeida Barbosa, dono da Fazenda Funil. A Companhia Carril Agrícola Funilense
+    foi fundada em 1890 e tinha o Barão Geraldo de Rezende entre os diretores. Ao contrário do que muita
+    gente repete, lembra Warney Smith, a ferrovia não foi obra só do barão.
+  - A obra atrasou com a febre amarela e a queda do café. Só andou quando Campos Salles virou presidente
+    do estado e liberou empréstimo. O primeiro comboio saiu em 18 de setembro de 1899, com Campos Salles
+    já presidente da República. Em 1904 a companhia não conseguiu pagar o Estado e a linha foi encampada.
+    Em 1924 virou de vez um ramal da Sorocabana, que funcionou até 1960.
+  - 'Da Funilense saíram Cosmópolis, Artur Nogueira, Engenheiro Coelho, Conchal e Paulínia, além de bairros
+    como Betel e Barão Geraldo. Nessas cidades tem museu e data comemorativa. Em Barão, o autor conta
+    que precisava insistir com os antigos moradores para que falassem do trem. Para ele, o trem só ''passava''
+    na vida deles. O historiador também cita a tese de Ana Laura Evangelista e Maria Cristina Schicchi:
+    trilhos arrancados, estações demolidas e a chegada de gente nova apagaram a ferrovia da paisagem.'
+  foto:
+    arquivo: 05_finilense.jpg
+    origem: blog
+    legenda: Trem da Funilense chegando a Barão Geraldo. Foto sem data.
+    credito: Fundo BAG-CMU, via blog História de Barão Geraldo (Warney Smith)
+    webp: funilense-mae-esquecida
+  fontes:
+  - titulo: 'Funilense: a mãe esquecida de Barão e das cidades ao norte de Campinas'
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2021/03/27/funilense-a-mae-esquecida-de-barao-e-das-cidades-ao-norte-de-campinas/
+  tags:
+  - funilense
+  - ferrovia
+  - sorocabana
+  - estacao
+  - cosmopolis
+  - barao-geraldo-de-rezende
+- slug: estacao-barao-geraldo
+  titulo: A Estação Barão Geraldo e o nome do bairro
+  periodo: 1908 a 1926
+  ano: 1908
+  categoria: lugar
+  lugar:
+    nome: Estação Barão Geraldo (prédio de 1926)
+    lat: -22.8315813
+    lng: -47.0789575
+    aproximado: true
+  nota_lugar: Coordenada da Rua Nura Mussi de Camargo Penteado. O prédio da estação fica nos fundos dela,
+    ao lado do Terminal. Hoje é casa particular e não é tombado.
+  resumo: Até 1908 o ponto de parada se chamava chave Santa Genebra. Com a reforma da Funilense ganhou
+    o nome do barão, morto no ano anterior. O prédio que ainda existe é de 1926.
+  texto:
+  - No começo não havia estação, só a 'chave' Santa Genebra, um desvio entre as fazendas Santa Genebra
+    e Rio das Pedras onde o trem parava. Na reforma que o Estado fez na linha, terminada em 1908, a chave
+    passou a se chamar Barão Geraldo e a do Capão Fresco virou Betel. O nome Barão Geraldo de Rezende
+    já tinha sido dado em 1899 à estação do Funil, mas lá o povo preferiu outro nome, que deu em Cosmópolis.
+  - 'Primeiro veio uma guarita, mandada construir pela Secretaria de Agricultura. Quando, ninguém sabe:
+    o blog fala em ''por volta de 1912'' e, noutro trecho, em algum ano entre 1912 e 1916. Os relatos
+    de quem viveu ali não batem: Luiz Gozzi, que chegou em 1914, e Amyr Moda, de 1916, disseram que já
+    havia estação; Humberto Barbieri jurava que em 1922 só existia uma guarita. Warney Smith acha que
+    todos falavam da mesma estaçãozinha.'
+  - A estação oficial, com várias salas e quatro casas anexas, foi erguida pela Sorocabana em 1926 e custou
+    15:907$864 réis, segundo o relatório da companhia. Foi inaugurada em 18 de setembro de 1926. Ali morou
+    Benedito Aranha com dona Alzira, que teve uma escolinha. Depois que a linha acabou, a casa foi cedida
+    a um ex-funcionário e segue com a família.
+  foto:
+    arquivo: 05_estacao-barao-1919.jpg
+    origem: blog
+    legenda: A estação Barão Geraldo numa foto que o blog data de 1919. Pertencia a César Ferreira, que
+      foi fiscal de linha da Funilense.
+    credito: Acervo de César Ferreira, via blog História de Barão Geraldo (Warney Smith)
+    webp: estacao-barao-geraldo
+  fontes:
+  - titulo: 'Funilense: a mãe esquecida de Barão e das cidades ao norte de Campinas'
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2021/03/27/funilense-a-mae-esquecida-de-barao-e-das-cidades-ao-norte-de-campinas/
+  - titulo: 115 anos do Mercadão é também da estação se chamar "Barão Geraldo"
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2023/04/12/115-anos-do-mercadao-e-tambem-da-estacao-se-chamar-barao-geraldo/
+  tags:
+  - estacao
+  - funilense
+  - sorocabana
+  - nome-do-bairro
+  - santa-genebra
+  - 1926
+- slug: mercadao-estacao-funilense
+  titulo: O Mercadão de Campinas, ponta da Funilense
+  periodo: '1908'
+  ano: 1908
+  categoria: lugar
+  lugar:
+    nome: Mercado Municipal de Campinas (Mercadão), Av. Benjamin Constant
+    lat: -22.9033765
+    lng: -47.0636502
+    aproximado: false
+  nota_lugar: Fica no Centro de Campinas, fora de Barão. Entra aqui porque foi a estação inicial da Funilense.
+  resumo: O Mercadão foi inaugurado em 12 de abril de 1908 junto com a Funilense reformada, e servia de
+    estação inicial da linha. Foi nessa reinauguração que a parada da Santa Genebra virou Barão Geraldo.
+  texto:
+  - O prédio, projetado pelo escritório de Ramos de Azevedo, foi inaugurado pelo prefeito Orosimbo Maia
+    e pelo secretário estadual de Agricultura Carlos Botelho. Botelho tinha mandado trocar a bitola da
+    linha de 60 centímetros para um metro e estendê-la até Artur Nogueira. Antes, a Funilense só chegava
+    até a Estação Guanabara.
+  - O plano era escoar a produção da Usina Ester e dos sitiantes da região até Campinas. No mesmo pacote
+    de obras, meses depois da morte do barão, a parada da Santa Genebra ganhou o nome dele. Em 2023, nos
+    115 anos do Mercadão, Warney Smith lembrou que o prédio do Mercadão foi tombado (Condephaat em 1983,
+    Condepacc em 1995) e que a estação de Barão, inaugurada em 1926, nunca foi.
+  foto:
+    arquivo: 02_mercadao5.jpg
+    origem: blog
+    legenda: Vista aérea antiga do Mercadão com o caminho da ferrovia marcado em vermelho.
+    credito: Acervo do blog História de Barão Geraldo (Warney Smith)
+    webp: mercadao-estacao-funilense
+  fontes:
+  - titulo: 115 anos do Mercadão é também da estação se chamar "Barão Geraldo"
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2023/04/12/115-anos-do-mercadao-e-tambem-da-estacao-se-chamar-barao-geraldo/
+  - titulo: 'Funilense: a mãe esquecida de Barão e das cidades ao norte de Campinas'
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2021/03/27/funilense-a-mae-esquecida-de-barao-e-das-cidades-ao-norte-de-campinas/
+  tags:
+  - mercadao
+  - funilense
+  - campinas
+  - ramos-de-azevedo
+  - carlos-botelho
+- slug: ultimo-trem
+  titulo: O último trem
+  periodo: 1960 a 1968
+  ano: 1962
+  categoria: causo
+  lugar:
+    nome: Antigo leito da ferrovia no centro velho, perto da antiga capela
+    lat: -22.8293138
+    lng: -47.0786705
+    aproximado: true
+  nota_lugar: O blog não dá o endereço exato da foto. A linha cortava o centro velho entre a estação e
+    a bifurcação da Av. Santa Isabel com a Estrada da Rhodia. O ponto usado é o da Av. Albino José Barbosa
+    de Oliveira, onde o blog situa a antiga venda do Plínio, perto da estação.
+  resumo: Em 1962 Eugênio Martins fotografou o que chamou de 'último trem', parado ao lado da igreja.
+    Anos depois tirou outra foto do mesmo ângulo, já sem trilho e com carros passando.
+  texto:
+  - O ramal da Sorocabana, antiga Funilense, foi parando a partir de 1960. A foto de Eugênio Martins,
+    de 1962, mostra a composição atravancando a rua, com caminhões e carros esperando do lado da torre
+    da igreja. Em 1968 ele voltou ao mesmo lugar e fotografou a rua livre.
+  - Quando Warney Smith perguntou a Nicolau Pacci por que tiraram a linha, ouviu que o trem estava 'estorvando'.
+    Nos anos 1950 Barão tinha virado distrito e ganhado estrada asfaltada para Campinas, loteamentos,
+    jardineiras e escolas novas. O autor acha que a linha cortando a vila no meio lembrava o tempo da
+    roça, e a saída dela foi comemorada.
+  foto:
+    arquivo: 05_o-ultimo-trem.jpg
+    origem: blog
+    legenda: O 'último trem', parado ao lado da igreja, em 1962.
+    credito: Foto de Eugênio Martins, via blog História de Barão Geraldo (Warney Smith)
+    webp: ultimo-trem
+  fontes:
+  - titulo: 'Funilense: a mãe esquecida de Barão e das cidades ao norte de Campinas'
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2021/03/27/funilense-a-mae-esquecida-de-barao-e-das-cidades-ao-norte-de-campinas/
+  tags:
+  - trem
+  - sorocabana
+  - funilense
+  - eugenio-martins
+  - 1962
+  - fotografia
+- slug: plinio-aveniente
+  titulo: Plínio Aveniente e a leiteria
+  periodo: 1909 a 1956
+  ano: 1909
+  categoria: pessoa-familia
+  capitulo: 3
+  lugar:
+    nome: Venda e sede da leiteria de Plínio Aveniente, perto da estação
+    lat: -22.8293138
+    lng: -47.0786705
+    aproximado: true
+  nota_lugar: A venda não existe mais. Segundo Luiz Gozzi e Humberto Barbieri, ficava perto de onde hoje
+    está o Burger King da Av. Albino José Barbosa de Oliveira. A coordenada é a desse ponto.
+  resumo: Italiano de Pisa, Plínio abriu uma venda perto da chave Santa Genebra por volta de 1909 e criou
+    vacas no pasto que hoje é o centro de Barão. Depois vendeu a terra em pedaços, a prazo.
+  texto:
+  - Plínio Aveniente nasceu em Pisa em 19 de outubro de 1879. Morou na região oeste de Campinas, provavelmente
+    em Matão, hoje Sumaré, e por volta dos 30 anos abriu uma venda perto da estação, quase na divisa das
+    fazendas Santa Genebra e Rio das Pedras. Comprou da Rio das Pedras uns 20 alqueires de pasto do outro
+    lado da linha, onde pôs vacas e montou uma leiteria. Depois juntou mais 2 ou 3 alqueires do lado da
+    venda, onde hoje estão a Vila Mokarzel e o bairro José Martins. Os textos do blog somam isso em 22
+    alqueires.
+  - A casa era de pau a pique. A mulher dele, Ema Carraro, contava que ali 'os bichos iam comer em casa'.
+    O filho caçula, Plínio Jr., lembrou que o pai buscava água na bica da Areia Molhada, hoje entrada
+    da Vila Costa e Silva. Os descendentes chamavam Plínio de 'Primo'.
+  - Ele vendeu a terra a prazo para Luis Vicentin, Modesto Fernandes, Agostinho Páttaro, Antônio Seraphin,
+    Nassif Mokarzel, José Martins e outros. Também emprestava dinheiro, e muitos antigos moradores contaram
+    que os pais tinham pegado empréstimo com ele. Nas palavras do blog, foi 'viver de juros'. Com o dinheiro
+    comprou um sítio entre o Guanabara e o Cambuizal, onde fez a Vila Aveniente. Morreu em 20 de novembro
+    de 1956, aos 77 anos.
+  - As datas variam. Um texto diz que Plínio começou a lotear a partir de 1920. Outro, baseado no filho,
+    fala em anos 1940. As vendas para Vicentin e Modesto aparecem em 1926 em mais de um texto.
+  foto:
+    arquivo: 10_plinio-aveniente-3-x-4.jpg
+    origem: blog
+    legenda: Plínio Aveniente em retrato 3x4, sem data.
+    credito: Acervo do blog História de Barão Geraldo (Warney Smith)
+    webp: plinio-aveniente
+  fontes:
+  - titulo: Mini Biografia de Plínio Aveniente
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2015/08/26/mini-biografia-de-plinio-aveniente/
+  - titulo: Os primeiros Vicentin de Barão
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2022/01/17/os-primeiros-vicentin/
+  - titulo: A Colônia Xadrez e outras antes da formação de Barão Geraldo
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2021/09/22/a-colonia-xadrez-e-outras-antes-da-formacao-de-barao-geraldo/
+  tags:
+  - plinio-aveniente
+  - leiteria
+  - venda
+  - imigrantes-italianos
+  - loteamento
+  - fundadores
+- slug: armazem-santa-genebra
+  titulo: O armazém ao lado da estação
+  periodo: c. 1910 em diante
+  ano: 1910
+  categoria: lugar
+  lugar:
+    nome: Antigo armazém da Fazenda Santa Genebra, ao lado da estação
+    lat: -22.8315813
+    lng: -47.0789575
+    aproximado: true
+  nota_lugar: O blog diz que o armazém fica ao lado da estação e está tombado, sem dar endereço. A coordenada
+    é a da Rua Nura Mussi de Camargo Penteado, nos fundos da qual está a estação.
+  resumo: Construído pela Fazenda Santa Genebra por volta de 1910, o armazém passou de mão em mão e já
+    foi venda, escola, salão de baile, cinema e cartório.
+  texto:
+  - O armazém é anterior ao prédio da estação de 1926. Pela conta do blog, foi administrado e vendido
+    por Plínio Aveniente, depois virou casa e armazém de Antônio Serafin, passou a Nassif Mokarzel, que
+    vendeu a Salomão Mussi e ao genro dele, Guido Camargo Penteado Sobrinho.
+  - Nesse caminho serviu de salão de baile, de cinema do Guido, de casa e cartório de Barão e de depósito.
+    Parece ter abrigado por um tempo a escolinha de dona Alzira. Depois ficou anos abandonado. Hoje é
+    tombado, e o autor diz não saber por qual motivo, já que a estação do lado não é.
+  fontes:
+  - titulo: 'Funilense: a mãe esquecida de Barão e das cidades ao norte de Campinas'
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2021/03/27/funilense-a-mae-esquecida-de-barao-e-das-cidades-ao-norte-de-campinas/
+  tags:
+  - armazem
+  - santa-genebra
+  - cartorio
+  - cinema
+  - mokarzel
+  - guido-camargo
+- slug: luis-vicentin
+  titulo: Luis Vicentin e a gleba entre a Estação e a Capela
+  periodo: 1894 a 1976
+  ano: 1926
+  categoria: pessoa-familia
+  lugar:
+    nome: Terreno da casa de Luis Vicentin, em frente à Matriz Santa Isabel
+    lat: -22.8282839
+    lng: -47.0814826
+    aproximado: true
+  nota_lugar: O blog diz que a casa ficava no terreno rebaixado perto da Igreja de Santa Isabel, quase
+    em frente, na atual Rua Benedito Alves Aranha. A coordenada é desse trecho da rua.
+  resumo: Em 1926 Luis Vicentin comprou a melhor parte do pasto de Plínio Aveniente, entre a Estação e
+    a Capela, para uma leiteria. Em 1949 loteou o sítio e depois doou o terreno da Matriz.
+  texto:
+  - Luigi Visentin nasceu em 23 de novembro de 1894 em Lancenigo, Villorba, na província de Treviso. Os
+    pais tinham voltado de Campinas meses antes e logo vieram de novo ao Brasil. Aqui foi registrado como
+    Luis Vicentin e cresceu no sítio da família, ao lado da Fazenda Quilombo. Dois textos do blog dizem
+    que ele nasceu em Charqueada, mas a certidão achada em Treviso pelo pesquisador Vanderley Tonella
+    dá Lancenigo. Gostava de cavalgar e de lidar com gado.
+  - 'Conheceu Catharina, filha do leiteiro João Batista Signori, na beira do campo de futebol em frente
+    à estação, onde o povo ficava depois da missa vendo o trem passar. Casaram em 13 de janeiro de 1917
+    na igreja de Santa Cruz, em Campinas. Tiveram oito filhos: Maria Antônia, Leonilda, Anézio, João Baptista
+    (o Ica), Eliza, Cecília, Atílio e Darci.'
+  - Em 1926 comprou de Plínio Aveniente 8 alqueires da parte principal do pasto. Vendia leite em Campinas
+    de casa em casa, num latão com torneirinha em cima da carroça. A filha Maria Antônia contou que em
+    casa nunca faltou nada e que às vezes o pai trazia uma saca inteira de bacalhau. Depois da chegada
+    da Rhodia, em 1942, as vacas foram adoecendo e morreram uma a uma. Foi isso que o levou a lotear o
+    sítio.
+  - Ajudou a pagar a primeira luz até a Capela em 1935, assinou o pedido de iluminação pública em 1949
+    e o de água e esgoto em 1959. Morreu em 15 de março de 1976, aos 81 anos. Catharina viveu na mesma
+    casa até 5 de janeiro de 1983. Os dois estão no Cemitério da Saudade.
+  foto:
+    arquivo: 01_luis-vicentin-1.jpg
+    origem: blog
+    legenda: Retrato de Luis Vicentin em moldura oval.
+    credito: Acervo do blog História de Barão Geraldo (Warney Smith)
+    webp: luis-vicentin
+  fontes:
+  - titulo: Luiz Vicentin
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2024/01/19/luiz-vicentin/
+  - titulo: Os primeiros Vicentin de Barão
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2022/01/17/os-primeiros-vicentin/
+  tags:
+  - vicentin
+  - leiteria
+  - fundadores
+  - imigrantes-italianos
+  - treviso
+  - loteamento
+- slug: primeiros-vicentin
+  titulo: 'Os primeiros Vicentin: Ângelo e Antônia'
+  periodo: 1888 a 1928
+  ano: 1909
+  categoria: pessoa-familia
+  lugar:
+    nome: Sítio de Ângelo Vicentin na antiga Fazenda Quilombo, perto do Terras do Barão
+    lat: -22.7772035
+    lng: -47.0905875
+    aproximado: true
+  nota_lugar: O sítio ficava no fim da Estrada da Rhodia, ao lado da antiga Fazenda Quilombo e perto do
+    atual Residencial Terras do Barão. Nos anos 1980 foi vendido à empresa Lacom. A coordenada é a do
+    Terras do Barão.
+  resumo: Ângelo Visentin e Antônia Vancin vieram de Treviso em 1888, voltaram para a Itália, vieram de
+    novo e em 1909 compraram um sítio de mata na Fazenda Quilombo. São os pais de Luis Vicentin.
+  texto:
+  - Ângelo nasceu em 6 de outubro de 1856 em Fossalta di Piave, perto de Treviso. Serviu quase cinco anos
+    na cavalaria e chegou a cabo. Casou com Antônia Vancin e em 1888 a família toda embarcou em Gênova
+    no vapor Fortunata Regina. Desceram em Santos em 23 de dezembro de 1888 e foram trabalhar como colonos
+    na Fazenda Cachoeira, no atual Bonfim.
+  - Sofreram com bicho-de-pé e com o calor. Em 1893 o patriarca Giuseppe, com mais de 70 anos, decidiu
+    voltar à Itália, e todos foram junto. Luigi nasceu lá em 1894, Giuseppe morreu meses depois e Ângelo
+    voltou ao Brasil. Segundo a nora, dona Antônia, o menino aprendeu a andar no navio. A família foi
+    para Charqueada, onde Ângelo e o irmão Eugênio formaram 12 mil pés de café num sítio. Depois Ângelo
+    descobriu que a escritura estava só no nome do irmão e saiu sem nada.
+  - De volta à Fazenda Cachoeira, juntaram dinheiro e em 1909 compraram terra da Fazenda Quilombo, do
+    senador Luiz de Queiroz. Orpheu Leonardi disse que ali 'só tinha floresta e mato'. Pai e filhos desmataram
+    e plantaram 7 mil pés de café. Ângelo teve um AVC por volta de 1922 e morreu em 28 de junho de 1928.
+  - Os textos divergem em alguns pontos. O tamanho da compra aparece como 11 alqueires, 5 alqueires ou
+    três sítios. A volta a Campinas é datada em 1906 num texto e em 1909 noutro. Um deles diz que Luis
+    nasceu em Charqueada, mas os outros, com a certidão achada em Treviso pelo pesquisador Vanderley Tonella,
+    dão Lancenigo. O sobrenome de Antônia aparece como Vancin, Bancin e, na certidão de casamento do filho,
+    Nansini.
+  foto:
+    arquivo: 03_angelo-e-vancin.jpg
+    origem: blog
+    legenda: Antônia Vancin e Ângelo Vicentin, foto da lápide no Cemitério da Saudade.
+    credito: Acervo do blog História de Barão Geraldo (Warney Smith)
+    webp: primeiros-vicentin
+  fontes:
+  - titulo: Os primeiros Vicentin de Barão
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2022/01/17/os-primeiros-vicentin/
+  - titulo: Luiz Vicentin
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2024/01/19/luiz-vicentin/
+  - titulo: A Colônia Xadrez e outras antes da formação de Barão Geraldo
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2021/09/22/a-colonia-xadrez-e-outras-antes-da-formacao-de-barao-geraldo/
+  tags:
+  - vicentin
+  - imigrantes-italianos
+  - fazenda-quilombo
+  - treviso
+  - cafe
+  - fazenda-cachoeira
+- slug: colonia-xadrez
+  titulo: A Colônia Xadrez
+  periodo: fim do século 19 a 1940
+  ano: 1922
+  categoria: lugar
+  lugar:
+    nome: Colônia Xadrez, atual Rua Carlos Diniz Leitão
+    lat: -22.8206986
+    lng: -47.0873211
+    aproximado: true
+  nota_lugar: A colônia não existe mais. Pela aerofotografia de 1940, as casas ficavam onde hoje passa
+    a Rua Carlos Diniz Leitão. A coordenada é a dessa rua.
+  resumo: Colônia de trabalhadores do cafezal plantado em xadrez na Fazenda Rio das Pedras. Para Warney
+    Smith é a principal raiz de Barão Geraldo, anterior à própria estação.
+  texto:
+  - O cafezal em forma de xadrez foi plantado no último quarto do século 19 na ala oeste da Rio das Pedras,
+    entre o atual Jardim Afife e a praça do Burato. Quem cuidava dele era Antônio Jacobina, genro do Conselheiro
+    Albino. A colônia ficava a uns 3 quilômetros da chave Santa Genebra. Moravam ali italianos, brasileiros
+    e algumas famílias negras, descendentes de escravizados.
+  - Antônio Páttaro chegou criança em 1922 e lembrava de duas fileiras de seis casas, doze famílias. Citava
+    Zé Níquel, Egídio Crispim, o espanhol Arthur Moretti, Totó Babre, Victorino Ferrari e João Buratto.
+    Levantavam às 5 da manhã para a carpa. Páscoa Ferrari, que nasceu no Xadrez em 1921 e casou com ele,
+    contou que cada família tocava de 10 a 20 alqueires e anotava em casa o que colhia, e o feitor também
+    anotava.
+  - Entre 1918 e 1922 sitiantes começaram a comprar terra no Xadrez. Giuseppe Soprano pagou 50 contos
+    por 12 alqueires em 1918, que pegavam quase toda a atual Vila Santa Isabel. Aristodemo Barbieri chegou
+    em 1922. Os dois descreveram café velho e terra cansada. Humberto Barbieri, filho de Aristodemo, contou
+    que a família trocou o cereal por fruta e raiz, e quem tinha café passou a plantar eucalipto.
+  foto:
+    arquivo: 04_colonia-xadrez-1940-peq-1.jpg
+    origem: blog
+    legenda: 'A Colônia Xadrez na aerofotografia de 1940: as casas em fileira à esquerda e a mata do atual
+      Jardim Afife à direita.'
+    credito: Aerofotografia de 1940 do Ministério da Agricultura, acervo da Prefeitura de Campinas, via
+      blog História de Barão Geraldo (Warney Smith)
+    webp: colonia-xadrez
+  fontes:
+  - titulo: A Colônia Xadrez e outras antes da formação de Barão Geraldo
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2021/09/22/a-colonia-xadrez-e-outras-antes-da-formacao-de-barao-geraldo/
+  tags:
+  - colonia-xadrez
+  - rio-das-pedras
+  - cafe
+  - colonos
+  - pattaro
+  - imigrantes-italianos
+- slug: colonia-curiango
+  titulo: Curiango e as colônias de sitiantes
+  periodo: c. 1909 a 1920
+  ano: 1909
+  categoria: lugar
+  lugar:
+    nome: Antiga colônia Curiango, entre a Estrada da Rhodia e o Guará
+    lat: -22.7816442
+    lng: -47.0833565
+    aproximado: true
+  nota_lugar: A comunidade não existe mais com esse nome. O blog a coloca entre a Estrada da Rhodia e
+    o Guará, na região dos atuais Terras do Barão, Vila Holândia e Vila Florida. A coordenada é um ponto
+    da Estrada do Guará.
+  resumo: Além da Colônia Xadrez, Barão nasceu também de colônias de sitiantes ao norte, como Quilombo
+    e Curiango, perto da Fazenda São Francisco da Barra.
+  texto:
+  - Entre a Rio das Pedras e as fazendas São Francisco e Quilombo havia as colônias Quilombo e Curiango,
+    que também era chamada de Goiabal. O primeiro comprador de terra conhecido ali foi Ângelo Vicentin,
+    em 1909.
+  - Perto ficavam a Fazenda São Francisco da Barra, onde hoje é a Rhodia, uma pequena cerâmica e a escolinha
+    Betel. Numa capela da fazenda funcionava uma escola com a professora dona Maria do Carmo, que morava
+    lá. A molecada jogava bola e pescava. No Curiango morava o italiano Giovanni Signori, conhecido como
+    João Batista Signori, que criava gado e vendia leite. Era o pai de Catharina, futura mulher de Luis
+    Vicentin.
+  - Do outro lado da Estrada dos Fazendeiros, como chamavam a Estrada da Rhodia, moravam desde 1925 o
+    português José Martins e Francisco de Barros Filho, que tinha sido carroceiro de Plínio Aveniente.
+  foto:
+    arquivo: 01_fazenda-sao-francisco-da-barra.jpg
+    origem: blog
+    legenda: Fazenda São Francisco da Barra, vizinha do Curiango. O blog data a foto por volta dos anos
+      1920.
+    credito: Acervo do blog História de Barão Geraldo (Warney Smith)
+    webp: colonia-curiango
+  fontes:
+  - titulo: A Colônia Xadrez e outras antes da formação de Barão Geraldo
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2021/09/22/a-colonia-xadrez-e-outras-antes-da-formacao-de-barao-geraldo/
+  - titulo: Luiz Vicentin
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2024/01/19/luiz-vicentin/
+  tags:
+  - curiango
+  - quilombo
+  - sitiantes
+  - fazenda-sao-francisco
+  - signori
+  - estrada-da-rhodia
+- slug: arruamento-luis-vicentin
+  titulo: 'Os primeiros loteamentos: o Arruamento Luis Vicentin'
+  periodo: '1949'
+  ano: 1949
+  categoria: linha-do-tempo
+  lugar:
+    nome: Praça Augusta Pires de Moraes, área doada por Luis Vicentin
+    lat: -22.8287974
+    lng: -47.0818879
+    aproximado: false
+  nota_lugar: A praça em frente à Matriz fica dentro da área de 15.178 m² que Luis Vicentin doou para
+    aprovar o loteamento.
+  resumo: Em 25 de fevereiro de 1949 Luis Vicentin registrou a doação de ruas e praça para lotear o sítio.
+    A Vila Agostinho Páttaro também saiu em 1949, e as duas famílias disputam qual foi o primeiro.
+  texto:
+  - Com as vacas mortas depois da chegada da Rhodia, Luis Vicentin resolveu lotear. A Rhodia contratava
+    muita gente que precisava de casa, e Modesto Fernandes, Agostinho Páttaro e Leitão também decidiram
+    lotear os sítios. A Prefeitura pedia ruas e praças em troca da aprovação.
+  - Em 25 de fevereiro de 1949 Vicentin registrou em cartório a doação de 15.178 m², com a praça e as
+    ruas. O loteamento ficou com o nome de Arruamento Luiz Vicentin, que o autor acha injusto. Para Agostinho
+    Páttaro a Prefeitura fez o arruamento da Vila Agostinho Páttaro em troca de terreno para abrir a Avenida
+    Santa Isabel, também em 1949. A primazia é disputada pelos descendentes.
+  - Loteamento precisava de luz. Ainda em 1949 Vicentin assinou com Hélio e Orpheu Leonardi o pedido de
+    iluminação pública à CPFL. O blog também lembra que, segundo Plínio Aveniente Jr., os 20 alqueires
+    do pai viraram os bairros Luis Vicentin, Modesto Fernandes e Agostinho Páttaro.
+  foto:
+    arquivo: 01_loteamento-luis-vicentin.jpg
+    origem: blog
+    legenda: Planta do Arruamento Luis Vicentin.
+    credito: Acervo do blog História de Barão Geraldo (Warney Smith)
+    webp: arruamento-luis-vicentin
+  fontes:
+  - titulo: Luiz Vicentin
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2024/01/19/luiz-vicentin/
+  - titulo: Mini Biografia de Plínio Aveniente
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2015/08/26/mini-biografia-de-plinio-aveniente/
+  tags:
+  - loteamento
+  - vicentin
+  - pattaro
+  - modesto-fernandes
+  - rhodia
+  - 1949
+- slug: matriz-santa-isabel
+  titulo: Da Capela à Matriz de Santa Isabel
+  periodo: c. 1920 a 1963
+  ano: 1963
+  categoria: lugar
+  lugar:
+    nome: Igreja Matriz de Santa Isabel, Rua Benedito Alves Aranha, 226
+    lat: -22.8282214
+    lng: -47.082022
+    aproximado: false
+  nota_lugar: Coordenada da Matriz atual, inaugurada em 1963. A antiga Capela de Santa Isabel ficava perto
+    da estação e da linha do trem, em terra da Fazenda Rio das Pedras, e foi demolida. O blog não dá o
+    ponto exato dela.
+  resumo: A Capela de Santa Isabel, perto da estação, juntava o povo nas missas de domingo. A nova igreja,
+    de campanha começada no fim dos anos 1950, abriu em 1963 em terreno doado por Luis Vicentin.
+  texto:
+  - A missa na Capela só acontecia quando vinha padre de Campinas. Por volta de 1920 Celeste Vicentin,
+    irmão de Luis, passou a cuidar da igreja e a guardar as chaves. Virou capelão e depois capelão-mor.
+    Em 1935 Hélio Leonardi, com ajuda de Luis Vicentin e outros, puxou a primeira luz até um poste na
+    Capela.
+  - A capela pertencia à Fazenda Rio das Pedras. O blog não sabe se João Adhemar de Almeida Prado, que
+    comprou a fazenda, pediu o terreno de volta para construir um banco. No fim dos anos 1950 correram
+    os livros de ouro e as doações. Luis Vicentin foi o primeiro a oferecer o terreno, quase em frente
+    à casa dele, e deu também dinheiro.
+  - A nova Matriz da Paróquia Santa Isabel foi inaugurada em 1963 com missa campal, banda de música e
+    o prefeito presente. O texto sobre a Funilense diz que a velha igreja foi derrubada no ano seguinte
+    à foto do último trem, de 1962, para dar lugar a um banco.
+  foto:
+    arquivo: 01_inauguracao-da-nova-matriz-1963.jpg
+    origem: blog
+    legenda: Inauguração da nova Matriz da Paróquia Santa Isabel, em 1963, no terreno doado por Luis Vicentin.
+    credito: Acervo do blog História de Barão Geraldo (Warney Smith)
+    webp: matriz-santa-isabel
+  fontes:
+  - titulo: Luiz Vicentin
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2024/01/19/luiz-vicentin/
+  - titulo: 'Funilense: a mãe esquecida de Barão e das cidades ao norte de Campinas'
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2021/03/27/funilense-a-mae-esquecida-de-barao-e-das-cidades-ao-norte-de-campinas/
+  tags:
+  - igreja
+  - santa-isabel
+  - capela
+  - matriz
+  - vicentin
+  - 1963
+- slug: salao-paroquial-polemica
+  titulo: A troca de terrenos do Salão Paroquial
+  periodo: 1970 a 1978
+  ano: 1978
+  categoria: causo
+  lugar:
+    nome: Salão Paroquial Santa Isabel, em frente à Matriz
+    lat: -22.8287974
+    lng: -47.0818879
+    aproximado: true
+  nota_lugar: O Salão foi erguido no antigo campo de futebol em frente à igreja, na área que Luis Vicentin
+    tinha doado como praça. O ponto usado é o da Praça Augusta Pires de Moraes, vizinha.
+  resumo: Modesto Fernandes doou um terreno para o Salão Paroquial, mas a paróquia preferiu construir
+    no campo em frente à igreja. A troca nunca foi registrada, e o terreno de Modesto acabou virando a
+    Praça Durval Páttaro.
+  texto:
+  - Quando Luis Vicentin ofereceu o terreno da igreja, o cunhado e vizinho Modesto Fernandes, que também
+    queria doar, mudou a oferta para um salão paroquial. Por volta de 1970 a 1972 o padre Gilberto Schneider,
+    o padre Giba, resolveu fazer o salão. Modesto chegou a doar formalmente um terreno na rua da casa
+    dele, a atual Avenida Modesto Fernandes.
+  - Depois de discussão, decidiram que o salão ficaria no campo em frente à igreja, na área doada por
+    Vicentin como praça. O padre combinou que essa área seria da paróquia e o terreno de Modesto ficaria
+    para a Prefeitura. Nada foi passado em cartório. Ali chegaram a anunciar subprefeitura e delegacia,
+    e no fim o terreno foi juntado a uma sobra da Vila Agostinho Páttaro e virou a Praça Durval Páttaro.
+  - A obra só começou em 31 de dezembro de 1976, meses depois da morte de Vicentin, que foi nomeado presidente
+    de honra. A comissão teve Atílio Vicentin, Jardes Lanza, José Zambon, Laércio Chiarreotto e Modesto
+    Fernandes Neto. O salão foi inaugurado em 2 de julho de 1978, no fim da Festa de Santa Isabel.
+  foto:
+    arquivo: 01_placa-salao.jpg
+    origem: blog
+    legenda: Placa do Salão Paroquial Santa Isabel, com as datas de fundação e inauguração e Luiz Vicentin
+      como presidente de honra.
+    credito: Acervo do blog História de Barão Geraldo (Warney Smith)
+    webp: salao-paroquial-polemica
+  fontes:
+  - titulo: Luiz Vicentin
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2024/01/19/luiz-vicentin/
+  tags:
+  - salao-paroquial
+  - modesto-fernandes
+  - vicentin
+  - padre-giba
+  - praca-durval-pattaro
+- slug: vendo-o-trem-passar
+  titulo: Vendo o trem passar
+  periodo: décadas de 1910 e 1920
+  ano: 1918
+  categoria: causo
+  lugar:
+    nome: Arredores da estação e do antigo campo de futebol
+    lat: -22.8315813
+    lng: -47.0789575
+    aproximado: true
+  nota_lugar: O campo ficava em frente à estação. A coordenada é a da Rua Nura Mussi de Camargo Penteado,
+    nos fundos da qual está o prédio da estação.
+  resumo: Ver o trem passar era programa de domingo. Os antigos moradores contaram ao autor do blog como
+    era o trem da Funilense nos primeiros anos.
+  texto:
+  - Depois da missa na Capela o povo ficava na beira do campo, em frente à estação, esperando o trem.
+    Foi assim que Luis Vicentin conversou pela primeira vez com Catharina Signori.
+  - 'Amyr Moda contou que em 1918 a passagem custava 300 réis e o chefe da estação era um tal de Canuto.
+    O trem subia às oito da manhã e voltava no começo da noite, com dois vagões de passageiros e o resto
+    de carga: lenha, madeira, mantimento, fruta, cana e açúcar da Usina Ester.'
+  - Luiz Gozzi lembrava de umas cinco casas beirando a linha e de gente que corria de medo quando o trem
+    apitava. Sá Maria e Maria Páttaro disseram que tudo tremia na passagem e que o trem buzinava perto
+    da capela. Como ele andava devagar depois da parada, os moradores puxavam conversa com os passageiros.
+  foto:
+    arquivo: 05_imagem_2021-03-27_032925.png
+    origem: blog
+    legenda: Joaquim Prado Jr., último chefe da Estação Barão Geraldo, nos anos 1950.
+    credito: Acervo do blog História de Barão Geraldo (Warney Smith)
+    webp: vendo-o-trem-passar
+  fontes:
+  - titulo: 'Funilense: a mãe esquecida de Barão e das cidades ao norte de Campinas'
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2021/03/27/funilense-a-mae-esquecida-de-barao-e-das-cidades-ao-norte-de-campinas/
+  - titulo: Luiz Vicentin
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2024/01/19/luiz-vicentin/
+  tags:
+  - trem
+  - causo
+  - estacao
+  - funilense
+  - namoro
+  - usina-ester
+- slug: campos-de-futebol
+  titulo: Os três campos de futebol do centro
+  periodo: c. 1910 a 1970
+  ano: 1935
+  categoria: lugar
+  lugar:
+    nome: Segundo campo de Barão, atual Rua Horácio Leonardi
+    lat: -22.8286646
+    lng: -47.079357
+    aproximado: true
+  nota_lugar: O segundo campo ficava onde hoje estão as Galerias e o bar Estação Barão, na Rua Horácio
+    Leonardi, que na época corria ao lado da ferrovia. A coordenada é desse trecho da rua. O primeiro
+    campo, em frente à estação, e o terceiro, em frente à Matriz, não têm ponto próprio aqui.
+  resumo: A vila cresceu em volta de um campo de futebol. O primeiro ficava em frente à estação, o segundo
+    onde hoje é a Rua Horácio Leonardi e o terceiro em frente à nova Matriz.
+  texto:
+  - 'Warney Smith escreve que Barão nasceu como tantas vilas de estação: em volta da parada do trem, da
+    capela de Santa Isabel, das vendas e de um campo de futebol. O primeiro campo, em frente à estação,
+    já existia pelo menos desde a venda e a leiteria de Plínio, por volta de 1909 e 1910.'
+  - O segundo campo era do Clube Atlético Barão Geraldo, criado por Hélio Leonardi com ajuda de Luis Vicentin.
+    Ficava onde hoje estão as Galerias e o bar Estação Barão. O terceiro foi aberto na praça que Vicentin
+    doou em frente à nova igreja, onde o padre Gilberto mantinha uma escolinha de futebol. Nos anos 1970
+    esse campo deu lugar ao Salão Paroquial.
+  fontes:
+  - titulo: Luiz Vicentin
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2024/01/19/luiz-vicentin/
+  - titulo: A Colônia Xadrez e outras antes da formação de Barão Geraldo
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2021/09/22/a-colonia-xadrez-e-outras-antes-da-formacao-de-barao-geraldo/
+  tags:
+  - futebol
+  - clube-atletico-barao-geraldo
+  - helio-leonardi
+  - centro
+  - vicentin
+- slug: fazenda-santa-genebra
+  titulo: Fazenda Santa Genebra
+  periodo: 1849-1993
+  ano: 1880
+  categoria: lugar
+  capitulo: 1
+  lugar:
+    nome: Fazenda Santa Genebra (área da antiga fazenda, junto à Mata Santa Genebra)
+    lat: -22.8229924
+    lng: -47.1092632
+    aproximado: true
+  nota_lugar: A sede da fazenda não aparece no OpenStreetMap. O ponto marca a ARIE Mata de Santa Genebra,
+    que fica nas terras da antiga fazenda, e não o casarão.
+  resumo: Antes de se chamar Santa Genebra, era a Fazenda Morro Grande. Foi de cana, depois de café. Na
+    mão de Geraldo de Rezende ganhou máquinas modernas e colonos europeus.
+  texto:
+  - 'O nome antigo era Fazenda Morro Grande, parte da velha sesmaria do Rio das Pedras. Quando Francisco
+    Ignácio de Souza Queiroz morreu, em 1830, as terras foram divididas entre as duas filhas. Genebra
+    ficou com o Morro Grande e casou em 1849 com o primo, o capitão Luis Ribeiro de Souza Rezende. Ela
+    morreu em 1863, o marido largou a administração e a Marquesa de Valença rebatizou a fazenda com o
+    nome dela: Santa Genebra.'
+  - Por um tempo quem tocou o dia a dia foi um capataz escravizado, o Toninho. Em 1870 a fazenda passou
+    para Geraldo Ribeiro de Souza Rezende, filho da marquesa, que ficou nela até morrer, em 1907. Nos
+    anos 1840 a terra era de cana. A partir de 1852 o café foi tomando conta.
+  - A Wikipédia conta que a Santa Genebra ficou famosa pelas plantadeiras americanas puxadas a animal
+    e pelos secadores de café, coisa que pouca fazenda do país tinha. Recebia agrônomos e autoridades,
+    e em 1896 passou por lá uma comissão suíça. As fotos de 1880 guardadas no Fundo da Princesa Isabel,
+    na Biblioteca Nacional, mostram o sobrado e o terreiro de café em frente.
+  - Depois do barão, a fazenda foi do senador Lins de Vasconcelos e, a partir de 1918, de José Pedro de
+    Oliveira. A mini-biografia de Plínio Aveniente, no blog, diz que Vasconcellos foi dono só até 1915.
+    A viúva dele, Jandyra Pamplona de Oliveira, cuidou das terras até 1993. Em 1958 o café foi arrancado
+    para dar lugar ao algodão. Em 1983 a pulverização de inseticida nos algodoais atingiu Barão e moradores
+    ligados à Unicamp protestaram até a fazenda mudar de cultura.
+  foto:
+    arquivo: 07_800px-fazenda_santa_genebra_sao_paulo_1880.jpg
+    origem: blog
+    legenda: Sede e terreiro de café da Fazenda Santa Genebra em 1880.
+    credito: Fundo Princesa Isabel, Biblioteca Nacional. Publicada por Warney Smith no blog História de
+      Barão Geraldo.
+    webp: fazenda-santa-genebra
+  fontes:
+  - titulo: Barão Geraldo
+    autor: Wikipédia
+    url: https://pt.wikipedia.org/wiki/Bar%C3%A3o_Geraldo
+  - titulo: História de Barão Geraldo
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2020/08/23/historia-de-barao-geraldo/
+  tags:
+  - fazenda
+  - café
+  - santa-genebra
+  - século-19
+- slug: barao-geraldo-de-rezende
+  titulo: Geraldo de Rezende, o barão que deu nome ao lugar
+  periodo: 1870-1907
+  ano: 1870
+  categoria: pessoa-familia
+  resumo: Fazendeiro da Santa Genebra e um dos diretores da Estrada de Ferro Funilense. Morreu em 1907,
+    antes de existir a vila que leva o título dele.
+  texto:
+  - Geraldo Ribeiro de Souza Rezende assumiu a Santa Genebra em 1870. Em 1876 casou com a prima Maria
+    Amélia, filha de Isabel Augusta. Segundo a biografia escrita pela filha, Amélia Rezende Martins, ele
+    alforriou os escravos em 1874, comprou máquinas novas para o café e trouxe os primeiros colonos, alemães
+    entre eles. Warney Smith lembra que a mesma Amélia conta que a relação com os imigrantes era tensa,
+    com fugas diárias e até uma greve puxada pelo italiano Pietro Davanzzo.
+  - O braço direito dele era Toninho, homem escravizado que já era capataz quando Geraldo chegou e cuidava
+    das chaves da fazenda. Pelo relato do blog, a partir de 1884 virou cocheiro do barão e andava bem
+    vestido.
+  - Geraldo pôs dinheiro e empréstimos na Funilense, inaugurada em 1899. A esposa morreu em Paris em 1902,
+    a ferrovia saiu das mãos dele e a fazenda, dada em garantia da dívida, foi para o senador Lins de
+    Vasconcelos. O blog conta que Vasconcellos pediu as propriedades em 1905 e que o barão recorreu, mas
+    perdeu na Justiça em 1907. Ele morreu na Santa Genebra em 1º de outubro de 1907. Há quem fale em suicídio;
+    a família sempre negou.
+  - Para Warney Smith, o barão não doou terra nem planejou vila nenhuma. O nome chegou ao lugar em 1908,
+    quando a estação foi reinaugurada em homenagem a ele, um ano depois da morte.
+  foto:
+    arquivo: 10_250px-Henrique_Manzo_-_Retrato_do_Bar%C3%A3o_Geraldo_de_Rezende%2C_Acervo_do_Museu_Paulista_da_USP.jpg
+    origem: wikipedia
+    legenda: Retrato do Barão Geraldo de Rezende pintado por Henrique Manzo.
+    credito: 'Henrique Manzo, acervo do Museu Paulista da USP. Foto: José Rosael/Hélio Nobre/Museu Paulista
+      da USP. CC BY-SA 4.0, via Wikimedia Commons.'
+    webp: barao-geraldo-de-rezende
+  fontes:
+  - titulo: Barão Geraldo
+    autor: Wikipédia
+    url: https://pt.wikipedia.org/wiki/Bar%C3%A3o_Geraldo
+  - titulo: História de Barão Geraldo
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2020/08/23/historia-de-barao-geraldo/
+  - titulo: Apresentação e Introdução da Página História de Barão Geraldo
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2020/07/06/apresentacao-e-introducao-da-pagina-historia-de-barao-geraldo/
+  tags:
+  - barão
+  - santa-genebra
+  - funilense
+  - toninho
+- slug: pintura-de-henrique-manzo
+  titulo: A pintura em que o barão provavelmente não está
+  periodo: c. 1941
+  ano: 1941
+  categoria: causo
+  lugar:
+    nome: Terreiro de café da Fazenda Santa Genebra
+    lat: -22.8229924
+    lng: -47.1092632
+    aproximado: true
+  nota_lugar: Ponto aproximado da antiga fazenda (ARIE Mata Santa Genebra). O casarão não está mapeado
+    no OpenStreetMap.
+  resumo: Um quadro de Henrique Manzo rodou pelo WhatsApp como retrato da família do barão. Warney Smith
+    acha que o homem de chapéu é outra pessoa.
+  texto:
+  - O quadro se chama Fazenda Santa Genebra, Família Barão Geraldo. É óleo de Henrique Manzo, mede 66
+    por 101,5 centímetros e está no Museu Paulista, que data a obra de 1941. Manzo pintava sob encomenda
+    do diretor do museu, Affonso Taunay, e costumava copiar fotografias antigas. A cena foi montada no
+    terreiro de secar café, em frente à sede.
+  - Em 2020 a imagem circulou em grupos de WhatsApp e Facebook de Barão. Warney Smith desconfiou. O único
+    homem adulto é baixo, de chapéu-coco, óculos, barba cheia e bigode curvo. Geraldo era alto e não usava
+    nada disso.
+  - Para ele, o mais provável é que seja o médico João Lopes de Assis Martins, genro do barão, ou até
+    Ruy Barbosa, primo da família, que esteve em Campinas em 1910. As três mulheres sentadas seriam as
+    filhas Amélia, Elisa e Marietta. O próprio autor diz que é suposição e que só a família poderia confirmar.
+  foto:
+    arquivo: 07_henrique_manzo_-_fazenda_santa_genebra_familia_barao_geraldo_rezende_acervo_do_museu_paulista_da_usp.jpg
+    origem: blog
+    legenda: Fazenda Santa Genebra, Família Barão Geraldo, óleo de Henrique Manzo.
+    credito: Henrique Manzo, acervo do Museu Paulista da USP. Publicada por Warney Smith no blog História
+      de Barão Geraldo.
+    webp: pintura-de-henrique-manzo
+  fontes:
+  - titulo: História de Barão Geraldo
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2020/08/23/historia-de-barao-geraldo/
+  tags:
+  - causo
+  - pintura
+  - santa-genebra
+  - barão
+- slug: imigrantes-mesmo-navio-mesma-fazenda
+  titulo: Mesmo navio, mesma fazenda
+  periodo: 1880-1920
+  ano: 1895
+  categoria: pessoa-familia
+  resumo: 'Nas entrevistas com filhos e netos dos pioneiros, a história se repete: as famílias se conheceram
+    no navio ou na fazenda, e foram se casando entre si.'
+  texto:
+  - 'Warney Smith gravou histórias de vida com 22 dos baronenses mais velhos entre 1992 e 1995. Uma frase
+    volta sempre: os pais e avós vieram no mesmo navio, da Itália ou do Líbano, ou se conheceram trabalhando
+    na mesma fazenda. Daí saiu o cruzamento de sobrenomes que formou Barão. Burato, Vicentin, Leonardi,
+    Páttaro, Ferrari e Pacci se misturaram com portugueses como os Antunes e os Martins, com libaneses
+    como os Mokarzel e os Mussi, e com brasileiros, a maioria descendentes de escravizados.'
+  - Os relatos da vida nas fazendas falam de trabalho pesado, desconto no salário e promessa descumprida.
+    O jeito de resistir era mudar de fazenda, às vezes no meio da noite. O objetivo era juntar dinheiro
+    para um sítio próprio.
+  - Nicolau e Rosa Pacci são um exemplo. Os avós dele e o pai dela, José Soprano, vieram juntos no mesmo
+    navio e foram para as fazendas Quirera e Capivari. Rosa contou que a sogra foi madrinha de batismo
+    dela, muito antes de alguém pensar em casamento. Seu Amyr Moda também contou que avós e pais vieram
+    todos no mesmo navio, de Rovigo até Campinas.
+  - As fotos de 1880 do Fundo da Princesa Isabel mostram colonos trabalhando no terreiro de café em frente
+    ao sobrado da Santa Genebra.
+  foto:
+    arquivo: 06_imigrantes-para-o-cafe-s-genebra.png
+    origem: blog
+    legenda: Imigrantes no terreiro de café em frente ao sobrado da Fazenda Santa Genebra, 1880.
+    credito: Fundo Princesa Isabel, Biblioteca Nacional. Publicada por Warney Smith no blog História de
+      Barão Geraldo.
+    webp: imigrantes-mesmo-navio-mesma-fazenda
+  fontes:
+  - titulo: '“Mesmo navio / Mesma fazenda”: os imigrantes, antes da formação de Barão'
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2020/08/30/mesmo-navio-mesma-fazenda-os-imigrantes-antes-da-formacao-de-barao/
+  - titulo: Barão Geraldo
+    autor: Wikipédia
+    url: https://pt.wikipedia.org/wiki/Bar%C3%A3o_Geraldo
+  tags:
+  - imigrantes
+  - italianos
+  - libaneses
+  - portugueses
+  - famílias
+- slug: antonio-pattaro-e-pascoa-ferrari
+  titulo: Antônio Páttaro e Páscoa Ferrari
+  periodo: 1916-1922
+  ano: 1922
+  categoria: pessoa-familia
+  resumo: Dois filhos de colonos da Fazenda da Serra que cresceram na lida do café e se casaram em Barão.
+  texto:
+  - As famílias Páttaro e Ferrari trabalhavam na antiga Fazenda da Serra, hoje São Vicente, na estrada
+    para Mogi. Felício Páttaro, filho do romano Girolamo, teve nove filhos com Cecília. Antônio nasceu
+    lá em 1916. A família passou pela Fazenda Funchal, onde hoje está a Replan, e em 1922 veio trabalhar
+    para a Rio das Pedras.
+  - Antônio contou que o pai cuidava de uma carpa de mil pés de café e que os filhos iam junto, desde
+    pequenos. Levantavam às cinco da manhã para apanhar, varrer e plantar. O café era ensacado e levado
+    de carroça para o terreiro da fazenda.
+  - 'Páscoa nasceu em 1921 e também trabalhou na roça desde cedo. Ela lembrava que cada família anotava
+    em casa quantos alqueires tinha colhido, e o feitor anotava também. Sobre as mudanças de fazenda dos
+    mais velhos, resumiu: a que pagava melhor, eles iam.'
+  foto:
+    arquivo: 09_antonio-pc3a1ttaro-e-m-pascoalina-e1594311810494.jpg
+    origem: blog
+    legenda: Antônio Páttaro e Maria Pascoalina Ferrari Páttaro no dia do casamento.
+    credito: Acervo Tito Páttaro Bozza. Publicada por Warney Smith no blog História de Barão Geraldo.
+    webp: antonio-pattaro-e-pascoa-ferrari
+  fontes:
+  - titulo: Barão Geraldo 100 anos
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2020/06/27/barao-geraldo-100-anos/
+  - titulo: '“Mesmo navio / Mesma fazenda”: os imigrantes, antes da formação de Barão'
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2020/08/30/mesmo-navio-mesma-fazenda-os-imigrantes-antes-da-formacao-de-barao/
+  tags:
+  - páttaro
+  - ferrari
+  - colonato
+  - café
+  - famílias
+- slug: fazenda-rio-das-pedras
+  titulo: Fazenda Rio das Pedras
+  periodo: 1799-2003
+  ano: 1847
+  categoria: lugar
+  lugar:
+    nome: Casarão da Fazenda Rio das Pedras
+    lat: -22.8128174
+    lng: -47.0859862
+    aproximado: false
+  nota_lugar: Coordenada do OpenStreetMap para a Fazenda Rio das Pedras, na Cidade Universitária.
+  resumo: A outra fazenda grande de Barão. Foi sendo vendida aos pedaços e virou boa parte dos bairros
+    do distrito. O casarão é tombado desde 2003.
+  texto:
+  - A origem das terras tem mais de uma versão. Historiadores como Melo Pupo e Jolumá Brito falam de uma
+    sesmaria registrada em 1799 para os irmãos Souza Queiroz. Já a família do barão contava que as terras
+    vizinhas, do Morro Grande, tinham sido compradas por volta de 1660 por uma faca, um ponche e 19$500
+    réis.
+  - Na partilha entre as irmãs, Isabel Augusta casou em 1847 com o juiz Albino José Barbosa de Oliveira,
+    que depois seria conselheiro do Império. A Rio das Pedras ficou com esse ramo da família. Segundo
+    a Wikipédia, ela nunca pertenceu ao Barão Geraldo.
+  - Ao contrário da Santa Genebra, a Rio das Pedras foi sendo loteada aos poucos e deu origem a vários
+    bairros. Mais tarde foi de João Adhemar de Almeida Prado, que recebeu visitas como Juscelino Kubitschek
+    e a rainha Elizabeth II, e doou a área do campus da Unicamp.
+  - O casarão, as cinco matas e as duas lagoas da fazenda foram tombados pelo Condepacc em 13 de novembro
+    de 2003.
+  foto:
+    arquivo: 08_500px-Casar%C3%A3o_da_Fazenda_Rio_das_Pedras.jpg
+    origem: wikipedia
+    legenda: Casarão da Fazenda Rio das Pedras, tombado pelo Condepacc em 2003.
+    credito: Ricardosdag, 2015. CC BY-SA 4.0, via Wikimedia Commons.
+    webp: fazenda-rio-das-pedras
+  fontes:
+  - titulo: Barão Geraldo
+    autor: Wikipédia
+    url: https://pt.wikipedia.org/wiki/Bar%C3%A3o_Geraldo
+  tags:
+  - fazenda
+  - rio-das-pedras
+  - patrimônio
+  - tombamento
+- slug: primeiro-loteamento-rio-das-pedras
+  titulo: O primeiro loteamento da Rio das Pedras
+  periodo: 1910-1918
+  ano: 1910
+  categoria: linha-do-tempo
+  lugar:
+    nome: Entre o açude do Residencial Barão do Café e o antigo Sítio Tijuco Telhas
+    lat: -22.8014723
+    lng: -47.0847644
+    aproximado: true
+  nota_lugar: Ponto no Residencial Barão do Café, onde Warney Smith situa o começo da área loteada. O
+    loteamento seguia até a região do CNPEM e da Fazenda Eudóxia.
+  resumo: Uma planta de 500 alqueires divididos em lotes, começada por Luiz Albino em 1910 e liberada
+    oito anos depois. Para Warney Smith, é daí que Barão começa.
+  texto:
+  - 'Com a morte de Albino José, o agrônomo que administrava a Rio das Pedras, em 1908, a família começou
+    a vender partes da fazenda para sítios. Warney Smith achou no arquivo do Centro de Memória da Unicamp
+    a planta do primeiro loteamento: 500 alqueires, iniciado por Luiz Albino em 1910 e só liberado oito
+    anos depois.'
+  - A área começava à esquerda do açude, onde hoje é a entrada do condomínio Barão do Café, e ia até o
+    antigo Sítio Tijuco Telhas, onde estão o CNPEM e a Fazenda Eudóxia, na divisa com a antiga Fazenda
+    Ponte Alta, hoje Tozan. O processo é o 7737 do Fundo TJC.
+  - Para o blog, essa é a data mais antiga com documento para o começo de Barão. Os mais antigos, como
+    Hélio e Orpheu Leonardi, falavam em 1896, mas ninguém achou prova dessa data. O próprio arquivo de
+    imagem do blog traz as datas 1909-1918.
+  foto:
+    arquivo: 09_primeiro-loteamento-da-rio-das-pedras-19091918.jpg
+    origem: blog
+    legenda: Planta dos terrenos da Fazenda Rio das Pedras a serem divididos em lotes.
+    credito: Processo 7737, Fundo TJC, Centro de Memória da Unicamp. Publicada por Warney Smith no blog
+      História de Barão Geraldo.
+    webp: primeiro-loteamento-rio-das-pedras
+  fontes:
+  - titulo: Barão Geraldo 100 anos
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2020/06/27/barao-geraldo-100-anos/
+  tags:
+  - loteamento
+  - rio-das-pedras
+  - sítios
+  - mapa
+- slug: origem-de-barao-geraldo
+  titulo: Como Barão virou Barão
+  periodo: 1908-1926
+  ano: 1908
+  categoria: linha-do-tempo
+  resumo: Não havia vila antes de 1907. O lugar foi se formando nos anos 1920, com sitiantes que compraram
+    terra perto da estação, da capela e das vendas.
+  texto:
+  - 'Warney Smith e a Wikipédia concordam no básico: o nome veio da estação Barão Geraldo, batizada em
+    1908 em homenagem ao fazendeiro que tinha morrido no ano anterior. Até onde a pesquisa chegou, não
+    há sinal de vila ali antes disso. O que existia eram colônias dentro das fazendas, longe da estação.'
+  - A vila nasceu entre duas fazendas, a Rio das Pedras e a Santa Genebra, quando imigrantes e brasileiros
+    compraram pequenos sítios e trocaram a monocultura do café por horta, fruta, leite e criação. A Wikipédia
+    descreve essa passagem de parceiro, de meia ou de terça, para sitiante dono da própria terra.
+  - 'Em volta da estação foram aparecendo a capela, o campo de futebol e as vendas. A Wikipédia lista
+    as primeiras: Plínio Aveniente, José Martins, os libaneses Antônio Seraphin e Gebrael Mokarzel, Ferrúcio
+    Carrara e Manoel Antunes Novo. Em 1935 os moradores puxaram a primeira ponta de energia elétrica,
+    vinda da Fazenda Anhumas.'
+  - No mapa ferroviário do estado de 1915, Barão Geraldo já aparece como estação e como localidade.
+  foto:
+    arquivo: 09_dsc04516-e1593291037259.jpg
+    origem: blog
+    legenda: Trecho do mapa de viação férrea de São Paulo de 1915, com B. Geraldo entre Campinas e Nova
+      Odessa.
+    credito: Fotografia de Warney Smith, blog História de Barão Geraldo.
+    webp: origem-de-barao-geraldo
+  fontes:
+  - titulo: Barão Geraldo 100 anos
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2020/06/27/barao-geraldo-100-anos/
+  - titulo: Apresentação e Introdução da Página História de Barão Geraldo
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2020/07/06/apresentacao-e-introducao-da-pagina-historia-de-barao-geraldo/
+  - titulo: Barão Geraldo
+    autor: Wikipédia
+    url: https://pt.wikipedia.org/wiki/Bar%C3%A3o_Geraldo
+  tags:
+  - origem
+  - sitiantes
+  - vila
+  - estação
+- slug: criacao-do-distrito-1953
+  titulo: Barão vira distrito
+  periodo: '1953'
+  ano: 1953
+  categoria: linha-do-tempo
+  capitulo: 4
+  lugar:
+    nome: Subprefeitura de Barão Geraldo
+    lat: -22.8306089
+    lng: -47.0812027
+    aproximado: false
+  nota_lugar: A subprefeitura, na Rua Luiz Vicentin, é a sede administrativa do distrito hoje. O ponto
+    marca a instituição, não um lugar ligado à assinatura de 1953.
+  resumo: Uma comissão de moradores liderada por Hélio Leonardi brigou por luz, escola e pela elevação
+    do bairro rural a distrito, que saiu em 1953.
+  texto:
+  - Nos anos 1940 começaram os loteamentos dos sítios de Agostinho Páttaro, Modesto Fernandes e Luis Vicentin.
+    Moradores antigos e gente nova, com cabeça mais urbana, formaram uma Comissão Representativa de Cidadãos.
+    À frente estava Hélio Leonardi, juiz de paz. Com ele, Guido Camargo Penteado Sobrinho, Edgar Prado,
+    Joaquim Prado, Salomão Mussi e Nicolau Pacci.
+  - 'A comissão conseguiu a iluminação pública em 1949, foi atrás de indústrias e pediu que Barão deixasse
+    de ser bairro rural. O governador Lucas Nogueira Garcez assinou a elevação a distrito, mas a data
+    muda conforme o trecho da Wikipédia: o texto diz que ele assinou em 30 de setembro de 1953, e a parte
+    de formação administrativa cita a Lei estadual 2.456, de 30 de dezembro de 1953, que criou o distrito
+    com território tirado do distrito sede de Campinas.'
+  - Warney Smith lembra que a Assembleia registrou o nome como Barão DE Geraldo. O asfalto da Estrada
+    dos Fazendeiros só veio em 1958, e em 1966 a Sociedade Amigos de Barão Geraldo fez o primeiro pedido
+    oficial de emancipação. Desde então foram mais de 20.
+  foto:
+    arquivo: 11_250px-Centro_de_Bar%C3%A3o_Geraldo.jpg
+    origem: wikipedia
+    legenda: Centro de Barão Geraldo em 1992.
+    credito: Warney Smith, 1992. CC BY-SA 3.0, via Wikimedia Commons.
+    webp: criacao-do-distrito-1953
+  fontes:
+  - titulo: Barão Geraldo
+    autor: Wikipédia
+    url: https://pt.wikipedia.org/wiki/Bar%C3%A3o_Geraldo
+  - titulo: Apresentação e Introdução da Página História de Barão Geraldo
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2020/07/06/apresentacao-e-introducao-da-pagina-historia-de-barao-geraldo/
+  tags:
+  - distrito
+  - 1953
+  - hélio-leonardi
+  - emancipação
+- slug: centenario-de-barao
+  titulo: Os cem anos de Barão
+  periodo: 1920-2020
+  ano: 2020
+  categoria: linha-do-tempo
+  resumo: Em 2020 Warney Smith escreveu que Barão estava perto de fazer cem anos, contando a partir das
+    primeiras vendas de terra perto da estação nos anos 1920.
+  texto:
+  - Em junho de 2020 o blog História de Barão Geraldo publicou que a cidade estava em vias de completar
+    cem anos. A conta parte dos anos 1920, quando os sitiantes começaram a comprar terra ao lado da estação.
+    Poderia ser mais, diz o autor, se a referência fosse 1908, ano em que a estação ganhou o nome.
+  - 'As datas que ele usa para montar a linha: 1908, estação rebatizada, ainda sem prédio. Antes de 1915,
+    provavelmente, uma guarita, já que nesse ano a estação aparece no mapa ferroviário do estado. Em 1922
+    vêm as primeiras vendas, sítios e casas. Em 1926 a Sorocabana constrói o prédio da estação. Em 1928
+    a capela é reformada.'
+  - Warney também defende chamar Barão de cidade, no sentido de lugar com mercado e identidade própria,
+    mesmo sem ser município. Para ele são mais de 60 bairros, e por isso o certo é dizer que se mora em
+    Barão.
+  fontes:
+  - titulo: Barão Geraldo 100 anos
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2020/06/27/barao-geraldo-100-anos/
+  - titulo: História de Barão Geraldo
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2020/08/23/historia-de-barao-geraldo/
+  tags:
+  - centenário
+  - 1920
+  - identidade
+- slug: unicamp-1966
+  titulo: A Unicamp chega
+  periodo: 1960-1966
+  ano: 1966
+  categoria: lugar
+  capitulo: 5
+  lugar:
+    nome: Universidade Estadual de Campinas (Unicamp)
+    lat: -22.822656
+    lng: -47.0627959
+    aproximado: false
+  nota_lugar: Coordenada do OpenStreetMap para o campus da Unicamp, na Cidade Universitária.
+  resumo: Moradores pediram que a universidade ficasse nas terras da Rio das Pedras. Saiu uma doação de
+    30 alqueires, oficializada por um cruzeiro, e a pedra fundamental em 1966.
+  texto:
+  - 'O corretor Honório Chiminazzo contou ao Centro de Memória que, a partir de 1960, ofereceu vários
+    terrenos a Zeferino Vaz e à comissão que ia instalar a universidade. Hélio Leonardi e Manoel Sidrônio
+    contaram outra parte: foram os moradores que pediram para a universidade vir para o cafezal Santa
+    Izabel, na Fazenda Rio das Pedras.'
+  - Em 1963 o grupo foi pedir a João Adhemar de Almeida Prado. Ele ofereceu 15 alqueires, a comissão de
+    Zeferino não aceitou, e os moradores pediram mais 15. Em 1965 fecharam a doação de 30 alqueires. Para
+    andar mais rápido, fizeram contrato de compra e venda por Cr$ 1,00.
+  - 'A pedra fundamental foi lançada em 10 de novembro de 1966. Em volta nasceu o loteamento Cidade Universitária.
+    Dali em diante Barão encheu de gente nova: a população urbana foi de 3.040 em 1970 para 13.189 em
+    1980, pelos números do IBGE citados na Wikipédia.'
+  foto:
+    arquivo: 13_250px-Centro_de_Bar%C3%A3o_Geraldo_ao_longe.JPG
+    origem: wikipedia
+    legenda: Barão Geraldo visto da parte de fora do campus da Unicamp, 2007.
+    credito: Fasouzafreitas, 2007. CC BY 3.0, via Wikimedia Commons.
+    webp: unicamp-1966
+  fontes:
+  - titulo: Barão Geraldo
+    autor: Wikipédia
+    url: https://pt.wikipedia.org/wiki/Bar%C3%A3o_Geraldo
+  tags:
+  - unicamp
+  - 1966
+  - zeferino-vaz
+  - rio-das-pedras
+- slug: laboratorio-de-luz-sincrotron
+  titulo: Laboratório Nacional de Luz Síncrotron
+  periodo: CNPEM
+  ano: 2007
+  categoria: lugar
+  lugar:
+    nome: CNPEM / Laboratório Nacional de Luz Síncrotron
+    lat: -22.8058685
+    lng: -47.0529836
+    aproximado: false
+  nota_lugar: Coordenada do OpenStreetMap para o Centro Nacional de Pesquisa em Energia e Materiais, na
+    Avenida Giuseppina Vianelli di Napoli.
+  resumo: O acelerador de partículas do CNPEM fica em Barão. A Wikipédia o descreve como o único do hemisfério
+    sul.
+  texto:
+  - A Wikipédia põe o Laboratório Nacional de Luz Síncrotron, que funciona dentro do CNPEM, entre os centros
+    de pesquisa que fazem de Barão um polo de tecnologia, junto com a Unicamp, o CPqD e o Hospital de
+    Clínicas.
+  - Na legenda da foto do acelerador, o artigo diz que ele é o único acelerador de partículas do hemisfério
+    sul. A foto é de 2007.
+  - Pela planta do primeiro loteamento da Rio das Pedras, publicada por Warney Smith, a área do CNPEM
+    fica no antigo Sítio Tijuco Telhas, ponta final daquele loteamento.
+  foto:
+    arquivo: 12_500px-Lnls.jpg
+    origem: wikipedia
+    legenda: Acelerador de partículas do Laboratório Nacional de Luz Síncrotron, 2007.
+    credito: Onbox, 2007. CC BY-SA 3.0, via Wikimedia Commons.
+    webp: laboratorio-de-luz-sincrotron
+  fontes:
+  - titulo: Barão Geraldo
+    autor: Wikipédia
+    url: https://pt.wikipedia.org/wiki/Bar%C3%A3o_Geraldo
+  - titulo: Barão Geraldo 100 anos
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2020/06/27/barao-geraldo-100-anos/
+  tags:
+  - ciência
+  - cnpem
+  - lnls
+  - pesquisa
+- slug: mata-santa-genebra
+  titulo: Mata Santa Genebra
+  periodo: '1985'
+  ano: 1985
+  categoria: lugar
+  lugar:
+    nome: ARIE Mata de Santa Genebra
+    lat: -22.8229924
+    lng: -47.1092632
+    aproximado: false
+  nota_lugar: Coordenada do OpenStreetMap para a Área de Relevante Interesse Ecológico, no Real Parque.
+  resumo: Pedaço de Mata Atlântica com 251,77 hectares na divisa com Paulínia. Virou ARIE em 1985.
+  texto:
+  - É o que sobrou de mata nativa nas terras da antiga Fazenda Santa Genebra. São 251,77 hectares de floresta
+    semidecídua, altitude média de 670 metros e temperatura média de 20,6 °C. O limite oeste da mata é
+    também a divisa entre Campinas e Paulínia.
+  - O governo federal declarou a mata Área de Relevante Interesse Ecológico em 1985. A Wikipédia diz que
+    ela é a segunda maior floresta urbana do Brasil, atrás só da Floresta da Tijuca, no Rio.
+  - Na foto do Commons, a placa da entrada traz o nome da Fundação José Pedro de Oliveira, o mesmo do
+    homem para quem a fazenda foi comprada em 1918.
+  foto:
+    arquivo: 15_250px-Entrada_da_ARIE_Mata_Santa_Genebra.jpg
+    origem: wikipedia
+    legenda: Entrada da ARIE Mata de Santa Genebra, 2014.
+    credito: Ricardosdag, 2014. CC BY-SA 3.0, via Wikimedia Commons.
+    webp: mata-santa-genebra
+  fontes:
+  - titulo: Barão Geraldo
+    autor: Wikipédia
+    url: https://pt.wikipedia.org/wiki/Bar%C3%A3o_Geraldo
+  tags:
+  - mata-atlântica
+  - meio-ambiente
+  - santa-genebra
+  - arie
+- slug: parque-ecologico-e-parque-linear
+  titulo: Parque Ecológico Hermógenes e o Parque Linear
+  periodo: 1998-2010
+  ano: 1998
+  categoria: lugar
+  lugar:
+    nome: Parque Ecológico Hermógenes de Freitas Leitão Filho
+    lat: -22.8118823
+    lng: -47.0711652
+    aproximado: false
+  nota_lugar: Coordenada do OpenStreetMap para o Parque Hermógenes. O Parque Linear do Ribeirão das Pedras
+    corre mais ao sul, perto de -22.8259, -47.0745.
+  resumo: Um lago feito no tempo dos loteamentos da Rio das Pedras virou o parque das caminhadas. Pelo
+    ribeirão, a prefeitura montou um parque linear com ciclovia.
+  texto:
+  - Quando João Adhemar de Almeida Prado entregou os loteamentos a Nelson de Carvalho, saiu a ideia de
+    fazer lagos. Um deles, entre o campus e a Cidade Universitária, tinha 60 mil metros quadrados e 2
+    metros de fundura. Em volta dele está hoje o Parque Ecológico Hermógenes de Freitas Leitão Filho,
+    com 13,44 hectares. A lagoa Chico Mendes ocupa 74% da área.
+  - Hermógenes foi professor do Instituto de Biologia e pró-reitor da Unicamp. Ele definia parque ecológico
+    como um lugar que junta várias atividades para aproximar as pessoas da natureza. Em 1983 tinha estado
+    entre os professores que enfrentaram a pulverização de inseticida da Fazenda Santa Genebra.
+  - O Ribeirão das Pedras nasce no Alto Taquaral, recebe água do parque e deságua no Anhumas, num percurso
+    de uns 8 quilômetros. Em 1998 a prefeitura desenhou o Parque Linear, com recuperação da mata ciliar
+    e ciclovia. Segundo a prefeitura, foram 50 mil mudas de 110 espécies nativas. Em 2010 o projeto ganhou
+    um prêmio nacional de gestão ambiental, e a Wikipédia registra que ele sempre teve polêmica e reclamação
+    de abandono.
+  foto:
+    arquivo: 16_250px-ParqueBar%C3%A3o3.JPG
+    origem: wikipedia
+    legenda: Margem da lagoa no Parque Ecológico Hermógenes Leitão Filho, 2011.
+    credito: Swendt, 2011. CC BY-SA 3.0, via Wikimedia Commons.
+    webp: parque-ecologico-e-parque-linear
+  fontes:
+  - titulo: Barão Geraldo
+    autor: Wikipédia
+    url: https://pt.wikipedia.org/wiki/Bar%C3%A3o_Geraldo
+  tags:
+  - parque
+  - lagoa
+  - ribeirão-das-pedras
+  - ciclovia
+  - meio-ambiente
+- slug: avenida-albino-e-o-centro
+  titulo: Avenida Albino José Barbosa de Oliveira
+  periodo: '1958'
+  ano: 1958
+  categoria: lugar
+  lugar:
+    nome: Avenida Albino José Barbosa de Oliveira
+    lat: -22.8217037
+    lng: -47.0807087
+    aproximado: false
+  nota_lugar: Trecho central da avenida segundo o OpenStreetMap, perto da Praça do Coco.
+  resumo: Era a Estrada dos Fazendeiros, depois Estrada da Rhodia. Hoje é a avenida que corta o centro
+    de Barão.
+  texto:
+  - A velha Estrada dos Fazendeiros ligava Campinas a Barão e às terras do norte. Segundo os baronenses,
+    só foi asfaltada em 1958. Com o tempo a ligação com Campinas passou para a Rodovia Professor Zeferino
+    Vaz, e a continuação da estrada virou Estrada da Rhodia, por causa da fazenda de cana e da destilaria
+    que a Rhodia montou na antiga Fazenda São Francisco.
+  - Hoje o trecho tem o nome de Avenida Albino José Barbosa de Oliveira. O homenageado é o juiz que casou
+    com Isabel Augusta em 1847 e ficou ligado à Fazenda Rio das Pedras.
+  - Warney Smith conta que, nos anos 1920, o português José Martins e o brasileiro Francisco de Barros
+    Filho, que tinha sido carroceiro de Plínio Aveniente, já moravam do outro lado da Estrada dos Fazendeiros,
+    em frente ao pasto que virou o centro.
+  fontes:
+  - titulo: Barão Geraldo
+    autor: Wikipédia
+    url: https://pt.wikipedia.org/wiki/Bar%C3%A3o_Geraldo
+  - titulo: Barão Geraldo 100 anos
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2020/06/27/barao-geraldo-100-anos/
+  tags:
+  - avenida
+  - centro
+  - estrada-da-rhodia
+- slug: praca-do-coco
+  titulo: Praça do Coco
+  periodo: hoje
+  ano: 2026
+  categoria: lugar
+  capitulo: 6
+  lugar:
+    nome: Praça do Coco
+    lat: -22.8226773
+    lng: -47.0820887
+    aproximado: false
+  nota_lugar: Coordenada do OpenStreetMap para a Praça do Coco, no centro de Barão, perto da Rua José
+    Martins e da Avenida Albino José Barbosa de Oliveira.
+  resumo: Praça do centro de Barão, ao lado da Vila Ninoca. É onde a Feira de Barão acontece aos sábados
+    e domingos.
+  texto:
+  - As fontes que temos falam pouco da Praça do Coco. Warney Smith cita a praça uma vez, para localizar
+    a Vila Ninoca, um dos núcleos do centro, que fica ao lado da Praça do Coco e da creche. A Wikipédia
+    não traz nada sobre ela.
+  - Hoje é na Praça do Coco que acontece a Feira de Barão, aos sábados das 10h às 16h e aos domingos das
+    10h às 15h.
+  - Quem souber quando a praça foi feita, de onde vem o nome ou tiver foto antiga dela pode mandar para
+    a feira. Este verbete vai crescer com isso.
+  fontes:
+  - titulo: Barão Geraldo 100 anos
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2020/06/27/barao-geraldo-100-anos/
+  tags:
+  - praça
+  - feira
+  - centro
+  - hoje
+- slug: lenda-do-boi-falo
+  titulo: A lenda do Boi Falô
+  periodo: 1960-1993
+  ano: 1988
+  categoria: causo
+  lugar:
+    nome: Capão do Boi (hoje Jardim Santa Genebra II)
+    lat: -22.834047
+    lng: -47.0865636
+    aproximado: true
+  nota_lugar: A Wikipédia situa o Capão do Boi onde hoje é o Jardim Santa Genebra II. O ponto é um trecho
+    do bairro no OpenStreetMap, não o local exato.
+  resumo: Numa Sexta-feira Santa, um boi da Santa Genebra teria se recusado a levantar e falado. A lenda
+    tem várias versões e virou festa com macarronada.
+  texto:
+  - A tradição conta que, numa Sexta-feira Santa, o capataz da Santa Genebra mandou buscar uns bois deitados
+    no Capão do Boi. Um deles não levantou. Apanhou e respondeu que aquele não era dia de trabalhar, era
+    dia de Nosso Senhor. O capataz foi ver e ouviu a mesma coisa.
+  - 'Há várias versões. Umas falam em escravo, outras em trabalhador, outras põem o próprio barão e o
+    Toninho na história. A versão que a Prefeitura de Campinas oficializou, com ano e escravo definidos,
+    é contestada: a Wikipédia diz que a filha do barão, Amélia Rezende Martins, desmente essa versão na
+    biografia do pai. Warney Smith também diferencia a lenda dos mais antigos de Barão da que circulou
+    depois.'
+  - Nos anos 1960 Barão passou a se chamar de Terra do Boi-Falô. Desde 1988 há a Festa do Boi Falô, com
+    macarronada para todo mundo na Sexta-feira Santa, legalizada em 1993. Segundo a Wikipédia, para justificar
+    a festa deram à lenda uma origem em 1888, o que mudou o sentido da versão tradicional, que não tinha
+    data. O bloco de carnaval Berra Vaca, de 1999, também tira o nome da lenda.
+  foto:
+    arquivo: 18_250px-Boifal%C3%B41.jpg
+    origem: wikipedia
+    legenda: Festa do Boi Falô em Barão Geraldo, 2010.
+    credito: Swendt, 2010. Domínio público, via Wikimedia Commons.
+    webp: lenda-do-boi-falo
+  fontes:
+  - titulo: Barão Geraldo
+    autor: Wikipédia
+    url: https://pt.wikipedia.org/wiki/Bar%C3%A3o_Geraldo
+  - titulo: História de Barão Geraldo
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2020/08/23/historia-de-barao-geraldo/
+  tags:
+  - lenda
+  - boi-falô
+  - festa
+  - sexta-feira-santa
+- slug: helio-leonardi-e-a-lista-dos-primeiros
+  titulo: Hélio Leonardi e a lista dos primeiros
+  periodo: 1935-1990
+  ano: 1949
+  categoria: pessoa-familia
+  resumo: Juiz de paz, líder da comissão que brigou pelo distrito e dono de um caderno com os primeiros
+    padeiro, barbeiro e açougueiro de Barão.
+  texto:
+  - Em 6 de agosto de 1935, moradores liderados por Hélio Leonardi puxaram a primeira ponta de energia
+    elétrica, vinda da Fazenda Anhumas. Alguns imigrantes não queriam pagar pelo progresso, conta a Wikipédia.
+    Em 1949 veio a iluminação pública, já com a comissão de cidadãos que ele liderava.
+  - 'Warney Smith conta, citando o jornalista Allan Gomes, que seu Hélio guardava uma pasta cheia de documentos
+    e um caderno com a relação dos primeiros de Barão: o primeiro padeiro, o primeiro barbeiro, o primeiro
+    açougueiro. Ele nunca publicou.'
+  - Depois que ele morreu, a lista ficou com o irmão, Orpheu Leonardi, um dos primeiros subprefeitos,
+    que seguiu anotando. A relação saiu em jornais de Barão no fim dos anos 1980 e serviu de base para
+    Vanderley Tonella montar as Curiosidades de Barão Geraldo.
+  fontes:
+  - titulo: História de Barão Geraldo
+    autor: Warney Smith
+    url: https://historiadebaraogeraldo.wordpress.com/2020/08/23/historia-de-barao-geraldo/
+  - titulo: Barão Geraldo
+    autor: Wikipédia
+    url: https://pt.wikipedia.org/wiki/Bar%C3%A3o_Geraldo
+  tags:
+  - hélio-leonardi
+  - orpheu-leonardi
+  - memória
+  - distrito

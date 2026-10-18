@@ -1094,6 +1094,36 @@
   </div>
 </section>
 
+<!-- MURAL DA MEMÓRIA VIVA: no centro da página. Memórias de
+     app/data/memoria/mural.yml, publicadas com o nome de quem mandou. -->
+<section id="mural" class="secao-mural" style="background:var(--papel); padding:56px 0; border-bottom:1.5px solid var(--linha);">
+  <div class="wrap">
+    <div style="text-align:center; max-width:800px; margin:0 auto 28px;">
+      <span class="chapeu-dossie">Construído com o bairro</span>
+      <h2 style="font-family:var(--font-cartaz); font-size:clamp(2rem,5vw,2.8rem); text-transform:uppercase; margin-bottom:10px;">Mural da Memória Viva</h2>
+      <p style="color:var(--taupe); font-size:1.02rem;">Toda memória publicada aqui sai com o nome de quem mandou. A história de Barão está nas gavetas, nos álbuns e na cabeça de quem viveu.</p>
+    </div>
+    {% if memoria_mural %}
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:18px; margin-bottom:26px;">
+      {% for m in memoria_mural %}
+      <blockquote style="margin:0; background:var(--cartao); border:1.5px solid var(--linha); border-left:4px solid var(--tomate); border-radius:14px; padding:18px 20px;">
+        <p style="font-style:italic; margin:0 0 10px;">“{{ m.texto }}”</p>
+        <footer style="font-size:0.82rem; color:var(--taupe);">{{ m.nome }}{% if m.quando %} · {{ m.quando }}{% endif %}{% if m.fonte_url %} · <a href="{{ m.fonte_url }}" rel="noopener">fonte</a>{% endif %}</footer>
+      </blockquote>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% if zap_memoria %}
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:12px;">
+      {% for chamada in ['Tem foto da Praça do Coco antes de 2000?', 'Seu avô ou sua avó trabalhou na Rhodia ou no Funilense?', 'Qual foi o primeiro bar que você frequentou em Barão?', 'Qual a foto mais antiga que você tem da Albino de Oliveira?'] %}
+      <a href="{{ zap_memoria }}" target="_blank" rel="noopener" style="display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:56px; padding:14px 16px; border:2px dashed var(--tomate); border-radius:12px; text-decoration:none; color:var(--tinta); font-weight:700; background:var(--papel-claro);">{{ chamada }} <i class="fab fa-whatsapp" aria-hidden="true" style="color:var(--verde-zap);"></i></a>
+      {% endfor %}
+    </div>
+    {% endif %}
+    <p style="text-align:center; margin-top:18px;"><a href="{{ url_for('public.memoria') }}" style="font-weight:700;">Abrir a Memória Viva completa →</a></p>
+  </div>
+</section>
+
 <!-- BARRA DE MEMÓRIA ABERTA & COLABORAÇÃO (depois do hero: no celular ela
      ocupava a primeira dobra inteira antes da manchete) -->
 <div class="barra-memoria-aberta">
@@ -1123,137 +1153,46 @@
   <!-- 2. A Camada dos 6 Capítulos Narrativos que Deslizam -->
   <div class="wrap scrolly-content-overlay">
 
-    <!-- CAPÍTULO 1: OS CAMINHOS DO CAFÉ & A FERROVIA FUNILENSE -->
-    <div class="story-step step-left" data-lat="-22.8220" data-lng="-47.0980" data-zoom="14">
+    {# Os cartões vêm de app/data/memoria/verbetes.yml (verbetes com
+       `capitulo`). Texto, foto e fonte moram lá; aqui é só a vitrine. #}
+    {% set romanos = ['I','II','III','IV','V','VI','VII','VIII'] %}
+    {% for v in memoria_capitulos %}
+    {% set foto = mem.foto_url(v.foto) %}
+    <div class="story-step {{ 'step-left' if loop.index is odd else 'step-right' }}"
+         {% if v.lugar %}data-lat="{{ v.lugar.lat }}" data-lng="{{ v.lugar.lng }}" data-zoom="{{ 15 if v.lugar.aproximado else 16 }}"{% endif %}>
       <div class="story-chapter-card">
-        <span class="chapter-number"><i class="fas fa-landmark"></i> Capítulo I · As Raízes do Chão</span>
-        <h2 class="chapter-title">O Café, a Mata e os Trilhos do Trem</h2>
-        <img class="chapter-photo" src="{{ url_for('static', filename='img/dossie/barao-geraldo.jpg') }}" width="800" height="500" loading="lazy" decoding="async" alt="Fazenda Santa Genebra e Barão Geraldo de Rezende">
+        <span class="chapter-number">Capítulo {{ romanos[loop.index0] }} · {{ v.periodo }}</span>
+        <h2 class="chapter-title">{{ v.titulo }}</h2>
+        {% if foto %}<img class="chapter-photo" src="{{ url_for('static', filename=foto) }}" width="800" height="600" loading="lazy" decoding="async" alt="{{ v.foto.legenda or v.titulo }}">
+        <p class="credito-foto" style="font-size:0.78rem; color:var(--taupe); margin:4px 0 10px;">{{ v.foto.legenda }}{% if v.foto.credito %} · {{ v.foto.credito }}{% endif %}</p>{% endif %}
         <div class="chapter-body">
-          <p>
-            No final do século XIX, a paisagem de Barão Geraldo era desenhada pelo vale verde do Rio Atibaia e pela pujança da <strong>Fazenda Santa Genebra</strong>, de propriedade do engenheiro e cafeicultor <strong>Geraldo Ribeiro de Sousa Rezende</strong> (o Barão Geraldo de Rezende, 1846–1907).
-          </p>
-          <p>
-            Em 1899, a chegada dos trilhos da lendária <strong>Estrada de Ferro Funilense</strong> conectou a produção agrícola à Estação Guanabara em Campinas, trazendo colonos, trabalhadores e os primeiros armazéns de beira de linha.
-          </p>
+          <p><strong>{{ v.resumo }}</strong></p>
+          {% for p in (v.texto or [])[:2] %}<p>{{ p }}</p>{% endfor %}
         </div>
-        <div class="depoimento-box">
-          “O apito do trem Funilense marcava a hora do almoço nas fazendas e a chegada das notícias que vinham da cidade.”
-          <span class="depoimento-autor">— Memória de colonos da Fazenda Santa Genebra</span>
+        {% if v.lugar %}
+        {% set embed = mem.embed_street_view(v.lugar) %}
+        {% if embed %}<iframe src="{{ embed }}" title="Street View de {{ v.lugar.nome }}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" style="width:100%; aspect-ratio:16/9; border:0; border-radius:12px; margin:10px 0;" allowfullscreen></iframe>{% endif %}
+        <p style="font-size:0.85rem; margin:8px 0 4px;"><i class="fas fa-map-marker-alt text-danger" aria-hidden="true"></i> {{ v.lugar.nome }}{% if v.lugar.aproximado %} <span style="color:var(--taupe);">(local aproximado)</span>{% endif %}</p>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; margin:8px 0;">
+          <a class="btn btn-fantasma" style="font-size:0.85rem;" href="{{ mem.link_mapa(v.lugar) }}" target="_blank" rel="noopener"><i class="fas fa-map" aria-hidden="true"></i> Ver no mapa</a>
+          <a class="btn btn-tomate" style="font-size:0.85rem;" href="{{ mem.link_street_view(v.lugar) }}" target="_blank" rel="noopener"><i class="fas fa-street-view" aria-hidden="true"></i> Street View agora</a>
         </div>
-        <div style="font-size:0.82rem; color:var(--tomate); font-weight:700; margin-top:8px;">
-          ↓ Role para ver a chegada dos colonos e a emancipação
-        </div>
+        {% endif %}
+        <p style="font-size:0.8rem; color:var(--taupe); margin:6px 0;">Fonte: {% for f in v.fontes %}<a href="{{ f.url }}" rel="noopener">{{ f.titulo }}{% if f.autor %} ({{ f.autor }}){% endif %}</a>{{ '; ' if not loop.last }}{% endfor %}</p>
+        <a href="{{ url_for('public.memoria_verbete', slug=v.slug) }}" style="font-weight:700; display:inline-flex; min-height:44px; align-items:center;">Ler o verbete completo →</a>
       </div>
     </div>
+    {% endfor %}
 
-    <!-- CAPÍTULO 2: A TERRA VERMELHA, OS COLONOS E A EMANCIPAÇÃO (1953) -->
-    <div class="story-step step-right" data-lat="-22.8250" data-lng="-47.0860" data-zoom="15">
+    <div class="story-step step-right">
       <div class="story-chapter-card">
-        <span class="chapter-number"><i class="fas fa-users"></i> Capítulo II · A Vila e os Armazéns</span>
-        <h2 class="chapter-title">A Terra dos Imigrantes & A Lei de 1953</h2>
-        <div class="chapter-body">
-          <p>
-            Com a transição da mão de obra, famílias de imigrantes italianos e portugueses fixaram raízes no solo fértil. Surgiram os primeiros armazéns de secos e molhados, ferrarias e capelas comunitárias.
-          </p>
-          <p>
-            Em <strong>30 de dezembro de 1953</strong>, através da Lei Estadual nº 2.456, o vilarejo foi elevado oficialmente à categoria de <strong>Distrito de Barão Geraldo</strong>, consolidando sua identidade própria e o traçado das primeiras ruas de paralelepípedo e terra batida.
-          </p>
+        <span class="chapter-number">E a história continua</span>
+        <h2 class="chapter-title">A memória que falta é a sua</h2>
+        <div class="chapter-body"><p>Tem muito mais na Memória Viva: lugares, famílias, causos, cada um no mapa com o Street View de hoje. E o que ainda não está lá pode estar na sua gaveta.</p></div>
+        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+          <a class="btn btn-tomate" href="{{ url_for('public.memoria') }}">Ver toda a Memória Viva →</a>
+          {% if zap_memoria %}<a class="btn btn-zap" href="{{ zap_memoria }}" target="_blank" rel="noopener"><i class="fab fa-whatsapp" aria-hidden="true"></i> Mandar uma memória</a>{% endif %}
         </div>
-        <div class="depoimento-box">
-          “O armazém era o jornal do bairro. Comprava-se querosene, fumo de corda, queijo curado e ali se decidia a vida comunitária.”
-          <span class="depoimento-autor">— Registro oral dos pioneiros do comércio</span>
-        </div>
-        <div style="font-size:0.82rem; color:var(--tomate); font-weight:700; margin-top:8px;">
-          ↓ Role para descobrir a chegada da indústria no vale
-        </div>
-      </div>
-    </div>
-
-    <!-- CAPÍTULO 3: A CHEGADA DA RHODIA & AS VILAS OPERÁRIAS -->
-    <div class="story-step step-left" data-lat="-22.8050" data-lng="-47.1100" data-zoom="14">
-      <div class="story-chapter-card">
-        <span class="chapter-number"><i class="fas fa-industry"></i> Capítulo III · A Fábrica na Beira do Rio</span>
-        <h2 class="chapter-title">A Estrada da Rhodia & As Vilas</h2>
-        <div class="chapter-body">
-          <p>
-            Na década de 1940, a instalação do parque químico da <strong>Rhodia</strong> às margens do Rio Atibaia provocou uma nova onda de povoamento. Técnicos, químicos e operários vieram residir no distrito.
-          </p>
-          <p>
-            Nasceram núcleos como a <em>Vila Rhodia</em> e o loteamento da <em>Vila Santa Isabel</em>, desenhando as estradas sinuosas e arborizadas que hoje abrigam a gastronomia de refúgio e chácaras tradicionais.
-          </p>
-        </div>
-        <div style="font-size:0.82rem; color:var(--tomate); font-weight:700; margin-top:8px;">
-          ↓ Role para a revolução universitária da Unicamp
-        </div>
-      </div>
-    </div>
-
-    <!-- CAPÍTULO 4: A PRIMAVERA ACADÊMICA & CULTURAL (1966) -->
-    <div class="story-step step-right" data-lat="-22.8184" data-lng="-47.0647" data-zoom="15">
-      <div class="story-chapter-card">
-        <span class="chapter-number"><i class="fas fa-graduation-cap"></i> Capítulo IV · A Revolução do Saber</span>
-        <h2 class="chapter-title">Zeferino Vaz, a Unicamp & O Boteco Pensante</h2>
-        <img class="chapter-photo" src="{{ url_for('static', filename='img/dossie/unicamp-campus.jpg') }}" width="800" height="500" loading="lazy" decoding="async" alt="Praça da Paz e campus da Unicamp">
-        <div class="chapter-body">
-          <p>
-            Em <strong>1966</strong>, o médico e visionário <strong>Zeferino Vaz</strong> fundava a <strong>Unicamp</strong> em uma antiga gleba doada por fazendeiros. Cientistas, filósofos e artistas exilados e de várias partes do mundo desembarcaram em Barão Geraldo.
-          </p>
-          <p>
-            Nasceu uma cultura ímpar: o surgimento do célebre <strong>Lume Teatro</strong>, o movimento de música instrumental, e a tradição dos <em>"botecos pensantes"</em>, onde teses de doutorado e manifestos artísticos eram rascunhados em guardanapos de papel com chope gelado.
-          </p>
-        </div>
-        <div class="depoimento-box">
-          “Em Barão Geraldo, a melhor aula de física e de teatro sempre terminava na mesa do bar, com uma porção de acepipes e conversa sem pressa.”
-          <span class="depoimento-autor">— Prof. Emérito da Unicamp</span>
-        </div>
-        <div style="font-size:0.82rem; color:var(--tomate); font-weight:700; margin-top:8px;">
-          ↓ Role para a história da Praça do Coco
-        </div>
-      </div>
-    </div>
-
-    <!-- CAPÍTULO 5: A PRAÇA DO COCO & A FEIRA VIVA (1999–2002) -->
-    <div id="pracacoco" class="story-step step-left" data-lat="-22.8227" data-lng="-47.0872" data-zoom="17">
-      <div class="story-chapter-card">
-        <span class="chapter-number"><i class="fas fa-store"></i> Capítulo V · O Coração Comunitário</span>
-        <h2 class="chapter-title">A Praça do Coco & A Feira de Barão</h2>
-        <img class="chapter-photo" src="{{ url_for('static', filename='img/dossie/praca-do-coco.jpg') }}" width="800" height="500" loading="lazy" decoding="async" alt="Praça do Coco e Feira de Artesanato">
-        <div class="chapter-body">
-          <p>
-            Oficialmente batizada de <em>Praça Irmã Carmela Stecchi</em>. Em <strong>1999</strong>, o comerciante <strong>Seu Valdir dos Santos</strong> estacionou sua Kombi para vender água de coco e caldo de cana em um terreno baldio. Com os filhos Vagner e Regiane, cuidou, plantou árvores e revitalizou o espaço.
-          </p>
-          <p>
-            Em <strong>2002</strong>, artistas e moradores criaram a <strong>Feira de Arte e Cultura de Barão Geraldo</strong>. O pastel crocante, a tapioca, o artesanato em cerâmica e as apresentações de circo e chorinho tornaram a praça o ponto sagrado de encontro das famílias e aposentados.
-          </p>
-        </div>
-        <div class="depoimento-box">
-          “A praça não tinha nada além de poeira. A gente trouxe a Kombi de coco, os artesãos trouxeram a arte, e o povo de Barão fez o resto.”
-          <span class="depoimento-autor">— Seu Valdir dos Santos (Pioneiro da Praça do Coco)</span>
-        </div>
-        <div style="font-size:0.82rem; color:var(--tomate); font-weight:700; margin-top:8px;">
-          ↓ Role para ver os pioneiros do balcão e a rede completa
-        </div>
-      </div>
-    </div>
-
-    <!-- CAPÍTULO 6: OS GUARDIÕES DO BALCÃO & A REDE CONECTADA -->
-    <div class="story-step step-right" data-lat="-22.8248" data-lng="-47.0838" data-zoom="16">
-      <div class="story-chapter-card" style="border-color:var(--verde-zap);">
-        <span class="chapter-number" style="color:var(--verde-zap);"><i class="fas fa-beer-mug-empty"></i> Capítulo VI · A Tradição Viva</span>
-        <h2 class="chapter-title">Os Pioneiros do Balcão & A Feira Digital</h2>
-        <img class="chapter-photo" src="{{ url_for('static', filename='img/dossie/emporio-do-nono.jpg') }}" width="800" height="500" loading="lazy" decoding="async" alt="Empório do Nono e balcão tradicional">
-        <div class="chapter-body">
-          <p>
-            Casas como o <strong>Empório do Nono</strong> (fundado em 1999 por Júnior Pattaro na Albino de Oliveira com as históricas <em>Segundas de Chorinho</em>) e o <strong>Botequim de Barão</strong> na Santa Isabel mantêm viva a arte da hospitalidade: serpentina de gelo, comida de estufa e acolhimento.
-          </p>
-          <p>
-            Mapeamos as <strong>{{ total_bares }} casas gastronômicas</strong> do distrito para garantir que essa história não seja engolida pelos algoritmos. Cada um pode ter presença no Google Maps, cardápio digital próprio e reservas sem intermediários — as barracas abaixo são prévias montadas com dados públicos, para cada casa ver como ficaria.
-          </p>
-        </div>
-        <a class="btn btn-zap" style="width:100%; font-size:0.88rem; padding:12px;" href="#bares">
-          <i class="fas fa-compass"></i> Explorar as {{ total_bares }} Barracas no Catálogo ↓
-        </a>
       </div>
     </div>
 
@@ -1310,86 +1249,6 @@
         <div class="timeline-year">2002</div>
         <h3 style="color:#fff; font-size:1rem; margin-bottom:6px;">Feira de Arte e Cultura</h3>
         <p class="timeline-desc">Artistas e artesãos oficializam a Feira da Praça do Coco aos fins de semana, unindo pastel, cerâmica e chorinho.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ========================================================
-     MURAL DA MEMÓRIA VIVA · O ACERVO DA COMUNIDADE
-     ======================================================== -->
-<section id="mural" class="secao-mural" style="background:var(--papel); padding:80px 0; border-bottom:1.5px solid var(--linha);">
-  <div class="wrap">
-    <div style="text-align:center; max-width:800px; margin:0 auto 40px;">
-      <span class="chapeu-dossie">Vozes & Memória Aberta</span>
-      <h2 style="font-family:var(--font-cartaz); font-size:2.8rem; text-transform:uppercase; margin-bottom:12px;">
-        Mural da Memória Viva de Barão
-      </h2>
-      <p style="color:var(--taupe); font-size:1.05rem;">
-        Relatos, fotografias de família, causos e memórias enviados pelos moradores, artistas e frequentadores de Barão Geraldo.
-      </p>
-    </div>
-
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:24px;">
-      {# conferir origem: os três relatos abaixo não têm fonte registrada. Os
-         nomes próprios saíram até alguém confirmar quem falou (e autorizar). #}
-      <!-- Card 1: Memória da Praça -->
-      <div style="background:var(--cartao); border:1.5px solid var(--linha); border-radius:16px; padding:24px; display:flex; flex-direction:column; box-shadow:0 6px 18px rgba(36,28,20,0.06);">
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
-          <div style="width:40px; height:40px; border-radius:50%; background:rgba(179,50,21,0.1); color:var(--tomate); display:flex; align-items:center; justify-content:center; font-size:1.1rem;">🥥</div>
-          <div>
-            <h3 style="font-size:0.95rem; font-weight:700; color:var(--tinta);">Frequentadora da Praça do Coco</h3>
-            <small style="color:var(--taupe);">Desde 1999</small>
-          </div>
-        </div>
-        <p style="font-size:0.9rem; color:var(--tinta); line-height:1.6; font-style:italic; flex:1;">
-          “Lembro do Seu Valdir chegando com a Kombi branca quando a praça era só terra batida. A gente tomava caldo de cana embaixo da sombra e viu a feira nascer com os artesãos.”
-        </p>
-        <span style="font-size:0.78rem; font-weight:700; color:var(--tomate); margin-top:14px;"><i class="fas fa-tag"></i> Praça do Coco · Memória Afetiva</span>
-      </div>
-
-      <!-- Card 2: Memória Acadêmica & Cultural -->
-      <div style="background:var(--cartao); border:1.5px solid var(--linha); border-radius:16px; padding:24px; display:flex; flex-direction:column; box-shadow:0 6px 18px rgba(36,28,20,0.06);">
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
-          <div style="width:40px; height:40px; border-radius:50%; background:rgba(22,107,63,0.1); color:var(--verde-zap); display:flex; align-items:center; justify-content:center; font-size:1.1rem;">🎭</div>
-          <div>
-            <h3 style="font-size:0.95rem; font-weight:700; color:var(--tinta);">Professor</h3>
-            <small style="color:var(--taupe);">Instituto de Artes da Unicamp</small>
-          </div>
-        </div>
-        <p style="font-size:0.9rem; color:var(--tinta); line-height:1.6; font-style:italic; flex:1;">
-          “As primeiras pesquisas corporais do Lume Teatro e os arranjos de choro eram discutidos nas mesas de madeira dos botecos da Albino de Oliveira. O bar era o nosso segundo palco.”
-        </p>
-        <span style="font-size:0.78rem; font-weight:700; color:var(--verde-zap); margin-top:14px;"><i class="fas fa-tag"></i> Lume Teatro & Boemia</span>
-      </div>
-
-      <!-- Card 3: Memória da Ferrovia -->
-      <div style="background:var(--cartao); border:1.5px solid var(--linha); border-radius:16px; padding:24px; display:flex; flex-direction:column; box-shadow:0 6px 18px rgba(36,28,20,0.06);">
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
-          <div style="width:40px; height:40px; border-radius:50%; background:rgba(245,158,11,0.1); color:var(--ambar); display:flex; align-items:center; justify-content:center; font-size:1.1rem;">🚂</div>
-          <div>
-            <h3 style="font-size:0.95rem; font-weight:700; color:var(--tinta);">Morador de família pioneira</h3>
-            <small style="color:var(--taupe);">Fazenda Santa Genebra</small>
-          </div>
-        </div>
-        <p style="font-size:0.9rem; color:var(--tinta); line-height:1.6; font-style:italic; flex:1;">
-          “Meu avô trabalhou na linha do Funilense. O trem parava na Estação Barão Geraldo trazendo sacas de café e levando os colonos para a cidade. É uma história que não pode se perder.”
-        </p>
-        <span style="font-size:0.78rem; font-weight:700; color:#b45309; margin-top:14px;"><i class="fas fa-tag"></i> Trem Funilense · Ferrovia</span>
-      </div>
-
-      <!-- Card 4: Convite Interativo para o Visitante Enviar -->
-      <div style="background:var(--papel-escuro); border:2px dashed var(--tomate); border-radius:16px; padding:24px; display:flex; flex-direction:column; justify-content:center; text-align:center;">
-        <i class="fas fa-camera-retro" style="font-size:2.2rem; color:var(--tomate); margin-bottom:12px;"></i>
-        <h3 style="font-family:var(--font-cartaz); font-size:1.4rem; text-transform:uppercase; color:var(--tinta); margin-bottom:6px;">
-          Envie Sua Foto ou Vídeo
-        </h3>
-        <p style="font-size:0.88rem; color:var(--taupe); margin-bottom:16px;">
-          Tem uma foto antiga no bairro, um registro em vídeo ou um causo? Compartilhe com o acervo permanente!
-        </p>
-        <button class="btn btn-tomate" style="font-size:0.85rem; padding:10px;" onclick="abrirModalColaboracao('foto_video')">
-          <i class="fas fa-plus-circle"></i> Adicionar Foto, Vídeo ou Relato
-        </button>
       </div>
     </div>
   </div>
@@ -1768,14 +1627,7 @@
   let map = null;
   let allMarkers = [];
 
-  const PONTOS_HISTORICOS = [
-    { id: 'santagenebra', lat: -22.8220, lng: -47.0980, nome: 'Fazenda Santa Genebra & Trem Funilense (1899)', desc: 'Barão Geraldo de Rezende e a cafeicultura' },
-    { id: 'centro1953', lat: -22.8250, lng: -47.0860, nome: 'Centro Histórico & Emancipação (1953)', desc: 'Os antigos armazéns e a lei de criação do distrito' },
-    { id: 'rhodia', lat: -22.8050, lng: -47.1100, nome: 'Estrada da Rhodia & Rio Atibaia (1940s)', desc: 'As vilas operárias e a gastronomia de refúgio' },
-    { id: 'unicamp', lat: -22.8184, lng: -47.0647, nome: 'Unicamp & Praça da Paz (1966)', desc: 'Zeferino Vaz, a efervescência acadêmica e artística' },
-    { id: 'pracacoco', lat: -22.8227, lng: -47.0872, nome: 'Praça do Coco (Praça Irmã Carmela Stecchi)', desc: 'Seu Valdir (1999) e a Feira de Artesanato (2002)' },
-    { id: 'nono', lat: -22.8248, lng: -47.0838, nome: 'Empório do Nono (1999)', desc: 'Júnior Pattaro · Segundas de Chorinho & Acepipes' }
-  ];
+  const PONTOS_HISTORICOS = {{ memoria_pontos|tojson }};
 
   function initMap() {
     try {
@@ -1920,8 +1772,9 @@
     };
 
     const tipoFormatado = rotulos[tipo] || tipo;
-    const msgZap = encodeURIComponent(`Olá Daniel! Gostaria de colaborar com o Dossiê e o Mural de Barão Geraldo.\n\n*Nome:* ${nome}\n*Contribuição:* ${tipoFormatado}\n*Relato / Contexto:* ${texto}\n\n_(Estou anexando as fotos/vídeos logo abaixo nesta conversa)_`);
-    window.open(`https://wa.me/5519999779942?text=${msgZap}`, '_blank');
+    const msgZap = encodeURIComponent(`Olá Daniel! Gostaria de colaborar com o Dossiê e o Mural de Barão Geraldo.\n\n*Nome:* ${nome}\n*Contribuição:* ${tipoFormatado}\n*Relato / Contexto:* ${texto}\n\n_(Estou anexando as fotos/vídeos logo abaixo nesta conversa)_\n\nAutorizo publicar no feiradebarao.com.br com o nome acima.`);
+    const destino = {{ (zap_url if zap_url.startswith('https://wa.me/') else '')|tojson }};
+    if (destino) { window.open(destino.split('?')[0] + '?text=' + msgZap, '_blank'); }
     fecharModalColaboracao();
   }
 

@@ -1,0 +1,10 @@
+{# Cartão de verbete: foto, período, título, resumo. `v` vem do YAML. #}
+{% set foto = mem.foto_url(v.foto, 400) %}
+<a class="cartao" href="{{ url_for('public.memoria_verbete', slug=v.slug) }}" style="text-decoration:none;color:inherit">
+  {% if foto %}<img src="{{ url_for('static', filename=foto) }}" width="400" height="300" loading="lazy" decoding="async" alt="{{ v.foto.legenda or v.titulo }}">{% endif %}
+  <div class="corpo">
+    <span class="chapeu">{{ v.periodo }}</span>
+    <h3>{{ v.titulo }}</h3>
+    <p style="margin:0;font-size:.93rem">{{ v.resumo }}</p>
+  </div>
+</a>

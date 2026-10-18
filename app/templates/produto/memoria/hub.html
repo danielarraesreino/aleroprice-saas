@@ -1,0 +1,91 @@
+{% extends 'produto/memoria/_base.html' %}
+{% block titulo %}Memória Viva de Barão Geraldo: história, lugares e causos · Feira de Barão{% endblock %}
+{% block descricao %}A história de Barão Geraldo contada com o bairro: a Funilense, Plínio Aveniente, os Vicentin, a Fazenda Santa Genebra, a Unicamp e a Praça do Coco. Com fotos, mapa e Street View de cada lugar.{% endblock %}
+{% block canonical %}{{ url_for('public.memoria', _external=True) }}{% endblock %}
+{% block head_extra %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" media="print" onload="this.media='all'">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  #mapa-memoria{height:420px;border-radius:14px;border:1.5px solid var(--linha);margin:12px 0 4px}
+  .linha{list-style:none;padding:0;margin:0;border-left:3px solid var(--tomate)}
+  .linha li{padding:6px 0 14px 18px;position:relative}
+  .linha li::before{content:'';position:absolute;left:-8px;top:12px;width:13px;height:13px;border-radius:50%;background:var(--tomate)}
+  .linha .ano{font-family:var(--font-cartaz);font-size:1.2rem}
+  .provoca{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+  .provoca a{display:block;padding:14px 16px;border:2px dashed var(--tomate);border-radius:12px;text-decoration:none;color:var(--tinta);font-weight:700;min-height:44px}
+  blockquote{margin:0;padding:14px 16px;background:var(--papel-claro);border-left:4px solid var(--tomate);border-radius:0 12px 12px 0}
+</style>
+{% endblock %}
+{% block conteudo %}
+<span class="chapeu" style="display:block;margin-top:24px">Construída com o bairro</span>
+<h1>Memória Viva de Barão Geraldo</h1>
+<p style="max-width:720px">Do café da Fazenda Santa Genebra aos trilhos da Funilense, da leiteria do Plínio Aveniente à Unicamp e à Praça do Coco. Cada verbete tem fonte e um ponto no mapa — e qualquer pessoa pode mandar foto, causo ou correção. Toda memória publicada sai com o nome de quem mandou.</p>
+{% if zap %}<div class="acoes"><a class="btn btn-zap" href="{{ zap }}" target="_blank" rel="noopener">Mandar memória ou foto pelo WhatsApp</a></div>{% endif %}
+
+<h2>O mapa da memória</h2>
+<div id="mapa-memoria" role="region" aria-label="Mapa com os lugares da memória de Barão Geraldo"></div>
+<p class="credito">Pinos marcados como aproximados ficam onde o lugar existia; alguns não existem mais.</p>
+
+<h2>Linha do tempo</h2>
+<ol class="linha">
+  {% for v in linha %}
+  <li><span class="ano">{{ v.periodo }}</span> · <a href="{{ url_for('public.memoria_verbete', slug=v.slug) }}">{{ v.titulo }}</a></li>
+  {% endfor %}
+</ol>
+
+{% for chave, rotulo, itens in grupos if chave != 'linha-do-tempo' %}
+<h2>{{ rotulo }}</h2>
+<div class="grade">{% for v in itens %}{% include 'produto/memoria/_cartao.html' %}{% endfor %}</div>
+{% endfor %}
+
+<h2 id="mural">Mural da Memória</h2>
+<div class="grade">
+  {% for m in mural %}
+  <blockquote>“{{ m.texto }}”<br><span class="credito">— {{ m.nome }}{% if m.quando %}, {{ m.quando }}{% endif %}{% if m.fonte_url %} · <a href="{{ m.fonte_url }}" rel="noopener">fonte</a>{% endif %}</span></blockquote>
+  {% endfor %}
+</div>
+{% if zap %}
+<h2>Você tem isso guardado?</h2>
+<div class="provoca">
+  {% for chamada in ['Tem foto da Praça do Coco antes de 2000?', 'Seu avô ou sua avó trabalhou na Rhodia ou no Funilense?', 'Qual foi o primeiro bar que você frequentou em Barão?', 'Qual a foto mais antiga que você tem da Albino de Oliveira?'] %}
+  <a href="{{ zap }}" target="_blank" rel="noopener">{{ chamada }} <span aria-hidden="true">→</span></a>
+  {% endfor %}
+</div>
+{% endif %}
+{% if hall %}
+<h2>Hall da Memória</h2>
+<p>{% for nome, n in hall %}{{ nome }} ({{ n }}){{ ', ' if not loop.last }}{% endfor %}</p>
+{% endif %}
+{% endblock %}
+{% block js %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"CollectionPage","name":"Memória Viva de Barão Geraldo",
+ "url":{{ url_for('public.memoria', _external=True)|tojson }},"inLanguage":"pt-BR",
+ "about":{"@type":"Place","name":"Barão Geraldo","address":{"@type":"PostalAddress","addressLocality":"Campinas","addressRegion":"SP","addressCountry":"BR"}},
+ "hasPart":[{% for v in linha %}{"@type":"Article","headline":{{ v.titulo|tojson }},"url":{{ url_for('public.memoria_verbete', slug=v.slug, _external=True)|tojson }}}{{ ',' if not loop.last }}{% endfor %}]}
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', function () {
+    var pontos = {{ pontos|tojson }};
+    function montar() {
+      if (typeof L === 'undefined') { return setTimeout(montar, 150); }
+      var mapa = L.map('mapa-memoria', {scrollWheelZoom: false}).setView([-22.82, -47.085], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '© OpenStreetMap', maxZoom: 18}).addTo(mapa);
+      var grupo = [];
+      pontos.forEach(function (p) {
+        var m = L.marker([p.lat, p.lng], {title: p.nome, alt: p.nome}).addTo(mapa);
+        var div = document.createElement('div');
+        var a = document.createElement('a'); a.href = p.url; a.textContent = p.nome; a.style.fontWeight = '700';
+        var sv = document.createElement('a'); sv.href = p.street_view; sv.target = '_blank'; sv.rel = 'noopener';
+        sv.textContent = 'Street View agora ↗';
+        div.appendChild(a); div.appendChild(document.createElement('br'));
+        if (p.aproximado) { var s = document.createElement('small'); s.textContent = '(local aproximado) '; div.appendChild(s); }
+        div.appendChild(sv);
+        m.bindPopup(div); grupo.push([p.lat, p.lng]);
+      });
+      if (grupo.length) { mapa.fitBounds(grupo, {padding: [30, 30]}); }
+    }
+    montar();
+  });
+</script>
+{% endblock %}

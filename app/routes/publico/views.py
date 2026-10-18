@@ -370,6 +370,23 @@ def _contexto_produto():
         'nota_media': nota_media,
         'modelos': opcoes_de_modelo(),
         'feira': FEIRA,
+        **_contexto_memoria(),
+    }
+
+
+def _contexto_memoria():
+    """O mapa da memória na home: cartões, pinos e mural vêm dos verbetes."""
+    from app.utils import memoria as mem
+    return {
+        'mem': mem,
+        'memoria_capitulos': mem.capitulos(),
+        'memoria_pontos': mem.pontos_do_mapa(
+            lambda s: url_for('public.memoria_verbete', slug=s)),
+        'memoria_mural': mem.mural()[:6],
+        'zap_memoria': _zap_memoria(
+            'Oi! Quero mandar uma memória/foto de Barão Geraldo para o Mural.\n\n'
+            'Nome para o crédito:\nQuando foi:\nO que aconteceu:\n\n'
+            'Autorizo publicar no feiradebarao.com.br com meu nome.'),
     }
 
 
@@ -390,6 +407,46 @@ FAQ_PARA_BARES = [
      'Sim. A gente configura horário, fotos, cardápio e o link do site no seu Perfil da Empresa; o perfil segue no seu nome.'),
     ('Tem fidelidade?', 'Não. Se não servir, você cancela.'),
 ]
+
+
+def _zap_memoria(texto):
+    """WhatsApp da Feira (FEIRA_WHATSAPP) com a mensagem pronta. Sem número
+    configurado, None — o template esconde o botão em vez de mandar a memória
+    de alguém para o número errado."""
+    zap = (os.environ.get('FEIRA_WHATSAPP') or '').strip()
+    if not zap:
+        return None
+    return f'https://wa.me/{zap}?text={urllib.parse.quote(texto)}'
+
+
+@bp.route('/memoria')
+def memoria():
+    """Memória Viva de Barão Geraldo: linha do tempo, lugares, pessoas, causos."""
+    from app.utils import memoria as mem
+    resp = make_response(render_template(
+        'produto/memoria/hub.html', grupos=mem.por_categoria(),
+        linha=mem.verbetes(), mural=mem.mural(), hall=mem.hall_da_memoria(),
+        pontos=mem.pontos_do_mapa(lambda s: url_for('public.memoria_verbete', slug=s)),
+        zap=_zap_memoria('Oi! Tenho uma memória/foto de Barão Geraldo pra mandar pro '
+                         'Mural da Memória Viva.\n\nNome para o crédito:\nQuando foi:\n'
+                         'O que aconteceu:\n\nAutorizo publicar no feiradebarao.com.br com meu nome.'),
+        **_contexto_produto()))
+    return _na_borda(resp)
+
+
+@bp.route('/memoria/<slug>')
+def memoria_verbete(slug):
+    from app.utils import memoria as mem
+    v = mem.verbete(slug)
+    if v is None:
+        abort(404)
+    resp = make_response(render_template(
+        'produto/memoria/verbete.html', v=v, relacionados=mem.relacionados(v),
+        zap=_zap_memoria(f'Oi! Sobre "{v["titulo"]}" no site da Feira de Barão: tenho '
+                         'uma foto/correção/história.\n\nNome para o crédito:\n\n'
+                         'Autorizo publicar no feiradebarao.com.br com meu nome.'),
+        **_contexto_produto()))
+    return _na_borda(resp)
 
 
 @bp.route('/site-para-bar-em-campinas')
@@ -488,6 +545,10 @@ def sitemap():
         # sem nenhuma URL do próprio host é ignorado pelo Google.
         paginas.append((f'https://{dominio_do_produto()}/', None))
         paginas.append((f'https://{dominio_do_produto()}/site-para-bar-em-campinas', None))
+        from app.utils.memoria import verbetes as _verbetes
+        paginas.append((f'https://{dominio_do_produto()}/memoria', None))
+        for v in _verbetes():
+            paginas.append((f"https://{dominio_do_produto()}/memoria/{v['slug']}", None))
 
     from app.models.modelo_sitecontent import DishCard
     for tenant in _tenants_do_sitemap(dono_do_dominio):
@@ -595,6 +656,15 @@ def llms_txt():
         f"- Planos e preços: https://{dominio_do_produto()}/#preco",
         "",
     ]
+    from app.utils.memoria import verbetes as _verbetes
+    if _verbetes():
+        linhas += ["## Memória Viva de Barão Geraldo",
+                   f"Hub: https://{dominio_do_produto()}/memoria "
+                   "(fontes: blog História de Barão Geraldo, de Warney Smith, e Wikipédia)", ""]
+        for v in _verbetes():
+            linhas.append(f"- [{v['titulo']}](https://{dominio_do_produto()}/memoria/{v['slug']}) "
+                          f"({v.get('periodo', '')}): {v.get('resumo', '')}")
+        linhas.append("")
     if tenants:
         linhas.append("## Bares e restaurantes de Barão Geraldo na plataforma")
 
