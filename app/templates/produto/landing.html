@@ -38,12 +38,18 @@
  {"@type":"Organization","@id":"https://feiradebarao.com.br/#org",
   "name":"Feira de Barão","url":"https://feiradebarao.com.br/",
   "areaServed":"Barão Geraldo, Campinas - SP, Brasil"},
- {"@type":"ItemList","name":"Bares e botecos de Barão Geraldo",
-  "numberOfItems":{{ bares|length }},
-  "itemListElement":[{% for b in bares %}
-   {"@type":"ListItem","position":{{ loop.index }},
-    "item":{"@type":"BarOrPub","name":{{ b.nome|tojson }},
-     "url":{{ url_for('public.landing_slug', slug=b.slug, _external=True)|tojson }}}}{{ ',' if not loop.last }}{% endfor %}
+ {"@type":"Event","@id":"https://feiradebarao.com.br/#feira",
+  "name":"Feira de Barão","url":"https://feiradebarao.com.br/",
+  "eventAttendanceMode":"https://schema.org/OfflineEventAttendanceMode",
+  "eventStatus":"https://schema.org/EventScheduled",
+  "organizer":{"@id":"https://feiradebarao.com.br/#org"},
+  "location":{"@type":"Place","name":{{ feira.local|tojson }},
+   "address":{"@type":"PostalAddress","streetAddress":{{ feira.local|tojson }},
+    "addressLocality":"Campinas","addressRegion":"SP","addressCountry":"BR"}},
+  "eventSchedule":[{% for h in feira.horarios %}
+   {"@type":"Schedule","repeatFrequency":"P1W","byDay":{{ h.schema|tojson }},
+    "startTime":{{ h.abre|tojson }},"endTime":{{ h.fecha|tojson }},
+    "scheduleTimezone":"America/Sao_Paulo"}{{ ',' if not loop.last }}{% endfor %}
   ]}
 ]}
 </script>
@@ -1072,6 +1078,21 @@
   </div>
 </section>
 
+<!-- QUANDO E ONDE: o que mais se procura sobre a feira ("feira de barão
+     horário", "feira da praça do coco"). Dados em FEIRA (publico/views.py). -->
+<section id="feira" aria-labelledby="feira-titulo" style="background:var(--papel-claro); border-top:1.5px solid var(--linha); border-bottom:1.5px solid var(--linha); padding:28px 0;">
+  <div class="wrap" style="display:flex; flex-wrap:wrap; gap:18px 40px; align-items:center; justify-content:center; text-align:center;">
+    <h2 id="feira-titulo" style="font-family:var(--font-cartaz); font-size:1.6rem; text-transform:uppercase; margin:0;">Quando e onde é a feira</h2>
+    <p style="margin:0; font-size:1.05rem;"><i class="fas fa-map-marker-alt text-danger" aria-hidden="true"></i>
+      <strong>{{ feira.local }}</strong> · {{ feira.bairro }}</p>
+    <ul style="list-style:none; margin:0; padding:0; display:flex; gap:20px; flex-wrap:wrap; justify-content:center; font-size:1.05rem;">
+      {% for h in feira.horarios %}
+      <li><i class="far fa-clock" aria-hidden="true"></i> <strong>{{ h.dia }}</strong> das {{ h.abre[:2] }}h às {{ h.fecha[:2] }}h</li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+
 <!-- BARRA DE MEMÓRIA ABERTA & COLABORAÇÃO (depois do hero: no celular ela
      ocupava a primeira dobra inteira antes da manchete) -->
 <div class="barra-memoria-aberta">
@@ -1226,7 +1247,7 @@
             Casas como o <strong>Empório do Nono</strong> (fundado em 1999 por Júnior Pattaro na Albino de Oliveira com as históricas <em>Segundas de Chorinho</em>) e o <strong>Botequim de Barão</strong> na Santa Isabel mantêm viva a arte da hospitalidade: serpentina de gelo, comida de estufa e acolhimento.
           </p>
           <p>
-            Mapeamos as <strong>{{ total_bares }} casas gastronômicas</strong> do distrito para garantir que essa história não seja engolida pelos algoritmos. Cada bar agora tem presença no Google Maps, cardápio digital próprio e reservas sem intermediários.
+            Mapeamos as <strong>{{ total_bares }} casas gastronômicas</strong> do distrito para garantir que essa história não seja engolida pelos algoritmos. Cada um pode ter presença no Google Maps, cardápio digital próprio e reservas sem intermediários — as barracas abaixo são prévias montadas com dados públicos, para cada casa ver como ficaria.
           </p>
         </div>
         <a class="btn btn-zap" style="width:100%; font-size:0.88rem; padding:12px;" href="#bares">
@@ -1457,25 +1478,28 @@
         <p>Indexação nativa com Menu Schema. Quem pesquisa "bar aberto agora em Barão Geraldo" acha seu cardápio com preços e fotos direto na busca.</p>
       </div>
 
-      <!-- 2. Concierge de Voz -->
+      {# Só o que está no ar hoje. Leitor de notas, CMV e alerta de insumos
+         são da gestão (GESTAO_ATIVA desligada): oferta vincula (CDC), então
+         não aparecem como recurso até voltarem a funcionar. #}
+      <!-- 2. Reservas -->
       <div class="card-tech-power">
-        <div class="tech-icon-box">🎙️</div>
-        <h3>Concierge de Voz (NVIDIA Riva)</h3>
-        <p>O cliente envia áudio no WhatsApp para reservar mesa e a inteligência de voz brasileira atende com naturalidade e confirma no sistema.</p>
+        <div class="tech-icon-box">📅</div>
+        <h3>Reserva com Aviso no WhatsApp</h3>
+        <p>O cliente reserva pelo site e a casa recebe o aviso no WhatsApp na hora. Sem aplicativo, sem comissão por mesa.</p>
       </div>
 
-      <!-- 3. OCR por Foto -->
+      <!-- 3. Avaliações -->
       <div class="card-tech-power">
-        <div class="tech-icon-box">📸</div>
-        <h3>Leitor de Notas por Foto</h3>
-        <p>Tire foto do cupom do açougue ou hortifruti com a câmera do celular: a visão computacional da NVIDIA lança os insumos no estoque na hora.</p>
+        <div class="tech-icon-box">⭐</div>
+        <h3>Avaliações no Google</h3>
+        <p>QR de "avalie a gente" para a mesa e mensagem pronta para pedir avaliação a quem reservou — do jeito que o Google permite: pedindo a todos.</p>
       </div>
 
-      <!-- 4. CMV Real -->
+      <!-- 4. Clientes da casa -->
       <div class="card-tech-power">
-        <div class="tech-icon-box">🐺</div>
-        <h3>CMV & Alerta de Inflação</h3>
-        <p>Raciocínio lógico com DeepSeek: acompanhe o custo exato de cada porção e receba alerta no celular se o fornecedor aumentar preços em mais de 10%.</p>
+        <div class="tech-icon-box">💌</div>
+        <h3>Lista de Clientes da Casa</h3>
+        <p>Quem visita o site pode se inscrever para receber novidades e promoções, com consentimento confirmado por e-mail (LGPD).</p>
       </div>
     </div>
   </div>
@@ -1539,7 +1563,7 @@
           +R$ 1.169/mês
         </div>
         <p style="font-size:0.94rem; color:var(--tinta); line-height:1.5;">
-          Com apenas <strong>1 mesa extra na semana</strong> trazida pelo Google Maps, o sistema se paga e ainda sobram mais de <strong>R$ 900 de lucro limpo</strong> no seu caixa.
+          É o <strong>faturamento a mais</strong> com as mesas extras que você escolheu acima — não é lucro, e não é garantia: é a conta para comparar com a mensalidade.
         </p>
       </div>
     </div>
@@ -1574,30 +1598,29 @@
           <li><i class="fas fa-check text-success"></i> <strong>Cardápio digital</strong> com QR Code de mesa</li>
           <li><i class="fas fa-check text-success"></i> <strong>Reservas no WhatsApp</strong> sem comissão</li>
           <li><i class="fas fa-check text-success"></i> <strong>Ficha no Google Maps</strong> otimizada</li>
-          <li class="nao"><i class="fas fa-times text-danger"></i> Leitor OCR de notas por foto</li>
-          <li class="nao"><i class="fas fa-times text-danger"></i> Ficha técnica e CMV de pratos</li>
+          <li><i class="fas fa-check text-success"></i> <strong>QR e pedido de avaliação</strong> no Google</li>
+          <li><i class="fas fa-check text-success"></i> <strong>Lista de clientes</strong> com novidades por e-mail</li>
         </ul>
         <a class="btn btn-fantasma" href="{{ zap_url }}" target="_blank" rel="noopener">Quero o Plano Site</a>
       </div>
 
       <!-- 2. Plano Pro + Arsenal IA (Destaque) -->
       <div class="card-plano-kraft destaque">
-        <div class="plano-badge-topo">★ MAIS ESCOLHIDO · GESTÃO + IA</div>
-        <span style="font-size:0.8rem; font-weight:800; text-transform:uppercase; color:var(--tomate);">Site + Gestão Completa</span>
-        <h3 style="font-family:var(--font-cartaz); font-size:1.6rem; margin-top:4px;">Pro + Arsenal IA</h3>
+        <div class="plano-badge-topo">EM BREVE · LISTA DE ESPERA</div>
+        <span style="font-size:0.8rem; font-weight:800; text-transform:uppercase; color:var(--tomate);">Site + Gestão</span>
+        <h3 style="font-family:var(--font-cartaz); font-size:1.6rem; margin-top:4px;">Pro com Gestão</h3>
         <div class="plano-valor" style="color:var(--tomate);">
-          {{ preco_pro }} <small style="font-size:1rem; font-family:var(--font-corpo); color:var(--taupe);">/mês</small>
+          Em breve
         </div>
         <ul class="plano-lista">
           <li><i class="fas fa-check text-success"></i> <strong>Tudo do Plano Presença incluso</strong></li>
-          <li><i class="fas fa-check text-success"></i> <strong>📸 Leitor OCR de Notas por Foto (NVIDIA)</strong></li>
-          <li><i class="fas fa-check text-success"></i> <strong>🎙️ Concierge de Voz no WhatsApp e no Site</strong></li>
-          <li><i class="fas fa-check text-success"></i> <strong>🐺 Cálculo de CMV Real e Fichas Técnicas</strong></li>
-          <li><i class="fas fa-check text-success"></i> <strong>Alerta de aumento de insumos no celular</strong></li>
-          <li><i class="fas fa-check text-success"></i> <strong>🎨 Gerador de Peças de Marketing com IA</strong></li>
+          <li class="nao"><i class="far fa-clock"></i> Em preparação: leitor de notas por foto</li>
+          <li class="nao"><i class="far fa-clock"></i> Em preparação: custo real de cada prato (CMV)</li>
+          <li class="nao"><i class="far fa-clock"></i> Em preparação: alerta de aumento de insumos</li>
         </ul>
+        <p style="font-size:0.85rem; color:var(--taupe); margin:0 0 12px;">Ainda não está à venda. Entre na lista e avisamos quando abrir — quem estiver no Plano Site migra sem perder nada.</p>
         <a class="btn btn-tomate" href="{{ zap_url }}" target="_blank" rel="noopener">
-          <i class="fab fa-whatsapp"></i> Ativar Plano Pro com IA
+          <i class="fab fa-whatsapp"></i> Entrar na lista de espera
         </a>
       </div>
 
@@ -1614,8 +1637,6 @@
           <li><i class="fas fa-check text-success"></i> <strong>Ficha configurada</strong> no Google Maps</li>
           <li><i class="fas fa-check text-success"></i> <strong>1 ano de domínio e hospedagem</strong></li>
           <li><small style="color:var(--taupe);">Renovação de {{ compra.renovacao }} a partir do 2º ano</small></li>
-          <li class="nao"><i class="fas fa-times text-danger"></i> Concierge de Voz por IA</li>
-          <li class="nao"><i class="fas fa-times text-danger"></i> Leitor OCR de notas e CMV</li>
         </ul>
         <a class="btn btn-fantasma" href="{{ zap_url }}" target="_blank" rel="noopener">Comprar à Vista</a>
       </div>

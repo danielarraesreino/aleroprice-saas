@@ -323,6 +323,18 @@ def _preco_publico():
     }
 
 
+# A feira em si. Dados confirmados pelo organizador em 18/10/2026; o resto
+# (agenda, barracas físicas) entra quando ele mandar — não inventar.
+FEIRA = {
+    'local': 'Praça do Coco',
+    'bairro': 'Barão Geraldo, Campinas – SP',
+    'horarios': [
+        {'dia': 'Sábado', 'schema': 'https://schema.org/Saturday', 'abre': '10:00', 'fecha': '16:00'},
+        {'dia': 'Domingo', 'schema': 'https://schema.org/Sunday', 'abre': '10:00', 'fecha': '15:00'},
+    ],
+}
+
+
 def _contexto_produto():
     """Dados comerciais da landing de venda. Vêm de env pra não versionar
     número de telefone nem preço — os dois mudam sem deploy."""
@@ -350,6 +362,7 @@ def _contexto_produto():
         'total_avaliacoes': sum(b['avaliacoes'] or 0 for b in bares),
         'nota_media': nota_media,
         'modelos': opcoes_de_modelo(),
+        'feira': FEIRA,
     }
 
 
@@ -532,18 +545,28 @@ def llms_txt():
     # Os mesmos do sitemap do portal: sem bar de domínio próprio (não é da
     # feira) e sem conta de teste.
     tenants = sorted(_tenants_do_sitemap(None), key=lambda t: t.nome or '')
+    horarios = '; '.join(f"{h['dia']} das {h['abre'][:2]}h às {h['fecha'][:2]}h"
+                         for h in FEIRA['horarios'])
     linhas = [
-        "# Feira de Barão & AleroPrice — Guia Gastronômico de Barão Geraldo, Campinas - SP",
+        "# Feira de Barão — Barão Geraldo, Campinas - SP",
         "",
-        "> Portal gastronômico e marketplace de bares, botecos, restaurantes e feirantes de Barão Geraldo (Campinas - SP).",
+        "> A Feira de Barão acontece na Praça do Coco, em Barão Geraldo (Campinas - SP), "
+        "aos fins de semana. O portal reúne a memória do bairro e ajuda bares e "
+        "restaurantes locais a serem encontrados no Google.",
         "",
-        "## Sobre o Ecossistema",
-        "- **Região**: Barão Geraldo, Campinas - SP, Brasil",
-        "- **Serviços**: Cardápios digitais atualizados, reservas de mesa via WhatsApp e fichas técnicas de gastronomia local.",
-        f"- **Website Oficial**: https://{dominio_do_produto()}/",
+        "## A feira",
+        f"- **Onde**: {FEIRA['local']}, {FEIRA['bairro']}",
+        f"- **Quando**: {horarios}",
+        f"- **Site**: https://{dominio_do_produto()}/",
         "",
-        "## Bares e Restaurantes em Destaque em Barão Geraldo",
+        "## Para donos de bar e restaurante",
+        "- Site próprio, cardápio digital com QR, reserva com aviso no WhatsApp, "
+        "pedido de avaliação no Google e perfil do Google Maps configurado.",
+        f"- Planos e preços: https://{dominio_do_produto()}/#preco",
+        "",
     ]
+    if tenants:
+        linhas.append("## Bares e restaurantes de Barão Geraldo na plataforma")
 
     for t in tenants:
         cfg = getattr(t, 'site_config', None)
