@@ -94,6 +94,11 @@ Publicado depois das reauditorias:
   lista de espera também no `/barao`.
 - `f3aa699`: menu do modelo tradicional, "Entrar no sistema" fora dos menus do
   freguês, cadastro acessível, `aria-pressed` no dock.
+- `5e9bca7`: página de venda no sitemap, alvos de 44px na vitrine e no login,
+  lupa do tradicional e índice do autoral acessíveis.
+
+Decisões do dono (18/10): Bar da Vila fica para depois; próximo foco é
+ampliar a história de Barão na home.
 
 ## Pendências que dependem do dono do projeto
 
@@ -108,7 +113,7 @@ Publicado depois das reauditorias:
    enviar os sitemaps. Hoje nenhum dos dois aparece indexado.
 4. **Vercel:** ligar o Web Analytics e redirecionar www para o domínio sem www
    nos dois domínios.
-5. **Bar da Vila:**
+5. **Bar da Vila (adiado pelo dono):**
    - horário estruturado (ex.: "Qua–Dom 11h–21h");
    - cardápio real com preços;
    - place_id na tela Avaliações.
@@ -120,9 +125,13 @@ Publicado depois das reauditorias:
 
 ## Próximos passos (ordem)
 
+0. Ampliar a história de Barão Geraldo na home (dono vai mandar material).
+   Desligar `/bar/demo-avaliacao` no Modo Campo (ON/OFF): ainda responde e é
+   indexável.
+
 1. Consolidar a reauditoria com os plugins e corrigir o que ela apontar.
 2. ~~LP B2B~~ feita (`/site-para-bar-em-campinas`). Falta: incluir no
-   sitemap e citar um caso real com números quando houver.
+   citar um caso real com números quando houver (já está no sitemap).
 3. Guia "Feira de Barão / Praça do Coco" com schema Event (depende da pendência 7).
 4. Hub "Bares em Barão Geraldo" indexável, à medida que as prévias virarem
    clientes.
