@@ -46,7 +46,7 @@
    se divergisse, o robô veria duas entidades pro mesmo bar. O fallback só entra
    se alguém renderizar este arquivo por fora da view. #}
 {% set url_pagina = url_canonica or (og_base ~ request.path) %}
-<title>{{ site.nome }} — {{ descritor }}</title>
+<title>{{ site.nome }} — {{ descritor }}{% if bairro_titulo %} · {{ bairro_titulo }}{% endif %}</title>
 {# Descrição montada em app/utils/seo.py: 140–160 caracteres (onde o Google
    corta) só com dado REAL do bar — nome, descritor, tagline, cidade, nota.
    Quando o bar não tem nada além do nome o motor devolve None e a tag não sai:

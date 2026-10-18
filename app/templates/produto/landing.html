@@ -1422,7 +1422,7 @@
           <div class="bar-nota-linha">
             <i class="fas fa-star text-warning"></i>
             <span>{{ b.nota }}</span>
-            <span style="color:var(--taupe); font-weight:500;">({{ b.avaliacoes }} no Google)</span>
+            {% if b.avaliacoes %}<span style="color:var(--taupe); font-weight:500;">({{ b.avaliacoes }} no Google)</span>{% endif %}
           </div>
           <div style="margin-top:auto; font-size:0.82rem; font-weight:700; color:var(--tomate); display:flex; justify-content:space-between; align-items:center; padding-top:8px;">
             <span>Abrir Barraca</span>

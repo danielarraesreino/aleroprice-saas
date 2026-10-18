@@ -54,7 +54,7 @@
    da view. #}
 {% set url_pagina = url_canonica or (og_base ~ request.path) %}
 
-<title>{{ site.nome }}{% if ano %} · desde {{ ano }}{% endif %} — {{ descritor }}</title>
+<title>{{ site.nome }}{% if ano %} · desde {{ ano }}{% endif %} — {{ descritor }}{% if bairro_titulo %} · {{ bairro_titulo }}{% endif %}</title>
 {# Descrição montada em app/utils/seo.py: 140–160 caracteres (onde o Google
    corta), só com dado real desta casa. Bar que só tem nome cadastrado não
    recebe tag nenhuma, de propósito — o trecho que o Google monta lendo a

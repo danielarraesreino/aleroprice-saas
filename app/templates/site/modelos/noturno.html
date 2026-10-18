@@ -22,7 +22,7 @@
 {% set hero_raw = site.hero_foto %}
 {% set hero_src = hero_raw if (hero_raw and (hero_raw.startswith('http://') or hero_raw.startswith('https://')))
                   else (url_for('static', filename=hero_raw) if hero_raw else '') %}
-<title>{{ nome_bar }} — {{ descritor }}</title>
+<title>{{ nome_bar }} — {{ descritor }}{% if bairro_titulo %} · {{ bairro_titulo }}{% endif %}</title>
 {% set og_base = 'https://' ~ request.host %}
 {# ---------------------------------------------------------------------------
    SINAL PARA BUSCA E PARA IA

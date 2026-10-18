@@ -24,7 +24,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 {% set descritor = site.descritor or site.cidade_uf or 'Espetaria e casa de porção' %}
-<title>{{ site.nome }} — {{ descritor }}</title>
+<title>{{ site.nome }} — {{ descritor }}{% if bairro_titulo %} · {{ bairro_titulo }}{% endif %}</title>
 {# Descrição montada por app/utils/seo.meta_descricao a partir do dado REAL do
    bar (descritor, tagline, cidade, nota) e cortada nos 160 caracteres em que o
    Google trunca. Sem dado, o motor devolve None e a tag não sai: descrição

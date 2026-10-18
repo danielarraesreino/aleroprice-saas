@@ -411,6 +411,40 @@ def endereco_schema(texto):
     return endereco
 
 
+def bairro(texto):
+    """'R. Madalena Barbosa Ferreira, 178 — Vila Lemos, Campinas–SP' -> 'Vila Lemos'.
+
+    O bairro é o trecho depois do travessão da rua, até a próxima vírgula — o
+    jeito como o endereço é escrito no cadastro. Sem travessão, None: chutar o
+    bairro a partir de pedaço de rua plantaria local errado no título.
+    """
+    texto = _limpo(texto)
+    if not texto:
+        return None
+    partes = re.split(r'\s[—–-]\s', texto, maxsplit=1)
+    if len(partes) < 2:
+        return None
+    nome = re.split(r'[,·]', partes[1], maxsplit=1)[0].strip(' ,;-–—')
+    # "Campinas - SP" sem bairro: o que veio depois do traço é a cidade ou a UF.
+    if not nome or nome.upper() in _UFS or _CEP.search(nome) or any(c.isdigit() for c in nome):
+        return None
+    return nome
+
+
+def bairro_para_titulo(site):
+    """Bairro que falta no título (`nome — descritor`), ou None.
+
+    Busca local é por bairro ("bar vila lemos campinas"); se o descritor já
+    diz onde é, não repete.
+    """
+    site = site or {}
+    nome = bairro(site.get('endereco'))
+    if not nome:
+        return None
+    ja_diz = ' '.join(_limpo(site.get(k)) or '' for k in ('nome', 'descritor')).lower()
+    return None if nome.lower() in ja_diz else nome
+
+
 # -------------------------------------------------------------------- rating
 
 def _nota_decimal(valor):
@@ -473,7 +507,10 @@ def meta_descricao(site, rest=None):
     extras = []
     if tagline:
         extras.append(tagline if tagline.endswith(('.', '!', '?')) else f'{tagline}.')
-    if cidade and cidade.lower() not in abertura.lower():
+    onde = bairro_para_titulo(site)
+    if onde and cidade:
+        extras.append(f'{onde}, {cidade}.')
+    elif cidade and cidade.lower() not in abertura.lower():
         extras.append(f'Em {cidade}.')
     if nota is not None:
         texto_nota = _limpo(site.get('nota_google'))

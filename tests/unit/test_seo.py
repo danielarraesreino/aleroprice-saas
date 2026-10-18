@@ -624,3 +624,11 @@ def test_grafo_usa_specification_quando_so_ha_abertura():
 
     assert 'openingHours' not in lugar
     assert lugar['openingHoursSpecification'][0]['opens'] == '18:00'
+
+
+def test_bairro_sai_do_trecho_depois_do_travessao():
+    from app.utils.seo import bairro
+    assert bairro('R. Madalena Barbosa Ferreira, 178 — Vila Lemos, Campinas–SP · 13100-486') == 'Vila Lemos'
+    assert bairro('Av. Santa Isabel, 57 - Barão Geraldo, Campinas - SP') == 'Barão Geraldo'
+    assert bairro('Rua X, 10, Campinas - SP') is None
+    assert bairro(None) is None

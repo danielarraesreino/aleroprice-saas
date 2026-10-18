@@ -85,8 +85,11 @@ def test_landing_do_bar_recebe_o_grafo_com_os_dados_dele(client, bar, contexto):
 def test_url_canonica_e_o_dominio_do_bar_mesmo_servindo_por_slug(client, bar,
                                                                  contexto):
     """O bar responde em três endereços. O grafo tem que apontar sempre pro
-    canônico, senão o mesmo bar vira três entidades no índice do Google."""
-    client.get('/bar/bar-da-vila', headers={'Host': PRODUTO})
+    canônico, senão o mesmo bar vira três entidades no índice do Google.
+
+    No domínio do produto o slug de bar com domínio próprio vira 301; quem
+    ainda serve pelo slug é o preview da Vercel."""
+    client.get('/bar/bar-da-vila', headers={'Host': 'preview-x.vercel.app'})
 
     assert contexto['url_canonica'] == 'https://bardavila.bar/'
     assert grafo_de(contexto)['@graph'][0]['@id'] == 'https://bardavila.bar/#restaurante'

@@ -16,7 +16,7 @@
    inexistente, og:image só com foto própria, tema_css depois do CSS local.
 --------------------------------------------------------------------------- #}
 {% set descritor = site.descritor or site.cidade_uf or 'Cozinha autoral' %}
-<title>{{ site.nome }} — {{ descritor }}</title>
+<title>{{ site.nome }} — {{ descritor }}{% if bairro_titulo %} · {{ bairro_titulo }}{% endif %}</title>
 {# Descrição: quem monta é app/utils/seo.py (nome + descritor + cidade + nota,
    cortado nos 160 caracteres onde o Google corta). O texto local fica de
    reserva pro caso de a view não mandar `meta_desc` — página sem description

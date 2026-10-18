@@ -176,6 +176,7 @@ def _render_landing(rest):
                            modo_atual=modo_atual, tema_forcado=tema_forcado,
                            reservas_ativas=reservas_ativas,
                            json_ld=json_ld, meta_desc=meta_desc,
+                           bairro_titulo=seo.bairro_para_titulo(site),
                            url_canonica=endereco_canonico,
                            contato_vendas=os.environ.get('FEIRA_WHATSAPP', ''),
                            email_vendas=os.environ.get('FEIRA_EMAIL', 'contato@feiradebarao.com.br'),
@@ -406,11 +407,21 @@ def _tenants_do_sitemap(dono_do_dominio):
 
     No domínio de um bar sobra só ele: sitemap de um host fala do próprio host,
     e o dono não hospeda a lista de clientes do produto no endereço dele.
+
+    No domínio do produto, o inverso: bar com domínio próprio fica de fora. A
+    URL dele é de outro host (o Google descarta), ele já tem o próprio sitemap,
+    e cliente com domínio próprio não é barraca da feira — o Bar da Vila é um
+    cliente da Vila Lemos, não de Barão Geraldo. Também fica de fora o tenant
+    sem endereço no site: é conta de teste ou cadastro pela metade, e a página
+    dele sairia vazia no Google.
     """
     consulta = _publicavel(Restaurante.clientes())
     if dono_do_dominio is not None:
-        consulta = consulta.filter(Restaurante.id == dono_do_dominio.id)
-    return consulta.order_by(Restaurante.id).all()
+        return consulta.filter(Restaurante.id == dono_do_dominio.id).all()
+    consulta = consulta.filter(db.or_(Restaurante.dominio.is_(None),
+                                      Restaurante.dominio == ''))
+    return [t for t in consulta.order_by(Restaurante.id).all()
+            if (getattr(getattr(t, 'site_config', None), 'endereco', None) or '').strip()]
 
 
 @bp.route('/sitemap.xml')
@@ -435,9 +446,16 @@ def sitemap():
         # sem nenhuma URL do próprio host é ignorado pelo Google.
         paginas.append((f'https://{dominio_do_produto()}/', None))
 
+    from app.models.modelo_sitecontent import DishCard
     for tenant in _tenants_do_sitemap(dono_do_dominio):
         cfg = getattr(tenant, 'site_config', None)
-        paginas.append((url_canonica(tenant), getattr(cfg, 'data_atualizacao', None)))
+        atualizado = getattr(cfg, 'data_atualizacao', None)
+        paginas.append((url_canonica(tenant), atualizado))
+        # O cardápio é página própria (canonical e JSON-LD de Menu), mas só
+        # existe com prato cadastrado — sem prato a rota dá 404.
+        cardapio = url_do_cardapio(tenant)
+        if cardapio and DishCard.query.filter_by(restaurant_id=tenant.id).first():
+            paginas.append((cardapio, atualizado))
 
     linhas = ['<?xml version="1.0" encoding="UTF-8"?>',
               '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
@@ -472,15 +490,18 @@ def llms_txt():
         rest = dono_do_dominio
         cfg = getattr(rest, 'site_config', None)
         nome = rest.nome
-        desc = (cfg.descritor if cfg else None) or (cfg.tagline if cfg else None) or 'Bar e Restaurante em Barão Geraldo, Campinas - SP'
-        endereco = (cfg.endereco if cfg else None) or 'Barão Geraldo, Campinas - SP'
+        # Nada de "Barão Geraldo" carimbado: o bar com domínio próprio pode
+        # estar em qualquer bairro (o Bar da Vila fica na Vila Lemos).
+        local = (cfg.cidade_uf if cfg else None) or 'Campinas - SP'
+        desc = (cfg.descritor if cfg else None) or (cfg.tagline if cfg else None) or f'Bar e restaurante em {local}'
+        endereco = (cfg.endereco if cfg else None) or local
         horario = (cfg.horario if cfg else None) or 'Consulte o site oficial'
         whatsapp = (cfg.whatsapp if cfg else None) or (cfg.callmebot_phone if cfg else None) or ''
         
         pratos = DishCard.query.filter_by(restaurant_id=rest.id).order_by(DishCard.ordem.asc()).all()
 
         linhas = [
-            f"# {nome} — Barão Geraldo, Campinas - SP",
+            f"# {nome} — {local}",
             "",
             f"> {desc}",
             "",
@@ -508,7 +529,9 @@ def llms_txt():
         return '\n'.join(linhas) + '\n', 200, {'Content-Type': 'text/markdown; charset=utf-8'}
 
     # 2. Se for no portal principal (feiradebarao.com.br/llms.txt)
-    tenants = _publicavel(Restaurante.clientes()).order_by(Restaurante.nome.asc()).all()
+    # Os mesmos do sitemap do portal: sem bar de domínio próprio (não é da
+    # feira) e sem conta de teste.
+    tenants = sorted(_tenants_do_sitemap(None), key=lambda t: t.nome or '')
     linhas = [
         "# Feira de Barão & AleroPrice — Guia Gastronômico de Barão Geraldo, Campinas - SP",
         "",
@@ -568,6 +591,11 @@ def landing_slug(slug):
     rest = tenant_por_slug(slug)  # já filtra inativo
     if rest is None:
         abort(404)
+    # Bar com domínio próprio não mora no portal da feira: no domínio do
+    # produto, /bar/<slug> dele vira 301 para o endereço dele. Antes servia a
+    # mesma página nos dois lugares (só o canonical apontava para o certo).
+    if rest.dominio and eh_dominio_do_produto(request.host):
+        return redirect(url_canonica(rest), code=301)
     return _render_landing(rest)
 
 
