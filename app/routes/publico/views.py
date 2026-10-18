@@ -749,6 +749,27 @@ def cadastro():
     return tela(**dados)
 
 
+@bp.route('/bar/<slug>/avaliar')
+def avaliar(slug):
+    """Endereço curto do QR "avalie a gente": conta o clique e manda para a
+    tela de escrever avaliação do Google. Sem place_id, cai no site do bar."""
+    from app.models.modelo_siteconfig import SiteConfig
+
+    rest = tenant_por_slug(slug)
+    if rest is None:
+        abort(404)
+    cfg = SiteConfig.query.filter_by(restaurant_id=rest.id).first()
+    if cfg is None or not cfg.google_place_id:
+        return redirect(url_for('public.landing_slug', slug=rest.slug))
+    # UPDATE atômico: dois cliques ao mesmo tempo não se perdem.
+    SiteConfig.query.filter_by(id=cfg.id).update(
+        {SiteConfig.cliques_avaliacao: db.func.coalesce(SiteConfig.cliques_avaliacao, 0) + 1},
+        synchronize_session=False)
+    db.session.commit()
+    return redirect('https://search.google.com/local/writereview?placeid='
+                    + urllib.parse.quote(cfg.google_place_id, safe=''))
+
+
 @bp.route('/novidades/token')
 def novidades_token():
     """Token de CSRF para o formulário de novidades.

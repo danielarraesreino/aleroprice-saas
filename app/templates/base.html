@@ -47,8 +47,12 @@
                             href="{{ url_for('dashboard.index') }}">Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if 'reservas' in request.endpoint %}active{% endif %}"
+                        <a class="nav-link {% if 'reservas' in request.endpoint and request.endpoint != 'reservas.avaliacoes' %}active{% endif %}"
                             href="{{ url_for('reservas.index') }}">Reservas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'reservas.avaliacoes' %}active{% endif %}"
+                            href="{{ url_for('reservas.avaliacoes') }}">Avaliações</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if 'agenda' in request.endpoint %}active{% endif %}"

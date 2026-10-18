@@ -75,6 +75,8 @@ if config_name != 'production' or os.environ.get('SCHEMA_NO_BOOT') == '1':
                     ('descritor', 'VARCHAR(80)'),
                     ('hero_foto', 'VARCHAR(300)'),
                     ('apoia_caminhos', 'BOOLEAN DEFAULT FALSE'),
+                    ('google_place_id', 'VARCHAR(120)'),
+                    ('cliques_avaliacao', 'INTEGER DEFAULT 0'),
                 ]
                 for col_nome, col_tipo in novas:
                     if col_nome not in cols:

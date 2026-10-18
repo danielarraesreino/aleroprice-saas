@@ -74,6 +74,12 @@ class SiteConfig(db.Model):
     # de outro bar, que era o que acontecia com o 4,9/39 fixo no template).
     nota_google = db.Column(db.String(10))
     qtd_avaliacoes = db.Column(db.Integer)
+    # Avaliações no Google: o place_id monta o link direto "escrever avaliação"
+    # (search.google.com/local/writereview). O contador soma quem abriu esse
+    # link pelo nosso endereço curto /bar/<slug>/avaliar — é o número que se
+    # mostra ao dono, já que o Google não diz quantas avaliações vieram dele.
+    google_place_id = db.Column(db.String(120))
+    cliques_avaliacao = db.Column(db.Integer, default=0)
     # Notificações WhatsApp via CallMeBot (grátis)
     callmebot_phone = db.Column(db.String(20))
     callmebot_apikey = db.Column(db.String(50))

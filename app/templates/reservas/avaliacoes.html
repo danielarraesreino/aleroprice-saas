@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Avaliações no Google · {{ MARCA }}{% endblock %}
+
+{% block content %}
+<h2 class="mb-1"><i class="fab fa-google text-warning"></i> Avaliações no Google</h2>
+<p class="text-muted mb-4">Quanto mais clientes avaliam, mais o {{ nome_bar }} aparece no Google Maps. Peça a <strong>todos</strong> — o Google proíbe pedir só a quem gostou e proíbe dar brinde em troca.</p>
+
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title">1. ID do seu lugar no Google</h5>
+        <form method="post" class="mb-3">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <label class="form-label small" for="google_place_id">Place ID (começa com <code>ChIJ</code>)</label>
+          <div class="input-group">
+            <input type="text" class="form-control" id="google_place_id" name="google_place_id"
+                   value="{{ cfg.google_place_id if cfg and cfg.google_place_id else '' }}" maxlength="120"
+                   autocapitalize="none" spellcheck="false" placeholder="ChIJ...">
+            <button class="btn btn-warning" type="submit">Salvar</button>
+          </div>
+          <div class="form-text">Não sabe? Procure seu bar no
+            <a href="https://developers.google.com/maps/documentation/places/web-service/place-id" target="_blank" rel="noopener">Place ID Finder</a>
+            e copie o código — ou peça pra gente.</div>
+        </form>
+
+        {% if link %}
+        <h5 class="card-title mt-4">2. Seu link e QR de avaliação</h5>
+        <div class="input-group input-group-sm mb-2">
+          <input type="text" class="form-control" value="{{ link }}" readonly id="link-avaliar">
+          <button class="btn btn-outline-secondary" type="button"
+                  onclick="navigator.clipboard.writeText(document.getElementById('link-avaliar').value); this.textContent='Copiado!'">Copiar</button>
+        </div>
+        <div class="text-center bg-white p-3 rounded border" id="qr-avaliar">
+          {{ qr_svg|safe }}
+          <div class="fw-bold mt-2" style="color:#241c14">Gostou? Avalie a gente no Google ⭐</div>
+        </div>
+        <button class="btn btn-sm btn-outline-secondary mt-2" type="button" onclick="window.print()"><i class="fas fa-print"></i> Imprimir para a mesa</button>
+        <p class="mt-3 mb-0"><strong>{{ cfg.cliques_avaliacao or 0 }}</strong> pessoa{{ 's' if (cfg.cliques_avaliacao or 0) != 1 }} abriram a tela de avaliação por este link.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title">3. Peça a quem veio (reservas dos últimos 3 dias)</h5>
+        {% if not link %}
+          <p class="text-muted">Salve o ID do Google ao lado para liberar as mensagens.</p>
+        {% elif not pedidos %}
+          <p class="text-muted">Nenhuma reserva nos últimos 3 dias. Use o QR na mesa e no caixa.</p>
+        {% else %}
+          <p class="small text-muted">O botão abre o seu WhatsApp com a mensagem pronta. Mande no dia seguinte à visita, que é quando mais gente responde.</p>
+          <ul class="list-group">
+            {% for p in pedidos %}
+            <li class="list-group-item d-flex justify-content-between align-items-center gap-2 flex-wrap">
+              <div>
+                <strong>{{ p.reserva.nome }}</strong>
+                <span class="text-muted small">· {{ p.reserva.data|data_br }} {{ p.reserva.hora }}</span>
+              </div>
+              {% if p.wa %}
+              <a class="btn btn-sm btn-success" href="{{ p.wa }}" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> Pedir avaliação</a>
+              {% else %}
+              <span class="small text-muted">telefone incompleto</span>
+              {% endif %}
+            </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+@media print {
+  body * { visibility: hidden; }
+  #qr-avaliar, #qr-avaliar * { visibility: visible; }
+  #qr-avaliar { position: absolute; left: 0; top: 0; width: 100%; border: 0 !important; }
+  #qr-avaliar svg { width: 70%; height: auto; }
+}
+</style>
+{% endblock %}
