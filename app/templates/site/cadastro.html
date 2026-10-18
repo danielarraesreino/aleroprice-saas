@@ -97,7 +97,7 @@
 
   .campo{margin-bottom:14px}
   label{
-    display:block;font-size:.74rem;font-weight:700;letter-spacing:.1em;
+    display:block;font-size:.8rem;font-weight:700;letter-spacing:.08em;
     text-transform:uppercase;color:var(--taupe);margin-bottom:5px;
   }
   input{
@@ -105,7 +105,8 @@
     padding:11px 13px;color:var(--tinta);font-size:1rem;font-family:inherit;
   }
   input::placeholder{color:rgb(110 93 69 / .62)}
-  input:focus{outline:none;border-color:var(--tomate);box-shadow:0 0 0 3px rgb(178 50 20 / .13)}
+  input:focus{outline:none;border-color:var(--tomate);box-shadow:0 0 0 3px rgb(178 50 20 / .35)}
+  input:focus-visible{outline:3px solid var(--tomate);outline-offset:1px}
   .ajuda{font-size:.79rem;color:var(--taupe);margin-top:4px}
 
   .btn{
@@ -133,7 +134,7 @@
 </style>
 </head>
 <body>
-  <div class="folha">
+  <main class="folha">
     {# Sem esta volta, o cadastro é um beco: quem quer reler o preço ou ver os
        bares que já estão na feira não tem como, e fecha a aba. #}
     <a class="voltar" href="{{ url_for('public.landing') }}">← voltar pra feira</a>
@@ -156,7 +157,7 @@
 
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% for category, message in messages %}
-          <div class="flash {{ category }}">{{ message }}</div>
+          <div class="flash {{ category }}" role="{{ 'alert' if category == 'danger' else 'status' }}">{{ message }}</div>
         {% endfor %}
       {% endwith %}
 
@@ -195,6 +196,6 @@
     </div>
 
     <div class="pe">Já tem barraca? <a href="{{ url_for('auth.login') }}">Entrar</a></div>
-  </div>
+  </main>
 </body>
 </html>

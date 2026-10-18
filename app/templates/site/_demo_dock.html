@@ -379,30 +379,30 @@
       <!-- Linha 2: Seletor de Estilos / Modelos na Mesa -->
       <div class="demo-dock-selector">
         <span class="selector-label">Design:</span>
-        <button class="dock-pill {{ 'ativo' if modelo_atual == 'classico' }}" onclick="trocarModelo('classico')">
+        <button class="dock-pill {{ 'ativo' if modelo_atual == 'classico' }}" aria-pressed="{{ 'true' if modelo_atual == 'classico' else 'false' }}" onclick="trocarModelo('classico')">
           📋 Clássico
         </button>
-        <button class="dock-pill {{ 'ativo' if modelo_atual == 'craft' }}" onclick="trocarModelo('craft')">
+        <button class="dock-pill {{ 'ativo' if modelo_atual == 'craft' }}" aria-pressed="{{ 'true' if modelo_atual == 'craft' else 'false' }}" onclick="trocarModelo('craft')">
           🍺 Craft (Chope)
         </button>
-        <button class="dock-pill {{ 'ativo' if modelo_atual == 'noturno' }}" onclick="trocarModelo('noturno')">
+        <button class="dock-pill {{ 'ativo' if modelo_atual == 'noturno' }}" aria-pressed="{{ 'true' if modelo_atual == 'noturno' else 'false' }}" onclick="trocarModelo('noturno')">
           🎷 Noturno (Shows)
         </button>
-        <button class="dock-pill {{ 'ativo' if modelo_atual == 'brasa' }}" onclick="trocarModelo('brasa')">
+        <button class="dock-pill {{ 'ativo' if modelo_atual == 'brasa' }}" aria-pressed="{{ 'true' if modelo_atual == 'brasa' else 'false' }}" onclick="trocarModelo('brasa')">
           🔥 Brasa (Grelhados)
         </button>
-        <button class="dock-pill {{ 'ativo' if modelo_atual == 'autoral' }}" onclick="trocarModelo('autoral')">
+        <button class="dock-pill {{ 'ativo' if modelo_atual == 'autoral' }}" aria-pressed="{{ 'true' if modelo_atual == 'autoral' else 'false' }}" onclick="trocarModelo('autoral')">
           👨‍🍳 Autoral (Gastrô)
         </button>
-        <button class="dock-pill {{ 'ativo' if modelo_atual == 'tradicional' }}" onclick="trocarModelo('tradicional')">
+        <button class="dock-pill {{ 'ativo' if modelo_atual == 'tradicional' }}" aria-pressed="{{ 'true' if modelo_atual == 'tradicional' else 'false' }}" onclick="trocarModelo('tradicional')">
           🏛️ Tradicional (Raiz)
         </button>
 
         <span class="selector-label" style="margin-left: 8px;">Modo:</span>
-        <button class="dock-pill {{ 'ativo' if modo_atual == 'claro' }}" onclick="trocarModo('claro')">
+        <button class="dock-pill {{ 'ativo' if modo_atual == 'claro' }}" aria-pressed="{{ 'true' if modo_atual == 'claro' else 'false' }}" onclick="trocarModo('claro')">
           ☀️ Claro
         </button>
-        <button class="dock-pill {{ 'ativo' if modo_atual == 'escuro' }}" onclick="trocarModo('escuro')">
+        <button class="dock-pill {{ 'ativo' if modo_atual == 'escuro' }}" aria-pressed="{{ 'true' if modo_atual == 'escuro' else 'false' }}" onclick="trocarModo('escuro')">
           🌙 Escuro
         </button>
       </div>

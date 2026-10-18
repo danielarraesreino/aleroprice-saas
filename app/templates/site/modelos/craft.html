@@ -876,7 +876,6 @@
     <a href="#contato">Contato</a>
   </div>
   <div class="nav-dir">
-    <a class="nav-entrar" href="{{ url_do_sistema() }}">Entrar no sistema</a>
     <button class="btn-icone" id="btnTema" onclick="alternarTema()" aria-label="Alternar tema claro e escuro" title="Alternar tema">
       <span id="icoTema" aria-hidden="true">☾</span>
     </button>
@@ -897,7 +896,6 @@
   {% if gallery %}<a href="#galeria" onclick="alternarMenu(this)"><i>07</i>Fotos</a>{% endif %}
   <a href="#reservar" onclick="alternarMenu(this)"><i>08</i>Reserva</a>
   <a href="#contato" onclick="alternarMenu(this)"><i>09</i>Contato</a>
-  <a class="painel-pe" href="{{ url_do_sistema() }}">Área do lojista → entrar no sistema</a>
 </div>
 
 {# Conteúdo da página num landmark só. Antes as seções eram filhas diretas do
