@@ -162,56 +162,69 @@
 <!-- ========================================================
      O GRANDE DOSSIÊ MULTIMÍDIA COM MAP SCROLLYTELLING
      ======================================================== -->
-<section id="dossie" class="scrolly-container">
-  <!-- 1. O Mapa Fixo de Barão Geraldo no Fundo -->
-  <div id="mapa-scrolly" class="scrolly-map-sticky"></div>
+<section id="dossie" class="scrolly-container" data-modo="lado" aria-labelledby="dossie-titulo">
+  {# Três jeitos de ver o mapa com a história: lado a lado, card flutuante
+     ou mapa + lista. O padrão sai do aparelho (JS); a escolha da pessoa fica
+     guardada no navegador. Sem JS, vale o "lado a lado" do HTML. #}
+  <div class="dossie-barra wrap">
+    <h2 id="dossie-titulo" class="dossie-titulo">A história no mapa</h2>
+    <div class="dossie-modos" role="group" aria-label="Como ver o mapa">
+      <button type="button" data-modo="lado" aria-pressed="true">Lado a lado</button>
+      <button type="button" data-modo="flutuante" aria-pressed="false">Flutuante</button>
+      <button type="button" data-modo="lista" aria-pressed="false">Mapa + lista</button>
+    </div>
+  </div>
 
-  <!-- 2. A Camada dos 6 Capítulos Narrativos que Deslizam -->
+  <div id="mapa-scrolly" class="scrolly-map-sticky" role="region" aria-label="Mapa histórico de Barão Geraldo"></div>
+
   <div class="wrap scrolly-content-overlay">
-
     {# Os cartões vêm de app/data/memoria/verbetes.yml (verbetes com
        `capitulo`). Texto, foto e fonte moram lá; aqui é só a vitrine. #}
     {% set romanos = ['I','II','III','IV','V','VI','VII','VIII'] %}
     {% for v in memoria_capitulos %}
-    {% set foto = mem.foto_url(v.foto) %}
-    <div class="story-step {{ 'step-left' if loop.index is odd else 'step-right' }}"
+    {% set foto = mem.foto_url(v.foto, 400) %}
+    <div class="story-step"
          {% if v.lugar %}data-lat="{{ v.lugar.lat }}" data-lng="{{ v.lugar.lng }}" data-zoom="{{ 15 if v.lugar.aproximado else 16 }}"{% endif %}>
-      <div class="story-chapter-card">
-        <span class="chapter-number">Capítulo {{ romanos[loop.index0] }} · {{ v.periodo }}</span>
-        <h2 class="chapter-title">{{ v.titulo }}</h2>
-        {% if foto %}<img class="chapter-photo" src="{{ url_for('static', filename=foto) }}" width="800" height="600" loading="lazy" decoding="async" alt="{{ v.foto.legenda or v.titulo }}">
-        <p class="credito-foto" style="font-size:0.78rem; color:var(--taupe); margin:4px 0 10px;">{{ v.foto.legenda }}{% if v.foto.credito %} · {{ v.foto.credito }}{% endif %}</p>{% endif %}
-        <div class="chapter-body">
-          <p><strong>{{ v.resumo }}</strong></p>
-          {% for p in (v.texto or [])[:2] %}<p>{{ p }}</p>{% endfor %}
+      <article class="story-chapter-card">
+        <div class="card-topo">
+          {% if foto %}<img class="card-thumb" src="{{ url_for('static', filename=foto) }}" width="400" height="300" loading="lazy" decoding="async" alt="{{ v.foto.legenda or v.titulo }}">{% endif %}
+          <div>
+            <span class="chapter-number">Cap. {{ romanos[loop.index0] }} · {{ v.periodo }}</span>
+            <h3 class="chapter-title">{{ v.titulo }}</h3>
+          </div>
         </div>
+        <p class="card-resumo">{{ v.resumo }}</p>
         {% if v.lugar %}
-        {% set embed = mem.embed_street_view(v.lugar) %}
-        {% if embed %}<iframe src="{{ embed }}" title="Street View de {{ v.lugar.nome }}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" style="width:100%; aspect-ratio:16/9; border:0; border-radius:12px; margin:10px 0;" allowfullscreen></iframe>{% endif %}
-        <p style="font-size:0.85rem; margin:8px 0 4px;"><i class="fas fa-map-marker-alt text-danger" aria-hidden="true"></i> {{ v.lugar.nome }}{% if v.lugar.aproximado %} <span style="color:var(--taupe);">(local aproximado)</span>{% endif %}</p>
-        <div style="display:flex; flex-wrap:wrap; gap:8px; margin:8px 0;">
-          <a class="btn btn-fantasma" style="font-size:0.85rem;" href="{{ mem.link_mapa(v.lugar) }}" target="_blank" rel="noopener"><i class="fas fa-map" aria-hidden="true"></i> Ver no mapa</a>
-          <a class="btn btn-tomate" style="font-size:0.85rem;" href="{{ mem.link_street_view(v.lugar) }}" target="_blank" rel="noopener"><i class="fas fa-street-view" aria-hidden="true"></i> Street View agora</a>
+        <div class="card-acoes">
+          <a class="btn btn-fantasma" href="{{ mem.link_mapa(v.lugar) }}" target="_blank" rel="noopener"><i class="fas fa-map" aria-hidden="true"></i> Mapa</a>
+          <a class="btn btn-tomate" href="{{ mem.link_street_view(v.lugar) }}" target="_blank" rel="noopener"><i class="fas fa-street-view" aria-hidden="true"></i> Street View</a>
         </div>
         {% endif %}
-        <p style="font-size:0.8rem; color:var(--taupe); margin:6px 0;">Fonte: {% for f in v.fontes %}<a href="{{ f.url }}" rel="noopener">{{ f.titulo }}{% if f.autor %} ({{ f.autor }}){% endif %}</a>{{ '; ' if not loop.last }}{% endfor %}</p>
-        <a href="{{ url_for('public.memoria_verbete', slug=v.slug) }}" style="font-weight:700; display:inline-flex; min-height:44px; align-items:center;">Ler o verbete completo →</a>
-      </div>
+        <details class="card-mais">
+          <summary>Ler mais</summary>
+          {% for p in (v.texto or [])[:2] %}<p>{{ p }}</p>{% endfor %}
+          {% if v.lugar %}<p class="card-meta"><i class="fas fa-map-marker-alt" aria-hidden="true"></i> {{ v.lugar.nome }}{% if v.lugar.aproximado %} (local aproximado){% endif %}</p>
+          {% set embed = mem.embed_street_view(v.lugar) %}
+          {% if embed %}<iframe src="{{ embed }}" title="Street View de {{ v.lugar.nome }}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" class="card-embed" allowfullscreen></iframe>{% endif %}{% endif %}
+          {% if foto and v.foto.credito %}<p class="card-meta">Foto: {{ v.foto.credito }}</p>{% endif %}
+          <p class="card-meta">Fonte: {% for f in v.fontes %}<a href="{{ f.url }}" rel="noopener">{{ f.titulo }}{% if f.autor %} ({{ f.autor }}){% endif %}</a>{{ '; ' if not loop.last }}{% endfor %}</p>
+          <a class="card-link" href="{{ url_for('public.memoria_verbete', slug=v.slug) }}">Ler o verbete completo →</a>
+        </details>
+      </article>
     </div>
     {% endfor %}
 
-    <div class="story-step step-right">
-      <div class="story-chapter-card">
+    <div class="story-step story-fim">
+      <article class="story-chapter-card">
         <span class="chapter-number">E a história continua</span>
-        <h2 class="chapter-title">A memória que falta é a sua</h2>
-        <div class="chapter-body"><p>Tem muito mais na Memória Viva: lugares, famílias, causos, cada um no mapa com o Street View de hoje. E o que ainda não está lá pode estar na sua gaveta.</p></div>
-        <div style="display:flex; flex-wrap:wrap; gap:8px;">
-          <a class="btn btn-tomate" href="{{ url_for('public.memoria') }}">Ver toda a Memória Viva →</a>
-          {% if zap_memoria %}<a class="btn btn-zap" href="{{ zap_memoria }}" target="_blank" rel="noopener"><i class="fab fa-whatsapp" aria-hidden="true"></i> Mandar uma memória</a>{% endif %}
+        <h3 class="chapter-title">A memória que falta é a sua</h3>
+        <p class="card-resumo">Lugares, famílias e causos, cada um no mapa com o Street View de hoje. O que ainda não está lá pode estar na sua gaveta.</p>
+        <div class="card-acoes">
+          <a class="btn btn-tomate" href="{{ url_for('public.memoria') }}">Ver toda a Memória →</a>
+          {% if zap_memoria %}<a class="btn btn-zap" href="{{ zap_memoria }}" target="_blank" rel="noopener"><i class="fab fa-whatsapp" aria-hidden="true"></i> Mandar memória</a>{% endif %}
         </div>
-      </div>
+      </article>
     </div>
-
   </div>
 </section>
 
@@ -686,12 +699,26 @@
   }
 
   // IntersectionObserver para Scrollytelling dos Capítulos
+  function voarPara(step) {
+    const lat = parseFloat(step.dataset.lat), lng = parseFloat(step.dataset.lng);
+    if (lat && lng && map) map.flyTo([lat, lng], parseInt(step.dataset.zoom), {duration: 1.6, easeLinearity: 0.25});
+  }
+
   function setupScrollytelling() {
     const steps = document.querySelectorAll('.story-step');
     if (!steps.length || !map) return;
 
+    // No modo lista não há rolagem sincronizada: o card voa o mapa no clique.
+    steps.forEach(s => s.addEventListener('click', e => {
+      if (document.getElementById('dossie').dataset.modo !== 'lista' || e.target.closest('a, summary')) return;
+      voarPara(s);
+      document.getElementById('mapa-scrolly').scrollIntoView({behavior: 'smooth', block: 'center'});
+    }));
+
     const observer = new IntersectionObserver((entries) => {
+      if (document.getElementById('dossie').dataset.modo === 'lista') return;
       entries.forEach(entry => {
+        entry.target.classList.toggle('ativo', entry.isIntersecting);
         if (entry.isIntersecting) {
           const lat = parseFloat(entry.target.dataset.lat);
           const lng = parseFloat(entry.target.dataset.lng);
@@ -711,6 +738,26 @@
 
     steps.forEach(s => observer.observe(s));
   }
+
+  // Modo do mapa da história: o padrão vem do aparelho (lado a lado no
+  // computador, flutuante no celular); a escolha da pessoa fica guardada.
+  (function () {
+    const dossie = document.getElementById('dossie');
+    if (!dossie) return;
+    let salvo = null;
+    try { salvo = localStorage.getItem('feira-modo-mapa'); } catch (e) {}
+    const padrao = window.matchMedia('(max-width: 899px)').matches ? 'flutuante' : 'lado';
+    function aplicar(modo, guardar) {
+      dossie.dataset.modo = modo;
+      dossie.querySelectorAll('.dossie-modos button').forEach(b =>
+        b.setAttribute('aria-pressed', b.dataset.modo === modo ? 'true' : 'false'));
+      if (guardar) { try { localStorage.setItem('feira-modo-mapa', modo); } catch (e) {} }
+      if (map) setTimeout(() => map.invalidateSize(), 60);
+    }
+    aplicar(['lado', 'flutuante', 'lista'].includes(salvo) ? salvo : padrao, false);
+    dossie.querySelectorAll('.dossie-modos button').forEach(b =>
+      b.addEventListener('click', () => aplicar(b.dataset.modo, true)));
+  })();
 
   // Modal de Colaboração. Guarda quem abriu para devolver o foco ao fechar.
   let focoAntesDoModal = null;

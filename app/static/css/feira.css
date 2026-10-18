@@ -733,27 +733,6 @@
     }
     .modal-box h3 { padding: 0 36px; } /* não passa por baixo do × */
 
-    /* Scrollytelling Mobile */
-    .scrolly-map-sticky {
-      height: 100vh;
-      top: 0;
-      pointer-events: none; /* Garante que o scroll no celular nunca fique preso no Leaflet */
-    }
-    .scrolly-content-overlay {
-      margin-top: -100vh;
-      padding-bottom: 60px;
-    }
-    .story-step {
-      min-height: 88vh;
-      padding: 16px 0;
-      justify-content: center !important;
-    }
-    .story-chapter-card {
-      max-width: calc(100vw - 28px);
-      margin: 0 auto;
-      padding: 22px 18px;
-      border-radius: 16px;
-    }
     .chapter-title { font-size: 1.65rem; }
     .chapter-photo { height: 160px; }
     .chapter-body { font-size: 0.9rem; line-height: 1.6; }
@@ -918,3 +897,78 @@
     .grid-23-bares { grid-template-columns: 1fr; }
     .bar-img-thumb { height: 160px; }
   }
+
+  /* ----------------------------------------------------
+     MODOS DO MAPA DA HISTÓRIA (data-modo no #dossie)
+     lado: cards à esquerda, mapa fixo à direita (celular: mapa no topo)
+     flutuante: mapa cheio, card pequeno por cima num canto/rodapé
+     lista: mapa parado e cards em grade, clique leva o mapa ao ponto
+     ---------------------------------------------------- */
+  .dossie-barra {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: 12px; padding-top: 28px; padding-bottom: 16px;
+  }
+  .dossie-titulo { font-family: var(--font-cartaz); font-size: 1.8rem; text-transform: uppercase; margin: 0; }
+  .dossie-modos { display: inline-flex; border: 2px solid var(--tinta); border-radius: 999px; overflow: hidden; }
+  .dossie-modos button {
+    min-height: 44px; padding: 0 16px; border: 0; background: transparent; color: var(--tinta);
+    font: inherit; font-weight: 700; font-size: 0.86rem; cursor: pointer;
+  }
+  .dossie-modos button + button { border-left: 2px solid var(--tinta); }
+  .dossie-modos button[aria-pressed="true"] { background: var(--tinta); color: var(--papel, #fdf8eb); }
+  .dossie-modos button:focus-visible { outline: 3px solid var(--tomate); outline-offset: -3px; }
+
+  /* card compacto (vale para os três modos) */
+  #dossie .story-chapter-card { padding: 18px; max-width: 400px; border-radius: 14px; }
+  #dossie .story-chapter-card:hover { transform: none; }
+  #dossie .chapter-title { font-size: 1.35rem; margin-bottom: 0; }
+  #dossie .chapter-number { font-size: 0.7rem; margin-bottom: 4px; }
+  .card-topo { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; }
+  .card-thumb { width: 84px; height: 84px; flex: none; object-fit: cover; border-radius: 10px; border: 1.5px solid var(--linha); background: #dfd3ba; }
+  .card-resumo { font-size: 0.92rem; line-height: 1.55; margin: 0 0 12px; }
+  .card-acoes { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+  .card-acoes .btn { min-height: 44px; font-size: 0.84rem; padding: 8px 14px; }
+  .card-mais summary { cursor: pointer; font-weight: 800; color: var(--tomate); min-height: 44px; display: flex; align-items: center; }
+  .card-mais p { font-size: 0.9rem; line-height: 1.6; margin: 0 0 10px; }
+  .card-meta { font-size: 0.78rem !important; color: var(--tinta-suave, #5a4d3f); }
+  .card-link { font-weight: 800; color: var(--tomate); }
+  .card-embed { width: 100%; height: 200px; border: 0; border-radius: 10px; margin-bottom: 10px; }
+  #dossie .story-step.ativo .story-chapter-card { border-color: var(--tinta); }
+
+  /* --- lado a lado --- */
+  @media (min-width: 900px) {
+    #dossie[data-modo="lado"] {
+      display: grid; grid-template-columns: minmax(340px, 40%) 1fr; column-gap: 24px;
+    }
+    #dossie[data-modo="lado"] .dossie-barra { grid-column: 1 / -1; }
+    #dossie[data-modo="lado"] .scrolly-map-sticky { grid-column: 2; grid-row: 2; }
+    #dossie[data-modo="lado"] .scrolly-content-overlay {
+      grid-column: 1; grid-row: 2; padding: 0 0 40vh 24px; max-width: none; margin: 0;
+    }
+    #dossie[data-modo="lado"] .story-step { min-height: 75vh; justify-content: flex-end; }
+  }
+  @media (max-width: 899px) {
+    #dossie[data-modo="lado"] .scrolly-map-sticky { top: 0; height: 42vh; z-index: 30; }
+    #dossie[data-modo="lado"] .story-step { min-height: 62vh; justify-content: center; padding: 16px 0; }
+    #dossie[data-modo="lado"] .story-chapter-card { max-width: none; }
+  }
+
+  /* --- flutuante --- */
+  #dossie[data-modo="flutuante"] .scrolly-content-overlay { margin-top: calc(-100vh + 60px); }
+  #dossie[data-modo="flutuante"] .story-step { min-height: 90vh; align-items: flex-end; justify-content: flex-start; padding: 0 0 32px; }
+  #dossie[data-modo="flutuante"] .story-chapter-card { max-width: 360px; }
+  @media (max-width: 899px) {
+    #dossie[data-modo="flutuante"] .scrolly-map-sticky { top: 0; height: 100vh; pointer-events: none; }
+    #dossie[data-modo="flutuante"] .scrolly-content-overlay { margin-top: -100vh; }
+    #dossie[data-modo="flutuante"] .story-step { min-height: 100vh; justify-content: center; padding-bottom: 16px; }
+    #dossie[data-modo="flutuante"] .story-chapter-card { max-width: calc(100vw - 28px); max-height: 42vh; overflow-y: auto; }
+  }
+
+  /* --- mapa + lista --- */
+  #dossie[data-modo="lista"] .scrolly-map-sticky { position: relative; top: 0; height: 60vh; }
+  #dossie[data-modo="lista"] .scrolly-content-overlay {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;
+    padding-top: 24px; padding-bottom: 48px; pointer-events: auto;
+  }
+  #dossie[data-modo="lista"] .story-step { min-height: 0; padding: 0; display: block; cursor: pointer; }
+  #dossie[data-modo="lista"] .story-chapter-card { max-width: none; height: 100%; box-shadow: none; }
