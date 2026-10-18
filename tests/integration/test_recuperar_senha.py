@@ -69,7 +69,7 @@ def test_token_falso_nao_entra(client, session):
 
 
 def test_login_nao_redireciona_para_outro_site(client, dono):
-    for destino in ('//golpe.com/x', '/\\golpe.com', 'https://golpe.com'):
+    for destino in ('//golpe.com/x', '/\\golpe.com', 'https://golpe.com', '/%09/golpe.com', '/%0A/golpe.com'):
         resp = client.post(f'/auth/login?next={destino}',
                            data={'email': 'dono@senha.com', 'senha': 'antiga-123'})
         assert resp.status_code == 302

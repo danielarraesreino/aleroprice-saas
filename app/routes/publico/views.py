@@ -190,8 +190,15 @@ def _render_landing(rest):
     # Vercel e não espera cold start nem o banco acordar. A página não carrega
     # token de sessão (o formulário busca em /novidades/token na hora de
     # enviar). Prévia espiada (?modelo=, ?tema=) não entra no cache.
+    if not previewando:
+        _na_borda(resp)
+    return resp
+
+
+def _na_borda(resp):
+    """Página igual para todo visitante sem sessão: sai da borda da Vercel."""
     if (current_app.config['SESSION_COOKIE_NAME'] not in request.cookies
-            and not previewando and not request.args):
+            and not request.args):
         resp.headers['Cache-Control'] = 'public, s-maxage=300, stale-while-revalidate=86400'
         session.accessed = False
     return resp
@@ -680,7 +687,8 @@ def _render_cardapio(rest):
     grafo = seo.cardapio_estruturado(rest, site, dishes, endereco_canonico,
                                      endereco_cardapio)
 
-    return render_template(
+    # O cardápio é o QR da mesa: abre no 4G de quem acabou de sentar.
+    return _na_borda(make_response(render_template(
         'site/cardapio.html',
         site=site, tenant=rest, grupos=_grupos_do_cardapio(dishes),
         copy=copy_da_vibe(getattr(cfg, 'vibe', None) if cfg else None,
@@ -695,7 +703,7 @@ def _render_cardapio(rest):
         url_do_site=url_for('public.landing_slug', slug=rest.slug),
         email_vendas=os.environ.get('FEIRA_EMAIL', 'contato@feiradebarao.com.br'),
         contato_vendas=os.environ.get('FEIRA_WHATSAPP', ''),
-    )
+    )))
 
 
 @bp.route('/bar/<slug>/cardapio')

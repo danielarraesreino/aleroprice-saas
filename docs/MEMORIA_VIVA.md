@@ -65,7 +65,14 @@ cada sessão: o que foi feito, o que ficou pendente e os próximos passos.
 **Sessão 3 (desktop, 18/10)**
 - Estado da sessão 2 recuperado e conferido em produção: `/run.py` e
   `/CLAUDE.md` dão 404, WebP no ar, 301 do Bar da Vila.
-- Esta memória criada. Reauditoria com os plugins relançada (ver abaixo).
+- Esta memória criada. Reauditoria com os plugins relançada em 3 frentes.
+- Reauditoria SEO/venda (`auditoria/reauditoria-seo-venda-2026-10-18.md`):
+  SEO/IA 5,5 → **7,0**; posicionamento de venda **4,5**.
+- `e9ccc65`: a home deixou de prometer o que está desligado (Pro virou lista
+  de espera), saíram "mais escolhido" e "lucro limpo", entrou o bloco
+  "Quando e onde" (Praça do Coco, sáb 10h–16h, dom 10h–15h) com schema Event,
+  e o `llms.txt` do portal foi reescrito. Os dados da feira ficam em `FEIRA`
+  (`app/routes/publico/views.py`).
 
 ## Pendências que dependem do dono do projeto
 
@@ -86,8 +93,9 @@ cada sessão: o que foi feito, o que ficou pendente e os próximos passos.
    - place_id na tela Avaliações.
 6. **Mural da home:** confirmar a origem dos depoimentos (os nomes foram
    anonimizados; o "Seu Valdir dos Santos" do capítulo V continua lá).
-7. **Guia da feira:** dados confirmados da Feira de Barão / Praça do Coco
-   (dias, horário, endereço, agenda), necessários antes de criar o guia.
+7. **Guia da feira:** horário confirmado (sáb 10h–16h, dom 10h–15h). Falta
+   o resto: endereço exato da praça, agenda, barracas físicas e fotos — o
+   dono do projeto está montando.
 
 ## Próximos passos (ordem)
 

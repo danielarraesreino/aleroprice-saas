@@ -22,6 +22,17 @@ def _destino_depois_do_login():
     return url_for('dashboard.index')
 
 
+def _caminho_local(destino):
+    """Só caminho deste site. "//golpe.com", "/\\golpe.com" e "/\t/golpe.com"
+    também começam com "/", mas o navegador descarta TAB/quebra de linha e
+    trata "\\" como "/" — e vai para outro domínio (open redirect)."""
+    from urllib.parse import urlsplit
+    if not destino.startswith('/') or any(ord(c) < 32 or c == '\\' for c in destino):
+        return False
+    partes = urlsplit(destino)
+    return not partes.scheme and not partes.netloc and not destino.startswith('//')
+
+
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -51,10 +62,7 @@ def login():
         session.pop('operador_id', None)     # login novo não herda "abrir admin"
         login_user(usuario, remember=bool(request.form.get('lembrar')))
         next_page = request.args.get('next') or ''
-        # Só caminho deste site: "//golpe.com" e "/\\golpe.com" também começam
-        # com "/" e o navegador os trata como outro domínio (open redirect).
-        if (not next_page.startswith('/') or next_page.startswith('//')
-                or '\\' in next_page):
+        if not _caminho_local(next_page):
             next_page = _destino_depois_do_login()
         return redirect(next_page)
 
