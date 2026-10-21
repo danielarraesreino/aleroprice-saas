@@ -5,23 +5,12 @@
 {% block head_extra %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" media="print" onload="this.media='all'">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<style>
-  #mapa-memoria{height:420px;border-radius:14px;border:1.5px solid var(--linha);margin:12px 0 4px}
-  .linha{list-style:none;padding:0;margin:0;border-left:3px solid var(--tomate)}
-  .linha li{padding:6px 0 14px 18px;position:relative}
-  .linha li::before{content:'';position:absolute;left:-8px;top:12px;width:13px;height:13px;border-radius:50%;background:var(--tomate)}
-  .linha .ano{font-family:var(--font-cartaz);font-size:1.2rem}
-  .provoca{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
-  .provoca a{display:block;padding:14px 16px;border:2px dashed var(--tomate);border-radius:12px;text-decoration:none;color:var(--tinta);font-weight:700;min-height:44px}
-  blockquote{margin:0;padding:14px 16px;background:var(--papel-claro);border-left:4px solid var(--tomate);border-radius:0 12px 12px 0}
-</style>
 {% endblock %}
 {% block conteudo %}
-<span class="chapeu" style="display:block;margin-top:24px">Construída com o bairro</span>
 <h1>Memória Viva de Barão Geraldo</h1>
-<p style="max-width:720px">Do café da Fazenda Santa Genebra aos trilhos da Funilense, da leiteria do Plínio Aveniente à Unicamp e à Praça do Coco. Cada verbete tem fonte e um ponto no mapa — e qualquer pessoa pode mandar foto, causo ou correção. Toda memória publicada sai com o nome de quem mandou.</p>
+<p class="texto-largo">Do café da Fazenda Santa Genebra aos trilhos da Funilense, da leiteria do Plínio Aveniente à Unicamp e à Praça do Coco. Cada verbete tem fonte e um ponto no mapa — e qualquer pessoa pode mandar foto, causo ou correção. Toda memória publicada sai com o nome de quem mandou.</p>
 {% if zap %}<div class="acoes"><a class="btn btn-zap" href="{{ zap }}" target="_blank" rel="noopener">Mandar memória ou foto pelo WhatsApp</a></div>{% endif %}
-{% if zap %}<div class="provoca" style="margin-top:14px">{% for chamada, link in memoria_provocacoes[:2] %}<a href="{{ link }}" target="_blank" rel="noopener">{{ chamada }} <span aria-hidden="true">→</span></a>{% endfor %}</div>{% endif %}
+{% if zap %}<div class="provoca abre">{% for chamada, link in memoria_provocacoes[:2] %}<a href="{{ link }}" target="_blank" rel="noopener">{{ chamada }} <span aria-hidden="true">→</span></a>{% endfor %}</div>{% endif %}
 
 <h2>O mapa da memória</h2>
 <div id="mapa-memoria" role="region" aria-label="Mapa com os lugares da memória de Barão Geraldo"></div>

@@ -1,0 +1,37 @@
+/* Memória Viva (hub, verbete, cartão) e /feira compartilham este arquivo base.
+   Camadas por troca de tom; sem filete em volta de caixa; sem cabeçalho em caixa alta espaçada. */
+.memoria{max-width:980px;margin:0 auto;padding:0 18px 20px;font-size:17px;line-height:1.65}
+.memoria p{margin:0 0 1em}
+.memoria ul,.memoria ol{margin:0 0 1em;padding-left:1.3em}
+.memoria h1,.memoria h2{font-family:var(--font-cartaz);text-transform:uppercase;line-height:1.1}
+.memoria h1{font-size:clamp(2.2rem,6vw,3.6rem);margin:28px 0 10px}
+.memoria h2{font-size:clamp(1.6rem,4vw,2.2rem);margin:44px 0 14px}
+.memoria h2.menor{font-size:1.4rem}
+.memoria .chapeu{display:block;font-size:.9375rem;font-weight:700;color:var(--tomate)}
+.memoria .acoes{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+.memoria .credito{font-size:.875rem;color:var(--taupe)}
+.memoria .cartao{display:block;border-radius:12px;overflow:hidden;background:var(--papel-claro);color:inherit;text-decoration:none}
+.memoria .cartao:hover{background:var(--cartao)}
+.memoria .cartao img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;background:var(--papel-escuro)}
+.memoria .cartao .corpo{padding:14px 16px}
+.memoria .cartao h3{margin:0 0 6px;font-size:1.05rem;line-height:1.3}
+.memoria .cartao p{margin:0;font-size:.9375rem}
+.memoria .grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.rodape-memoria{margin-top:40px;padding:24px 0;background:var(--papel-escuro);font-size:.9375rem;color:var(--taupe)}
+.memoria .trilha{margin-top:20px}
+.memoria .abre{margin-top:14px}
+.memoria .texto-largo{max-width:720px}
+.memoria .resumo{font-size:1.125rem;font-weight:600}
+.memoria .foto-verbete{margin:18px 0}
+.memoria .foto-verbete img{width:100%;height:auto;border-radius:12px}
+.memoria .streetview{width:100%;aspect-ratio:16/9;border:0;border-radius:12px}
+/* hub */
+#mapa-memoria{height:420px;border-radius:12px;background:var(--papel-escuro);margin:12px 0 4px}
+.linha{list-style:none;padding:0;margin:0;border-left:3px solid var(--tomate)}
+.linha li{padding:6px 0 14px 18px;position:relative}
+.linha li::before{content:'';position:absolute;left:-8px;top:12px;width:13px;height:13px;border-radius:50%;background:var(--tomate)}
+.linha .ano{font-family:var(--font-cartaz);font-size:1.2rem}
+.provoca{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.provoca a{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:48px;padding:14px 16px;border-radius:12px;background:var(--papel-escuro);color:var(--tinta);font-weight:700;text-decoration:none}
+.provoca a:hover{background:var(--papel-claro)}
+.memoria blockquote{margin:0;padding:16px 18px;border-radius:12px;background:var(--papel-claro)}
