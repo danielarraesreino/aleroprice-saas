@@ -267,6 +267,9 @@ def create_app(config_name='default'):
         # novidades), inscrição, QR de avaliação e o resumo para IAs.
         'public.novidades_token', 'public.novidades', 'public.avaliar',
         'public.llms_txt',
+        # Endereço antigo do catálogo da Berga (posts e bio do Instagram): tem que
+        # responder no domínio dela e levar à vitrine, não ao domínio do produto.
+        'public.kits_legado',
     }
 
     @app.before_request

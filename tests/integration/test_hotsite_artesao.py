@@ -137,3 +137,12 @@ def test_categoria_sem_nenhum_produto_com_foto_some(client, session):
     db.session.commit()
     corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
     assert '>Kits</h3>' not in corpo and '>Defumados</h3>' in corpo
+
+
+def test_kits_responde_no_dominio_do_artesao_mesmo_com_dominios_separados(client, session, monkeypatch):
+    """Em produção SEPARAR_DOMINIOS=1: rota fora da lista do tenant vira 302 pro
+    domínio do produto. /kits tem que ficar na lista."""
+    monkeypatch.setenv('SEPARAR_DOMINIOS', '1')
+    semear(no_ar=True)
+    resp = client.get('/kits/index.html', headers={'Host': DOMINIO})
+    assert resp.status_code == 301 and resp.headers['Location'].endswith('/#produtos')
