@@ -972,3 +972,69 @@
   }
   #dossie[data-modo="lista"] .story-step { min-height: 0; padding: 0; display: block; cursor: pointer; }
   #dossie[data-modo="lista"] .story-chapter-card { max-width: none; height: 100%; box-shadow: none; }
+
+/* ===== Home da Feira: funil visitante -> expositor =====
+   Camadas por troca de tom; o campo cheio (tinta) aparece duas vezes: o
+   "quando e onde" no topo e a virada para quem expõe. */
+.hm-secao{padding:48px 0}
+.hm-h1{margin:0 0 16px;font:400 clamp(3.25rem,12vw,6.5rem)/.92 var(--font-cartaz);text-transform:uppercase;color:var(--tinta)}
+.hm-h2{margin:0;font:400 clamp(1.9rem,5vw,2.8rem)/1.05 var(--font-cartaz);text-transform:uppercase}
+.hm-sub{max-width:40rem;font-size:1.125rem;line-height:1.55;color:var(--taupe)}
+.hm-acoes{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.hm-acoes.centro{justify-content:center}
+.hm-hero{padding:36px 0 40px}
+.hm-hero-in{display:grid;gap:28px}
+.hm-quando{padding:22px;border-radius:12px;background:var(--tinta);color:var(--papel)}
+.hm-quando h2{margin:0 0 12px;font:700 1.0625rem/1.2 var(--font-heading)}
+.hm-quando ul{margin:0 0 10px;padding:0;list-style:none;display:grid;gap:4px;font-size:1.25rem}
+.hm-quando p{margin:0;color:var(--papel-escuro)}
+.hm-hoje{display:flex;align-items:center;min-height:44px;margin-top:16px;padding:8px 14px;border-radius:8px;background:#f2b705;color:#2a1d00;font-weight:700;text-decoration:none}
+.hm-hoje:hover{background:var(--papel)}
+.hm-cab{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 24px;margin-bottom:22px}
+.hm-todos{display:inline-flex;align-items:center;min-height:44px;font-weight:700;color:var(--tomate)}
+.hm-lista{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0;padding:0;list-style:none}
+.hm-exp{position:relative;border-radius:12px;overflow:hidden;background:var(--papel-claro)}
+.hm-exp:hover{background:var(--cartao)}
+.hm-exp.hoje{background:color-mix(in srgb,#f2b705 22%,var(--papel-claro))}
+.hm-foto{display:flex;align-items:center;justify-content:center;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;background:var(--papel-escuro);font:400 3rem var(--font-cartaz);color:var(--taupe)}
+.hm-corpo{display:flex;flex-direction:column;gap:6px;padding:14px 16px 18px}
+.hm-corpo h3{margin:0;font:700 1.15rem/1.2 var(--font-heading)}
+.hm-corpo h3 a{color:inherit;text-decoration:none}
+.hm-corpo h3 a::after{content:"";position:absolute;inset:0}
+.hm-corpo p{margin:0;color:var(--taupe);font-size:.9375rem}
+.hm-selos{display:flex;flex-wrap:wrap;gap:6px}
+.hm-selo{display:inline-block;padding:2px 9px;border-radius:6px;font-size:.8125rem;font-weight:700;color:#fff;background:var(--tomate)}
+.hm-selo.artesao{background:#2f6b4f}
+.hm-selo.hoje{background:#f2b705;color:#2a1d00}
+.hm-expor{background:var(--tinta);color:var(--papel)}
+.hm-expor-in{display:grid;gap:22px;align-items:center}
+.hm-expor .hm-sub{color:var(--papel-escuro);margin-top:12px}
+.hm-expor .hm-acoes{margin-top:0}
+.hm-expor .btn-fantasma{color:var(--papel)!important;border-color:var(--papel-escuro)}
+.hm-expor .btn-fantasma:hover{background:var(--papel);color:var(--tinta)!important}
+.hm-cab-centro{max-width:760px;margin:0 auto 28px;text-align:center}
+.hm-cab-centro p{margin:12px 0 0;color:var(--taupe);font-size:1.0625rem}
+.secao-mural{background:var(--papel)}
+.hm-mural{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:24px}
+.hm-relato{margin:0;padding:18px 20px;border-radius:12px;background:var(--cartao)}
+.hm-relato p{margin:0 0 10px;font-style:italic}
+.hm-relato footer{font-size:.875rem;color:var(--taupe)}
+.hm-provoca{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.hm-provoca a{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:56px;padding:14px 16px;border-radius:12px;background:var(--papel-escuro);color:var(--tinta);font-weight:700;text-decoration:none}
+.hm-provoca a:hover{background:var(--papel-claro)}
+.hm-provoca i{color:var(--verde-zap)}
+.hm-mais{margin-top:18px;text-align:center}
+.hm-mais a{display:inline-flex;align-items:center;min-height:44px;font-weight:700}
+.hm-contato{padding:72px 0;text-align:center;background:var(--papel-escuro)}
+.hm-contato .hm-sub{margin:14px auto 26px}
+.hm-contato .btn{padding:14px 32px;font-size:1.05rem}
+.hm-novidades{padding:40px 16px 60px;background:var(--papel)}
+@media (max-width:599px){.hm-foto{aspect-ratio:1/1;font-size:2.2rem}.hm-corpo{padding:10px 12px 14px}.hm-corpo h3{font-size:1rem}.hm-corpo p{display:none}}
+@media (min-width:600px){.hm-lista{gap:14px}}
+@media (min-width:900px){
+  .hm-hero{padding:56px 0 64px}
+  .hm-hero-in{grid-template-columns:1.5fr 1fr;align-items:end;gap:48px}
+  .hm-expor-in{grid-template-columns:1.4fr 1fr}
+  .hm-expor .hm-acoes{justify-content:flex-end}
+}
+@media (min-width:960px){.hm-lista{grid-template-columns:repeat(3,minmax(0,1fr))}}

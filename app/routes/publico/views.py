@@ -348,6 +348,22 @@ FEIRA = {
 }
 
 
+def _vitrine_de_expositores(limite=6):
+    """Quem aparece na home: os que avisaram que estão hoje primeiro, depois os demais.
+
+    A home nunca pode cair por causa disso: se a consulta falhar (coluna que
+    ainda não existe, banco fora), a seção some e o resto da página segue.
+    """
+    try:
+        from app.utils import feira as fe
+        lista = fe.expositores()
+    except Exception:
+        db.session.rollback()
+        return {'exp_vitrine': [], 'exp_total': 0, 'exp_hoje': 0}
+    return {'exp_vitrine': lista[:limite], 'exp_total': len(lista),
+            'exp_hoje': sum(1 for e in lista if e['hoje'])}
+
+
 def _contexto_produto():
     """Dados comerciais da landing de venda. Vêm de env pra não versionar
     número de telefone nem preço — os dois mudam sem deploy."""
@@ -363,6 +379,7 @@ def _contexto_produto():
     from app.utils.planos import compra_do_site, taxa_de_instalacao, precos
     tab_precos = precos()
     return {
+        **_vitrine_de_expositores(),
         'zap_url': f'https://wa.me/{zap}?text={msg}' if zap else '#preco',
         'taxa_setup': taxa_de_instalacao(),
         'compra': compra_do_site(),

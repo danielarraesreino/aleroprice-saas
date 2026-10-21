@@ -62,81 +62,140 @@
 
 <main id="conteudo" tabindex="-1">
 
-<!-- HERO PRINCIPAL DA GRANDE REPORTAGEM -->
-<section class="hero-dossie">
-  <div class="wrap">
-    <span class="chapeu-dossie">Barão Geraldo, Campinas–SP · Memória & Gastronomia</span>
-    <h1 class="manchete-cartaz">
-      A Feira que <b>Não Desmonta</b>.<br>
-      A Memória Viva de Barão Geraldo.
-    </h1>
-    <p class="gravata-lead">
-      Das águas do Rio Atibaia e os trilhos do trem Funilense à primavera acadêmica de Zeferino Vaz e o aroma de pastel da Praça do Coco: 
-      um dossiê imersivo sobre o distrito que fez do boteco a extensão da universidade e conectou suas <strong>{{ total_bares }} casas gastronômicas</strong> em uma rede viva.
-    </p>
-
-    <div style="display:flex; justify-content:center; gap:14px; flex-wrap:wrap;">
-      <a class="btn btn-tomate" href="#dossie">
-        <i class="fas fa-compass"></i> Iniciar Jornada no Mapa ↓
-      </a>
-      <button type="button" class="btn btn-colab" onclick="abrirModalColaboracao('historia')">
-        <i class="fas fa-comment-dots"></i> Contar uma Memória do Bairro
-      </button>
-      <a class="btn btn-fantasma" href="#bares">
-        Ver as {{ total_bares }} Barracas Digitais
-      </a>
+<!-- TOPO: o que o visitante procura primeiro (quando, onde, quem está) -->
+<section class="hm-hero">
+  <div class="wrap hm-hero-in">
+    <div class="hm-hero-txt">
+      <h1 class="hm-h1">Feira de Barão</h1>
+      <p class="hm-sub">Artesãos, comida e bares na {{ feira.local }}, em {{ feira.bairro }}.{% if total_bares %} Com a memória do distrito e as {{ total_bares }} casas gastronômicas que fazem Barão.{% endif %}</p>
+      <div class="hm-acoes">
+        <a class="btn btn-tomate" href="{{ url_for('public.feira') }}">Ver expositores e mapa</a>
+        <a class="btn btn-fantasma" href="#expor">Quero expor na feira</a>
+      </div>
     </div>
-
-    <div class="meta-reportagem">
-      <span><i class="fas fa-calendar-alt text-danger"></i> Pesquisa & Dossiê Vivo · 2026</span>
-      <span><i class="fas fa-map-marker-alt text-danger"></i> Distrito de Barão Geraldo</span>
-      <span><i class="fas fa-users text-danger"></i> Construção Coletiva com Moradores e Bares</span>
-    </div>
+    <!-- QUANDO E ONDE: o que mais se procura sobre a feira ("feira de barão
+         horário", "feira da praça do coco"). Dados em FEIRA (publico/views.py). -->
+    <aside id="feira" class="hm-quando" aria-labelledby="feira-titulo">
+      <h2 id="feira-titulo">Quando e onde é a feira</h2>
+      <ul>
+        {% for h in feira.horarios %}<li><strong>{{ h.dia }}</strong> das {{ h.abre[:2] }}h às {{ h.fecha[:2] }}h</li>{% endfor %}
+      </ul>
+      <p>{{ feira.local }}, {{ feira.bairro }}</p>
+      {% if exp_hoje %}<a class="hm-hoje" href="{{ url_for('public.feira', hoje=1) }}">{{ exp_hoje }} {{ 'expositor avisou' if exp_hoje == 1 else 'expositores avisaram' }} que {{ 'está' if exp_hoje == 1 else 'estão' }} na feira hoje</a>{% endif %}
+    </aside>
   </div>
 </section>
 
-<!-- QUANDO E ONDE: o que mais se procura sobre a feira ("feira de barão
-     horário", "feira da praça do coco"). Dados em FEIRA (publico/views.py). -->
-<section id="feira" aria-labelledby="feira-titulo" style="background:var(--papel-claro); border-top:1.5px solid var(--linha); border-bottom:1.5px solid var(--linha); padding:28px 0;">
-  <div class="wrap" style="display:flex; flex-wrap:wrap; gap:18px 40px; align-items:center; justify-content:center; text-align:center;">
-    <h2 id="feira-titulo" style="font-family:var(--font-cartaz); font-size:1.6rem; text-transform:uppercase; margin:0;">Quando e onde é a feira</h2>
-    <p style="margin:0; font-size:1.05rem;"><i class="fas fa-map-marker-alt text-danger" aria-hidden="true"></i>
-      <strong>{{ feira.local }}</strong> · {{ feira.bairro }}</p>
-    <ul style="list-style:none; margin:0; padding:0; display:flex; gap:20px; flex-wrap:wrap; justify-content:center; font-size:1.05rem;">
-      {% for h in feira.horarios %}
-      <li><i class="far fa-clock" aria-hidden="true"></i> <strong>{{ h.dia }}</strong> das {{ h.abre[:2] }}h às {{ h.fecha[:2] }}h</li>
+{% if exp_vitrine %}
+<section id="expositores" class="hm-secao" aria-labelledby="expositores-titulo">
+  <div class="wrap">
+    <div class="hm-cab">
+      <h2 id="expositores-titulo" class="hm-h2">Quem expõe</h2>
+      <a class="hm-todos" href="{{ url_for('public.feira') }}">Ver os {{ exp_total }} expositores e o mapa</a>
+    </div>
+    <ul class="hm-lista">
+      {% for e in exp_vitrine %}
+      <li class="hm-exp{% if e.hoje %} hoje{% endif %}">
+        {% if e.foto %}<img class="hm-foto" src="{{ e.foto }}" alt="" loading="lazy" width="320" height="240">
+        {% else %}<span class="hm-foto" aria-hidden="true">{{ e.nome[:1]|upper }}</span>{% endif %}
+        <div class="hm-corpo">
+          <span class="hm-selos"><span class="hm-selo {{ e.tipo }}">{{ e.tipo_rotulo }}</span>{% if e.hoje %}<span class="hm-selo hoje">Na feira hoje</span>{% endif %}</span>
+          <h3><a href="{{ e.url }}">{{ e.nome }}</a></h3>
+          {% if e.descritor %}<p>{{ e.descritor }}</p>{% endif %}
+        </div>
+      </li>
       {% endfor %}
     </ul>
+  </div>
+</section>
+{% endif %}
+
+<!-- ========================================================
+     CATÁLOGO DAS 23 BARRACAS DIGITAIS DE BARÃO
+     ======================================================== -->
+<section id="bares" class="secao-bares">
+  <div class="wrap">
+    <div class="hm-cab-centro">
+      <h2 class="hm-h2">As {{ total_bares }} barracas de Barão Geraldo</h2>
+      <p>
+        Toque em qualquer casa para abrir a demonstração real com fotos, cardápio digital e o Concierge de Voz ao vivo no balcão:
+      </p>
+    </div>
+
+    {# Cliente pagante na frente das prévias, com link para o endereço canônico
+       dele: é a página da casa que o Google indexa (as prévias são noindex). #}
+    {% if clientes_destaque %}
+    <div class="clientes-feira">
+      <h3>Clientes da Feira</h3>
+      <div class="grid-23-bares" style="margin-top:16px;">
+        {% for c in clientes_destaque %}
+        <a class="bar-card-kraft" href="{{ c.url }}">
+          {% if c.foto %}
+          <img class="bar-img-thumb" src="{{ c.foto if c.foto.startswith(('http', '/')) else url_for('static', filename=c.foto) }}" alt="{{ c.nome }}" width="480" height="360" loading="lazy" decoding="async">
+          {% endif %}
+          <div class="bar-info-box">
+            <h4 class="bar-title-kraft">{{ c.nome }}</h4>
+            <div style="margin-top:auto; font-size:0.82rem; font-weight:700; color:var(--tomate); display:flex; justify-content:space-between; align-items:center; padding-top:8px;">
+              <span>Visitar o site</span>
+              <i class="fas fa-arrow-right"></i>
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if bares %}
+    <div class="grid-23-bares">
+      {% for b in bares %}
+      <a class="bar-card-kraft" href="{{ url_for('public.landing_slug', slug=b.slug) }}">
+        <img class="bar-img-thumb" src="{{ url_for('static', filename=b.foto_480) }}" alt="{{ b.nome }}" width="480" height="360" loading="lazy" decoding="async">
+        <div class="bar-info-box">
+          <h3 class="bar-title-kraft">{{ b.nome }}</h3>
+          <div class="bar-nota-linha">
+            <i class="fas fa-star text-warning"></i>
+            <span>{{ b.nota }}</span>
+            {% if b.avaliacoes %}<span style="color:var(--taupe); font-weight:500;">({{ b.avaliacoes }} no Google)</span>{% endif %}
+          </div>
+          <div style="margin-top:auto; font-size:0.82rem; font-weight:700; color:var(--tomate); display:flex; justify-content:space-between; align-items:center; padding-top:8px;">
+            <span>Abrir Barraca</span>
+            <i class="fas fa-arrow-right"></i>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
   </div>
 </section>
 
 <!-- MURAL DA MEMÓRIA VIVA: no centro da página. Memórias de
      app/data/memoria/mural.yml, publicadas com o nome de quem mandou. -->
-<section id="mural" class="secao-mural" style="background:var(--papel); padding:56px 0; border-bottom:1.5px solid var(--linha);">
+<section id="mural" class="secao-mural hm-secao">
   <div class="wrap">
-    <div style="text-align:center; max-width:800px; margin:0 auto 28px;">
-      <span class="chapeu-dossie">Construído com o bairro</span>
-      <h2 style="font-family:var(--font-cartaz); font-size:clamp(2rem,5vw,2.8rem); text-transform:uppercase; margin-bottom:10px;">Mural da Memória Viva</h2>
-      <p style="color:var(--taupe); font-size:1.02rem;">Toda memória publicada aqui sai com o nome de quem mandou. A história de Barão está nas gavetas, nos álbuns e na cabeça de quem viveu.</p>
+    <div class="hm-cab-centro">
+      <h2 class="hm-h2">Mural da Memória Viva</h2>
+      <p>Toda memória publicada aqui sai com o nome de quem mandou. A história de Barão está nas gavetas, nos álbuns e na cabeça de quem viveu.</p>
     </div>
     {% if memoria_mural %}
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:18px; margin-bottom:26px;">
+    <div class="hm-mural">
       {% for m in memoria_mural %}
-      <blockquote style="margin:0; background:var(--cartao); border:1.5px solid var(--linha); border-left:4px solid var(--tomate); border-radius:14px; padding:18px 20px;">
-        <p style="font-style:italic; margin:0 0 10px;">“{{ m.texto }}”</p>
-        <footer style="font-size:0.82rem; color:var(--taupe);"><strong>{{ m.nome }}</strong>{% if m.quando %} · {{ m.quando }}{% endif %}{% if m.fonte_url %}<br>Fonte: <a href="{{ m.fonte_url }}" rel="noopener">{{ mem.fonte_rotulo(m.fonte_url) }}</a>{% endif %}</footer>
+      <blockquote class="hm-relato">
+        <p>“{{ m.texto }}”</p>
+        <footer><strong>{{ m.nome }}</strong>{% if m.quando %} · {{ m.quando }}{% endif %}{% if m.fonte_url %}<br>Fonte: <a href="{{ m.fonte_url }}" rel="noopener">{{ mem.fonte_rotulo(m.fonte_url) }}</a>{% endif %}</footer>
       </blockquote>
       {% endfor %}
     </div>
     {% endif %}
     {% if zap_memoria %}
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:12px;">
+    <div class="hm-provoca">
       {% for chamada, link in memoria_provocacoes %}
-      <a href="{{ link }}" target="_blank" rel="noopener" style="display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:56px; padding:14px 16px; border:2px dashed var(--tomate); border-radius:12px; text-decoration:none; color:var(--tinta); font-weight:700; background:var(--papel-claro);">{{ chamada }} <i class="fab fa-whatsapp" aria-hidden="true" style="color:var(--verde-zap);"></i></a>
+      <a href="{{ link }}" target="_blank" rel="noopener">{{ chamada }} <i class="fab fa-whatsapp" aria-hidden="true"></i></a>
       {% endfor %}
     </div>
     {% endif %}
-    <p style="text-align:center; margin-top:18px;"><a href="{{ url_for('public.memoria') }}" style="font-weight:700;">Abrir a Memória Viva completa →</a></p>
+    <p class="hm-mais"><a href="{{ url_for('public.memoria') }}">Abrir a Memória Viva completa →</a></p>
   </div>
 </section>
 
@@ -283,66 +342,17 @@
   </div>
 </section>
 
-<!-- ========================================================
-     CATÁLOGO DAS 23 BARRACAS DIGITAIS DE BARÃO
-     ======================================================== -->
-<section id="bares" class="secao-bares">
-  <div class="wrap">
-    <div style="text-align:center; max-width:750px; margin:0 auto;">
-      <span class="chapeu-dossie">A Feira que Não Desmonta</span>
-      <h2 style="font-family:var(--font-cartaz); font-size:2.8rem; text-transform:uppercase; margin-bottom:12px;">
-        As {{ total_bares }} Barracas de Barão Geraldo
-      </h2>
-      <p style="color:var(--taupe); font-size:1.05rem;">
-        Toque em qualquer casa para abrir a demonstração real com fotos, cardápio digital e o Concierge de Voz ao vivo no balcão:
-      </p>
+<!-- PARA QUEM EXPÕE: a virada do funil, do visitante para o expositor -->
+<section id="expor" class="hm-secao hm-expor" aria-labelledby="expor-titulo">
+  <div class="wrap hm-expor-in">
+    <div>
+      <h2 id="expor-titulo" class="hm-h2">Tem barraca ou bar em Barão?</h2>
+      <p class="hm-sub">Seu site com produtos, WhatsApp e o ponto da sua barraca no mapa da feira. No dia da feira, um toque avisa que você está lá.</p>
     </div>
-
-    {# Cliente pagante na frente das prévias, com link para o endereço canônico
-       dele: é a página da casa que o Google indexa (as prévias são noindex). #}
-    {% if clientes_destaque %}
-    <div class="clientes-feira">
-      <h3>Clientes da Feira</h3>
-      <div class="grid-23-bares" style="margin-top:16px;">
-        {% for c in clientes_destaque %}
-        <a class="bar-card-kraft" href="{{ c.url }}">
-          {% if c.foto %}
-          <img class="bar-img-thumb" src="{{ c.foto if c.foto.startswith(('http', '/')) else url_for('static', filename=c.foto) }}" alt="{{ c.nome }}" width="480" height="360" loading="lazy" decoding="async">
-          {% endif %}
-          <div class="bar-info-box">
-            <h4 class="bar-title-kraft">{{ c.nome }}</h4>
-            <div style="margin-top:auto; font-size:0.82rem; font-weight:700; color:var(--tomate); display:flex; justify-content:space-between; align-items:center; padding-top:8px;">
-              <span>Visitar o site</span>
-              <i class="fas fa-arrow-right"></i>
-            </div>
-          </div>
-        </a>
-        {% endfor %}
-      </div>
+    <div class="hm-acoes">
+      <a class="btn btn-zap" href="{{ zap_url }}" target="_blank" rel="noopener">Falar com o Daniel</a>
+      <a class="btn btn-fantasma" href="#preco">Ver os planos</a>
     </div>
-    {% endif %}
-
-    {% if bares %}
-    <div class="grid-23-bares">
-      {% for b in bares %}
-      <a class="bar-card-kraft" href="{{ url_for('public.landing_slug', slug=b.slug) }}">
-        <img class="bar-img-thumb" src="{{ url_for('static', filename=b.foto_480) }}" alt="{{ b.nome }}" width="480" height="360" loading="lazy" decoding="async">
-        <div class="bar-info-box">
-          <h3 class="bar-title-kraft">{{ b.nome }}</h3>
-          <div class="bar-nota-linha">
-            <i class="fas fa-star text-warning"></i>
-            <span>{{ b.nota }}</span>
-            {% if b.avaliacoes %}<span style="color:var(--taupe); font-weight:500;">({{ b.avaliacoes }} no Google)</span>{% endif %}
-          </div>
-          <div style="margin-top:auto; font-size:0.82rem; font-weight:700; color:var(--tomate); display:flex; justify-content:space-between; align-items:center; padding-top:8px;">
-            <span>Abrir Barraca</span>
-            <i class="fas fa-arrow-right"></i>
-          </div>
-        </div>
-      </a>
-      {% endfor %}
-    </div>
-    {% endif %}
   </div>
 </section>
 
@@ -545,27 +555,24 @@
 <!-- ========================================================
      FECHAMENTO & CONVITE PARA A COMUNIDADE
      ======================================================== -->
-<section id="contato" style="text-align:center; padding:80px 0; border-top:1.5px solid var(--linha); background:var(--papel-escuro);">
+<section id="contato" class="hm-contato">
   <div class="wrap">
-    <span class="chapeu-dossie">Construído em Barão Geraldo</span>
-    <h2 style="font-family:var(--font-cartaz); font-size:clamp(2.4rem, 5vw, 3.8rem); text-transform:uppercase; margin-bottom:16px;">
-      Vamos Conversar no Seu Balcão?
-    </h2>
-    <p style="color:var(--taupe); font-size:1.1rem; max-width:720px; margin:0 auto 30px;">
+    <h2 class="hm-h2">Vamos conversar no seu balcão?</h2>
+    <p class="hm-sub">
       Eu sou o Daniel, moro aqui em Barão Geraldo e criei o projeto para valorizar a história e os negócios da nossa comunidade. Levo a demonstração pronta no celular até o seu bar.
     </p>
-    <div style="display:flex; justify-content:center; gap:14px; flex-wrap:wrap;">
-      <a class="btn btn-zap" style="font-size:1.05rem; padding:14px 32px;" href="{{ zap_url }}" target="_blank" rel="noopener">
+    <div class="hm-acoes centro">
+      <a class="btn btn-zap" href="{{ zap_url }}" target="_blank" rel="noopener">
         <i class="fab fa-whatsapp"></i> Chamar no WhatsApp
       </a>
-      <button class="btn btn-colab" style="font-size:1.05rem; padding:14px 32px;" onclick="abrirModalColaboracao('historia')">
-        <i class="fas fa-feather"></i> Contar uma História do Bairro
+      <button class="btn btn-colab" onclick="abrirModalColaboracao('historia')">
+        <i class="fas fa-feather"></i> Contar uma história do bairro
       </button>
     </div>
   </div>
 </section>
 
-<section id="novidades" style="padding:40px 16px 60px; background:var(--papel);">
+<section id="novidades" class="hm-novidades">
   {% with novidades_bar = '' %}{% include "site/_novidades.html" %}{% endwith %}
 </section>
 
