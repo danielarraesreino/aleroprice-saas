@@ -30,6 +30,17 @@ class SiteConfig(db.Model):
     # como imagem de compartilhamento quando não há foto de capa.
     logo = db.Column(db.String(300))
 
+    # Onde o expositor fica na Feira. `lat`/`lng` vêm do GPS do celular do
+    # operador (Modo Campo), parado na barraca; `ponto_na_feira` é o texto que o
+    # visitante lê ("Barraca 12, ao lado do palco"). A coordenada não é editável
+    # pelo dono: ponto errado no mapa leva freguês pro lugar errado.
+    lat = db.Column(db.Float)
+    lng = db.Column(db.Float)
+    ponto_na_feira = db.Column(db.String(120))
+    # Último dia em que o expositor avisou "estou na feira hoje". Data, não
+    # booleano: vale só no próprio dia e some sozinha, sem ninguém desligar.
+    na_feira_em = db.Column(db.Date)
+
     # Contato
     whatsapp = db.Column(db.String(20))          # só dígitos c/ DDI, ex.: 5519999779942
     telefone_exibicao = db.Column(db.String(30))

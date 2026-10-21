@@ -70,6 +70,20 @@ Depois de deploy com model/coluna nova:
 Toda migration nova: checar `inspect().get_columns` antes de `add_column`, e
 registrar a coluna também na lista `novas_r`/`novas` do `run.py` (dev e boot).
 
+### SQL idempotente: mapa da Feira (colunas de `site_config`)
+
+Aplicar no Neon **antes** do deploy que lê `lat`/`lng`/`ponto_na_feira`/`na_feira_em`
+(sem as colunas, toda página de bar daria erro 500):
+
+```sql
+BEGIN;
+ALTER TABLE site_config ADD COLUMN IF NOT EXISTS lat DOUBLE PRECISION;
+ALTER TABLE site_config ADD COLUMN IF NOT EXISTS lng DOUBLE PRECISION;
+ALTER TABLE site_config ADD COLUMN IF NOT EXISTS ponto_na_feira VARCHAR(120);
+ALTER TABLE site_config ADD COLUMN IF NOT EXISTS na_feira_em DATE;
+COMMIT;
+```
+
 ## Provisionar um cliente
 
 ```bash

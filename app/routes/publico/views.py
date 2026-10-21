@@ -398,6 +398,32 @@ def _contexto_memoria():
     }
 
 
+@bp.route('/feira')
+def feira():
+    """Expositores da Feira: mapa, lista e busca de produto.
+
+    Sem parâmetro a página é igual para todo visitante e sai da borda da
+    Vercel (`_na_borda`); com `?q=`/`?tipo=`/`?hoje=` é resposta própria.
+    """
+    from app.utils import feira as fe
+
+    q = (request.args.get('q') or '').strip()[:60]
+    tipo = request.args.get('tipo') if request.args.get('tipo') in fe.TIPOS else None
+    so_hoje = request.args.get('hoje') == '1'
+
+    lista = fe.expositores(tipo=tipo, so_hoje=so_hoje, q=q)
+    pontos = [{'nome': e['nome'], 'tipo': e['tipo'], 'url': e['url'], 'lat': e['lat'],
+               'lng': e['lng'], 'ponto': e['ponto'], 'hoje': e['hoje']}
+              for e in lista if e['lat'] is not None and e['lng'] is not None]
+    resp = make_response(render_template(
+        'produto/feira.html', expositores=lista, pontos=pontos,
+        produtos=fe.buscar_produtos(q) if q else [],
+        q=q, tipo=tipo, so_hoje=so_hoje,
+        total_hoje=sum(1 for e in lista if e['hoje']),
+        centro=fe.CENTRO, **_contexto_produto()))
+    return _na_borda(resp)
+
+
 @bp.route('/barao')
 def barao():
     """Landing da campanha "Bares de Barão": a página que o vendedor manda no
@@ -555,6 +581,7 @@ def sitemap():
         paginas.append((f'https://{dominio_do_produto()}/site-para-bar-em-campinas', None))
         from app.utils.memoria import verbetes as _verbetes
         paginas.append((f'https://{dominio_do_produto()}/memoria', None))
+        paginas.append((f'https://{dominio_do_produto()}/feira', None))
         for v in _verbetes():
             paginas.append((f"https://{dominio_do_produto()}/memoria/{v['slug']}", None))
 

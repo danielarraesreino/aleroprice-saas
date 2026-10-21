@@ -13,6 +13,7 @@
       FEIRA DE <span>BARÃO</span>
     </a>
     <nav class="nav-dossie" aria-label="Seções principais">
+      <a href="{{ url_for('public.feira') }}">Expositores</a>
       <a href="{{ url_for('public.memoria') }}">Memória</a>
       <a href="{{ base }}#bares">Barracas</a>
       <a href="{{ base }}#preco">Planos</a>
@@ -56,6 +57,7 @@
     <li><a href="{{ base }}#linha-do-tempo" onclick="fecharMenuMobile(false)"><i class="fas fa-history"></i> Linha do Tempo (1870–Hoje)</a></li>
     <li><a href="{{ base }}#feira" onclick="fecharMenuMobile(false)"><i class="fas fa-store"></i> Quando e onde é a feira</a></li>
     <li><a href="{{ base }}#mural" onclick="fecharMenuMobile(false)"><i class="fas fa-comments"></i> Mural da Memória Viva</a></li>
+    <li><a href="{{ url_for('public.feira') }}"><i class="fas fa-map-location-dot"></i> Expositores e mapa da feira</a></li>
     <li><a href="{{ url_for('public.memoria') }}"><i class="fas fa-landmark"></i> Memória Viva completa</a></li>
     <li><a href="{{ base }}#bares" onclick="fecharMenuMobile(false)"><i class="fas fa-beer-mug-empty"></i> {{ total_bares }} Barracas Digitais</a></li>
     <li><a href="{{ base }}#tecnologia" onclick="fecharMenuMobile(false)"><i class="fas fa-microchip"></i> Tecnologia & Bar OS</a></li>

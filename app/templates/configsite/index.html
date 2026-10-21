@@ -52,9 +52,24 @@
 </div>
 <p class="text-muted">Campo em branco simplesmente não aparece no site.</p>
 
+{# Aviso do dia: vale só hoje e some sozinho (guarda a data, não um liga/desliga). #}
+<form method="post" action="{{ url_for('configsite.na_feira') }}" class="card p-3 mb-4 col-lg-9">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+      <strong>{{ 'Seu site aparece como “na feira hoje”.' if na_feira_hoje else 'Vai estar na feira hoje?' }}</strong>
+      <div class="form-text mb-0">Quem abre o mapa da Feira vê quem está lá agora. Vale só para hoje.</div>
+    </div>
+    <button type="submit" class="btn {{ 'btn-outline-secondary' if na_feira_hoje else 'btn-success' }}">
+      {{ 'Tirar o aviso' if na_feira_hoje else 'Estou na feira hoje' }}
+    </button>
+  </div>
+</form>
+
 <form method="post" class="col-lg-9">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
+{% if not eh_artesao %}
   {# Modelo vem primeiro porque é a decisão maior: troca o esqueleto da página,
      e a paleta se escolhe em cima do que ficou. Cartão e não <select> porque
      "Craft" e "Brasa" não dizem nada sozinhos — o dono decide lendo o "pra
@@ -86,6 +101,8 @@
       não altera seu site — só o botão Salvar aplica.
     </div>
   </div>
+
+{% endif %}
 
   <div class="mb-4">
     <label class="form-label fw-semibold">Claro ou escuro</label>

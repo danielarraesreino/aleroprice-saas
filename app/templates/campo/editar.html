@@ -224,6 +224,32 @@
          data-alvo="galeria" class="upload" multiple hidden>
 </div>
 
+<div class="bloco" id="ponto-feira">
+  <h2>Ponto na feira</h2>
+  <p class="nota">Fique parado na barraca e toque em “Usar minha localização”. O pino
+  vai pro mapa da Feira. Use a referência em texto pra quem chega andando.</p>
+  <form method="post" action="{{ url_for('campo.ponto', slug=rest.slug) }}" id="form-ponto">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="lat" id="ponto-lat" value="{{ cfg.lat if cfg.lat is not none else '' }}">
+    <input type="hidden" name="lng" id="ponto-lng" value="{{ cfg.lng if cfg.lng is not none else '' }}">
+    <label for="ponto-ref">Referência (ex: Barraca 12, ao lado do palco)</label>
+    <input type="text" id="ponto-ref" name="ponto_na_feira" maxlength="120"
+           value="{{ cfg.ponto_na_feira or '' }}" style="width:100%;min-height:44px">
+    <p id="ponto-status" class="nota" role="status">
+      {% if cfg.lat is not none %}Pino marcado: {{ '%.5f'|format(cfg.lat) }}, {{ '%.5f'|format(cfg.lng) }}.
+      {% else %}Ainda sem pino no mapa.{% endif %}
+    </p>
+    <button class="btn fantasma" type="button" id="btn-gps">📍 Usar minha localização</button>
+    <button class="btn" type="submit">Salvar ponto</button>
+  </form>
+  <form method="post" action="{{ url_for('campo.na_feira', slug=rest.slug) }}" style="margin-top:12px">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn fantasma" type="submit">
+      {{ '✔ Na feira hoje (tocar para desmarcar)' if na_feira_hoje else 'Marcar: na feira hoje' }}
+    </button>
+  </form>
+</div>
+
 <div class="bloco">
   <h2>6 · Endereço próprio</h2>
   <button class="btn fantasma" type="button" id="btn-dominio">🔎 Ver domínios livres</button>
@@ -351,6 +377,26 @@ const LADO_MAX = 1200;
    FormData é montado à mão em `subir()`. Sem isto, a foto volta 400 e a venda
    presencial para no primeiro clique da câmera. */
 const CSRF = {{ csrf_token()|tojson }};
+
+/* GPS do celular → campos escondidos do formulário do ponto. Só preenche; quem
+   grava é o "Salvar ponto" (e o servidor recusa coordenada fora de Campinas). */
+(function () {
+  const btn = document.getElementById('btn-gps');
+  if (!btn) return;
+  const status = document.getElementById('ponto-status');
+  btn.addEventListener('click', function () {
+    if (!navigator.geolocation) { status.textContent = 'Este aparelho não informa a localização.'; return; }
+    status.textContent = 'Buscando o sinal do GPS…';
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      document.getElementById('ponto-lat').value = pos.coords.latitude.toFixed(6);
+      document.getElementById('ponto-lng').value = pos.coords.longitude.toFixed(6);
+      status.textContent = 'Localização capturada (precisão ~' + Math.round(pos.coords.accuracy) +
+        ' m). Toque em “Salvar ponto”.';
+    }, function () {
+      status.textContent = 'Não consegui a localização. Permita o acesso ao GPS e tente de novo.';
+    }, {enableHighAccuracy: true, timeout: 20000, maximumAge: 0});
+  });
+})();
 
 /* Reduzir no navegador, não no servidor: foto de celular tem ~4MB e o 4G do
    bar não sobe isso enquanto alguém espera olhando. ~200KB sobe em segundos —

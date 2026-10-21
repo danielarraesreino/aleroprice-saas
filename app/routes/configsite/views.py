@@ -4,6 +4,7 @@ from app.extensions import db
 from app.models.modelo_siteconfig import SiteConfig
 from app.routes.configsite import bp
 from app.routes.publico.views import SITE_DEFAULTS
+from app.utils.feira import hoje_br
 from app.utils.tenant import get_current_restaurant_id
 from app.utils import blob
 from app.utils.decorators import plano_minimo
@@ -55,6 +56,26 @@ def foto():
     cfg.hero_foto = url
     db.session.commit()
     return jsonify({'ok': True, 'url': url})
+
+
+@bp.post('/na-feira')
+@plano_minimo('site')
+def na_feira():
+    """O expositor avisa "estou na feira hoje". Vale só no dia (data, não flag)."""
+    from app.utils.feira import alternar_na_feira
+
+    rid = get_current_restaurant_id()
+    if not rid:
+        return redirect(url_for('auth.login'))
+    cfg = SiteConfig.query.filter_by(restaurant_id=rid).first()
+    if cfg is None:
+        cfg = SiteConfig(restaurant_id=rid)
+        db.session.add(cfg)
+    ligado = alternar_na_feira(cfg)
+    db.session.commit()
+    flash('Pronto: seu site aparece como "na feira hoje".' if ligado
+          else 'Tirei o "na feira hoje" do seu site.', 'success')
+    return redirect(url_for('configsite.index'))
 
 
 @bp.route('/', methods=['GET', 'POST'])
@@ -119,7 +140,9 @@ def index():
                                          else MODELO_PADRAO),
                            modo_atual=(cfg.tema_modo if cfg and cfg.tema_modo
                                        in ('auto', 'claro', 'escuro') else 'auto'),
-                           slug=(rest.slug if rest else None))
+                           slug=(rest.slug if rest else None),
+                           na_feira_hoje=bool(cfg and cfg.na_feira_em == hoje_br()),
+                           eh_artesao=(getattr(rest, 'tipo_negocio', None) == 'artesao'))
 
 
 @bp.post('/testar-callmebot')

@@ -25,7 +25,8 @@ from datetime import date, datetime, timedelta
 from app.extensions import db
 from app.models.modelo_restaurante import Restaurante
 from app.models.modelo_siteconfig import SiteConfig
-from app.models.modelo_sitecontent import DishCard, Review, TeamMember, GalleryItem
+from app.models.modelo_sitecontent import DishCard, Review, TeamMember, GalleryItem, ProdutoSite
+from app.utils.vocabulario import TIPOS as TIPOS_DE_NEGOCIO
 from app.utils.formatacao_br import ler_moeda
 from app.utils.site_router import gerar_slug, slug_unico
 
@@ -46,6 +47,9 @@ LISTAS = (
     ('avaliacoes', Review, ('autor', 'texto', 'estrelas')),
     ('equipe', TeamMember, ('nome', 'papel', 'emoji')),
     ('galeria', GalleryItem, ('imagem', 'legenda')),
+    # Hotsite de artesão (tipo_negocio: artesao). Bar não declara a chave.
+    ('produtos', ProdutoSite, ('nome', 'descricao', 'categoria', 'preco', 'sob_encomenda',
+                               'imagem', 'destaque')),
 )
 
 
@@ -107,6 +111,8 @@ def fotos_do_bar(slug):
 
         capa.jpg              foto do topo
         prato-<nome>.jpg      vira item do cardápio, com o nome tirado do arquivo
+        produto-<nome>.jpg    (artesão) vira produto da vitrine, idem
+        logo.jpg              (artesão) marca no menu e no ícone da aba
         equipe-<nome>.jpg     ignorada por ora (equipe é texto)
         qualquer-outra.jpg    entra na galeria
 
@@ -116,9 +122,9 @@ def fotos_do_bar(slug):
     """
     pasta = pasta_do_bar(slug)
     if not os.path.isdir(pasta):
-        return {'capa': None, 'pratos': [], 'galeria': []}
+        return {'capa': None, 'logo': None, 'pratos': [], 'produtos': [], 'galeria': []}
 
-    capa, pratos, galeria = None, [], []
+    capa, logo, pratos, produtos, galeria = None, None, [], [], []
     for nome in sorted(os.listdir(pasta)):
         if not nome.lower().endswith(EXTENSOES):
             continue
@@ -127,6 +133,11 @@ def fotos_do_bar(slug):
 
         if base in ('capa', 'hero', '00-capa'):
             capa = caminho
+        elif base == 'logo':
+            logo = caminho
+        elif base.startswith('produto-'):
+            rotulo = base[len('produto-'):].replace('-', ' ').replace('_', ' ').strip()
+            produtos.append({'nome': rotulo.capitalize() or 'Produto', 'imagem': caminho})
         elif base.startswith('prato-'):
             # "prato-costela-na-brasa.jpg" -> "Costela na brasa"
             rotulo = base[len('prato-'):].replace('-', ' ').replace('_', ' ').strip()
@@ -141,7 +152,7 @@ def fotos_do_bar(slug):
     # abrir o site sem imagem nenhuma.
     if capa is None and galeria:
         capa = galeria[0]['imagem']
-    return {'capa': capa, 'pratos': pratos, 'galeria': galeria}
+    return {'capa': capa, 'logo': logo, 'pratos': pratos, 'produtos': produtos, 'galeria': galeria}
 
 
 def _aplicar_listas(dados, rid, log):
@@ -195,6 +206,10 @@ def aplicar_lead(caminho):
 
     rest.nome = dados['nome']
     rest.tipo_conta = 'demo'
+    tipo = (dados.get('tipo_negocio') or rest.tipo_negocio or 'bar').strip().lower()
+    if tipo not in TIPOS_DE_NEGOCIO:
+        raise LeadInvalido(f'`tipo_negocio` precisa ser um de {list(TIPOS_DE_NEGOCIO)}, veio {tipo!r}')
+    rest.tipo_negocio = tipo
     # `ativo: false` no arquivo tira a prévia do ar e a mantém fora.
     #
     # Sem isso o aplicador reativava tudo a cada rodada, e casa que fechou (o
@@ -220,16 +235,23 @@ def aplicar_lead(caminho):
     # Fotos que estiverem na pasta do bar entram sozinhas. O .yml continua
     # mandando: só preenchemos o que ele não declarou.
     fotos = fotos_do_bar(rest.slug)
-    if fotos['capa'] or fotos['pratos'] or fotos['galeria']:
+    if fotos['capa'] or fotos['pratos'] or fotos['produtos'] or fotos['galeria']:
         log.append(f"  fotos da pasta: capa={'sim' if fotos['capa'] else 'não'}, "
-                   f"pratos={len(fotos['pratos'])}, galeria={len(fotos['galeria'])}")
+                   f"pratos={len(fotos['pratos'])}, produtos={len(fotos['produtos'])}, "
+                   f"galeria={len(fotos['galeria'])}")
 
     site = dict(dados.get('site') or {})
     site.setdefault('nome', dados['nome'])
     if fotos['capa'] and not site.get('hero_foto'):
         site['hero_foto'] = fotos['capa']
+    if fotos['logo'] and not site.get('logo'):
+        site['logo'] = fotos['logo']
     if fotos['pratos'] and not dados.get('cardapio'):
         dados['cardapio'] = fotos['pratos']
+    if fotos['produtos'] and not dados.get('produtos'):
+        dados['produtos'] = fotos['produtos']
+    if tipo == 'artesao' and not site.get('vibe'):
+        site['vibe'] = 'artesanal'           # senão cairia no texto de boteco
     if fotos['galeria'] and not dados.get('galeria'):
         dados['galeria'] = fotos['galeria']
     for chave in ('tema', 'cidade_uf'):          # aceitos no topo por conveniência

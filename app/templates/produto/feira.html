@@ -1,0 +1,173 @@
+{% extends 'produto/memoria/_base.html' %}
+{% block titulo %}Expositores da Feira de Barão: mapa, produtos e quem está hoje{% endblock %}
+{% block descricao %}Quem expõe na Feira de Barão, na Praça do Coco: mapa com a barraca de cada um, busca de produtos artesanais e o aviso de quem está lá hoje.{% endblock %}
+{% block canonical %}{{ url_for('public.feira', _external=True) }}{% endblock %}
+{% block head_extra %}
+{% if q or tipo or so_hoje %}<meta name="robots" content="noindex,follow">{% endif %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" media="print" onload="this.media='all'">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  .feira-pg{--verde:#2f6b4f;--hoje:#f2b705}
+  .feira-pg .lead{max-width:44rem;font-size:1.0625rem}
+  .feira-pg .hoje-aviso{margin:14px 0 0;padding:12px 16px;border-left:4px solid var(--hoje);background:var(--papel-claro);font-weight:600}
+  .feira-pg .hoje-aviso.vazio{border-left-color:var(--linha);font-weight:400;color:var(--taupe)}
+  .feira-pg form.busca{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 12px}
+  .feira-pg form.busca label{flex:1 1 100%;font-weight:700}
+  .feira-pg form.busca input[type=search]{flex:1 1 260px;min-height:48px;padding:0 14px;border:2px solid var(--tinta);border-radius:10px;background:var(--papel-claro);color:var(--tinta);font:inherit}
+  .feira-pg form.busca button{min-height:48px;padding:0 22px;border:0;border-radius:10px;background:var(--tomate);color:#fff;font:inherit;font-weight:700;cursor:pointer}
+  .feira-pg :focus-visible{outline:3px solid var(--tinta);outline-offset:3px}
+  .feira-pg .filtros{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 6px;padding:0;list-style:none}
+  .feira-pg .filtros a{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border:2px solid var(--linha);border-radius:10px;color:var(--tinta);font-weight:700;text-decoration:none}
+  .feira-pg .filtros a[aria-current=true]{background:var(--tinta);border-color:var(--tinta);color:var(--papel-claro)}
+  .feira-pg #mapa-feira{height:min(62vh,460px);min-height:320px;border:1.5px solid var(--linha);border-radius:14px;margin:14px 0 8px}
+  .feira-pg .legenda{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.9rem;color:var(--taupe)}
+  .feira-pg .legenda span{display:inline-flex;align-items:center;gap:6px}
+  .pino{display:block;width:22px;height:22px;border-radius:50%;border:3px solid #fff;box-sizing:border-box}
+  .pino-bar{background:var(--tomate)} .pino-artesao{background:var(--verde)}
+  .pino-hoje{width:30px;height:30px;border-color:var(--hoje)}
+  .leaflet-div-icon{background:transparent;border:0}
+  .feira-pg .lista{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;margin:16px 0 0;padding:0;list-style:none}
+  .feira-pg .exp{display:flex;flex-direction:column;height:100%;background:var(--papel-claro);border:1.5px solid var(--linha);border-radius:14px;overflow:hidden;color:var(--tinta);text-decoration:none}
+  .feira-pg .exp:hover{border-color:var(--tinta)}
+  .feira-pg .exp .foto{aspect-ratio:4/3;width:100%;object-fit:cover;background:var(--papel-escuro);display:flex;align-items:center;justify-content:center;font:700 3rem var(--font-cartaz);color:var(--taupe)}
+  .feira-pg .exp .corpo{display:flex;flex-direction:column;gap:6px;padding:14px 16px 16px}
+  .feira-pg .exp h3{margin:0;font-size:1.15rem;line-height:1.25}
+  .feira-pg .selos{display:flex;flex-wrap:wrap;gap:6px}
+  .feira-pg .selo{display:inline-block;padding:3px 9px;border-radius:6px;font-size:.78rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--tomate)}
+  .feira-pg .selo.artesao{background:var(--verde)}
+  .feira-pg .selo.hoje{background:var(--hoje);color:#2a1d00}
+  .feira-pg .meta{font-size:.92rem;color:var(--taupe)}
+  .feira-pg .vazio-bloco{padding:28px 20px;border:2px dashed var(--linha);border-radius:14px;text-align:center;color:var(--taupe)}
+  .feira-pg .prod .foto{aspect-ratio:1/1}
+  .feira-pg span.foto{aspect-ratio:16/7}
+  .feira-pg .leaflet-bar a{width:44px;height:44px;line-height:44px;font-size:24px}
+  @media (max-width:560px){.feira-pg .lista{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.feira-pg .exp .corpo{padding:10px 12px 12px}.feira-pg .exp h3{font-size:1rem}.feira-pg .exp .foto{font-size:2rem}}
+  @media (prefers-reduced-motion:reduce){.feira-pg *{transition:none!important}}
+</style>
+{% endblock %}
+{% block conteudo %}
+<div class="feira-pg">
+<span class="chapeu" style="display:block;margin-top:24px">{{ feira.local }} · {{ feira.bairro }}</span>
+<h1>Expositores da Feira</h1>
+<p class="lead">
+  {% for h in feira.horarios %}{{ h.dia }} das {{ h.abre }} às {{ h.fecha }}{{ ' e ' if not loop.last }}{% endfor %},
+  na {{ feira.local }}. Veja quem expõe, onde fica cada barraca e o que cada um faz.
+</p>
+{% if total_hoje %}
+<p class="hoje-aviso" role="status">{{ total_hoje }} {{ 'expositor avisou' if total_hoje == 1 else 'expositores avisaram' }} que {{ 'está' if total_hoje == 1 else 'estão' }} na feira hoje.</p>
+{% else %}
+<p class="hoje-aviso vazio" role="status">Ninguém avisou ainda que está na feira hoje.</p>
+{% endif %}
+
+<form class="busca" method="get" action="{{ url_for('public.feira') }}" role="search">
+  <label for="busca-q">Procure um produto ou um expositor</label>
+  <input id="busca-q" type="search" name="q" value="{{ q }}" maxlength="60" placeholder="defumado, geleia, crochê, joia…" autocomplete="off">
+  {% if tipo %}<input type="hidden" name="tipo" value="{{ tipo }}">{% endif %}
+  {% if so_hoje %}<input type="hidden" name="hoje" value="1">{% endif %}
+  <button type="submit">Buscar</button>
+</form>
+<nav aria-label="Filtrar expositores"><ul class="filtros">
+  <li><a href="{{ url_for('public.feira', q=q or None) }}" {% if not tipo and not so_hoje %}aria-current="true"{% endif %}>Todos</a></li>
+  <li><a href="{{ url_for('public.feira', q=q or None, tipo='artesao') }}" {% if tipo == 'artesao' %}aria-current="true"{% endif %}>Artesãos</a></li>
+  <li><a href="{{ url_for('public.feira', q=q or None, tipo='bar') }}" {% if tipo == 'bar' %}aria-current="true"{% endif %}>Bares</a></li>
+  <li><a href="{{ url_for('public.feira', q=q or None, hoje=1) }}" {% if so_hoje %}aria-current="true"{% endif %}>Na feira hoje</a></li>
+</ul></nav>
+
+{% if q %}
+<h2>Produtos com “{{ q }}”</h2>
+{% if produtos %}
+<ul class="lista">
+  {% for p in produtos %}
+  <li><a class="exp prod" href="{{ p.url }}">
+    <img class="foto" src="{{ p.img }}" alt="{{ p.nome }}" loading="lazy" width="480" height="480">
+    <span class="corpo">
+      <h3>{{ p.nome }}</h3>
+      <span class="meta">{{ p.expositor }}{% if p.categoria %} · {{ p.categoria }}{% endif %}</span>
+      {% if p.preco %}<strong>{{ p.preco|moeda_br }}</strong>{% endif %}
+      {% if p.sob_encomenda %}<span class="meta">Sob encomenda</span>{% endif %}
+    </span>
+  </a></li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="vazio-bloco">Nenhum produto com “{{ q }}” por enquanto. Tente uma palavra mais curta ou veja os expositores abaixo.</p>
+{% endif %}
+{% endif %}
+
+<h2>O mapa da feira</h2>
+{% if pontos %}
+<div id="mapa-feira" role="region" aria-label="Mapa com a barraca de cada expositor na Feira de Barão"></div>
+<div class="legenda" aria-hidden="true">
+  <span><i class="pino pino-artesao" style="display:inline-block;width:14px;height:14px;border-width:2px"></i> Artesão</span>
+  <span><i class="pino pino-bar" style="display:inline-block;width:14px;height:14px;border-width:2px"></i> Bar</span>
+  <span><i class="pino pino-artesao pino-hoje" style="display:inline-block;width:18px;height:18px;border-width:3px"></i> Na feira hoje</span>
+</div>
+<p class="meta">A lista logo abaixo traz as mesmas informações em texto.</p>
+{% else %}
+<p class="vazio-bloco">Os pontos das barracas estão sendo marcados no mapa. Enquanto isso, veja quem expõe na lista.</p>
+{% endif %}
+
+<h2>{{ expositores|length }} {{ 'expositor' if expositores|length == 1 else 'expositores' }}</h2>
+{% if expositores %}
+<ul class="lista">
+  {% for e in expositores %}
+  <li><a class="exp" href="{{ e.url }}">
+    {% if e.foto %}<img class="foto" src="{{ e.foto }}" alt="" loading="lazy" width="480" height="360">
+    {% else %}<span class="foto" aria-hidden="true">{{ e.nome[:1]|upper }}</span>{% endif %}
+    <span class="corpo">
+      <span class="selos">
+        <span class="selo {{ e.tipo }}">{{ e.tipo_rotulo }}</span>
+        {% if e.hoje %}<span class="selo hoje">Na feira hoje</span>{% endif %}
+      </span>
+      <h3>{{ e.nome }}</h3>
+      {% if e.descritor %}<span class="meta">{{ e.descritor }}</span>{% endif %}
+      {% if e.categorias %}<span class="meta">{{ e.categorias|join(' · ') }}</span>{% endif %}
+      {% if e.ponto %}<span class="meta"><strong>Onde:</strong> {{ e.ponto }}</span>{% endif %}
+    </span>
+  </a></li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="vazio-bloco">
+  {% if so_hoje %}Ninguém avisou que está na feira hoje.{% elif q %}Nenhum expositor com “{{ q }}”.{% else %}Ainda não há expositores cadastrados nesta lista.{% endif %}
+  <a href="{{ url_for('public.feira') }}">Ver todos</a>
+</p>
+{% endif %}
+</div>
+{% endblock %}
+{% block js %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"CollectionPage","name":"Expositores da Feira de Barão",
+ "url":{{ url_for('public.feira', _external=True)|tojson }},"inLanguage":"pt-BR",
+ "about":{"@type":"Place","name":{{ feira.local|tojson }},"address":{"@type":"PostalAddress","addressLocality":"Campinas","addressRegion":"SP","addressCountry":"BR"}},
+ "mainEntity":{"@type":"ItemList","itemListElement":[{% for e in expositores[:60] %}{"@type":"ListItem","position":{{ loop.index }},"name":{{ e.nome|tojson }},"url":{{ e.url|tojson }}}{{ ',' if not loop.last }}{% endfor %}]}}
+</script>
+{% if pontos %}
+<script>
+  window.addEventListener('DOMContentLoaded', function () {
+    var pontos = {{ pontos|tojson }};
+    var centro = {{ centro|tojson }};
+    function montar() {
+      if (typeof L === 'undefined') { return setTimeout(montar, 150); }
+      var mapa = L.map('mapa-feira', {scrollWheelZoom: false}).setView(centro, 17);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '© OpenStreetMap', maxZoom: 19}).addTo(mapa);
+      var limites = [];
+      pontos.forEach(function (p) {
+        var icone = L.divIcon({className: '', html: '<span class="pino pino-' + p.tipo + (p.hoje ? ' pino-hoje' : '') + '"></span>',
+                               iconSize: p.hoje ? [30, 30] : [22, 22]});
+        var m = L.marker([p.lat, p.lng], {icon: icone, title: p.nome, alt: p.nome}).addTo(mapa);
+        var caixa = document.createElement('div');
+        var a = document.createElement('a'); a.href = p.url; a.textContent = p.nome; a.style.fontWeight = '700';
+        caixa.appendChild(a);
+        if (p.hoje) { var h = document.createElement('div'); h.textContent = 'Na feira hoje'; caixa.appendChild(h); }
+        if (p.ponto) { var o = document.createElement('div'); o.textContent = p.ponto; caixa.appendChild(o); }
+        m.bindPopup(caixa); limites.push([p.lat, p.lng]);
+      });
+      if (limites.length > 1) { mapa.fitBounds(limites, {padding: [40, 40], maxZoom: 18}); }
+      else if (limites.length === 1) { mapa.setView(limites[0], 18); }
+    }
+    montar();
+  });
+</script>
+{% endif %}
+{% endblock %}

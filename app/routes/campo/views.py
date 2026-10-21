@@ -25,6 +25,7 @@ from app.routes.campo import bp
 from app.utils import blob, demos, dominios
 from app.utils.copy_site import opcoes_de_vibe, vibe_valida
 from app.utils.demos import LeadInvalido, converter_demo
+from app.utils.feira import hoje_br
 from app.utils.formatacao_br import ler_moeda
 from app.utils.modelos import (
     MODELO_PADRAO, MODELOS, modelo_valido, opcoes_de_modelo,
@@ -181,6 +182,7 @@ def editar(slug):
         # Sugestão pronta: em campo ninguém inventa senha boa de cabeça.
         senha_sugerida=secrets.token_urlsafe(9),
         plano=plano, plano_rotulo=rotulo(plano), precos=precos(),
+        na_feira_hoje=(cfg.na_feira_em == hoje_br()),
     )
 
 
@@ -195,6 +197,39 @@ def basico(slug):
         rest.nome = cfg.nome
     db.session.commit()
     flash('Salvo.', 'success')
+    return redirect(url_for('campo.editar', slug=slug))
+
+
+@bp.post('/<slug>/ponto')
+def ponto(slug):
+    """Grava o ponto da barraca na Feira: referência em texto e, se vier, a
+    coordenada do GPS do celular do operador (parado na barraca)."""
+    from app.utils.feira import coordenada_valida
+
+    rest = _bar(slug)
+    cfg = _config(rest)
+    cfg.ponto_na_feira = (request.form.get('ponto_na_feira') or '').strip()[:120] or None
+    if request.form.get('lat') or request.form.get('lng'):
+        coord = coordenada_valida(request.form.get('lat'), request.form.get('lng'))
+        if coord is None:
+            flash('Localização fora de Campinas. Confira o GPS e tente de novo '
+                  'na barraca.', 'danger')
+            return redirect(url_for('campo.editar', slug=slug))
+        cfg.lat, cfg.lng = coord
+    db.session.commit()
+    flash('Ponto na feira salvo.', 'success')
+    return redirect(url_for('campo.editar', slug=slug))
+
+
+@bp.post('/<slug>/na-feira')
+def na_feira(slug):
+    from app.utils.feira import alternar_na_feira
+
+    rest = _bar(slug)
+    ligado = alternar_na_feira(_config(rest))
+    db.session.commit()
+    flash('Marcado: na feira hoje.' if ligado else 'Desmarcado: não está na feira hoje.',
+          'success')
     return redirect(url_for('campo.editar', slug=slug))
 
 

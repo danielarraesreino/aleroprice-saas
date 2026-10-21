@@ -802,6 +802,12 @@ def dados_estruturados(rest, site, dishes, reviews, eventos, url_canonica,
             restaurante['areaServed'] = ', '.join(
                 p for p in (endereco['addressLocality'], endereco.get('addressRegion')) if p)
 
+    # Coordenada do GPS (Modo Campo), só quando existe: o Google passa a plotar o
+    # negócio no ponto exato da barraca em vez de geocodificar o texto.
+    lat, lng = _campo(cfg, 'lat'), _campo(cfg, 'lng')
+    if lat is not None and lng is not None:
+        restaurante['geo'] = {'@type': 'GeoCoordinates', 'latitude': lat, 'longitude': lng}
+
     cozinha = COZINHA_POR_VIBE.get(vibe)
     if cozinha:
         restaurante['servesCuisine'] = cozinha
