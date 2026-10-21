@@ -63,17 +63,21 @@ h1{font-size:clamp(40px,8vw,84px);line-height:1.02;font-weight:700;margin-bottom
 section{padding:72px 0}
 section h2{font-size:clamp(28px,5vw,44px);line-height:1.1;margin-bottom:10px}
 .lead2{color:var(--cream-dim);max-width:620px;margin-bottom:32px}
-.cat{font-family:system-ui,sans-serif;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);margin:36px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--wood)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px;align-items:start}
-.card{background:var(--ink-2);border:1px solid var(--wood);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column}
+.cat{font-family:system-ui,sans-serif;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);margin:64px 0 20px;padding-bottom:10px;border-bottom:1px solid var(--wood)}
+.cat:first-of-type{margin-top:40px}
+/* Flex centralizado (e não grid): a última linha incompleta fica no meio, sem buraco à direita. */
+.grid{display:flex;flex-wrap:wrap;justify-content:center;gap:16px}
+.card{flex:0 1 calc((100% - 48px)/4);min-width:0;background:var(--ink-2);border:1px solid var(--wood);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column}
 .card.destaque{border-color:var(--amber)}
 .card .foto{aspect-ratio:1;background:var(--wood);object-fit:cover;width:100%;display:block}
-.card .corpo{padding:16px 18px 18px;display:flex;flex-direction:column;gap:8px;flex:1}
-.card h3{font-size:18px;line-height:1.25}
-.card p{color:var(--cream-dim);font-size:15px;flex:1}
-.preco{font-weight:700;color:var(--amber);font-size:17px}
+.card .corpo{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px;flex:1}
+.card h3{font-size:16px;line-height:1.25}
+.card p{color:var(--cream-dim);font-size:14px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.preco{font-weight:700;color:var(--amber);font-size:16px}
 .tag{font-size:12px;color:var(--cream-dim);letter-spacing:.04em}
-.card .btn{min-height:42px;font-size:14px;margin-top:6px}
+.card .btn{min-height:42px;font-size:14px;margin-top:auto}
+.card .corpo>.btn:first-of-type{margin-top:auto}
+@media (max-width:980px){.card{flex-basis:calc((100% - 32px)/3)}}
 .equipe{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px;margin-top:20px}
 .equipe div{background:var(--ink-2);border:1px solid var(--wood);border-radius:var(--radius);padding:18px}
 .galeria{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
@@ -85,7 +89,7 @@ section h2{font-size:clamp(28px,5vw,44px);line-height:1.1;margin-bottom:10px}
 .contato ul{list-style:none;padding:0;margin:0 0 24px;display:grid;gap:8px}
 footer{padding:28px 0 96px;text-align:center;color:var(--cream-dim);font-size:14px;font-family:system-ui,sans-serif}
 .wa{position:fixed;right:16px;bottom:calc(16px + var(--dock-h,0px));z-index:30;width:56px;height:56px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.35);text-decoration:none;font-size:26px}
-@media (max-width:640px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card .corpo{padding:12px}.card h3{font-size:15px}.card p{font-size:13px}.card .btn{min-height:40px;font-size:13px;padding:0 12px}nav .links{display:none}.hero{min-height:70vh}section{padding:52px 0}}
+@media (max-width:640px){.grid{gap:12px}.card{flex-basis:calc((100% - 12px)/2)}.card .corpo{padding:12px}.card h3{font-size:15px}.card p{font-size:13px}.card .btn{min-height:40px;font-size:13px;padding:0 10px}.cat{margin:48px 0 16px}nav .links{display:none}.hero{min-height:70vh}section{padding:52px 0}}
 </style>
 {% if tema_css %}<style>{{ tema_css|safe }}</style>{% endif %}
 </head>
@@ -126,7 +130,7 @@ footer{padding:28px 0 96px;text-align:center;color:var(--cream-dim);font-size:14
   {% for cat in cats %}
     {% if cats|length > 1 %}<h3 class="cat">{{ cat }}</h3>{% endif %}
     <div class="grid">
-    {% for p in produtos if (p.categoria or 'Outros') == cat %}
+    {% for p in produtos|sort(attribute='destaque', reverse=true) if (p.categoria or 'Outros') == cat %}
       <article class="card{% if p.destaque %} destaque{% endif %}">
         {% if p.img %}<img class="foto" src="{{ p.img }}" alt="{{ p.nome }}" loading="lazy" decoding="async">{% endif %}
         <div class="corpo">

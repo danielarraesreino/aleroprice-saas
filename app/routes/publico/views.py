@@ -1108,12 +1108,18 @@ def montar_conteudo(rest):
 
     # Produtos do hotsite de artesão. Bar não paga a query: só lê a tabela
     # quando o tenant é artesão.
+    #
+    # Só vai pra vitrine produto COM FOTO: card sem imagem não vende charcutaria
+    # e deixa a grade com buracos. O produto sem foto continua no painel
+    # (/conteudo/produtos) e aparece sozinho assim que ganhar a imagem. Filtra
+    # aqui, e não no template, para o JSON-LD também não anunciar o que a
+    # página não mostra.
     produtos = []
     if tipo_do(rest) == 'artesao':
         produtos = [{'nome': p.nome, 'descricao': p.descricao, 'img': _img(p.imagem),
                      'categoria': p.categoria, 'preco': p.preco,
                      'sob_encomenda': bool(p.sob_encomenda), 'destaque': bool(p.destaque)}
-                    for p in rows(ProdutoSite)]
+                    for p in rows(ProdutoSite) if p.imagem]
 
     return {'dishes': dishes, 'reviews': reviews, 'team': team, 'gallery': gallery,
             'produtos': produtos}

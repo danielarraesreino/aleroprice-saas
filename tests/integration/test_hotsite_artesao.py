@@ -5,7 +5,7 @@ import re
 from app.extensions import db
 from app.models.modelo_restaurante import Restaurante
 from app.models.modelo_sitecontent import ProdutoSite
-from app.scripts.seed_berga import SLUG, DOMINIO, PRODUTOS, semear
+from app.scripts.seed_berga import SLUG, DOMINIO, IMAGENS, PRODUTOS, semear
 
 
 def _grafo(corpo):
@@ -44,7 +44,7 @@ def test_json_ld_tem_product_e_nao_menu(client, session):
     grafo = _grafo(client.get(f'/bar/{SLUG}').get_data(as_text=True))
     tipos = [n['@type'] for n in grafo]
     assert 'Store' in tipos and 'Menu' not in tipos
-    assert tipos.count('Product') == len(PRODUTOS)
+    assert tipos.count('Product') == len(IMAGENS)      # só os que têm foto
     assert all('offers' not in n for n in grafo if n['@type'] == 'Product')  # sem preço
 
 
@@ -113,3 +113,27 @@ def test_logo_vai_no_menu_no_icone_e_como_imagem_de_compartilhamento(client, ses
     db.session.commit()
     corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
     assert re.search(r'og:image" content="https?://[^"]+img/berga/logo\.jpg', corpo)
+
+
+def test_produto_sem_foto_fica_fora_da_vitrine_e_do_schema(client, session):
+    rest, _ = semear(no_ar=True)
+    corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    sem_foto = [n for n, *_ in PRODUTOS if n not in IMAGENS]
+    assert sem_foto                                    # o seed tem produtos sem foto
+    for nome in sem_foto:
+        assert nome not in corpo, nome
+    assert all(n.get('name') not in sem_foto for n in _grafo(corpo))
+    # continua no banco/painel e aparece quando ganhar foto
+    p = ProdutoSite.query.filter_by(restaurant_id=rest.id, nome='Pastrami de Cupim').first()
+    assert p is not None
+    p.imagem = 'img/berga/bacon.jpg'
+    db.session.commit()
+    assert 'Pastrami de Cupim' in client.get(f'/bar/{SLUG}').get_data(as_text=True)
+
+
+def test_categoria_sem_nenhum_produto_com_foto_some(client, session):
+    rest, _ = semear(no_ar=True)
+    ProdutoSite.query.filter_by(restaurant_id=rest.id, categoria='Kits').update({'imagem': None})
+    db.session.commit()
+    corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    assert '>Kits</h3>' not in corpo and '>Defumados</h3>' in corpo
