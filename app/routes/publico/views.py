@@ -414,7 +414,7 @@ def feira():
     so_hoje = request.args.get('hoje') == '1'
 
     lista = fe.expositores(tipo=tipo, so_hoje=so_hoje, q=q)
-    pontos = [{'nome': e['nome'], 'tipo': e['tipo'], 'url': e['url'], 'lat': e['lat'],
+    pontos = [{'slug': e['slug'], 'nome': e['nome'], 'tipo': e['tipo'], 'url': e['url'], 'lat': e['lat'],
                'lng': e['lng'], 'ponto': e['ponto'], 'hoje': e['hoje']}
               for e in lista if e['lat'] is not None and e['lng'] is not None]
     resp = make_response(render_template(

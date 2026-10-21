@@ -1,0 +1,81 @@
+/* /feira: lista de expositores + mapa. Herda os tokens de feira.css (papel, tinta, tomate).
+   Camadas por troca de tom, sem filete de caixa; um campo cheio por vez (o aviso de hoje). */
+.fp{--verde:#2f6b4f;--hoje:#f2b705;--topo-h:64px}
+.fp h1{margin-top:28px}
+.fp-lead{max-width:44rem;font-size:1.0625rem;color:var(--taupe)}
+.fp :focus-visible{outline:3px solid var(--tinta);outline-offset:3px}
+.fp-hoje{display:inline-block;margin:var(--esp,16px) 0 0;padding:10px 16px;border-radius:8px;background:var(--papel-escuro);color:var(--tinta);font-weight:600}
+.fp-hoje.tem{background:var(--hoje);color:#2a1d00}
+
+/* barra de busca e filtros, fixa ao rolar */
+.fp-barra{position:sticky;top:var(--topo-h);z-index:20;margin:20px -18px 0;padding:12px 18px;background:var(--papel)}
+.fp-busca{display:flex;gap:8px}
+.fp-busca label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.fp-busca input[type=search]{flex:1 1 auto;min-width:0;min-height:48px;padding:0 14px;border:0;border-radius:8px;background:var(--papel-escuro);color:var(--tinta);font:inherit}
+.fp-busca input[type=search]::placeholder{color:var(--taupe)}
+.fp-busca button{flex:none;min-height:48px;padding:0 20px;border:0;border-radius:8px;background:var(--tomate);color:#fff;font:inherit;font-weight:700;cursor:pointer}
+.fp-busca button:hover{background:var(--tinta)}
+.fp-filtros{display:flex;gap:8px;margin:10px 0 0;padding:0;list-style:none;overflow-x:auto;scrollbar-width:none}
+.fp-filtros::-webkit-scrollbar{display:none}
+.fp-filtros a{display:inline-flex;align-items:center;flex:none;white-space:nowrap;min-height:44px;padding:0 16px;border-radius:22px;background:var(--papel-escuro);color:var(--tinta);font-weight:700;text-decoration:none}
+.fp-filtros a:hover{background:var(--papel-claro)}
+.fp-filtros a[aria-current=true]{background:var(--tinta);color:var(--papel-claro)}
+
+.fp h2{margin:32px 0 14px;font-size:clamp(1.5rem,4vw,2rem)}
+.fp-vazio{padding:24px 20px;border-radius:12px;background:var(--papel-escuro);color:var(--taupe)}
+
+/* corpo: no celular, mapa em cima e lista embaixo; no desktop, lado a lado */
+.fp-corpo{display:grid;gap:8px}
+.fp-mapa{order:-1}
+#mapa-feira{height:min(46vh,340px);min-height:260px;border-radius:12px;background:var(--papel-escuro);overflow:hidden}
+.fp-legenda{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:8px;font-size:.9rem;color:var(--taupe)}
+.fp-legenda span{display:inline-flex;align-items:center;gap:6px}
+.pino{display:block;width:22px;height:22px;border-radius:50%;border:3px solid #fff;box-sizing:border-box;transition:transform .15s}
+.pino-bar{background:var(--tomate)}.pino-artesao{background:var(--verde)}
+.pino-hoje{width:30px;height:30px;border-color:var(--hoje)}
+.pino-sel{transform:scale(1.35)}
+.leaflet-div-icon{background:transparent;border:0}
+.fp .leaflet-bar a{width:44px;height:44px;line-height:44px;font-size:24px}
+.fp-leg-pino{display:inline-block;width:14px;height:14px;border-width:2px}
+.fp-leg-pino.hoje{width:18px;height:18px;border-width:3px}
+
+/* cartões da lista */
+.fp-lista ul{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.fp-card{position:relative;display:grid;grid-template-columns:96px 1fr;gap:14px;padding:12px;border-radius:12px;background:var(--papel-claro);color:var(--tinta);transition:background-color .15s}
+.fp-card:hover{background:var(--cartao)}
+.fp-card.hoje{background:color-mix(in srgb,var(--hoje) 22%,var(--papel-claro))}
+.fp-card.destacado{background:var(--tinta);color:var(--papel-claro)}
+.fp-card.destacado .fp-meta{color:var(--papel-escuro)}
+.fp-foto{width:96px;height:96px;border-radius:8px;object-fit:cover;background:var(--papel-escuro);display:flex;align-items:center;justify-content:center;font:400 2.2rem var(--font-cartaz);color:var(--taupe)}
+.fp-info{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fp-selos{display:flex;flex-wrap:wrap;gap:6px}
+.fp-selo{display:inline-block;padding:2px 9px;border-radius:6px;font-size:.8125rem;font-weight:700;color:#fff;background:var(--tomate)}
+.fp-selo.artesao{background:var(--verde)}
+.fp-selo.hoje{background:var(--hoje);color:#2a1d00}
+.fp-card h3{margin:0;font:700 1.1rem/1.2 var(--font-heading)}
+.fp-card h3 a{color:inherit;text-decoration:none}
+.fp-card h3 a::after{content:"";position:absolute;inset:0;border-radius:12px}
+.fp-meta{font-size:.9375rem;line-height:1.4;color:var(--taupe)}
+.fp-ver{position:relative;z-index:1;align-self:flex-start;min-height:44px;margin-top:2px;padding:0 4px;border:0;background:transparent;color:var(--tomate);font:inherit;font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.fp-card.destacado .fp-ver{color:var(--ambar)}
+
+/* produtos achados na busca */
+.fp-prods{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0;padding:0;list-style:none}
+.fp-prod{display:flex;flex-direction:column;height:100%;border-radius:12px;overflow:hidden;background:var(--papel-claro);color:var(--tinta);text-decoration:none}
+.fp-prod:hover{background:var(--cartao)}
+.fp-prod img{width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;background:var(--papel-escuro)}
+.fp-prod .fp-info{padding:10px 12px 12px}
+.fp-prod h3{margin:0;font:700 1rem/1.2 var(--font-heading)}
+
+@media (min-width:720px){
+  .fp-barra{margin-inline:0;padding-inline:0}
+  .fp-prods{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+}
+@media (min-width:960px){
+  .fp-corpo{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:28px;align-items:start}
+  .fp-mapa{order:0;position:sticky;top:calc(var(--topo-h) + 130px)}
+  #mapa-feira{height:calc(100vh - var(--topo-h) - 190px);max-height:680px;min-height:420px}
+  .fp-lista h2{margin-top:0}
+}
+@media (prefers-reduced-motion:reduce){.fp *{transition:none!important}}
+.memoria:has(.fp){max-width:1180px}
