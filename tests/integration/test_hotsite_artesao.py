@@ -167,3 +167,29 @@ def test_acessibilidade_basica_da_vitrine(client, session):
     assert 'prefers-reduced-motion' in corpo
     assert 'class="cta-bar"' in corpo           # barra de WhatsApp do celular
     assert 'id="produtos"' in corpo             # âncora usada pelo redirect de /kits
+
+
+def test_cartaz_vertical_vai_inteiro_e_foto_normal_nao(client, session):
+    semear(no_ar=True)
+    corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    cartazes = re.findall(r'<article class="tile[^"]*\bcartaz\b[^"]*" data-nome="([^"]+)"', corpo)
+    assert set(cartazes) == {'Picanha Suína', 'Lombo Italiano Defumado',
+                             'Presunto Defumado Artesanal', 'Bacon Defumado'}
+    assert 'data-nome="Tender"' in corpo and 'cartaz" data-nome="Tender"' not in corpo
+
+
+def test_montar_encomenda_tem_botao_por_produto_e_folha_unica(client, session):
+    semear(no_ar=True)
+    corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    assert corpo.count('class="btn add"') == len(IMAGENS)       # um por produto com foto
+    assert 'class="btn pedir-link"' in corpo                     # sem JS o link por produto segue valendo
+    assert '<dialog class="pedido"' in corpo and 'id="pedido-enviar"' in corpo
+    assert 'Olá! Quero encomendar:' in corpo                     # texto da mensagem única
+
+
+def test_site_sem_whatsapp_nao_oferece_encomenda(client, session):
+    rest, _ = semear(no_ar=True)
+    rest.site_config.whatsapp = None
+    db.session.commit()
+    corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    assert 'class="btn add"' not in corpo and '<dialog' not in corpo and 'id="como"' not in corpo

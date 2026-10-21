@@ -2,6 +2,8 @@ import os
 import urllib.parse
 import urllib.request
 from datetime import datetime, date, timedelta
+from functools import lru_cache
+from pathlib import Path
 
 from flask import (
     Blueprint, render_template, request, jsonify, current_app, abort,
@@ -1103,6 +1105,24 @@ def _img(path):
     return url_for('static', filename=path)
 
 
+@lru_cache(maxsize=256)
+def _proporcao(path):
+    """largura/altura de uma imagem local em static (None se remota ou ilegível).
+
+    O template usa para mostrar inteiro o cartaz vertical (9:16), que cortado como
+    foto de produto perde o nome e a legenda.
+    """
+    if not path or path.startswith(('http://', 'https://')):
+        return None
+    try:
+        from PIL import Image
+        arquivo = Path(current_app.static_folder) / path
+        with Image.open(arquivo) as im:
+            return round(im.width / im.height, 3)
+    except Exception:
+        return None
+
+
 def montar_conteudo(rest):
     """Listas das seções (cardápio, avaliações, equipe, galeria): do tenant ou padrão."""
     from app.models.modelo_sitecontent import DishCard, Review, TeamMember, GalleryItem, ProdutoSite
@@ -1145,7 +1165,8 @@ def montar_conteudo(rest):
     if tipo_do(rest) == 'artesao':
         produtos = [{'nome': p.nome, 'descricao': p.descricao, 'img': _img(p.imagem),
                      'categoria': p.categoria, 'preco': p.preco,
-                     'sob_encomenda': bool(p.sob_encomenda), 'destaque': bool(p.destaque)}
+                     'sob_encomenda': bool(p.sob_encomenda), 'destaque': bool(p.destaque),
+                     'ratio': _proporcao(p.imagem)}
                     for p in rows(ProdutoSite) if p.imagem]
 
     return {'dishes': dishes, 'reviews': reviews, 'team': team, 'gallery': gallery,
