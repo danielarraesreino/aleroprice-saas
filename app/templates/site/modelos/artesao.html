@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 {% set descritor = site.descritor or site.cidade_uf or 'Produtos artesanais' %}
 {% set canonica = url_canonica or request.base_url %}
-{# Foto de capa: caminho em static ou URL absoluta (Vercel Blob). #}
+{# Capa e logo: caminho em static ou URL absoluta (Vercel Blob). #}
 {% set hero = (site.hero_foto if site.hero_foto.startswith('http') else url_for('static', filename=site.hero_foto)) if site.hero_foto else None %}
 {% set logo = (site.logo if site.logo.startswith('http') else url_for('static', filename=site.logo)) if site.logo else None %}
 {% set capa_og = hero or logo %}
@@ -23,187 +23,347 @@
 <meta property="og:url" content="{{ canonica }}">
 {% if og_img %}<meta property="og:image" content="{{ og_img }}">{% endif %}
 <meta name="twitter:card" content="{{ 'summary_large_image' if og_img else 'summary' }}">
-<meta name="theme-color" content="{{ tema_cor or '#1c1410' }}">
+<meta name="theme-color" content="{{ tema_cor or '#15100d' }}">
 {% if logo %}<link rel="icon" type="image/jpeg" href="{{ logo }}">{% else %}<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">{% endif %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
 <style>
-:root{--ink:#1c1410;--ink-2:#261b15;--wood:#3a2a20;--cream:#f4ebdd;--cream-dim:#bfae98;--amber:#d98a4a;--ember:#b5472f;--radius:14px}
-@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--ink:#faf5ec;--ink-2:#f0e7d8;--wood:#e2d3bd;--cream:#2a1d14;--cream-dim:#6b5846;--amber:#a85a1f;--ember:#8f2f1c}}
-:root[data-theme="light"]{--ink:#faf5ec;--ink-2:#f0e7d8;--wood:#e2d3bd;--cream:#2a1d14;--cream-dim:#6b5846;--amber:#a85a1f;--ember:#8f2f1c}
-*{box-sizing:border-box;margin:0}
-html{scroll-behavior:smooth}
-body{background:var(--ink);color:var(--cream);font:17px/1.55 Georgia,'Times New Roman',serif;-webkit-font-smoothing:antialiased}
-h1,h2,h3,.btn,nav,.eyebrow,.preco,.tag{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+/* Direção: vitrine de açougue/charcutaria. Peças fotografadas em quadro cheio,
+   letra condensada de placa, vermelho da marca (a coroa de louros do logo) como
+   única cor de ação. Sem sombra, sem degradê (exceto o véu da foto), sem canto
+   arredondado grande. Nomes das variáveis seguem os presets de tema do site. */
+:root{
+  /* cor */
+  --ink:#15100d;        /* fundo */
+  --ink-2:#1f1814;      /* superfície do card */
+  --wood:#35291f;       /* linhas e placeholders */
+  --cream:#f5ede2;      /* texto */
+  --cream-dim:#bdaf9f;  /* texto secundário */
+  --amber:#f0715f;      /* acento em texto (vermelho claro, contraste AA no escuro) */
+  --ember:#c0262d;      /* ação: botões e blocos de destaque */
+  --on-ember:#ffffff;
+  /* tipo */
+  --font-display:'Barlow Condensed','Arial Narrow','Helvetica Neue',Arial,sans-serif;
+  --font-body:'Barlow','Helvetica Neue',Arial,sans-serif;
+  /* espaçamento: escala de 4 */
+  --s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;--s7:48px;--s8:72px;--s9:104px;
+  --r:4px;
+  --nav-h:64px;
+}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
+  --ink:#f6f0e6;--ink-2:#ece3d5;--wood:#d6c9b6;--cream:#1d1511;--cream-dim:#5b4d41;--amber:#a51f27;--ember:#b3202a}}
+:root[data-theme="light"]{--ink:#f6f0e6;--ink-2:#ece3d5;--wood:#d6c9b6;--cream:#1d1511;--cream-dim:#5b4d41;--amber:#a51f27;--ember:#b3202a}
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--nav-h) + 64px)}
+body{margin:0;background:var(--ink);color:var(--cream);font:400 1.0625rem/1.55 var(--font-body);-webkit-font-smoothing:antialiased;padding-bottom:84px}
+img{display:block;max-width:100%}
+h1,h2,h3,h4,p,ul,figure{margin:0}
+ul{padding:0;list-style:none}
 a{color:inherit}
-em{color:var(--amber);font-style:italic}
-.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
-nav{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--ink) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--wood)}
-nav .wrap{display:flex;align-items:center;justify-content:space-between;min-height:56px;gap:16px}
-nav .logo{display:inline-flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.06em;text-decoration:none;text-transform:uppercase;font-size:15px}
-nav .logo img{width:36px;height:36px;border-radius:50%;object-fit:cover}
-nav .links{display:flex;gap:18px;font-size:14px}
-nav .links a{text-decoration:none;color:var(--cream-dim);padding:12px 0}
-nav .links a:hover{color:var(--cream)}
-.btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 22px;border-radius:999px;font-weight:600;font-size:15px;text-decoration:none;border:1px solid var(--amber);cursor:pointer}
-.btn-primary{background:var(--amber);color:#1c1410}
-.btn-ghost{color:var(--cream)}
-.hero{position:relative;min-height:78vh;display:flex;align-items:flex-end;background:linear-gradient(135deg,var(--wood),var(--ink-2));overflow:hidden}
-.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,var(--ink) 4%,transparent 65%)}
-/* Sobre foto o texto é sempre claro, em qualquer tema: véu escuro garante contraste. */
-.hero.com-foto::after{background:linear-gradient(to top,rgba(20,12,8,.92) 8%,rgba(20,12,8,.55) 55%,rgba(20,12,8,.35))}
-.hero.com-foto h1,.hero.com-foto p.lead{color:#fbf3e8}
-.hero.com-foto .eyebrow{color:#f0b27a}
-.hero.com-foto em{color:#f0b27a}
-.hero.com-foto .btn-ghost{color:#fbf3e8;border-color:#fbf3e8}
-.hero .wrap{position:relative;z-index:1;padding-bottom:48px;padding-top:80px}
-.eyebrow{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--amber);margin-bottom:12px}
-h1{font-size:clamp(40px,8vw,84px);line-height:1.02;font-weight:700;margin-bottom:16px}
-.hero p.lead{max-width:560px;color:var(--cream-dim);font-size:19px;margin-bottom:24px}
-.acoes{display:flex;gap:12px;flex-wrap:wrap}
-section{padding:72px 0}
-section h2{font-size:clamp(28px,5vw,44px);line-height:1.1;margin-bottom:10px}
-.lead2{color:var(--cream-dim);max-width:620px;margin-bottom:32px}
-.cat{font-family:system-ui,sans-serif;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);margin:64px 0 20px;padding-bottom:10px;border-bottom:1px solid var(--wood)}
-.cat:first-of-type{margin-top:40px}
-/* Flex centralizado (e não grid): a última linha incompleta fica no meio, sem buraco à direita. */
-.grid{display:flex;flex-wrap:wrap;justify-content:center;gap:16px}
-.card{flex:0 1 calc((100% - 48px)/4);min-width:0;background:var(--ink-2);border:1px solid var(--wood);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column}
-.card.destaque{border-color:var(--amber)}
-.card .foto{aspect-ratio:1;background:var(--wood);object-fit:cover;width:100%;display:block}
-.card .corpo{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px;flex:1}
-.card h3{font-size:16px;line-height:1.25}
-.card p{color:var(--cream-dim);font-size:14px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.preco{font-weight:700;color:var(--amber);font-size:16px}
-.tag{font-size:12px;color:var(--cream-dim);letter-spacing:.04em}
-.card .btn{min-height:42px;font-size:14px;margin-top:auto}
-.card .corpo>.btn:first-of-type{margin-top:auto}
-@media (max-width:980px){.card{flex-basis:calc((100% - 32px)/3)}}
-.equipe{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px;margin-top:20px}
-.equipe div{background:var(--ink-2);border:1px solid var(--wood);border-radius:var(--radius);padding:18px}
-.galeria{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
-.galeria img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;display:block}
-.aval{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
-.aval blockquote{background:var(--ink-2);border-left:3px solid var(--amber);padding:16px 18px;border-radius:8px;font-style:italic}
-.aval cite{display:block;margin-top:8px;font-style:normal;font-family:system-ui,sans-serif;font-size:14px;color:var(--cream-dim)}
-.contato{background:var(--ink-2);border-top:1px solid var(--wood)}
-.contato ul{list-style:none;padding:0;margin:0 0 24px;display:grid;gap:8px}
-footer{padding:28px 0 96px;text-align:center;color:var(--cream-dim);font-size:14px;font-family:system-ui,sans-serif}
-.wa{position:fixed;right:16px;bottom:calc(16px + var(--dock-h,0px));z-index:30;width:56px;height:56px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.35);text-decoration:none;font-size:26px}
-@media (max-width:640px){.grid{gap:12px}.card{flex-basis:calc((100% - 12px)/2)}.card .corpo{padding:12px}.card h3{font-size:15px}.card p{font-size:13px}.card .btn{min-height:40px;font-size:13px;padding:0 10px}.cat{margin:48px 0 16px}nav .links{display:none}.hero{min-height:70vh}section{padding:52px 0}}
+[hidden]{display:none!important}
+.wrap{width:100%;max-width:1200px;margin-inline:auto;padding-inline:var(--s4)}
+:focus-visible{outline:3px solid var(--amber);outline-offset:3px}
+.skip{position:absolute;left:var(--s4);top:-80px;z-index:100;background:var(--ember);color:var(--on-ember,#fff);padding:var(--s3) var(--s4);font-weight:600;text-decoration:none}
+.skip:focus{top:var(--s3)}
+
+/* ---------- tipo ---------- */
+.eyebrow{font:600 .8125rem/1.2 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--amber)}
+.display{font-family:var(--font-display);font-weight:700;text-transform:uppercase;line-height:.92;letter-spacing:.005em}
+h2.display{font-size:clamp(2.5rem,8vw,4.75rem)}
+.lead{font-size:1.125rem;color:var(--cream-dim);max-width:34rem}
+
+/* ---------- botão ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 var(--s5);border-radius:var(--r);font:600 1rem/1 var(--font-body);letter-spacing:.02em;text-decoration:none;border:2px solid var(--ember);background:var(--ember);color:var(--on-ember,#fff);cursor:pointer;transition:background-color .15s,color .15s,border-color .15s}
+.btn:hover{background:transparent;color:var(--amber);border-color:var(--amber)}
+.btn-line{background:transparent;border-color:currentColor;color:var(--cream)}
+.btn-line:hover{background:var(--cream);color:var(--ink);border-color:var(--cream)}
+
+/* ---------- menu ---------- */
+.nav{position:sticky;top:0;z-index:40;background:var(--ink);border-bottom:1px solid var(--wood)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:var(--s4);height:var(--nav-h)}
+.marca{display:inline-flex;align-items:center;gap:var(--s3);min-height:48px;text-decoration:none}
+.marca img{width:40px;height:40px;border-radius:50%;object-fit:cover}
+.marca span{font:700 1.375rem/1 var(--font-display);letter-spacing:.06em;text-transform:uppercase}
+.nav-links{display:none;align-items:center;gap:var(--s5)}
+.nav-links a:not(.btn){display:inline-flex;align-items:center;min-height:48px;font-weight:500;color:var(--cream-dim);text-decoration:none}
+.nav-links a:not(.btn):hover{color:var(--cream)}
+.nav-links .btn{min-height:44px;padding:0 var(--s4)}
+
+/* ---------- hero ---------- */
+.hero{position:relative;isolation:isolate;display:flex;align-items:flex-end;min-height:min(86vh,780px);background:var(--wood);color:#f5ede2;overflow:hidden}
+.hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(to top,rgba(10,6,4,.94) 6%,rgba(10,6,4,.62) 48%,rgba(10,6,4,.36))}
+.hero .wrap{padding-block:var(--s9) var(--s7)}
+.hero .eyebrow{color:#f4a090;margin-bottom:var(--s4)}
+.hero h1{font-size:clamp(4rem,19vw,10.5rem);margin-bottom:var(--s5)}
+.hero h1 em{font-style:normal;color:#f4a090;display:block}
+.hero .lead{color:#e6dccd;margin-bottom:var(--s6)}
+.hero .acoes{display:flex;flex-wrap:wrap;gap:var(--s3)}
+.hero .btn-line{color:#f5ede2}
+.hero .btn-line:hover{background:#f5ede2;color:#15100d;border-color:#f5ede2}
+
+/* ---------- faixa de fatos ---------- */
+.fatos{border-block:1px solid var(--wood);background:var(--ink-2)}
+.fatos ul{display:grid;grid-template-columns:1fr}
+.fatos li{padding:var(--s5) var(--s4);border-bottom:1px solid var(--wood)}
+.fatos li:last-child{border-bottom:0}
+.fatos strong{display:block;font:700 1.5rem/1.1 var(--font-display);text-transform:uppercase;letter-spacing:.03em}
+.fatos span{color:var(--cream-dim);font-size:1rem}
+
+/* ---------- produtos ---------- */
+.secao{padding-block:var(--s8)}
+.secao.produtos{padding-bottom:var(--s8);padding-top:var(--s8)}
+.cab{display:grid;gap:var(--s3);margin-bottom:var(--s6)}
+.chips{display:none;position:sticky;top:var(--nav-h);z-index:30;background:var(--ink);border-bottom:1px solid var(--wood)}
+.js .chips{display:block}
+.chips .wrap{display:flex;gap:var(--s2);overflow-x:auto;padding-block:var(--s3);scroll-snap-type:x proximity;scrollbar-width:none}
+.chips .wrap::-webkit-scrollbar{display:none}
+.chip{flex:none;scroll-snap-align:start;min-height:44px;padding:0 var(--s4);border-radius:var(--r);border:1px solid var(--wood);background:transparent;color:var(--cream);font:600 .9375rem/1 var(--font-body);letter-spacing:.04em;cursor:pointer}
+.chip:hover{border-color:var(--cream)}
+.chip[aria-pressed="true"]{background:var(--cream);color:var(--ink);border-color:var(--cream)}
+
+.grade{--gap:var(--s3);--cols:2;display:flex;flex-wrap:wrap;justify-content:center;gap:var(--gap);padding-top:var(--s6)}
+.tile{flex:0 0 calc((100% - (var(--cols) - 1) * var(--gap)) / var(--cols));min-width:0;position:relative;display:flex;flex-direction:column;background:var(--ink-2)}
+.tile.destaque::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:var(--ember);z-index:2}
+.tile figure{overflow:hidden;background:var(--wood)}
+.tile img{width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;transition:transform .4s ease}
+.tile:hover img{transform:scale(1.04)}
+.tile .corpo{display:flex;flex-direction:column;gap:var(--s2);flex:1;padding:var(--s4) var(--s3) var(--s3)}
+.tile .cat{font:600 .75rem/1.2 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--amber)}
+.tile h3{font:700 1.375rem/1.05 var(--font-display);text-transform:uppercase;letter-spacing:.02em}
+.tile p.desc{font-size:.9375rem;line-height:1.45;color:var(--cream-dim);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tile .preco{font:700 1.375rem/1 var(--font-display);color:var(--amber)}
+.tile .enc{font-size:.8125rem;letter-spacing:.06em;text-transform:uppercase;color:var(--cream-dim)}
+.tile .btn{margin-top:auto;width:100%;min-height:48px;padding:0 var(--s2)}
+.vazio{padding:var(--s7) var(--s5);background:var(--ink-2);text-align:center;display:grid;gap:var(--s4);justify-items:center}
+.vazio h3{font:700 2rem/1 var(--font-display);text-transform:uppercase}
+
+/* ---------- quem faz / galeria ---------- */
+.equipe{display:grid;gap:var(--s3);margin-top:var(--s5)}
+.equipe li{padding:var(--s4);background:var(--ink-2)}
+.equipe strong{display:block;font:700 1.375rem/1.1 var(--font-display);text-transform:uppercase}
+.equipe span{color:var(--cream-dim)}
+.galeria{--gap:var(--s2);--cols:2;display:flex;flex-wrap:wrap;justify-content:center;gap:var(--gap);margin-top:var(--s6)}
+.galeria figure{flex:0 0 calc((100% - (var(--cols) - 1) * var(--gap)) / var(--cols));min-width:0}
+.galeria img{width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;background:var(--wood)}
+.galeria figcaption{padding-top:var(--s2);font-size:.9375rem;color:var(--cream-dim)}
+
+/* ---------- avaliações ---------- */
+.aval{display:grid;gap:var(--s4);margin-top:var(--s6)}
+.aval blockquote{margin:0;padding:var(--s5);background:var(--ink-2);border-left:4px solid var(--ember)}
+.aval p{font-size:1.125rem}
+.aval cite{display:block;margin-top:var(--s3);font-style:normal;font-weight:600;color:var(--cream-dim)}
+
+/* ---------- contato ---------- */
+.contato{background:var(--ember);color:var(--on-ember,#fff)}
+.contato .eyebrow{color:inherit;opacity:.85}
+.contato h2{font-size:clamp(3rem,11vw,6.5rem);margin-block:var(--s3) var(--s5)}
+.contato .lead{color:inherit;opacity:.92;margin-bottom:var(--s5)}
+.contato ul{display:grid;gap:var(--s2);margin-bottom:var(--s6);font-size:1.125rem}
+.contato .acoes{display:flex;flex-wrap:wrap;gap:var(--s3)}
+.contato .btn{background:var(--on-ember,#fff);color:var(--ember);border-color:var(--on-ember,#fff)}
+.contato .btn:hover{background:transparent;color:var(--on-ember,#fff)}
+.contato .btn-line{background:transparent;color:var(--on-ember,#fff)}
+.contato .btn-line:hover{background:var(--on-ember,#fff);color:var(--ember)}
+.contato :focus-visible{outline-color:var(--on-ember,#fff)}
+
+.rodape{padding-block:var(--s6) var(--s7);color:var(--cream-dim);font-size:1rem}
+.rodape .wrap{display:grid;gap:var(--s2)}
+
+/* ---------- barra de WhatsApp (celular) ---------- */
+.cta-bar{position:fixed;left:0;right:0;bottom:var(--dock-h,0px);z-index:50;display:flex;padding:var(--s3) var(--s4) calc(var(--s3) + env(safe-area-inset-bottom,0px));background:var(--ink);border-top:1px solid var(--wood)}
+.cta-bar .btn{width:100%}
+
+/* ---------- breakpoints (mobile-first) ---------- */
+@media (min-width:720px){
+  .wrap{padding-inline:var(--s6)}
+  .grade{--gap:var(--s4);--cols:3}
+  .galeria{--cols:3;--gap:var(--s3)}
+  .fatos ul{grid-template-columns:repeat(3,1fr)}
+  .fatos li{border-bottom:0;border-right:1px solid var(--wood);padding:var(--s6) var(--s5)}
+  .fatos li:last-child{border-right:0}
+  .equipe{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+  .aval{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+  .tile .corpo{padding:var(--s5) var(--s4) var(--s4)}
+  .tile h3{font-size:1.5rem}
+  .nav-links{display:flex}
+  .cta-bar{display:none}
+  body{padding-bottom:0}
+}
+@media (min-width:1000px){
+  .grade{--cols:4}
+  .galeria{--cols:4}
+  .secao{padding-block:var(--s9)}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .tile img,.btn{transition:none}
+  .tile:hover img{transform:none}
+}
 </style>
 {% if tema_css %}<style>{{ tema_css|safe }}</style>{% endif %}
+<script>document.documentElement.classList.add('js')</script>
 </head>
 <body>
+<a class="skip" href="#conteudo">Pular para o conteúdo</a>
 {% include "site/_demo_dock.html" %}
-<nav aria-label="Seções do site"><div class="wrap">
-  <a href="#topo" class="logo">{% if logo %}<img src="{{ logo }}" alt="" width="36" height="36">{% endif %}<span>{{ site.nome }}</span></a>
-  <div class="links">
-    {% if produtos %}<a href="#produtos">{{ rotulo(tenant, 'cardapio') }}</a>{% endif %}
-    {% if team or gallery %}<a href="#quem-faz">Quem faz</a>{% endif %}
-    {% if reviews %}<a href="#avaliacoes">Avaliações</a>{% endif %}
-    <a href="#contato">Contato</a>
-  </div>
-</div></nav>
 
-<header class="hero{% if hero %} com-foto{% endif %}" id="topo">
-  {% if hero %}<img src="{{ hero }}" alt="{{ site.nome }}" fetchpriority="high" decoding="async">{% endif %}
+<header class="nav">
   <div class="wrap">
-    {% if site.kicker %}<p class="eyebrow">{{ site.kicker }}</p>{% endif %}
-    <h1>{% if site.hero_linha1 or site.hero_linha2 %}{{ site.hero_linha1 or '' }} <em>{{ site.hero_linha2 or '' }}</em>{% else %}{{ site.nome }}{% endif %}</h1>
-    {% if site.tagline %}<p class="lead">{{ site.tagline }}</p>{% endif %}
-    <div class="acoes">
-      {% if site.whatsapp %}<a class="btn btn-primary" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener">Encomendar no WhatsApp</a>{% endif %}
-      {% if produtos %}<a class="btn btn-ghost" href="#produtos">{{ rotulo(tenant, 'cardapio') }}</a>{% endif %}
-    </div>
+    <a href="#topo" class="marca" aria-label="{{ site.nome }}, início">{% if logo %}<img src="{{ logo }}" alt="" width="40" height="40">{% endif %}<span>{{ site.nome }}</span></a>
+    <nav class="nav-links" aria-label="Seções do site">
+      {% if produtos %}<a href="#produtos">{{ rotulo(tenant, 'cardapio') }}</a>{% endif %}
+      {% if team or gallery %}<a href="#quem-faz">Quem faz</a>{% endif %}
+      {% if reviews %}<a href="#avaliacoes">Avaliações</a>{% endif %}
+      <a href="#contato">Contato</a>
+      {% if site.whatsapp %}<a class="btn" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener">Encomendar</a>{% endif %}
+    </nav>
   </div>
 </header>
 
-<main>
-{% if produtos %}
-<section id="produtos"><div class="wrap">
-  <p class="eyebrow">{{ copy.cardapio.eyebrow }}</p>
-  <h2>{{ copy.cardapio.titulo|safe }}</h2>
-  {% if copy.cardapio.lead %}<p class="lead2">{{ copy.cardapio.lead }}</p>{% endif %}
-  {# Categorias na ordem em que aparecem (ordem do dono), não em ordem alfabética. #}
-  {% set cats = [] %}
-  {% for p in produtos %}{% if (p.categoria or 'Outros') not in cats %}{% set _ = cats.append(p.categoria or 'Outros') %}{% endif %}{% endfor %}
-  {% for cat in cats %}
-    {% if cats|length > 1 %}<h3 class="cat">{{ cat }}</h3>{% endif %}
-    <div class="grid">
-    {% for p in produtos|sort(attribute='destaque', reverse=true) if (p.categoria or 'Outros') == cat %}
-      <article class="card{% if p.destaque %} destaque{% endif %}">
-        {% if p.img %}<img class="foto" src="{{ p.img }}" alt="{{ p.nome }}" loading="lazy" decoding="async">{% endif %}
-        <div class="corpo">
-          <h3>{{ p.nome }}</h3>
-          {% if p.descricao %}<p>{{ p.descricao }}</p>{% endif %}
-          {% if p.preco %}<span class="preco">{{ p.preco|moeda_br }}</span>{% endif %}
-          {% if p.sob_encomenda %}<span class="tag">Sob encomenda</span>{% endif %}
-          {% if site.whatsapp %}<a class="btn btn-ghost" href="https://wa.me/{{ site.whatsapp }}?text={{ ('Olá! Quero saber mais sobre: ' ~ p.nome)|urlencode }}" target="_blank" rel="noopener">{{ 'Encomendar' if p.sob_encomenda else 'Pedir' }}</a>{% endif %}
-        </div>
-      </article>
-    {% endfor %}
+<main id="conteudo">
+<section class="hero{% if hero %} com-foto{% endif %}" id="topo" aria-labelledby="titulo">
+  {% if hero %}<img src="{{ hero }}" alt="" fetchpriority="high" decoding="async">{% endif %}
+  <div class="wrap">
+    {% if site.kicker %}<p class="eyebrow">{{ site.kicker }}</p>{% endif %}
+    <h1 id="titulo" class="display">{% if site.hero_linha1 or site.hero_linha2 %}{{ site.hero_linha1 or '' }} <em>{{ site.hero_linha2 or '' }}</em>{% else %}{{ site.nome }}{% endif %}</h1>
+    {% if site.tagline %}<p class="lead">{{ site.tagline }}</p>{% endif %}
+    <div class="acoes">
+      {% if site.whatsapp %}<a class="btn" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener">Encomendar no WhatsApp</a>{% endif %}
+      {% if produtos %}<a class="btn btn-line" href="#produtos">Ver {{ rotulo(tenant, 'cardapio')|lower }}</a>{% endif %}
     </div>
-  {% endfor %}
+  </div>
+</section>
+
+{% if copy.clima and copy.clima.cards %}
+<section class="fatos" aria-label="Como trabalhamos"><div class="wrap">
+  <ul>{% for c in copy.clima.cards %}<li><strong>{{ c[1] }}</strong><span>{{ c[2] }}</span></li>{% endfor %}</ul>
 </div></section>
 {% endif %}
 
+<section id="produtos" class="secao produtos" aria-labelledby="titulo-produtos">
+<div class="wrap">
+  <div class="cab">
+    <p class="eyebrow">{{ copy.cardapio.eyebrow }}</p>
+    <h2 id="titulo-produtos" class="display">{{ copy.cardapio.titulo|safe }}</h2>
+    {% if copy.cardapio.lead %}<p class="lead">{{ copy.cardapio.lead }}</p>{% endif %}
+  </div>
+</div>
+
+{% if produtos %}
+{# Categorias na ordem em que aparecem (a do dono), não em ordem alfabética. #}
+{% set cats = [] %}
+{% for p in produtos %}{% if (p.categoria or 'Outros') not in cats %}{% set _ = cats.append(p.categoria or 'Outros') %}{% endif %}{% endfor %}
+{% if cats|length > 1 %}
+<div class="chips"><div class="wrap" role="group" aria-label="Filtrar por categoria">
+  <button type="button" class="chip" data-filtro="" aria-pressed="true">Todos</button>
+  {% for cat in cats %}<button type="button" class="chip" data-filtro="{{ cat }}" aria-pressed="false">{{ cat }}</button>{% endfor %}
+</div></div>
+{% endif %}
+
+<div class="wrap">
+  <div class="grade" id="grade">
+  {% for cat in cats %}
+    {% for p in produtos|sort(attribute='destaque', reverse=true) if (p.categoria or 'Outros') == cat %}
+    <article class="tile{% if p.destaque %} destaque{% endif %}" data-cat="{{ cat }}">
+      <figure><img src="{{ p.img }}" alt="{{ p.nome }}" loading="lazy" decoding="async" width="640" height="640"></figure>
+      <div class="corpo">
+        <p class="cat">{{ cat }}{% if p.destaque %} · Destaque{% endif %}</p>
+        <h3>{{ p.nome }}</h3>
+        {% if p.descricao %}<p class="desc">{{ p.descricao }}</p>{% endif %}
+        {% if p.preco %}<p class="preco">{{ p.preco|moeda_br }}</p>{% endif %}
+        {% if p.sob_encomenda %}<p class="enc">Sob encomenda</p>{% endif %}
+        {% if site.whatsapp %}<a class="btn" href="https://wa.me/{{ site.whatsapp }}?text={{ ('Olá! Quero saber mais sobre: ' ~ p.nome)|urlencode }}" target="_blank" rel="noopener" aria-label="{{ 'Encomendar' if p.sob_encomenda else 'Pedir' }} {{ p.nome }} pelo WhatsApp">{{ 'Encomendar' if p.sob_encomenda else 'Pedir' }}</a>{% endif %}
+      </div>
+    </article>
+    {% endfor %}
+  {% endfor %}
+  </div>
+</div>
+{% else %}
+<div class="wrap">
+  <div class="vazio">
+    <h3>Catálogo em montagem</h3>
+    <p class="lead">Os produtos estão sendo fotografados. Enquanto isso, peça direto pelo WhatsApp e a gente responde com o que tem hoje.</p>
+    {% if site.whatsapp %}<a class="btn" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener">Falar no WhatsApp</a>{% endif %}
+  </div>
+</div>
+{% endif %}
+</section>
+
 {% if team or gallery %}
-<section id="quem-faz"><div class="wrap">
-  <p class="eyebrow">{{ copy.historia.eyebrow }}</p>
-  <h2>{{ copy.historia.titulo|safe }}</h2>
-  {% if team %}
-  <p class="lead2">{{ copy.historia.texto }}</p>
-  <div class="equipe">{% for t in team %}<div><strong>{{ t.emoji }} {{ t.nome }}</strong>{% if t.papel %}<br><span class="tag">{{ t.papel }}</span>{% endif %}</div>{% endfor %}</div>
-  {% endif %}
+<section id="quem-faz" class="secao" aria-labelledby="titulo-quem"><div class="wrap">
+  <div class="cab">
+    <p class="eyebrow">{{ copy.historia.eyebrow }}</p>
+    <h2 id="titulo-quem" class="display">{{ copy.historia.titulo|safe }}</h2>
+    {% if team %}<p class="lead">{{ copy.historia.texto }}</p>{% endif %}
+  </div>
+  {% if team %}<ul class="equipe">{% for t in team %}<li><strong>{{ t.nome }}</strong>{% if t.papel %}<span>{{ t.papel }}</span>{% endif %}</li>{% endfor %}</ul>{% endif %}
   {% if gallery %}
-  <div class="galeria" style="margin-top:28px">{% for g in gallery %}<img src="{{ g.img }}" alt="{{ g.legenda or site.nome }}" loading="lazy" decoding="async">{% endfor %}</div>
+  <div class="galeria">{% for g in gallery %}<figure><img src="{{ g.img }}" alt="{{ g.legenda or site.nome }}" loading="lazy" decoding="async" width="640" height="640">{% if g.legenda %}<figcaption>{{ g.legenda }}</figcaption>{% endif %}</figure>{% endfor %}</div>
   {% endif %}
 </div></section>
 {% endif %}
 
 {% if reviews %}
-<section id="avaliacoes"><div class="wrap">
-  <p class="eyebrow">{{ copy.avaliacoes.eyebrow }}</p>
-  <h2>{{ copy.avaliacoes.titulo|safe }}</h2>
-  <div class="aval" style="margin-top:24px">{% for r in reviews %}<blockquote>{{ r.texto }}<cite>{{ '★' * r.estrelas }} {{ r.autor }}</cite></blockquote>{% endfor %}</div>
+<section id="avaliacoes" class="secao" aria-labelledby="titulo-aval"><div class="wrap">
+  <div class="cab">
+    <p class="eyebrow">{{ copy.avaliacoes.eyebrow }}</p>
+    <h2 id="titulo-aval" class="display">{{ copy.avaliacoes.titulo|safe }}</h2>
+  </div>
+  <div class="aval">{% for r in reviews %}<blockquote><p>{{ r.texto }}</p><cite>{{ r.autor }} · {{ r.estrelas }} de 5</cite></blockquote>{% endfor %}</div>
 </div></section>
 {% endif %}
 
 {% if eventos %}
-<section id="agenda"><div class="wrap">
-  <p class="eyebrow">{{ copy.agenda.eyebrow }}</p>
-  <h2>{{ copy.agenda.titulo|safe }}</h2>
-  <ul style="list-style:none;padding:0;margin-top:20px;display:grid;gap:10px">
-  {% for ev in eventos %}<li><strong>{{ ev.data|data_br }}{% if ev.hora %} · {{ ev.hora }}{% endif %}</strong> — {{ ev.titulo }}{% if ev.descricao %}<br><span class="tag">{{ ev.descricao }}</span>{% endif %}</li>{% endfor %}
-  </ul>
+<section id="agenda" class="secao" aria-labelledby="titulo-agenda"><div class="wrap">
+  <div class="cab">
+    <p class="eyebrow">{{ copy.agenda.eyebrow }}</p>
+    <h2 id="titulo-agenda" class="display">{{ copy.agenda.titulo|safe }}</h2>
+  </div>
+  <ul class="equipe">{% for ev in eventos %}<li><strong>{{ ev.data|data_br }}{% if ev.hora %} · {{ ev.hora }}{% endif %}</strong><span>{{ ev.titulo }}{% if ev.descricao %} — {{ ev.descricao }}{% endif %}</span></li>{% endfor %}</ul>
 </div></section>
 {% endif %}
 
-<section class="contato" id="contato"><div class="wrap">
+<section id="contato" class="secao contato" aria-labelledby="titulo-contato"><div class="wrap">
   <p class="eyebrow">{{ copy.contato.eyebrow }}</p>
-  <h2>{{ copy.contato.titulo|safe }}</h2>
-  <ul style="margin-top:16px">
-    {% if site.endereco %}<li>📍 {{ site.endereco }}{% if site.cidade_uf %} · {{ site.cidade_uf }}{% endif %}</li>{% endif %}
-    {% if site.horario %}<li>🕒 {{ site.horario }}</li>{% endif %}
-    {% if site.telefone_exibicao %}<li>📞 {{ site.telefone_exibicao }}</li>{% endif %}
+  <h2 id="titulo-contato" class="display">{{ copy.cta.titulo }}</h2>
+  <p class="lead">{{ copy.cta.linha }}</p>
+  <ul>
+    {% if site.endereco %}<li>{{ site.endereco }}{% if site.cidade_uf %} · {{ site.cidade_uf }}{% endif %}</li>{% elif site.cidade_uf %}<li>{{ site.cidade_uf }}</li>{% endif %}
+    {% if site.horario %}<li>{{ site.horario }}</li>{% endif %}
+    {% if site.telefone_exibicao %}<li>{{ site.telefone_exibicao }}</li>{% endif %}
   </ul>
-  <p class="lead2" style="margin-bottom:16px"><strong>{{ copy.cta.titulo }}</strong> {{ copy.cta.linha }}</p>
   <div class="acoes">
-    {% if site.whatsapp %}<a class="btn btn-primary" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener">Falar no WhatsApp</a>{% endif %}
-    {% if site.maps_query %}<a class="btn btn-ghost" href="https://www.google.com/maps/search/?api=1&query={{ site.maps_query|urlencode }}" target="_blank" rel="noopener">Como chegar</a>{% endif %}
-    {% if site.instagram_url %}<a class="btn btn-ghost" href="{{ site.instagram_url }}" target="_blank" rel="noopener">Instagram</a>{% endif %}
+    {% if site.whatsapp %}<a class="btn" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener">Falar no WhatsApp</a>{% endif %}
+    {% if site.maps_query %}<a class="btn btn-line" href="https://www.google.com/maps/search/?api=1&query={{ site.maps_query|urlencode }}" target="_blank" rel="noopener">Como chegar</a>{% endif %}
+    {% if site.instagram_url %}<a class="btn btn-line" href="{{ site.instagram_url }}" target="_blank" rel="noopener">Instagram</a>{% endif %}
   </div>
 </div></section>
 </main>
 
-<footer><div class="wrap">
+<footer class="rodape"><div class="wrap">
   {% include "site/_selo_caminhos.html" %}
   <p>{{ copy.rodape }}</p>
   <p>© {{ site.nome }}</p>
 </div></footer>
 
 {% if site.whatsapp %}
-<a class="wa" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener" aria-label="WhatsApp">💬</a>
+<div class="cta-bar"><a class="btn" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener">Encomendar no WhatsApp</a></div>
 {% endif %}
+
+<script>
+(function(){
+  var chips=document.querySelectorAll('.chip'),tiles=document.querySelectorAll('.tile');
+  if(!chips.length)return;
+  chips.forEach(function(c){c.addEventListener('click',function(){
+    var f=c.getAttribute('data-filtro');
+    chips.forEach(function(x){x.setAttribute('aria-pressed',x===c?'true':'false')});
+    tiles.forEach(function(t){t.hidden=!!f&&t.getAttribute('data-cat')!==f});
+  })});
+})();
+</script>
 </body>
 </html>

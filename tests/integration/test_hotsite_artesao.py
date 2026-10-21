@@ -33,7 +33,7 @@ def test_site_no_ar_mostra_produtos_por_categoria(client, session):
     assert 'Dona Berga' in corpo
     assert '>Produtos</a>' in corpo and '>Cardápio</a>' not in corpo
     for cat in ("Defumados", "Linguiças", "Maturados", "Conservas", "Kits"):
-        assert f'>{cat}</h3>' in corpo
+        assert f'>{cat}</button>' in corpo      # filtro de categoria
     assert 'Sob encomenda' in corpo
     assert 'wa.me/5519991563362' in corpo
     assert 'R$ 0' not in corpo          # sem preço: nunca "R$ 0,00"
@@ -136,7 +136,7 @@ def test_categoria_sem_nenhum_produto_com_foto_some(client, session):
     ProdutoSite.query.filter_by(restaurant_id=rest.id, categoria='Kits').update({'imagem': None})
     db.session.commit()
     corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
-    assert '>Kits</h3>' not in corpo and '>Defumados</h3>' in corpo
+    assert '>Kits</button>' not in corpo and '>Defumados</button>' in corpo
 
 
 def test_kits_responde_no_dominio_do_artesao_mesmo_com_dominios_separados(client, session, monkeypatch):
@@ -146,3 +146,24 @@ def test_kits_responde_no_dominio_do_artesao_mesmo_com_dominios_separados(client
     semear(no_ar=True)
     resp = client.get('/kits/index.html', headers={'Host': DOMINIO})
     assert resp.status_code == 301 and resp.headers['Location'].endswith('/#produtos')
+
+
+def test_sem_nenhum_produto_com_foto_mostra_estado_vazio_com_whatsapp(client, session):
+    rest, _ = semear(no_ar=True)
+    ProdutoSite.query.filter_by(restaurant_id=rest.id).update({'imagem': None})
+    db.session.commit()
+    corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    assert 'Catálogo em montagem' in corpo
+    assert 'class="tile' not in corpo and 'class="chip"' not in corpo
+    assert 'wa.me/5519991563362' in corpo
+
+
+def test_acessibilidade_basica_da_vitrine(client, session):
+    semear(no_ar=True)
+    corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    assert 'class="skip" href="#conteudo"' in corpo and 'id="conteudo"' in corpo
+    assert corpo.count('<h1') == 1
+    assert 'aria-pressed="true"' in corpo and 'role="group"' in corpo
+    assert 'prefers-reduced-motion' in corpo
+    assert 'class="cta-bar"' in corpo           # barra de WhatsApp do celular
+    assert 'id="produtos"' in corpo             # âncora usada pelo redirect de /kits
