@@ -59,3 +59,28 @@ class GalleryItem(db.Model):
     legenda = db.Column(db.String(160))
     ordem = db.Column(db.Integer, default=0, index=True)
     ativo = db.Column(db.Boolean, default=True, index=True)
+
+
+class ProdutoSite(db.Model):
+    """Produto/peça do hotsite de um artesão (tipo_negocio='artesao'), por tenant.
+
+    Nome `ProdutoSite` porque `Produto` já é o insumo de estoque da gestão
+    (`modelo_produto`). Este é conteúdo de vitrine, igual ao `DishCard`.
+    """
+    __tablename__ = 'site_produto'
+    id = db.Column(db.Integer, primary_key=True)
+    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurante.id'), nullable=False, index=True)
+    nome = db.Column(db.String(120), nullable=False)
+    descricao = db.Column(db.Text)
+    # Texto livre ("Defumados", "Conservas"): categoria fechada engessaria o
+    # primeiro artesão que não cabe na lista. A vitrine agrupa pelo que o dono
+    # escreveu.
+    categoria = db.Column(db.String(60), index=True)
+    # Numeric e nullable pelas mesmas razões do DishCard.preco: centavo exato e
+    # "sem preço" é estado legítimo (nunca mostra "R$ 0,00").
+    preco = db.Column(db.Numeric(8, 2))
+    sob_encomenda = db.Column(db.Boolean, default=False)
+    imagem = db.Column(db.String(300))        # caminho em static ou URL (Blob)
+    destaque = db.Column(db.Boolean, default=False)
+    ordem = db.Column(db.Integer, default=0, index=True)
+    ativo = db.Column(db.Boolean, default=True, index=True)

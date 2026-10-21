@@ -107,6 +107,10 @@ def create_app(config_name='default'):
     from app.utils.site_router import url_do_sistema
     app.jinja_env.globals['url_do_sistema'] = url_do_sistema
 
+    # Rótulos por tipo de negócio (bar/artesão): {{ rotulo(tenant, 'cardapio') }}.
+    from app.utils.vocabulario import rotulo
+    app.jinja_env.globals['rotulo'] = rotulo
+
     # A marca, num lugar só.
     #
     # "AleroPrice" estava escrito à mão em 38 lugares e aparecia no título de

@@ -45,6 +45,7 @@ from datetime import date, datetime
 # e preço publicado no grafo têm que ser o mesmo julgamento. `formatacao_br` é
 # folha (stdlib só), então o motor de SEO segue testável com dicts simples.
 from app.utils.formatacao_br import ler_moeda
+from app.utils.vocabulario import tipo_schema
 
 # Prefixo de assets do Flask (`static_url_path` padrão). Só é usado para
 # absolutizar caminho relativo gravado no banco ("img/demo/x/capa.jpg"); URL
@@ -555,6 +556,39 @@ def _preco_schema(valor):
     return None if valor is None else f'{valor:.2f}'
 
 
+def _pedacos_de_produto(produtos, origem, url_canonica, id_vendedor):
+    """Nós `Product` do hotsite de artesão. Sem produto, lista vazia.
+
+    `Offer` só quando há preço (mesma regra do cardápio: nunca "0.00").
+    Produto sob encomenda sem preço sai sem `offers` e sem disponibilidade
+    inventada; com preço e sob encomenda, `PreOrder`.
+    """
+    nos = []
+    for i, prod in enumerate(produtos or [], start=1):
+        nome = _limpo(_campo(prod, 'nome'))
+        if not nome:
+            continue
+        no = {'@type': 'Product', '@id': f'{url_canonica}#produto-{i}', 'name': nome}
+        descricao = _limpo(_campo(prod, 'descricao'))
+        if descricao:
+            no['description'] = descricao
+        imagem = _url_absoluta(_campo(prod, 'img') or _campo(prod, 'imagem'), origem)
+        if imagem:
+            no['image'] = imagem
+        categoria = _limpo(_campo(prod, 'categoria'))
+        if categoria:
+            no['category'] = categoria
+        preco = _preco_schema(_campo(prod, 'preco'))
+        if preco:
+            oferta = {'@type': 'Offer', 'price': preco, 'priceCurrency': 'BRL',
+                      'seller': {'@id': id_vendedor}}
+            if _campo(prod, 'sob_encomenda'):
+                oferta['availability'] = 'https://schema.org/PreOrder'
+            no['offers'] = oferta
+        nos.append(no)
+    return nos
+
+
 def _pedacos_do_cardapio(dishes, origem, id_cardapio):
     itens = []
     for i, prato in enumerate(dishes or [], start=1):
@@ -624,9 +658,9 @@ def cardapio_estruturado(rest, site, dishes, url_canonica, url_cardapio=None):
     id_restaurante = f'{url_canonica}#restaurante'
     cardapio['isPartOf'] = {'@id': id_restaurante}
     casa = {
-        '@type': TIPO_POR_VIBE.get(
+        '@type': tipo_schema(_campo(rest, 'tipo_negocio'), TIPO_POR_VIBE.get(
             _limpo(site.get('vibe')) or _limpo(_campo(_campo(rest, 'site_config'), 'vibe')),
-            'Restaurant'),
+            'Restaurant')),
         '@id': id_restaurante,
         'name': nome,
         'url': url_canonica,
@@ -708,7 +742,7 @@ def _comodidades(servicos):
 
 
 def dados_estruturados(rest, site, dishes, reviews, eventos, url_canonica,
-                       url_cardapio=None):
+                       url_cardapio=None, produtos=None):
     """Grafo JSON-LD completo deste bar, pronto pra `json.dumps`.
 
     Recebe exatamente o que `_render_landing` já montou — nada é consultado no
@@ -729,7 +763,8 @@ def dados_estruturados(rest, site, dishes, reviews, eventos, url_canonica,
     id_cardapio = f'{url_canonica}#cardapio'
 
     restaurante = {
-        '@type': TIPO_POR_VIBE.get(vibe, 'Restaurant'),
+        '@type': tipo_schema(_campo(rest, 'tipo_negocio'),
+                             TIPO_POR_VIBE.get(vibe, 'Restaurant')),
         '@id': id_restaurante,
         'name': nome,
         'url': url_canonica,
@@ -820,6 +855,7 @@ def dados_estruturados(rest, site, dishes, reviews, eventos, url_canonica,
         restaurante['hasMenu'] = {'@id': id_cardapio}
         grafo.append(cardapio)
 
+    grafo.extend(_pedacos_de_produto(produtos, origem, url_canonica, id_restaurante))
     grafo.extend(_pedacos_de_avaliacao(reviews, url_canonica, id_restaurante))
     grafo.extend(_pedacos_de_evento(eventos, url_canonica, id_restaurante))
 

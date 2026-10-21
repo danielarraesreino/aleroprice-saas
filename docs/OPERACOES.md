@@ -53,6 +53,23 @@ Vercel remove diretórios chamados `public`.
 Ao mexer em modelo: gere a migration (`flask db migrate` / `flask db upgrade`) e
 saiba que o `create_all` pode mascarar o erro em dev.
 
+## Schema em produção: procedimento seguro
+
+Estado medido em 20/10/2026: o Neon tinha `alembic_version = d5b7c1e9f204`, uma
+revisão atrás do head da época (`e6c8d2f0a1b3`), mas as colunas dela já existiam
+(criadas por `action=schema`). Por isso as migrations novas são **idempotentes**
+(checam se a coluna existe) e `e6c8d2f0a1b3` foi ajustada do mesmo jeito.
+
+Depois de deploy com model/coluna nova:
+
+1. `GET /bootstrap-demo?token=$SEED_TOKEN&action=status` (só leitura)
+2. `GET /bootstrap-demo?token=$SEED_TOKEN&action=schema` (cria tabela/coluna que falta, sem destruir)
+3. `GET /bootstrap-demo?token=$SEED_TOKEN&action=migrate` (Alembic até o head, com advisory lock)
+4. `action=status` de novo: `alembic_version` tem que ser o head (`flask db heads`)
+
+Toda migration nova: checar `inspect().get_columns` antes de `add_column`, e
+registrar a coluna também na lista `novas_r`/`novas` do `run.py` (dev e boot).
+
 ## Provisionar um cliente
 
 ```bash

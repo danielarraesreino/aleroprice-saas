@@ -18,6 +18,11 @@ class Restaurante(db.Model):
     slug = db.Column(db.String(60), unique=True, index=True)
     dominio = db.Column(db.String(120), unique=True, index=True)
 
+    # Que tipo de negócio é: 'bar' (padrão) ou 'artesao'. Muda vocabulário e
+    # schema.org (utils/vocabulario.py). NULL vale 'bar': a coluna nasceu por
+    # ALTER TABLE e linhas antigas podem ficar sem valor.
+    tipo_negocio = db.Column(db.String(20), default='bar', server_default='bar', index=True)
+
     endereco = db.Column(db.String(200))
     telefone = db.Column(db.String(20))
     ativo = db.Column(db.Boolean, default=True)

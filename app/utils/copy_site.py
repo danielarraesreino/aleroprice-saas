@@ -75,6 +75,42 @@ VIBES = {
         'scroll': '↓ role e sente o cheiro',
     },
 
+    # ------------------------------------------------------------- artesanal
+    # Hotsite de artesão (tipo_negocio='artesao'). Fala de produto, feito à mão e
+    # encomenda — não de mesa, reserva nem samba. Mantém todas as chaves porque
+    # `?modelo=` pode espiar outro layout num tenant artesão.
+    'artesanal': {
+        'label': 'Artesanal',
+        'descricao': 'Feito à mão, em pequena escala. Catálogo, encomenda e WhatsApp.',
+        'marquee': ['FEITO À MÃO', 'PEQUENA PRODUÇÃO', 'SEM QUÍMICA', 'SOB ENCOMENDA'],
+        'cardapio': {'eyebrow': 'O QUE A GENTE FAZ', 'titulo': 'Nossos <em>produtos</em>',
+                     'lead': 'Feito em pequena escala, com ingrediente de verdade. Chame no WhatsApp para encomendar.'},
+        'historia': {'eyebrow': 'QUEM FAZ',
+                     'titulo': 'Por trás de<br><em>cada peça</em>',
+                     'texto': 'O {nome} é trabalho de gente, não de fábrica. Cada produto passa pelas mãos de quem assina.'},
+        'avaliacoes': {'eyebrow': 'QUEM PROVOU', 'titulo': 'O que dizem <em>os clientes</em>'},
+        'clima': {'eyebrow': 'COMO É', 'titulo': 'Feito com <em>cuidado</em>',
+                  'cards': [('🤲', 'Artesanal', 'Feito à mão, do início ao fim'),
+                            ('🌿', 'Ingrediente de verdade', 'Sem atalho e sem aditivo'),
+                            ('📦', 'Sob encomenda', 'Produção limitada para manter a qualidade')]},
+        'galeria': {'eyebrow': 'DÁ UMA OLHADA', 'titulo': 'Bastidores e <em>produtos</em>',
+                    'lead': 'Do processo à mesa.'},
+        'promocoes': {'eyebrow': 'NO MOMENTO', 'titulo': 'Novidades e <em>ofertas</em>'},
+        'agenda': {'eyebrow': 'ONDE ENCONTRAR', 'titulo': 'Próximas <em>feiras</em>',
+                   'lead': 'Venha conhecer e provar de perto.'},
+        'reserva': {'eyebrow': 'ENCOMENDE', 'titulo': 'Faça sua <em>encomenda</em>',
+                    'lead': 'Conte o que você quer e a gente responde no WhatsApp.'},
+        'reserva_ui': {'titulo': 'Avisar no WhatsApp',
+                       'botao': 'Encomendar',
+                       'fallback': 'Chame a gente no WhatsApp para encomendar.'},
+        'contato': {'eyebrow': 'FALE COM A GENTE', 'titulo': 'Onde <em>encontrar</em>'},
+        'cta': {'titulo': 'Quer provar?',
+                'linha': 'Chame no WhatsApp, monte sua encomenda ou venha na feira.'},
+        'rodape': 'Feito à mão, com respeito ao processo.',
+        'zap': 'Olá! Vim pelo site do {nome} e queria saber mais sobre os produtos.',
+        'scroll': '↓ veja os produtos',
+    },
+
     # ------------------------------------------------------------------- pub
     'pub': {
         'label': 'Pub / cervejaria',

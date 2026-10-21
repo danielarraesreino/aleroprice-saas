@@ -74,6 +74,7 @@ if config_name != 'production' or os.environ.get('SCHEMA_NO_BOOT') == '1':
                     ('tema', "VARCHAR(30) DEFAULT 'boteco-ambar'"),
                     ('descritor', 'VARCHAR(80)'),
                     ('hero_foto', 'VARCHAR(300)'),
+                    ('logo', 'VARCHAR(300)'),
                     ('apoia_caminhos', 'BOOLEAN DEFAULT FALSE'),
                     ('google_place_id', 'VARCHAR(120)'),
                     ('cliques_avaliacao', 'INTEGER DEFAULT 0'),
@@ -105,6 +106,7 @@ if config_name != 'production' or os.environ.get('SCHEMA_NO_BOOT') == '1':
                     ('stripe_customer_id', 'VARCHAR(100)'),
                     ('stripe_subscription_id', 'VARCHAR(100)'),
                     ('pricing_strategy', 'VARCHAR(50)'),
+                    ('tipo_negocio', "VARCHAR(20) DEFAULT 'bar'"),
                 ]
                 for col_nome, col_tipo in novas_r:
                     if col_nome not in cols_r:

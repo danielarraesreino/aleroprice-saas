@@ -25,6 +25,10 @@ class SiteConfig(db.Model):
     # Caminho em static ("img/bar/foto-18.jpg") ou URL absoluta. 300 porque URL
     # de Vercel Blob passa fácil de 120 — mesmo tamanho de DishCard.imagem.
     hero_foto = db.Column(db.String(300))
+    # Logo/marca (quadrada). Mesmo formato do hero_foto. Opcional: sem logo, o
+    # site mostra só o nome. Usada no menu (recorte redondo), no ícone da aba e
+    # como imagem de compartilhamento quando não há foto de capa.
+    logo = db.Column(db.String(300))
 
     # Contato
     whatsapp = db.Column(db.String(20))          # só dígitos c/ DDI, ex.: 5519999779942

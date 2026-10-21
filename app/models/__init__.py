@@ -14,5 +14,5 @@ from app.models.modelo_reserva import Reserva
 from app.models.modelo_evento import Evento
 from app.models.modelo_promocao import Promocao
 from app.models.modelo_siteconfig import SiteConfig
-from app.models.modelo_sitecontent import DishCard, Review, TeamMember, GalleryItem
+from app.models.modelo_sitecontent import DishCard, Review, TeamMember, GalleryItem, ProdutoSite
 from app.models.usuario import Usuario

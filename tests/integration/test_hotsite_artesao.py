@@ -1,0 +1,115 @@
+"""Hotsite de artesão (Berga): produtos, schema Product, domínio próprio, /kits."""
+import json
+import re
+
+from app.extensions import db
+from app.models.modelo_restaurante import Restaurante
+from app.models.modelo_sitecontent import ProdutoSite
+from app.scripts.seed_berga import SLUG, DOMINIO, PRODUTOS, semear
+
+
+def _grafo(corpo):
+    bruto = re.search(r'<script type="application/ld\+json">(.*?)</script>', corpo, re.S).group(1)
+    return json.loads(bruto)['@graph']
+
+
+def test_seed_cria_tenant_inativo_e_nao_serve_site(client, session):
+    rest, novos = semear()
+    assert rest.tipo_negocio == 'artesao' and rest.ativo is False
+    assert novos == len(PRODUTOS)
+    assert client.get(f'/bar/{SLUG}').status_code == 404
+
+
+def test_seed_e_idempotente(session):
+    semear()
+    _, novos = semear()
+    assert novos == 0
+    assert ProdutoSite.query.count() == len(PRODUTOS)
+
+
+def test_site_no_ar_mostra_produtos_por_categoria(client, session):
+    semear(no_ar=True)
+    corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    assert 'Dona Berga' in corpo
+    assert '>Produtos</a>' in corpo and '>Cardápio</a>' not in corpo
+    for cat in ("Defumados", "Linguiças", "Maturados", "Conservas", "Kits"):
+        assert f'>{cat}</h3>' in corpo
+    assert 'Sob encomenda' in corpo
+    assert 'wa.me/5519991563362' in corpo
+    assert 'R$ 0' not in corpo          # sem preço: nunca "R$ 0,00"
+
+
+def test_json_ld_tem_product_e_nao_menu(client, session):
+    semear(no_ar=True)
+    grafo = _grafo(client.get(f'/bar/{SLUG}').get_data(as_text=True))
+    tipos = [n['@type'] for n in grafo]
+    assert 'Store' in tipos and 'Menu' not in tipos
+    assert tipos.count('Product') == len(PRODUTOS)
+    assert all('offers' not in n for n in grafo if n['@type'] == 'Product')  # sem preço
+
+
+def test_preco_vira_offer(client, session):
+    rest, _ = semear(no_ar=True)
+    p = ProdutoSite.query.filter_by(restaurant_id=rest.id, nome='Tender').first()
+    p.preco = 42.5
+    p.sob_encomenda = True
+    db.session.commit()
+    corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    oferta = next(n['offers'] for n in _grafo(corpo) if n.get('name') == 'Tender')
+    assert oferta['price'] == '42.50' and oferta['priceCurrency'] == 'BRL'
+    assert oferta['availability'].endswith('PreOrder')
+    assert 'R$ 42,50' in corpo
+
+
+def test_dominio_proprio_serve_a_berga_e_kits_redireciona(client, session):
+    semear(no_ar=True)
+    resp = client.get('/', headers={'Host': DOMINIO})
+    assert resp.status_code == 200 and 'Dona Berga' in resp.get_data(as_text=True)
+    kits = client.get('/kits/index.html', headers={'Host': DOMINIO})
+    assert kits.status_code == 301 and kits.headers['Location'].endswith('/#produtos')
+
+
+def test_kits_em_dominio_de_bar_ou_produto_e_404(client, session):
+    assert client.get('/kits').status_code == 404
+    assert client.get('/kits/index.html', headers={'Host': 'feiradebarao.com.br'}).status_code == 404
+
+
+def test_bar_nao_carrega_produtos(client, session):
+    r = Restaurante(nome='Bar X', cnpj='66666666000166', slug='bar-x', subscription_tier='site')
+    session.add(r)
+    session.commit()
+    session.add(ProdutoSite(restaurant_id=r.id, nome='Peça solta'))
+    session.commit()
+    assert 'Peça solta' not in client.get('/bar/bar-x').get_data(as_text=True)
+
+
+def test_toda_imagem_do_seed_existe_em_disco():
+    import os
+    from app.scripts.seed_berga import GALERIA, IMAGENS, SITE
+    base = os.path.join(os.path.dirname(__file__), '..', '..', 'app', 'static')
+    caminhos = [SITE['hero_foto']] + [f'img/berga/{v}.jpg' for v in IMAGENS.values()] \
+        + [f'img/berga/{a}.jpg' for a, _ in GALERIA]
+    faltando = [c for c in caminhos if not os.path.isfile(os.path.join(base, c))]
+    assert not faltando, faltando
+    assert set(IMAGENS) <= {p[0] for p in PRODUTOS}   # nenhuma foto órfã de produto
+
+
+def test_site_mostra_fotos_e_galeria(client, session):
+    semear(no_ar=True)
+    corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    assert 'img/berga/hero.jpg' in corpo and 'img/berga/tender.jpg' in corpo
+    assert 'A barraca na Feira de Barão' in corpo
+
+
+def test_logo_vai_no_menu_no_icone_e_como_imagem_de_compartilhamento(client, session):
+    from app.models.modelo_siteconfig import SiteConfig
+    semear(no_ar=True)
+    corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    assert 'img/berga/logo.jpg' in corpo
+    assert 'rel="icon" type="image/jpeg"' in corpo
+    # sem foto de capa, o card de compartilhamento cai na logo
+    rest = Restaurante.query.filter_by(slug=SLUG).first()
+    SiteConfig.query.filter_by(restaurant_id=rest.id).first().hero_foto = None
+    db.session.commit()
+    corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    assert re.search(r'og:image" content="https?://[^"]+img/berga/logo\.jpg', corpo)

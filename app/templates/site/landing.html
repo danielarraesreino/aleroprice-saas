@@ -628,7 +628,7 @@ srcset="{{ base }}-400.webp 400w, {{ base }}-800.webp 800w" sizes="{{ tamanhos }
 <nav aria-label="Seções do site">
   <a href="#topo" class="nav-logo"><img src="{{ url_for('static', filename='img/favicon-64.png') }}" alt="Logo do {{ site.nome }}" width="30" height="30" decoding="async">{{ site.nome|upper }}</a>
   <div class="nav-links">
-    {% if dishes %}<a href="#cardapio">Cardápio</a>{% endif %}
+    {% if dishes %}<a href="#cardapio">{{ rotulo(tenant, 'cardapio') }}</a>{% endif %}
     {% if team or gallery %}<a href="#historia">História</a>{% endif %}
     {# Mesma condição da seção: com nota do Google e sem depoimento, a seção
        existe — e o menu tem que levar até ela. #}
@@ -657,7 +657,7 @@ srcset="{{ base }}-400.webp 400w, {{ base }}-800.webp 800w" sizes="{{ tamanhos }
 <!-- MENU CANECA (mobile): a caneca derrama o chopp e revela os itens -->
 <div class="menu-scrim" id="menuScrim" onclick="toggleMenu()"></div>
 <div class="mobile-menu" id="mobileMenu" role="navigation" aria-label="Menu principal">
-  {% if dishes %}<a href="#cardapio" onclick="toggleMenu(this)">Cardápio</a>{% endif %}
+  {% if dishes %}<a href="#cardapio" onclick="toggleMenu(this)">{{ rotulo(tenant, 'cardapio') }}</a>{% endif %}
   {% if team or gallery %}<a href="#historia" onclick="toggleMenu(this)">História</a>{% endif %}
   {% if reviews or site.nota_google %}<a href="#avaliacoes" onclick="toggleMenu(this)">Avaliações</a>{% endif %}
   {% if gallery %}<a href="#galeria" onclick="toggleMenu(this)">Galeria</a>{% endif %}
@@ -775,7 +775,7 @@ srcset="{{ base }}-400.webp 400w, {{ base }}-800.webp 800w" sizes="{{ tamanhos }
     {# A página de cardápio (a do QR da mesa) só era citada no JSON-LD: nenhum
        link levava até ela. Relativo de propósito, fica no domínio do bar. #}
     {% if tenant and tenant.slug %}
-    <p class="reveal" style="margin-top:34px;text-align:center"><a class="btn btn-ghost" href="{{ url_for('public.cardapio', slug=tenant.slug) }}">Ver cardápio completo</a></p>
+    <p class="reveal" style="margin-top:34px;text-align:center"><a class="btn btn-ghost" href="{{ url_for('public.cardapio', slug=tenant.slug) }}">{{ rotulo(tenant, 'cardapio_completo') }}</a></p>
     {% endif %}
   </div>
 </section>

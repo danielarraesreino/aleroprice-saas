@@ -17,9 +17,14 @@ depends_on = None
 
 
 def upgrade():
+    # Idempotente: em produção essas colunas já foram criadas por
+    # /bootstrap-demo?action=schema, e o Alembic ficou uma revisão atrás.
+    existentes = {c['name'] for c in sa.inspect(op.get_bind()).get_columns('site_config')}
     with op.batch_alter_table('site_config', schema=None) as batch_op:
-        batch_op.add_column(sa.Column('callmebot_phone', sa.String(length=20), nullable=True))
-        batch_op.add_column(sa.Column('callmebot_apikey', sa.String(length=50), nullable=True))
+        if 'callmebot_phone' not in existentes:
+            batch_op.add_column(sa.Column('callmebot_phone', sa.String(length=20), nullable=True))
+        if 'callmebot_apikey' not in existentes:
+            batch_op.add_column(sa.Column('callmebot_apikey', sa.String(length=50), nullable=True))
 
 
 def downgrade():

@@ -2,12 +2,13 @@ from flask import render_template, redirect, url_for, flash, request, abort
 from flask_login import current_user
 
 from app.extensions import db
-from app.models.modelo_sitecontent import DishCard, Review, TeamMember, GalleryItem
+from app.models.modelo_sitecontent import DishCard, Review, TeamMember, GalleryItem, ProdutoSite
 from app.routes.conteudo import bp
 from app.utils.tenant import get_current_restaurant_id
 from app.utils.decorators import plano_minimo
 from app.utils.formatacao_br import ler_moeda
 from app.utils.planos import limite
+from app.utils.vocabulario import tipo_do
 
 # Motor genérico: cada tipo mapeia um model + a definição dos campos do formulário.
 # campo = (nome, rótulo, tipo_widget, obrigatório)
@@ -27,6 +28,19 @@ TIPOS = {
             ('imagem', 'Imagem (caminho em static, ex: img/bar/foto-5.jpg, ou URL)', 'text', False),
             ('tag', 'Selo (ex: ★ O MAIS PEDIDO)', 'text', False),
             ('destaque', 'Destacar com borda', 'check', False),
+            ('ordem', 'Ordem', 'number', False),
+        ],
+    },
+    'produtos': {
+        'model': ProdutoSite, 'label': 'Produtos', 'singular': 'produto', 'resumo': 'nome',
+        'campos': [
+            ('nome', 'Nome do produto', 'text', True),
+            ('descricao', 'Descrição', 'textarea', False),
+            ('categoria', 'Categoria (ex: Defumados, Conservas, Geleias)', 'text', False),
+            ('preco', 'Preço (ex: 18,50 — deixe vazio para não mostrar)', 'preco', False),
+            ('sob_encomenda', 'Sob encomenda', 'check', False),
+            ('imagem', 'Imagem (caminho em static ou URL)', 'text', False),
+            ('destaque', 'Destacar na vitrine', 'check', False),
             ('ordem', 'Ordem', 'number', False),
         ],
     },
@@ -59,10 +73,21 @@ TIPOS = {
 }
 
 
+# Aba que só existe para um tipo de negócio: bar edita "cardapio", artesão
+# edita "produtos". As demais (avaliações, equipe, galeria) servem aos dois.
+SO_PARA = {'cardapio': 'bar', 'produtos': 'artesao'}
+
+
 def _tipo(tipo):
     if tipo not in TIPOS:
         abort(404)
     return TIPOS[tipo]
+
+
+def _tipos_do_negocio():
+    """TIPOS que o negócio logado enxerga (esconde a aba do outro tipo)."""
+    negocio = tipo_do(getattr(current_user, 'restaurante', None))
+    return {k: v for k, v in TIPOS.items() if SO_PARA.get(k, negocio) == negocio}
 
 
 def _rid():
@@ -74,7 +99,7 @@ def _rid():
 
 @bp.route('/')
 def home():
-    return redirect(url_for('conteudo.index', tipo='cardapio'))
+    return redirect(url_for('conteudo.index', tipo=next(iter(_tipos_do_negocio()))))
 
 
 @bp.route('/<tipo>')
@@ -86,7 +111,7 @@ def index(tipo):
         return redirect(url_for('auth.login'))
     Model = t['model']
     itens = Model.query.filter_by(restaurant_id=rid).order_by(Model.ordem, Model.id).all()
-    return render_template('conteudo/index.html', tipo=tipo, t=t, tipos=TIPOS, itens=itens)
+    return render_template('conteudo/index.html', tipo=tipo, t=t, tipos=_tipos_do_negocio(), itens=itens)
 
 
 @bp.route('/<tipo>/novo', methods=['GET', 'POST'])
@@ -129,13 +154,13 @@ def salvar(tipo, item_id=None):
                 v = (request.form.get(campo) or '').strip()
                 if obrig and not v:
                     flash(f'{label} é obrigatório.', 'danger')
-                    return render_template('conteudo/form.html', tipo=tipo, t=t, item=item, tipos=TIPOS)
+                    return render_template('conteudo/form.html', tipo=tipo, t=t, item=item, tipos=_tipos_do_negocio())
                 setattr(item, campo, v or None)
         db.session.commit()
         flash('Salvo.', 'success')
         return redirect(url_for('conteudo.index', tipo=tipo))
 
-    return render_template('conteudo/form.html', tipo=tipo, t=t, item=item, tipos=TIPOS)
+    return render_template('conteudo/form.html', tipo=tipo, t=t, item=item, tipos=_tipos_do_negocio())
 
 
 @bp.route('/<tipo>/<int:item_id>/toggle', methods=['POST'])

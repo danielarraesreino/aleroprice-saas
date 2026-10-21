@@ -18,6 +18,7 @@ from app.utils.site_router import (
     tenant_por_slug, url_canonica, url_do_cardapio,
 )
 from app.utils import seo
+from app.utils.vocabulario import tipo_do
 from app.utils.temas import css_do_tema, cor_do_tema, tema_valido
 from app.utils.copy_site import copy_da_vibe, vibe_valida
 from app.utils.modelos import MODELO_PADRAO, arquivo_do_modelo, modelo_valido
@@ -164,11 +165,14 @@ def _render_landing(rest):
     endereco_canonico = url_canonica(rest)
     json_ld = seo.serializar(seo.dados_estruturados(
         rest, site, conteudo['dishes'], conteudo['reviews'], eventos,
-        endereco_canonico, url_do_cardapio(rest),
+        endereco_canonico, url_do_cardapio(rest), produtos=conteudo['produtos'],
     ))
     meta_desc = seo.meta_descricao(site, rest)
 
-    resp = make_response(render_template(_template_do_modelo(modelo_atual),
+    # Artesão não escolhe entre os layouts de bar: tem o seu próprio, fixo.
+    arquivo = ('site/modelos/artesao.html' if tipo_do(rest) == 'artesao'
+               else _template_do_modelo(modelo_atual))
+    resp = make_response(render_template(arquivo,
                            eventos=eventos, promocoes=promocoes,
                            site=site, tema_css=css_do_tema(tema),
                            tema_cor=cor_do_tema(tema), tenant=rest, copy=copy,
@@ -812,6 +816,21 @@ def cardapio(slug):
     return _render_cardapio(rest)
 
 
+@bp.route('/kits')
+@bp.route('/kits/')
+@bp.route('/kits/index.html')
+def kits_legado():
+    """Endereço antigo do catálogo de kits (donaberga.com.br/kits/index.html).
+
+    Está em posts e na bio do Instagram da Berga. Domínio de artesão leva à
+    vitrine de produtos; qualquer outro host não tem /kits e dá 404.
+    """
+    rest = None if eh_dominio_do_produto(request.host) else tenant_por_host(request.host)
+    if rest is None or tipo_do(rest) != 'artesao':
+        abort(404)
+    return redirect('/#produtos', code=301)
+
+
 @bp.route('/s/<int:rid>')
 def landing_tenant(rid):
     """Alias legado (preview por id). Mantido para não quebrar links já enviados."""
@@ -1008,6 +1027,7 @@ SITE_DEFAULTS = {
     'subline': None,
     'selo_estrelas': None,
     'hero_foto': None,
+    'logo': None,
     'whatsapp': None,
     'telefone_exibicao': None,
     'endereco': None,
@@ -1058,7 +1078,7 @@ def _img(path):
 
 def montar_conteudo(rest):
     """Listas das seções (cardápio, avaliações, equipe, galeria): do tenant ou padrão."""
-    from app.models.modelo_sitecontent import DishCard, Review, TeamMember, GalleryItem
+    from app.models.modelo_sitecontent import DishCard, Review, TeamMember, GalleryItem, ProdutoSite
     rid = rest.id if rest else None
 
     def rows(model):
@@ -1086,7 +1106,17 @@ def montar_conteudo(rest):
     gallery = [{'img': _img(g.imagem), 'legenda': g.legenda}
                for g in rows(GalleryItem)]
 
-    return {'dishes': dishes, 'reviews': reviews, 'team': team, 'gallery': gallery}
+    # Produtos do hotsite de artesão. Bar não paga a query: só lê a tabela
+    # quando o tenant é artesão.
+    produtos = []
+    if tipo_do(rest) == 'artesao':
+        produtos = [{'nome': p.nome, 'descricao': p.descricao, 'img': _img(p.imagem),
+                     'categoria': p.categoria, 'preco': p.preco,
+                     'sob_encomenda': bool(p.sob_encomenda), 'destaque': bool(p.destaque)}
+                    for p in rows(ProdutoSite)]
+
+    return {'dishes': dishes, 'reviews': reviews, 'team': team, 'gallery': gallery,
+            'produtos': produtos}
 
 
 @bp.route('/reservar', methods=['POST'])
