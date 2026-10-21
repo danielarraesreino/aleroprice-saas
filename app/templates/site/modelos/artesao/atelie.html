@@ -1,0 +1,76 @@
+{% extends "site/modelos/artesao/_base.html" %}
+{% import "site/modelos/artesao/_produtos.html" as pr %}
+{% block fonte_display %}family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800{% endblock %}
+{% block tokens %}
+/* Ateliê: pedra clara, azul-ultramar de ação, nome gigante. Funciona sem foto. */
+:root{
+  --ink:#f1efeb;--ink-2:#e6e2dc;--ink-3:#d8d3cb;--cream:#1b1b1d;--cream-dim:#55545a;
+  --amber:#2b3a9e;--ember:#2b3a9e;--gold:#8a6a10;--spot:#f0c419;
+  --font-display:'Bricolage Grotesque','Helvetica Neue',Arial,sans-serif;--r:4px;color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ink:#131316;--ink-2:#1c1c21;--ink-3:#28282f;--cream:#f1efeb;--cream-dim:#b2b0b8;--amber:#a6b4ff;--ember:#4558c8;--gold:#e7c24d;color-scheme:dark}}
+:root[data-theme="dark"]{--ink:#131316;--ink-2:#1c1c21;--ink-3:#28282f;--cream:#f1efeb;--cream-dim:#b2b0b8;--amber:#a6b4ff;--ember:#4558c8;--gold:#e7c24d;color-scheme:dark}
+{% endblock %}
+{% block estilo %}
+.titulo{font-weight:800;letter-spacing:-.03em}
+.hero{padding-block:var(--s7) var(--s7)}
+.hero-in{display:grid;gap:var(--s6)}
+.hero h1{font-size:clamp(3.25rem,15vw,9.5rem);line-height:.9;overflow-wrap:anywhere}
+.hero .lado{display:grid;gap:var(--s5);align-content:start}
+.hero .faz{background:var(--ember);color:var(--on-ember);border-radius:var(--r);padding:var(--s5)}
+.hero .faz h2{font:700 1rem/1.2 var(--font-body);margin-bottom:var(--s3);opacity:.9}
+.hero .faz ul{display:grid;gap:var(--s2);font:700 clamp(1.25rem,3.4vw,1.75rem)/1.15 var(--font-display)}
+.hero .quando{color:var(--cream-dim)}
+.chips{display:none;position:sticky;top:var(--nav-h);z-index:30;background:var(--ink);padding-block:var(--s2);margin-bottom:var(--s6)}
+.js .chips{display:block}
+.chips .wrap{display:flex;gap:var(--s2);overflow-x:auto;scrollbar-width:none}
+.chips .wrap::-webkit-scrollbar{display:none}
+.chip{flex:none;min-height:44px;padding:0 var(--s4);border-radius:var(--r);border:0;background:var(--ink-2);color:var(--cream);font:600 .9375rem/1 var(--font-body);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ember);color:var(--on-ember)}
+.categoria + .categoria{margin-top:var(--s8)}
+.categoria > h3{font:800 clamp(1.5rem,4vw,2.25rem)/1.05 var(--font-display);letter-spacing:-.02em;margin-bottom:var(--s5)}
+.categoria > h3 small{margin-left:var(--s2);font:500 1rem var(--font-body);color:var(--cream-dim)}
+/* catálogo editorial: uma peça por linha, nome grande, foto só quando existe */
+.grade{display:grid;grid-template-columns:1fr;gap:var(--s3)}
+.tile{display:grid;grid-template-columns:1fr;min-width:0;background:var(--ink-2);border-radius:var(--r);overflow:hidden}
+.tile figure{background:var(--ink-3)}
+.tile img{width:100%;height:auto;aspect-ratio:4/3;object-fit:cover}
+.tile.cartaz img{object-fit:contain;padding:var(--s3)}
+.tile .corpo{display:grid;gap:var(--s2);align-content:start;padding:var(--s5)}
+.tile h4{font:800 clamp(1.375rem,4vw,1.875rem)/1.05 var(--font-display);letter-spacing:-.02em}
+.tile .desc{color:var(--cream-dim)}
+.tile .preco{font:700 1.25rem/1 var(--font-display);color:var(--gold)}
+.tile .enc{justify-self:start;padding:var(--s1) var(--s2);border-radius:var(--r);background:var(--spot);color:#1b1b1d;font-size:.875rem;font-weight:600}
+.tile .acao{padding-top:var(--s2)}
+.tile.sem-foto .corpo{padding:var(--s5)}
+.tile.destaque{background:var(--ink-3)}
+@media (min-width:720px){
+  .hero{padding-block:var(--s8)}
+  .hero-in{grid-template-columns:1.4fr 1fr;align-items:end;gap:var(--s7)}
+  .grade{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4)}
+  .tile:not(.sem-foto){grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)}
+  .tile:not(.sem-foto) img{height:100%;aspect-ratio:auto;min-height:220px}
+}
+{% endblock %}
+{% block hero %}
+<section class="hero" id="topo" aria-labelledby="titulo">
+  <div class="wrap hero-in">
+    <h1 id="titulo" class="titulo">{{ site.nome }}</h1>
+    <div class="lado">
+      {% if site.tagline %}<p class="lead">{{ site.tagline }}</p>{% endif %}
+      {% if produtos %}
+      <div class="faz"><h2>O que é feito aqui</h2>
+        <ul>{% for p in produtos[:6] %}<li>{{ p.nome }}</li>{% endfor %}</ul>
+      </div>
+      {% endif %}
+      <div class="acoes">
+        {% if produtos %}<a class="btn" href="#produtos">Ver {{ rotulo(tenant, 'cardapio')|lower }}</a>{% endif %}
+        {% if contato_href %}<a class="btn btn-line" href="{{ contato_href }}" target="_blank" rel="noopener">Falar no {{ contato_nome }}</a>{% endif %}
+      </div>
+      {% if site.horario %}<p class="quando">{{ site.horario }}{% if site.ponto_na_feira %}. {{ site.ponto_na_feira }}{% endif %}</p>{% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block vitrine %}{{ pr.grade(produtos, cats, site, wa) }}{% endblock %}

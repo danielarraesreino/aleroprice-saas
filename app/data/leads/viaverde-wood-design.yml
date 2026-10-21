@@ -1,0 +1,23 @@
+# Importado do pacote de hotsites. Sem foto de propósito: peça a original e a
+# autorização de imagem; coloque em app/static/img/demo/viaverde-wood-design/ (capa.jpg, logo.jpg,
+# produto-<nome>.jpg). Troque `site.modelo` se outro layout combinar mais.
+nome: Via Verde Wood Design
+tipo_negocio: artesao
+site:
+  vibe: artesanal-feira
+  modelo: atelie
+  tagline: (bio só traz o site e a cidade)
+  descritor: Madeira e artesanato
+  instagram_url: https://instagram.com/viaverde_wood_design
+  horario: Na Feira de Barão
+  cidade_uf: Barão Geraldo, Campinas–SP
+  maps_query: Feira de Barão Geraldo Campinas
+  tema_modo: auto
+produtos:
+- nome: Tábuas de madeira
+- nome: Esculturas/rostos em madeira
+- nome: Velas
+- nome: Adereços
+demo:
+  fonte: pacote-hotsites-2026-10
+  expira_em: '2026-12-20'

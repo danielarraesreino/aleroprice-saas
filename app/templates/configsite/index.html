@@ -69,7 +69,6 @@
 <form method="post" class="col-lg-9">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-{% if not eh_artesao %}
   {# Modelo vem primeiro porque é a decisão maior: troca o esqueleto da página,
      e a paleta se escolhe em cima do que ficou. Cartão e não <select> porque
      "Craft" e "Brasa" não dizem nada sozinhos — o dono decide lendo o "pra
@@ -101,8 +100,6 @@
       não altera seu site — só o botão Salvar aplica.
     </div>
   </div>
-
-{% endif %}
 
   <div class="mb-4">
     <label class="form-label fw-semibold">Claro ou escuro</label>

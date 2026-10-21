@@ -1,0 +1,28 @@
+# Importado do pacote de hotsites. Sem foto de propósito: peça a original e a
+# autorização de imagem; coloque em app/static/img/demo/atelie-afetivo/ (capa.jpg, logo.jpg,
+# produto-<nome>.jpg). Troque `site.modelo` se outro layout combinar mais.
+nome: Ateliê Afetivo
+tipo_negocio: artesao
+site:
+  vibe: artesanal-feira
+  modelo: atelie
+  tagline: 'Peças artesanais: bolsas, lenços e faixas de cabelo, almofadas térmicas de sementes.'
+  descritor: Bolsas, pochetes e acessórios de costura
+  whatsapp: '5511982709538'
+  telefone_exibicao: (11) 98270-9538
+  instagram_url: https://instagram.com/belvasconcellos_atelieafetivo
+  horario: Na Feira de Barão
+  cidade_uf: Barão Geraldo, Campinas–SP
+  maps_query: Feira de Barão Geraldo Campinas
+  tema_modo: auto
+produtos:
+- nome: Bolsas e mochilas
+- nome: Pochetes
+- nome: Carteiras
+- nome: Porta-óculos
+- nome: Lenços e faixas
+- nome: Almofadas térmicas de sementes
+- nome: Absorventes
+demo:
+  fonte: pacote-hotsites-2026-10
+  expira_em: '2026-12-20'

@@ -1,0 +1,57 @@
+{% extends "site/modelos/artesao/_base.html" %}
+{% import "site/modelos/artesao/_produtos.html" as pr %}
+{% block fonte_display %}family=Abril+Fatface{% endblock %}
+{% block tokens %}
+/* Ritual: noite e dourado, tudo centralizado, serviços em lista. */
+:root{
+  --ink:#120d24;--ink-2:#1b1434;--ink-3:#281d49;--cream:#f1ebff;--cream-dim:#b6aad6;
+  --amber:#e8c468;--ember:#6d3fcf;--gold:#e8c468;
+  --font-display:'Abril Fatface','Didot',Georgia,serif;color-scheme:dark;
+}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
+  --ink:#f4f0fb;--ink-2:#e8e0f6;--ink-3:#d9cdf0;--cream:#1c1236;--cream-dim:#55467a;--amber:#5a32b0;--ember:#5a32b0;--gold:#7d5d0c;color-scheme:light}}
+:root[data-theme="light"]{--ink:#f4f0fb;--ink-2:#e8e0f6;--ink-3:#d9cdf0;--cream:#1c1236;--cream-dim:#55467a;--amber:#5a32b0;--ember:#5a32b0;--gold:#7d5d0c;color-scheme:light}
+{% endblock %}
+{% block estilo %}
+.titulo{font-weight:400;letter-spacing:0}
+.hero{padding-block:var(--s8) var(--s8);text-align:center}
+.hero h1{font-size:clamp(3rem,13vw,7.5rem);line-height:1;overflow-wrap:anywhere;margin-bottom:var(--s5)}
+.hero .lead{margin-inline:auto;margin-bottom:var(--s6)}
+.hero .acoes{justify-content:center}
+.hero .quando{margin-top:var(--s6);color:var(--cream-dim)}
+.cab{text-align:center;justify-items:center}
+.chips{display:none;position:sticky;top:var(--nav-h);z-index:30;background:var(--ink);padding-block:var(--s2);margin-bottom:var(--s6)}
+.js .chips{display:block}
+.chips .wrap{display:flex;justify-content:center;gap:var(--s2);overflow-x:auto;scrollbar-width:none}
+.chips .wrap::-webkit-scrollbar{display:none}
+.chip{flex:none;min-height:44px;padding:0 var(--s4);border-radius:var(--r);border:0;background:var(--ink-2);color:var(--cream);font:600 .9375rem/1 var(--font-body);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--gold);color:var(--ink)}
+.categoria{max-width:760px;margin-inline:auto}
+.categoria + .categoria{margin-top:var(--s7)}
+.categoria > h3{text-align:center;font:400 clamp(1.5rem,4.5vw,2.25rem)/1.1 var(--font-display);color:var(--amber);margin-bottom:var(--s5)}
+.categoria > h3 small{margin-left:var(--s2);font:500 1rem var(--font-body);color:var(--cream-dim)}
+.linhas{display:grid;gap:var(--s3)}
+.linha{display:grid;gap:var(--s3);justify-items:center;text-align:center;padding:var(--s5);background:var(--ink-2);border-radius:var(--r)}
+.linha img{width:96px;height:96px;object-fit:cover;border-radius:50%;background:var(--ink-3)}
+.linha h4{font:400 clamp(1.375rem,4vw,1.75rem)/1.15 var(--font-display)}
+.linha .desc{margin-top:var(--s1);color:var(--cream-dim)}
+.linha .preco{margin-top:var(--s1);font:400 1.25rem/1 var(--font-display);color:var(--gold)}
+.linha .enc{display:inline-block;margin-top:var(--s2);padding:var(--s1) var(--s2);border-radius:var(--r);background:var(--ink-3);font-size:.875rem}
+.linha .acao .btn{min-width:180px}
+.btn-line{border-color:var(--gold);color:var(--gold)}
+.btn-line:hover{background:var(--gold);border-color:var(--gold);color:var(--ink)}
+{% endblock %}
+{% block hero %}
+<section class="hero" id="topo" aria-labelledby="titulo">
+  <div class="wrap">
+    <h1 id="titulo" class="titulo">{{ site.nome }}</h1>
+    {% if site.tagline %}<p class="lead">{{ site.tagline }}</p>{% endif %}
+    <div class="acoes">
+      {% if produtos %}<a class="btn" href="#produtos">Ver {{ rotulo(tenant, 'cardapio')|lower }}</a>{% endif %}
+      {% if contato_href %}<a class="btn btn-line" href="{{ contato_href }}" target="_blank" rel="noopener">Falar no {{ contato_nome }}</a>{% endif %}
+    </div>
+    {% if site.horario %}<p class="quando">{{ site.horario }}{% if site.ponto_na_feira %}. {{ site.ponto_na_feira }}{% endif %}</p>{% endif %}
+  </div>
+</section>
+{% endblock %}
+{% block vitrine %}{{ pr.linhas(produtos, cats, site, wa) }}{% endblock %}

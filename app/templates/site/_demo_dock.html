@@ -369,7 +369,7 @@
           <button class="btn-dock-info" onclick="abrirModalMaps()">
             📍 Google Maps
           </button>
-          <a class="btn-dock-cta" href="https://wa.me/{{ site.whatsapp or contato_vendas }}?text={{ ('Olá! Gostei da demonstração do site para o ' ~ site.nome ~ ' e quero ativar pro meu bar.') | urlencode }}" target="_blank" rel="noopener">
+          <a class="btn-dock-cta" href="https://wa.me/{{ site.whatsapp or contato_vendas }}?text={{ ('Olá! Gostei da demonstração do site para o ' ~ site.nome ~ ' e quero ativar ' ~ ('para a minha barraca.' if modelos_artesao else 'pro meu bar.')) | urlencode }}" target="_blank" rel="noopener">
             Quero Este Site →
           </a>
           <button type="button" class="btn-dock-recolher" id="dockRecolher" onclick="alternarDock(false)" aria-controls="dockBar">Recolher ▼</button>
@@ -379,6 +379,14 @@
       <!-- Linha 2: Seletor de Estilos / Modelos na Mesa -->
       <div class="demo-dock-selector">
         <span class="selector-label">Design:</span>
+        {% if modelos_artesao %}
+        {# Hotsite de artesão: os modelos dele, não os de bar. #}
+        {% for m in modelos_artesao %}
+        <button class="dock-pill {{ 'ativo' if modelo_atual == m.valor }}" aria-pressed="{{ 'true' if modelo_atual == m.valor else 'false' }}" onclick="trocarModelo('{{ m.valor }}')" title="{{ m.para }}">
+          {{ m.label }}
+        </button>
+        {% endfor %}
+        {% else %}
         <button class="dock-pill {{ 'ativo' if modelo_atual == 'classico' }}" aria-pressed="{{ 'true' if modelo_atual == 'classico' else 'false' }}" onclick="trocarModelo('classico')">
           📋 Clássico
         </button>
@@ -397,6 +405,7 @@
         <button class="dock-pill {{ 'ativo' if modelo_atual == 'tradicional' }}" aria-pressed="{{ 'true' if modelo_atual == 'tradicional' else 'false' }}" onclick="trocarModelo('tradicional')">
           🏛️ Tradicional (Raiz)
         </button>
+        {% endif %}
 
         <span class="selector-label" style="margin-left: 8px;">Modo:</span>
         <button class="dock-pill {{ 'ativo' if modo_atual == 'claro' }}" aria-pressed="{{ 'true' if modo_atual == 'claro' else 'false' }}" onclick="trocarModo('claro')">

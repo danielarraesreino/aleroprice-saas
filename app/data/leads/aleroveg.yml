@@ -1,0 +1,24 @@
+# Importado do pacote de hotsites. Sem foto de propósito: peça a original e a
+# autorização de imagem; coloque em app/static/img/demo/aleroveg/ (capa.jpg, logo.jpg,
+# produto-<nome>.jpg). Troque `site.modelo` se outro layout combinar mais.
+nome: AleroVeg
+tipo_negocio: artesao
+site:
+  vibe: artesanal-feira
+  modelo: cozinha
+  tagline: Comida congelada vegetariana e vegana. Cogumelos in natura.
+  descritor: Comida vegana e vegetariana
+  whatsapp: '5519994434004'
+  telefone_exibicao: (19) 99443-4004
+  instagram_url: https://instagram.com/aleroveg
+  horario: Sábados e domingos na Feira de Barão
+  cidade_uf: Barão Geraldo, Campinas–SP
+  maps_query: Feira de Barão Geraldo Campinas
+  tema_modo: auto
+produtos:
+- nome: Pratos veganos e vegetarianos
+  descricao: Grão-de-bico caprese, moqueca de cogumelos, chili de cogumelos, caldeirada de lentilha
+- nome: Cogumelos in natura
+demo:
+  fonte: pacote-hotsites-2026-10
+  expira_em: '2026-12-20'

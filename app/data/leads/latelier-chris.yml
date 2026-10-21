@@ -1,0 +1,23 @@
+# Importado do pacote de hotsites. Sem foto de propósito: peça a original e a
+# autorização de imagem; coloque em app/static/img/demo/latelier-chris/ (capa.jpg, logo.jpg,
+# produto-<nome>.jpg). Troque `site.modelo` se outro layout combinar mais.
+nome: L'atelier Chris
+tipo_negocio: artesao
+site:
+  vibe: artesanal-feira
+  modelo: atelie
+  tagline: Crochê moderno, amigurumi, maxi crochê, tricô, handmade. Artesanato, Campinas SP.
+  descritor: Crochê e amigurumi
+  instagram_url: https://instagram.com/latelierchris
+  horario: Na Feira de Barão
+  cidade_uf: Barão Geraldo, Campinas–SP
+  maps_query: Feira de Barão Geraldo Campinas
+  tema_modo: auto
+produtos:
+- nome: Amigurumis
+  descricao: Bichinhos, bonecas
+- nome: Maxi crochê
+- nome: Tricô
+demo:
+  fonte: pacote-hotsites-2026-10
+  expira_em: '2026-12-20'

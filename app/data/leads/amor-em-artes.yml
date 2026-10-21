@@ -1,0 +1,23 @@
+# Importado do pacote de hotsites. Sem foto de propósito: peça a original e a
+# autorização de imagem; coloque em app/static/img/demo/amor-em-artes/ (capa.jpg, logo.jpg,
+# produto-<nome>.jpg). Troque `site.modelo` se outro layout combinar mais.
+nome: Amor em Artes
+tipo_negocio: artesao
+site:
+  vibe: artesanal-feira
+  modelo: atelie
+  tagline: Pintura em madeira personalizada, pintada à mão conforme solicitação do cliente. Aceita encomendas.
+  descritor: Pintura em madeira e canecas
+  instagram_url: https://instagram.com/juamoremartes
+  horario: Na Feira de Barão
+  cidade_uf: Barão Geraldo, Campinas–SP
+  maps_query: Feira de Barão Geraldo Campinas
+  tema_modo: auto
+produtos:
+- nome: Canecas pintadas
+- nome: Quadros
+- nome: Porta-maternidade
+- nome: Peças pet e logomarcas
+demo:
+  fonte: pacote-hotsites-2026-10
+  expira_em: '2026-12-20'

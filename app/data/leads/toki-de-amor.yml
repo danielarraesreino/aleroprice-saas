@@ -1,0 +1,25 @@
+# Importado do pacote de hotsites. Sem foto de propósito: peça a original e a
+# autorização de imagem; coloque em app/static/img/demo/toki-de-amor/ (capa.jpg, logo.jpg,
+# produto-<nome>.jpg). Troque `site.modelo` se outro layout combinar mais.
+nome: Toki de Amor
+tipo_negocio: artesao
+site:
+  vibe: artesanal-feira
+  modelo: ritual
+  tagline: Um toque especial em cada momento, seja através das joias, da auriculoterapia com os cristais,
+    do Reiki com energização.
+  descritor: Joias, cristais e terapias
+  instagram_url: https://instagram.com/toki_de_amor
+  horario: Na Feira de Barão
+  cidade_uf: Barão Geraldo, Campinas–SP
+  maps_query: Feira de Barão Geraldo Campinas
+  tema_modo: auto
+produtos:
+- nome: Joias
+  descricao: Anéis, pulseiras, colares
+- nome: Auriculoterapia com cristais
+- nome: Reiki
+- nome: Oficinas
+demo:
+  fonte: pacote-hotsites-2026-10
+  expira_em: '2026-12-20'

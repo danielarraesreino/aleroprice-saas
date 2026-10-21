@@ -2,6 +2,8 @@
 import json
 import re
 
+import pytest
+
 from app.extensions import db
 from app.models.modelo_restaurante import Restaurante
 from app.models.modelo_sitecontent import ProdutoSite
@@ -148,9 +150,21 @@ def test_kits_responde_no_dominio_do_artesao_mesmo_com_dominios_separados(client
     assert resp.status_code == 301 and resp.headers['Location'].endswith('/#produtos')
 
 
-def test_sem_nenhum_produto_com_foto_mostra_estado_vazio_com_whatsapp(client, session):
+def test_sem_nenhuma_foto_mostra_o_que_faz_em_texto(client, session):
+    """Hotsite recém-montado, sem fotos originais: lista em texto, nunca vitrine vazia."""
     rest, _ = semear(no_ar=True)
     ProdutoSite.query.filter_by(restaurant_id=rest.id).update({'imagem': None})
+    db.session.commit()
+    corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    assert 'Catálogo em montagem' not in corpo
+    assert 'Pastrami de Cupim' in corpo and 'sem-foto' in corpo
+    assert 'tender.jpg' not in corpo and 'picanha-suina.jpg' not in corpo
+    assert 'wa.me/5519991563362' in corpo
+
+
+def test_sem_nenhum_produto_cadastrado_mostra_catalogo_em_montagem(client, session):
+    rest, _ = semear(no_ar=True)
+    ProdutoSite.query.filter_by(restaurant_id=rest.id).delete()
     db.session.commit()
     corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
     assert 'Catálogo em montagem' in corpo
@@ -193,3 +207,58 @@ def test_site_sem_whatsapp_nao_oferece_encomenda(client, session):
     db.session.commit()
     corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
     assert 'class="btn add"' not in corpo and '<dialog' not in corpo and 'id="como"' not in corpo
+
+
+# ---------------------------------------------------------------- modelos de artesão
+
+from app.utils.modelos import MODELOS_ARTESAO, modelo_para_categoria  # noqa: E402
+
+
+@pytest.mark.parametrize('modelo', list(MODELOS_ARTESAO))
+def test_cada_modelo_renderiza_com_claro_escuro_e_encomenda(client, session, modelo):
+    semear(no_ar=True)
+    resp = client.get(f'/bar/{SLUG}?modelo={modelo}')
+    corpo = resp.get_data(as_text=True)
+    assert resp.status_code == 200
+    assert f'class="modelo-{modelo}"' in corpo
+    assert corpo.count('<h1') == 1 and 'Dona Berga' in corpo
+    # os dois modos: pelo aparelho e fixado pela casa
+    assert 'prefers-color-scheme' in corpo
+    assert ':root[data-theme="light"]' in corpo or ':root[data-theme="dark"]' in corpo   # o outro é o :root
+    assert 'color-scheme:light' in corpo and 'color-scheme:dark' in corpo
+    assert 'class="btn add"' in corpo and '<dialog class="pedido"' in corpo
+    assert 'noindex' not in corpo                       # espiar modelo não vira prévia indexável
+
+
+def test_modelo_desconhecido_cai_na_vitrine(client, session):
+    semear(no_ar=True)
+    corpo = client.get(f'/bar/{SLUG}?modelo=boteco').get_data(as_text=True)   # modelo de bar não vale aqui
+    assert 'class="modelo-vitrine"' in corpo
+
+
+def test_modelo_salvo_vale_para_o_artesao(client, session):
+    rest, _ = semear(no_ar=True)
+    rest.site_config.modelo = 'cozinha'
+    db.session.commit()
+    assert 'class="modelo-cozinha"' in client.get(f'/bar/{SLUG}').get_data(as_text=True)
+
+
+@pytest.mark.parametrize('categoria,esperado', [
+    ('Charcutaria artesanal', 'vitrine'), ('Pão artesanal', 'cozinha'), ('Risotos (trailer)', 'cozinha'),
+    ('Plantas, terrários e kokedamas', 'jardim'), ('Incensos e esotéricos', 'ritual'),
+    ('Serviço: tarô', 'ritual'), ('Crochê e amigurumi', 'atelie'), ('Cerâmica (colares e brincos)', 'atelie'),
+    ('', 'atelie'), (None, 'atelie'),
+])
+def test_modelo_sugerido_pela_categoria(categoria, esperado):
+    assert modelo_para_categoria(categoria) == esperado
+
+
+def test_sem_whatsapp_o_contato_vira_instagram_e_nao_oferece_encomenda(client, session):
+    rest, _ = semear(no_ar=True)
+    rest.site_config.whatsapp = None
+    db.session.commit()
+    for modelo in MODELOS_ARTESAO:
+        corpo = client.get(f'/bar/{SLUG}?modelo={modelo}').get_data(as_text=True)
+        assert 'wa.me/5519991563362' not in corpo, modelo
+        assert 'Chamar no Instagram' in corpo and 'donaberga_produtosartesanais' in corpo, modelo
+        assert 'class="btn add"' not in corpo and '<dialog' not in corpo, modelo

@@ -222,6 +222,27 @@ VIBES = {
 }
 
 
+# Vibe neutra para os hotsites de expositores da feira. A `artesanal` carrega
+# afirmações da Berga (sem química, produção limitada) que NÃO se podem pôr na
+# boca de outro expositor sem ele ter dito. Aqui só entra o que vale para qualquer
+# barraca: quem faz, o que faz, onde encontrar.
+VIBES['artesanal-feira'] = {
+    **VIBES['artesanal'],
+    'label': 'Expositor da feira',
+    'descricao': 'Texto neutro para barraca da feira: produtos, contato e onde encontrar.',
+    'marquee': [],
+    'cardapio': {'eyebrow': '', 'titulo': 'Nossos <em>produtos</em>',
+                 'lead': 'Veja o que tem e chame para combinar. Também dá para conhecer na feira.'},
+    'historia': {'eyebrow': '', 'titulo': 'Quem faz',
+                 'texto': 'Conheça quem está por trás de {nome}.'},
+    'clima': {'eyebrow': '', 'titulo': '', 'cards': []},
+    'cta': {'titulo': 'Quer conhecer?', 'linha': 'Fale com a gente ou venha à feira.'},
+    'rodape': 'Feira de Barão, Campinas.',
+    'zap': 'Olá! Vim pelo site do {nome} e queria saber mais.',
+    'scroll': '',
+}
+
+
 def vibe_valida(nome):
     return nome in VIBES
 

@@ -1,0 +1,24 @@
+# Importado do pacote de hotsites. Sem foto de propósito: peça a original e a
+# autorização de imagem; coloque em app/static/img/demo/sandra-cristina-mosaicos/ (capa.jpg, logo.jpg,
+# produto-<nome>.jpg). Troque `site.modelo` se outro layout combinar mais.
+nome: Sandra Cristina Mosaicos
+tipo_negocio: artesao
+site:
+  vibe: artesanal-feira
+  modelo: atelie
+  tagline: Mosaicista. Peças exclusivas feitas com amor. Na Feira de Barão aos sábados e domingos.
+  descritor: Mosaicos
+  instagram_url: https://instagram.com/sandracristinamosaicos
+  horario: Sábados e domingos na Feira de Barão
+  cidade_uf: Barão Geraldo, Campinas–SP
+  maps_query: Feira de Barão Geraldo Campinas
+  tema_modo: auto
+produtos:
+- nome: Relógios de mosaico
+- nome: Vasos
+- nome: Números de casa
+- nome: Pombas do Divino
+- nome: Luminárias
+demo:
+  fonte: pacote-hotsites-2026-10
+  expira_em: '2026-12-20'

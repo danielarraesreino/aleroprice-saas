@@ -152,6 +152,7 @@ def test_do_formulario_ao_site_no_ar(client, session, tmp_path):
     session.commit()
     pagina = client.get(f'/bar/{rest.slug}').get_data(as_text=True)
     assert 'Ateliê da Maria' in pagina and 'wa.me/5519999991234' in pagina
-    assert 'Catálogo em montagem' in pagina            # produtos sem foto ficam ocultos
+    assert 'Catálogo em montagem' not in pagina        # sem foto nenhuma, o que faz aparece em texto
+    assert 'sem-foto' in pagina
     assert 'noindex' in pagina                         # prévia não oficial
     assert 'Ateliê da Maria' in client.get('/feira').get_data(as_text=True)

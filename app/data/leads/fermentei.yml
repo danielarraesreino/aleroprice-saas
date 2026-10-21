@@ -1,0 +1,24 @@
+# Importado do pacote de hotsites. Sem foto de propósito: peça a original e a
+# autorização de imagem; coloque em app/static/img/demo/fermentei/ (capa.jpg, logo.jpg,
+# produto-<nome>.jpg). Troque `site.modelo` se outro layout combinar mais.
+nome: Fermentei
+tipo_negocio: artesao
+site:
+  vibe: artesanal-feira
+  modelo: cozinha
+  tagline: Pão artesanal de fermentação natural, processos longos. Campinas, Feira de Barão.
+  descritor: Pão artesanal
+  whatsapp: '5519983530419'
+  telefone_exibicao: (19) 98353-0419
+  instagram_url: https://instagram.com/fermentei_bakery
+  horario: Na Feira de Barão
+  cidade_uf: Barão Geraldo, Campinas–SP
+  maps_query: Feira de Barão Geraldo Campinas
+  tema_modo: auto
+produtos:
+- nome: Pães de fermentação natural
+- nome: Panetone e cardápio de Natal
+- nome: Aulas/cozinhando juntos
+demo:
+  fonte: pacote-hotsites-2026-10
+  expira_em: '2026-12-20'

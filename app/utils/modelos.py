@@ -91,3 +91,95 @@ def opcoes_de_modelo():
         {'valor': chave, 'label': m['label'], 'descricao': m['descricao'], 'para': m['para']}
         for chave, m in MODELOS.items()
     ]
+
+
+# --------------------------------------------------------------------------
+# Modelos do hotsite de ARTESÃO (tipo_negocio='artesao')
+#
+# Mesma ideia dos modelos de bar: o esqueleto muda (hero, jeito de mostrar o
+# que vende, tipo, paleta), não só a cor. Ficam fora de `MODELOS` de propósito:
+# bar e artesão têm catálogos separados, e um `?modelo=` de um não vale no outro.
+# Todos estendem `site/modelos/artesao/_base.html` (menu, encomenda, contato).
+# --------------------------------------------------------------------------
+
+MODELO_ARTESAO_PADRAO = 'vitrine'
+
+MODELOS_ARTESAO = {
+    'vitrine': {
+        'label': 'Vitrine',
+        'descricao': 'Foto do produto inteira, rótulo preto por cima e vitrine por categoria. '
+                     'Funciona melhor quando há boas fotos.',
+        'para': 'Pra charcutaria, conservas e quem tem foto forte de produto.',
+        'arquivo': 'site/modelos/artesao/vitrine.html',
+    },
+    'atelie': {
+        'label': 'Ateliê',
+        'descricao': 'Nome gigante, bloco de cor com o que a pessoa faz e catálogo em '
+                     'lista editorial. Não depende de foto para ficar bonito.',
+        'para': 'Pra peças feitas à mão: crochê, cerâmica, madeira, joia, costura, mosaico.',
+        'arquivo': 'site/modelos/artesao/atelie.html',
+    },
+    'cozinha': {
+        'label': 'Cozinha',
+        'descricao': 'Campo de cor cheio, horário em destaque e cardápio da barraca em '
+                     'linhas grandes, com botão de pedir em cada prato.',
+        'para': 'Pra comida na feira: pão, pizza, empada, risoto, biscoito, vegano.',
+        'arquivo': 'site/modelos/artesao/cozinha.html',
+    },
+    'jardim': {
+        'label': 'Jardim',
+        'descricao': 'Verdes e cantos macios, com o que a pessoa cultiva ou monta em '
+                     'etiquetas, e um catálogo leve.',
+        'para': 'Pra plantas, terrários, kokedamas e quem trabalha com natureza.',
+        'arquivo': 'site/modelos/artesao/jardim.html',
+    },
+    'ritual': {
+        'label': 'Ritual',
+        'descricao': 'Noite e dourado, título centralizado e serviços em lista, com '
+                     'chamada para agendar ou conversar.',
+        'para': 'Pra incenso, cristais, tarô, terapias e mandalas.',
+        'arquivo': 'site/modelos/artesao/ritual.html',
+    },
+}
+
+# Palavras da categoria -> modelo. A primeira que casar vale; sem casar, ateliê
+# (a maioria da feira é peça feita à mão).
+_CATEGORIA_PARA_MODELO = (
+    ('vitrine', ('charcut', 'defumad', 'conserva', 'embutid')),
+    ('cozinha', ('comida', 'empada', 'risot', 'pizza', 'pao', 'padaria', 'biscoito', 'cookie',
+                 'culinaria', 'vegan', 'lanche', 'doce', 'bolo', 'quiche')),
+    ('jardim', ('planta', 'terrario', 'kokedama', 'jardim', 'horta', 'suculenta')),
+    ('ritual', ('incenso', 'esoter', 'taro', 'cristal', 'terapia', 'reiki', 'astrolog')),
+)
+
+
+def modelo_artesao_valido(nome):
+    return nome in MODELOS_ARTESAO
+
+
+def arquivo_do_modelo_artesao(nome):
+    """Template do modelo; nome desconhecido cai na vitrine, em silêncio."""
+    return (MODELOS_ARTESAO.get(nome) or MODELOS_ARTESAO[MODELO_ARTESAO_PADRAO])['arquivo']
+
+
+def modelo_para_categoria(categoria):
+    """Sugere o modelo pela categoria que o expositor declarou ('Pão artesanal' -> cozinha)."""
+    import unicodedata
+    base = unicodedata.normalize('NFKD', categoria or '')
+    texto = ''.join(c for c in base if not unicodedata.combining(c)).casefold()
+    for modelo, palavras in _CATEGORIA_PARA_MODELO:
+        if any(p in texto for p in palavras):
+            return modelo
+    return 'atelie'
+
+
+def opcoes_de_modelo_artesao():
+    return [{'valor': k, 'label': m['label'], 'descricao': m['descricao'], 'para': m['para']}
+            for k, m in MODELOS_ARTESAO.items()]
+
+
+def catalogo_de_modelos(tipo):
+    """(dicionário de modelos, modelo padrão, opções p/ seletor) do tipo de negócio."""
+    if tipo == 'artesao':
+        return MODELOS_ARTESAO, MODELO_ARTESAO_PADRAO, opcoes_de_modelo_artesao()
+    return MODELOS, MODELO_PADRAO, opcoes_de_modelo()

@@ -1,0 +1,27 @@
+# Importado do pacote de hotsites. Sem foto de propósito: peça a original e a
+# autorização de imagem; coloque em app/static/img/demo/neto-schmidt-terrarios/ (capa.jpg, logo.jpg,
+# produto-<nome>.jpg). Troque `site.modelo` se outro layout combinar mais.
+nome: Neto Schmidt Terrários
+tipo_negocio: artesao
+site:
+  vibe: artesanal-feira
+  modelo: jardim
+  tagline: Formado em biologia e professor, amigo da natureza. Terrários, kokedamas, quadros vivos, mini
+    jardins.
+  descritor: Plantas, terrários e kokedamas
+  instagram_url: https://instagram.com/netoschmidtterrarios
+  horario: Na Feira de Barão
+  cidade_uf: Barão Geraldo, Campinas–SP
+  maps_query: Feira de Barão Geraldo Campinas
+  tema_modo: auto
+produtos:
+- nome: Terrários
+- nome: Kokedamas
+- nome: Quadros vivos
+- nome: Mini jardins
+- nome: Orquídeas
+- nome: Suculentas
+- nome: Lembrancinhas
+demo:
+  fonte: pacote-hotsites-2026-10
+  expira_em: '2026-12-20'

@@ -23,7 +23,11 @@ from app.utils import seo
 from app.utils.vocabulario import tipo_do
 from app.utils.temas import css_do_tema, cor_do_tema, tema_valido
 from app.utils.copy_site import copy_da_vibe, vibe_valida
-from app.utils.modelos import MODELO_PADRAO, arquivo_do_modelo, modelo_valido
+from app.utils.modelos import (
+    MODELO_PADRAO, arquivo_do_modelo, modelo_valido,
+    MODELO_ARTESAO_PADRAO, arquivo_do_modelo_artesao, modelo_artesao_valido,
+    opcoes_de_modelo_artesao,
+)
 from app.utils.planos import pode, precos
 from app.utils.tenant import limite_excedido
 
@@ -106,13 +110,18 @@ def _render_landing(rest):
     # modelo só nesta resposta, sem gravar nada no banco — ele abre as opções
     # na frente do dono do bar e o site salvo continua o que era. Valor
     # desconhecido (na query ou no banco) cai no clássico, em silêncio.
+    # Artesão tem o próprio catálogo de modelos (MODELOS_ARTESAO), com a mesma
+    # regra: o salvo vale, `?modelo=` espia sem gravar, desconhecido cai no padrão.
+    artesao = tipo_do(rest) == 'artesao'
+    valido = modelo_artesao_valido if artesao else modelo_valido
+    padrao = MODELO_ARTESAO_PADRAO if artesao else MODELO_PADRAO
     modelo_salvo = getattr(cfg, 'modelo', None) if cfg else None
     modelo_espiado = (request.args.get('modelo') or '').strip()
-    previewando = modelo_valido(modelo_espiado)
+    previewando = valido(modelo_espiado)
     if previewando:
         modelo_atual = modelo_espiado
     else:
-        modelo_atual = modelo_salvo if modelo_valido(modelo_salvo) else MODELO_PADRAO
+        modelo_atual = modelo_salvo if valido(modelo_salvo) else padrao
 
     # Claro ou escuro é escolha da casa, não do celular de quem visita.
     #
@@ -171,14 +180,14 @@ def _render_landing(rest):
     ))
     meta_desc = seo.meta_descricao(site, rest)
 
-    # Artesão não escolhe entre os layouts de bar: tem o seu próprio, fixo.
-    arquivo = ('site/modelos/artesao.html' if tipo_do(rest) == 'artesao'
+    arquivo = (arquivo_do_modelo_artesao(modelo_atual) if artesao
                else _template_do_modelo(modelo_atual))
     resp = make_response(render_template(arquivo,
                            eventos=eventos, promocoes=promocoes,
                            site=site, tema_css=css_do_tema(tema),
                            tema_cor=cor_do_tema(tema), tenant=rest, copy=copy,
                            modelo_atual=modelo_atual, previewando=previewando,
+                           modelos_artesao=opcoes_de_modelo_artesao() if artesao else None,
                            modo_atual=modo_atual, tema_forcado=tema_forcado,
                            reservas_ativas=reservas_ativas,
                            json_ld=json_ld, meta_desc=meta_desc,
@@ -1079,6 +1088,7 @@ SITE_DEFAULTS = {
     'endereco': None,
     'cidade_uf': None,
     'horario': None,
+    'ponto_na_feira': None,     # onde fica a barraca na feira (hotsite de artesão)
     'maps_query': None,
     'descritor': None,
     'servicos': None,
@@ -1178,13 +1188,19 @@ def montar_conteudo(rest):
     # (/conteudo/produtos) e aparece sozinho assim que ganhar a imagem. Filtra
     # aqui, e não no template, para o JSON-LD também não anunciar o que a
     # página não mostra.
+    #
+    # Exceção: quem não tem foto de produto nenhum (hotsite recém-montado, ainda
+    # sem as fotos originais e a autorização de imagem) mostra o que faz em
+    # texto, no lugar de uma vitrine vazia. Basta uma foto para voltar à regra.
     produtos = []
     if tipo_do(rest) == 'artesao':
+        todos = rows(ProdutoSite)
+        escolhidos = [p for p in todos if p.imagem] or todos
         produtos = [{'nome': p.nome, 'descricao': p.descricao, 'img': _img(p.imagem),
                      'categoria': p.categoria, 'preco': p.preco,
                      'sob_encomenda': bool(p.sob_encomenda), 'destaque': bool(p.destaque),
                      'ratio': _proporcao(p.imagem)}
-                    for p in rows(ProdutoSite) if p.imagem]
+                    for p in escolhidos]
 
     return {'dishes': dishes, 'reviews': reviews, 'team': team, 'gallery': gallery,
             'produtos': produtos}

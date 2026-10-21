@@ -1,0 +1,23 @@
+# Importado do pacote de hotsites. Sem foto de propósito: peça a original e a
+# autorização de imagem; coloque em app/static/img/demo/afazeres-arts/ (capa.jpg, logo.jpg,
+# produto-<nome>.jpg). Troque `site.modelo` se outro layout combinar mais.
+nome: Afazeres Arts (Susy Afaz)
+tipo_negocio: artesao
+site:
+  vibe: artesanal-feira
+  modelo: atelie
+  tagline: Encantar os olhos e o coração com lembranças afetivas. Costura criativa do enxoval de bebês
+    e crianças.
+  descritor: Enxoval de bebê
+  instagram_url: https://instagram.com/afazeres_arts
+  horario: Domingos na Feira de Barão
+  cidade_uf: Barão Geraldo, Campinas–SP
+  maps_query: Feira de Barão Geraldo Campinas
+  tema_modo: auto
+produtos:
+- nome: Enxoval de bebê
+- nome: Naninhas e bonecas de pano
+- nome: Peças infantis
+demo:
+  fonte: pacote-hotsites-2026-10
+  expira_em: '2026-12-20'

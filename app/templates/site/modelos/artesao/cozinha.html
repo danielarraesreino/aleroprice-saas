@@ -1,0 +1,66 @@
+{% extends "site/modelos/artesao/_base.html" %}
+{% import "site/modelos/artesao/_produtos.html" as pr %}
+{% block fonte_display %}family=Alfa+Slab+One{% endblock %}
+{% block tokens %}
+/* Cozinha: campo de mostarda no topo, verde-floresta de ação, cardápio em linhas. */
+:root{
+  --ink:#faf8f3;--ink-2:#efece2;--ink-3:#e1ddcd;--cream:#1d2118;--cream-dim:#51574a;
+  --amber:#1f5a3a;--ember:#1f5a3a;--gold:#7a5a05;--campo:#f2b92e;--sobre-campo:#1c1403;
+  --font-display:'Alfa Slab One','Rockwell','Arial Black',Georgia,serif;color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ink:#14170f;--ink-2:#1d2217;--ink-3:#2a3122;--cream:#f4f1e6;--cream-dim:#b9bfa9;--amber:#f2c94c;--ember:#2c7a4c;--gold:#f2c94c;color-scheme:dark}}
+:root[data-theme="dark"]{--ink:#14170f;--ink-2:#1d2217;--ink-3:#2a3122;--cream:#f4f1e6;--cream-dim:#b9bfa9;--amber:#f2c94c;--ember:#2c7a4c;--gold:#f2c94c;color-scheme:dark}
+{% endblock %}
+{% block estilo %}
+.titulo{font-weight:400;letter-spacing:0;line-height:1.05}
+.hero{background:var(--campo);color:var(--sobre-campo);padding-block:var(--s7) var(--s8)}
+.hero h1{font-size:clamp(2.75rem,12vw,7.5rem);line-height:1;overflow-wrap:anywhere;margin-bottom:var(--s5)}
+.hero .lead{color:var(--sobre-campo);opacity:.85;margin-bottom:var(--s5)}
+.hero .hoje{display:inline-block;margin-bottom:var(--s5);padding:var(--s3) var(--s4);border-radius:var(--r);background:var(--sobre-campo);color:var(--campo);font:400 clamp(1.125rem,3vw,1.5rem)/1.2 var(--font-display)}
+.hero .btn{background:var(--sobre-campo);border-color:var(--sobre-campo);color:var(--campo)}
+.hero .btn:hover{background:transparent;color:var(--sobre-campo)}
+.hero .btn-line{background:transparent;color:var(--sobre-campo);border-color:var(--sobre-campo)}
+.hero .btn-line:hover{background:var(--sobre-campo);color:var(--campo)}
+.hero :focus-visible{outline-color:var(--sobre-campo)}
+.chips{display:none;position:sticky;top:var(--nav-h);z-index:30;background:var(--ink);padding-block:var(--s2);margin-bottom:var(--s6)}
+.js .chips{display:block}
+.chips .wrap{display:flex;gap:var(--s2);overflow-x:auto;scrollbar-width:none}
+.chips .wrap::-webkit-scrollbar{display:none}
+.chip{flex:none;min-height:44px;padding:0 var(--s4);border-radius:22px;border:0;background:var(--ink-2);color:var(--cream);font:600 .9375rem/1 var(--font-body);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ember);color:var(--on-ember)}
+.categoria + .categoria{margin-top:var(--s7)}
+.categoria > h3{font:400 clamp(1.5rem,4.5vw,2.25rem)/1.1 var(--font-display);margin-bottom:var(--s4)}
+.categoria > h3 small{margin-left:var(--s2);font:500 1rem var(--font-body);color:var(--cream-dim)}
+/* cardápio da barraca: uma linha por prato, tons alternados no lugar de filetes */
+.linhas{display:grid;gap:var(--s2)}
+.linha{display:grid;grid-template-columns:1fr;gap:var(--s3);align-items:center;padding:var(--s4);background:var(--ink-2);border-radius:var(--r)}
+.linha:nth-child(even){background:var(--ink-3)}
+.linha img{width:96px;height:96px;object-fit:cover;border-radius:var(--r);background:var(--ink-3)}
+.linha h4{font:400 clamp(1.1875rem,3.4vw,1.5rem)/1.15 var(--font-display)}
+.linha .desc{margin-top:var(--s1);color:var(--cream-dim)}
+.linha .preco{margin-top:var(--s1);font:400 1.25rem/1 var(--font-display);color:var(--gold)}
+.linha .enc{display:inline-block;margin-top:var(--s2);padding:var(--s1) var(--s2);border-radius:var(--r);background:var(--campo);color:var(--sobre-campo);font-size:.875rem;font-weight:600}
+.linha .acao .btn{width:100%}
+@media (min-width:720px){
+  .hero{padding-block:var(--s8) var(--s9)}
+  .linha{grid-template-columns:1fr auto;padding:var(--s4) var(--s5)}
+  .linha:has(img){grid-template-columns:96px 1fr auto}
+  .linha .acao .btn{width:auto;min-width:140px}
+}
+@media (min-width:1000px){.linhas{grid-template-columns:repeat(2,minmax(0,1fr))}}
+{% endblock %}
+{% block hero %}
+<section class="hero" id="topo" aria-labelledby="titulo">
+  <div class="wrap">
+    <h1 id="titulo" class="titulo">{{ site.nome }}</h1>
+    {% if site.horario %}<p class="hoje">{{ site.horario }}{% if site.ponto_na_feira %}. {{ site.ponto_na_feira }}{% endif %}</p>{% endif %}
+    {% if site.tagline %}<p class="lead">{{ site.tagline }}</p>{% endif %}
+    <div class="acoes">
+      {% if produtos %}<a class="btn" href="#produtos">Ver {{ rotulo(tenant, 'cardapio')|lower }}</a>{% endif %}
+      {% if contato_href %}<a class="btn btn-line" href="{{ contato_href }}" target="_blank" rel="noopener">Falar no {{ contato_nome }}</a>{% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block vitrine %}{{ pr.linhas(produtos, cats, site, wa) }}{% endblock %}

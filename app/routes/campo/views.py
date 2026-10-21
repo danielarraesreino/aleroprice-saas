@@ -28,7 +28,7 @@ from app.utils.demos import LeadInvalido, converter_demo
 from app.utils.feira import hoje_br
 from app.utils.formatacao_br import ler_moeda
 from app.utils.modelos import (
-    MODELO_PADRAO, MODELOS, modelo_valido, opcoes_de_modelo,
+    MODELO_PADRAO, MODELOS, modelo_valido, opcoes_de_modelo, catalogo_de_modelos,
 )
 from app.utils.operador import e_operador
 from app.utils.planos import (
@@ -250,7 +250,7 @@ def estilo(slug):
     modo = (request.form.get('modo') or '').strip()
     tema = request.form.get('tema')
     vibe = request.form.get('vibe')
-    if modelo and modelo_valido(modelo):
+    if modelo and modelo in catalogo_de_modelos(rest.tipo_negocio)[0]:
         cfg.modelo = modelo
     if modo in ('auto', 'claro', 'escuro'):
         cfg.tema_modo = modo
@@ -281,8 +281,9 @@ def visual(slug):
     cfg = _config(rest)
 
     if request.method == 'POST':
+        catalogo, padrao, opcoes = catalogo_de_modelos(rest.tipo_negocio)
         escolhido = (request.form.get('modelo') or '').strip()
-        if not modelo_valido(escolhido):
+        if escolhido not in catalogo:
             flash('Esse modelo eu não conheço — não mudei nada.', 'danger')
             return redirect(url_for('campo.visual', slug=slug))
         cfg.modelo = escolhido
@@ -293,16 +294,17 @@ def visual(slug):
             cfg.tema_modo = modo
         db.session.commit()
         flash(f'Pronto: o site do {cfg.nome or rest.nome} agora é o '
-              f'{MODELOS[escolhido]["label"]}.', 'success')
+              f'{catalogo[escolhido]["label"]}.', 'success')
         return redirect(url_for('campo.visual', slug=slug))
 
     return render_template(
         'campo/visual.html', rest=rest, cfg=cfg,
-        modelos=opcoes_de_modelo(),
+        modelos=catalogo_de_modelos(rest.tipo_negocio)[2],
         # O que está salvo hoje — é o cartão que abre marcado e o que leva o
-        # selo "no ar". Valor órfão (modelo removido) cai no clássico, que é o
-        # que o visitante do site está vendo de fato.
-        modelo_atual=(cfg.modelo if modelo_valido(cfg.modelo) else MODELO_PADRAO),
+        # selo "no ar". Valor órfão (modelo removido) cai no padrão do tipo, que
+        # é o que o visitante do site está vendo de fato.
+        modelo_atual=(cfg.modelo if cfg.modelo in catalogo_de_modelos(rest.tipo_negocio)[0]
+                      else catalogo_de_modelos(rest.tipo_negocio)[1]),
         modo_atual=(cfg.tema_modo if cfg.tema_modo in ('auto', 'claro', 'escuro')
                     else 'auto'),
         url_previa=url_for('public.landing_slug', slug=rest.slug, _external=True),

@@ -182,7 +182,8 @@ def test_dono_avisa_que_esta_na_feira_hoje(client, session):
     assert SiteConfig.query.filter_by(restaurant_id=r.id).first().na_feira_em == fe.hoje_br()
     corpo = client.get('/config-site/').get_data(as_text=True)
     assert 'Tirar o aviso' in corpo
-    assert 'name="modelo"' not in corpo                 # artesão não escolhe layout de bar
+    assert 'name="modelo"' in corpo and 'value="atelie"' in corpo   # modelos de artesão...
+    assert 'value="craft"' not in corpo                           # ...e não os de bar
     client.post('/config-site/na-feira')
     assert SiteConfig.query.filter_by(restaurant_id=r.id).first().na_feira_em is None
 

@@ -1,0 +1,24 @@
+# Importado do pacote de hotsites. Sem foto de propósito: peça a original e a
+# autorização de imagem; coloque em app/static/img/demo/roseta-biscoitos/ (capa.jpg, logo.jpg,
+# produto-<nome>.jpg). Troque `site.modelo` se outro layout combinar mais.
+nome: Roseta Biscoitos
+tipo_negocio: artesao
+site:
+  vibe: artesanal-feira
+  modelo: cozinha
+  tagline: Cookies e biscoitos artesanais, feitos a mão, sem pressa. Campinas SP.
+  descritor: Cookies e biscoitos artesanais
+  whatsapp: '5519984216883'
+  telefone_exibicao: (19) 98421-6883
+  instagram_url: https://instagram.com/rosetabiscoitos
+  horario: Na Feira de Barão
+  cidade_uf: Barão Geraldo, Campinas–SP
+  maps_query: Feira de Barão Geraldo Campinas
+  tema_modo: auto
+produtos:
+- nome: Cookies
+- nome: Biscoitos decorados
+- nome: Presentes em potes e buquês de biscoito
+demo:
+  fonte: pacote-hotsites-2026-10
+  expira_em: '2026-12-20'

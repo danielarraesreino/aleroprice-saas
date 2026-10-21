@@ -1,0 +1,24 @@
+# Importado do pacote de hotsites. Sem foto de propósito: peça a original e a
+# autorização de imagem; coloque em app/static/img/demo/taro-logico-roger/ (capa.jpg, logo.jpg,
+# produto-<nome>.jpg). Troque `site.modelo` se outro layout combinar mais.
+nome: Roger | Tarô para Compreender
+tipo_negocio: artesao
+site:
+  vibe: artesanal-feira
+  modelo: ritual
+  tagline: Tarô para entender, não apenas saber. Laboratório TaroLógico. Consultas.
+  descritor: 'Serviço: tarô'
+  whatsapp: '5519987655252'
+  telefone_exibicao: (19) 98765-5252
+  instagram_url: https://instagram.com/tarologoroger
+  horario: Na Feira de Barão
+  cidade_uf: Barão Geraldo, Campinas–SP
+  maps_query: Feira de Barão Geraldo Campinas
+  tema_modo: auto
+produtos:
+- nome: Consultas de tarô
+  descricao: Presencial e online
+- nome: Curso e e-book
+demo:
+  fonte: pacote-hotsites-2026-10
+  expira_em: '2026-12-20'

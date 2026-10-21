@@ -70,3 +70,39 @@ precisa do domínio no projeto `aleroprice-bardavila`).
 Esta funcionalidade adiciona colunas em `site_config` (`lat`, `lng`,
 `ponto_na_feira`, `na_feira_em`). Aplique antes do deploy (SQL idempotente na
 seção "Schema em produção" de `OPERACOES.md`).
+
+## Modelos de hotsite de artesão (como os dos bares)
+
+Cinco esqueletos, cada um com claro e escuro (automático pelo aparelho, ou fixado em
+"Claro ou escuro" no painel / `?modo=claro|escuro`). Todos estendem
+`site/modelos/artesao/_base.html` (menu, encomenda por WhatsApp, contato). Registro em
+`app/utils/modelos.py` (`MODELOS_ARTESAO`).
+
+| Modelo | Para quem | Jeito |
+|---|---|---|
+| `vitrine` | charcutaria, conservas, quem tem foto forte | foto inteira, rótulo por cima, grade por categoria, cartaz vertical inteiro |
+| `atelie` | peça feita à mão: crochê, cerâmica, madeira, joia, costura, mosaico | nome gigante, bloco de cor com o que faz, catálogo editorial; não depende de foto |
+| `cozinha` | pão, pizza, empada, risoto, biscoito, vegano | campo de mostarda, horário em destaque, cardápio em linhas |
+| `jardim` | plantas, terrários, kokedamas | verdes, cantos macios, etiquetas |
+| `ritual` | incenso, cristais, tarô, terapias | noite e dourado, centralizado, serviços em lista |
+
+- A categoria sugere o modelo (`modelo_para_categoria`); o operador troca no Modo Campo
+  (cartões "Modelo") ou o dono em `/config-site`. `?modelo=<nome>` espia sem gravar.
+- Sem foto de produto nenhuma, a página mostra o que a pessoa faz em texto (cartão
+  `sem-foto` / linha). Com ao menos uma foto, só aparecem os produtos com foto.
+- Sem WhatsApp, o contato vira Instagram e some o "Montar encomenda".
+- Vibe `artesanal-feira`: texto neutro, sem afirmação que o expositor não fez (a
+  `artesanal` é a da Berga e fala de "sem química").
+
+## Importar o pacote de hotsites (expositores.json)
+
+```bash
+python -m app.scripts.importar_hotsites /caminho/expositores.json --dry-run
+python -m app.scripts.importar_hotsites /caminho/expositores.json
+```
+
+Gera `app/data/leads/<slug>.yml` (`tipo_negocio: artesao`, modelo pela categoria,
+prévia `noindex` que expira em 60 dias). **Fotos do pacote não entram**: são capturas de
+tela do Instagram, sem autorização. WhatsApp com dois números diferentes no pacote é
+omitido até validar. Depois, como as demais prévias:
+`GET /bootstrap-demo?token=$SEED_TOKEN&action=demos` (um só: `&slug=<slug>`).

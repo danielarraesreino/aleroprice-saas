@@ -11,7 +11,7 @@ from app.utils.decorators import plano_minimo
 from app.utils.temas import opcoes_de_tema, tema_valido
 from app.utils.copy_site import opcoes_de_vibe, vibe_valida
 from app.utils.modelos import (
-    MODELO_PADRAO, modelo_valido, opcoes_de_modelo,
+    MODELO_PADRAO, modelo_valido, opcoes_de_modelo, catalogo_de_modelos,
 )
 
 CAMPOS = list(SITE_DEFAULTS.keys())
@@ -116,7 +116,9 @@ def index():
         # ficava no `classico` pra sempre, sem saber que existiam outros cinco.
         # Trocar o layout do próprio site é escolha dele, não do vendedor.
         modelo = (request.form.get('modelo') or '').strip()
-        if modelo and modelo_valido(modelo):
+        from app.models.modelo_restaurante import Restaurante as _R
+        catalogo, _, _ = catalogo_de_modelos(getattr(_R.query.get(rid), 'tipo_negocio', None))
+        if modelo and modelo in catalogo:
             cfg.modelo = modelo
         modo = (request.form.get('tema_modo') or '').strip()
         if modo in ('auto', 'claro', 'escuro'):
@@ -135,9 +137,10 @@ def index():
     rest = Restaurante.query.get(rid)
     return render_template('configsite/index.html', cfg=cfg, defaults=SITE_DEFAULTS,
                            temas=opcoes_de_tema(), vibes=opcoes_de_vibe(),
-                           modelos=opcoes_de_modelo(),
-                           modelo_atual=(cfg.modelo if cfg and modelo_valido(cfg.modelo)
-                                         else MODELO_PADRAO),
+                           modelos=catalogo_de_modelos(getattr(rest, 'tipo_negocio', None))[2],
+                           modelo_atual=(cfg.modelo if cfg and cfg.modelo in
+                                         catalogo_de_modelos(getattr(rest, 'tipo_negocio', None))[0]
+                                         else catalogo_de_modelos(getattr(rest, 'tipo_negocio', None))[1]),
                            modo_atual=(cfg.tema_modo if cfg and cfg.tema_modo
                                        in ('auto', 'claro', 'escuro') else 'auto'),
                            slug=(rest.slug if rest else None),

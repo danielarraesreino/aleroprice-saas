@@ -1,0 +1,24 @@
+# Importado do pacote de hotsites. Sem foto de propósito: peça a original e a
+# autorização de imagem; coloque em app/static/img/demo/cor-in-vitro/ (capa.jpg, logo.jpg,
+# produto-<nome>.jpg). Troque `site.modelo` se outro layout combinar mais.
+nome: Ateliê Cor in Vitro
+tipo_negocio: artesao
+site:
+  vibe: artesanal-feira
+  modelo: atelie
+  tagline: Produtos personalizados em vidro, madeira e metal.
+  descritor: Vidro, madeira e metal personalizados
+  instagram_url: https://instagram.com/corinvitro
+  horario: Domingos na Feira de Barão
+  cidade_uf: Barão Geraldo, Campinas–SP
+  maps_query: Feira de Barão Geraldo Campinas
+  tema_modo: auto
+produtos:
+- nome: Colares
+- nome: Brincos
+- nome: Anéis
+- nome: Relógios
+- nome: Porta-chaves
+demo:
+  fonte: pacote-hotsites-2026-10
+  expira_em: '2026-12-20'

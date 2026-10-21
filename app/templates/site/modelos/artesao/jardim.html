@@ -1,0 +1,64 @@
+{% extends "site/modelos/artesao/_base.html" %}
+{% import "site/modelos/artesao/_produtos.html" as pr %}
+{% block fonte_display %}family=Young+Serif{% endblock %}
+{% block tokens %}
+/* Jardim: verdes, cantos macios, o que se cultiva em etiquetas. */
+:root{
+  --ink:#eef2e6;--ink-2:#e0e8d4;--ink-3:#cfdbc0;--cream:#14261c;--cream-dim:#43594a;
+  --amber:#1f6b45;--ember:#236f48;--gold:#6a5410;
+  --font-display:'Young Serif',Georgia,serif;--r:20px;color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ink:#0e1a13;--ink-2:#15271c;--ink-3:#1e3527;--cream:#e9f0e2;--cream-dim:#a9bba9;--amber:#8fd49a;--ember:#267a4c;--gold:#e1c872;color-scheme:dark}}
+:root[data-theme="dark"]{--ink:#0e1a13;--ink-2:#15271c;--ink-3:#1e3527;--cream:#e9f0e2;--cream-dim:#a9bba9;--amber:#8fd49a;--ember:#267a4c;--gold:#e1c872;color-scheme:dark}
+{% endblock %}
+{% block estilo %}
+.titulo{font-weight:400;letter-spacing:-.01em}
+.hero{padding:var(--s5) 0 var(--s7)}
+.hero .painel{padding:var(--s7) var(--s5);background:var(--ink-3);border-radius:32px}
+.hero h1{font-size:clamp(2.75rem,12vw,6.5rem);line-height:1;overflow-wrap:anywhere;margin-bottom:var(--s4)}
+.hero .lead{margin-bottom:var(--s5)}
+.hero .etiquetas{display:flex;flex-wrap:wrap;gap:var(--s2);margin-bottom:var(--s5)}
+.hero .etiquetas li{padding:var(--s2) var(--s4);border-radius:999px;background:var(--ink);font-weight:500}
+.hero .quando{margin-top:var(--s5);color:var(--cream-dim)}
+.btn{border-radius:999px}
+.chips{display:none;position:sticky;top:var(--nav-h);z-index:30;background:var(--ink);padding-block:var(--s2);margin-bottom:var(--s6)}
+.js .chips{display:block}
+.chips .wrap{display:flex;gap:var(--s2);overflow-x:auto;scrollbar-width:none}
+.chips .wrap::-webkit-scrollbar{display:none}
+.chip{flex:none;min-height:44px;padding:0 var(--s4);border-radius:999px;border:0;background:var(--ink-2);color:var(--cream);font:600 .9375rem/1 var(--font-body);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ember);color:var(--on-ember)}
+.categoria + .categoria{margin-top:var(--s7)}
+.categoria > h3{font:400 clamp(1.5rem,4.5vw,2.25rem)/1.1 var(--font-display);margin-bottom:var(--s4)}
+.categoria > h3 small{margin-left:var(--s2);font:500 1rem var(--font-body);color:var(--cream-dim)}
+.grade{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s3)}
+.tile{display:flex;flex-direction:column;min-width:0;background:var(--ink-2);border-radius:var(--r);overflow:hidden}
+.tile figure{background:var(--ink-3)}
+.tile img{width:100%;height:auto;aspect-ratio:1/1;object-fit:cover}
+.tile.cartaz img{object-fit:contain;padding:var(--s3)}
+.tile .corpo{display:flex;flex-direction:column;gap:var(--s2);flex:1;padding:var(--s4)}
+.tile h4{font:400 1.1875rem/1.2 var(--font-display)}
+.tile .desc{font-size:.9375rem;color:var(--cream-dim)}
+.tile .preco{font:400 1.25rem/1 var(--font-display);color:var(--gold)}
+.tile .enc{align-self:flex-start;padding:var(--s1) var(--s3);border-radius:999px;background:var(--ink-3);font-size:.875rem}
+.tile .acao{margin-top:auto;padding-top:var(--s2)}
+.tile .btn{width:100%;padding:0 var(--s2)}
+.tile.sem-foto .corpo{padding:var(--s5) var(--s4)}
+@media (min-width:720px){.hero .painel{padding:var(--s8) var(--s7)}.grade{grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s4)}}
+@media (min-width:1000px){.grade{grid-template-columns:repeat(4,minmax(0,1fr))}}
+{% endblock %}
+{% block hero %}
+<section class="hero" id="topo" aria-labelledby="titulo">
+  <div class="wrap"><div class="painel">
+    <h1 id="titulo" class="titulo">{{ site.nome }}</h1>
+    {% if site.tagline %}<p class="lead">{{ site.tagline }}</p>{% endif %}
+    {% if produtos %}<ul class="etiquetas" aria-label="O que a gente faz">{% for p in produtos[:6] %}<li>{{ p.nome }}</li>{% endfor %}</ul>{% endif %}
+    <div class="acoes">
+      {% if produtos %}<a class="btn" href="#produtos">Ver {{ rotulo(tenant, 'cardapio')|lower }}</a>{% endif %}
+      {% if contato_href %}<a class="btn btn-line" href="{{ contato_href }}" target="_blank" rel="noopener">Falar no {{ contato_nome }}</a>{% endif %}
+    </div>
+    {% if site.horario %}<p class="quando">{{ site.horario }}{% if site.ponto_na_feira %}. {{ site.ponto_na_feira }}{% endif %}</p>{% endif %}
+  </div></div>
+</section>
+{% endblock %}
+{% block vitrine %}{{ pr.grade(produtos, cats, site, wa) }}{% endblock %}

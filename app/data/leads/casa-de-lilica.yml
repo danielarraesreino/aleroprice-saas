@@ -1,0 +1,24 @@
+# Importado do pacote de hotsites. Sem foto de propósito: peça a original e a
+# autorização de imagem; coloque em app/static/img/demo/casa-de-lilica/ (capa.jpg, logo.jpg,
+# produto-<nome>.jpg). Troque `site.modelo` se outro layout combinar mais.
+nome: Casa de Lilica
+tipo_negocio: artesao
+site:
+  vibe: artesanal-feira
+  modelo: atelie
+  tagline: Pequena oficina e tornearia de madeira onde Marcos e Marilia (pai e filha) fazem experimentos.
+  descritor: 'Madeira: tornearia, móveis e luminárias'
+  instagram_url: https://instagram.com/casadelilica
+  horario: Na Feira de Barão
+  cidade_uf: Barão Geraldo, Campinas–SP
+  maps_query: Feira de Barão Geraldo Campinas
+  tema_modo: auto
+produtos:
+- nome: Utensílios de madeira
+- nome: Luminárias
+- nome: Móveis
+  descricao: Banquetas, mesas
+- nome: Cabideiro
+demo:
+  fonte: pacote-hotsites-2026-10
+  expira_em: '2026-12-20'
