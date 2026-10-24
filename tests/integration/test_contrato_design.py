@@ -148,3 +148,15 @@ def test_ficha_vazia_nao_mostra_bloco_nenhum(client, session, modelo):
                     'class="sobre"', 'WhatsApp confirmado', 'Produzido em', 'no Pix', 'paymentAccepted',
                     'deliveryLeadTime'):
         assert ausente not in corpo, ausente
+
+
+@pytest.mark.parametrize('modelo', list(MODELOS_ARTESAO))
+def test_previa_mostra_a_estrutura_da_ficha_como_a_preencher(client, session, modelo):
+    """Na prévia o lojista vê onde entram pagamento, políticas e história, sem dado inventado."""
+    rest, _ = semear(no_ar=True)
+    rest.tipo_conta = 'demo'
+    session.commit()
+    corpo = client.get(f'/bar/{SLUG}?modelo={modelo}').get_data(as_text=True)
+    assert corpo.count('class="a-preencher"') >= 4
+    assert 'o expositor informa' in corpo
+    assert 'WhatsApp confirmado' not in corpo and 'Produzido em' not in corpo   # nada afirmado sem dado

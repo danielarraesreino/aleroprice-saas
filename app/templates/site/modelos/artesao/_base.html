@@ -330,6 +330,7 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
 .contato .info dt,.contato .politicas{color:inherit;opacity:.8}
 .contato .info div{border-bottom-color:currentColor;border-bottom-color:color-mix(in srgb,currentColor 28%,transparent)}
 .sobre p{max-width:68ch;margin-bottom:var(--s4);line-height:1.7}
+.a-preencher{font-style:italic;opacity:.7}
 .redes{display:flex;flex-wrap:wrap;gap:var(--s3);margin-top:var(--s4)}
 .redes a{min-height:44px;display:inline-flex;align-items:center;font-weight:600;text-decoration:underline;text-underline-offset:4px}
 @media (max-width:480px){.info div{grid-template-columns:1fr;gap:2px}}
@@ -702,7 +703,8 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
     <span class="eyebrow">Trabalho autoral</span>
     <h2 id="titulo-quem" class="titulo">{{ copy.historia.titulo|replace('<br>', ' ')|safe }}</h2>
     {% if site.sobre %}<div class="sobre">{% for par in site.sobre.replace('\r', '').split('\n\n') if par.strip() %}<p>{{ par.strip() }}</p>{% endfor %}</div>
-    {% elif team %}<p class="lead">{{ copy.historia.texto }}</p>{% endif %}
+    {% elif team %}<p class="lead">{{ copy.historia.texto }}</p>
+    {% elif tenant and tenant.eh_demo %}<div class="sobre"><p class="a-preencher">Aqui entra a história de quem faz, em três partes: de onde vem, o que faz com as mãos e para quem faz. O expositor escreve e a gente ajuda a deixar bonito.</p></div>{% endif %}
   </div>
   {% if team %}<ul class="equipe">{% for t in team %}<li class="rev"><strong>{{ t.nome }}</strong>{% if t.papel %}<span>{{ t.papel }}</span>{% endif %}</li>{% endfor %}</ul>{% endif %}
   {% if gallery %}
@@ -757,18 +759,20 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
   <dl class="info">
     {% if site.endereco or site.cidade_uf %}<div><dt>Localização</dt><dd>{{ site.endereco or '' }}{% if site.endereco and site.cidade_uf %}, {% endif %}{{ site.cidade_uf or '' }}</dd></div>{% endif %}
     {% if site.horario or site.ponto_na_feira %}<div><dt>Na Feira</dt><dd>{{ site.ponto_na_feira or 'Praça do Coco' }}{% if site.horario %} · {{ site.horario }}{% endif %}</dd></div>{% endif %}
-    {% if site.atendimento %}<div><dt>Atendimento</dt><dd>{{ site.atendimento }}</dd></div>{% endif %}
-    {% if site.pagamento or site.desconto_pix_pct %}<div><dt>Pagamento</dt><dd>{{ site.pagamento or 'Pix' }}{% if site.desconto_pix_pct %} · {{ site.desconto_pix_pct }}% de desconto no Pix{% endif %}</dd></div>{% endif %}
+    {% set previa = tenant and tenant.eh_demo %}
+    {% if site.atendimento %}<div><dt>Atendimento</dt><dd>{{ site.atendimento }}</dd></div>{% elif previa %}<div><dt>Atendimento</dt><dd class="a-preencher">Dias e horas em que responde no WhatsApp: o expositor informa.</dd></div>{% endif %}
+    {% if site.pagamento or site.desconto_pix_pct %}<div><dt>Pagamento</dt><dd>{{ site.pagamento or 'Pix' }}{% if site.desconto_pix_pct %} · {{ site.desconto_pix_pct }}% de desconto no Pix{% endif %}</dd></div>{% elif previa %}<div><dt>Pagamento</dt><dd class="a-preencher">Formas de pagamento e desconto no Pix: o expositor informa.</dd></div>{% endif %}
     {% if site.telefone_exibicao %}<div><dt>WhatsApp</dt><dd>{{ site.telefone_exibicao }}</dd></div>{% endif %}
-    {% if site.email %}<div><dt>E-mail</dt><dd>{{ site.email }}</dd></div>{% endif %}
+    {% if site.email %}<div><dt>E-mail</dt><dd>{{ site.email }}</dd></div>{% elif previa %}<div><dt>E-mail</dt><dd class="a-preencher">O expositor informa.</dd></div>{% endif %}
   </dl>
-  {% if site.politicas %}<div class="politicas"><strong>Envio, retirada e encomenda</strong><p>{{ site.politicas }}</p></div>{% endif %}
+  {% if site.politicas %}<div class="politicas"><strong>Envio, retirada e encomenda</strong><p>{{ site.politicas }}</p></div>
+  {% elif previa %}<div class="politicas"><strong>Envio, retirada e encomenda</strong><p class="a-preencher">Como entrega, se retira na Praça do Coco e como combina a encomenda: o expositor informa.</p></div>{% endif %}
   <div class="acoes">
     {% if wa %}<a class="btn" href="{{ zap_href }}" target="_blank" rel="noopener">Falar no WhatsApp</a>{% endif %}
     {% if site.maps_query %}<a class="btn btn-line" href="https://www.google.com/maps/search/?api=1&query={{ site.maps_query|urlencode }}" target="_blank" rel="noopener">Como chegar</a>{% endif %}
     {% if site.instagram_url %}<a class="btn {{ 'btn-line' if wa else '' }}" href="{{ site.instagram_url }}" target="_blank" rel="noopener">Instagram</a>{% endif %}
   </div>
-  {% if site.facebook_url or site.tiktok_url %}<p class="redes">{% if site.facebook_url %}<a href="{{ site.facebook_url }}" target="_blank" rel="noopener">Facebook</a>{% endif %}{% if site.tiktok_url %}<a href="{{ site.tiktok_url }}" target="_blank" rel="noopener">TikTok</a>{% endif %}</p>{% endif %}
+  {% if site.facebook_url or site.tiktok_url %}<p class="redes"><span class="a-preencher">Siga também:</span>{% if site.instagram_url %}<a href="{{ site.instagram_url }}" target="_blank" rel="noopener">Instagram</a>{% endif %}{% if site.facebook_url %}<a href="{{ site.facebook_url }}" target="_blank" rel="noopener">Facebook</a>{% endif %}{% if site.tiktok_url %}<a href="{{ site.tiktok_url }}" target="_blank" rel="noopener">TikTok</a>{% endif %}</p>{% endif %}
 </div></section>
 </main>
 
