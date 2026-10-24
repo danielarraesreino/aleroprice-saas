@@ -77,7 +77,7 @@
         <a class="btn btn-colab" href="#dossie">
           <i class="fas fa-compass" aria-hidden="true"></i> Explorar o mapa histórico
         </a>
-        <a class="btn btn-fantasma" href="#participar">Tenho banca ou bar →</a>
+        <a class="btn btn-fantasma" href="#participar">Tenho banca ou bar</a>
       </div>
     </div>
 
@@ -89,11 +89,11 @@
       <ul>
         {% for h in feira.horarios %}<li><strong>{{ h.dia }}</strong> das {{ h.abre[:2] }}h às {{ h.fecha[:2] }}h</li>{% endfor %}
       </ul>
-      <p>{{ feira.local }} (Praça Irmã Carmela Stecchi) — {{ feira.bairro }}</p>
+      <p>{{ feira.local }} (Praça Irmã Carmela Stecchi), {{ feira.bairro }}</p>
       <p class="hm-quando-detalhe">Artesanato autoral, charcutaria, pães de fermentação natural, plantas, brechó, comida de rua e roda de choro.</p>
       {% if exp_hoje %}
       <a class="hm-hoje" href="{{ url_for('public.feira', hoje=1) }}">
-        {{ exp_hoje }} {{ 'expositor avisou' if exp_hoje == 1 else 'expositores avisaram' }} que {{ 'está' if exp_hoje == 1 else 'estão' }} na feira hoje →
+        {{ exp_hoje }} {{ 'expositor avisou' if exp_hoje == 1 else 'expositores avisaram' }} que {{ 'está' if exp_hoje == 1 else 'estão' }} na feira hoje
       </a>
       {% endif %}
     </aside>
@@ -111,7 +111,7 @@
         <h2 id="expositores-titulo" class="hm-h2">Quem expõe na Praça do Coco</h2>
       </div>
       <a class="hm-todos" href="{{ url_for('public.feira') }}">
-        {% if exp_total %}Ver os {{ exp_total }} expositores e o mapa →{% else %}Abrir o mapa e a busca da Feira →{% endif %}
+        {% if exp_total %}Ver os {{ exp_total }} expositores e o mapa{% else %}Abrir o mapa e a busca da Feira{% endif %}
       </a>
     </div>
 
@@ -134,28 +134,28 @@
     <!-- Os Ofícios da Feira: convida o morador a explorar as bancas por vocação -->
     <div class="oficios-feira-grid" aria-label="Ofícios e bancas da Feira de Barão">
       <a class="oficio-card" href="{{ url_for('public.feira', tipo='artesao') }}">
-        <span class="oficio-icone" aria-hidden="true">🥓</span>
+        <span class="oficio-icone" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18V9l18-4v13Z"/><circle cx="9" cy="14" r="1.2"/><circle cx="15" cy="11.5" r="1.2"/></svg></span>
         <div>
           <h3>Charcutaria, Queijos &amp; Conservas</h3>
           <p>Defumados artesanais no lenho de árvore frutífera, antepastos, geleias e mel de produtores locais.</p>
         </div>
       </a>
       <a class="oficio-card" href="{{ url_for('public.feira', tipo='artesao') }}">
-        <span class="oficio-icone" aria-hidden="true">🥖</span>
+        <span class="oficio-icone" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20h14v-9a5 5 0 0 0-4-4.9 7 7 0 0 0-6 0A5 5 0 0 0 5 11Z"/><path d="M9 11l1 3M13 11l1 3"/></svg></span>
         <div>
           <h3>Fornada, Confeitaria &amp; Comida de Rua</h3>
           <p>Pães de fermentação natural, bolos, doces autorais, risotos, acarajé e sabores de domingo na praça.</p>
         </div>
       </a>
       <a class="oficio-card" href="{{ url_for('public.feira', tipo='artesao') }}">
-        <span class="oficio-icone" aria-hidden="true">🏺</span>
+        <span class="oficio-icone" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6M10 3v3c-3 2-5 5-5 9a5 5 0 0 0 5 5h4a5 5 0 0 0 5-5c0-4-2-7-5-9V3"/></svg></span>
         <div>
           <h3>Ateliês, Cerâmica, Crochê &amp; Arte</h3>
           <p>Joias em cerâmica, amigurumis, encadernação manual, marcenaria criativa, moda autoral e pintura.</p>
         </div>
       </a>
       <a class="oficio-card" href="{{ url_for('public.feira', tipo='artesao') }}">
-        <span class="oficio-icone" aria-hidden="true">🌿</span>
+        <span class="oficio-icone" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19c0-8 5-13 14-14 0 9-5 14-13 14Z"/><path d="M5 19l8-8"/></svg></span>
         <div>
           <h3>Jardim, Saboaria &amp; Aromas</h3>
           <p>Terrários, kokedamas, suculentas, cosméticos naturais veganos, incensos artesanais e tarô.</p>
@@ -217,7 +217,7 @@
           {% if embed %}<iframe src="{{ embed }}" title="Street View de {{ v.lugar.nome }}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" class="card-embed" allowfullscreen></iframe>{% endif %}{% endif %}
           {% if foto and v.foto.credito %}<p class="card-meta">Foto: {{ v.foto.credito }}</p>{% endif %}
           <p class="card-meta">Fonte: {% for f in v.fontes %}<a href="{{ f.url }}" rel="noopener">{{ f.titulo }}{% if f.autor %} ({{ f.autor }}){% endif %}</a>{{ '; ' if not loop.last }}{% endfor %}</p>
-          <a class="card-link" href="{{ url_for('public.memoria_verbete', slug=v.slug) }}">Ler o verbete completo →</a>
+          <a class="card-link" href="{{ url_for('public.memoria_verbete', slug=v.slug) }}">Ler o verbete completo</a>
         </details>
       </article>
     </div>
@@ -229,7 +229,7 @@
         <h3 class="chapter-title">A memória que falta é a sua</h3>
         <p class="card-resumo">Lugares, famílias e causos, cada um no mapa com o Street View de hoje. O que ainda não está lá pode estar na sua gaveta.</p>
         <div class="card-acoes">
-          <a class="btn btn-tomate" href="{{ url_for('public.memoria') }}">Ver toda a Memória →</a>
+          <a class="btn btn-tomate" href="{{ url_for('public.memoria') }}">Ver toda a Memória</a>
           {% if zap_memoria %}<a class="btn btn-zap" href="{{ zap_memoria }}" target="_blank" rel="noopener"><i class="fab fa-whatsapp" aria-hidden="true"></i> Mandar memória</a>{% endif %}
         </div>
       </article>
@@ -282,7 +282,7 @@
       {% endfor %}
     </div>
     {% endif %}
-    <p class="hm-mais"><a href="{{ url_for('public.memoria') }}">Abrir o acervo completo da Memória Viva (24 verbetes documentados) →</a></p>
+    <p class="hm-mais"><a href="{{ url_for('public.memoria') }}">Abrir o acervo completo da Memória Viva (24 verbetes documentados)</a></p>
   </div>
 </section>
 
@@ -416,35 +416,35 @@
         Expõe na Praça do Coco ou tem um bar em Barão?
       </h2>
       <p class="participar-lead">
-        Criamos o <strong>feiradebarao.com.br</strong> para que cada artesão, feirante e botequeiro de Barão Geraldo tenha uma vitrine bonita, rápida e fácil de achar — mantendo o contato direto no seu WhatsApp mesmo depois que a lona da feira fecha no domingo.
+        Criamos o <strong>feiradebarao.com.br</strong> para que cada artesão, feirante e botequeiro de Barão Geraldo tenha uma vitrine bonita, rápida e fácil de achar, mantendo o contato direto no seu WhatsApp mesmo depois que a lona da feira fecha no domingo.
       </p>
     </div>
 
     <div class="grid-tech-powers">
       <!-- 1. Vitrine de Artesão / Barraca -->
       <div class="card-tech-power">
-        <div class="tech-icon-box">⛺</div>
+        <div class="tech-icon-box"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 20 12 4l10 16Z"/><path d="M9.5 20 12 15l2.5 5"/></svg></div>
         <h3>Sua Banca Aberta a Semana Toda</h3>
         <p>Página própria com a identidade do seu trabalho (charcutaria, ateliê, fornada, jardim ou ritual), fotos das suas peças e opção de usar domínio próprio (como <em>donaberga.com.br</em>).</p>
       </div>
 
       <!-- 2. Encomendas no WhatsApp -->
       <div class="card-tech-power">
-        <div class="tech-icon-box">💬</div>
+        <div class="tech-icon-box"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/></svg></div>
         <h3>Encomendas e Reservas no WhatsApp</h3>
-        <p>O morador escolhe os produtos na sua vitrine (ou reserva uma mesa no seu bar) e o pedido chega organizado direto no seu WhatsApp — zero aplicativo e zero comissão sobre a sua venda.</p>
+        <p>O morador escolhe os produtos na sua vitrine (ou reserva uma mesa no seu bar) e o pedido chega organizado direto no seu WhatsApp, sem aplicativo e zero comissão sobre a sua venda.</p>
       </div>
 
       <!-- 3. Pino no Mapa da Praça do Coco + Hoje na Feira -->
       <div class="card-tech-power">
-        <div class="tech-icon-box">📍</div>
+        <div class="tech-icon-box"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg></div>
         <h3>Ponto no Mapa &amp; “Na Feira Hoje”</h3>
         <p>Sua barraca ganha coordenada exata no mapa interativo da Praça do Coco. No sábado ou domingo de manhã, 1 toque no celular avisa os clientes que você está na praça.</p>
       </div>
 
       <!-- 4. Google Maps & Busca Local -->
       <div class="card-tech-power">
-        <div class="tech-icon-box">⭐</div>
+        <div class="tech-icon-box"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg></div>
         <h3>Achado no Google e nas IAs</h3>
         <p>Catálogo e cardápio estruturados para que quem procura em Barão Geraldo ou Campinas encontre sua história, seus produtos, seus horários e suas avaliações.</p>
       </div>
@@ -454,10 +454,10 @@
       <div class="participar-convite-txt">
         <h3>Quer colocar sua banca ou seu bar na rede?</h3>
         <p>
-          Eu mesmo monto a sua página com você na praça, no ateliê ou no balcão — com fotos, produtos e atalho direto para o seu WhatsApp.
+          Eu mesmo monto a sua página com você na praça, no ateliê ou no balcão, com fotos, produtos e atalho direto para o seu WhatsApp.
         </p>
         <p class="participar-links-apoio">
-          <a href="{{ url_for('public.cadastro') }}">Prefere criar sua página agora mesmo pelo celular? Começar cadastro →</a>
+          <a href="{{ url_for('public.cadastro') }}">Prefere criar sua página agora mesmo pelo celular? Começar cadastro</a>
         </p>
       </div>
       <div class="participar-convite-acoes">
@@ -520,11 +520,11 @@
       <div class="form-group">
         <label for="colab-tipo">Tipo de Contribuição:</label>
         <select id="colab-tipo" class="form-control">
-          <option value="foto">📸 Enviar Foto Antiga de Família ou do Bairro</option>
-          <option value="video">🎥 Enviar Vídeo ou Depoimento em Áudio</option>
-          <option value="historia">📖 Causo / Memória Afetiva de Barão Geraldo</option>
-          <option value="correcao">🔍 Correção Histórica / Documento Genealógico</option>
-          <option value="bar">🍺 História de um Bar, Banca ou Estabelecimento Tradicional</option>
+          <option value="foto">Enviar Foto Antiga de Família ou do Bairro</option>
+          <option value="video">Enviar Vídeo ou Depoimento em Áudio</option>
+          <option value="historia">Causo / Memória Afetiva de Barão Geraldo</option>
+          <option value="correcao">Correção Histórica / Documento Genealógico</option>
+          <option value="bar">História de um Bar, Banca ou Estabelecimento Tradicional</option>
         </select>
       </div>
 
@@ -607,7 +607,7 @@
       // Ícone personalizado em Tomate
       const iconeTomate = L.divIcon({
         className: 'custom-pin',
-        html: '<div aria-hidden="true" style="background:#b33215; color:#fff; width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; border:2.5px solid #fff; box-shadow:0 4px 12px rgba(0,0,0,0.4);">📍</div>',
+        html: '<div aria-hidden="true" style="background:#b33215; color:#fff; width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2.5px solid #fff; box-shadow:0 4px 12px rgba(0,0,0,0.4);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg></div>',
         iconSize: [44, 44],
         iconAnchor: [22, 44]
       });
@@ -729,11 +729,11 @@
     const texto = document.getElementById('colab-texto').value;
 
     const rotulos = {
-      'foto': '📸 Foto Antiga / Registro Visual',
-      'video': '🎥 Vídeo / Depoimento em Áudio',
-      'historia': '📖 Causo / Memória Afetiva',
-      'correcao': '🔍 Correção Histórica / Genealógica',
-      'bar': '🍺 História de Bar / Banca Tradicional'
+      'foto': 'Foto Antiga / Registro Visual',
+      'video': 'Vídeo / Depoimento em Áudio',
+      'historia': 'Causo / Memória Afetiva',
+      'correcao': 'Correção Histórica / Genealógica',
+      'bar': 'História de Bar / Banca Tradicional'
     };
 
     const tipoFormatado = rotulos[tipo] || tipo;

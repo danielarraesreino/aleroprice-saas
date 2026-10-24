@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Termos de uso · Feira de Barão</title>
+<meta name="description" content="Regras de uso do site da Feira de Barão e do serviço de site para bares e expositores: planos, pagamento, conteúdo e cancelamento.">
+<link rel="canonical" href="{{ url_for('public.termos', _external=True) }}">
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+{% include 'produto/_estilo_proposta.html' %}
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <span class="eyebrow">Feira de Barão</span>
+  <h1>Termos de uso</h1>
+  <p class="lead">Regras simples para quem navega na Feira e para quem contrata um site. Atualizado em 24/10/2026.</p>
+</div></header>
+<main>
+<section class="secao"><div class="wrap">
+  <h2>Quem somos e o que oferecemos</h2>
+  <p class="p">A Feira de Barão reúne informações da feira da Praça do Coco, em Barão Geraldo, Campinas, e oferece a bares, restaurantes e expositores um site próprio, com cardápio ou vitrine, reserva ou encomenda por WhatsApp e painel para editar o conteúdo.</p>
+
+  <h2 style="margin-top:32px">Para quem navega</h2>
+  <ul class="lista">
+    <li>As informações dos expositores e dos bares (preços, prazos, horários, endereços) são fornecidas por eles. Confirme com o vendedor antes de se deslocar ou pagar.</li>
+    <li>Reserva e encomenda feitas pelo site são solicitações. Só valem quando o bar ou o expositor confirmar.</li>
+    <li>O pagamento é combinado diretamente entre você e o vendedor. A Feira não recebe nem intermedeia o valor das compras.</li>
+    <li>Páginas marcadas como prévia são demonstrações com fotos ilustrativas e não representam o site oficial do negócio.</li>
+  </ul>
+
+  <h2 style="margin-top:32px">Para quem contrata um site</h2>
+  <ul class="lista">
+    <li><b>Planos:</b> anual, pago à vista e sem devolução, ou mensal, sem contrato e com cancelamento a qualquer momento. Os valores vigentes estão em <a href="{{ url_for('public.expor') }}">/expor</a> (expositores) e na página para bares. Hoje, expositor: {{ preco_exp.anual }} por ano ou {{ preco_exp.mensal }} por mês; bar: {{ tabela.site_anual }} por ano ou {{ tabela.site }} por mês.</li>
+    <li><b>O que está incluso:</b> endereço do site e hospedagem. Ajustes personalizados de design têm taxa única informada antes de começar.</li>
+    <li><b>Conteúdo e imagens:</b> você é responsável pelo que publica e declara ter autorização para usar textos, nomes e fotos. Fotos de prévia são ilustrativas e são trocadas pelas suas.</li>
+    <li><b>Sem garantia de resultado:</b> o site e a ficha do Google facilitam ser encontrado, mas não garantimos posição em buscas, número de visitas, reservas ou vendas.</li>
+    <li><b>Cancelamento:</b> no mensal, ao cancelar o site deixa de ser editável e pode ser retirado do ar ao fim do período pago. No anual, não há devolução do valor pago.</li>
+    <li><b>Disponibilidade:</b> mantemos o site no ar com cuidado, mas pode haver interrupções para manutenção ou por falhas de serviços de terceiros.</li>
+    <li><b>Uso indevido:</b> podemos retirar do ar páginas com conteúdo ilegal, enganoso ou que use imagem ou marca de outra pessoa sem autorização.</li>
+  </ul>
+
+  <h2 style="margin-top:32px">Dados pessoais e mudanças</h2>
+  <p class="p">O tratamento de dados está descrito na <a href="{{ url_for('public.privacidade') }}">política de privacidade</a>. Estes termos podem mudar; a data de atualização fica no topo desta página. Dúvidas: WhatsApp da Feira, indicado na página inicial.</p>
+</div></section>
+</main>
+<footer><div class="wrap"><a href="{{ url_for('public.landing') }}">Voltar para a Feira de Barão</a> · <a href="{{ url_for('public.privacidade') }}">Privacidade</a></div></footer>
+</body>
+</html>

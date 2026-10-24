@@ -8,10 +8,10 @@
 <meta name="description" content="Site próprio para bar e restaurante em Campinas: cardápio com QR, reserva com aviso no WhatsApp, pedido de avaliação e seu bar achável no Google Maps. A partir de {{ preco_site }} por mês, sem fidelidade.">
 <link rel="canonical" href="{{ url_for('public.para_bares', _external=True) }}">
 {% else %}
-<title>Bares de Barão — seu bar merece mais que um story de 24 horas</title>
+<title>Bares de Barão: seu bar merece mais que um story de 24 horas</title>
 <meta name="description" content="Site pronto para bares de Barão Geraldo: página com foto, cardápio com QR, reserva no WhatsApp e seu bar achável no Google. A partir de {{ preco_site }} por mês.">
 {% endif %}
-<meta property="og:title" content="Bares de Barão — seu bar merece mais que um story de 24 horas">
+<meta property="og:title" content="Bares de Barão: seu bar merece mais que um story de 24 horas">
 <meta property="og:description" content="O story some à meia-noite. O site fica: reserva, agenda, cardápio com QR e seu bar achável no Google.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="{{ og_imagem('og-barao.jpg') }}">
@@ -171,8 +171,7 @@
     grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
   .card{background:var(--cartao);border:1px solid var(--linha);border-radius:4px;
     padding:var(--s-5);box-shadow:3px 3px 0 rgb(37 27 16 / .08)}
-  .card-icone{width:38px;height:38px;display:grid;place-items:center;border-radius:3px;
-    background:rgb(178 50 20 / .1);margin-bottom:var(--s-3)}
+  .card-icone{display:block;line-height:0;margin-bottom:var(--s-3)}
   .card p{color:var(--taupe);font-size:.95rem;margin-top:var(--s-2)}
 
   /* ---- preço ---- */
@@ -249,7 +248,7 @@
 <header class="hero" id="topo">
   <div class="wrap">
     {% if campinas %}
-    <span class="eyebrow" data-hero>Site · cardápio · reserva · Google — para bares de Campinas</span>
+    <span class="eyebrow" data-hero>Site, cardápio, reserva e Google para bares de Campinas</span>
     <h1 data-hero>Seu bar em Campinas merece mais que um <span class="some">story de 24 horas</span>.</h1>
     {% else %}
     <span class="eyebrow" data-hero>Bares de Barão · Barão Geraldo, Campinas</span>
@@ -261,7 +260,7 @@
         <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.2 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.4-.7-2.9-1.1-4.7-4-4.9-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5s.8 1.9.8 2c.1.1.1.3 0 .5l-.3.5c-.2.2-.3.4-.1.7.1.3.7 1.2 1.5 1.9 1.1.9 2 1.2 2.2 1.4.3.1.5.1.6-.1.2-.2.7-.8.9-1.1.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.2 1.3Z"/></svg>
         Chamar no WhatsApp
       </a>
-      <p class="micro">Resposta na hora · sem compromisso</p>
+      <p class="micro">Sem compromisso, conversa de balcão</p>
     </div>
   </div>
 </header>
@@ -273,14 +272,14 @@
     <div class="wrap prova-grid">
       <div data-reveal>
         <span class="eyebrow">Prova viva</span>
-        <h2>Não é promessa. Já está no ar.</h2>
-        <p class="secao-p">A gente sabe o trabalho que dá segurar o balcão e ainda alimentar rede social todo dia. O <b>Bar da Vila</b>, aqui em Campinas, foi o primeiro a sair dessa: site próprio, reserva caindo no WhatsApp do balcão e cardápio com foto. Entra e confere — está no ar agora.</p>
+        <h2>O Bar da Vila foi o primeiro</h2>
+        <p class="secao-p">A gente sabe o trabalho que dá segurar o balcão e ainda alimentar rede social todo dia. O <b>Bar da Vila</b>, aqui em Campinas, foi o primeiro a sair dessa: site próprio, reserva caindo no WhatsApp do balcão e cardápio com foto. Entra e confere: está no ar agora.</p>
         <div class="contador">
           {# O número vem do mesmo lugar que monta a feira na landing. Estava
              fixo em 24 no HTML e desatualizava a cada bar novo. #}
           <span class="num-grande"><span data-counter data-target="{{ total_bares or 23 }}">{{ total_bares or 23 }}</span></span>
           <p class="contador-rotulo">bares de Barão já mapeados</p>
-          <p class="contador-sub">A campanha é aqui do bairro — a gente já conhece a sua rua.</p>
+          <p class="contador-sub">O trabalho é aqui do bairro: a gente já conhece a sua rua.</p>
         </div>
       </div>
       <div data-reveal>
@@ -314,8 +313,8 @@
     <div class="wrap" data-reveal>
       <span class="eyebrow">Onde a decisão fecha</span>
       <h2>Quem busca “bar em Barão Geraldo” decide no Google</h2>
-      <p class="secao-p">Nota, foto, rota — a escolha acontece ali, em segundos. E quando a pessoa toca em <b>Site</b>, ela precisa cair num lugar que feche a decisão: cardápio de dar fome, reserva na hora, endereço certo.</p>
-      <p class="secao-p">A gente monta esse lugar <b>e arruma a sua ficha no Google</b>: horário certo, fotos, cardápio e o link do site no campo certo. O perfil continua sendo seu — a gente só faz ele trabalhar.</p>
+      <p class="secao-p">Nota, foto, rota: a escolha acontece ali, em segundos. E quando a pessoa toca em <b>Site</b>, ela precisa cair num lugar que feche a decisão: cardápio de dar fome, reserva na hora, endereço certo.</p>
+      <p class="secao-p">A gente monta esse lugar <b>e arruma a sua ficha no Google</b>: horário certo, fotos, cardápio e o link do site no campo certo. O perfil continua sendo seu, a gente só faz ele trabalhar.</p>
       <div class="google-mock" role="img" aria-label="Ilustração de uma busca no Google por “bar em barão geraldo”, com um resultado de bar mostrando nota 4,8, avaliações e os botões Rota, Ligar e Site.">
         <div class="g-busca" aria-hidden="true">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" stroke-width="2.4" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
@@ -350,33 +349,33 @@
     <div class="wrap">
       <div data-reveal>
         <span class="eyebrow">O que chega pro seu bar</span>
-        <h2>Cinco coisas, bem feitas</h2>
+        <h2>O que vem no site</h2>
       </div>
       <div class="cards">
         <article class="card" data-reveal>
           <div class="card-icone" aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--tomate)" stroke-width="1.8" aria-hidden="true"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M13.7 20a2 2 0 0 1-3.4 0"/></svg>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--tomate)" stroke-width="1.8" aria-hidden="true"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M13.7 20a2 2 0 0 1-3.4 0"/></svg>
           </div>
           <h3>Reserva com alerta no WhatsApp</h3>
           <p>O cliente reserva no site e o aviso toca no seu celular na hora. Sem aplicativo novo, sem tablet no balcão.</p>
         </article>
         <article class="card" data-reveal>
           <div class="card-icone" aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--tomate)" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 9h18"/></svg>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--tomate)" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 9h18"/></svg>
           </div>
           <h3>Agenda de eventos</h3>
           <p>Quinta de música ao vivo, feijoada de sábado: sua programação inteira num lugar que não desaparece.</p>
         </article>
         <article class="card" data-reveal>
           <div class="card-icone" aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--tomate)" stroke-width="1.8" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--tomate)" stroke-width="1.8" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>
           </div>
           <h3>Promoções</h3>
           <p>Dose dupla, happy hour, prato do dia: você publica e troca direto do celular, sem depender de ninguém.</p>
         </article>
         <article class="card" data-reveal>
           <div class="card-icone" aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--tomate)" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM18 18h3v3h-3z"/></svg>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--tomate)" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM18 18h3v3h-3z"/></svg>
           </div>
           <h3>Cardápio com QR na mesa</h3>
           <p>Seus carros-chefes com foto e preço, no celular de quem já está sentado. Trocar item leva um minuto.</p>
@@ -385,10 +384,10 @@
            Agência cobra de R$ 500 a R$ 1.500 POR MÊS só pra cuidar disso. #}
         <article class="card" data-reveal>
           <div class="card-icone" aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--tomate)" stroke-width="1.8" aria-hidden="true"><path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--tomate)" stroke-width="1.8" aria-hidden="true"><path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg>
           </div>
-          <h3>Seu bar achável no Google</h3>
-          <p>Arrumo sua ficha: horário certo, fotos, cardápio e o link do site. Quem procura bar às dez da noite passa a achar o seu.</p>
+          <h3>Sua ficha arrumada no Google</h3>
+          <p>Arrumo sua ficha: horário certo, fotos, cardápio e o link do site. Quem procura bar às dez da noite vê informação certa sobre a sua casa.</p>
         </article>
       </div>
     </div>
@@ -399,7 +398,7 @@
     <div class="wrap">
       <div data-reveal>
         <span class="eyebrow">Preço de feira</span>
-        <h2>Dois planos, uma placa só</h2>
+        <h2>Um plano agora, o Pro depois</h2>
       </div>
       <div class="planos">
         <article class="plano" data-reveal>
@@ -409,7 +408,7 @@
           <p class="acordo">{{ precos.site_anual_mes }} por mês, pago à vista, sem devolução. Domínio e hospedagem inclusos.</p>
           <p class="acordo"><b>Quer testar antes?</b> Mensal: {{ preco_site }} {{ preco_periodo }}, sem contrato, também com domínio e hospedagem inclusos.</p>
           <ul>
-            <li><b>Site com domínio próprio</b> — seu endereço, não um perfil</li>
+            <li><b>Site com domínio próprio</b>: seu endereço, não um perfil</li>
             <li>Ficha do Google arrumada: horário, fotos, cardápio e link</li>
             <li>Reserva com alerta no WhatsApp</li>
             <li>Agenda de eventos e promoções</li>
@@ -471,7 +470,7 @@
     <div class="wrap" data-reveal>
       <span class="eyebrow">Daqui</span>
       <h2>Feito pra noite de Barão</h2>
-      <p class="secao-p">Todo mundo conhece o fim de semana em que Barão se encontra na Praça do Coco. A Feira de Barão é o ponto alto do bairro — e, que fique claro, <b>nós não somos a feira</b>: somos vizinhos dela. O nosso trabalho é o resto da semana: seu bar visível, e reservável, de segunda a segunda.</p>
+      <p class="secao-p">Todo mundo conhece o fim de semana em que Barão se encontra na Praça do Coco. A Feira de Barão é o ponto alto do bairro, mas este serviço é separado dela e cuida do resto da semana: seu bar visível e reservável, de segunda a segunda.</p>
       <p class="marquee-titulo">Barão tem bar demais pra qualquer um ficar invisível</p>
     </div>
     {# O letreiro sai da mesma lista que monta a feira na landing — a lista fixa
@@ -491,17 +490,17 @@
   <section class="secao">
     <div class="wrap" data-reveal>
       <span class="eyebrow">Sem burocracia</span>
-      <h2>Chama no zap que eu monto o seu na mesa, na hora.</h2>
+      <h2>Chama no zap que eu monto o seu junto com você, na mesa.</h2>
       <div class="passos">
         <p class="passo">Você chama no WhatsApp</p>
         <p class="passo">A gente monta o site junto, na mesa</p>
-        <p class="passo">Hoje mesmo ele está no ar</p>
+        <p class="passo">Pronto, ele entra no ar</p>
       </div>
       <a class="btn-zap btn-zap--grande" href="{{ zap_url }}">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.2 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.4-.7-2.9-1.1-4.7-4-4.9-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5s.8 1.9.8 2c.1.1.1.3 0 .5l-.3.5c-.2.2-.3.4-.1.7.1.3.7 1.2 1.5 1.9 1.1.9 2 1.2 2.2 1.4.3.1.5.1.6-.1.2-.2.7-.8.9-1.1.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.2 1.3Z"/></svg>
-        Chamar no WhatsApp agora
+        Chamar no WhatsApp
       </a>
-      <p class="stakes">Cada fim de semana sem site é cliente decidindo no Google — e fechando no bar do lado.</p>
+      <p class="stakes">Cada fim de semana sem site é cliente decidindo no Google e fechando no bar do lado.</p>
     </div>
   </section>
 
@@ -512,7 +511,7 @@
     <p><b>Feira de Barão</b> · Tecnologia e Presença Digital para Gastronomia em Barão Geraldo, Campinas/SP</p>
     <p>Já no ar: <a href="https://bardavila.bar" target="_blank" rel="noopener">bardavila.bar</a></p>
   </div>
-<div class="wrap"><p><a href="{{ url_for('public.privacidade') }}">Privacidade</a></p></div></footer>
+<div class="wrap"><p><a href="{{ url_for('public.privacidade') }}">Privacidade</a> · <a href="{{ url_for('public.termos') }}">Termos</a></p></div></footer>
 
 <div class="barra-zap">
   <a class="btn-zap" href="{{ zap_url }}">

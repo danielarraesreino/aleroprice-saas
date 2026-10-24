@@ -50,7 +50,7 @@
   padding-top:var(--s2);color:var(--cream-dim);font-weight:500;
 }
 .hero .quando::before{
-  content:"✦";color:var(--terracota);
+  content:"";width:6px;height:6px;background:var(--terracota);transform:rotate(45deg);
 }
 
 /* Moldura de fotografia com fita crepe de ateliê (herdada do Tradicional) */
@@ -158,7 +158,7 @@
 }
 .tile .acao{padding-top:var(--s3);margin-top:auto}
 .tile .btn{width:100%}
-.tile.sem-foto{border-left:6px solid var(--ember)}
+.tile.sem-foto{background:color-mix(in srgb,var(--ember) 8%,var(--ink-2))}
 .tile.sem-foto .corpo{padding:var(--s5)}
 .tile.destaque{border-color:var(--ember)}
 
@@ -195,7 +195,7 @@
       {% endif %}
       {% if produtos %}
       <div class="faz">
-        <h2>✦ O que é feito à mão aqui</h2>
+        <h2>O que é feito à mão aqui</h2>
         <ul>{% for p in produtos[:5] %}<li>{{ p.nome }}</li>{% endfor %}</ul>
       </div>
       {% endif %}

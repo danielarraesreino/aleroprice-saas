@@ -158,7 +158,7 @@
     }catch(e){}
   })();
 </script>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   /* ============================================================
      TOKENS — escuro é o padrão. Os nomes --ink/--cream/--amber/…
@@ -273,7 +273,7 @@
   html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
   body{
     margin:0;background:var(--bg);color:var(--fg);
-    font-family:"Inter",system-ui,-apple-system,sans-serif;
+    font-family:"Work Sans","Barlow Condensed",system-ui,-apple-system,sans-serif;
     font-size:16px;line-height:1.55;overflow-x:hidden;
     -webkit-font-smoothing:antialiased;
   }
@@ -604,7 +604,7 @@
   .linha-ev p{color:var(--fg-dim);font-size:.92rem;margin-top:4px;max-width:60ch}
 
   /* ------------------------------------------------------ história */
-  .historia{display:grid;gap:26px}
+  .historia{display:grid;grid-template-columns:minmax(0,1fr);gap:26px;overflow-wrap:anywhere}
   .historia p{color:var(--fg);font-size:1.02rem;margin-top:14px;max-width:56ch}
   .retrato{width:100%;border:1px solid var(--linha);filter:var(--foto)}
   .retrato img{width:100%;aspect-ratio:4/3;object-fit:cover}
@@ -618,7 +618,7 @@
   .equipe small{font-family:"JetBrains Mono",monospace;font-size:.75rem;letter-spacing:.14em;
     text-transform:uppercase;color:var(--fg-dim)}
   @media(min-width:860px){
-    .historia{grid-template-columns:1fr 1fr;gap:44px;align-items:start}
+    .historia{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:44px;align-items:start}
   }
 
   /* ----------------------------------------------------- avaliações */
@@ -709,7 +709,7 @@
     letter-spacing:.2em;text-transform:uppercase;color:var(--amber);margin-bottom:6px}
   .campo input,.campo textarea{
     width:100%;min-width:0;background:var(--bg);border:1px solid var(--linha-forte);border-radius:0;
-    padding:12px;color:var(--fg);font-family:"Inter",system-ui,sans-serif;font-size:16px;
+    padding:12px;color:var(--fg);font-family:"Work Sans",system-ui,sans-serif;font-size:16px;
   }
   .campo input:focus,.campo textarea:focus{outline:2px solid var(--amber);outline-offset:-1px;border-color:var(--amber)}
   .campo textarea{resize:vertical;min-height:62px}
@@ -745,7 +745,7 @@
 
   /* -------------------------------------------------------- rodapé */
   footer{border-top:1px solid var(--linha);padding:34px 0 46px;margin-top:10px}
-  .rodape-nome{font-family:"Barlow Condensed","Arial Narrow",sans-serif;text-transform:uppercase;
+  .rodape-nome{overflow-wrap:anywhere;font-family:"Barlow Condensed","Arial Narrow",sans-serif;text-transform:uppercase;
     font-weight:700;font-size:clamp(2rem,12vw,3.4rem);line-height:.9;letter-spacing:.01em}
   .rodape-linha{margin-top:10px;font-family:"JetBrains Mono",monospace;font-size:.75rem;
     letter-spacing:.16em;text-transform:uppercase;color:var(--fg-dim)}
@@ -877,7 +877,7 @@
   </div>
   <div class="nav-dir">
     <button class="btn-icone" id="btnTema" onclick="alternarTema()" aria-label="Alternar tema claro e escuro" title="Alternar tema">
-      <span id="icoTema" aria-hidden="true">☾</span>
+      <span id="icoTema" aria-hidden="true"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></span>
     </button>
     <button class="btn-icone" id="btnMenu" onclick="alternarMenu()" aria-label="Abrir menu" aria-expanded="false" aria-controls="painelMenu">
       <span aria-hidden="true">≡</span>
@@ -887,9 +887,9 @@
 
 <div class="painel" id="painelMenu" role="dialog" aria-modal="true" aria-label="Menu de navegação">
   <button class="btn-icone fechar" onclick="alternarMenu()" aria-label="Fechar menu"><span aria-hidden="true">✕</span></button>
-  {% if dishes %}<a href="#cardapio" onclick="alternarMenu(this)"><i>01</i>Torneiras</a>{% endif %}
-  {% if promocoes %}<a href="#promocoes" onclick="alternarMenu(this)"><i>02</i>Ofertas</a>{% endif %}
-  {% if eventos %}<a href="#agenda" onclick="alternarMenu(this)"><i>03</i>Agenda</a>{% endif %}
+  {% if dishes %}<a href="#cardapio" onclick="alternarMenu(this)">Torneiras</a>{% endif %}
+  {% if promocoes %}<a href="#promocoes" onclick="alternarMenu(this)">Ofertas</a>{% endif %}
+  {% if eventos %}<a href="#agenda" onclick="alternarMenu(this)">Agenda</a>{% endif %}
   <a href="#balcao" onclick="alternarMenu(this)"><i>04</i>O balcão</a>
   {% if team or gallery %}<a href="#historia" onclick="alternarMenu(this)"><i>05</i>Origem</a>{% endif %}
   {% if reviews or site.nota_google %}<a href="#avaliacoes" onclick="alternarMenu(this)"><i>06</i>Notas</a>{% endif %}
@@ -1036,7 +1036,7 @@
     <div class="casa">
       {% for emoji, titulo, sub in copy.clima.cards %}
       <div class="item rev">
-        <span class="em" aria-hidden="true">{{ emoji }}</span>
+        <span class="em" aria-hidden="true"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l8 8-8 8-8-8z"/></svg></span>
         <div><b>{{ titulo }}</b><small>{{ sub }}</small></div>
       </div>
       {% endfor %}
@@ -1339,7 +1339,7 @@
       {% endif %}
     </div>
     {% endif %}
-    <div><a class="lojista" href="{{ url_do_sistema() }}">Área do lojista → entrar no sistema</a></div>
+    <div><a class="lojista" href="{{ url_do_sistema() }}">Área do lojista · entrar no sistema</a></div>
   </div>
   {% with novidades_bar = tenant.slug if tenant else '' %}{% include "site/_novidades.html" %}{% endwith %}
   {% include "site/_selo_caminhos.html" %}
@@ -1363,8 +1363,9 @@
     return (v || '').trim() || '{{ tema_cor or "#0b0c0b" }}';
   }
   function pintarIconeTema(){
+    var SUN = '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>', MOON = '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>';
     var ico = document.getElementById('icoTema');
-    if (ico) ico.textContent = temaAtual() === 'light' ? '☀' : '☾';
+    if (ico) ico.innerHTML = temaAtual() === 'light' ? SUN : MOON;
   }
   function alternarTema(){
     var novo = temaAtual() === 'light' ? 'dark' : 'light';

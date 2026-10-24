@@ -56,7 +56,6 @@
   background:linear-gradient(165deg, color-mix(in srgb, var(--ink-2) 96%, transparent), var(--ink));
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   border:1px solid var(--line-strong);
-  border-top:8px solid var(--ember);
   border-radius:var(--r);
   box-shadow:0 24px 60px -15px rgba(0,0,0,.6);
 }
@@ -157,8 +156,7 @@
 .tile.cartaz img{object-fit:contain;padding:var(--s3);transition:transform .35s ease}
 .tile.cartaz:hover img{transform:scale(1.02)}
 .tile.sem-foto{
-  background:linear-gradient(155deg, var(--ink-2), var(--ink-3));
-  border-top:4px solid var(--ember);
+  background:color-mix(in srgb,var(--ember) 8%,var(--ink-2));
 }
 .tile.sem-foto .corpo{padding:var(--s5) var(--s4)}
 .tile:only-child{grid-column:span 2}

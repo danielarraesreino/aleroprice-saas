@@ -223,7 +223,7 @@ h2.titulo{font-size:clamp(2rem,5.2vw,3.35rem)}
 .marquee:hover .marquee-track{animation-play-state:paused}
 .marquee-track span{display:inline-flex;align-items:center;gap:14px;white-space:nowrap}
 .marquee-track b{color:var(--amber);font-weight:700}
-.marquee-track i{font-style:normal;color:var(--ember);font-size:.75rem}
+.marquee-track i{flex:none;width:6px;height:6px;background:var(--ember);transform:rotate(45deg)}
 @keyframes marquee-scroll{
   from{transform:translateX(0)}
   to{transform:translateX(-50%)}
@@ -248,7 +248,6 @@ h2.titulo{font-size:clamp(2rem,5.2vw,3.35rem)}
   padding:var(--s5);
   background:linear-gradient(155deg, var(--ink-2), var(--ink-3));
   border:1px solid var(--line);
-  border-left:4px solid var(--ember);
   border-radius:var(--r);
   box-shadow:var(--shadow-card);
   transition:transform .25s ease,border-color .25s ease;
@@ -363,7 +362,7 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
 .equipe li{
   padding:var(--s5);
   background:linear-gradient(155deg, var(--ink-2), var(--ink-3));
-  border:1px solid var(--line);border-left:4px solid var(--amber);
+  border:1px solid var(--line);
   border-radius:var(--r);
   box-shadow:var(--shadow-card);
 }
@@ -623,11 +622,11 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
 <div class="marquee" aria-hidden="true">
   <div class="marquee-track">
     {% for _ in [1, 2] %}
-    <span><b>{{ site.nome }}</b> <i>✦</i> {{ descritor }}</span>
+    <span><b>{{ site.nome }}</b> <i></i> {{ descritor }}</span>
     {% if produtos %}
-      {% for p in produtos[:5] %}<span>{{ p.nome }} <i>✦</i></span>{% endfor %}
+      {% for p in produtos[:5] %}<span>{{ p.nome }} <i></i></span>{% endfor %}
     {% endif %}
-    <span><b>Feira de Barão</b> <i>✦</i> Praça do Coco · Barão Geraldo</span>
+    <span><b>Feira de Barão</b> <i></i> Praça do Coco · Barão Geraldo</span>
     {% endfor %}
   </div>
 </div>

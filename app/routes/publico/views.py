@@ -469,6 +469,14 @@ def privacidade():
     return render_template('produto/privacidade.html', **_contexto_produto())
 
 
+@bp.route('/termos')
+def termos():
+    """Termos de uso do site e do serviço de site para bares e expositores."""
+    from app.utils.planos import precos, precos_expositor
+    return render_template('produto/termos.html', tabela=precos(),
+                           preco_exp=precos_expositor(), **_contexto_produto())
+
+
 @bp.route('/vendedor')
 def vendedor():
     """Como vender e como se ganha comissão. Não indexa, não está no menu: é
