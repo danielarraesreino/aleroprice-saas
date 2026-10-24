@@ -146,7 +146,7 @@ body{
 .linhas{display:grid;gap:var(--s4)}
 .linha{
   --tilt:-.25deg;
-  display:grid;grid-template-columns:1fr;gap:var(--s4);align-items:center;
+  display:grid;grid-template-columns:minmax(0,1fr);gap:var(--s4);align-items:center;
   padding:var(--s4);
   background:var(--ink-2);
   border:2px solid var(--line-strong);
@@ -193,7 +193,7 @@ body{
 @media (min-width:720px){
   .hero{padding-block:var(--s8)}
   .hero-grid:has(.hero-quadro){grid-template-columns:1.25fr .95fr;gap:var(--s7)}
-  .linha{grid-template-columns:1fr auto;padding:var(--s4) var(--s5)}
+  .linha{grid-template-columns:minmax(0,1fr) auto;padding:var(--s4) var(--s5)}
   .linha:has(.linha-foto){grid-template-columns:104px 1fr auto}
   .linha .acao .btn{width:auto;min-width:144px}
 }
@@ -208,7 +208,7 @@ body{
 <section class="hero" id="topo" aria-labelledby="titulo">
   <div class="wrap hero-grid">
     <div>
-      <span class="fita" data-hero>★ Feito na hora · {{ descritor }}</span>
+      <span class="fita" data-hero>★ {{ descritor }}</span>
       <h1 id="titulo" class="titulo" data-hero>{{ site.nome }}</h1>
       {% if site.horario %}<p class="hoje" data-hero>{{ site.horario }}{% if site.ponto_na_feira %} · {{ site.ponto_na_feira }}{% endif %}</p>{% endif %}
       {% if site.tagline %}<p class="lead" data-hero>{{ site.tagline }}</p>{% endif %}

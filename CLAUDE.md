@@ -1,4 +1,4 @@
-# AleroPrice SaaS — guia do repositório
+# Feira de Barão (plataforma) — guia do repositório
 
 Documento escrito a partir da leitura do código (não dos .md legados, que estão
 desatualizados). Fonte da verdade: `app/`, `run.py`, `migrations/`.
@@ -44,7 +44,12 @@ sem mudar o banco junto. `Server-Timing: app;dur=…` e o log `DB_CONNECT` (em
 - Postgres em produção (`DATABASE_URL`), SQLite em dev (`instance/alerodb.sqlite`)
 - Só na gestão (`requirements-gestao.txt`): pandas/numpy (previsão, importação, exports), `thefuzz` (match de nome de prato), `xmltodict` + `pydantic` (parser NF-e), `openpyxl` (xlsx). `requirements.txt` é o do site, enxuto para caber na Vercel
 - Stripe (billing), Sentry (opcional, ativa só se `SENTRY_DSN` existir)
-- Deploy: Render/qualquer container (`Procfile`, `render.yaml`) — Vercel existe (`api/index.py`, `vercel.json`) mas é o caminho ruim pra essa stack (FS read-only, pandas pesado)
+- Deploy: **Vercel** (projeto `aleroprice-bardavila`, função em gru1, `api/index.py` + `vercel.json`), a partir do push em `main`. Banco: Neon (`alerosaas`, sa-east-1).
+- Subir local sem tocar no banco de dev: `DATABASE_URL=sqlite:////tmp/x.sqlite APP_ENV=development venv/bin/python run.py` (sem `DATABASE_URL`, o `run.py` grava em `instance/alerodb.sqlite`).
+- Testes: `venv/bin/python -m pytest tests/unit tests/integration -q --no-cov -p no:cacheprovider` (o `tests/pytest.ini` grava `.coverage` e `htmlcov/` se rodar sem `--no-cov`).
+- Roteamento por host: `app/utils/site_router.py` (`tenant_por_host`, `tenant_por_slug`); `ENDPOINTS_DO_TENANT` em `app/__init__.py` lista o que responde no domínio do cliente (com `SEPARAR_DOMINIOS=1`).
+- Preço só em `app/utils/planos.py` (env `FEIRA_*`); páginas e PDFs leem de lá. Páginas públicas usam `_na_borda` (cache de borda; `?v=` fura).
+- Endpoints destrutivos ficam em `app/routes/admin_dev/` (`/admin-dev/*`), exigem `ADMIN_DEV_TOKEN` e falham no boot em produção.
 
 ## Mapa do código
 
@@ -54,7 +59,7 @@ sem mudar o banco junto. `Server-Timing: app;dur=…` e o log `DB_CONNECT` (em
 | `app/config.py` | `DevelopmentConfig` / `TestingConfig` / `ProductionConfig` |
 | `app/extensions.py` | `db`, `migrate`, `login_manager`, `csrf` |
 | `app/cli.py` | `flask create-tenant` — único jeito oficial de provisionar tenant via CLI |
-| `app/models/` | 20+ modelos, um arquivo por domínio (`modelo_*.py`) |
+| `app/models/` | ~17 modelos, um arquivo por domínio (`modelo_*.py`) |
 | `app/routes/<dominio>/views.py` | um blueprint por domínio |
 | `app/utils/` | cálculos, parser NF-e, importação de vendas, filtros BR, tenant |
 | `app/templates/` | Jinja2; `site/` = site público, resto = sistema interno |

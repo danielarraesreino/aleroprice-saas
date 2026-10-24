@@ -30,10 +30,14 @@
   .some{position:relative;white-space:nowrap}
   .some::after{content:"";position:absolute;left:0;right:0;top:52%;height:.09em;background:var(--tomate);transform:rotate(-1.4deg)}
   a{color:var(--tomate)}
-  .btn-zap{display:inline-flex;align-items:center;gap:var(--s-2);background:var(--verde);color:#f4efe2;
+  .hero .btn-zap,.secao .btn-zap{display:inline-flex;align-items:center;gap:var(--s-2);background:var(--verde);color:#f4efe2;
     text-decoration:none;font-weight:700;padding:13px 22px;border-radius:3px;min-height:44px;
     box-shadow:3px 3px 0 rgb(37 27 16 / .18);margin-top:var(--s-5)}
-  .btn-zap:hover{background:#125533}
+  .hero .btn-zap:hover,.secao .btn-zap:hover{background:#125533}
+  /* o topo da Feira mantém a própria largura e os próprios botões */
+  .site-header .wrap{max-width:1140px;padding-inline:24px}
+  @media(max-width:1024px){.site-header .wrap{padding-inline:18px}}
+  @media(max-width:360px){.site-header .wrap{padding-inline:12px}}
   :focus-visible{outline:3px solid var(--tomate);outline-offset:3px}
   .hero{padding-block:var(--s-7) var(--s-6)}
 

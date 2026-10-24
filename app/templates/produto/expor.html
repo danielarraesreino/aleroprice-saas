@@ -13,7 +13,7 @@
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Work+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Work+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/feira.css') }}">
 {% include 'produto/_estilo_proposta.html' %}
@@ -117,6 +117,6 @@
   </div>
 </section>
 </main>
-<footer><div class="wrap"><b>Feira de Barão</b> · Praça do Coco, Barão Geraldo, Campinas/SP</div></footer>
+<footer><div class="wrap"><b>Feira de Barão</b> · Praça do Coco, Barão Geraldo, Campinas/SP</div><p style="margin-top:8px"><a href="{{ url_for('public.privacidade') }}">Privacidade</a></p></footer>
 </body>
 </html>

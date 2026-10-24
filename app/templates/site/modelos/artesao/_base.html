@@ -573,6 +573,9 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
   .btn,.chip,.galeria img,.fatos li,.passos li,.aval blockquote,.marquee-track{transition:none!important;animation:none!important}
   .js-anim [data-hero],.js-anim .rev{opacity:1!important}
 }
+/* nome comprido nunca empurra a página: quebra onde precisar (break-ui) */
+.titulo,.rodape p,.tile h4,.linha h4,.linha .desc,.legenda,.sem-foto *{overflow-wrap:anywhere;min-width:0}
+.linha{min-width:0}
 </style>
 <style>
 {% block estilo %}{% endblock %}

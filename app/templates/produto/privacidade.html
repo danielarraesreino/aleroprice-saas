@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacidade · Feira de Barão</title>
+<meta name="description" content="Quais dados a Feira de Barão coleta, para quê e como pedir a exclusão.">
+<link rel="canonical" href="{{ url_for('public.privacidade', _external=True) }}">
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+{% include 'produto/_estilo_proposta.html' %}
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <span class="eyebrow">Feira de Barão</span>
+  <h1>Privacidade</h1>
+  <p class="lead">Quais dados guardamos, para quê, e como pedir para apagar. Atualizado em 24/10/2026.</p>
+</div></header>
+<main>
+<section class="secao"><div class="wrap">
+  <h2>O que guardamos</h2>
+  <ul class="lista">
+    <li><b>Cadastro de quem tem site:</b> nome, e-mail e senha (guardada em forma de hash). Serve para entrar no painel e avisar sobre a conta.</li>
+    <li><b>Novidades da Feira:</b> e-mail, nome e telefone (se você informar) e o seu aceite. Só enviamos o que você pediu e você sai quando quiser. Os contatos ficam num serviço de e-mail (Brevo).</li>
+    <li><b>Reservas e encomendas:</b> o que você digita no formulário vai para o bar ou expositor escolhido. Pedidos por WhatsApp abrem a sua conversa no WhatsApp, com a mensagem pronta; o conteúdo dela é entre você e o vendedor.</li>
+    <li><b>Medição de acesso:</b> contagem de visitas e velocidade das páginas, pela Vercel, sem identificar você pelo nome.</li>
+  </ul>
+  <h2 style="margin-top:32px">O que não fazemos</h2>
+  <ul class="lista">
+    <li>Não vendemos nem cedemos seus dados.</li>
+    <li>Não guardamos dados de cartão: o pagamento do site é combinado direto, e quando houver cobrança on-line ela passa por um processador de pagamento.</li>
+  </ul>
+  <h2 style="margin-top:32px">Seus direitos</h2>
+  <p class="p">Você pode pedir para ver, corrigir ou apagar seus dados, e sair das novidades a qualquer momento. Fale com a gente pelo WhatsApp da Feira, indicado na página inicial.</p>
+</div></section>
+</main>
+<footer><div class="wrap"><a href="{{ url_for('public.landing') }}">Voltar para a Feira de Barão</a></div></footer>
+</body>
+</html>

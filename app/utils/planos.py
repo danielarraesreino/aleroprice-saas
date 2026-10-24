@@ -8,8 +8,8 @@ Planos
 demo      prévia comercial; acesso amplo, sem cobrança, marcada como não oficial
 trial     14 dias após a conversão — vale como `pro`, porque esconder o produto
           na janela em que a pessoa está decidindo é o oposto de vender
-site      o site do bar (R$129): domínio próprio, CMS, reservas, agenda, promoções
-pro       site + gestão (R$249): ficha técnica, estoque, NF-e, previsão, relatórios
+site      o site do bar (R$147,90): domínio próprio, CMS, reservas, agenda, promoções
+pro       site + gestão (R$247,90): ficha técnica, estoque, NF-e, previsão, relatórios
 free      pós-trial sem pagar: o site continua no ar, mas congelado
 
 Degradação, não desligamento

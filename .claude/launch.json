@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "feira-preview",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "DATABASE_URL=sqlite:////tmp/feira-preview.sqlite exec python -c \"from app import create_app, db; a=create_app('development'); ctx=a.app_context(); ctx.push(); db.create_all(); a.run(host='127.0.0.1', port=5055)\""],
+      "port": 5055
+    }
+  ]
+}

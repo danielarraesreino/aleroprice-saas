@@ -390,7 +390,7 @@
   .hero-kicker::before{content:"";width:26px;height:1px;background:var(--hero-amber);flex:0 0 auto}
   .hero-nome{font-family:"Barlow Condensed","Arial Narrow",sans-serif;text-transform:uppercase;
     font-weight:700;line-height:.86;letter-spacing:-.005em;margin-top:14px;
-    font-size:clamp(3.2rem,20vw,10rem);color:var(--hero-fg)}
+    font-size:clamp(3.2rem,20vw,10rem);color:var(--hero-fg);overflow-wrap:anywhere}
   .hero-nome span{display:block}
   .hero-nome span+span{color:var(--hero-amber)}
   .hero-tag{margin-top:16px;max-width:38ch;color:var(--hero-fg);font-size:1.02rem}
@@ -609,7 +609,7 @@
   .retrato{width:100%;border:1px solid var(--linha);filter:var(--foto)}
   .retrato img{width:100%;aspect-ratio:4/3;object-fit:cover}
   .equipe{margin-top:18px;border-top:1px solid var(--linha)}
-  .equipe li{display:grid;grid-template-columns:38px 1fr;column-gap:12px;align-items:center;
+  .equipe li{display:grid;grid-template-columns:38px minmax(0,1fr);column-gap:12px;align-items:center;overflow-wrap:anywhere;
     padding:12px 0;border-bottom:1px solid var(--linha)}
   .equipe .av{width:38px;height:38px;display:grid;place-items:center;font-size:1.2rem;
     border:1px solid var(--linha-forte)}

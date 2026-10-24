@@ -23,7 +23,7 @@
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Work+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Work+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {# topo e menu da Feira (o mesmo da home e da Memória); o <style> abaixo vem
    depois e manda no resto da página #}
@@ -233,6 +233,9 @@
 
   /* Topo da Feira: os botões da página (acima) não valem dentro dele */
   .site-header,.menu-mobile-drawer{font-family:var(--font-corpo);line-height:normal}
+  .site-header .wrap{max-width:1140px;padding-inline:24px}
+  @media(max-width:1024px){.site-header .wrap{padding-inline:18px}}
+  @media(max-width:360px){.site-header .wrap{padding-inline:12px}}
   .site-header .btn{white-space:nowrap;border-radius:999px;box-shadow:none;font-family:inherit;letter-spacing:0}
 
   /* Nada nasce escondido: as classes de animação só entram se o JS assumir. */
@@ -446,7 +449,7 @@
       </div>
       {% endif %}
 
-      <p class="acordo" data-reveal>Sem fidelidade: se não servir, você cancela e pronto.</p>
+      <p class="acordo" data-reveal>No mensal não há contrato: se não servir, você cancela. O anual é pago à vista e não é devolvido.</p>
     </div>
   </section>
 
@@ -509,7 +512,7 @@
     <p><b>Feira de Barão</b> · Tecnologia e Presença Digital para Gastronomia em Barão Geraldo, Campinas/SP</p>
     <p>Já no ar: <a href="https://bardavila.bar" target="_blank" rel="noopener">bardavila.bar</a></p>
   </div>
-</footer>
+<div class="wrap"><p><a href="{{ url_for('public.privacidade') }}">Privacidade</a></p></div></footer>
 
 <div class="barra-zap">
   <a class="btn-zap" href="{{ zap_url }}">

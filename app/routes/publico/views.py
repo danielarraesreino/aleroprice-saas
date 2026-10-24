@@ -377,7 +377,7 @@ def _contexto_produto():
     """Dados da home e das páginas do portal. Vêm de env pra não versionar
     número de telefone nem preço — os dois mudam sem deploy."""
     zap = (os.environ.get('FEIRA_WHATSAPP') or '').strip()
-    msg = urllib.parse.quote('Oi! Vi o Feira de Barão e quero conversar sobre colocar minha banca/casa no ar.')
+    msg = urllib.parse.quote('Oi! Vi a Feira de Barão e quero conversar sobre colocar minha banca/casa no ar.')
 
     bares = _bares_da_feira()
     com_nota = [float(b['nota'].replace(',', '.')) for b in bares]
@@ -461,6 +461,12 @@ def expor():
         'produto/expor.html', preco_exp=precos_expositor(),
         n_expositores=len(fe.expositores()), **_contexto_produto()))
     return _na_borda(resp)
+
+
+@bp.route('/privacidade')
+def privacidade():
+    """Política de privacidade: só descreve dados que o sistema de fato coleta."""
+    return render_template('produto/privacidade.html', **_contexto_produto())
 
 
 @bp.route('/vendedor')
