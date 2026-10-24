@@ -789,8 +789,8 @@ def evento_da_feira(horarios, local, imagem=None, hoje=None):
         fim = data.replace(hour=fh, minute=fm)
         if fim <= agora:
             data += timedelta(days=7)
-        proximos.append(data)
-    inicio = min(proximos) if proximos else None
+        proximos.append((data, data.replace(hour=fh, minute=fm)))
+    inicio, termino = min(proximos) if proximos else (None, None)
     url = 'https://feiradebarao.com.br/'
     from app.utils.feira import CENTRO
     lat, lng = CENTRO
@@ -801,6 +801,7 @@ def evento_da_feira(horarios, local, imagem=None, hoje=None):
                         'Geraldo, Campinas. Todo fim de semana, com entrada livre.'),
         'image': imagem,
         'startDate': inicio.isoformat() if inicio else None,
+        'endDate': termino.isoformat() if termino else None,
         'eventAttendanceMode': 'https://schema.org/OfflineEventAttendanceMode',
         'eventStatus': 'https://schema.org/EventScheduled',
         'isAccessibleForFree': True,
