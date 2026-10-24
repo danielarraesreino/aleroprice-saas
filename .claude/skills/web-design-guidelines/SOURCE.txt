@@ -1,0 +1,4 @@
+Fonte: https://github.com/vercel-labs/web-interface-guidelines (command.md)
+Baixado em: 2026-10-21
+sha256: d246b026f4f29b5823a9cc857f9edf3d2507002e055e32040cadeaf3b38e0234
+Skill upstream: vercel-labs/agent-skills @ 063bee9
