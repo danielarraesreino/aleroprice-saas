@@ -18,7 +18,7 @@ A regra de ouro
 ---------------
 **Campo ausente = chave ausente.** Nunca string vazia, nunca "None", nunca
 placeholder, nunca default inventado. Um bar sem telefone não emite `telephone`;
-um bar sem nota não emite `AggregateRating`. Marcar dado que não existe é pior
+um bar sem telefone não emite `telephone`. Marcar dado que não existe é pior
 que não marcar nada: o Google trata schema mentiroso como spam estrutural, e uma
 penalidade cai sobre o site do cliente, não sobre o nosso código.
 
@@ -28,8 +28,8 @@ com `exemplo=True`) **nunca** entram no grafo: publicar show inventado como
 
 O que é montado
 ---------------
-`Restaurant`/`BarOrPub` (NAP + horário + redes + mapa), `AggregateRating`,
-`Menu`/`MenuItem`, `Review`, `Event`, `BreadcrumbList` e `WebSite`. O
+`Restaurant`/`BarOrPub`/`Store` (NAP + horário + redes + mapa),
+`Menu`/`MenuItem`, `Product`+`Offer`, `Event`, `BreadcrumbList` e `WebSite`. O
 `dateModified` sai de `SiteConfig.data_atualizacao` porque frescor é critério de
 citação: página tocada nos últimos 30 dias é mais citada por IA generativa.
 
@@ -460,19 +460,11 @@ def _nota_decimal(valor):
     return nota if 0 < nota <= 5 else None
 
 
-def _avaliacao_agregada(site):
-    """`AggregateRating` — só quando a nota existe de verdade."""
-    nota = _nota_decimal(site.get('nota_google'))
-    if nota is None:
-        return None
-    agregado = {'@type': 'AggregateRating', 'ratingValue': nota, 'bestRating': 5}
-    try:
-        quantidade = int(site.get('qtd_avaliacoes') or 0)
-    except (TypeError, ValueError):
-        quantidade = 0
-    if quantidade > 0:
-        agregado['reviewCount'] = quantidade
-    return agregado
+# `AggregateRating` e `Review` NÃO entram no grafo. O negócio publicaria nota e
+# avaliações sobre si mesmo (self-serving): o Google ignora esse markup para
+# LocalBusiness/Store e pode aplicar ação manual por spam estrutural. Nota e
+# avaliações continuam visíveis na página como texto (e na meta description);
+# só saem do schema.
 
 
 # ----------------------------------------------------------- meta description
@@ -582,8 +574,9 @@ def _pedacos_de_produto(produtos, origem, url_canonica, id_vendedor):
         if preco:
             oferta = {'@type': 'Offer', 'price': preco, 'priceCurrency': 'BRL',
                       'seller': {'@id': id_vendedor}}
-            if _campo(prod, 'sob_encomenda'):
-                oferta['availability'] = 'https://schema.org/PreOrder'
+            oferta['availability'] = ('https://schema.org/PreOrder'
+                                      if _campo(prod, 'sob_encomenda')
+                                      else 'https://schema.org/InStock')
             prazo = _campo(prod, 'prazo_dias')
             if isinstance(prazo, int) and not isinstance(prazo, bool) and prazo > 0:
                 # dias úteis de produção; schema.org não tem "útil", DAY é o mais próximo
@@ -674,31 +667,6 @@ def cardapio_estruturado(rest, site, dishes, url_canonica, url_cardapio=None):
     return _sem_vazios({'@context': 'https://schema.org', '@graph': [casa, cardapio]})
 
 
-def _pedacos_de_avaliacao(reviews, url_canonica, id_restaurante):
-    nos = []
-    for i, avaliacao in enumerate(reviews or [], start=1):
-        autor = _limpo(_campo(avaliacao, 'autor'))
-        texto = _limpo(_campo(avaliacao, 'texto'))
-        if not autor or not texto:
-            continue
-        no = {
-            '@type': 'Review',
-            '@id': f'{url_canonica}#avaliacao-{i}',
-            'author': {'@type': 'Person', 'name': autor},
-            'reviewBody': texto,
-            'itemReviewed': {'@id': id_restaurante},
-        }
-        try:
-            estrelas = int(_campo(avaliacao, 'estrelas') or 0)
-        except (TypeError, ValueError):
-            estrelas = 0
-        if 1 <= estrelas <= 5:
-            no['reviewRating'] = {'@type': 'Rating', 'ratingValue': estrelas,
-                                  'bestRating': 5}
-        nos.append(no)
-    return nos
-
-
 def _pedacos_de_evento(eventos, url_canonica, id_restaurante):
     """Eventos reais do bar. Os de demonstração ficam de fora, sempre.
 
@@ -734,6 +702,123 @@ def _pedacos_de_evento(eventos, url_canonica, id_restaurante):
             no['description'] = descricao
         nos.append(no)
     return nos
+
+
+# Horário da Feira na Praça do Coco (confirmado pelo organizador; espelha
+# `FEIRA['horarios']` em app/routes/publico/views.py, que este módulo folha não
+# pode importar). Mudou lá, mude aqui.
+LOCAL_FEIRA = 'Praça do Coco'
+HORARIOS_FEIRA = (
+    ('Saturday', '10:00', '16:00'),
+    ('Sunday', '10:00', '15:00'),
+)
+
+# Faixa de preço ($ a $$$) a partir da MÉDIA dos itens do cardápio com preço:
+# até R$ 30 = "$", até R$ 70 = "$$", acima = "$$$". Regra deliberadamente
+# simples e documentada; faixa escrita pelo dono (`faixa_preco`) sempre vence.
+FAIXA_BARATA_ATE = 30.0
+FAIXA_MEDIA_ATE = 70.0
+
+
+def faixa_de_preco(dishes):
+    """Média dos preços válidos do cardápio -> '$' | '$$' | '$$$'; sem preço, None."""
+    precos = [ler_moeda(_campo(d, 'preco')) for d in (dishes or [])]
+    precos = [float(p) for p in precos if p is not None]
+    if not precos:
+        return None
+    media = sum(precos) / len(precos)
+    if media <= FAIXA_BARATA_ATE:
+        return '$'
+    return '$$' if media <= FAIXA_MEDIA_ATE else '$$$'
+
+
+def _especificacoes_de_horario(faixas):
+    """['Mo-Th 11:00-00:00'] -> [OpeningHoursSpecification]. Só o que converte."""
+    saida = []
+    for faixa in faixas or []:
+        dias, _, intervalo = faixa.partition(' ')
+        abre, _, fecha = intervalo.partition('-')
+        nomes = _expandir_dias(dias)
+        if nomes and abre and fecha:
+            saida.append({'@type': 'OpeningHoursSpecification', 'dayOfWeek': nomes,
+                          'opens': abre, 'closes': fecha})
+    return saida
+
+
+def _horario_da_feira():
+    return [{'@type': 'OpeningHoursSpecification',
+             'dayOfWeek': dia, 'opens': abre, 'closes': fecha}
+            for dia, abre, fecha in HORARIOS_FEIRA]
+
+
+def _link_do_mapa(place_id, consulta):
+    """Link do Maps: place_id quando existe (exato), senão a busca de sempre."""
+    place_id = _limpo(place_id)
+    if place_id:
+        return 'https://www.google.com/maps/place/?q=place_id:' + urllib.parse.quote(
+            place_id, safe='')
+    consulta = _limpo(consulta)
+    if not consulta:
+        return None
+    return consulta if consulta.startswith(('http://', 'https://')) else (
+        'https://www.google.com/maps/search/?api=1&query=' + urllib.parse.quote(consulta))
+
+
+def evento_da_feira(horarios, local, imagem=None, hoje=None):
+    """Nó `Event` da home: a Feira recorrente na Praça do Coco.
+
+    `startDate` é a próxima ocorrência (sábado ou domingo ainda não encerrado,
+    fuso de São Paulo); a recorrência vai em `eventSchedule` (P1W + byDay).
+    Entrada livre = `Offer` com preço 0. Sem CEP: não foi confirmado.
+    """
+    from datetime import timedelta
+    from zoneinfo import ZoneInfo
+    fuso = ZoneInfo('America/Sao_Paulo')
+    agora = hoje or datetime.now(fuso)
+    dias = {'Monday': 0, 'Tuesday': 1, 'Wednesday': 2, 'Thursday': 3,
+            'Friday': 4, 'Saturday': 5, 'Sunday': 6}
+    proximos = []
+    for h in horarios:
+        dia = dias.get(str(h['schema']).rsplit('/', 1)[-1])
+        if dia is None:
+            continue
+        hh, mm = (int(x) for x in h['abre'].split(':'))
+        fh, fm = (int(x) for x in h['fecha'].split(':'))
+        data = (agora + timedelta(days=(dia - agora.weekday()) % 7)).replace(
+            hour=hh, minute=mm, second=0, microsecond=0)
+        fim = data.replace(hour=fh, minute=fm)
+        if fim <= agora:
+            data += timedelta(days=7)
+        proximos.append(data)
+    inicio = min(proximos) if proximos else None
+    url = 'https://feiradebarao.com.br/'
+    from app.utils.feira import CENTRO
+    lat, lng = CENTRO
+    return _sem_vazios({
+        '@type': 'Event', '@id': url + '#feira',
+        'name': 'Feira de Barão', 'url': url,
+        'description': (f'Feira de artesãos, produtores e gastronomia na {local}, em Barão '
+                        'Geraldo, Campinas. Todo fim de semana, com entrada livre.'),
+        'image': imagem,
+        'startDate': inicio.isoformat() if inicio else None,
+        'eventAttendanceMode': 'https://schema.org/OfflineEventAttendanceMode',
+        'eventStatus': 'https://schema.org/EventScheduled',
+        'isAccessibleForFree': True,
+        'organizer': {'@id': url + '#org'},
+        'location': {
+            '@type': 'Place', 'name': local,
+            'address': {'@type': 'PostalAddress', 'streetAddress': local,
+                        'addressLocality': 'Campinas', 'addressRegion': 'SP',
+                        'addressCountry': 'BR'},
+            'geo': {'@type': 'GeoCoordinates', 'latitude': lat, 'longitude': lng},
+        },
+        'offers': {'@type': 'Offer', 'price': '0', 'priceCurrency': 'BRL',
+                   'availability': 'https://schema.org/InStock', 'url': url},
+        'eventSchedule': [{
+            '@type': 'Schedule', 'repeatFrequency': 'P1W',
+            'byDay': h['schema'], 'startTime': h['abre'], 'endTime': h['fecha'],
+            'scheduleTimezone': 'America/Sao_Paulo'} for h in horarios],
+    })
 
 
 def _comodidades(servicos):
@@ -796,7 +881,16 @@ def dados_estruturados(rest, site, dishes, reviews, eventos, url_canonica,
     if telefone:
         restaurante['telephone'] = telefone
 
+    # Expositor com barraca na Feira (`ponto_na_feira`): a Praça do Coco é o
+    # endereço e o horário da feira vale — só quando o próprio expositor não
+    # tem endereço escrito (esse sempre vence).
+    na_feira = (_campo(rest, 'tipo_negocio') == 'artesao'
+                and bool(_limpo(site.get('ponto_na_feira'))))
     endereco = endereco_schema(site.get('endereco'))
+    if endereco is None and na_feira:
+        endereco = {'@type': 'PostalAddress', 'streetAddress': LOCAL_FEIRA,
+                    'addressLocality': 'Campinas', 'addressRegion': 'SP',
+                    'addressCountry': 'BR'}
     if endereco:
         restaurante['address'] = endereco
         # Área e coordenadas só do que o endereço de verdade diz. Antes iam
@@ -817,7 +911,7 @@ def dados_estruturados(rest, site, dishes, reviews, eventos, url_canonica,
     if cozinha:
         restaurante['servesCuisine'] = cozinha
 
-    faixa_preco = _limpo(site.get('faixa_preco'))
+    faixa_preco = _limpo(site.get('faixa_preco')) or faixa_de_preco(dishes)
     if faixa_preco:
         restaurante['priceRange'] = faixa_preco
 
@@ -826,8 +920,11 @@ def dados_estruturados(rest, site, dishes, reviews, eventos, url_canonica,
     # `openingHoursSpecification` com `opens` e sem `closes`: publica o que se
     # sabe em vez de deixar o bar sem horário nenhum no Google.
     horarios = horario_schema(site.get('horario'))
-    if horarios:
+    if na_feira:
+        restaurante['openingHoursSpecification'] = _horario_da_feira()
+    elif horarios:
         restaurante['openingHours'] = horarios
+        restaurante['openingHoursSpecification'] = _especificacoes_de_horario(horarios)
     else:
         aberturas = abertura_schema(site.get('horario'))
         if aberturas:
@@ -847,20 +944,13 @@ def dados_estruturados(rest, site, dishes, reviews, eventos, url_canonica,
     if pagamento:
         restaurante['paymentAccepted'] = pagamento
 
-    mapa = _limpo(site.get('maps_query'))
+    mapa = _link_do_mapa(_campo(cfg, 'google_place_id'), site.get('maps_query'))
     if mapa:
-        restaurante['hasMap'] = mapa if mapa.startswith(('http://', 'https://')) else (
-            'https://www.google.com/maps/search/?api=1&query='
-            + urllib.parse.quote(mapa)
-        )
+        restaurante['hasMap'] = mapa
 
     comodidades = _comodidades(site.get('servicos'))
     if comodidades:
         restaurante['amenityFeature'] = comodidades
-
-    agregado = _avaliacao_agregada(site)
-    if agregado:
-        restaurante['aggregateRating'] = agregado
 
     grafo = [restaurante]
 
@@ -876,7 +966,6 @@ def dados_estruturados(rest, site, dishes, reviews, eventos, url_canonica,
         grafo.append(cardapio)
 
     grafo.extend(_pedacos_de_produto(produtos, origem, url_canonica, id_restaurante))
-    grafo.extend(_pedacos_de_avaliacao(reviews, url_canonica, id_restaurante))
     grafo.extend(_pedacos_de_evento(eventos, url_canonica, id_restaurante))
 
     trilha = [{'@type': 'ListItem', 'position': 1, 'name': nome or 'Início',

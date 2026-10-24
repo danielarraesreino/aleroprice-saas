@@ -9,6 +9,8 @@
 <meta property="og:title" content="Sua barraca aberta a semana inteira · Feira de Barão">
 <meta property="og:description" content="Vitrine com preço, prazo e pedido pelo WhatsApp. Anual {{ preco_exp.anual }}, mensal {{ preco_exp.mensal }}.">
 <meta property="og:type" content="website">
+<meta property="og:url" content="{{ url_for('public.expor', _external=True) }}">
+<meta name="twitter:card" content="summary_large_image">
 <meta property="og:image" content="{{ og_imagem('og-feira.jpg') }}">
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">

@@ -136,6 +136,12 @@ def create_app(config_name='default'):
 
     app.jinja_env.globals['og_imagem'] = og_imagem
 
+    def evento_feira(feira, imagem):
+        from app.utils.seo import evento_da_feira
+        return evento_da_feira(feira['horarios'], feira['local'], imagem)
+
+    app.jinja_env.globals['evento_feira'] = evento_feira
+
     @app.context_processor
     def recursos_do_plano():
         """`pode('gestao')` em qualquer template, para o tenant de quem está logado.

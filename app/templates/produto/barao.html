@@ -11,8 +11,13 @@
 <title>Bares de Barão: seu bar merece mais que um story de 24 horas</title>
 <meta name="description" content="Site pronto para bares de Barão Geraldo: página com foto, cardápio com QR, reserva no WhatsApp e seu bar achável no Google. A partir de {{ preco_site }} por mês.">
 {% endif %}
+{% if campinas %}
+<meta property="og:title" content="Site, cardápio digital e reserva para bar em Campinas · Feira de Barão">
+<meta property="og:description" content="Site próprio para bar e restaurante em Campinas: cardápio com QR, reserva com aviso no WhatsApp, pedido de avaliação e seu bar achável no Google Maps. A partir de {{ preco_site }} por mês, sem fidelidade.">
+{% else %}
 <meta property="og:title" content="Bares de Barão: seu bar merece mais que um story de 24 horas">
 <meta property="og:description" content="O story some à meia-noite. O site fica: reserva, agenda, cardápio com QR e seu bar achável no Google.">
+{% endif %}
 <meta property="og:type" content="website">
 <meta property="og:image" content="{{ og_imagem('og-barao.jpg') }}">
 <meta property="og:image:width" content="1200">

@@ -2,6 +2,7 @@
 {% block titulo %}Expositores da Feira de Barão: mapa, produtos e quem está hoje{% endblock %}
 {% block descricao %}Quem expõe na Feira de Barão, na Praça do Coco: mapa com a barraca de cada um, busca de produtos artesanais e o aviso de quem está lá hoje.{% endblock %}
 {% block canonical %}{{ url_for('public.feira', _external=True) }}{% endblock %}
+{% block og_tipo %}website{% endblock %}
 {% block head_extra %}
 {% if q or tipo or so_hoje %}<meta name="robots" content="noindex,follow">{% endif %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/feira-expositores.css') }}">

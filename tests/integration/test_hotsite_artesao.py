@@ -264,13 +264,22 @@ def test_sem_whatsapp_o_contato_vira_instagram_e_nao_oferece_encomenda(client, s
         assert 'class="btn add"' not in corpo and '<dialog' not in corpo, modelo
 
 
-def test_artesao_com_dominio_proprio_tambem_abre_dentro_do_portal_da_feira(client, session):
+def test_artesao_com_dominio_proprio_redireciona_301_do_portal(client, session):
     semear(no_ar=True)
+    resp = client.get(f'/bar/{SLUG}', headers={'Host': 'feiradebarao.com.br'})
+    assert resp.status_code == 301
+    assert resp.headers['Location'] == f'https://{DOMINIO}/'
+
+
+def test_artesao_sem_dominio_abre_dentro_do_portal_da_feira(client, session):
+    rest, _ = semear(no_ar=True)
+    rest.dominio = None
+    db.session.commit()
     resp = client.get(f'/bar/{SLUG}', headers={'Host': 'feiradebarao.com.br'})
     corpo = resp.get_data(as_text=True)
     assert resp.status_code == 200
     assert 'Dona Berga' in corpo
-    assert f'rel="canonical" href="https://{DOMINIO}/"' in corpo
+    assert f'rel="canonical" href="https://feiradebarao.com.br/bar/{SLUG}"' in corpo
     assert 'class="feira-topo"' in corpo
 
 

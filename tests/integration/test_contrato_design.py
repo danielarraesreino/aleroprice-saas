@@ -98,7 +98,8 @@ def test_faixa_de_previa_em_todo_modelo_de_expositor(client, session, modelo):
     rest.tipo_conta = 'demo'
     session.commit()
     corpo = client.get(f'/bar/{SLUG}?modelo={modelo}').get_data(as_text=True)
-    assert 'faixa-previa' in corpo and 'noindex' in corpo
+    # artesão prévia é indexável (decisão do dono); a faixa continua
+    assert 'faixa-previa' in corpo and 'content="index,follow"' in corpo and 'noindex' not in corpo
 
 
 @pytest.mark.parametrize('modelo', list(MODELOS_ARTESAO))

@@ -75,8 +75,8 @@ def test_landing_do_bar_recebe_o_grafo_com_os_dados_dele(client, bar, contexto):
     assert casa['telephone'] == '(19) 99977-9942'
     assert casa['address']['addressLocality'] == 'Campinas'
     assert casa['openingHours'] == ['Tu-Th 17:00-01:30', 'Fr 17:00-02:30']
-    assert casa['aggregateRating']['ratingValue'] == 4.9
-    assert casa['aggregateRating']['reviewCount'] == 39
+    # nota própria do bar não vai pro schema (self-serving); fica visível na página
+    assert 'aggregateRating' not in casa
 
     cardapio = next(n for n in grafo['@graph'] if n['@type'] == 'Menu')
     assert cardapio['hasMenuItem'][0]['name'] == 'Croquete da Bruna'

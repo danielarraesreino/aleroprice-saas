@@ -154,5 +154,6 @@ def test_do_formulario_ao_site_no_ar(client, session, tmp_path):
     assert 'Ateliê da Maria' in pagina and 'wa.me/5519999991234' in pagina
     assert 'Catálogo em montagem' not in pagina        # sem foto nenhuma, o que faz aparece em texto
     assert 'sem-foto' in pagina
-    assert 'noindex' in pagina                         # prévia não oficial
+    assert 'content="index,follow"' in pagina and 'noindex' not in pagina   # prévia de artesão é indexável
+    assert 'faixa-previa' in pagina                    # mas segue declarada como prévia
     assert 'Ateliê da Maria' in client.get('/feira').get_data(as_text=True)

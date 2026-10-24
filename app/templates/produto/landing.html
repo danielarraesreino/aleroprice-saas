@@ -35,19 +35,7 @@
  {"@type":"Organization","@id":"https://feiradebarao.com.br/#org",
   "name":"Feira de Barão","url":"https://feiradebarao.com.br/",
   "areaServed":"Barão Geraldo, Campinas - SP, Brasil"},
- {"@type":"Event","@id":"https://feiradebarao.com.br/#feira",
-  "name":"Feira de Barão","url":"https://feiradebarao.com.br/",
-  "eventAttendanceMode":"https://schema.org/OfflineEventAttendanceMode",
-  "eventStatus":"https://schema.org/EventScheduled",
-  "organizer":{"@id":"https://feiradebarao.com.br/#org"},
-  "location":{"@type":"Place","name":{{ feira.local|tojson }},
-   "address":{"@type":"PostalAddress","streetAddress":{{ feira.local|tojson }},
-    "addressLocality":"Campinas","addressRegion":"SP","addressCountry":"BR"}},
-  "eventSchedule":[{% for h in feira.horarios %}
-   {"@type":"Schedule","repeatFrequency":"P1W","byDay":{{ h.schema|tojson }},
-    "startTime":{{ h.abre|tojson }},"endTime":{{ h.fecha|tojson }},
-    "scheduleTimezone":"America/Sao_Paulo"}{{ ',' if not loop.last }}{% endfor %}
-  ]}
+ {{ evento_feira(feira, og_imagem('og-feira.jpg'))|tojson }}
 ]}
 </script>
 

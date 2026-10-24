@@ -12,6 +12,7 @@ Parser de horário de bar brasileiro não se testa com exemplo inventado: as
 variações que quebram ("a partir das 18h", "Sex 11h30–14h e 18h–23h") só
 aparecem no que os donos de bar realmente escreveram.
 """
+import json
 from datetime import date, datetime
 from decimal import Decimal
 
@@ -107,7 +108,8 @@ def test_bar_completo_gera_o_grafo_inteiro(site_completo, dishes, reviews):
 
     assert grafo['@context'] == 'https://schema.org'
     assert set(tipos(grafo)) == {
-        'BarOrPub', 'Menu', 'Review', 'Event', 'BreadcrumbList', 'WebSite'}
+        'BarOrPub', 'Menu', 'Event', 'BreadcrumbList', 'WebSite'}   # sem Review (self-serving)
+    assert 'aggregateRating' not in no_de(grafo, 'BarOrPub')
 
     casa = no_de(grafo, 'BarOrPub')
     assert casa['name'] == 'Estação Barão'
@@ -275,48 +277,21 @@ def test_preco_sobrevive_a_serializacao(site_completo):
     assert 'R$' not in texto      # símbolo é coisa de tela, não de schema
 
 
-def test_avaliacao_sem_autor_ou_texto_nao_vira_review(site_completo):
-    reviews = [{'autor': 'Ana', 'texto': None, 'estrelas': 5},
-               {'autor': None, 'texto': 'Ótimo', 'estrelas': 5},
-               {'autor': 'João', 'texto': 'Ótimo', 'estrelas': None}]
+def test_avaliacao_do_proprio_negocio_nao_entra_no_schema(site_completo):
+    """Review/AggregateRating que o negócio publica sobre si é self-serving: o
+    Google ignora e pode penalizar. A avaliação segue na página como texto."""
+    reviews = [{'autor': 'João', 'texto': 'Ótimo', 'estrelas': 5}]
     grafo = dados_estruturados(None, site_completo, [], reviews, [], URL)
-    avaliacoes = [n for n in grafo['@graph'] if n['@type'] == 'Review']
-    assert len(avaliacoes) == 1
-    assert avaliacoes[0]['author']['name'] == 'João'
-    assert 'reviewRating' not in avaliacoes[0]   # estrela ausente = chave ausente
+    assert 'Review' not in tipos(grafo)
+    assert 'aggregateRating' not in no_de(grafo, 'BarOrPub')
 
 
 # --------------------------------------------------------------- nota Google
 
-@pytest.mark.parametrize('escrito, esperado', [
-    ('4,7', 4.7), ('4.7', 4.7), ('5,0', 5.0), ('4', 4.0), (4.9, 4.9),
-])
-def test_nota_com_virgula_vira_float_com_ponto(escrito, esperado):
-    site = {'nome': 'Bar X', 'nota_google': escrito, 'qtd_avaliacoes': 26}
-    nota = dados_estruturados(None, site, [], [], [], URL)['@graph'][0]['aggregateRating']
-    assert nota['ratingValue'] == esperado
-    assert isinstance(nota['ratingValue'], float)
-    assert nota['bestRating'] == 5
-    assert nota['reviewCount'] == 26
-
-
-def test_sem_nota_nao_existe_aggregate_rating():
-    """Estrela no resultado do Google é o item mais cobiçado — e o mais
-    perigoso de inventar."""
-    site = {'nome': 'Bar X', 'qtd_avaliacoes': 26}
-    assert 'aggregateRating' not in dados_estruturados(
-        None, site, [], [], [], URL)['@graph'][0]
-
-
-def test_nota_sem_quantidade_sai_sem_review_count():
-    site = {'nome': 'Bar X', 'nota_google': '4,8'}
-    nota = dados_estruturados(None, site, [], [], [], URL)['@graph'][0]['aggregateRating']
-    assert 'reviewCount' not in nota
-
-
-@pytest.mark.parametrize('lixo', ['', '  ', None, 'sem nota', '9,9', '0'])
-def test_nota_impossivel_nao_vira_rating(lixo):
-    site = {'nome': 'Bar X', 'nota_google': lixo, 'qtd_avaliacoes': 10}
+@pytest.mark.parametrize('nota', ['4,7', '4.7', 4.9, '', None, '9,9'])
+def test_nota_google_nunca_vira_aggregate_rating(nota):
+    """A nota continua na tela e na meta description; no schema nunca (self-serving)."""
+    site = {'nome': 'Bar X', 'nota_google': nota, 'qtd_avaliacoes': 26}
     assert 'aggregateRating' not in dados_estruturados(
         None, site, [], [], [], URL)['@graph'][0]
 
@@ -632,3 +607,107 @@ def test_bairro_sai_do_trecho_depois_do_travessao():
     assert bairro('Av. Santa Isabel, 57 - Barão Geraldo, Campinas - SP') == 'Barão Geraldo'
     assert bairro('Rua X, 10, Campinas - SP') is None
     assert bairro(None) is None
+
+
+# ------------------------------------------- expositor, bar e Event da home
+
+def _expositor(**extra):
+    site = {'nome': 'Dona Berga', 'ponto_na_feira': 'Barraca 12'}
+    site.update(extra)
+    return ({'tipo_negocio': 'artesao',
+             'site_config': {'lat': -22.8227, 'lng': -47.0821,
+                             'google_place_id': 'ChIJabc123'}}, site)
+
+
+def test_expositor_na_feira_emite_endereco_horario_geo_mapa_e_oferta():
+    rest, site = _expositor()
+    produtos = [{'nome': 'Bolsa', 'preco': 'R$ 80,00'}, {'nome': 'Sem preço'}]
+    grafo = dados_estruturados(rest, site, [], [], [], URL, produtos=produtos)
+    loja = no_de(grafo, 'Store')
+
+    assert loja['address'] == {'@type': 'PostalAddress', 'streetAddress': 'Praça do Coco',
+                               'addressLocality': 'Campinas', 'addressRegion': 'SP',
+                               'addressCountry': 'BR'}
+    horas = {d['dayOfWeek']: (d['opens'], d['closes'])
+             for d in loja['openingHoursSpecification']}
+    assert horas == {'Saturday': ('10:00', '16:00'), 'Sunday': ('10:00', '15:00')}
+    assert loja['geo']['latitude'] == -22.8227
+    assert loja['hasMap'] == 'https://www.google.com/maps/place/?q=place_id:ChIJabc123'
+
+    com_preco, sem_preco = [n for n in grafo['@graph'] if n['@type'] == 'Product']
+    assert com_preco['offers']['price'] == '80.00'
+    assert com_preco['offers']['priceCurrency'] == 'BRL'
+    assert com_preco['offers']['availability'] == 'https://schema.org/InStock'
+    assert 'offers' not in sem_preco
+    for caminho, valor in varrer(grafo):
+        assert valor not in (None, '', 'None'), caminho
+
+
+def test_expositor_sem_place_id_usa_busca_e_sem_feira_usa_horario_proprio():
+    rest = {'tipo_negocio': 'artesao'}
+    site = {'nome': 'Ateliê', 'maps_query': 'Ateliê Campinas', 'horario': 'Sáb 9h-13h'}
+    loja = no_de(dados_estruturados(rest, site, [], [], [], URL), 'Store')
+    assert loja['hasMap'].startswith('https://www.google.com/maps/search/')
+    assert 'address' not in loja
+    assert loja['openingHoursSpecification'] == [{
+        '@type': 'OpeningHoursSpecification', 'dayOfWeek': ['Saturday'],
+        'opens': '09:00', 'closes': '13:00'}]
+
+
+def test_bar_ganha_horario_estruturado_faixa_de_preco_e_ofertas(site_completo, dishes):
+    dishes = [dict(d, preco='R$ 40,00') for d in dishes]
+    casa = no_de(dados_estruturados(None, site_completo, dishes, [], [], URL), 'BarOrPub')
+    assert casa['openingHoursSpecification'][0]['dayOfWeek'] == [
+        'Monday', 'Tuesday', 'Wednesday', 'Thursday']
+    assert casa['priceRange'] in ('$', '$$', '$$$')
+    ofertas = [i['offers'] for i in no_de(
+        dados_estruturados(None, site_completo, dishes, [], [], URL), 'Menu')['hasMenuItem']
+        if 'offers' in i]
+    assert ofertas and all(o['priceCurrency'] == 'BRL' for o in ofertas)
+
+
+@pytest.mark.parametrize('precos, faixa', [
+    ([20, 30], '$'), ([40, 60], '$$'), ([80, 120], '$$$'), ([], None)])
+def test_faixa_de_preco_pela_media_do_cardapio(precos, faixa):
+    from app.utils.seo import faixa_de_preco
+    assert faixa_de_preco([{'nome': 'x', 'preco': p} for p in precos]) == faixa
+
+
+def test_event_da_home_traz_recorrencia_oferta_e_geo():
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    from app.utils.seo import evento_da_feira
+    horarios = [
+        {'dia': 'Sábado', 'schema': 'https://schema.org/Saturday', 'abre': '10:00', 'fecha': '16:00'},
+        {'dia': 'Domingo', 'schema': 'https://schema.org/Sunday', 'abre': '10:00', 'fecha': '15:00'}]
+    # quarta-feira -> próximo é o sábado seguinte
+    ev = evento_da_feira(horarios, 'Praça do Coco', 'https://x/og.jpg',
+                         hoje=datetime(2026, 10, 21, 12, 0, tzinfo=ZoneInfo('America/Sao_Paulo')))
+    assert ev['startDate'].startswith('2026-10-24T10:00:00')
+    assert ev['offers']['price'] == '0' and ev['offers']['priceCurrency'] == 'BRL'
+    assert ev['location']['address']['addressLocality'] == 'Campinas'
+    assert ev['location']['address']['addressRegion'] == 'SP'
+    assert 'postalCode' not in ev['location']['address']
+    assert ev['location']['geo']['latitude'] == pytest.approx(-22.8226773)
+    assert [e['byDay'] for e in ev['eventSchedule']] == [h['schema'] for h in horarios]
+    assert ev['image'] == 'https://x/og.jpg' and ev['description']
+    # sábado já encerrado -> domingo
+    ev = evento_da_feira(horarios, 'Praça do Coco',
+                         hoje=datetime(2026, 10, 24, 17, 0, tzinfo=ZoneInfo('America/Sao_Paulo')))
+    assert ev['startDate'].startswith('2026-10-25T10:00:00')
+
+
+def test_json_ld_de_cada_tipo_de_pagina_e_json_valido(client):
+    """Home (Event), bar e expositor: o que vai no <script> precisa passar em json.loads."""
+    import re
+    home = client.get('/').get_data(as_text=True)
+    blocos = re.findall(r'<script type="application/ld\+json">(.*?)</script>', home, re.S)
+    assert blocos
+    grafo = json.loads(blocos[0])
+    evento = next(n for n in grafo['@graph'] if n['@type'] == 'Event')
+    assert evento['startDate'] and evento['offers']['price'] == '0'
+
+    rest, site = _expositor()
+    for r, st in ((None, {'nome': 'Bar X', 'horario': 'Sex 18h-23h'}), (rest, site)):
+        texto = serializar(dados_estruturados(r, st, [], [], [], URL))
+        assert json.loads(texto)['@graph']

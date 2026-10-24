@@ -169,15 +169,19 @@ def _render_landing(rest):
     # faz o bar existir pro Google e pras IAs como fato (endereço, horário,
     # nota, cardápio) e não como imagem bonita. Ver app/utils/seo.py.
     #
-    # A prévia comercial entra aqui igual ao cliente: ela já é `noindex` no
-    # template, e `dados_estruturados` recusa por conta própria os itens de
-    # demonstração (`exemplo=True`) — inclusive quando um dia a prévia deixar
-    # de ser noindex.
+    # A prévia comercial entra aqui igual ao cliente: prévia de bar é `noindex`
+    # no template, a de artesão é indexável, e `dados_estruturados` recusa por
+    # conta própria os itens de demonstração (`exemplo=True`).
     endereco_canonico = url_canonica(rest)
-    json_ld = seo.serializar(seo.dados_estruturados(
+    dados_ld = seo.dados_estruturados(
         rest, site, conteudo['dishes'], conteudo['reviews'], eventos,
         endereco_canonico, url_do_cardapio(rest), produtos=conteudo['produtos'],
-    ))
+    )
+    # Prévia usa foto ilustrativa: o artesão prévia é indexável, mas o Google
+    # não pode associar a foto de exemplo ao produto/loja. Sem `image` no grafo.
+    if getattr(rest, 'eh_demo', False):
+        dados_ld = _sem_imagem(dados_ld)
+    json_ld = seo.serializar(dados_ld)
     meta_desc = seo.meta_descricao(site, rest)
 
     arquivo = (arquivo_do_modelo_artesao(modelo_atual) if artesao
@@ -208,6 +212,15 @@ def _render_landing(rest):
     if not previewando:
         _na_borda(resp)
     return resp
+
+
+def _sem_imagem(no):
+    """Remove toda chave `image` do JSON-LD (recursivo). Só para prévia."""
+    if isinstance(no, dict):
+        return {k: _sem_imagem(v) for k, v in no.items() if k != 'image'}
+    if isinstance(no, list):
+        return [_sem_imagem(v) for v in no]
+    return no
 
 
 def _na_borda(resp):
@@ -594,30 +607,32 @@ def robots():
 def _tenants_do_sitemap(dono_do_dominio):
     """Quem pode ser indexado neste domínio.
 
-    Duas regras, uma consulta. `_publicavel` tira o tenant desligado (o mesmo
-    filtro que decide se o site responde), e `Restaurante.clientes()` tira a
-    prévia comercial: ela é `noindex` por definição — não é o site oficial do
-    bar e não pode competir no Google com o negócio real do dono. Pedir
-    indexação do que a própria página manda não indexar é contradição, e o
-    Search Console reporta como erro.
+    Regras, uma consulta. `_publicavel` tira o tenant desligado (o mesmo filtro
+    que decide se o site responde). Prévia de BAR fica de fora: é `noindex` por
+    definição — não é o site oficial do bar e não pode competir no Google com o
+    negócio real do dono. Prévia de ARTESÃO entra (decisão do dono: "onde
+    comprar artesanato em Barão Geraldo" tem de achar os expositores) e a página
+    emite `index,follow`. Ver `Restaurante.indexavel`.
 
     No domínio de um bar sobra só ele: sitemap de um host fala do próprio host,
     e o dono não hospeda a lista de clientes do produto no endereço dele.
 
     No domínio do produto, o inverso: bar com domínio próprio fica de fora. A
     URL dele é de outro host (o Google descarta), ele já tem o próprio sitemap,
-    e cliente com domínio próprio não é barraca da feira — o Bar da Vila é um
-    cliente da Vila Lemos, não de Barão Geraldo. Também fica de fora o tenant
-    sem endereço no site: é conta de teste ou cadastro pela metade, e a página
-    dele sairia vazia no Google.
+    e cliente com domínio próprio não é barraca da feira. Também fica de fora o
+    tenant sem endereço no site: é conta de teste ou cadastro pela metade, e a
+    página dele sairia vazia no Google.
     """
-    consulta = _publicavel(Restaurante.clientes())
+    consulta = _publicavel(Restaurante.query.filter(db.or_(
+        Restaurante.tipo_conta.is_(None), Restaurante.tipo_conta != 'demo',
+        Restaurante.tipo_negocio == 'artesao')))
     if dono_do_dominio is not None:
         return consulta.filter(Restaurante.id == dono_do_dominio.id).all()
     consulta = consulta.filter(db.or_(Restaurante.dominio.is_(None),
                                       Restaurante.dominio == ''))
     return [t for t in consulta.order_by(Restaurante.id).all()
-            if (getattr(getattr(t, 'site_config', None), 'endereco', None) or '').strip()]
+            if (getattr(getattr(t, 'site_config', None), 'endereco', None) or '').strip()
+            or (t.eh_demo and t.tipo_negocio == 'artesao')]
 
 
 @bp.route('/sitemap.xml')
@@ -645,6 +660,8 @@ def sitemap():
         from app.utils.memoria import verbetes as _verbetes
         paginas.append((f'https://{dominio_do_produto()}/memoria', None))
         paginas.append((f'https://{dominio_do_produto()}/feira', None))
+        for caminho in ('/expor', '/termos', '/privacidade'):
+            paginas.append((f'https://{dominio_do_produto()}{caminho}', None))
         for v in _verbetes():
             paginas.append((f"https://{dominio_do_produto()}/memoria/{v['slug']}", None))
 
@@ -656,7 +673,7 @@ def sitemap():
         # O cardápio é página própria (canonical e JSON-LD de Menu), mas só
         # existe com prato cadastrado — sem prato a rota dá 404.
         cardapio = url_do_cardapio(tenant)
-        if cardapio and DishCard.query.filter_by(restaurant_id=tenant.id).first():
+        if cardapio and not tenant.eh_demo and DishCard.query.filter_by(restaurant_id=tenant.id).first():
             paginas.append((cardapio, atualizado))
 
     linhas = ['<?xml version="1.0" encoding="UTF-8"?>',
@@ -730,60 +747,165 @@ def llms_txt():
         ])
         return '\n'.join(linhas) + '\n', 200, {'Content-Type': 'text/markdown; charset=utf-8'}
 
-    # 2. Se for no portal principal (feiradebarao.com.br/llms.txt)
-    # Os mesmos do sitemap do portal: sem bar de domínio próprio (não é da
-    # feira) e sem conta de teste.
-    tenants = sorted(_tenants_do_sitemap(None), key=lambda t: t.nome or '')
+    # 2. Portal principal (feiradebarao.com.br/llms.txt e /llms-full.txt).
+    completo = request.path.endswith('llms-full.txt')
+    return '\n'.join(_llms_portal(completo)) + '\n', 200, {
+        'Content-Type': 'text/markdown; charset=utf-8'}
+
+
+FAQ_EXPOSITOR = [
+    ('Preciso comprar domínio?',
+     'Não. O site abre dentro da Feira, em feiradebarao.com.br/bar/<nome>. Endereço próprio é conversa à parte.'),
+    ('Tem comissão sobre as vendas?',
+     'Não. O valor é fixo; a venda e o pagamento continuam entre o expositor e o cliente.'),
+    ('E se eu quiser sair?',
+     'No plano mensal, cancela quando quiser. No anual, o valor é à vista e não é devolvido.'),
+    ('Como começa?',
+     'Chama no WhatsApp, vê a prévia com o seu nome, manda fotos e informações, e o site entra no ar.'),
+    ('As fotos das prévias são do expositor?',
+     'Não. Nas prévias as imagens são ilustrativas e serão trocadas pelas do expositor.'),
+]
+
+FAQ_FEIRA = [
+    ('Onde e quando é a Feira de Barão?',
+     'Na Praça do Coco, em Barão Geraldo, Campinas - SP. Sábado das 10h às 16h e domingo das 10h às 15h.'),
+    ('Onde comprar artesanato em Barão Geraldo?',
+     'Na Praça do Coco, nos fins de semana, e na lista de expositores em /feira, com mapa, produtos e quem está na Feira hoje.'),
+]
+
+
+def _llms_portal(completo):
+    """Corpo do llms.txt (resumo) ou do llms-full.txt (tudo) do portal."""
+    from app.utils import feira as fe
+    from app.utils.memoria import verbetes as _verbetes
+    from app.utils.planos import precos, precos_expositor, taxa_de_instalacao
+
+    from app.utils.site_router import dominio_do_produto
+    base = f'https://{dominio_do_produto()}'
+
+    def absoluta(url):
+        return base + url if url.startswith('/') else url
+
     horarios = '; '.join(f"{h['dia']} das {h['abre'][:2]}h às {h['fecha'][:2]}h"
                          for h in FEIRA['horarios'])
-    linhas = [
-        "# Feira de Barão — Barão Geraldo, Campinas - SP",
-        "",
+    zap = (os.environ.get('FEIRA_WHATSAPP') or '').strip()
+    pr = precos()
+    pe = precos_expositor()
+    taxa = taxa_de_instalacao()
+
+    try:
+        expo = fe.expositores()
+    except Exception:
+        db.session.rollback()
+        expo = []
+
+    # Bares do portal (sem domínio próprio e sem prévia de bar): os mesmos do sitemap.
+    bares = [t for t in sorted(_tenants_do_sitemap(None), key=lambda t: t.nome or '')
+             if getattr(t, 'tipo_negocio', 'bar') != 'artesao']
+
+    L = [
+        "# Feira de Barão — Barão Geraldo, Campinas - SP", "",
         "> A Feira de Barão acontece na Praça do Coco, em Barão Geraldo (Campinas - SP), "
-        "aos fins de semana. O portal reúne a memória do bairro e ajuda bares e "
-        "restaurantes locais a serem encontrados no Google.",
-        "",
+        "aos fins de semana. O portal lista os expositores, guarda a memória do bairro "
+        "e faz o site de expositores e de bares locais.", "",
         "## A feira",
         f"- **Onde**: {FEIRA['local']}, {FEIRA['bairro']}",
         f"- **Quando**: {horarios}",
-        f"- **Site**: https://{dominio_do_produto()}/",
-        "",
-        "## Para expositores, artesãos e bares de Barão Geraldo",
-        "- Vitrine e catálogo digital na Feira, encomendas direto no WhatsApp, "
-        "ponto no mapa da Praça do Coco e presença no Google Maps.",
-        f"- Como participar: https://{dominio_do_produto()}/#participar",
-        "",
+        f"- **Expositores e mapa**: {base}/feira",
+        f"- **Site**: {base}/", "",
+        "## Contato",
+        (f"- **WhatsApp da Feira**: https://wa.me/{zap}" if zap else
+         f"- **Como falar com a Feira**: {base}/expor"),
+        "- **E-mail**: " + os.environ.get('FEIRA_EMAIL', 'contato@feiradebarao.com.br'), "",
+        "## Planos e preços",
+        f"- **Site para expositor (artesão)**: {pe['anual']} por ano (equivale a {pe['anual_mes']} por mês, 12 meses) "
+        f"ou {pe['mensal']} por mês sem compromisso. Detalhes: {base}/expor",
+        f"- **Site para bar**: {pr['site']} por mês (anual {pr['site_anual']}, equivale a {pr['site_anual_mes']} por mês); "
+        f"plano Pro {pr['pro']} por mês." + (f" Instalação única: {taxa}." if taxa else ""),
+        f"  Detalhes: {base}/site-para-bar-em-campinas", "",
     ]
-    from app.utils.memoria import verbetes as _verbetes
-    if _verbetes():
-        linhas += ["## Memória Viva de Barão Geraldo",
-                   f"Hub: https://{dominio_do_produto()}/memoria "
-                   "(fontes: blog História de Barão Geraldo, de Warney Smith, e Wikipédia)", ""]
-        for v in _verbetes():
-            linhas.append(f"- [{v['titulo']}](https://{dominio_do_produto()}/memoria/{v['slug']}) "
-                          f"({v.get('periodo', '')}): {v.get('resumo', '')}")
-        linhas.append("")
-    if tenants:
-        linhas.append("## Bares e restaurantes de Barão Geraldo na plataforma")
 
-    for t in tenants:
-        cfg = getattr(t, 'site_config', None)
-        desc = (cfg.descritor if cfg else None) or (cfg.tagline if cfg else None) or 'Bar e Gastronomia'
-        end = (cfg.endereco if cfg else None) or 'Barão Geraldo, Campinas - SP'
-        linhas.append(f"### [{t.nome}]({url_canonica(t)})")
-        linhas.append(f"- **Descrição**: {desc}")
-        linhas.append(f"- **Endereço**: {end}")
-        linhas.append(f"- **Cardápio Digital**: {url_canonica(t)}#cardapio")
-        linhas.append("")
+    L.append("## Expositores da Feira")
+    if expo:
+        for e in expo:
+            vende = ', '.join(e['categorias']) or e['descritor'] or 'artesanato'
+            ponto = e['ponto'] or 'Praça do Coco'
+            L.append(f"- [{e['nome']}]({absoluta(e['url'])}) — {vende}. Ponto: {ponto}.")
+    else:
+        L.append(f"- Lista atualizada em {base}/feira")
+    L.append("")
 
-    linhas.extend([
-        "## Links Úteis",
-        f"- Portal: https://{dominio_do_produto()}/",
-        f"- Cadastro de Estabelecimentos: https://{dominio_do_produto()}/cadastro",
-        f"- Sitemap: https://{dominio_do_produto()}/sitemap.xml",
-    ])
+    if bares and not completo:
+        L.append("## Bares e restaurantes")
+        L += [f"- [{t.nome}]({url_canonica(t)})" for t in bares]
+        L.append("")
 
-    return '\n'.join(linhas) + '\n', 200, {'Content-Type': 'text/markdown; charset=utf-8'}
+    L.append("## Perguntas frequentes")
+    for q, r in (FAQ_FEIRA + FAQ_EXPOSITOR)[:(None if completo else 4)]:
+        L.append(f"- **{q}** {r}")
+    L.append("")
+
+    if completo:
+        L += ["## Perguntas frequentes para bares"]
+        L += [f"- **{q}** {r}" for q, r in FAQ_PARA_BARES]
+        L += ["",
+              "## Como contratar",
+              "1. Expositor: chama a Feira no WhatsApp" + (f" (https://wa.me/{zap})" if zap else f" pelo {base}/expor")
+              + ", vê a prévia do site com o próprio nome e aprova.",
+              "2. Manda fotos, preços, prazo de produção e informações; a Feira monta e publica.",
+              "3. Escolhe o plano: anual à vista ou mensal sem compromisso.",
+              "4. Bar: o caminho é o mesmo, com cardápio com QR, reserva com aviso no WhatsApp "
+              f"e configuração do Perfil da Empresa no Google ({base}/site-para-bar-em-campinas).", "",
+              "## O que existe",
+              "- Vitrine de produtos com foto, preço, prazo e desconto no Pix.",
+              "- Encomenda pelo WhatsApp: o cliente monta a lista e ela chega pronta ao expositor.",
+              "- Ponto da barraca no mapa da Praça do Coco, com horário e aviso de quem está na Feira hoje.",
+              "- Site de bar com cardápio digital (QR), reservas e dados estruturados para o Google.",
+              "- Memória Viva de Barão Geraldo: verbetes sobre a história do bairro.", "",
+              "## O que não existe",
+              "- Pagamento dentro do site: o pagamento é combinado no WhatsApp entre expositor e cliente.",
+              "- Comissão sobre vendas: não há, o valor é fixo.",
+              "- Aplicativo para instalar: tudo roda no navegador.",
+              "- Prévias com foto do expositor: nas prévias as imagens são ilustrativas até o expositor enviar as dele.", ""]
+        L.append("## Bares e restaurantes na plataforma")
+        if bares:
+            for t in bares:
+                cfg = getattr(t, 'site_config', None)
+                desc = (cfg.descritor if cfg else None) or (cfg.tagline if cfg else None) or 'Bar e Gastronomia'
+                end = (cfg.endereco if cfg else None) or 'Barão Geraldo, Campinas - SP'
+                L += [f"### [{t.nome}]({url_canonica(t)})",
+                      f"- **Descrição**: {desc}",
+                      f"- **Endereço**: {end}",
+                      f"- **Cardápio Digital**: {url_canonica(t)}#cardapio", ""]
+        else:
+            L += ["- Nenhum bar do portal listado no momento.", ""]
+        L += ["## Detalhe dos expositores"]
+        for e in expo:
+            L.append(f"### [{e['nome']}]({absoluta(e['url'])})")
+            L.append(f"- **O que vende**: {', '.join(e['categorias']) or e['descritor'] or 'artesanato'}")
+            L.append(f"- **Descrição**: {e['descritor'] or 'Expositor da Feira de Barão'}")
+            L.append(f"- **Ponto**: {e['ponto'] or 'Praça do Coco'}")
+            L.append(f"- **Produtos cadastrados**: {e['total_produtos']}")
+            L.append("")
+
+    vs = _verbetes()
+    if vs:
+        L += ["## Memória Viva de Barão Geraldo",
+              f"Hub: {base}/memoria (fontes: blog História de Barão Geraldo, de Warney Smith, e Wikipédia)", ""]
+        for v in (vs if completo else vs[:10]):
+            L.append(f"- [{v['titulo']}]({base}/memoria/{v['slug']}) ({v.get('periodo', '')}): {v.get('resumo', '')}")
+        if not completo and len(vs) > 10:
+            L.append(f"- Mais {len(vs) - 10} verbetes em {base}/memoria e em {base}/llms-full.txt")
+        L.append("")
+
+    L += ["## Links úteis",
+          f"- Portal: {base}/",
+          f"- Expositores: {base}/feira",
+          f"- Para expositores: {base}/expor",
+          f"- Para bares: {base}/site-para-bar-em-campinas",
+          f"- Versão completa deste texto: {base}/llms-full.txt",
+          f"- Sitemap: {base}/sitemap.xml"]
+    return L
 
 
 def _marcar_visita(rest):
@@ -812,13 +934,15 @@ def landing_slug(slug):
     rest = tenant_por_slug(slug)  # já filtra inativo
     if rest is None:
         abort(404)
-    # Bar externo com domínio próprio (ex.: Bar da Vila, na Vila Lemos) não
-    # mora no portal da feira: no domínio do produto, /bar/<slug> dele vira 301
-    # para o endereço dele. Já o expositor artesão da Feira de Barão abre aqui
-    # mesmo dentro do portal (mantendo o canonical pro domínio próprio, se tiver).
-    if (rest.dominio and eh_dominio_do_produto(request.host)
-            and getattr(rest, 'tipo_negocio', 'bar') != 'artesao'):
-        return redirect(url_canonica(rest), code=301)
+    # Todo cliente com domínio próprio (Bar da Vila, Dona Berga...) tem UM
+    # endereço: no domínio do produto, /bar/<slug> vira 301 para ele (senão o
+    # site fica duplicado). Sem domínio (artesão ou bar), /bar/<slug> é a
+    # URL definitiva e abre aqui. `?modelo=`/`?tema=` seguem na query.
+    if rest.dominio and eh_dominio_do_produto(request.host):
+        destino = url_canonica(rest)
+        if request.query_string:
+            destino += '?' + request.query_string.decode('utf-8', 'ignore')
+        return redirect(destino, code=301)
     return _render_landing(rest)
 
 

@@ -22,7 +22,7 @@
 <meta name="description" content="{{ meta_desc or (site.nome ~ ' — ' ~ (site.tagline or descritor)) }}">
 <link rel="canonical" href="{{ canonica }}">
 {% if json_ld %}<script type="application/ld+json">{{ json_ld|safe }}</script>{% endif %}
-{% if tenant and tenant.eh_demo %}<meta name="robots" content="noindex,nofollow,noarchive">{% endif %}
+{% if tenant and tenant.eh_demo %}<meta name="robots" content="{{ 'index,follow' if tenant.indexavel else 'noindex,nofollow,noarchive' }}">{% endif %}
 <meta property="og:site_name" content="{{ site.nome }}">
 <meta property="og:title" content="{{ site.nome }} — {{ descritor }}">
 <meta property="og:description" content="{{ site.tagline or descritor }}">
@@ -783,6 +783,7 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
     {% include "site/_selo_caminhos.html" %}
     <p>{{ copy.rodape }}</p>
     {% with novidades_bar = tenant.slug if tenant else '', novidades_titulo = 'Receba as novidades da Feira de Barão', novidades_texto = 'Quem está na Praça do Coco, o que chegou de novo e os eventos do mês. Um e-mail de vez em quando, sem spam.' %}{% include "site/_novidades.html" %}{% endwith %}
+    {% include "site/_feito_com.html" %}
   </div>
   <p>© {{ site.nome }} · Feira de Barão</p>
 </div></footer>

@@ -61,6 +61,13 @@ class Restaurante(db.Model):
         return self.tipo_conta == 'demo'
 
     @property
+    def indexavel(self):
+        """Pode entrar no Google. Cliente sempre; prévia só se for expositor
+        artesão (decisão do dono: "onde comprar artesanato em Barão Geraldo"
+        precisa achar as barracas). Prévia de bar segue `noindex`."""
+        return (not self.eh_demo) or self.tipo_negocio == 'artesao'
+
+    @property
     def demo_expirada(self):
         """Prévia vencida. Não tira o site do ar — a landing troca o conteúdo
         por um convite pra reativar (o lead pode voltar meses depois)."""

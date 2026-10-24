@@ -8,7 +8,7 @@
 <link rel="canonical" href="{% block canonical %}{% endblock %}">
 <meta property="og:title" content="{{ self.titulo() }}">
 <meta property="og:description" content="{{ self.descricao() }}">
-<meta property="og:type" content="article">
+<meta property="og:type" content="{% block og_tipo %}article{% endblock %}">
 <meta property="og:locale" content="pt_BR">
 <meta property="og:image" content="{% block og_imagem %}{{ og_imagem('og-feira.jpg') }}{% endblock %}">
 <meta name="twitter:card" content="summary_large_image">
