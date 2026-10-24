@@ -1,11 +1,6 @@
-"""A vitrine anuncia o mesmo preço que o sistema cobra.
-
-Já divergiu duas vezes. A primeira, a tela de planos dizia R$ 97 e a landing
-R$ 197 — resolvida centralizando em `planos.precos()`. A segunda foi mais
-silenciosa: a landing passou a ler `FEIRA_PRECO` e `planos.precos()` continuou
-lendo `FEIRA_PRECO_SITE`, duas envs para o mesmo número. Trocar o preço num
-lugar deixava o outro para trás, e quem descobre isso é o dono do bar, na mesa,
-comparando a página com o que foi falado.
+"""As páginas comerciais (/cadastro, /barao, /site-para-bar-em-campinas)
+anunciam o mesmo preço que o sistema cobra, enquanto a home comunitária (/)
+não exibe tabela comercial de preços nem calculadora de ROI.
 """
 import re
 
@@ -30,7 +25,7 @@ def dominio_do_produto(app):
     return app
 
 
-@pytest.mark.parametrize('rota', ['/', '/cadastro'])
+@pytest.mark.parametrize('rota', ['/cadastro', '/barao', '/site-para-bar-em-campinas'])
 def test_paginas_publicas_anunciam_o_preco_que_o_sistema_cobra(
         dominio_do_produto, client, rota):
     assert precos()['site'] in _html(client, rota), (
@@ -38,42 +33,24 @@ def test_paginas_publicas_anunciam_o_preco_que_o_sistema_cobra(
         'voltaram a divergir')
 
 
-def test_landing_mostra_setup_e_compra(dominio_do_produto, client):
+def test_paginas_de_bares_mostram_setup_e_compra(dominio_do_produto, client):
+    html = _html(client, '/site-para-bar-em-campinas')
+
+    assert taxa_de_instalacao() in html, 'a montagem sumiu da página comercial'
+    assert compra_do_site()['valor'] in html, 'a compra do site sumiu da página comercial'
+
+
+def test_landing_comunitaria_nao_exibe_tabela_de_precos_nem_calculadora(
+        dominio_do_produto, client):
+    """A home (/) é o portal cultural e comunitário da Feira de Barão: não
+    exibe tabela de planos (#preco), calculadora (#conta) nem cifra comercial
+    de assinatura ('R$ ...')."""
     html = _html(client, '/')
 
-    assert taxa_de_instalacao() in html, 'a montagem sumiu da landing'
-    assert compra_do_site()['valor'] in html, 'a compra do site sumiu da landing'
-
-
-def test_landing_nao_tem_preco_escrito_na_mao(dominio_do_produto, client):
-    """Nenhum "R$ ..." na landing que não venha do módulo de preços.
-
-    É o que impede a regressão de voltar por outro caminho: alguém escreve
-    "R$ 197" direto no template durante uma correção de texto, e a página passa
-    a prometer um número que ninguém cobra.
-    """
-    html = _html(client, '/')
-
-    # A calculadora ("a conta da mesa vazia") mostra dinheiro DO BAR — consumo
-    # por pessoa, quanto vale uma mesa, quanto dá no mês. São números do
-    # visitante, não preço nosso, e mudam a cada toque no controle. O que este
-    # teste persegue é preço do NOSSO produto digitado no template.
-    inicio = html.find('id="conta"')
-    if inicio != -1:
-        fim = html.find('id="preco"', inicio)
-        html = html[:inicio] + html[fim if fim != -1 else inicio:]
-
-    conhecidos = {precos()['site'], precos()['pro'], taxa_de_instalacao(),
-                  compra_do_site()['valor'], compra_do_site()['renovacao']}
-    conhecidos = {v for v in conhecidos if v}
-
-    # Valores dos bares (nota, preço de prato) não entram: o que se procura é
-    # preço do NOSSO produto, sempre escrito como "R$ <número>".
+    assert 'id="preco"' not in html
+    assert 'id="conta"' not in html
     achados = set(re.findall(r'R\$\s?[\d.,]+(?:/ano|/mês)?', html))
-    estranhos = {v for v in achados
-                 if not any(v in c or c in v for c in conhecidos)}
-
-    assert not estranhos, f'preços escritos na mão na landing: {sorted(estranhos)}'
+    assert not achados, f'preços na home comunitária: {sorted(achados)}'
 
 
 def test_sem_teste_gratis_a_pagina_nao_promete_teste(dominio_do_produto, client):

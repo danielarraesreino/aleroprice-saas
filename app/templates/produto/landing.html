@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bares e botecos de Barão Geraldo (Campinas) · Feira de Barão</title>
-<meta name="description" content="Os bares e botecos de Barão Geraldo, em Campinas, com nota do Google, fotos e cardápio — e a história do distrito: a ferrovia Funilense, a Unicamp e a Praça do Coco.">
+<title>Feira de Barão · Praça do Coco, Memória Viva e Bares de Barão Geraldo (Campinas)</title>
+<meta name="description" content="A Feira da Praça do Coco aos sábados e domingos, os artesãos e expositores, o mapa histórico da Ferrovia Funilense e da Unicamp, e os bares e botecos de Barão Geraldo, em Campinas.">
 <link rel="canonical" href="https://feiradebarao.com.br/">
 <link rel="alternate" type="text/markdown" title="LLM Summary" href="/llms.txt">
-<meta property="og:title" content="Bares e botecos de Barão Geraldo (Campinas) · Feira de Barão">
-<meta property="og:description" content="As raízes no café, a ferrovia Funilense, a chegada da Unicamp, a Feira da Praça do Coco e o mapa vivo dos bares e restaurantes de Barão Geraldo.">
+<meta property="og:title" content="Feira de Barão · Praça do Coco, Memória Viva e Bares de Barão Geraldo">
+<meta property="og:description" content="Artesãos e gastronomia na Praça do Coco, a Memória Viva do distrito no mapa interativo e os bares que fazem a cultura de Barão Geraldo.">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="pt_BR">
 <meta property="og:image" content="{{ og_imagem('og-feira.jpg') }}">
@@ -20,16 +20,13 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<!-- Leaflet.js para o Scrollytelling de Mapa (CDN cdnjs estável). O mapa fica
-     a ~40% da página: nada aqui pode segurar a primeira pintura. O CSS entra
+<!-- Leaflet.js para o Scrollytelling de Mapa (CDN cdnjs estável). O CSS entra
      como `print` e vira `all` quando chega; o JS vem com `defer` e o mapa só
      é montado quando o dossiê se aproxima da tela (`IntersectionObserver`). -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" media="print" onload="this.media='all'">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 
-{# WebSite + Organization + a lista dos bares da vitrine: é o formato que
-   buscador e LLM citam para "bares em Barão Geraldo". Sem nota nem avaliação
-   no schema: a nota é do Google, não coletada aqui. #}
+{# WebSite + Organization + Event da Feira na Praça do Coco #}
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
  {"@type":"WebSite","@id":"https://feiradebarao.com.br/#site",
@@ -62,37 +59,63 @@
 
 <main id="conteudo" tabindex="-1">
 
-<!-- TOPO: o que o visitante procura primeiro (quando, onde, quem está) -->
+<!-- ========================================================
+     1. HERO: A FEIRA DA PRAÇA DO COCO E A ALMA DE BARÃO GERALDO
+     ======================================================== -->
 <section class="hm-hero">
   <div class="wrap hm-hero-in">
     <div class="hm-hero-txt">
+      <span class="chapeu-dossie">Praça do Coco · Barão Geraldo · Campinas – SP</span>
       <h1 class="hm-h1">Feira de Barão</h1>
-      <p class="hm-sub">Artesãos, comida e bares na {{ feira.local }}, em {{ feira.bairro }}.{% if total_bares %} Com a memória do distrito e as {{ total_bares }} casas gastronômicas que fazem Barão.{% endif %}</p>
+      <p class="hm-sub">
+        Debaixo das árvores da {{ feira.local }}, em {{ feira.bairro }}, artesãos, produtores, cozinheiros e músicos mantêm viva a tradição mais querida do distrito. Aqui você encontra quem expõe na praça, navega pelo mapa histórico de Barão Geraldo e visita os {% if total_bares %}{{ total_bares }} {% endif %}bares e botecos da região.
+      </p>
       <div class="hm-acoes">
-        <a class="btn btn-tomate" href="{{ url_for('public.feira') }}">Ver expositores e mapa</a>
-        <a class="btn btn-fantasma" href="#expor">Quero expor na feira</a>
+        <a class="btn btn-tomate" href="{{ url_for('public.feira') }}">
+          <i class="fas fa-map-location-dot" aria-hidden="true"></i> Ver expositores e mapa da feira
+        </a>
+        <a class="btn btn-colab" href="#dossie">
+          <i class="fas fa-compass" aria-hidden="true"></i> Explorar o mapa histórico
+        </a>
+        <a class="btn btn-fantasma" href="#participar">Tenho banca ou bar →</a>
       </div>
     </div>
+
     <!-- QUANDO E ONDE: o que mais se procura sobre a feira ("feira de barão
          horário", "feira da praça do coco"). Dados em FEIRA (publico/views.py). -->
     <aside id="feira" class="hm-quando" aria-labelledby="feira-titulo">
+      <span class="hm-quando-selo">Todo fim de semana · Entrada livre</span>
       <h2 id="feira-titulo">Quando e onde é a feira</h2>
       <ul>
         {% for h in feira.horarios %}<li><strong>{{ h.dia }}</strong> das {{ h.abre[:2] }}h às {{ h.fecha[:2] }}h</li>{% endfor %}
       </ul>
-      <p>{{ feira.local }}, {{ feira.bairro }}</p>
-      {% if exp_hoje %}<a class="hm-hoje" href="{{ url_for('public.feira', hoje=1) }}">{{ exp_hoje }} {{ 'expositor avisou' if exp_hoje == 1 else 'expositores avisaram' }} que {{ 'está' if exp_hoje == 1 else 'estão' }} na feira hoje</a>{% endif %}
+      <p>{{ feira.local }} (Praça Irmã Carmela Stecchi) — {{ feira.bairro }}</p>
+      <p class="hm-quando-detalhe">Artesanato autoral, charcutaria, pães de fermentação natural, plantas, brechó, comida de rua e roda de choro.</p>
+      {% if exp_hoje %}
+      <a class="hm-hoje" href="{{ url_for('public.feira', hoje=1) }}">
+        {{ exp_hoje }} {{ 'expositor avisou' if exp_hoje == 1 else 'expositores avisaram' }} que {{ 'está' if exp_hoje == 1 else 'estão' }} na feira hoje →
+      </a>
+      {% endif %}
     </aside>
   </div>
 </section>
 
-{% if exp_vitrine %}
-<section id="expositores" class="hm-secao" aria-labelledby="expositores-titulo">
+<!-- ========================================================
+     2. QUEM EXPÕE NA PRAÇA DO COCO (ARTESÃOS & BARRACAS)
+     ======================================================== -->
+<section id="expositores" class="hm-secao secao-expositores-home" aria-labelledby="expositores-titulo">
   <div class="wrap">
     <div class="hm-cab">
-      <h2 id="expositores-titulo" class="hm-h2">Quem expõe</h2>
-      <a class="hm-todos" href="{{ url_for('public.feira') }}">Ver os {{ exp_total }} expositores e o mapa</a>
+      <div>
+        <span class="chapeu-dossie">Feito à Mão em Barão</span>
+        <h2 id="expositores-titulo" class="hm-h2">Quem expõe na Praça do Coco</h2>
+      </div>
+      <a class="hm-todos" href="{{ url_for('public.feira') }}">
+        {% if exp_total %}Ver os {{ exp_total }} expositores e o mapa →{% else %}Abrir o mapa e a busca da Feira →{% endif %}
+      </a>
     </div>
+
+    {% if exp_vitrine %}
     <ul class="hm-lista">
       {% for e in exp_vitrine %}
       <li class="hm-exp{% if e.hoje %} hoje{% endif %}">
@@ -106,127 +129,54 @@
       </li>
       {% endfor %}
     </ul>
-  </div>
-</section>
-{% endif %}
-
-<!-- ========================================================
-     CATÁLOGO DAS 23 BARRACAS DIGITAIS DE BARÃO
-     ======================================================== -->
-<section id="bares" class="secao-bares">
-  <div class="wrap">
-    <div class="hm-cab-centro">
-      <h2 class="hm-h2">As {{ total_bares }} barracas de Barão Geraldo</h2>
-      <p>
-        Toque em qualquer casa para abrir a demonstração real com fotos, cardápio digital e o Concierge de Voz ao vivo no balcão:
-      </p>
-    </div>
-
-    {# Cliente pagante na frente das prévias, com link para o endereço canônico
-       dele: é a página da casa que o Google indexa (as prévias são noindex). #}
-    {% if clientes_destaque %}
-    <div class="clientes-feira">
-      <h3>Clientes da Feira</h3>
-      <div class="grid-23-bares" style="margin-top:16px;">
-        {% for c in clientes_destaque %}
-        <a class="bar-card-kraft" href="{{ c.url }}">
-          {% if c.foto %}
-          <img class="bar-img-thumb" src="{{ c.foto if c.foto.startswith(('http', '/')) else url_for('static', filename=c.foto) }}" alt="{{ c.nome }}" width="480" height="360" loading="lazy" decoding="async">
-          {% endif %}
-          <div class="bar-info-box">
-            <h4 class="bar-title-kraft">{{ c.nome }}</h4>
-            <div style="margin-top:auto; font-size:0.82rem; font-weight:700; color:var(--tomate); display:flex; justify-content:space-between; align-items:center; padding-top:8px;">
-              <span>Visitar o site</span>
-              <i class="fas fa-arrow-right"></i>
-            </div>
-          </div>
-        </a>
-        {% endfor %}
-      </div>
-    </div>
     {% endif %}
 
-    {% if bares %}
-    <div class="grid-23-bares">
-      {% for b in bares %}
-      <a class="bar-card-kraft" href="{{ url_for('public.landing_slug', slug=b.slug) }}">
-        <img class="bar-img-thumb" src="{{ url_for('static', filename=b.foto_480) }}" alt="{{ b.nome }}" width="480" height="360" loading="lazy" decoding="async">
-        <div class="bar-info-box">
-          <h3 class="bar-title-kraft">{{ b.nome }}</h3>
-          <div class="bar-nota-linha">
-            <i class="fas fa-star text-warning"></i>
-            <span>{{ b.nota }}</span>
-            {% if b.avaliacoes %}<span style="color:var(--taupe); font-weight:500;">({{ b.avaliacoes }} no Google)</span>{% endif %}
-          </div>
-          <div style="margin-top:auto; font-size:0.82rem; font-weight:700; color:var(--tomate); display:flex; justify-content:space-between; align-items:center; padding-top:8px;">
-            <span>Abrir Barraca</span>
-            <i class="fas fa-arrow-right"></i>
-          </div>
+    <!-- Os Ofícios da Feira: convida o morador a explorar as bancas por vocação -->
+    <div class="oficios-feira-grid" aria-label="Ofícios e bancas da Feira de Barão">
+      <a class="oficio-card" href="{{ url_for('public.feira', tipo='artesao') }}">
+        <span class="oficio-icone" aria-hidden="true">🥓</span>
+        <div>
+          <h3>Charcutaria, Queijos &amp; Conservas</h3>
+          <p>Defumados artesanais no lenho de árvore frutífera, antepastos, geleias e mel de produtores locais.</p>
         </div>
       </a>
-      {% endfor %}
+      <a class="oficio-card" href="{{ url_for('public.feira', tipo='artesao') }}">
+        <span class="oficio-icone" aria-hidden="true">🥖</span>
+        <div>
+          <h3>Fornada, Confeitaria &amp; Comida de Rua</h3>
+          <p>Pães de fermentação natural, bolos, doces autorais, risotos, acarajé e sabores de domingo na praça.</p>
+        </div>
+      </a>
+      <a class="oficio-card" href="{{ url_for('public.feira', tipo='artesao') }}">
+        <span class="oficio-icone" aria-hidden="true">🏺</span>
+        <div>
+          <h3>Ateliês, Cerâmica, Crochê &amp; Arte</h3>
+          <p>Joias em cerâmica, amigurumis, encadernação manual, marcenaria criativa, moda autoral e pintura.</p>
+        </div>
+      </a>
+      <a class="oficio-card" href="{{ url_for('public.feira', tipo='artesao') }}">
+        <span class="oficio-icone" aria-hidden="true">🌿</span>
+        <div>
+          <h3>Jardim, Saboaria &amp; Aromas</h3>
+          <p>Terrários, kokedamas, suculentas, cosméticos naturais veganos, incensos artesanais e tarô.</p>
+        </div>
+      </a>
     </div>
-    {% endif %}
   </div>
 </section>
-
-<!-- MURAL DA MEMÓRIA VIVA: no centro da página. Memórias de
-     app/data/memoria/mural.yml, publicadas com o nome de quem mandou. -->
-<section id="mural" class="secao-mural hm-secao">
-  <div class="wrap">
-    <div class="hm-cab-centro">
-      <h2 class="hm-h2">Mural da Memória Viva</h2>
-      <p>Toda memória publicada aqui sai com o nome de quem mandou. A história de Barão está nas gavetas, nos álbuns e na cabeça de quem viveu.</p>
-    </div>
-    {% if memoria_mural %}
-    <div class="hm-mural">
-      {% for m in memoria_mural %}
-      <blockquote class="hm-relato">
-        <p>“{{ m.texto }}”</p>
-        <footer><strong>{{ m.nome }}</strong>{% if m.quando %} · {{ m.quando }}{% endif %}{% if m.fonte_url %}<br>Fonte: <a href="{{ m.fonte_url }}" rel="noopener">{{ mem.fonte_rotulo(m.fonte_url) }}</a>{% endif %}</footer>
-      </blockquote>
-      {% endfor %}
-    </div>
-    {% endif %}
-    {% if zap_memoria %}
-    <div class="hm-provoca">
-      {% for chamada, link in memoria_provocacoes %}
-      <a href="{{ link }}" target="_blank" rel="noopener">{{ chamada }} <i class="fab fa-whatsapp" aria-hidden="true"></i></a>
-      {% endfor %}
-    </div>
-    {% endif %}
-    <p class="hm-mais"><a href="{{ url_for('public.memoria') }}">Abrir a Memória Viva completa →</a></p>
-  </div>
-</section>
-
-<!-- BARRA DE MEMÓRIA ABERTA & COLABORAÇÃO (depois do hero: no celular ela
-     ocupava a primeira dobra inteira antes da manchete) -->
-<div class="barra-memoria-aberta">
-  <div class="wrap barra-memoria-inner">
-    <div class="barra-memoria-texto">
-      <i class="fas fa-book-open"></i>
-      <span>{% if zap_memoria %}<a href="{{ memoria_provocacoes[0][1] }}" target="_blank" rel="noopener" style="color:inherit;"><strong>{{ memoria_provocacoes[0][0] }}</strong></a> <a href="{{ memoria_provocacoes[1][1] }}" target="_blank" rel="noopener" style="color:inherit;">{{ memoria_provocacoes[1][0] }}</a> Manda pra gente: sai com o seu nome.{% else %}<strong>Dossiê Aberto à Comunidade:</strong> Você tem um causo, foto antiga ou correção histórica de Barão Geraldo?{% endif %}</span>
-    </div>
-    <div style="display:flex; gap:10px;">
-      <button class="btn btn-fantasma" style="color:#f6eedb !important; border-color:rgba(255,255,255,0.3); padding:6px 14px; font-size:0.8rem;" onclick="abrirModalColaboracao('correcao')">
-        <i class="fas fa-pen"></i> Sugerir Correção
-      </button>
-      <button class="btn btn-tomate" style="padding:6px 14px; font-size:0.8rem;" onclick="abrirModalColaboracao('historia')">
-        <i class="fas fa-plus-circle"></i> Enviar Meu Relato
-      </button>
-    </div>
-  </div>
-</div>
 
 <!-- ========================================================
-     O GRANDE DOSSIÊ MULTIMÍDIA COM MAP SCROLLYTELLING
+     3. O GRANDE DOSSIÊ HISTÓRICO NO MAPA DE BARÃO GERALDO
      ======================================================== -->
 <section id="dossie" class="scrolly-container" data-modo="lado" aria-labelledby="dossie-titulo">
   {# Três jeitos de ver o mapa com a história: lado a lado, card flutuante
      ou mapa + lista. O padrão sai do aparelho (JS); a escolha da pessoa fica
      guardada no navegador. Sem JS, vale o "lado a lado" do HTML. #}
   <div class="dossie-barra wrap">
-    <h2 id="dossie-titulo" class="dossie-titulo">A história no mapa</h2>
+    <div>
+      <span class="chapeu-dossie" style="margin-bottom:4px;">Território &amp; Raízes</span>
+      <h2 id="dossie-titulo" class="dossie-titulo">A história de Barão Geraldo no mapa</h2>
+    </div>
     <div class="dossie-modos" role="group" aria-label="Como ver o mapa">
       <button type="button" data-modo="lado" aria-pressed="true">Lado a lado</button>
       <button type="button" data-modo="flutuante" aria-pressed="false">Flutuante</button>
@@ -287,8 +237,57 @@
   </div>
 </section>
 
+<!-- BARRA DE MEMÓRIA ABERTA & COLABORAÇÃO -->
+<div class="barra-memoria-aberta">
+  <div class="wrap barra-memoria-inner">
+    <div class="barra-memoria-texto">
+      <i class="fas fa-book-open"></i>
+      <span>{% if zap_memoria %}<a href="{{ memoria_provocacoes[0][1] }}" target="_blank" rel="noopener" style="color:inherit;"><strong>{{ memoria_provocacoes[0][0] }}</strong></a> <a href="{{ memoria_provocacoes[1][1] }}" target="_blank" rel="noopener" style="color:inherit;">{{ memoria_provocacoes[1][0] }}</a> Manda pra gente: sai com o seu nome.{% else %}<strong>Dossiê Aberto à Comunidade:</strong> Você tem um causo, foto antiga ou correção histórica de Barão Geraldo?{% endif %}</span>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-fantasma" style="color:#f6eedb !important; border-color:rgba(255,255,255,0.3); padding:6px 14px; font-size:0.8rem;" onclick="abrirModalColaboracao('correcao')">
+        <i class="fas fa-pen"></i> Sugerir Correção
+      </button>
+      <button class="btn btn-tomate" style="padding:6px 14px; font-size:0.8rem;" onclick="abrirModalColaboracao('historia')">
+        <i class="fas fa-plus-circle"></i> Enviar Meu Relato
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- ========================================================
-     LINHA DO TEMPO HISTÓRICA DE BARÃO GERALDO
+     4. MURAL DA MEMÓRIA VIVA (HISTÓRIA ORAL DOS MORADORES)
+     ======================================================== -->
+<section id="mural" class="secao-mural hm-secao">
+  <div class="wrap">
+    <div class="hm-cab-centro">
+      <span class="chapeu-dossie">Vozes do Bairro</span>
+      <h2 class="hm-h2">Mural da Memória Viva</h2>
+      <p>Toda memória publicada aqui sai com o nome de quem mandou. A história de Barão Geraldo está nos álbuns de família, nas rodas de conversa e na lembrança de quem viveu cada época.</p>
+    </div>
+    {% if memoria_mural %}
+    <div class="hm-mural">
+      {% for m in memoria_mural %}
+      <blockquote class="hm-relato">
+        <p>“{{ m.texto }}”</p>
+        <footer><strong>{{ m.nome }}</strong>{% if m.quando %} · {{ m.quando }}{% endif %}{% if m.fonte_url %}<br>Fonte: <a href="{{ m.fonte_url }}" rel="noopener">{{ mem.fonte_rotulo(m.fonte_url) }}</a>{% endif %}</footer>
+      </blockquote>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% if zap_memoria %}
+    <div class="hm-provoca">
+      {% for chamada, link in memoria_provocacoes %}
+      <a href="{{ link }}" target="_blank" rel="noopener">{{ chamada }} <i class="fab fa-whatsapp" aria-hidden="true"></i></a>
+      {% endfor %}
+    </div>
+    {% endif %}
+    <p class="hm-mais"><a href="{{ url_for('public.memoria') }}">Abrir o acervo completo da Memória Viva (24 verbetes documentados) →</a></p>
+  </div>
+</section>
+
+<!-- ========================================================
+     5. LINHA DO TEMPO HISTÓRICA DE BARÃO GERALDO
      ======================================================== -->
 <section id="linha-do-tempo" class="full-bleed-section">
   <div class="wrap">
@@ -298,7 +297,7 @@
         A Linha do Tempo de Barão Geraldo
       </h2>
       <p style="color:#d1c7b7; font-size:1.05rem; margin-top:8px;">
-        Mais de um século de história moldando o distrito mais acolhedor e intelectual do interior de São Paulo.
+        Mais de um século de história moldando o distrito mais acolhedor, criativo e boêmio de Campinas.
       </p>
     </div>
 
@@ -306,264 +305,182 @@
       <div class="timeline-card">
         <div class="timeline-year">1870–1907</div>
         <h3 style="color:#fff; font-size:1rem; margin-bottom:6px;">Fazenda Santa Genebra</h3>
-        <p class="timeline-desc">Geraldo Ribeiro de Sousa Rezende (o Barão de Rezende) consolida a cafeicultura e a preservação da mata nativa.</p>
+        <p class="timeline-desc">Geraldo Ribeiro de Sousa Rezende (o Barão de Rezende) consolida a fazenda modelo e a preservação da mata nativa de Santa Genebra.</p>
       </div>
 
       <div class="timeline-card">
         <div class="timeline-year">1899</div>
         <h3 style="color:#fff; font-size:1rem; margin-bottom:6px;">Estrada de Ferro Funilense</h3>
-        <p class="timeline-desc">Inauguração do ramal ferroviário ligando Campinas a Cosmópolis, cortando o vilarejo com a Estação Barão Geraldo.</p>
+        <p class="timeline-desc">Inauguração do ramal ferroviário ligando Campinas a Cosmópolis, cortando o vilarejo com a Estação Barão Geraldo e trazendo famílias imigrantes.</p>
       </div>
 
       <div class="timeline-card">
         <div class="timeline-year">1953</div>
         <h3 style="color:#fff; font-size:1rem; margin-bottom:6px;">Criação do Distrito</h3>
-        <p class="timeline-desc">A Lei Estadual nº 2.456 de 30 de dezembro de 1953 cria oficialmente o Distrito de Paz de Barão Geraldo.</p>
+        <p class="timeline-desc">A Lei Estadual nº 2.456 de 30 de dezembro de 1953 emancipa oficialmente o Distrito de Paz de Barão Geraldo.</p>
       </div>
 
       <div class="timeline-card">
         <div class="timeline-year">1966</div>
         <h3 style="color:#fff; font-size:1rem; margin-bottom:6px;">Fundação da Unicamp</h3>
-        <p class="timeline-desc">Zeferino Vaz instala a universidade, atraindo intelectuais do mundo inteiro e forjando a boemia dos "botecos pensantes".</p>
+        <p class="timeline-desc">Zeferino Vaz instala a universidade, atraindo pesquisadores e artistas do mundo inteiro e forjando a cultura das repúblicas e dos botecos.</p>
       </div>
 
       <div class="timeline-card">
         <div class="timeline-year">1999</div>
         <h3 style="color:#fff; font-size:1rem; margin-bottom:6px;">A Kombi da Praça do Coco</h3>
-        <p class="timeline-desc">Seu Valdir dos Santos inicia a venda de água de coco na Praça Irmã Carmela Stecchi, revitalizando o coração do bairro.</p>
+        <p class="timeline-desc">Seu Valdir dos Santos estaciona sua Kombi de água de coco na Praça Irmã Carmela Stecchi, transformando a praça em ponto de encontro.</p>
       </div>
 
       <div class="timeline-card">
         <div class="timeline-year">2002</div>
         <h3 style="color:#fff; font-size:1rem; margin-bottom:6px;">Feira de Arte e Cultura</h3>
-        <p class="timeline-desc">Artistas e artesãos oficializam a Feira da Praça do Coco aos fins de semana, unindo pastel, cerâmica e chorinho.</p>
+        <p class="timeline-desc">Artesãos, cozinheiros e músicos consolidam a Feira da Praça do Coco aos fins de semana, unindo gastronomia, arte manual e música na praça.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- PARA QUEM EXPÕE: a virada do funil, do visitante para o expositor -->
-<section id="expor" class="hm-secao hm-expor" aria-labelledby="expor-titulo">
-  <div class="wrap hm-expor-in">
-    <div>
-      <h2 id="expor-titulo" class="hm-h2">Tem barraca ou bar em Barão?</h2>
-      <p class="hm-sub">Seu site com produtos, WhatsApp e o ponto da sua barraca no mapa da feira. No dia da feira, um toque avisa que você está lá.</p>
+<!-- ========================================================
+     6. OS BARES, BOTECOS E BARRACAS GASTRONÔMICAS DE BARÃO
+     ======================================================== -->
+<section id="bares" class="secao-bares">
+  <div class="wrap">
+    <div class="hm-cab-centro">
+      <span class="chapeu-dossie">Boemia &amp; Mesas na Calçada</span>
+      <h2 class="hm-h2">Os bares de Barão</h2>
+      <p>
+        Em Barão Geraldo, cada boteco, choperia e restaurante tem alma de barraca de feira: lugar de encontrar amigos, conversar sem pressa e comer bem. Toque em qualquer casa para visitar sua barraca digital:
+      </p>
     </div>
-    <div class="hm-acoes">
-      <a class="btn btn-zap" href="{{ zap_url }}" target="_blank" rel="noopener">Falar com o Daniel</a>
-      <a class="btn btn-fantasma" href="#preco">Ver os planos</a>
+
+    {# Cliente pagante na frente das prévias, com link para o endereço canônico
+       dele: é a página da casa que o Google indexa (as prévias são noindex). #}
+    {% if clientes_destaque %}
+    <div class="clientes-feira">
+      <h3>Casas Parceiras da Rede</h3>
+      <div class="grid-23-bares" style="margin-top:16px;">
+        {% for c in clientes_destaque %}
+        <a class="bar-card-kraft" href="{{ c.url }}">
+          {% if c.foto %}
+          <img class="bar-img-thumb" src="{{ c.foto if c.foto.startswith(('http', '/')) else url_for('static', filename=c.foto) }}" alt="{{ c.nome }}" width="480" height="360" loading="lazy" decoding="async">
+          {% endif %}
+          <div class="bar-info-box">
+            <h4 class="bar-title-kraft">{{ c.nome }}</h4>
+            <div style="margin-top:auto; font-size:0.82rem; font-weight:700; color:var(--tomate); display:flex; justify-content:space-between; align-items:center; padding-top:8px;">
+              <span>Visitar o site</span>
+              <i class="fas fa-arrow-right"></i>
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
     </div>
+    {% endif %}
+
+    {% if bares %}
+    <div class="grid-23-bares">
+      {% for b in bares %}
+      <a class="bar-card-kraft" href="{{ url_for('public.landing_slug', slug=b.slug) }}">
+        <img class="bar-img-thumb" src="{{ url_for('static', filename=b.foto_480) }}" alt="{{ b.nome }}" width="480" height="360" loading="lazy" decoding="async">
+        <div class="bar-info-box">
+          <h3 class="bar-title-kraft">{{ b.nome }}</h3>
+          <div class="bar-nota-linha">
+            <i class="fas fa-star text-warning"></i>
+            <span>{{ b.nota }}</span>
+            {% if b.avaliacoes %}<span style="color:var(--taupe); font-weight:500;">({{ b.avaliacoes }} no Google)</span>{% endif %}
+          </div>
+          <div style="margin-top:auto; font-size:0.82rem; font-weight:700; color:var(--tomate); display:flex; justify-content:space-between; align-items:center; padding-top:8px;">
+            <span>Abrir Barraca</span>
+            <i class="fas fa-arrow-right"></i>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
   </div>
 </section>
 
 <!-- ========================================================
-     A TECNOLOGIA BAR OS & ARSENAL X-MEN (SUPERPODERES)
+     7. CONVITE COMUNITÁRIO: PARA EXPOSITORES DA FEIRA E BARES
+     (Sem tabela fria de preços — conversa direta de vizinho para vizinho)
      ======================================================== -->
-<section id="tecnologia" class="secao-tecnologia">
+<section id="participar" class="secao-participar" aria-labelledby="participar-titulo">
+  <div id="expor"></div>
+  <div id="tecnologia"></div>
   <div class="wrap">
-    <div class="tech-title-wrap">
-      <span style="font-size:0.82rem; font-weight:800; text-transform:uppercase; letter-spacing:0.16em; color:var(--ambar);">Infraestrutura Comunitária</span>
-      <h2 class="tech-headline">Como a Nossa Tecnologia Protege a Gastronomia de Barão</h2>
-      <p style="color:#94a3b8; font-size:1.08rem;">
-        Desenvolvemos um sistema operacional próprio para que os bares do bairro continuem cheios no fim de semana, com lucro auditado e sem pagar comissões abusivas a grandes plataformas.
+    <div class="participar-cab">
+      <span class="chapeu-dossie" style="color:var(--ambar); border-color:var(--ambar);">Rede Comunitária de Barão Geraldo</span>
+      <h2 id="participar-titulo" class="participar-h2">
+        Expõe na Praça do Coco ou tem um bar em Barão?
+      </h2>
+      <p class="participar-lead">
+        Criamos o <strong>feiradebarao.com.br</strong> para que cada artesão, feirante e botequeiro de Barão Geraldo tenha uma vitrine bonita, rápida e fácil de achar — mantendo o contato direto no seu WhatsApp mesmo depois que a lona da feira fecha no domingo.
       </p>
     </div>
 
     <div class="grid-tech-powers">
-      <!-- 1. Google Maps -->
+      <!-- 1. Vitrine de Artesão / Barraca -->
+      <div class="card-tech-power">
+        <div class="tech-icon-box">⛺</div>
+        <h3>Sua Banca Aberta a Semana Toda</h3>
+        <p>Página própria com a identidade do seu trabalho (charcutaria, ateliê, fornada, jardim ou ritual), fotos das suas peças e opção de usar domínio próprio (como <em>donaberga.com.br</em>).</p>
+      </div>
+
+      <!-- 2. Encomendas no WhatsApp -->
+      <div class="card-tech-power">
+        <div class="tech-icon-box">💬</div>
+        <h3>Encomendas e Reservas no WhatsApp</h3>
+        <p>O morador escolhe os produtos na sua vitrine (ou reserva uma mesa no seu bar) e o pedido chega organizado direto no seu WhatsApp — zero aplicativo e zero comissão sobre a sua venda.</p>
+      </div>
+
+      <!-- 3. Pino no Mapa da Praça do Coco + Hoje na Feira -->
       <div class="card-tech-power">
         <div class="tech-icon-box">📍</div>
-        <h3>Cardápio no Google Maps</h3>
-        <p>Indexação nativa com Menu Schema. Quem pesquisa "bar aberto agora em Barão Geraldo" acha seu cardápio com preços e fotos direto na busca.</p>
+        <h3>Ponto no Mapa &amp; “Na Feira Hoje”</h3>
+        <p>Sua barraca ganha coordenada exata no mapa interativo da Praça do Coco. No sábado ou domingo de manhã, 1 toque no celular avisa os clientes que você está na praça.</p>
       </div>
 
-      {# Só o que está no ar hoje. Leitor de notas, CMV e alerta de insumos
-         são da gestão (GESTAO_ATIVA desligada): oferta vincula (CDC), então
-         não aparecem como recurso até voltarem a funcionar. #}
-      <!-- 2. Reservas -->
-      <div class="card-tech-power">
-        <div class="tech-icon-box">📅</div>
-        <h3>Reserva com Aviso no WhatsApp</h3>
-        <p>O cliente reserva pelo site e a casa recebe o aviso no WhatsApp na hora. Sem aplicativo, sem comissão por mesa.</p>
-      </div>
-
-      <!-- 3. Avaliações -->
+      <!-- 4. Google Maps & Busca Local -->
       <div class="card-tech-power">
         <div class="tech-icon-box">⭐</div>
-        <h3>Avaliações no Google</h3>
-        <p>QR de "avalie a gente" para a mesa e mensagem pronta para pedir avaliação a quem reservou — do jeito que o Google permite: pedindo a todos.</p>
-      </div>
-
-      <!-- 4. Clientes da casa -->
-      <div class="card-tech-power">
-        <div class="tech-icon-box">💌</div>
-        <h3>Lista de Clientes da Casa</h3>
-        <p>Quem visita o site pode se inscrever para receber novidades e promoções, com consentimento confirmado por e-mail (LGPD).</p>
+        <h3>Achado no Google e nas IAs</h3>
+        <p>Catálogo e cardápio estruturados para que quem procura em Barão Geraldo ou Campinas encontre sua história, seus produtos, seus horários e suas avaliações.</p>
       </div>
     </div>
-  </div>
-</section>
 
-<!-- ========================================================
-     A CONTA DA MESA VAZIA & CALCULADORA DE ROI
-     ======================================================== -->
-<section id="conta" class="secao-conta">
-  <div class="wrap">
-    <div style="text-align:center; max-width:750px; margin:0 auto 40px;">
-      <span class="chapeu-dossie">Matemática de Balcão</span>
-      <h2 style="font-family:var(--font-cartaz); font-size:2.8rem; text-transform:uppercase; margin-bottom:12px;">
-        Quanto Vale 1 Mesa Vazia no Seu Bar?
-      </h2>
-      <p style="color:var(--taupe); font-size:1.05rem;">
-        Mexa nos números do seu salão. Não é promessa mágica: é a matemática do seu próprio movimento em Barão Geraldo.
-      </p>
-    </div>
-
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:36px; align-items:center;">
-      <!-- Sliders -->
-      <div>
-        <div style="margin-bottom:18px;">
-          <div style="display:flex; justify-content:space-between; font-weight:700; color:var(--tinta); margin-bottom:6px;">
-            <label for="roi-mesas">Mesas no Salão</label>
-            <span id="roi-mesas-val" style="color:var(--tomate);">14 mesas</span>
-          </div>
-          <input type="range" style="width:100%; accent-color:var(--tomate);" id="roi-mesas" min="4" max="50" value="14" step="1">
-        </div>
-
-        <div style="margin-bottom:18px;">
-          <div style="display:flex; justify-content:space-between; font-weight:700; color:var(--tinta); margin-bottom:6px;">
-            <label for="roi-pessoas">Pessoas por Mesa</label>
-            <span id="roi-pessoas-val" style="color:var(--tomate);">3 pessoas</span>
-          </div>
-          <input type="range" style="width:100%; accent-color:var(--tomate);" id="roi-pessoas" min="2" max="6" value="3" step="1">
-        </div>
-
-        <div style="margin-bottom:18px;">
-          <div style="display:flex; justify-content:space-between; font-weight:700; color:var(--tinta); margin-bottom:6px;">
-            <label for="roi-ticket">Consumo Médio por Pessoa</label>
-            <span id="roi-ticket-val" style="color:var(--tomate);">R$ 45,00</span>
-          </div>
-          <input type="range" style="width:100%; accent-color:var(--tomate);" id="roi-ticket" min="20" max="150" value="45" step="5">
-        </div>
-
-        <div style="margin-bottom:18px;">
-          <div style="display:flex; justify-content:space-between; font-weight:700; color:var(--tinta); margin-bottom:6px;">
-            <label for="roi-noites">Noites Cheias por Semana</label>
-            <span id="roi-noites-val" style="color:var(--tomate);">2 noites</span>
-          </div>
-          <input type="range" style="width:100%; accent-color:var(--tomate);" id="roi-noites" min="1" max="7" value="2" step="1">
-        </div>
-      </div>
-
-      <!-- Placa de Resultado -->
-      <div style="background:var(--papel); border:2.5px solid var(--tomate); border-radius:18px; padding:32px; text-align:center;">
-        <span style="font-size:0.82rem; font-weight:800; text-transform:uppercase; color:var(--taupe);">Retorno com apenas 1 mesa a mais por noite cheia:</span>
-        <div id="roi-resultado-mes" style="font-family:var(--font-cartaz); font-size:3.2rem; color:var(--verde-zap); margin:8px 0;">
-          +R$ 1.169/mês
-        </div>
-        <p style="font-size:0.94rem; color:var(--tinta); line-height:1.5;">
-          É o <strong>faturamento a mais</strong> com as mesas extras que você escolheu acima — não é lucro, e não é garantia: é a conta para comparar com a mensalidade.
+    <div class="participar-convite-box">
+      <div class="participar-convite-txt">
+        <h3>Quer colocar sua banca ou seu bar na rede?</h3>
+        <p>
+          Eu mesmo monto a sua página com você na praça, no ateliê ou no balcão — com fotos, produtos e atalho direto para o seu WhatsApp.
+        </p>
+        <p class="participar-links-apoio">
+          <a href="{{ url_for('public.cadastro') }}">Prefere criar sua página agora mesmo pelo celular? Começar cadastro →</a>
         </p>
       </div>
-    </div>
-  </div>
-</section>
-
-<!-- ========================================================
-     TABELA DE PLANOS & PREÇOS TRANSPARENTES
-     ======================================================== -->
-<section id="preco" class="secao-planos">
-  <div class="wrap">
-    <div style="text-align:center; max-width:750px; margin:0 auto;">
-      <span class="chapeu-dossie">Planos Sem Pegadinhas</span>
-      <h2 style="font-family:var(--font-cartaz); font-size:2.8rem; text-transform:uppercase; margin-bottom:12px;">
-        Escolha o Modelo do Seu Bar
-      </h2>
-      <p style="color:var(--taupe); font-size:1.05rem;">
-        Sem fidelidade, sem contratos amarrados e sem comissão por pedido. Cancele quando quiser com 1 toque.
-      </p>
-    </div>
-
-    <div class="tabela-planos-grid">
-      <!-- 1. Plano Presença Digital -->
-      <div class="card-plano-kraft">
-        <span style="font-size:0.8rem; font-weight:800; text-transform:uppercase; color:var(--taupe);">Presença Digital</span>
-        <h3 style="font-family:var(--font-cartaz); font-size:1.6rem; margin-top:4px;">Site & Maps</h3>
-        <div class="plano-valor">
-          {{ preco_site }} <small style="font-size:1rem; font-family:var(--font-corpo); color:var(--taupe);">/mês</small>
-        </div>
-        <ul class="plano-lista">
-          <li><i class="fas fa-check text-success"></i> <strong>Site exclusivo</strong> no domínio próprio</li>
-          <li><i class="fas fa-check text-success"></i> <strong>Cardápio digital</strong> com QR Code de mesa</li>
-          <li><i class="fas fa-check text-success"></i> <strong>Reservas no WhatsApp</strong> sem comissão</li>
-          <li><i class="fas fa-check text-success"></i> <strong>Ficha no Google Maps</strong> otimizada</li>
-          <li><i class="fas fa-check text-success"></i> <strong>QR e pedido de avaliação</strong> no Google</li>
-          <li><i class="fas fa-check text-success"></i> <strong>Lista de clientes</strong> com novidades por e-mail</li>
-        </ul>
-        <a class="btn btn-fantasma" href="{{ zap_url }}" target="_blank" rel="noopener">Quero o Plano Site</a>
-      </div>
-
-      <!-- 2. Plano Pro + Arsenal IA (Destaque) -->
-      <div class="card-plano-kraft destaque">
-        <div class="plano-badge-topo">EM BREVE · LISTA DE ESPERA</div>
-        <span style="font-size:0.8rem; font-weight:800; text-transform:uppercase; color:var(--tomate);">Site + Gestão</span>
-        <h3 style="font-family:var(--font-cartaz); font-size:1.6rem; margin-top:4px;">Pro com Gestão</h3>
-        <div class="plano-valor" style="color:var(--tomate);">
-          Em breve
-        </div>
-        <ul class="plano-lista">
-          <li><i class="fas fa-check text-success"></i> <strong>Tudo do Plano Presença incluso</strong></li>
-          <li class="nao"><i class="far fa-clock"></i> Em preparação: leitor de notas por foto</li>
-          <li class="nao"><i class="far fa-clock"></i> Em preparação: custo real de cada prato (CMV)</li>
-          <li class="nao"><i class="far fa-clock"></i> Em preparação: alerta de aumento de insumos</li>
-        </ul>
-        <p style="font-size:0.85rem; color:var(--taupe); margin:0 0 12px;">Ainda não está à venda. Entre na lista e avisamos quando abrir — quem estiver no Plano Site migra sem perder nada.</p>
-        <a class="btn btn-tomate" href="{{ zap_url }}" target="_blank" rel="noopener">
-          <i class="fab fa-whatsapp"></i> Entrar na lista de espera
+      <div class="participar-convite-acoes">
+        <a class="btn btn-zap" href="{{ zap_url }}" target="_blank" rel="noopener">
+          <i class="fab fa-whatsapp"></i> Conversar com o Daniel no WhatsApp
         </a>
       </div>
-
-      <!-- 3. Compra Vitalícia -->
-      <div class="card-plano-kraft">
-        <span style="font-size:0.8rem; font-weight:800; text-transform:uppercase; color:var(--taupe);">Sem Mensalidade</span>
-        <h3 style="font-family:var(--font-cartaz); font-size:1.6rem; margin-top:4px;">Compra Única</h3>
-        <div class="plano-valor">
-          {{ compra.valor }} <small style="font-size:1rem; font-family:var(--font-corpo); color:var(--taupe);">à vista</small>
-        </div>
-        <ul class="plano-lista">
-          <li><i class="fas fa-check text-success"></i> <strong>Site publicado</strong> no domínio próprio</li>
-          <li><i class="fas fa-check text-success"></i> <strong>Cardápio digital</strong> com QR Code</li>
-          <li><i class="fas fa-check text-success"></i> <strong>Ficha configurada</strong> no Google Maps</li>
-          <li><i class="fas fa-check text-success"></i> <strong>1 ano de domínio e hospedagem</strong></li>
-          <li><small style="color:var(--taupe);">Renovação de {{ compra.renovacao }} a partir do 2º ano</small></li>
-        </ul>
-        <a class="btn btn-fantasma" href="{{ zap_url }}" target="_blank" rel="noopener">Comprar à Vista</a>
-      </div>
-    </div>
-
-    <div style="margin-top:30px; text-align:center; color:var(--taupe); font-size:0.88rem;">
-      {% if taxa_setup %}
-      <p style="margin-bottom:6px;"><strong>Taxa única de montagem: {{ taxa_setup }}</strong> — inclui design exclusivo personalizado, fotos da casa e configuração completa do Perfil da Empresa no Google Maps.</p>
-      {% endif %}
-      <p><i class="fas fa-shield-alt text-success"></i> <strong>Sem fidelidade:</strong> você não assina contrato longo e cancela quando quiser com 1 toque.</p>
-      <p style="margin-top:14px;"><a href="{{ url_for('public.cadastro') }}" style="font-weight:700;">Prefere começar sozinho? Crie a conta do seu bar →</a></p>
-      <p style="margin-top:8px;"><a href="{{ url_for('public.para_bares') }}">Como funciona o site para bar em Campinas →</a></p>
     </div>
   </div>
 </section>
 
 <!-- ========================================================
-     FECHAMENTO & CONVITE PARA A COMUNIDADE
+     8. FECHAMENTO & CONVITE PARA A COMUNIDADE
      ======================================================== -->
 <section id="contato" class="hm-contato">
   <div class="wrap">
-    <h2 class="hm-h2">Vamos conversar no seu balcão?</h2>
+    <h2 class="hm-h2">Nos vemos na praça ou no balcão?</h2>
     <p class="hm-sub">
-      Eu sou o Daniel, moro aqui em Barão Geraldo e criei o projeto para valorizar a história e os negócios da nossa comunidade. Levo a demonstração pronta no celular até o seu bar.
+      Eu sou o Daniel e construí este portal para celebrar a memória de Barão Geraldo e fortalecer quem produz, cozinha e trabalha no distrito. Se você tem uma história antiga de Barão ou quer colocar sua banca no ar, me chama no WhatsApp.
     </p>
     <div class="hm-acoes centro">
       <a class="btn btn-zap" href="{{ zap_url }}" target="_blank" rel="noopener">
-        <i class="fab fa-whatsapp"></i> Chamar no WhatsApp
+        <i class="fab fa-whatsapp"></i> Chamar o Daniel no WhatsApp
       </a>
       <button class="btn btn-colab" onclick="abrirModalColaboracao('historia')">
         <i class="fas fa-feather"></i> Contar uma história do bairro
@@ -607,7 +524,7 @@
           <option value="video">🎥 Enviar Vídeo ou Depoimento em Áudio</option>
           <option value="historia">📖 Causo / Memória Afetiva de Barão Geraldo</option>
           <option value="correcao">🔍 Correção Histórica / Documento Genealógico</option>
-          <option value="bar">🍺 História de um Bar / Estabelecimento Tradicional</option>
+          <option value="bar">🍺 História de um Bar, Banca ou Estabelecimento Tradicional</option>
         </select>
       </div>
 
@@ -635,28 +552,28 @@
 <footer class="site-footer">
   <div class="wrap">
     <p style="font-weight:700; color:var(--tinta); font-family:var(--font-cartaz); font-size:1.2rem; margin-bottom:6px;">
-      FEIRA DE BARÃO · O GRANDE DOSSIÊ HISTÓRICO & GASTRONÔMICO
+      FEIRA DE BARÃO · PRAÇA DO COCO, MEMÓRIA VIVA &amp; GASTRONOMIA
     </p>
-    <p>Distrito de Barão Geraldo, Campinas – SP · Construído com carinho para a memória e os comércios da nossa comunidade.</p>
+    <p>Distrito de Barão Geraldo, Campinas – SP · Construído para celebrar a memória, os artesãos e os botecos de Barão Geraldo.</p>
     <nav class="rodape-nav" aria-label="Todas as seções">
-      <a href="#dossie">O Dossiê Vivo</a>
-      <a href="#linha-do-tempo">Linha do Tempo</a>
-      <a href="#pracacoco">A Praça do Coco</a>
+      <a href="{{ url_for('public.feira') }}">Expositores e Mapa da Feira</a>
+      <a href="#dossie">O Mapa Histórico</a>
       <a href="#mural">Mural da Memória</a>
-      <a href="#bares">Barracas</a>
-      <a href="#tecnologia">Infraestrutura IA</a>
-      <a href="#conta">Calculadora</a>
-      <a href="#preco">Planos</a>
+      <a href="#linha-do-tempo">Linha do Tempo</a>
+      <a href="{{ url_for('public.memoria') }}">Acervo Memória Viva</a>
+      <a href="#bares">Bares</a>
+      <a href="#participar">Participar da Rede</a>
+      <a href="{{ url_for('public.para_bares') }}">Para Bares em Campinas</a>
       <a href="#contato">Contato</a>
     </nav>
-    <p><a href="{{ url_for('auth.login') }}" style="color:var(--taupe); text-decoration:underline; display:inline-flex; align-items:center; min-height:44px;">Entrar</a></p>
+    <p><a href="{{ url_for('auth.login') }}" style="color:var(--taupe); text-decoration:underline; display:inline-flex; align-items:center; min-height:44px;">Entrar no painel</a></p>
   </div>
 </footer>
 
 <div class="lona-topo"></div>
 
 <!-- ========================================================
-     SCRIPTS DE MAP SCROLLYTELLING, MODAL & CALCULADORA
+     SCRIPTS DE MAP SCROLLYTELLING & MODAL DE MEMÓRIA
      ======================================================== -->
 <script>
   // Inicialização do Leaflet Map
@@ -816,7 +733,7 @@
       'video': '🎥 Vídeo / Depoimento em Áudio',
       'historia': '📖 Causo / Memória Afetiva',
       'correcao': '🔍 Correção Histórica / Genealógica',
-      'bar': '🍺 História de Bar / Balcão Tradicional'
+      'bar': '🍺 História de Bar / Banca Tradicional'
     };
 
     const tipoFormatado = rotulos[tipo] || tipo;
@@ -826,37 +743,9 @@
     fecharModalColaboracao();
   }
 
-  // Calculadora de ROI
-  const elMesas = document.getElementById('roi-mesas');
-  const elPessoas = document.getElementById('roi-pessoas');
-  const elTicket = document.getElementById('roi-ticket');
-  const elNoites = document.getElementById('roi-noites');
-
-  function atualizarCalculadora() {
-    if (!elMesas) return;
-    const mesas = parseInt(elMesas.value);
-    const pessoas = parseInt(elPessoas.value);
-    const ticket = parseInt(elTicket.value);
-    const noites = parseInt(elNoites.value);
-
-    document.getElementById('roi-mesas-val').innerText = `${mesas} mesas`;
-    document.getElementById('roi-pessoas-val').innerText = `${pessoas} pessoas`;
-    document.getElementById('roi-ticket-val').innerText = `R$ ${ticket},00`;
-    document.getElementById('roi-noites-val').innerText = `${noites} noites`;
-
-    const retornoMes = (1 * pessoas * ticket) * noites * 4.33;
-    const formatado = Math.round(retornoMes).toLocaleString('pt-BR');
-    document.getElementById('roi-resultado-mes').innerText = `+R$ ${formatado}/mês`;
-  }
-
-  [elMesas, elPessoas, elTicket, elNoites].forEach(input => {
-    input?.addEventListener('input', atualizarCalculadora);
-  });
-
   // O Leaflet chega com `defer` (já está pronto no DOMContentLoaded), mas o
   // mapa só é montado quando o dossiê está a uma tela de distância.
   window.addEventListener('DOMContentLoaded', () => {
-    atualizarCalculadora();
     const dossie = document.getElementById('dossie');
     if (!dossie || !('IntersectionObserver' in window)) {
       initMap();

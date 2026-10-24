@@ -357,7 +357,7 @@ FEIRA = {
 }
 
 
-def _vitrine_de_expositores(limite=6):
+def _vitrine_de_expositores(limite=8):
     """Quem aparece na home: os que avisaram que estão hoje primeiro, depois os demais.
 
     A home nunca pode cair por causa disso: se a consulta falhar (coluna que
@@ -374,10 +374,10 @@ def _vitrine_de_expositores(limite=6):
 
 
 def _contexto_produto():
-    """Dados comerciais da landing de venda. Vêm de env pra não versionar
+    """Dados da home e das páginas do portal. Vêm de env pra não versionar
     número de telefone nem preço — os dois mudam sem deploy."""
     zap = (os.environ.get('FEIRA_WHATSAPP') or '').strip()
-    msg = urllib.parse.quote('Oi! Vi o Feira de Barão e quero saber como funciona pro meu bar.')
+    msg = urllib.parse.quote('Oi! Vi o Feira de Barão e quero conversar sobre colocar minha banca/casa no ar.')
 
     bares = _bares_da_feira()
     com_nota = [float(b['nota'].replace(',', '.')) for b in bares]
@@ -389,7 +389,7 @@ def _contexto_produto():
     tab_precos = precos()
     return {
         **_vitrine_de_expositores(),
-        'zap_url': f'https://wa.me/{zap}?text={msg}' if zap else '#preco',
+        'zap_url': f'https://wa.me/{zap}?text={msg}' if zap else '#participar',
         'taxa_setup': taxa_de_instalacao(),
         'compra': compra_do_site(),
         'precos': tab_precos,
@@ -713,10 +713,10 @@ def llms_txt():
         f"- **Quando**: {horarios}",
         f"- **Site**: https://{dominio_do_produto()}/",
         "",
-        "## Para donos de bar e restaurante",
-        "- Site próprio, cardápio digital com QR, reserva com aviso no WhatsApp, "
-        "pedido de avaliação no Google e perfil do Google Maps configurado.",
-        f"- Planos e preços: https://{dominio_do_produto()}/#preco",
+        "## Para expositores, artesãos e bares de Barão Geraldo",
+        "- Vitrine e catálogo digital na Feira, encomendas direto no WhatsApp, "
+        "ponto no mapa da Praça do Coco e presença no Google Maps.",
+        f"- Como participar: https://{dominio_do_produto()}/#participar",
         "",
     ]
     from app.utils.memoria import verbetes as _verbetes

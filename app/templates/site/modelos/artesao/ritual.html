@@ -60,14 +60,21 @@
   50%{transform:scale(1.45);opacity:.45}
 }
 .hero-medallao{
-  width:118px;height:118px;margin:0 auto var(--s4);
-  border-radius:50%;padding:4px;
+  position:relative;width:clamp(176px,40vw,300px);aspect-ratio:1;margin:var(--s2) auto var(--s6);
+  border-radius:50%;padding:6px;
   background:linear-gradient(135deg, var(--gold), var(--ember));
-  box-shadow:0 0 32px color-mix(in srgb, var(--gold) 35%, transparent);
+  box-shadow:0 0 64px color-mix(in srgb, var(--gold) 38%, transparent), 0 18px 48px rgba(0,0,0,.45);
 }
+/* anel tracejado girando devagar em volta da foto (selo de ritual; noturno.html usa o mesmo recurso de farol) */
+.hero-medallao::before{
+  content:"";position:absolute;inset:-16px;border-radius:50%;
+  border:2px dashed color-mix(in srgb, var(--gold) 70%, transparent);
+  animation:giro 48s linear infinite;
+}
+@keyframes giro{to{transform:rotate(360deg)}}
 .hero-medallao img{
   width:100%;height:100%;object-fit:cover;border-radius:50%;
-  border:2px solid var(--ink);
+  border:3px solid var(--ink);
 }
 .hero h1{
   font-size:clamp(2.85rem,11vw,6.2rem);line-height:1;
@@ -192,7 +199,7 @@
       <span class="hero-selo" data-hero><span class="bola" aria-hidden="true"></span> {{ descritor }} · Feira de Barão</span>
       {% if hero %}
       <figure class="hero-medallao" data-hero data-zoom="{{ hero }}" data-legenda="{{ site.nome }}">
-        <img src="{{ hero }}" alt="{{ site.nome }}" width="240" height="240" fetchpriority="high" decoding="async">
+        <img src="{{ hero }}" alt="{{ site.nome }}" width="300" height="300" fetchpriority="high" decoding="async">
       </figure>
       {% endif %}
       <h1 id="titulo" class="titulo" data-hero>{{ site.nome }}</h1>

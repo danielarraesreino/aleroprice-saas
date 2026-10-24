@@ -1038,3 +1038,32 @@
   .hm-expor .hm-acoes{justify-content:flex-end}
 }
 @media (min-width:960px){.hm-lista{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* Destaques da Praça do Coco e Convite Comunitário */
+.hm-quando-selo{display:inline-block;margin-bottom:8px;padding:3px 10px;border-radius:999px;background:rgba(245,158,11,.18);border:1px solid rgba(245,158,11,.45);color:var(--ambar);font-size:.74rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.hm-quando-detalhe{margin-top:8px!important;padding-top:8px;border-top:1px solid rgba(246,238,219,.14);font-size:.86rem;line-height:1.45;opacity:.88}
+.secao-expositores-home{border-top:1.5px solid var(--linha);border-bottom:1.5px solid var(--linha);background:var(--papel-claro)}
+.oficios-feira-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:24px}
+.oficio-card{display:flex;align-items:flex-start;gap:14px;padding:18px;border-radius:14px;background:var(--cartao);border:1.5px solid var(--linha);color:var(--tinta)!important;text-decoration:none!important;transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+.oficio-card:hover{transform:translateY(-2px);border-color:var(--tomate);box-shadow:0 10px 24px rgba(36,28,20,.09)}
+.oficio-icone{flex:none;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;background:var(--papel);font-size:1.4rem}
+.oficio-card h3{margin:0 0 4px;font:700 1.02rem/1.25 var(--font-heading);color:var(--tinta)}
+.oficio-card p{margin:0;font-size:.88rem;line-height:1.48;color:var(--taupe)}
+
+.secao-participar{background:#181410;color:var(--papel);padding:84px 0;border-bottom:1.5px solid var(--linha)}
+.participar-cab{text-align:center;max-width:780px;margin:0 auto 44px}
+.participar-h2{font:400 clamp(2.1rem,4.5vw,3.3rem)/1.03 var(--font-cartaz);text-transform:uppercase;color:#fff;margin:6px 0 14px}
+.participar-lead{color:#d8cebe;font-size:1.08rem;line-height:1.6}
+.secao-participar .card-tech-power{background:#231d17;border:1px solid rgba(246,238,219,.12)}
+.secao-participar .card-tech-power p{color:#cbbba4}
+.participar-convite-box{margin-top:32px;padding:28px 30px;border-radius:18px;background:rgba(246,238,219,.06);border:1.5px solid rgba(245,158,11,.35);display:grid;gap:22px;align-items:center}
+.participar-convite-txt h3{font:700 1.35rem/1.2 var(--font-heading);color:#fff;margin:0 0 8px}
+.participar-convite-txt p{margin:0;color:#ded4c5;font-size:.98rem;line-height:1.6}
+.participar-links-apoio{margin-top:12px!important;display:flex;flex-wrap:wrap;gap:8px 12px;font-size:.9rem!important}
+.participar-links-apoio a{color:var(--ambar)!important;font-weight:700;text-decoration:underline!important}
+.participar-convite-acoes{display:flex;flex-wrap:wrap;gap:12px}
+@media (min-width:860px){
+  .participar-convite-box{grid-template-columns:1.5fr auto}
+  .participar-convite-acoes{justify-content:flex-end}
+}
+
