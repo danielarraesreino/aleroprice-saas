@@ -56,6 +56,18 @@ class SiteConfig(db.Model):
     # Redes
     instagram_url = db.Column(db.String(200))
     facebook_url = db.Column(db.String(200))
+    tiktok_url = db.Column(db.String(200))
+
+    # Ficha da loja do expositor (hotsite de artesão). Tudo opcional: campo vazio = bloco não aparece,
+    # nunca texto inventado. `sobre` = "quem faz", até 3 parágrafos separados por linha em branco.
+    sobre = db.Column(db.Text)
+    pagamento = db.Column(db.String(200))        # "Pix, cartão de crédito"
+    politicas = db.Column(db.Text)               # envio, retirada, encomenda
+    atendimento = db.Column(db.String(120))      # quando responde no WhatsApp
+    email = db.Column(db.String(120))
+    desconto_pix_pct = db.Column(db.Integer)     # 3 -> "3% no Pix" nos produtos com preço
+    # Só o operador marca, depois de confirmar o número com a pessoa (selo "WhatsApp confirmado").
+    whatsapp_confirmado = db.Column(db.Boolean, default=False)
 
     # Aparência: nome de um preset em app/utils/temas.py (não é CSS livre —
     # cliente escolhe entre paletas fechadas para não conseguir feiar o site).

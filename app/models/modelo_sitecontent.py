@@ -80,6 +80,7 @@ class ProdutoSite(db.Model):
     # "sem preço" é estado legítimo (nunca mostra "R$ 0,00").
     preco = db.Column(db.Numeric(8, 2))
     sob_encomenda = db.Column(db.Boolean, default=False)
+    prazo_dias = db.Column(db.Integer)        # dias úteis de produção; nulo = não informado
     imagem = db.Column(db.String(300))        # caminho em static ou URL (Blob)
     destaque = db.Column(db.Boolean, default=False)
     ordem = db.Column(db.Integer, default=0, index=True)

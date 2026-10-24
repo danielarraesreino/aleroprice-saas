@@ -49,7 +49,7 @@ LISTAS = (
     ('galeria', GalleryItem, ('imagem', 'legenda')),
     # Hotsite de artesão (tipo_negocio: artesao). Bar não declara a chave.
     ('produtos', ProdutoSite, ('nome', 'descricao', 'categoria', 'preco', 'sob_encomenda',
-                               'imagem', 'destaque')),
+                               'prazo_dias', 'imagem', 'destaque')),
 )
 
 

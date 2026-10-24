@@ -584,6 +584,11 @@ def _pedacos_de_produto(produtos, origem, url_canonica, id_vendedor):
                       'seller': {'@id': id_vendedor}}
             if _campo(prod, 'sob_encomenda'):
                 oferta['availability'] = 'https://schema.org/PreOrder'
+            prazo = _campo(prod, 'prazo_dias')
+            if isinstance(prazo, int) and not isinstance(prazo, bool) and prazo > 0:
+                # dias úteis de produção; schema.org não tem "útil", DAY é o mais próximo
+                oferta['deliveryLeadTime'] = {'@type': 'QuantitativeValue', 'value': prazo,
+                                              'unitCode': 'DAY'}
             no['offers'] = oferta
         nos.append(no)
     return nos
@@ -828,10 +833,19 @@ def dados_estruturados(rest, site, dishes, reviews, eventos, url_canonica,
         if aberturas:
             restaurante['openingHoursSpecification'] = aberturas
 
-    redes = [_limpo(site.get('instagram_url')), _limpo(site.get('facebook_url'))]
+    redes = [_limpo(site.get('instagram_url')), _limpo(site.get('facebook_url')),
+             _limpo(site.get('tiktok_url'))]
     redes = [r for r in redes if r]
     if redes:
         restaurante['sameAs'] = redes
+
+    # Ficha da loja (hotsite de expositor): só o que o expositor preencheu.
+    email = _limpo(site.get('email'))
+    if email:
+        restaurante['email'] = email
+    pagamento = _limpo(site.get('pagamento'))
+    if pagamento:
+        restaurante['paymentAccepted'] = pagamento
 
     mapa = _limpo(site.get('maps_query'))
     if mapa:

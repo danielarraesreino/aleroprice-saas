@@ -1098,6 +1098,14 @@ SITE_DEFAULTS = {
     'qtd_avaliacoes': None,
     'instagram_url': None,
     'facebook_url': None,
+    'tiktok_url': None,
+    # Ficha da loja do expositor (cada bloco só aparece se preenchido)
+    'sobre': None,
+    'pagamento': None,
+    'politicas': None,
+    'atendimento': None,
+    'email': None,
+    'desconto_pix_pct': None,
     'callmebot_phone': None,
     'callmebot_apikey': None,
 }
@@ -1120,6 +1128,8 @@ def montar_site(rest):
         valor = getattr(cfg, chave, None) if cfg else None
         site[chave] = valor if (valor is not None and str(valor).strip() != '') else padrao
 
+    # Fora de SITE_DEFAULTS de propósito: só o operador marca; o painel do dono não pode editar.
+    site['whatsapp_confirmado'] = bool(getattr(cfg, 'whatsapp_confirmado', False)) if cfg else False
     if not site.get('nome') and rest is not None:
         site['nome'] = rest.nome
     return site
@@ -1201,7 +1211,7 @@ def montar_conteudo(rest):
         produtos = [{'nome': p.nome, 'descricao': p.descricao, 'img': _img(p.imagem),
                      'categoria': p.categoria, 'preco': p.preco,
                      'sob_encomenda': bool(p.sob_encomenda), 'destaque': bool(p.destaque),
-                     'ratio': _proporcao(p.imagem)}
+                     'prazo_dias': p.prazo_dias, 'ratio': _proporcao(p.imagem)}
                     for p in escolhidos]
 
     return {'dishes': dishes, 'reviews': reviews, 'team': team, 'gallery': gallery,

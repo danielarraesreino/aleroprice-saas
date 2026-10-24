@@ -29,6 +29,13 @@
   'qtd_avaliacoes':'Quantidade de avaliações',
   'instagram_url':'Link do Instagram',
   'facebook_url':'Link do Facebook',
+  'tiktok_url':'Link do TikTok',
+  'sobre':'Quem faz (até 3 parágrafos: de onde vem, o que faz com as mãos, para quem)',
+  'pagamento':'Formas de pagamento (ex: Pix, cartão)',
+  'politicas':'Envio, retirada e encomenda',
+  'atendimento':'Atendimento (ex: seg a sex, 9h às 17h30)',
+  'email':'E-mail',
+  'desconto_pix_pct':'Desconto no Pix (% — só o número)',
 } %}
 {% set dicas = {
   'descritor':'Ex.: Hamburgueria artesanal em Vinhedo',
@@ -38,7 +45,7 @@
 } %}
 {# Ordem: o que o dono realmente preenche primeiro; o resto fica em "avançado". #}
 {% set essenciais = ['nome','tagline','whatsapp','endereco','horario','hero_foto'] %}
-{% set avancados = ['maps_query','descritor','telefone_exibicao','cidade_uf','servicos','nota_google','qtd_avaliacoes','instagram_url','facebook_url'] %}
+{% set avancados = ['maps_query','descritor','telefone_exibicao','cidade_uf','servicos','nota_google','qtd_avaliacoes','instagram_url','facebook_url','tiktok_url'] %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
@@ -170,6 +177,8 @@
       </div>
       <input type="hidden" id="capa-valor" name="hero_foto"
              value="{{ cfg.hero_foto if cfg and cfg.hero_foto else '' }}">
+    {% elif campo in ['sobre','politicas'] %}
+      <textarea class="form-control" name="{{ campo }}" rows="5" maxlength="1500">{{ cfg[campo] if cfg and cfg[campo] else '' }}</textarea>
     {% else %}
       <input class="form-control" name="{{ campo }}"
              value="{{ cfg[campo] if cfg and cfg[campo] else '' }}"

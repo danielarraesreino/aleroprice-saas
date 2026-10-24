@@ -1,3 +1,4 @@
+{% import "site/modelos/artesao/_produtos.html" as pr %}
 <!DOCTYPE html>
 <html lang="pt-BR"{% if tema_forcado %} data-theme="{{ tema_forcado }}"{% endif %}>
 <head>
@@ -305,6 +306,34 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
   gap:var(--s2);margin-top:var(--s1);
 }
 
+/* Ficha da loja: preço com Pix e prazo, selo, destaques, busca, informações (MacMarchê/BrasiArte como referência de clareza) */
+.pix,.prazo{font-size:.82rem;line-height:1.3;color:var(--cream-dim);font-weight:600}
+.pix{color:var(--gold)}
+.selo-ok{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--cream)}
+.selo-ok svg{width:14px;height:14px;flex:none;color:var(--amber)}
+.destaques{margin-bottom:var(--s7)}
+.destaques h3{font:700 1.25rem/1.2 var(--font-display);margin-bottom:var(--s4)}
+.destaques ul{display:grid;gap:var(--s3);grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+.destaques li{display:grid;gap:var(--s2);align-content:start;padding:var(--s3);border:1px solid var(--line);border-radius:var(--r);background:var(--ink-2)}
+.destaques img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:calc(var(--r) - 2px)}
+.destaques strong{font:700 1rem/1.25 var(--font-display)}
+.catalogo-barra{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--s3);margin-bottom:var(--s5)}
+.catalogo-barra .contagem-prod{color:var(--cream-dim);font-weight:600}
+.catalogo-barra input[type=search]{min-height:44px;min-width:min(100%,260px);padding:0 var(--s4);border-radius:999px;border:1px solid var(--line-strong);background:var(--ink-2);color:var(--cream);font:inherit}
+.catalogo-barra input[type=search]:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+.info{display:grid;gap:var(--s4);margin:var(--s5) 0;max-width:720px}
+.info div{display:grid;grid-template-columns:minmax(110px,160px) 1fr;gap:var(--s3);padding-bottom:var(--s3);border-bottom:1px solid var(--line)}
+.info dt{color:var(--cream-dim);font-weight:600}
+.info dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.politicas{max-width:720px;margin:var(--s4) 0;color:var(--cream-dim);line-height:1.6}
+/* a seção de contato é uma faixa colorida: cor herdada, senão o rótulo some no verde/roxo */
+.contato .info dt,.contato .politicas{color:inherit;opacity:.8}
+.contato .info div{border-bottom-color:currentColor;border-bottom-color:color-mix(in srgb,currentColor 28%,transparent)}
+.sobre p{max-width:68ch;margin-bottom:var(--s4);line-height:1.7}
+.redes{display:flex;flex-wrap:wrap;gap:var(--s3);margin-top:var(--s4)}
+.redes a{min-height:44px;display:inline-flex;align-items:center;font-weight:600;text-decoration:underline;text-underline-offset:4px}
+@media (max-width:480px){.info div{grid-template-columns:1fr;gap:2px}}
+
 /* Como Encomendar (.passos) */
 .passos{display:grid;gap:var(--s4);counter-reset:passo}
 .passos li{
@@ -560,7 +589,7 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
     <a class="feira-voltar" href="{{ url_for('public.feira') }}">
       ← <strong>Feira de Barão</strong> <span>Praça do Coco</span>
     </a>
-    <span class="feira-horario-topo">{{ site.horario or 'Sáb e Dom na Praça do Coco · Barão Geraldo' }}</span>
+    <span class="feira-horario-topo">{% if site.whatsapp_confirmado %}<span class="selo-ok"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Expositor da Feira · WhatsApp confirmado</span> · {% endif %}{{ site.horario or 'Sáb e Dom na Praça do Coco · Barão Geraldo' }}</span>
   </div>
 </div>
 
@@ -617,6 +646,21 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
 {% if produtos %}
 {% set cats = [] %}
 {% for p in produtos %}{% if (p.categoria or 'Outros') not in cats %}{% set _ = cats.append(p.categoria or 'Outros') %}{% endif %}{% endfor %}
+<div class="wrap catalogo-barra">
+  <p class="contagem-prod">{{ produtos|length }} {{ 'produto' if produtos|length == 1 else 'produtos' }}</p>
+  {% if produtos|length > 8 %}<input type="search" id="busca" placeholder="Buscar produto" aria-label="Buscar produto" autocomplete="off">{% endif %}
+</div>
+{% set em_destaque = produtos|selectattr('destaque')|list %}
+{% if em_destaque|length >= 2 and produtos|length > 4 %}
+<div class="wrap destaques"><h3>Os mais procurados</h3><ul>
+  {% for p in em_destaque[:4] %}<li>
+    {% if p.img %}<img src="{{ p.img }}" alt="{{ p.nome }}" loading="lazy" decoding="async" width="480" height="360">{% endif %}
+    <strong>{{ p.nome }}</strong>
+    <div class="meta-produto">{{ pr.precos(p, site) }}</div>
+    <a class="btn btn-line" href="#produtos" aria-label="Ver {{ p.nome }} nos produtos">Ver nos produtos</a>
+  </li>{% endfor %}
+</ul></div>
+{% endif %}
 {% if cats|length > 1 %}
 <div class="chips"><div class="wrap" role="group" aria-label="Filtrar por categoria">
   <button type="button" class="chip" data-filtro="" aria-pressed="true">Todos</button>
@@ -652,12 +696,13 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
 </div></section>
 {% endif %}
 
-{% if team or gallery %}
+{% if team or gallery or site.sobre %}
 <section id="quem-faz" class="secao" aria-labelledby="titulo-quem"><div class="wrap">
   <div class="cab rev">
     <span class="eyebrow">Trabalho autoral</span>
     <h2 id="titulo-quem" class="titulo">{{ copy.historia.titulo|replace('<br>', ' ')|safe }}</h2>
-    {% if team %}<p class="lead">{{ copy.historia.texto }}</p>{% endif %}
+    {% if site.sobre %}<div class="sobre">{% for par in site.sobre.replace('\r', '').split('\n\n') if par.strip() %}<p>{{ par.strip() }}</p>{% endfor %}</div>
+    {% elif team %}<p class="lead">{{ copy.historia.texto }}</p>{% endif %}
   </div>
   {% if team %}<ul class="equipe">{% for t in team %}<li class="rev"><strong>{{ t.nome }}</strong>{% if t.papel %}<span>{{ t.papel }}</span>{% endif %}</li>{% endfor %}</ul>{% endif %}
   {% if gallery %}
@@ -709,16 +754,21 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
   <span class="eyebrow">{{ site.nome }}</span>
   <h2 id="titulo-contato" class="titulo">{{ copy.cta.titulo }}</h2>
   <p class="lead">{{ copy.cta.linha }}</p>
-  <ul>
-    {% if site.endereco %}<li>📍 {{ site.endereco }}{% if site.cidade_uf %}, {{ site.cidade_uf }}{% endif %}</li>{% elif site.cidade_uf %}<li>📍 {{ site.cidade_uf }}</li>{% endif %}
-    {% if site.horario %}<li>🕒 {{ site.horario }}</li>{% endif %}
-    {% if site.telefone_exibicao %}<li>📞 {{ site.telefone_exibicao }}</li>{% endif %}
-  </ul>
+  <dl class="info">
+    {% if site.endereco or site.cidade_uf %}<div><dt>Localização</dt><dd>{{ site.endereco or '' }}{% if site.endereco and site.cidade_uf %}, {% endif %}{{ site.cidade_uf or '' }}</dd></div>{% endif %}
+    {% if site.horario or site.ponto_na_feira %}<div><dt>Na Feira</dt><dd>{{ site.ponto_na_feira or 'Praça do Coco' }}{% if site.horario %} · {{ site.horario }}{% endif %}</dd></div>{% endif %}
+    {% if site.atendimento %}<div><dt>Atendimento</dt><dd>{{ site.atendimento }}</dd></div>{% endif %}
+    {% if site.pagamento or site.desconto_pix_pct %}<div><dt>Pagamento</dt><dd>{{ site.pagamento or 'Pix' }}{% if site.desconto_pix_pct %} · {{ site.desconto_pix_pct }}% de desconto no Pix{% endif %}</dd></div>{% endif %}
+    {% if site.telefone_exibicao %}<div><dt>WhatsApp</dt><dd>{{ site.telefone_exibicao }}</dd></div>{% endif %}
+    {% if site.email %}<div><dt>E-mail</dt><dd>{{ site.email }}</dd></div>{% endif %}
+  </dl>
+  {% if site.politicas %}<div class="politicas"><strong>Envio, retirada e encomenda</strong><p>{{ site.politicas }}</p></div>{% endif %}
   <div class="acoes">
     {% if wa %}<a class="btn" href="{{ zap_href }}" target="_blank" rel="noopener">Falar no WhatsApp</a>{% endif %}
     {% if site.maps_query %}<a class="btn btn-line" href="https://www.google.com/maps/search/?api=1&query={{ site.maps_query|urlencode }}" target="_blank" rel="noopener">Como chegar</a>{% endif %}
     {% if site.instagram_url %}<a class="btn {{ 'btn-line' if wa else '' }}" href="{{ site.instagram_url }}" target="_blank" rel="noopener">Instagram</a>{% endif %}
   </div>
+  {% if site.facebook_url or site.tiktok_url %}<p class="redes">{% if site.facebook_url %}<a href="{{ site.facebook_url }}" target="_blank" rel="noopener">Facebook</a>{% endif %}{% if site.tiktok_url %}<a href="{{ site.tiktok_url }}" target="_blank" rel="noopener">TikTok</a>{% endif %}</p>{% endif %}
 </div></section>
 </main>
 
@@ -800,6 +850,20 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
     chips.forEach(function(x){x.setAttribute('aria-pressed',x===c?'true':'false')});
     cats.forEach(function(s){s.hidden=!!f&&s.getAttribute('data-cat')!==f});
   })});
+
+  /* 2b. Busca por nome (aparece com mais de 8 produtos) */
+  var busca=document.getElementById('busca');
+  if(busca){busca.addEventListener('input',function(){
+    var q=busca.value.trim().toLowerCase();
+    chips.forEach(function(x){x.setAttribute('aria-pressed',x.getAttribute('data-filtro')===''?'true':'false')});
+    cats.forEach(function(s){
+      var vis=0;
+      s.querySelectorAll('[data-nome]').forEach(function(el){
+        var ok=!q||el.getAttribute('data-nome').toLowerCase().indexOf(q)>-1;el.hidden=!ok;if(ok)vis++;
+      });
+      s.hidden=vis===0;
+    });
+  })}
 
   /* 3. Lightbox de Fotos (Produtos e Galeria) */
   var lb=document.getElementById('lightbox'),lbImg=document.getElementById('lightbox-img'),

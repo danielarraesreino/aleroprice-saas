@@ -107,3 +107,44 @@ def test_paridade_com_bar_novidades_e_preload_do_hero(client, session, modelo):
     corpo = client.get(f'/bar/{SLUG}?modelo={modelo}').get_data(as_text=True) if semear(no_ar=True) else ''
     assert 'novidades-box' in corpo and 'novidades da Feira de Barão' in corpo
     assert 'rel="preload" as="image"' in corpo
+
+
+# ---- Ficha da loja (referência: MacMarchê/BrasiArte) -------------------------------------------
+
+FICHA = dict(sobre='Formada em arquitetura.\n\nTrabalho com madeira.\n\nPara quem decora casas.',
+             pagamento='Pix e cartão', politicas='Envio para todo o Brasil.', atendimento='Seg a sex, 9h às 17h30',
+             email='contato@exemplo.com.br', desconto_pix_pct=3, tiktok_url='https://tiktok.com/@exemplo')
+
+
+def _com_ficha(session, ficha=True):
+    rest, _ = semear(no_ar=True)
+    cfg = SiteConfig.query.filter_by(restaurant_id=rest.id).first()
+    for campo, valor in FICHA.items():
+        setattr(cfg, campo, valor if ficha else None)
+    cfg.whatsapp_confirmado = ficha
+    for p in ProdutoSite.query.filter_by(restaurant_id=rest.id):
+        p.prazo_dias = 5 if ficha else None
+        p.preco = 50 if ficha else None
+    session.commit()
+
+
+@pytest.mark.parametrize('modelo', list(MODELOS_ARTESAO))
+def test_ficha_da_loja_aparece_quando_preenchida(client, session, modelo):
+    _com_ficha(session)
+    corpo = client.get(f'/bar/{SLUG}?modelo={modelo}').get_data(as_text=True)
+    for esperado in ('<dt>Atendimento</dt>', 'Seg a sex, 9h às 17h30', '<dt>Pagamento</dt>', '3% de desconto no Pix',
+                     '<dt>E-mail</dt>', 'contato@exemplo.com.br', 'Envio para todo o Brasil.',
+                     'Produzido em 5 dias úteis', '3% no Pix', 'WhatsApp confirmado', 'TikTok'):
+        assert esperado in corpo, esperado
+    assert corpo.count('<div class="sobre">') == 1 and corpo.count('class="sobre"') == 1
+    assert '"paymentAccepted"' in corpo and '"deliveryLeadTime"' in corpo
+
+
+@pytest.mark.parametrize('modelo', list(MODELOS_ARTESAO))
+def test_ficha_vazia_nao_mostra_bloco_nenhum(client, session, modelo):
+    _com_ficha(session, ficha=False)
+    corpo = client.get(f'/bar/{SLUG}?modelo={modelo}').get_data(as_text=True)
+    for ausente in ('<dt>Atendimento</dt>', '<dt>Pagamento</dt>', '<dt>E-mail</dt>', 'class="politicas"',
+                    'class="sobre"', 'WhatsApp confirmado', 'Produzido em', 'no Pix', 'paymentAccepted',
+                    'deliveryLeadTime'):
+        assert ausente not in corpo, ausente

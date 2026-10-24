@@ -39,6 +39,7 @@ TIPOS = {
             ('categoria', 'Categoria (ex: Defumados, Conservas, Geleias)', 'text', False),
             ('preco', 'Preço (ex: 18,50 — deixe vazio para não mostrar)', 'preco', False),
             ('sob_encomenda', 'Sob encomenda', 'check', False),
+            ('prazo_dias', 'Prazo de produção em dias úteis (deixe vazio se não souber)', 'number', False),
             ('imagem', 'Imagem (caminho em static ou URL)', 'text', False),
             ('destaque', 'Destacar na vitrine', 'check', False),
             ('ordem', 'Ordem', 'number', False),

@@ -11,6 +11,13 @@
   {% endif %}
 {% endmacro %}
 
+{# Preço + desconto no Pix + prazo de produção (ou "sob encomenda"). Cada parte só aparece se houver dado. #}
+{% macro precos(p, site) %}
+  {% if p.preco %}<p class="preco">{{ p.preco|moeda_br }}</p>{% if site.desconto_pix_pct %}<p class="pix">{{ site.desconto_pix_pct }}% no Pix</p>{% endif %}{% endif %}
+  {% if p.prazo_dias %}<p class="prazo">Produzido em {{ p.prazo_dias }} {{ 'dia útil' if p.prazo_dias == 1 else 'dias úteis' }}</p>
+  {% elif p.sob_encomenda %}<p class="enc">Sob encomenda</p>{% endif %}
+{% endmacro %}
+
 {# Cartões de vitrine e ateliê (foto quando há, com zoom em lightbox; sem foto vira cartão tipográfico). #}
 {% macro grade(produtos, cats, site, wa) %}
 {% for cat in cats %}
@@ -39,11 +46,8 @@
           <h4>{{ p.nome }}</h4>
           {% if p.descricao %}<p class="desc">{{ p.descricao }}</p>{% endif %}
         </div>
-        {% if p.preco or p.sob_encomenda %}
-        <div class="meta-produto">
-          {% if p.preco %}<p class="preco">{{ p.preco|moeda_br }}</p>{% endif %}
-          {% if p.sob_encomenda %}<p class="enc">Sob encomenda</p>{% endif %}
-        </div>
+        {% if p.preco or p.sob_encomenda or p.prazo_dias %}
+        <div class="meta-produto">{{ precos(p, site) }}</div>
         {% endif %}
         {{ acao(p, site, wa) }}
       </div>
@@ -80,7 +84,9 @@
           {% if p.preco %}<p class="preco">{{ p.preco|moeda_br }}</p>{% endif %}
         </div>
         {% if p.descricao %}<p class="desc">{{ p.descricao }}</p>{% endif %}
-        {% if p.sob_encomenda %}<p class="enc">Sob encomenda</p>{% endif %}
+        {% if p.preco and site.desconto_pix_pct %}<p class="pix">{{ site.desconto_pix_pct }}% no Pix</p>{% endif %}
+        {% if p.prazo_dias %}<p class="prazo">Produzido em {{ p.prazo_dias }} {{ 'dia útil' if p.prazo_dias == 1 else 'dias úteis' }}</p>
+        {% elif p.sob_encomenda %}<p class="enc">Sob encomenda</p>{% endif %}
       </div>
       {{ acao(p, site, wa) }}
     </li>
