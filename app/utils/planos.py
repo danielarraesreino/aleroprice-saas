@@ -50,6 +50,20 @@ def precos():
     return {
         'site': os.environ.get('FEIRA_PRECO_SITE', 'R$ 147,90'),
         'pro': os.environ.get('FEIRA_PRECO_PRO', 'R$ 247,90'),
+        # Anual do site: pago à vista, sem devolução. R$ 45 × 12.
+        'site_anual': os.environ.get('FEIRA_PRECO_SITE_ANUAL', 'R$ 540'),
+        'site_anual_mes': os.environ.get('FEIRA_PRECO_SITE_ANUAL_MES', 'R$ 45'),
+    }
+
+
+def precos_expositor():
+    """Hotsite de expositor da Feira. Dois caminhos, ambos de env:
+    anual (12 meses, vínculo) e mensal sem compromisso. O anual equivale a
+    R$ 30/mês; o mensal custa 50% a mais para quem não quer se vincular."""
+    return {
+        'anual': os.environ.get('FEIRA_EXPOSITOR_ANUAL', 'R$ 360'),
+        'anual_mes': os.environ.get('FEIRA_EXPOSITOR_ANUAL_MES', 'R$ 30'),
+        'mensal': os.environ.get('FEIRA_EXPOSITOR_MENSAL', 'R$ 45'),
     }
 
 

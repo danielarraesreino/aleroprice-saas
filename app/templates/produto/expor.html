@@ -1,0 +1,53 @@
+{% extends 'produto/memoria/_base.html' %}
+{% block titulo %}Site para expositor da Feira de Barão: a partir de {{ preco_exp.anual_mes }} por mês{% endblock %}
+{% block descricao %}Vitrine própria com seus produtos, preço, prazo e pedido pelo WhatsApp. Anual {{ preco_exp.anual }} ou mensal {{ preco_exp.mensal }} sem compromisso.{% endblock %}
+{% block canonical %}{{ url_for('public.expor', _external=True) }}{% endblock %}
+{% block head_extra %}
+<style>
+.ex{max-width:880px;margin:0 auto;padding:40px 16px 64px}
+.ex h1{font-family:'Anton',sans-serif;font-size:clamp(2rem,6vw,3.2rem);line-height:1.05;margin:0 0 12px;text-wrap:balance}
+.ex-lead{font-size:1.1rem;max-width:62ch;margin:0 0 32px}
+.ex-planos{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin:0 0 32px}
+.ex-plano{border:2px solid currentColor;border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:8px}
+.ex-plano.dest{background:var(--tomate,#d94f30);color:#fff;border-color:transparent}
+.ex-plano h2{margin:0;font-size:1.05rem}
+.ex-valor{font-family:'Anton',sans-serif;font-size:2.6rem;line-height:1}
+.ex-valor small{font-family:inherit;font-size:1rem}
+.ex-plano p{margin:0}
+.ex ul{padding-left:1.2em;max-width:62ch}
+.ex li{margin:6px 0}
+.ex-cta{display:inline-block;margin-top:24px;min-height:44px}
+</style>
+{% endblock %}
+{% block conteudo %}
+<div class="ex">
+<h1>Seu site na Feira, pronto para vender</h1>
+<p class="ex-lead">Uma vitrine só sua, com seus produtos, preço, prazo de produção e pedido direto no seu WhatsApp. Você aparece na página da Feira de Barão e no Google.</p>
+
+<div class="ex-planos">
+  <section class="ex-plano dest" aria-labelledby="p-anual">
+    <h2 id="p-anual">Anual, com vínculo de 12 meses</h2>
+    <div class="ex-valor">{{ preco_exp.anual }}<small>/ano</small></div>
+    <p>Equivale a {{ preco_exp.anual_mes }} por mês. Menor preço para quem fica.</p>
+  </section>
+  <section class="ex-plano" aria-labelledby="p-mensal">
+    <h2 id="p-mensal">Mensal, sem compromisso</h2>
+    <div class="ex-valor">{{ preco_exp.mensal }}<small>/mês</small></div>
+    <p>Sem contrato de um ano. Cancela quando quiser.</p>
+  </section>
+</div>
+
+<h2>O que está incluído</h2>
+<ul>
+  <li>Vitrine com seus produtos, preço, prazo de produção e desconto no Pix.</li>
+  <li>Pedido pelo WhatsApp.</li>
+  <li>Seu ponto na Praça do Coco e os horários da Feira, com mapa.</li>
+  <li>Selo de expositor da Feira.</li>
+  <li>Modo claro e escuro, boa leitura no celular.</li>
+</ul>
+
+{% if zap_url and zap_url != '#participar' %}
+<a class="btn btn-zap ex-cta" href="{{ zap_url }}" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> Quero ver o meu site</a>
+{% endif %}
+</div>
+{% endblock %}

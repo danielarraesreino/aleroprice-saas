@@ -65,3 +65,19 @@ def test_sem_teste_gratis_a_pagina_nao_promete_teste(dominio_do_produto, client)
 
     html = _html(client, '/cadastro')
     assert 'dias grátis' not in html
+
+
+def test_expor_anuncia_precos_do_expositor(dominio_do_produto, client):
+    from app.utils.planos import precos_expositor
+    html = _html(client, '/expor')
+    p = precos_expositor()
+    for chave in ('anual', 'anual_mes', 'mensal'):
+        assert p[chave] in html, f'/expor não mostra {p[chave]}'
+
+
+def test_bar_mostra_anual_e_mensal_e_personalizado_a_partir_de(dominio_do_produto, client):
+    html = _html(client, '/site-para-bar-em-campinas')
+    p = precos()
+    assert p['site_anual'] in html and p['site_anual_mes'] in html
+    assert 'a partir de ' + taxa_de_instalacao() in html
+    assert 'configurado no Google' not in html.split('id="preco"', 1)[1]

@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 {% if campinas %}
 <title>Site, cardápio digital e reserva para bar em Campinas · Feira de Barão</title>
-<meta name="description" content="Site próprio para bar e restaurante em Campinas: cardápio com QR, reserva com aviso no WhatsApp, pedido de avaliação e seu bar configurado no Google Maps. A partir de {{ preco_site }} por mês, sem fidelidade.">
+<meta name="description" content="Site próprio para bar e restaurante em Campinas: cardápio com QR, reserva com aviso no WhatsApp, pedido de avaliação e seu bar achável no Google Maps. A partir de {{ preco_site }} por mês, sem fidelidade.">
 <link rel="canonical" href="{{ url_for('public.para_bares', _external=True) }}">
 {% else %}
 <title>Bares de Barão — seu bar merece mais que um story de 24 horas</title>
-<meta name="description" content="Site pronto para bares de Barão Geraldo: página com foto, cardápio com QR, reserva no WhatsApp e seu bar configurado no Google. A partir de {{ preco_site }} por mês.">
+<meta name="description" content="Site pronto para bares de Barão Geraldo: página com foto, cardápio com QR, reserva no WhatsApp e seu bar achável no Google. A partir de {{ preco_site }} por mês.">
 {% endif %}
 <meta property="og:title" content="Bares de Barão — seu bar merece mais que um story de 24 horas">
 <meta property="og:description" content="O story some à meia-noite. O site fica: reserva, agenda, cardápio com QR e seu bar achável no Google.">
@@ -400,7 +400,10 @@
       <div class="planos">
         <article class="plano" data-reveal>
           <p class="plano-nome">Site</p>
-          <p class="preco-valor">{{ preco_site }} <span class="preco-periodo">{{ preco_periodo }}</span></p>
+          <p class="plano-selo">Melhor preço · anual</p>
+          <p class="preco-valor">{{ precos.site_anual }} <span class="preco-periodo">por ano</span></p>
+          <p class="acordo">{{ precos.site_anual_mes }} por mês, pago à vista, sem devolução. Domínio e hospedagem inclusos.</p>
+          <p class="acordo"><b>Quer testar antes?</b> Mensal: {{ preco_site }} {{ preco_periodo }}, sem contrato, também com domínio e hospedagem inclusos.</p>
           <ul>
             <li><b>Site com domínio próprio</b> — seu endereço, não um perfil</li>
             <li>Reserva com alerta no WhatsApp</li>
@@ -435,9 +438,9 @@
          o mesmo que a landing lê. #}
       {% if taxa_setup %}
       <div class="montagem" data-reveal>
-        <p><b>{{ taxa_setup }}</b> na montagem, uma vez só — design exclusivo pra
-        casa, seu bar configurado no Google e o cardápio no ar. Depois disso,
-        só a mensalidade.</p>
+        <p>O site já nasce de um dos <b>modelos prontos</b>, sem custo extra.
+        Quer um ajuste mais personalizado, com a cara da sua casa? Tem uma taxa
+        única, <b>a partir de {{ taxa_setup }}</b>.</p>
       </div>
       {% endif %}
 

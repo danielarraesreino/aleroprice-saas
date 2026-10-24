@@ -452,6 +452,15 @@ def feira():
     return _na_borda(resp)
 
 
+@bp.route('/expor')
+def expor():
+    """Página do expositor: o que o hotsite inclui e quanto custa."""
+    from app.utils.planos import precos_expositor
+    resp = make_response(render_template(
+        'produto/expor.html', preco_exp=precos_expositor(), **_contexto_produto()))
+    return _na_borda(resp)
+
+
 @bp.route('/barao')
 def barao():
     """Landing da campanha "Bares de Barão": a página que o vendedor manda no

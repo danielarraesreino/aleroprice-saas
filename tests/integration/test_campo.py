@@ -575,12 +575,12 @@ def test_proposta_nao_promete_dominio_quando_rdap_falha(client, session, demo, m
 def test_taxa_de_instalacao_so_aparece_com_env(client, session, demo, monkeypatch):
     entrar(client)
     monkeypatch.delenv('FEIRA_TAXA_SETUP', raising=False)
-    assert 'Instalação única' not in client.get(
+    assert 'Ajuste personalizado' not in client.get(
         f'/campo/{demo.slug}/proposta').get_data(as_text=True)
 
     monkeypatch.setenv('FEIRA_TAXA_SETUP', 'R$ 97')
     corpo = client.get(f'/campo/{demo.slug}/proposta').get_data(as_text=True)
-    assert 'Instalação única' in corpo and 'R$ 97' in corpo
+    assert 'Ajuste personalizado' in corpo and 'R$ 97' in corpo
 
 
 def test_rota_de_dominio_responde_json_pro_operador(client, session, demo, monkeypatch):
@@ -739,7 +739,7 @@ def test_codigo_certo_aplica_o_desconto_mostrando_o_cheio(client, demo, com_conv
     assert 'R$ 129' in corpo
     assert 'R$ 197' in corpo, 'o cheio continua visível, riscado'
     assert 'Casa fundadora' in corpo
-    assert 'instalação' in corpo.lower()
+    assert 'ajuste personalizado' in corpo.lower()
 
 
 def test_codigo_aceita_como_o_dono_digita(client, demo, com_convite):

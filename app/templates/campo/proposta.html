@@ -122,8 +122,8 @@
   {% endif %}
 
   {% if taxa_setup %}
-  <p class="nota" style="margin:10px 0 0">Instalação única de <strong>{{ taxa_setup }}</strong>:
-  registro do domínio, conexão e publicação do site.</p>
+  <p class="nota" style="margin:10px 0 0">Começa num modelo pronto, sem custo extra. Ajuste personalizado: taxa única
+  a partir de <strong>{{ taxa_setup }}</strong>.</p>
   {% endif %}
 </div>
 
@@ -190,15 +190,15 @@
   </div>
 
   {% if taxa_setup and not convite_aplicado %}
-  <p class="nota">Instalação: <strong>{{ taxa_setup }}</strong> uma vez só — registro do domínio,
-  montagem com as suas fotos e publicação.</p>
+  <p class="nota">Começa num modelo pronto, sem custo extra. Ajuste personalizado: taxa única
+  a partir de <strong>{{ taxa_setup }}</strong>.</p>
   {% endif %}
 
   {% if convite_aplicado %}
     <div class="convite" role="status">
       <strong>{{ convite_aplicado.rotulo }}</strong> — código
       <code>{{ convite_aplicado.codigo }}</code> aplicado. Este preço é seu enquanto
-      for cliente{% if taxa_setup %}, e a instalação de {{ taxa_setup }} sai por conta
+      for cliente{% if taxa_setup %}, e o ajuste personalizado (a partir de {{ taxa_setup }}) sai por conta
       da casa{% endif %}.
     </div>
   {% elif tem_convite %}
