@@ -33,11 +33,26 @@ def test_paginas_publicas_anunciam_o_preco_que_o_sistema_cobra(
         'voltaram a divergir')
 
 
-def test_paginas_de_bares_mostram_setup_e_compra(dominio_do_produto, client):
+def test_paginas_de_bares_mostram_personalizado_e_nao_a_compra(dominio_do_produto, client):
     html = _html(client, '/site-para-bar-em-campinas')
 
-    assert taxa_de_instalacao() in html, 'a montagem sumiu da página comercial'
-    assert compra_do_site()['valor'] in html, 'a compra do site sumiu da página comercial'
+    assert taxa_de_instalacao() in html, 'o personalizado sumiu da página comercial'
+    assert compra_do_site()['valor'] not in html, 'a compra voltou a competir com o anual'
+
+
+def test_vendedor_mostra_precos_e_comissao_e_nao_indexa(dominio_do_produto, client):
+    from app.utils.planos import comissao
+    html = _html(client, '/vendedor')
+    for _, valor, ganho in comissao()['exemplos']:
+        assert valor in html and ganho in html
+    assert 'noindex' in html
+    assert str(comissao()['pct_ano1']) + '%' in html
+
+
+def test_expor_tem_dores_prova_e_faq(dominio_do_produto, client):
+    html = _html(client, '/expor')
+    assert html.count('<h1') == 1
+    assert 'id="preco"' in html and 'Perguntas' in html and 'Prova' in html
 
 
 def test_landing_comunitaria_nao_exibe_tabela_de_precos_nem_calculadora(

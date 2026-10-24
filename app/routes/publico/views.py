@@ -454,11 +454,23 @@ def feira():
 
 @bp.route('/expor')
 def expor():
-    """Página do expositor: o que o hotsite inclui e quanto custa."""
+    """Proposta ao expositor: a dor, o que o hotsite entrega e quanto custa."""
+    from app.utils import feira as fe
     from app.utils.planos import precos_expositor
     resp = make_response(render_template(
-        'produto/expor.html', preco_exp=precos_expositor(), **_contexto_produto()))
+        'produto/expor.html', preco_exp=precos_expositor(),
+        n_expositores=len(fe.expositores()), **_contexto_produto()))
     return _na_borda(resp)
+
+
+@bp.route('/vendedor')
+def vendedor():
+    """Como vender e como se ganha comissão. Não indexa, não está no menu: é
+    um link que o dono manda a quem vai vender."""
+    from app.utils.planos import comissao, precos, precos_expositor, taxa_de_instalacao
+    return render_template(
+        'produto/vendedor.html', preco_exp=precos_expositor(), comissao=comissao(),
+        tabela=precos(), taxa=taxa_de_instalacao(), **_contexto_produto())
 
 
 @bp.route('/barao')

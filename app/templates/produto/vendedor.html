@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Guia do vendedor e comissão · Feira de Barão</title>
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+{% include 'produto/_estilo_proposta.html' %}
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Feira de Barão · para quem vende</span>
+    <h1>Guia do vendedor e da comissão</h1>
+    <p class="lead">O que você vende, por quanto, como abordar e quanto você ganha. Uma página só, sem letra miúda.</p>
+  </div>
+</header>
+
+<main>
+<section class="secao">
+  <div class="wrap">
+    <span class="eyebrow">O que você vende</span>
+    <h2>Dois produtos, dois públicos</h2>
+    <div class="rolar"><table class="t">
+      <tr><th></th><th>Expositor da Feira</th><th>Bar ou restaurante</th></tr>
+      <tr><td>A dor</td><td>Cliente pergunta preço e prazo no direct; a foto some no feed; quem não foi à praça não compra.</td><td>O story some à meia-noite; o cliente decide no Google e fecha no bar do lado.</td></tr>
+      <tr><td>O que entrega</td><td>Vitrine com preço, prazo e Pix; pedido pelo WhatsApp; ponto e mapa na Praça do Coco; painel para editar.</td><td>Site próprio com domínio, reserva com alerta no WhatsApp, agenda, promoções, cardápio com QR e a ficha do Google arrumada.</td></tr>
+      <tr><td>Anual</td><td><b>{{ preco_exp.anual }}</b> por ano ({{ preco_exp.anual_mes }}/mês)</td><td><b>{{ tabela.site_anual }}</b> por ano ({{ tabela.site_anual_mes }}/mês)</td></tr>
+      <tr><td>Mensal</td><td><b>{{ preco_exp.mensal }}</b>, sem compromisso</td><td><b>{{ tabela.site }}</b>, sem contrato</td></tr>
+      <tr><td>Extra</td><td>Nenhum</td><td>Ajuste personalizado: taxa única a partir de <b>{{ taxa }}</b></td></tr>
+      <tr><td>Página para mandar</td><td>/expor</td><td>/barao (WhatsApp) ou /site-para-bar-em-campinas</td></tr>
+    </table></div>
+    <p class="p">Domínio e hospedagem estão inclusos. O anual é pago à vista e não é devolvido; o mensal cancela quando quiser. Ofereça o anual primeiro e o mensal só como porta de entrada.</p>
+  </div>
+</section>
+
+<section class="secao">
+  <div class="wrap">
+    <span class="eyebrow">Comissão</span>
+    <h2>Quanto você ganha</h2>
+    <p class="p"><b>{{ comissao.pct_ano1 }}%</b> do que o cliente efetivamente pagar nos 12 primeiros meses, e <b>{{ comissao.pct_depois }}%</b> enquanto ele continuar pagando depois disso. A comissão é sobre dinheiro que entrou, nunca sobre venda que cancelou.</p>
+    <div class="rolar"><table class="t">
+      <tr><th>Venda</th><th>Cliente paga</th><th>Você recebe</th></tr>
+      {% for nome, valor, ganho in comissao.exemplos %}<tr><td>{{ nome }}</td><td>{{ valor }}</td><td><b>{{ ganho }}</b></td></tr>{% endfor %}
+    </table></div>
+    <ul class="lista">
+      <li>Pagamento todo dia <b>{{ comissao.dia_pagamento }}</b>, sobre o que entrou no mês anterior.</li>
+      <li>O ajuste personalizado (taxa única) é do dono, fora da comissão.</li>
+      <li>Cada lead que você registrar fica com você por <b>{{ comissao.exclusividade_dias }} dias</b>. Registre o nome e o WhatsApp do cliente antes de abordar.</li>
+      <li>Combinados diferentes (como o do Berga) valem à parte e não mudam esta regra.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="secao">
+  <div class="wrap">
+    <span class="eyebrow">Como abordar</span>
+    <h2>Em dois minutos, com o celular na mão</h2>
+    <ul class="lista">
+      <li><b>Mostre o site dele primeiro.</b> A prévia com o nome dele vende mais do que qualquer explicação. Preço depois.</li>
+      <li><b>Fale da dor dele,</b> não do recurso: o story que some, o direct que repete, o cliente que decide no Google.</li>
+      <li><b>Ofereça o anual.</b> Para o expositor: &quot;menos de R$ 1 por dia&quot;. Para o bar: o que uma agência cobra de mensalidade, comparado com o ano inteiro aqui.</li>
+      <li><b>Se disser que não,</b> não insista. Ofereça o mensal e combine de voltar.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="secao">
+  <div class="wrap">
+    <span class="eyebrow">Objeções</span>
+    <h2>O que costumam responder</h2>
+    <div class="rolar"><table class="t">
+      <tr><th>Ele diz</th><th>Você responde</th></tr>
+      <tr><td>&quot;Já tenho Instagram.&quot;</td><td>O Instagram traz curtida; o site traz pedido. Ele fica, e o seu Instagram aponta para ele.</td></tr>
+      <tr><td>&quot;Está caro.&quot;</td><td>Expositor: menos de R$ 1 por dia. Bar: um ano inteiro custa menos que um mês de agência. E o mensal não tem contrato.</td></tr>
+      <tr><td>&quot;Não entendo de site.&quot;</td><td>Ele só manda as fotos e as informações; nós montamos. O painel é para editar do celular.</td></tr>
+      <tr><td>&quot;Vou pensar.&quot;</td><td>Combine um dia para voltar e deixe o link da prévia com ele.</td></tr>
+    </table></div>
+  </div>
+</section>
+
+<section class="secao">
+  <div class="wrap">
+    <span class="eyebrow">Não prometa</span>
+    <h2>O que ainda não existe</h2>
+    <ul class="lista">
+      <li>Pagamento dentro do site (Pix ou cartão no pedido). Hoje o pagamento combina no WhatsApp.</li>
+      <li>Envio de foto pelo celular direto no painel. Hoje as fotos são enviadas à equipe.</li>
+      <li>Primeiro lugar no Google ou no Maps. O que se entrega é a ficha arrumada e o site conectado, sem garantia de posição.</li>
+      <li>Gestão de estoque e ficha técnica (plano Pro): está em lista de espera.</li>
+    </ul>
+  </div>
+</section>
+</main>
+<footer><div class="wrap"><b>Feira de Barão</b> · material interno para vendedores</div></footer>
+</body>
+</html>

@@ -1,53 +1,122 @@
-{% extends 'produto/memoria/_base.html' %}
-{% block titulo %}Site para expositor da Feira de Barão: a partir de {{ preco_exp.anual_mes }} por mês{% endblock %}
-{% block descricao %}Vitrine própria com seus produtos, preço, prazo e pedido pelo WhatsApp. Anual {{ preco_exp.anual }} ou mensal {{ preco_exp.mensal }} sem compromisso.{% endblock %}
-{% block canonical %}{{ url_for('public.expor', _external=True) }}{% endblock %}
-{% block head_extra %}
-<style>
-.ex{max-width:880px;margin:0 auto;padding:40px 16px 64px}
-.ex h1{font-family:'Anton',sans-serif;font-size:clamp(2rem,6vw,3.2rem);line-height:1.05;margin:0 0 12px;text-wrap:balance}
-.ex-lead{font-size:1.1rem;max-width:62ch;margin:0 0 32px}
-.ex-planos{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin:0 0 32px}
-.ex-plano{border:2px solid currentColor;border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:8px}
-.ex-plano.dest{background:var(--tomate,#d94f30);color:#fff;border-color:transparent}
-.ex-plano h2{margin:0;font-size:1.05rem}
-.ex-valor{font-family:'Anton',sans-serif;font-size:2.6rem;line-height:1}
-.ex-valor small{font-family:inherit;font-size:1rem}
-.ex-plano p{margin:0}
-.ex ul{padding-left:1.2em;max-width:62ch}
-.ex li{margin:6px 0}
-.ex-cta{display:inline-block;margin-top:24px;min-height:44px}
-</style>
-{% endblock %}
-{% block conteudo %}
-<div class="ex">
-<h1>Seu site na Feira, pronto para vender</h1>
-<p class="ex-lead">Uma vitrine só sua, com seus produtos, preço, prazo de produção e pedido direto no seu WhatsApp. Você aparece na página da Feira de Barão e no Google.</p>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Site para expositor da Feira de Barão: a partir de {{ preco_exp.anual_mes }} por mês</title>
+<meta name="description" content="Sua barraca aberta a semana inteira: vitrine com preço, prazo e pedido pelo WhatsApp. Anual {{ preco_exp.anual }} ou mensal {{ preco_exp.mensal }} sem compromisso.">
+<link rel="canonical" href="{{ url_for('public.expor', _external=True) }}">
+<meta property="og:title" content="Sua barraca aberta a semana inteira · Feira de Barão">
+<meta property="og:description" content="Vitrine com preço, prazo e pedido pelo WhatsApp. Anual {{ preco_exp.anual }}, mensal {{ preco_exp.mensal }}.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="{{ og_imagem('og-feira.jpg') }}">
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Work+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/feira.css') }}">
+{% include 'produto/_estilo_proposta.html' %}
+</head>
+<body>
+{% with na_home = false %}{% include 'produto/_topo.html' %}{% endwith %}
 
-<div class="ex-planos">
-  <section class="ex-plano dest" aria-labelledby="p-anual">
-    <h2 id="p-anual">Anual, com vínculo de 12 meses</h2>
-    <div class="ex-valor">{{ preco_exp.anual }}<small>/ano</small></div>
-    <p>Equivale a {{ preco_exp.anual_mes }} por mês. Menor preço para quem fica.</p>
-  </section>
-  <section class="ex-plano" aria-labelledby="p-mensal">
-    <h2 id="p-mensal">Mensal, sem compromisso</h2>
-    <div class="ex-valor">{{ preco_exp.mensal }}<small>/mês</small></div>
-    <p>Sem contrato de um ano. Cancela quando quiser.</p>
-  </section>
-</div>
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Expositores da Feira de Barão</span>
+    <h1>Sua barraca aberta a semana inteira, não só no fim de semana.</h1>
+    <p class="lead">Uma vitrine só sua, com seus produtos, preço, prazo de produção e pedido pelo WhatsApp. Um endereço para mandar no direct, no cartão e na sacola.</p>
+    {% if zap_url and zap_url != '#participar' %}<a class="btn-zap" href="{{ zap_url }}" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> Quero ver o meu site</a>{% endif %}
+    <p class="micro">A gente monta uma prévia com o seu nome antes de você decidir qualquer coisa.</p>
+  </div>
+</header>
 
-<h2>O que está incluído</h2>
-<ul>
-  <li>Vitrine com seus produtos, preço, prazo de produção e desconto no Pix.</li>
-  <li>Pedido pelo WhatsApp.</li>
-  <li>Seu ponto na Praça do Coco e os horários da Feira, com mapa.</li>
-  <li>Selo de expositor da Feira.</li>
-  <li>Modo claro e escuro, boa leitura no celular.</li>
-</ul>
+<main id="conteudo" tabindex="-1">
+<section class="secao">
+  <div class="wrap">
+    <span class="eyebrow">O que pesa hoje</span>
+    <h2>O que a barraca perde quando a Feira fecha</h2>
+    <div class="dores">
+      <div class="dor"><p class="dor-hoje"><b>Hoje</b>O cliente pergunta preço e prazo no direct, de novo, toda semana.</p><p class="dor-com"><b>Com o site</b>Preço, prazo de produção e desconto no Pix já estão na vitrine.</p></div>
+      <div class="dor"><p class="dor-hoje"><b>Hoje</b>A foto do produto some no feed em dois dias.</p><p class="dor-com"><b>Com o site</b>A vitrine fica no ar, com todas as peças, fotos e categorias.</p></div>
+      <div class="dor"><p class="dor-hoje"><b>Hoje</b>Quem não foi à Praça do Coco no sábado não compra.</p><p class="dor-com"><b>Com o site</b>O cliente escolhe os produtos e manda a encomenda pronta numa mensagem de WhatsApp.</p></div>
+      <div class="dor"><p class="dor-hoje"><b>Hoje</b>O cliente não sabe onde você fica nem a que horas.</p><p class="dor-com"><b>Com o site</b>Seu ponto na Praça do Coco aparece no mapa, com sábado 10–16h e domingo 10–15h.</p></div>
+    </div>
+  </div>
+</section>
 
-{% if zap_url and zap_url != '#participar' %}
-<a class="btn btn-zap ex-cta" href="{{ zap_url }}" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> Quero ver o meu site</a>
-{% endif %}
-</div>
-{% endblock %}
+<section class="secao">
+  <div class="wrap">
+    <span class="eyebrow">Prova</span>
+    <h2>Já tem site montado para os expositores</h2>
+    <p class="p">{% if n_expositores %}A Feira já lista {{ n_expositores }} expositores, cada um{% else %}Cada expositor tem{% endif %} com a vitrine em formato próprio: vitrine, cozinha, ateliê, jardim ou ritual, conforme o que a barraca faz. As fotos das prévias são ilustrativas até você mandar as suas.</p>
+    <p class="p"><a href="{{ url_for('public.feira') }}">Ver os expositores e os sites</a></p>
+  </div>
+</section>
+
+<section class="secao">
+  <div class="wrap">
+    <span class="eyebrow">O que você recebe</span>
+    <h2>O que entra no seu site, sem enfeite</h2>
+    <ul class="lista">
+      <li><b>Vitrine com seus produtos</b>, fotos, preço, prazo de produção e desconto no Pix.</li>
+      <li><b>Encomenda pelo WhatsApp:</b> o cliente monta a lista e ela chega pronta para você.</li>
+      <li><b>Sua barraca na Feira:</b> ponto na Praça do Coco, horário e lugar no mapa e na lista da Feira.</li>
+      <li><b>Quem faz:</b> um espaço para contar sua história, formas de pagamento, envio e redes.</li>
+      <li><b>Painel para você mesmo editar</b> produtos, preços e textos.</li>
+      <li><b>Boa leitura no celular,</b> claro e escuro, e um selo de expositor da Feira.</li>
+    </ul>
+    <p class="p">O que ainda não existe: pagamento dentro do site. Hoje o pagamento combina no WhatsApp, como você já faz.</p>
+  </div>
+</section>
+
+<section class="secao">
+  <div class="wrap">
+    <span class="eyebrow">O seu cliente</span>
+    <h2>O que muda para quem compra de você</h2>
+    <ul class="lista">
+      <li>Acha o que você faz buscando o produto na página da Feira, e não só pelo seu Instagram.</li>
+      <li>Vê preço e prazo antes de chamar, sem esperar resposta.</li>
+      <li>Sabe onde é a barraca e quando você está lá.</li>
+      <li>Encomenda sem ter que explicar tudo de novo.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="secao" id="preco">
+  <div class="wrap">
+    <span class="eyebrow">Preço</span>
+    <h2>Dois jeitos de ter o seu site</h2>
+    <div class="planos">
+      <article class="plano plano--dest">
+        <span class="selo">Melhor preço</span>
+        <h3 style="margin-top:12px">Anual, 12 meses</h3>
+        <p class="valor">{{ preco_exp.anual }}<small> por ano</small></p>
+        <p>Equivale a {{ preco_exp.anual_mes }} por mês. Menos de R$ 1 por dia.</p>
+      </article>
+      <article class="plano">
+        <h3>Mensal, sem compromisso</h3>
+        <p class="valor">{{ preco_exp.mensal }}<small> por mês</small></p>
+        <p>Sem contrato. Cancela quando quiser.</p>
+      </article>
+    </div>
+    <p class="p">Endereço na Feira e hospedagem inclusos nos dois.</p>
+  </div>
+</section>
+
+<section class="secao faq">
+  <div class="wrap">
+    <span class="eyebrow">Perguntas</span>
+    <h2>O que todo expositor pergunta</h2>
+    <h3>Preciso comprar domínio?</h3><p class="p">Não. Seu site já abre dentro da Feira. Se você quiser um endereço próprio, a gente conversa à parte.</p>
+    <h3>E as fotos?</h3><p class="p">Você manda as suas e a gente coloca. A prévia usa fotos ilustrativas até lá.</p>
+    <h3>Tem comissão sobre minhas vendas?</h3><p class="p">Não. O valor é fixo, e a venda e o pagamento continuam entre você e o seu cliente.</p>
+    <h3>E se eu quiser sair?</h3><p class="p">No mensal, cancela quando quiser. No anual, o valor é à vista e não é devolvido.</p>
+    <h3>Como começa?</h3><p class="p">Você chama no WhatsApp, vê a prévia com o seu nome, manda fotos e informações, e o site entra no ar.</p>
+    {% if zap_url and zap_url != '#participar' %}<a class="btn-zap" href="{{ zap_url }}" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> Chamar no WhatsApp</a>{% endif %}
+  </div>
+</section>
+</main>
+<footer><div class="wrap"><b>Feira de Barão</b> · Praça do Coco, Barão Geraldo, Campinas/SP</div></footer>
+</body>
+</html>

@@ -198,6 +198,7 @@
     border-bottom:1px solid var(--linha);padding-block:var(--s-4)}
   .montagem b{font-family:var(--f-display);font-weight:400;font-size:1.25rem}
   .acordo{margin-top:var(--s-4);color:var(--taupe);font-size:var(--t-micro)}
+  @media print{.marquee,.google-mock,.g-caption,.fone,.fone-legenda,.barra-zap,.site-header,.lona-topo{display:none!important}.secao{padding-block:14pt}.prova-grid{display:block}}
 
   /* ---- barão / letreiro ---- */
   .marquee-titulo{font-family:var(--f-display);font-size:1.3rem;margin-top:var(--s-5);
@@ -406,6 +407,7 @@
           <p class="acordo"><b>Quer testar antes?</b> Mensal: {{ preco_site }} {{ preco_periodo }}, sem contrato, também com domínio e hospedagem inclusos.</p>
           <ul>
             <li><b>Site com domínio próprio</b> — seu endereço, não um perfil</li>
+            <li>Ficha do Google arrumada: horário, fotos, cardápio e link</li>
             <li>Reserva com alerta no WhatsApp</li>
             <li>Agenda de eventos e promoções</li>
             <li>Cardápio com QR, sem limite de itens</li>
@@ -444,13 +446,6 @@
       </div>
       {% endif %}
 
-      {% if compra and compra.valor %}
-      <p class="acordo" data-reveal>
-        <b>Não quer mensalidade?</b> O site pode ser seu por {{ compra.valor }},
-        de uma vez: {{ compra.inclui | lower }}. Nesse caminho não entram
-        {{ compra.nao_inclui | lower }}.
-      </p>
-      {% endif %}
       <p class="acordo" data-reveal>Sem fidelidade: se não servir, você cancela e pronto.</p>
     </div>
   </section>

@@ -1,5 +1,10 @@
 # Precificação — o que se cobra e por quê
 
+> **Atualização de 24/10/2026.** O modelo mudou: bar anual R$ 540 (R$ 45/mês, à vista, sem devolução) e mensal
+> R$ 147,90; expositor anual R$ 360 e mensal R$ 45; montagem virou "ajuste personalizado a partir de R$ 349";
+> a Compra de R$ 1.400 saiu da página (ficou mais cara que o anual); a ficha do Google entra como ajuste básico.
+> Fonte atual: `~/Documentos/FEIRADEBARAO/documentacao/14_OFERTA_DORES_E_PRECOS.md`. O texto abaixo é o histórico.
+
 Pesquisa de mercado feita em **16/08/2026**. Os números do mercado estão
 datados de propósito: preço de agência muda, e uma tabela sem data vira lenda
 interna em seis meses.

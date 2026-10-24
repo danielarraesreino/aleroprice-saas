@@ -67,6 +67,41 @@ def precos_expositor():
     }
 
 
+def _reais(texto):
+    """'R$ 1.234,56' -> 1234.56."""
+    return float(texto.replace('R$', '').replace('.', '').replace(',', '.').strip())
+
+
+def _fmt(v):
+    """1234.5 -> 'R$ 1.234,50'; inteiro sai sem centavos."""
+    txt = f'{v:,.2f}'.replace(',', '#').replace('.', ',').replace('#', '.')
+    return 'R$ ' + (txt[:-3] if txt.endswith(',00') else txt)
+
+
+def comissao():
+    """Regra de comissão de vendedor (não do Berga: o acordo dele é à parte).
+
+    Paga sobre o que o cliente efetivamente pagou: pct_ano1 nos 12 primeiros
+    meses, pct_depois dali em diante. Montagem personalizada fica com o dono.
+    `exemplos` mostra, em reais, o que o vendedor recebe por venda de cada plano.
+    """
+    pct1 = int(os.environ.get('FEIRA_COMISSAO_ANO1', '30'))
+    pct2 = int(os.environ.get('FEIRA_COMISSAO_DEPOIS', '10'))
+    bar, exp = precos(), precos_expositor()
+    return {
+        'pct_ano1': pct1,
+        'pct_depois': pct2,
+        'exclusividade_dias': int(os.environ.get('FEIRA_EXCLUSIVIDADE_DIAS', '30')),
+        'dia_pagamento': int(os.environ.get('FEIRA_COMISSAO_DIA', '10')),
+        'exemplos': [
+            ('Expositor, anual', exp['anual'], _fmt(_reais(exp['anual']) * pct1 / 100)),
+            ('Expositor, mensal', exp['mensal'] + '/mês', _fmt(_reais(exp['mensal']) * pct1 / 100) + '/mês'),
+            ('Bar, anual', bar['site_anual'], _fmt(_reais(bar['site_anual']) * pct1 / 100)),
+            ('Bar, mensal', bar['site'] + '/mês', _fmt(_reais(bar['site']) * pct1 / 100) + '/mês'),
+        ],
+    }
+
+
 def taxa_de_instalacao():
     """Cobrança única de montar o site e pôr o bar no mapa.
 
