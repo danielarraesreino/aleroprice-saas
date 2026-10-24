@@ -772,15 +772,17 @@ def _marcar_visita(rest):
 
 @bp.route('/bar/<slug>')
 def landing_slug(slug):
-    """Site de um bar pelo slug. Sempre funciona, com ou sem domínio próprio —
-    é o endereço das demos (ex.: /bar/bar-do-ze)."""
+    """Site de um bar ou expositor pelo slug. Sempre funciona, com ou sem
+    domínio próprio — é o endereço das barracas no portal (ex.: /bar/dona-berga)."""
     rest = tenant_por_slug(slug)  # já filtra inativo
     if rest is None:
         abort(404)
-    # Bar com domínio próprio não mora no portal da feira: no domínio do
-    # produto, /bar/<slug> dele vira 301 para o endereço dele. Antes servia a
-    # mesma página nos dois lugares (só o canonical apontava para o certo).
-    if rest.dominio and eh_dominio_do_produto(request.host):
+    # Bar externo com domínio próprio (ex.: Bar da Vila, na Vila Lemos) não
+    # mora no portal da feira: no domínio do produto, /bar/<slug> dele vira 301
+    # para o endereço dele. Já o expositor artesão da Feira de Barão abre aqui
+    # mesmo dentro do portal (mantendo o canonical pro domínio próprio, se tiver).
+    if (rest.dominio and eh_dominio_do_produto(request.host)
+            and getattr(rest, 'tipo_negocio', 'bar') != 'artesao'):
         return redirect(url_canonica(rest), code=301)
     return _render_landing(rest)
 

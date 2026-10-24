@@ -2,62 +2,175 @@
 {% import "site/modelos/artesao/_produtos.html" as pr %}
 {% block fonte_display %}family=Young+Serif{% endblock %}
 {% block tokens %}
-/* Jardim: verdes, cantos macios, o que se cultiva em etiquetas. */
+/* Jardim: herbário vivo, verdes de estufa, arcos botânicos, etiquetas de cultivo e cantos macios. */
 :root{
-  --ink:#eef2e6;--ink-2:#e0e8d4;--ink-3:#cfdbc0;--cream:#14261c;--cream-dim:#43594a;
-  --amber:#1f6b45;--ember:#236f48;--gold:#6a5410;
+  --ink:#eef3e6;--ink-2:#e1ead4;--ink-3:#d0dec0;--cream:#13261b;--cream-dim:#415848;
+  --amber:#1d6842;--ember:#236f48;--gold:#73560d;--glow:rgba(35,111,72,.16);
   --font-display:'Young Serif',Georgia,serif;--r:20px;color-scheme:light;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --ink:#0e1a13;--ink-2:#15271c;--ink-3:#1e3527;--cream:#e9f0e2;--cream-dim:#a9bba9;--amber:#8fd49a;--ember:#267a4c;--gold:#e1c872;color-scheme:dark}}
-:root[data-theme="dark"]{--ink:#0e1a13;--ink-2:#15271c;--ink-3:#1e3527;--cream:#e9f0e2;--cream-dim:#a9bba9;--amber:#8fd49a;--ember:#267a4c;--gold:#e1c872;color-scheme:dark}
+  --ink:#0d1912;--ink-2:#14261b;--ink-3:#1d3526;--cream:#eaf1e3;--cream-dim:#abc0ac;
+  --amber:#8fd49a;--ember:#287d4f;--gold:#e3c970;--glow:rgba(143,212,154,.16);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ink:#0d1912;--ink-2:#14261b;--ink-3:#1d3526;--cream:#eaf1e3;--cream-dim:#abc0ac;
+  --amber:#8fd49a;--ember:#287d4f;--gold:#e3c970;--glow:rgba(143,212,154,.16);color-scheme:dark}
 {% endblock %}
 {% block estilo %}
 .titulo{font-weight:400;letter-spacing:-.01em}
-.hero{padding:var(--s5) 0 var(--s7)}
-.hero .painel{padding:var(--s7) var(--s5);background:var(--ink-3);border-radius:32px}
-.hero h1{font-size:clamp(2.75rem,12vw,6.5rem);line-height:1;overflow-wrap:anywhere;margin-bottom:var(--s4)}
-.hero .lead{margin-bottom:var(--s5)}
-.hero .etiquetas{display:flex;flex-wrap:wrap;gap:var(--s2);margin-bottom:var(--s5)}
-.hero .etiquetas li{padding:var(--s2) var(--s4);border-radius:999px;background:var(--ink);font-weight:500}
-.hero .quando{margin-top:var(--s5);color:var(--cream-dim)}
 .btn{border-radius:999px}
-.chips{display:none;position:sticky;top:var(--nav-h);z-index:30;background:var(--ink);padding-block:var(--s2);margin-bottom:var(--s6)}
+
+/* Hero Estufa Botânica com Arco Solar e Etiquetas de Espécies */
+.hero{padding:var(--s5) 0 var(--s7)}
+.hero .painel{
+  display:grid;gap:var(--s6);align-items:center;
+  padding:var(--s6) var(--s5);
+  background:
+    radial-gradient(ellipse 70% 60% at 85% 15%, color-mix(in srgb, var(--amber) 18%, transparent), transparent 65%),
+    linear-gradient(155deg, var(--ink-2), var(--ink-3));
+  border:1.5px solid var(--line-strong);
+  border-radius:32px;
+  box-shadow:var(--shadow-card);
+  position:relative;overflow:hidden;
+}
+.hero-selo{
+  display:inline-flex;align-items:center;gap:8px;justify-self:start;
+  padding:6px 14px;border-radius:999px;
+  background:var(--ink);border:1px solid var(--line-strong);
+  font:700 .76rem/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--amber);
+}
+.hero h1{
+  font-size:clamp(2.65rem,10vw,5.6rem);line-height:1.02;
+  overflow-wrap:anywhere;margin-block:var(--s3);
+}
+.hero .lead{margin-bottom:var(--s4)}
+.hero .etiquetas{display:flex;flex-wrap:wrap;gap:var(--s2);margin-bottom:var(--s5)}
+.hero .etiquetas li{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:7px 15px;border-radius:999px;
+  background:var(--ink);border:1px solid var(--line-strong);
+  font-size:.9rem;font-weight:600;color:var(--cream);
+  box-shadow:0 4px 10px rgba(0,0,0,.06);
+}
+.hero .etiquetas li::before{
+  content:"";width:7px;height:7px;border-radius:50%;background:var(--ember);
+}
+.hero .quando{
+  margin-top:var(--s4);padding-top:var(--s3);
+  border-top:1px solid var(--line);
+  color:var(--cream-dim);font-size:.94rem;
+}
+/* Moldura em Arco Botânico para a foto de capa */
+.arco-botanico{
+  margin:0;padding:10px;
+  background:var(--ink);
+  border:1.5px solid var(--line-strong);
+  border-radius:180px 180px 24px 24px;
+  box-shadow:var(--shadow-card);
+  overflow:hidden;
+}
+.arco-botanico img{
+  width:100%;aspect-ratio:4/5;object-fit:cover;
+  border-radius:170px 170px 16px 16px;
+  transition:transform .6s cubic-bezier(.22,1,.36,1);
+}
+.arco-botanico:hover img{transform:scale(1.04)}
+
+/* Filtro de Categorias */
+.chips{
+  display:none;position:sticky;top:var(--nav-h);z-index:30;
+  background:color-mix(in srgb, var(--ink) 92%, transparent);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);
+  padding-block:var(--s3);margin-bottom:var(--s6);
+}
 .js .chips{display:block}
 .chips .wrap{display:flex;gap:var(--s2);overflow-x:auto;scrollbar-width:none}
 .chips .wrap::-webkit-scrollbar{display:none}
-.chip{flex:none;min-height:44px;padding:0 var(--s4);border-radius:999px;border:0;background:var(--ink-2);color:var(--cream);font:600 .9375rem/1 var(--font-body);cursor:pointer}
-.chip[aria-pressed="true"]{background:var(--ember);color:var(--on-ember)}
+.chip{
+  flex:none;min-height:42px;padding:0 var(--s4);
+  border-radius:999px;border:1px solid var(--line-strong);
+  background:var(--ink-2);color:var(--cream);
+  font:600 .92rem/1 var(--font-body);cursor:pointer;
+  transition:transform .18s ease,background-color .18s ease,color .18s ease;
+}
+.chip:hover{background:var(--ink-3);transform:translateY(-2px)}
+.chip[aria-pressed="true"]{
+  background:var(--ember);border-color:var(--ember);color:var(--on-ember);
+  box-shadow:0 6px 16px -4px color-mix(in srgb, var(--ember) 55%, transparent);
+}
+
+/* Grade de Espécimes e Produtos (.grade) */
 .categoria + .categoria{margin-top:var(--s7)}
-.categoria > h3{font:400 clamp(1.5rem,4.5vw,2.25rem)/1.1 var(--font-display);margin-bottom:var(--s4)}
-.categoria > h3 small{margin-left:var(--s2);font:500 1rem var(--font-body);color:var(--cream-dim)}
-.grade{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s3)}
-.tile{display:flex;flex-direction:column;min-width:0;background:var(--ink-2);border-radius:var(--r);overflow:hidden}
-.tile figure{background:var(--ink-3)}
-.tile img{width:100%;height:auto;aspect-ratio:1/1;object-fit:cover}
+.grade{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s3);grid-auto-flow:dense}
+.tile{
+  display:flex;flex-direction:column;min-width:0;
+  background:linear-gradient(165deg, var(--ink-2), var(--ink-3));
+  border:1px solid var(--line-strong);
+  border-radius:var(--r);overflow:hidden;
+  box-shadow:var(--shadow-card);
+  transition:transform .28s cubic-bezier(.22,1,.36,1),border-color .28s ease,box-shadow .28s ease;
+}
+.tile:hover{
+  transform:translateY(-6px);
+  border-color:var(--ember);
+  box-shadow:0 20px 40px -14px rgba(13,25,18,.32);
+}
+.tile figure{background:var(--ink-3);overflow:hidden;border-bottom:1px solid var(--line)}
+.tile img{
+  width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;
+  transition:transform .55s cubic-bezier(.22,1,.36,1);
+}
+.tile:hover img{transform:scale(1.06)}
 .tile.cartaz img{object-fit:contain;padding:var(--s3)}
 .tile .corpo{display:flex;flex-direction:column;gap:var(--s2);flex:1;padding:var(--s4)}
-.tile h4{font:400 1.1875rem/1.2 var(--font-display)}
-.tile .desc{font-size:.9375rem;color:var(--cream-dim)}
+.tile .corpo-topo{display:grid;gap:6px}
+.tile h4{font:400 1.2rem/1.2 var(--font-display)}
+.tile .desc{font-size:.93rem;line-height:1.48;color:var(--cream-dim)}
 .tile .preco{font:400 1.25rem/1 var(--font-display);color:var(--gold)}
-.tile .enc{align-self:flex-start;padding:var(--s1) var(--s3);border-radius:999px;background:var(--ink-3);font-size:.875rem}
-.tile .acao{margin-top:auto;padding-top:var(--s2)}
+.tile .enc{
+  align-self:flex-start;padding:4px 12px;border-radius:999px;
+  background:var(--ink);border:1px solid var(--line-strong);
+  font-size:.8rem;font-weight:600;color:var(--amber);
+}
+.tile .acao{margin-top:auto;padding-top:var(--s3)}
 .tile .btn{width:100%;padding:0 var(--s2)}
+.tile.destaque{grid-column:span 2}
+.tile.destaque figure img{aspect-ratio:16/10}
 .tile.sem-foto .corpo{padding:var(--s5) var(--s4)}
-@media (min-width:720px){.hero .painel{padding:var(--s8) var(--s7)}.grade{grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s4)}}
-@media (min-width:1000px){.grade{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.tile:only-child{grid-column:span 2}
+.tile:only-child:not(.destaque) figure img{aspect-ratio:16/10}
+
+@media (min-width:720px){
+  .hero .painel{padding:var(--s7)}
+  .hero .painel:has(.arco-botanico){grid-template-columns:1.25fr .85fr;gap:var(--s7)}
+  .grade{grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s4)}
+}
+@media (min-width:1000px){
+  .grade{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media (prefers-reduced-motion:reduce){
+  .tile,.tile img,.arco-botanico img{transform:none!important;transition:none!important}
+}
 {% endblock %}
 {% block hero %}
 <section class="hero" id="topo" aria-labelledby="titulo">
   <div class="wrap"><div class="painel">
-    <h1 id="titulo" class="titulo">{{ site.nome }}</h1>
-    {% if site.tagline %}<p class="lead">{{ site.tagline }}</p>{% endif %}
-    {% if produtos %}<ul class="etiquetas" aria-label="O que a gente faz">{% for p in produtos[:6] %}<li>{{ p.nome }}</li>{% endfor %}</ul>{% endif %}
-    <div class="acoes">
-      {% if produtos %}<a class="btn" href="#produtos">Ver {{ rotulo(tenant, 'cardapio')|lower }}</a>{% endif %}
-      {% if contato_href %}<a class="btn btn-line" href="{{ contato_href }}" target="_blank" rel="noopener">Falar no {{ contato_nome }}</a>{% endif %}
+    <div>
+      <span class="hero-selo" data-hero>Cultivo &amp; Botânica Artesanal · {{ descritor }}</span>
+      <h1 id="titulo" class="titulo" data-hero>{{ site.nome }}</h1>
+      {% if site.tagline %}<p class="lead" data-hero>{{ site.tagline }}</p>{% endif %}
+      {% if produtos %}<ul class="etiquetas" aria-label="O que a gente cultiva e produz" data-hero>{% for p in produtos[:6] %}<li>{{ p.nome }}</li>{% endfor %}</ul>{% endif %}
+      <div class="acoes" data-hero>
+        {% if produtos %}<a class="btn" href="#produtos">Ver {{ rotulo(tenant, 'cardapio')|lower }}</a>{% endif %}
+        {% if contato_href %}<a class="btn btn-line" href="{{ contato_href }}" target="_blank" rel="noopener">Falar no {{ contato_nome }}</a>{% endif %}
+      </div>
+      {% if site.horario %}<p class="quando" data-hero>{{ site.horario }}{% if site.ponto_na_feira %} · {{ site.ponto_na_feira }}{% endif %}</p>{% endif %}
     </div>
-    {% if site.horario %}<p class="quando">{{ site.horario }}{% if site.ponto_na_feira %}. {{ site.ponto_na_feira }}{% endif %}</p>{% endif %}
+    {% if hero %}
+    <figure class="arco-botanico" data-hero data-zoom="{{ hero }}" data-legenda="{{ site.nome }}">
+      <img src="{{ hero }}" alt="{{ site.nome }}" width="640" height="800" fetchpriority="high" decoding="async">
+    </figure>
+    {% endif %}
   </div></div>
 </section>
 {% endblock %}

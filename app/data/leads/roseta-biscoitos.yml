@@ -1,6 +1,3 @@
-# Importado do pacote de hotsites. Sem foto de propósito: peça a original e a
-# autorização de imagem; coloque em app/static/img/demo/roseta-biscoitos/ (capa.jpg, logo.jpg,
-# produto-<nome>.jpg). Troque `site.modelo` se outro layout combinar mais.
 nome: Roseta Biscoitos
 tipo_negocio: artesao
 site:
@@ -15,10 +12,34 @@ site:
   cidade_uf: Barão Geraldo, Campinas–SP
   maps_query: Feira de Barão Geraldo Campinas
   tema_modo: auto
+  hero_foto: img/demo/roseta-biscoitos/capa.jpg
 produtos:
-- nome: Cookies
-- nome: Biscoitos decorados
-- nome: Presentes em potes e buquês de biscoito
+- nome: Cookies Recheados Artesanais
+  categoria: Cookies
+  destaque: true
+  imagem: img/demo/roseta-biscoitos/foto-02.jpg
+  descricao: Casquinha crocante por fora e recheio cremoso de chocolate nobre derretendo por dentro.
+- nome: Buquês e Biscoitos Decorados
+  categoria: Presentes
+  destaque: true
+  imagem: img/demo/roseta-biscoitos/foto-03.jpg
+  descricao: Biscoitos amanteigados decorados à mão em formato de buquê de flores.
+- nome: Potes e Caixas de Presente
+  categoria: Presentes
+  destaque: true
+  imagem: img/demo/roseta-biscoitos/foto-04.jpg
+  descricao: Potes e caixas especiais cheias de biscoitos artesanais que viram memória de família.
 demo:
   fonte: pacote-hotsites-2026-10
   expira_em: '2026-12-20'
+galeria:
+- imagem: img/demo/roseta-biscoitos/foto-03.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/roseta-biscoitos/foto-04.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/roseta-biscoitos/foto-05.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/roseta-biscoitos/foto-06.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/roseta-biscoitos/foto-01.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor

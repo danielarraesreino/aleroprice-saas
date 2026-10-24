@@ -11,22 +11,40 @@
   {% endif %}
 {% endmacro %}
 
-{# Cartões (foto quando há; sem foto vira cartão de texto). #}
+{# Cartões de vitrine e ateliê (foto quando há, com zoom em lightbox; sem foto vira cartão tipográfico). #}
 {% macro grade(produtos, cats, site, wa) %}
 {% for cat in cats %}
 {% set itens = produtos|selectattr('categoria', 'equalto', cat)|list if cat != 'Outros' else produtos|rejectattr('categoria')|list %}
-<section class="categoria" data-cat="{{ cat }}" aria-label="{{ cat }}">
-  {% if cats|length > 1 or cat != 'Outros' %}<h3>{{ cat }} <small>{{ itens|length }}</small></h3>{% endif %}
+<section class="categoria rev" data-cat="{{ cat }}" aria-label="{{ cat }}">
+  {% if cats|length > 1 or cat != 'Outros' %}
+  <div class="cat-cab">
+    <h3>{{ cat }} <small>{{ itens|length }} {{ 'item' if itens|length == 1 else 'itens' }}</small></h3>
+    <span class="cat-traco" aria-hidden="true"></span>
+  </div>
+  {% endif %}
   <div class="grade">
   {% for p in itens|sort(attribute='destaque', reverse=true) %}
     {% set cartaz = p.ratio and p.ratio < 0.7 %}
     <article class="tile{% if p.destaque %} destaque{% endif %}{% if cartaz %} cartaz{% endif %}{% if not p.img %} sem-foto{% endif %}" data-nome="{{ p.nome }}">
-      {% if p.img %}<figure><img src="{{ p.img }}" alt="{{ p.nome }}" loading="lazy" decoding="async" width="640" height="640"></figure>{% endif %}
+      {% if p.img %}
+      <figure data-zoom="{{ p.img }}" data-legenda="{{ p.nome }}{% if p.descricao %} — {{ p.descricao }}{% endif %}">
+        {% if p.destaque %}<span class="selo-destaque">★ Destaque</span>{% endif %}
+        <img src="{{ p.img }}" alt="{{ p.nome }}" loading="lazy" decoding="async" width="640" height="640">
+        <span class="zoom-dica" aria-hidden="true">Ampliar</span>
+      </figure>
+      {% endif %}
       <div class="corpo">
-        <h4>{{ p.nome }}</h4>
-        {% if p.descricao %}<p class="desc">{{ p.descricao }}</p>{% endif %}
-        {% if p.preco %}<p class="preco">{{ p.preco|moeda_br }}</p>{% endif %}
-        {% if p.sob_encomenda %}<p class="enc">Sob encomenda</p>{% endif %}
+        <div class="corpo-topo">
+          {% if not p.img and p.destaque %}<span class="selo-destaque selo-inline">★ Destaque</span>{% endif %}
+          <h4>{{ p.nome }}</h4>
+          {% if p.descricao %}<p class="desc">{{ p.descricao }}</p>{% endif %}
+        </div>
+        {% if p.preco or p.sob_encomenda %}
+        <div class="meta-produto">
+          {% if p.preco %}<p class="preco">{{ p.preco|moeda_br }}</p>{% endif %}
+          {% if p.sob_encomenda %}<p class="enc">Sob encomenda</p>{% endif %}
+        </div>
+        {% endif %}
         {{ acao(p, site, wa) }}
       </div>
     </article>
@@ -36,20 +54,32 @@
 {% endfor %}
 {% endmacro %}
 
-{# Linhas, como cardápio de barraca (a foto é miniatura opcional). #}
+{# Linhas de cardápio/serviço (como quadro de barraca ou menu de atendimento, com miniatura ampliável). #}
 {% macro linhas(produtos, cats, site, wa) %}
 {% for cat in cats %}
 {% set itens = produtos|selectattr('categoria', 'equalto', cat)|list if cat != 'Outros' else produtos|rejectattr('categoria')|list %}
-<section class="categoria" data-cat="{{ cat }}" aria-label="{{ cat }}">
-  {% if cats|length > 1 or cat != 'Outros' %}<h3>{{ cat }} <small>{{ itens|length }}</small></h3>{% endif %}
+<section class="categoria rev" data-cat="{{ cat }}" aria-label="{{ cat }}">
+  {% if cats|length > 1 or cat != 'Outros' %}
+  <div class="cat-cab">
+    <h3>{{ cat }} <small>{{ itens|length }} {{ 'item' if itens|length == 1 else 'itens' }}</small></h3>
+    <span class="cat-traco" aria-hidden="true"></span>
+  </div>
+  {% endif %}
   <ul class="linhas">
   {% for p in itens|sort(attribute='destaque', reverse=true) %}
-    <li class="linha{% if not p.img %} sem-foto{% endif %}" data-nome="{{ p.nome }}">
-      {% if p.img %}<img src="{{ p.img }}" alt="{{ p.nome }}" loading="lazy" decoding="async" width="96" height="96">{% endif %}
+    <li class="linha{% if p.destaque %} destaque{% endif %}{% if not p.img %} sem-foto{% endif %}" data-nome="{{ p.nome }}">
+      {% if p.img %}
+      <figure class="linha-foto" data-zoom="{{ p.img }}" data-legenda="{{ p.nome }}{% if p.descricao %} — {{ p.descricao }}{% endif %}">
+        <img src="{{ p.img }}" alt="{{ p.nome }}" loading="lazy" decoding="async" width="112" height="112">
+      </figure>
+      {% endif %}
       <div class="texto">
-        <h4>{{ p.nome }}</h4>
+        <div class="linha-cab">
+          <h4>{{ p.nome }}</h4>
+          {% if p.destaque %}<span class="selo-destaque selo-inline">★ Destaque</span>{% endif %}
+          {% if p.preco %}<p class="preco">{{ p.preco|moeda_br }}</p>{% endif %}
+        </div>
         {% if p.descricao %}<p class="desc">{{ p.descricao }}</p>{% endif %}
-        {% if p.preco %}<p class="preco">{{ p.preco|moeda_br }}</p>{% endif %}
         {% if p.sob_encomenda %}<p class="enc">Sob encomenda</p>{% endif %}
       </div>
       {{ acao(p, site, wa) }}

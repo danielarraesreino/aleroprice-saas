@@ -98,6 +98,14 @@ def _produtos_visiveis(ids=None):
     return q.order_by(ProdutoSite.restaurant_id, ProdutoSite.ordem, ProdutoSite.id).all()
 
 
+def _url_na_feira(r):
+    """Expositor artesão abre dentro do portal (/bar/<slug>) para o visitante
+    navegar pela Feira sem sair do domínio; bar externo usa a URL canônica."""
+    if getattr(r, 'tipo_negocio', 'bar') == 'artesao':
+        return url_for('public.landing_slug', slug=r.slug)
+    return url_canonica(r)
+
+
 def expositores(tipo=None, so_hoje=False, q=None, hoje=None):
     """Lista de expositores da Feira, quem está hoje primeiro.
 
@@ -131,7 +139,7 @@ def expositores(tipo=None, so_hoje=False, q=None, hoje=None):
         saida.append({
             'slug': r.slug, 'nome': c.nome or r.nome, 'tipo': t,
             'tipo_rotulo': ROTULO_TIPO[t], 'descritor': c.descritor,
-            'foto': _img(c.hero_foto), 'url': url_canonica(r),
+            'foto': _img(c.hero_foto), 'url': _url_na_feira(r),
             'lat': c.lat, 'lng': c.lng, 'ponto': c.ponto_na_feira,
             'hoje': esta_hoje, 'categorias': categorias[:4],
             'total_produtos': len(produtos),
@@ -156,7 +164,7 @@ def buscar_produtos(q, limite=48):
             'nome': p.nome, 'descricao': p.descricao, 'categoria': p.categoria,
             'img': _img(p.imagem), 'preco': p.preco,
             'sob_encomenda': bool(p.sob_encomenda),
-            'expositor': c.nome or r.nome, 'url': f'{url_canonica(r)}#produtos',
+            'expositor': c.nome or r.nome, 'url': f'{_url_na_feira(r)}#produtos',
         })
         if len(achados) >= limite:
             break

@@ -1,6 +1,3 @@
-# Importado do pacote de hotsites. Sem foto de propósito: peça a original e a
-# autorização de imagem; coloque em app/static/img/demo/liguria-pizza/ (capa.jpg, logo.jpg,
-# produto-<nome>.jpg). Troque `site.modelo` se outro layout combinar mais.
 nome: Liguria Pizza
 tipo_negocio: artesao
 site:
@@ -13,9 +10,29 @@ site:
   cidade_uf: Barão Geraldo, Campinas–SP
   maps_query: Feira de Barão Geraldo Campinas
   tema_modo: auto
+  hero_foto: img/demo/liguria-pizza/capa.jpg
 produtos:
-- nome: Pizzas
-- nome: Focaccia
+- nome: Pizzas Napolitanas Individuais
+  categoria: Forno a 450°C
+  destaque: true
+  imagem: img/demo/liguria-pizza/foto-02.jpg
+  descricao: 'Massa de longa fermentação aberta na hora: Mortadela com Burrata e Pistache, Margherita
+    e Pepperoni.'
+- nome: Focaccia Artesanal e Eventos
+  categoria: Fornada & Eventos
+  destaque: true
+  imagem: img/demo/liguria-pizza/foto-03.jpg
+  descricao: Focaccias de fermentação lenta e estação de pizzas assadas na hora para festas e eventos.
+  sob_encomenda: true
 demo:
   fonte: pacote-hotsites-2026-10
   expira_em: '2026-12-20'
+galeria:
+- imagem: img/demo/liguria-pizza/foto-03.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/liguria-pizza/foto-04.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/liguria-pizza/foto-01.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/liguria-pizza/foto-02.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor

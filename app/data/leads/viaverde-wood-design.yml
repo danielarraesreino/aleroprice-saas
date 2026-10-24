@@ -1,11 +1,8 @@
-# Importado do pacote de hotsites. Sem foto de propósito: peça a original e a
-# autorização de imagem; coloque em app/static/img/demo/viaverde-wood-design/ (capa.jpg, logo.jpg,
-# produto-<nome>.jpg). Troque `site.modelo` se outro layout combinar mais.
 nome: Via Verde Wood Design
 tipo_negocio: artesao
 site:
   vibe: artesanal-feira
-  modelo: atelie
+  modelo: jardim
   tagline: (bio só traz o site e a cidade)
   descritor: Madeira e artesanato
   instagram_url: https://instagram.com/viaverde_wood_design
@@ -13,11 +10,38 @@ site:
   cidade_uf: Barão Geraldo, Campinas–SP
   maps_query: Feira de Barão Geraldo Campinas
   tema_modo: auto
+  hero_foto: img/demo/viaverde-wood-design/capa.jpg
 produtos:
-- nome: Tábuas de madeira
-- nome: Esculturas/rostos em madeira
-- nome: Velas
-- nome: Adereços
+- nome: Tábuas de Madeira Nobre
+  categoria: Marcenaria
+  destaque: true
+  imagem: img/demo/viaverde-wood-design/foto-02.jpg
+  descricao: Tábuas de corte e de servir feitas com madeiras de reaproveitamento e acabamento natural.
+- nome: Esculturas e Rostos em Madeira
+  categoria: Esculturas
+  destaque: true
+  imagem: img/demo/viaverde-wood-design/foto-03.jpg
+  descricao: Máscaras e rostos expressivos esculpidos à mão em retalhos de madeira maciça.
+- nome: Velas Artesanais Decoradas
+  categoria: Aromas
+  destaque: true
+  imagem: img/demo/viaverde-wood-design/foto-04.jpg
+  descricao: Velas aromáticas em latinhas pintadas e reutilizáveis.
+- nome: Adereços e Biojoias Botânicas
+  categoria: Acessórios
+  imagem: img/demo/viaverde-wood-design/foto-05.jpg
+  descricao: Colares, móbiles e adereços criados com sementes brasileiras e madeira.
 demo:
   fonte: pacote-hotsites-2026-10
   expira_em: '2026-12-20'
+galeria:
+- imagem: img/demo/viaverde-wood-design/foto-03.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/viaverde-wood-design/foto-04.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/viaverde-wood-design/foto-05.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/viaverde-wood-design/foto-01.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/viaverde-wood-design/foto-02.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor

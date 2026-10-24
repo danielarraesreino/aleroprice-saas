@@ -14,7 +14,7 @@ cada pasta foi lida inteira e copiada à mão. Data da revisão: 2026-10-21.
 
 ## Dials do taste-skill neste projeto
 
-Variação 5, movimento 3, densidade 6. Motivo: público em celular, artesãos sem equipe de
+Portal e painel: variação 5, movimento 3, densidade 6. **Hotsite de expositor e site de bar: variação 6, movimento 6, densidade 6** (uma cena orquestrada + grão + Ken Burns + marquee; o dono pediu nível bardavila.bar, ver skill `design-feira`). Motivo: público em celular, artesãos sem equipe de
 design e nota móvel baixa. Sem animação decorativa; `prefers-reduced-motion` respeitado.
 
 ## Precedência quando discordam

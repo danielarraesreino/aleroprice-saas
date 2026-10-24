@@ -1,6 +1,3 @@
-# Importado do pacote de hotsites. Sem foto de propósito: peça a original e a
-# autorização de imagem; coloque em app/static/img/demo/baraq/ (capa.jpg, logo.jpg,
-# produto-<nome>.jpg). Troque `site.modelo` se outro layout combinar mais.
 nome: BaraQ Culinária Árabe
 tipo_negocio: artesao
 site:
@@ -15,12 +12,41 @@ site:
   cidade_uf: Barão Geraldo, Campinas–SP
   maps_query: Feira de Barão Geraldo Campinas
   tema_modo: auto
+  hero_foto: img/demo/baraq/capa.jpg
 produtos:
-- nome: Quibe cru
+- nome: Antepastos árabes tradicionais
+  categoria: Pastas e antepastos
+  destaque: true
+  imagem: img/demo/baraq/foto-02.jpg
+  descricao: Homus, babaganuche defumado, coalhada seca artesanal e muhammara com nozes e romã.
+- nome: Quibe cru tradicional e em torre
+  categoria: Clássicos sírios
+  destaque: true
+  imagem: img/demo/baraq/foto-03.jpg
+  descricao: Preparado na tradição síria com trigo selecionado, hortelã fresca, cebola crocante e azeite.
 - nome: Charuto de folha de repolho
-- nome: Antepastos árabes
-- nome: Pratos vegano
-- nome: Cardápio de Natal
+  categoria: Pratos quentes
+  destaque: true
+  imagem: img/demo/baraq/foto-04.jpg
+  descricao: Charutos enrolados à mão e cozidos lentamente com tempero sírio da família.
+- nome: Pratos veganos sírios
+  categoria: Vegano
+  imagem: img/demo/baraq/foto-05.jpg
+  descricao: Falafel crocante, tabule fresco, mjadra com cebola caramelizada e pastas vegetais.
+- nome: Encomendas e Cardápio de Festas
+  categoria: Encomendas
+  imagem: img/demo/baraq/foto-06.jpg
+  descricao: Travessas e banquetes árabes sob encomenda para almoços de domingo e celebrações.
+  sob_encomenda: true
 demo:
   fonte: pacote-hotsites-2026-10
   expira_em: '2026-12-20'
+galeria:
+- imagem: img/demo/baraq/foto-03.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/baraq/foto-04.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/baraq/foto-05.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/baraq/foto-06.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor

@@ -1,0 +1,47 @@
+[
+ {
+  "arquivo": "capa.jpg",
+  "autor": "Dagmara Dombrovska",
+  "fonte": "Pexels",
+  "id": 20641015,
+  "url": "https://www.pexels.com/photo/20641015/",
+  "licenca": "Pexels License",
+  "ilustrativa": true
+ },
+ {
+  "arquivo": "foto-01.jpg",
+  "autor": "Dagmara Dombrovska",
+  "fonte": "Pexels",
+  "id": 20641015,
+  "url": "https://www.pexels.com/photo/20641015/",
+  "licenca": "Pexels License",
+  "ilustrativa": true
+ },
+ {
+  "arquivo": "foto-02.jpg",
+  "autor": "Mercedes Alvarado",
+  "fonte": "Pexels",
+  "id": 15493231,
+  "url": "https://www.pexels.com/photo/15493231/",
+  "licenca": "Pexels License",
+  "ilustrativa": true
+ },
+ {
+  "arquivo": "foto-03.jpg",
+  "autor": "Magali Guimarães",
+  "fonte": "Pexels",
+  "id": 5830200,
+  "url": "https://www.pexels.com/photo/5830200/",
+  "licenca": "Pexels License",
+  "ilustrativa": true
+ },
+ {
+  "arquivo": "foto-04.jpg",
+  "autor": "Yelena from Pexels",
+  "fonte": "Pexels",
+  "id": 9953500,
+  "url": "https://www.pexels.com/photo/9953500/",
+  "licenca": "Pexels License",
+  "ilustrativa": true
+ }
+]

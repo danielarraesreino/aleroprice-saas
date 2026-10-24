@@ -2,65 +2,234 @@
 {% import "site/modelos/artesao/_produtos.html" as pr %}
 {% block fonte_display %}family=Alfa+Slab+One{% endblock %}
 {% block tokens %}
-/* Cozinha: campo de mostarda no topo, verde-floresta de ação, cardápio em linhas. */
+/* Cozinha: papel kraft de barraca, topo mostarda de feira, fita serrilhada e sombra dura (irmão do modelo Brasa). */
 :root{
-  --ink:#faf8f3;--ink-2:#efece2;--ink-3:#e1ddcd;--cream:#1d2118;--cream-dim:#51574a;
-  --amber:#1f5a3a;--ember:#1f5a3a;--gold:#7a5a05;--campo:#f2b92e;--sobre-campo:#1c1403;
+  --ink:#faf6ed;--ink-2:#efe9da;--ink-3:#e2d9c3;--cream:#1d2118;--cream-dim:#505648;
+  --amber:#1f5a3a;--ember:#1f5a3a;--gold:#8a5209;--campo:#f2b92e;--sobre-campo:#1c1403;
+  --sombra-dura:#1c1403;--glow:rgba(242,185,46,.22);
   --font-display:'Alfa Slab One','Rockwell','Arial Black',Georgia,serif;color-scheme:light;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --ink:#14170f;--ink-2:#1d2217;--ink-3:#2a3122;--cream:#f4f1e6;--cream-dim:#b9bfa9;--amber:#f2c94c;--ember:#2c7a4c;--gold:#f2c94c;color-scheme:dark}}
-:root[data-theme="dark"]{--ink:#14170f;--ink-2:#1d2217;--ink-3:#2a3122;--cream:#f4f1e6;--cream-dim:#b9bfa9;--amber:#f2c94c;--ember:#2c7a4c;--gold:#f2c94c;color-scheme:dark}
+  --ink:#14170f;--ink-2:#1d2217;--ink-3:#293020;--cream:#f4f1e6;--cream-dim:#b9bfa9;
+  --amber:#f2c94c;--ember:#2c7a4c;--gold:#f2c94c;--campo:#e0a81e;--sobre-campo:#171102;
+  --sombra-dura:#090b07;--glow:rgba(242,201,76,.14);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ink:#14170f;--ink-2:#1d2217;--ink-3:#293020;--cream:#f4f1e6;--cream-dim:#b9bfa9;
+  --amber:#f2c94c;--ember:#2c7a4c;--gold:#f2c94c;--campo:#e0a81e;--sobre-campo:#171102;
+  --sombra-dura:#090b07;--glow:rgba(242,201,76,.14);color-scheme:dark}
 {% endblock %}
 {% block estilo %}
-.titulo{font-weight:400;letter-spacing:0;line-height:1.05}
-.hero{background:var(--campo);color:var(--sobre-campo);padding-block:var(--s7) var(--s8)}
-.hero h1{font-size:clamp(2.75rem,12vw,7.5rem);line-height:1;overflow-wrap:anywhere;margin-bottom:var(--s5)}
-.hero .lead{color:var(--sobre-campo);opacity:.85;margin-bottom:var(--s5)}
-.hero .hoje{display:inline-block;margin-bottom:var(--s5);padding:var(--s3) var(--s4);border-radius:var(--r);background:var(--sobre-campo);color:var(--campo);font:400 clamp(1.125rem,3vw,1.5rem)/1.2 var(--font-display)}
-.hero .btn{background:var(--sobre-campo);border-color:var(--sobre-campo);color:var(--campo)}
-.hero .btn:hover{background:transparent;color:var(--sobre-campo)}
-.hero .btn-line{background:transparent;color:var(--sobre-campo);border-color:var(--sobre-campo)}
+/* Textura de papel kraft / embrulho de barraca (herdada do Brasa) */
+body{
+  background-image:
+    radial-gradient(rgba(182,58,27,.045) 1px, transparent 1px),
+    repeating-linear-gradient(0deg, rgba(28,20,3,.02) 0 1px, transparent 1px 4px);
+  background-size:22px 22px, 100% 4px;
+}
+.titulo{font-weight:400;letter-spacing:0;line-height:1.04}
+.btn{
+  border-color:var(--sombra-dura);
+  box-shadow:4px 4px 0 var(--sombra-dura);
+}
+.btn:hover{
+  transform:translate(-2px,-2px);
+  box-shadow:6px 6px 0 var(--sombra-dura);
+}
+
+/* Hero Tabuleta de Barraca (Campo Mostarda + Foto Carimbada + Corte Serrilhado) */
+.hero{
+  position:relative;
+  background:
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,.28), transparent 52%),
+    repeating-linear-gradient(-45deg, rgba(28,20,3,.03) 0 8px, transparent 8px 16px),
+    var(--campo);
+  color:var(--sobre-campo);
+  padding-block:var(--s7) var(--s8);
+  overflow:hidden;
+}
+.hero-grid{display:grid;gap:var(--s6);align-items:center}
+.hero .fita{
+  display:inline-flex;align-items:center;gap:8px;
+  margin-bottom:var(--s4);padding:8px 16px;
+  background:var(--sobre-campo);color:var(--campo);
+  font:700 .82rem/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;
+  transform:rotate(-1.4deg);
+  box-shadow:4px 4px 0 rgba(28,20,3,.32);
+}
+.hero h1{
+  font-size:clamp(2.65rem,10vw,6.2rem);line-height:.98;
+  overflow-wrap:anywhere;margin-bottom:var(--s4);
+  text-shadow:3px 3px 0 rgba(255,255,255,.24);
+}
+.hero .hoje{
+  display:inline-block;margin-bottom:var(--s4);
+  padding:var(--s2) var(--s4);border-radius:var(--r);
+  background:rgba(28,20,3,.12);border:2px dashed var(--sobre-campo);
+  color:var(--sobre-campo);
+  font:400 clamp(1rem,2.4vw,1.25rem)/1.25 var(--font-display);
+}
+.hero .lead{color:var(--sobre-campo);opacity:.9;margin-bottom:var(--s5);font-weight:500}
+.hero .btn{
+  background:var(--sobre-campo);border-color:var(--sobre-campo);color:var(--campo);
+  box-shadow:4px 4px 0 rgba(28,20,3,.35);
+}
+.hero .btn:hover{background:var(--ember);border-color:var(--sobre-campo);color:#fff}
+.hero .btn-line{
+  background:transparent;color:var(--sobre-campo);border-color:var(--sobre-campo);
+  box-shadow:none;
+}
 .hero .btn-line:hover{background:var(--sobre-campo);color:var(--campo)}
 .hero :focus-visible{outline-color:var(--sobre-campo)}
-.chips{display:none;position:sticky;top:var(--nav-h);z-index:30;background:var(--ink);padding-block:var(--s2);margin-bottom:var(--s6)}
+.hero-quadro{
+  position:relative;margin:0;
+  padding:10px 10px 28px;
+  background:#fffdf7;color:#1c1403;
+  border:2px solid var(--sobre-campo);
+  border-radius:var(--r);
+  box-shadow:8px 8px 0 var(--sobre-campo);
+  transform:rotate(1.4deg);
+}
+.hero-quadro img{
+  width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:4px;
+  border:1px solid rgba(28,20,3,.18);
+}
+/* Sem foto (skill design-feira R4): inicial gigante sobre listras, no mesmo quadro de polaroid (brasa.html:377 `.solo`, 464 `.sem-foto`) */
+.hero-quadro .sem-imagem{
+  display:grid;place-items:center;aspect-ratio:4/3;border-radius:4px;
+  border:1px solid rgba(28,20,3,.18);
+  background:repeating-linear-gradient(135deg,#f2b632 0 14px,#f7c957 14px 28px);
+  color:#1c1403;font:400 clamp(4.5rem,13vw,8.5rem)/1 var(--font-display);
+  text-shadow:4px 4px 0 rgba(255,253,247,.8);letter-spacing:.02em;
+}
+.hero-quadro figcaption{
+  position:absolute;bottom:6px;left:14px;right:14px;
+  font:700 .78rem/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;
+  color:#5c4a1e;text-align:center;
+}
+
+/* Corte serrilhado de papel de embrulho (direto do Brasa) */
+.serra{
+  height:14px;width:100%;
+  background:
+    linear-gradient(135deg, var(--campo) 33.33%, transparent 33.33%) 0 0/18px 14px,
+    linear-gradient(225deg, var(--campo) 33.33%, transparent 33.33%) 0 0/18px 14px;
+  background-repeat:repeat-x;
+  background-color:var(--ink-2);
+}
+
+/* Barra de Categorias */
+.chips{
+  display:none;position:sticky;top:var(--nav-h);z-index:30;
+  background:color-mix(in srgb, var(--ink) 92%, transparent);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border-bottom:2px dashed var(--line-strong);
+  padding-block:var(--s3);margin-bottom:var(--s6);
+}
 .js .chips{display:block}
 .chips .wrap{display:flex;gap:var(--s2);overflow-x:auto;scrollbar-width:none}
 .chips .wrap::-webkit-scrollbar{display:none}
-.chip{flex:none;min-height:44px;padding:0 var(--s4);border-radius:22px;border:0;background:var(--ink-2);color:var(--cream);font:600 .9375rem/1 var(--font-body);cursor:pointer}
-.chip[aria-pressed="true"]{background:var(--ember);color:var(--on-ember)}
-.categoria + .categoria{margin-top:var(--s7)}
-.categoria > h3{font:400 clamp(1.5rem,4.5vw,2.25rem)/1.1 var(--font-display);margin-bottom:var(--s4)}
-.categoria > h3 small{margin-left:var(--s2);font:500 1rem var(--font-body);color:var(--cream-dim)}
-/* cardápio da barraca: uma linha por prato, tons alternados no lugar de filetes */
-.linhas{display:grid;gap:var(--s2)}
-.linha{display:grid;grid-template-columns:1fr;gap:var(--s3);align-items:center;padding:var(--s4);background:var(--ink-2);border-radius:var(--r)}
-.linha:nth-child(even){background:var(--ink-3)}
-.linha img{width:96px;height:96px;object-fit:cover;border-radius:var(--r);background:var(--ink-3)}
-.linha h4{font:400 clamp(1.1875rem,3.4vw,1.5rem)/1.15 var(--font-display)}
-.linha .desc{margin-top:var(--s1);color:var(--cream-dim)}
-.linha .preco{margin-top:var(--s1);font:400 1.25rem/1 var(--font-display);color:var(--gold)}
-.linha .enc{display:inline-block;margin-top:var(--s2);padding:var(--s1) var(--s2);border-radius:var(--r);background:var(--campo);color:var(--sobre-campo);font-size:.875rem;font-weight:600}
-.linha .acao .btn{width:100%}
-@media (min-width:720px){
-  .hero{padding-block:var(--s8) var(--s9)}
-  .linha{grid-template-columns:1fr auto;padding:var(--s4) var(--s5)}
-  .linha:has(img){grid-template-columns:96px 1fr auto}
-  .linha .acao .btn{width:auto;min-width:140px}
+.chip{
+  flex:none;min-height:42px;padding:0 var(--s4);
+  border-radius:var(--r);border:2px solid var(--line-strong);
+  background:var(--ink-2);color:var(--cream);
+  font:700 .9rem/1 var(--font-body);cursor:pointer;
+  transition:transform .18s ease,background-color .18s ease,color .18s ease,box-shadow .18s ease;
 }
-@media (min-width:1000px){.linhas{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.chip:hover{transform:translateY(-2px);border-color:var(--ember)}
+.chip[aria-pressed="true"]{
+  background:var(--ember);border-color:var(--sombra-dura);color:var(--on-ember);
+  box-shadow:3px 3px 0 var(--sombra-dura);
+}
+
+/* Cardápio de Barraca (.linhas) — Cartões carimbados com inclinação leve e fita de destaque */
+.categoria + .categoria{margin-top:var(--s7)}
+.linhas{display:grid;gap:var(--s4)}
+.linha{
+  --tilt:-.25deg;
+  display:grid;grid-template-columns:1fr;gap:var(--s4);align-items:center;
+  padding:var(--s4);
+  background:var(--ink-2);
+  border:2px solid var(--line-strong);
+  border-radius:var(--r);
+  box-shadow:5px 5px 0 color-mix(in srgb, var(--sombra-dura) 22%, transparent);
+  transform:rotate(var(--tilt));
+  transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease;
+}
+.linha:nth-child(even){--tilt:.25deg;background:var(--ink-3)}
+.linha:hover{
+  transform:rotate(0deg) translateY(-4px);
+  border-color:var(--ember);
+  box-shadow:7px 7px 0 color-mix(in srgb, var(--sombra-dura) 38%, transparent);
+}
+.linha.destaque{border-color:var(--ember)}
+.linha-foto{
+  margin:0;width:104px;height:104px;border-radius:var(--r);overflow:hidden;
+  border:2px solid var(--line-strong);background:var(--ink-3);
+  box-shadow:3px 3px 0 rgba(0,0,0,.18);
+}
+.linha-foto img{
+  width:100%;height:100%;object-fit:cover;
+  transition:transform .35s ease;
+}
+.linha:hover .linha-foto img{transform:scale(1.08) rotate(-1.5deg)}
+.linha-cab{
+  display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;
+  gap:var(--s2);
+  border-bottom:1px dashed var(--line-strong);
+  padding-bottom:6px;
+}
+.linha h4{font:400 clamp(1.1875rem,3vw,1.45rem)/1.15 var(--font-display)}
+.linha .desc{margin-top:var(--s2);color:var(--cream-dim);font-size:.95rem;line-height:1.48}
+.linha .preco{font:400 1.3rem/1 var(--font-display);color:var(--gold)}
+.linha .enc{
+  display:inline-block;margin-top:var(--s2);
+  padding:5px 14px 5px 10px;
+  background:var(--campo);color:var(--sobre-campo);
+  font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  clip-path:polygon(0 0, 100% 0, 93% 50%, 100% 100%, 0 100%);
+}
+.linha .acao .btn{width:100%}
+
+@media (min-width:720px){
+  .hero{padding-block:var(--s8)}
+  .hero-grid:has(.hero-quadro){grid-template-columns:1.25fr .95fr;gap:var(--s7)}
+  .linha{grid-template-columns:1fr auto;padding:var(--s4) var(--s5)}
+  .linha:has(.linha-foto){grid-template-columns:104px 1fr auto}
+  .linha .acao .btn{width:auto;min-width:144px}
+}
+@media (min-width:1000px){
+  .linhas{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4)}
+}
+@media (prefers-reduced-motion:reduce){
+  .linha,.linha-foto img,.hero-quadro{transform:none!important;transition:none!important}
+}
 {% endblock %}
 {% block hero %}
 <section class="hero" id="topo" aria-labelledby="titulo">
-  <div class="wrap">
-    <h1 id="titulo" class="titulo">{{ site.nome }}</h1>
-    {% if site.horario %}<p class="hoje">{{ site.horario }}{% if site.ponto_na_feira %}. {{ site.ponto_na_feira }}{% endif %}</p>{% endif %}
-    {% if site.tagline %}<p class="lead">{{ site.tagline }}</p>{% endif %}
-    <div class="acoes">
-      {% if produtos %}<a class="btn" href="#produtos">Ver {{ rotulo(tenant, 'cardapio')|lower }}</a>{% endif %}
-      {% if contato_href %}<a class="btn btn-line" href="{{ contato_href }}" target="_blank" rel="noopener">Falar no {{ contato_nome }}</a>{% endif %}
+  <div class="wrap hero-grid">
+    <div>
+      <span class="fita" data-hero>★ Feito na hora · {{ descritor }}</span>
+      <h1 id="titulo" class="titulo" data-hero>{{ site.nome }}</h1>
+      {% if site.horario %}<p class="hoje" data-hero>{{ site.horario }}{% if site.ponto_na_feira %} · {{ site.ponto_na_feira }}{% endif %}</p>{% endif %}
+      {% if site.tagline %}<p class="lead" data-hero>{{ site.tagline }}</p>{% endif %}
+      <div class="acoes" data-hero>
+        {% if produtos %}<a class="btn" href="#produtos">Ver {{ rotulo(tenant, 'cardapio')|lower }}</a>{% endif %}
+        {% if contato_href %}<a class="btn btn-line" href="{{ contato_href }}" target="_blank" rel="noopener">Falar no {{ contato_nome }}</a>{% endif %}
+      </div>
     </div>
+    {% if hero %}
+    <figure class="hero-quadro" data-hero data-zoom="{{ hero }}" data-legenda="{{ site.nome }}">
+      <img src="{{ hero }}" alt="{{ site.nome }}" width="720" height="540" fetchpriority="high" decoding="async">
+      <figcaption>{{ site.nome }} · Feira de Barão</figcaption>
+    </figure>
+    {% else %}
+    <figure class="hero-quadro" data-hero aria-hidden="true">
+      <div class="sem-imagem">{{ iniciais }}</div>
+      <figcaption>{{ site.nome }} · Feira de Barão</figcaption>
+    </figure>
+    {% endif %}
   </div>
 </section>
+<div class="serra" aria-hidden="true"></div>
 {% endblock %}
 {% block vitrine %}{{ pr.linhas(produtos, cats, site, wa) }}{% endblock %}

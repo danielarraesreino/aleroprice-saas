@@ -1,6 +1,3 @@
-# Importado do pacote de hotsites. Sem foto de propósito: peça a original e a
-# autorização de imagem; coloque em app/static/img/demo/sandra-cristina-mosaicos/ (capa.jpg, logo.jpg,
-# produto-<nome>.jpg). Troque `site.modelo` se outro layout combinar mais.
 nome: Sandra Cristina Mosaicos
 tipo_negocio: artesao
 site:
@@ -13,12 +10,43 @@ site:
   cidade_uf: Barão Geraldo, Campinas–SP
   maps_query: Feira de Barão Geraldo Campinas
   tema_modo: auto
+  hero_foto: img/demo/sandra-cristina-mosaicos/capa.jpg
 produtos:
-- nome: Relógios de mosaico
-- nome: Vasos
-- nome: Números de casa
-- nome: Pombas do Divino
-- nome: Luminárias
+- nome: Números de Casa Personalizados
+  categoria: Fachada
+  destaque: true
+  imagem: img/demo/sandra-cristina-mosaicos/foto-02.jpg
+  descricao: Placas residenciais em mosaico cerâmico e vidro espelhado resistentes ao sol e à chuva.
+  sob_encomenda: true
+- nome: Pombas do Divino e Mandalas
+  categoria: Mandalas
+  destaque: true
+  imagem: img/demo/sandra-cristina-mosaicos/foto-03.jpg
+  descricao: Mandalas de parede com relevo do Divino Espírito Santo tesseladas manualmente.
+- nome: Luminárias e Castiçais em Mosaico
+  categoria: Iluminação
+  destaque: true
+  imagem: img/demo/sandra-cristina-mosaicos/foto-04.jpg
+  descricao: Castiçais e luminárias em vidro colorido que projetam um vitral acolhedor à meia-luz.
+- nome: Vasos e Cachepôs Revestidos
+  categoria: Jardim
+  imagem: img/demo/sandra-cristina-mosaicos/foto-05.jpg
+  descricao: Vasos trabalhados pastilha por pastilha com desenhos florais e geométricos.
+- nome: Relógios de Parede em Mosaico
+  categoria: Decoração
+  imagem: img/demo/sandra-cristina-mosaicos/foto-01.jpg
+  descricao: Relógios artesanais em mosaico para cozinhas, varandas e áreas gourmet.
 demo:
   fonte: pacote-hotsites-2026-10
   expira_em: '2026-12-20'
+galeria:
+- imagem: img/demo/sandra-cristina-mosaicos/foto-03.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/sandra-cristina-mosaicos/foto-04.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/sandra-cristina-mosaicos/foto-05.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/sandra-cristina-mosaicos/foto-01.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/sandra-cristina-mosaicos/foto-02.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor

@@ -1,0 +1,56 @@
+[
+ {
+  "arquivo": "capa.jpg",
+  "autor": "Diego F. Parra",
+  "fonte": "Pexels",
+  "id": 25489685,
+  "url": "https://www.pexels.com/photo/25489685/",
+  "licenca": "Pexels License",
+  "ilustrativa": true
+ },
+ {
+  "arquivo": "foto-01.jpg",
+  "autor": "Diego F. Parra",
+  "fonte": "Pexels",
+  "id": 25489685,
+  "url": "https://www.pexels.com/photo/25489685/",
+  "licenca": "Pexels License",
+  "ilustrativa": true
+ },
+ {
+  "arquivo": "foto-02.jpg",
+  "autor": "Ali Can DEMİR",
+  "fonte": "Pexels",
+  "id": 19269999,
+  "url": "https://www.pexels.com/photo/19269999/",
+  "licenca": "Pexels License",
+  "ilustrativa": true
+ },
+ {
+  "arquivo": "foto-03.jpg",
+  "autor": "Ali Can DEMİR",
+  "fonte": "Pexels",
+  "id": 19392702,
+  "url": "https://www.pexels.com/photo/19392702/",
+  "licenca": "Pexels License",
+  "ilustrativa": true
+ },
+ {
+  "arquivo": "foto-04.jpg",
+  "autor": "Vikash Pareek",
+  "fonte": "Pexels",
+  "id": 30495690,
+  "url": "https://www.pexels.com/photo/30495690/",
+  "licenca": "Pexels License",
+  "ilustrativa": true
+ },
+ {
+  "arquivo": "foto-05.jpg",
+  "autor": "Orkhan Sweden",
+  "fonte": "Pexels",
+  "id": 37728172,
+  "url": "https://www.pexels.com/photo/37728172/",
+  "licenca": "Pexels License",
+  "ilustrativa": true
+ }
+]

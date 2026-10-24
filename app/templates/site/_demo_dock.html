@@ -369,7 +369,7 @@
           <button class="btn-dock-info" onclick="abrirModalMaps()">
             📍 Google Maps
           </button>
-          <a class="btn-dock-cta" href="https://wa.me/{{ site.whatsapp or contato_vendas }}?text={{ ('Olá! Gostei da demonstração do site para o ' ~ site.nome ~ ' e quero ativar ' ~ ('para a minha barraca.' if modelos_artesao else 'pro meu bar.')) | urlencode }}" target="_blank" rel="noopener">
+          <a class="btn-dock-cta" href="https://wa.me/{{ contato_vendas or site.whatsapp }}?text={{ ('Olá! Gostei da demonstração do site para o ' ~ site.nome ~ ' e quero ativar ' ~ ('para a minha barraca.' if modelos_artesao else 'pro meu bar.')) | urlencode }}" target="_blank" rel="noopener">
             Quero Este Site →
           </a>
           <button type="button" class="btn-dock-recolher" id="dockRecolher" onclick="alternarDock(false)" aria-controls="dockBar">Recolher ▼</button>
@@ -500,7 +500,7 @@
       </div>
 
       <div style="margin-top: 20px; text-align: center;">
-        <a class="btn-dock-cta" style="width: 100%; justify-content: center; padding: 10px 18px; font-size: 0.95rem;" href="https://wa.me/{{ site.whatsapp or contato_vendas }}?text={{ ('Quero configurar a presença do ' ~ site.nome ~ ' no Google Maps e no site oficial!') | urlencode }}" target="_blank" rel="noopener">
+        <a class="btn-dock-cta" style="width: 100%; justify-content: center; padding: 10px 18px; font-size: 0.95rem;" href="https://wa.me/{{ contato_vendas or site.whatsapp }}?text={{ ('Quero configurar a presença do ' ~ site.nome ~ ' no Google Maps e no site oficial!') | urlencode }}" target="_blank" rel="noopener">
           Falar com o Especialista no WhatsApp
         </a>
       </div>

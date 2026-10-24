@@ -26,6 +26,9 @@ def create_app(config_name='default'):
         
     app = Flask(__name__, **params)
     app.config.from_object(config[config_name])
+    if config_name != 'production':
+        app.config['TEMPLATES_AUTO_RELOAD'] = True
+        app.jinja_env.auto_reload = True
 
     # Na Vercel o Flask só vê o proxy (todo visitante era 127.0.0.1), e os
     # limites por IP viravam um limite único para o mundo inteiro: um script

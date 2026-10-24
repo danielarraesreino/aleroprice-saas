@@ -1,6 +1,3 @@
-# Importado do pacote de hotsites. Sem foto de propósito: peça a original e a
-# autorização de imagem; coloque em app/static/img/demo/mais-detalhes/ (capa.jpg, logo.jpg,
-# produto-<nome>.jpg). Troque `site.modelo` se outro layout combinar mais.
 nome: +Detalhes Ateliê
 tipo_negocio: artesao
 site:
@@ -13,10 +10,32 @@ site:
   cidade_uf: Barão Geraldo, Campinas–SP
   maps_query: Feira de Barão Geraldo Campinas
   tema_modo: auto
+  hero_foto: img/demo/mais-detalhes/capa.jpg
 produtos:
-- nome: Porta-livro e porta-Kindle
-- nome: Itens de costura reutilizáveis
-- nome: Peças para casa
+- nome: Porta-livro com Alça Regulável
+  categoria: Leitura
+  destaque: true
+  imagem: img/demo/mais-detalhes/foto-02.jpg
+  descricao: Capa acolchoada com alça removível e bolso para levar seu livro protegido para qualquer lugar.
+- nome: Porta-Kindle Sob Medida
+  categoria: Leitura
+  destaque: true
+  imagem: img/demo/mais-detalhes/foto-03.jpg
+  descricao: Feito à mão com estampas exclusivas e estrutura macia que protege a tela do leitor.
+- nome: Costura Criativa para Casa e Rotina
+  categoria: Casa & Rotina
+  destaque: true
+  imagem: img/demo/mais-detalhes/foto-04.jpg
+  descricao: Bolsas, estojos, nécessaires e peças reutilizáveis feitas com acabamento impecável.
 demo:
   fonte: pacote-hotsites-2026-10
   expira_em: '2026-12-20'
+galeria:
+- imagem: img/demo/mais-detalhes/foto-03.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/mais-detalhes/foto-04.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/mais-detalhes/foto-05.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/mais-detalhes/foto-01.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor

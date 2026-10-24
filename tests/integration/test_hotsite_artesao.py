@@ -262,3 +262,25 @@ def test_sem_whatsapp_o_contato_vira_instagram_e_nao_oferece_encomenda(client, s
         assert 'wa.me/5519991563362' not in corpo, modelo
         assert 'Chamar no Instagram' in corpo and 'donaberga_produtosartesanais' in corpo, modelo
         assert 'class="btn add"' not in corpo and '<dialog' not in corpo, modelo
+
+
+def test_artesao_com_dominio_proprio_tambem_abre_dentro_do_portal_da_feira(client, session):
+    semear(no_ar=True)
+    resp = client.get(f'/bar/{SLUG}', headers={'Host': 'feiradebarao.com.br'})
+    corpo = resp.get_data(as_text=True)
+    assert resp.status_code == 200
+    assert 'Dona Berga' in corpo
+    assert f'rel="canonical" href="https://{DOMINIO}/"' in corpo
+    assert 'class="feira-topo"' in corpo
+
+
+
+@pytest.mark.parametrize('modelo', list(MODELOS_ARTESAO))
+def test_previa_mostra_faixa_e_cliente_nao(client, session, modelo):
+    rest, _ = semear(no_ar=True)
+    assert 'faixa-previa' not in client.get(f'/bar/{SLUG}?modelo={modelo}').get_data(as_text=True)
+    rest.tipo_conta = 'demo'
+    db.session.commit()
+    corpo = client.get(f'/bar/{SLUG}?modelo={modelo}').get_data(as_text=True)
+    assert 'Prévia para Dona Berga' in corpo and 'imagens são ilustrativas' in corpo
+    assert 'Quero ativar meu site' in corpo

@@ -59,8 +59,23 @@ sem mudar o banco junto. `Server-Timing: app;dur=…` e o log `DB_CONNECT` (em
 | `app/utils/` | cálculos, parser NF-e, importação de vendas, filtros BR, tenant |
 | `app/templates/` | Jinja2; `site/` = site público, resto = sistema interno |
 | `app/scripts/`, `scripts/` | seeds e populadores de demo |
-| `migrations/versions/` | 7 migrations Alembic |
+| `migrations/versions/` | 17 migrations Alembic |
 | `tests/` | `unit/`, `integration/`, `e2e/` (Playwright) + `conftest.py` |
+
+## Design: obrigatório (não pule)
+
+Quem altera a aparência de qualquer site (você, outra IA, um dev) segue isto. O mecanismo está em
+`.claude/settings.json` (hook que lembra ao editar) e `tests/integration/test_contrato_design.py` (gate).
+
+- Editar `app/templates/site/**` (modelos de bar e de expositor): invocar a skill **`design-feira`** antes
+  de abrir o arquivo; ler o modelo de bar-fonte (`.claude/skills/design-feira/references/receitas.md`).
+- Editar `app/templates/produto/**` ou `app/static/css/feira*.css` (portal): `impeccable` + `frontend-design`.
+- Precedência: palavra do dono > bardavila.bar (`site/landing.html`) > `docs/DESIGN.md` > `design-feira` > skills genéricas.
+- Hotsite que parece menos trabalhado que os modelos de bar **não está pronto**, mesmo com teste verde.
+- Entrega = capturas (320/390/768/1440, claro/escuro, com e sem foto) + suíte verde + OK do dono. Sem deploy sem OK.
+- Imagem só com origem registrada (`creditos.json` ou `AUTORIZADO.txt`); nada de foto ampliada de miniatura.
+- Vocabulário: expositor (quem vende na Feira), barraca (ponto físico), bar (casa de bebida). Feira = Praça do Coco.
+- Mapa completo das skills e do acionamento: `~/Documentos/FEIRADEBARAO/documentacao/09_SKILLS_MAPA_E_ACIONAMENTO.md`.
 
 ## Regras que valem pra qualquer alteração
 
@@ -133,7 +148,7 @@ pytest tests/e2e                         # Playwright, precisa do app no ar
 
 - `run.py` alinha o schema (`db.create_all()` + colunas novas) **no import só fora de produção**. Em produção isso custava ~7s de cada cold start e saiu do boot: depois de deploy com model/coluna nova, rode `/bootstrap-demo?token=…&action=schema` (precisa `SEED_TOKEN` setada no `aleroprice-bardavila`) ou suba com `SCHEMA_NO_BOOT=1`. Migrations Alembic seguem fora desse caminho, então o schema de produção pode divergir do histórico.
 - A home do produto (`public.landing` no domínio do produto, visitante sem sessão) sai com `s-maxage=300, stale-while-revalidate` e é servida pela borda da Vercel: mudanças na vitrine (ex.: barraca desligada) podem levar alguns minutos para aparecer.
-- `billing/success` marca `subscription_tier='pro'` **sem verificar a sessão no Stripe** (otimista). O webhook (`billing.webhook`) não faz a ativação — o handler de `checkout.session.completed` é um `pass`.
+- Billing: `billing/success` confere a sessão no Stripe (e o `client_reference_id` do tenant) antes de marcar `pro`; o webhook valida a assinatura e trata `checkout.session.completed`, `subscription.*` e `invoice.*` (`app/routes/billing/views.py`). A cobrança de expositor hoje é manual (`registrar_pagamento`).
 - Com `STRIPE_SECRET_KEY` contendo `test_PLACEHOLDER`, o checkout e o webhook entram em modo mock: o checkout vira sucesso simulado direto.
 - `Config.SECRET_KEY` tem fallback hardcoded (`'uma-chave-secreta-dificil-de-adivinhar'`); só `ProductionConfig` exige env.
 - `Prato.nome` e `Produto.codigo` são `unique=True` **globais**, não por tenant — dois restaurantes não podem ter pratos de mesmo nome.

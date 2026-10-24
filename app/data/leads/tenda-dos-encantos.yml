@@ -1,6 +1,3 @@
-# Importado do pacote de hotsites. Sem foto de propósito: peça a original e a
-# autorização de imagem; coloque em app/static/img/demo/tenda-dos-encantos/ (capa.jpg, logo.jpg,
-# produto-<nome>.jpg). Troque `site.modelo` se outro layout combinar mais.
 nome: Tenda dos Encantos
 tipo_negocio: artesao
 site:
@@ -13,11 +10,32 @@ site:
   cidade_uf: Barão Geraldo, Campinas–SP
   maps_query: Feira de Barão Geraldo Campinas
   tema_modo: auto
+  hero_foto: img/demo/tenda-dos-encantos/capa.jpg
 produtos:
-- nome: Incensos artesanais
-- nome: Produtos para limpeza energética e proteção
-- nome: Duendes
-  descricao: Bonecos artesanais
+- nome: Incensos Artesanais de Ervas e Resinas
+  categoria: Aromas & Defumação
+  destaque: true
+  imagem: img/demo/tenda-dos-encantos/foto-02.jpg
+  descricao: Varetas e bastões enrolados à mão com ervas naturais, resinas puras e óleos essenciais.
+- nome: Produtos para Limpeza Energética e Proteção
+  categoria: Rituais
+  destaque: true
+  imagem: img/demo/tenda-dos-encantos/foto-03.jpg
+  descricao: Banhos de ervas, sprays vibracionais, cristais e velas para harmonizar a casa.
+- nome: Duendes e Guardiões Artesanais
+  categoria: Elementais
+  destaque: true
+  imagem: img/demo/tenda-dos-encantos/foto-04.jpg
+  descricao: Bonecos elementais modelados à mão, cada um com expressão e história próprias.
 demo:
   fonte: pacote-hotsites-2026-10
   expira_em: '2026-12-20'
+galeria:
+- imagem: img/demo/tenda-dos-encantos/foto-03.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/tenda-dos-encantos/foto-04.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/tenda-dos-encantos/foto-05.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/tenda-dos-encantos/foto-01.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor

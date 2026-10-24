@@ -54,6 +54,7 @@ class Config:
 class DevelopmentConfig(Config):
     """Configuração de desenvolvimento"""
     DEBUG = True
+    TEMPLATES_AUTO_RELOAD = True
     SQLALCHEMY_ECHO = True
 
 class TestingConfig(Config):

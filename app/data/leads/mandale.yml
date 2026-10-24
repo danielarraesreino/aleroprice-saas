@@ -1,11 +1,8 @@
-# Importado do pacote de hotsites. Sem foto de propósito: peça a original e a
-# autorização de imagem; coloque em app/static/img/demo/mandale/ (capa.jpg, logo.jpg,
-# produto-<nome>.jpg). Troque `site.modelo` se outro layout combinar mais.
 nome: Mandalê
 tipo_negocio: artesao
 site:
   vibe: artesanal-feira
-  modelo: atelie
+  modelo: ritual
   tagline: Arte em pontilhismo. Mandalas, incensários e peças exclusivas. Sustentabilidade + beleza. Envio
     para todo o Brasil.
   descritor: Mandalas em pontilhismo
@@ -14,11 +11,38 @@ site:
   cidade_uf: Barão Geraldo, Campinas–SP
   maps_query: Feira de Barão Geraldo Campinas
   tema_modo: auto
+  hero_foto: img/demo/mandale/capa.jpg
 produtos:
-- nome: Mandalas pintadas
-- nome: Incensários
-- nome: Caixas decoradas
-- nome: Móbiles/pingentes
+- nome: Mandalas Pintadas em Pontilhismo
+  categoria: Mandalas
+  destaque: true
+  imagem: img/demo/mandale/foto-02.jpg
+  descricao: Mandalas de parede e de mesa pintadas ponto a ponto à mão para harmonizar ambientes.
+- nome: Caixas Decoradas em Madeira
+  categoria: Caixas
+  destaque: true
+  imagem: img/demo/mandale/foto-03.jpg
+  descricao: Caixas em MDF para chás, joias ou recordações com pintura autoral em relevo.
+- nome: Móbiles e Pingentes com Cristais
+  categoria: Móbiles
+  destaque: true
+  imagem: img/demo/mandale/foto-04.jpg
+  descricao: Móbiles para janela e varanda com cristais facetados que espalham luz pela casa.
+- nome: Incensários e Placas Decorativas
+  categoria: Decoração
+  imagem: img/demo/mandale/foto-05.jpg
+  descricao: Incensários, mandalinhas de mesa e placas divertidas para quem ama pets.
 demo:
   fonte: pacote-hotsites-2026-10
   expira_em: '2026-12-20'
+galeria:
+- imagem: img/demo/mandale/foto-03.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/mandale/foto-04.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/mandale/foto-05.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/mandale/foto-06.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/mandale/foto-01.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor

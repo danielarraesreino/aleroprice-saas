@@ -1,0 +1,26 @@
+{# Faixa fixa de prévia: o lojista precisa ver, sem procurar, que o site é um
+   exemplo e que as imagens serão trocadas. Só aparece em tenant.eh_demo. #}
+{% if tenant and tenant.eh_demo %}
+<style>
+:root{--faixa-h:44px}
+.faixa-previa{position:sticky;top:0;z-index:60;height:var(--faixa-h);display:flex;align-items:center;
+  background:#1b1410;color:#fbefd9;border-bottom:2px solid #f2b632;font:600 .84rem/1.2 system-ui,sans-serif}
+.faixa-previa .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;
+  max-width:1160px;margin:0 auto;padding:0 16px}
+.faixa-previa p{margin:0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.faixa-previa b{color:#f2b632}
+.faixa-previa a{flex:none;display:inline-flex;align-items:center;min-height:36px;padding:0 14px;border-radius:999px;
+  background:#f2b632;color:#1b1410;text-decoration:none;font-weight:800}
+.faixa-previa a:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.faixa-previa .curto{display:none}
+@media (max-width:600px){.faixa-previa .longo{display:none}.faixa-previa .curto{display:inline}}
+</style>
+<div class="faixa-previa" role="region" aria-label="Aviso de prévia">
+  <div class="wrap">
+    <p><b><span class="longo">Prévia para {{ site.nome }}.</span><span class="curto">Prévia ·</span></b>
+      <span class="longo">As imagens são ilustrativas e serão trocadas pelas suas.</span>
+      <span class="curto">imagens ilustrativas</span></p>
+    <a href="https://wa.me/{{ contato_vendas }}?text={{ ('Olá! Vi a prévia do site da ' ~ site.nome ~ ' na Feira de Barão e quero ativar o meu.') | urlencode }}" target="_blank" rel="noopener">Quero ativar meu site</a>
+  </div>
+</div>
+{% endif %}

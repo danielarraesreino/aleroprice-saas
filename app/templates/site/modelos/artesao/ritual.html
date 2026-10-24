@@ -2,55 +2,207 @@
 {% import "site/modelos/artesao/_produtos.html" as pr %}
 {% block fonte_display %}family=Abril+Fatface{% endblock %}
 {% block tokens %}
-/* Ritual: noite e dourado, tudo centralizado, serviços em lista. */
+/* Ritual: veludo da noite e ouro alquímico, moldura de carta de tarô, luz pulsante (irmão do Noturno + Clássico). */
 :root{
-  --ink:#120d24;--ink-2:#1b1434;--ink-3:#281d49;--cream:#f1ebff;--cream-dim:#b6aad6;
-  --amber:#e8c468;--ember:#6d3fcf;--gold:#e8c468;
+  --ink:#110c22;--ink-2:#1b1335;--ink-3:#281d4b;--cream:#f3edff;--cream-dim:#bbb0db;
+  --amber:#e8c468;--ember:#6d3fcf;--gold:#e8c468;--glow:rgba(232,196,104,.16);
   --font-display:'Abril Fatface','Didot',Georgia,serif;color-scheme:dark;
 }
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]){
-  --ink:#f4f0fb;--ink-2:#e8e0f6;--ink-3:#d9cdf0;--cream:#1c1236;--cream-dim:#55467a;--amber:#5a32b0;--ember:#5a32b0;--gold:#7d5d0c;color-scheme:light}}
-:root[data-theme="light"]{--ink:#f4f0fb;--ink-2:#e8e0f6;--ink-3:#d9cdf0;--cream:#1c1236;--cream-dim:#55467a;--amber:#5a32b0;--ember:#5a32b0;--gold:#7d5d0c;color-scheme:light}
+  --ink:#f5f1fc;--ink-2:#eae2f8;--ink-3:#dcd0f2;--cream:#1c1236;--cream-dim:#544579;
+  --amber:#5a32b0;--ember:#5a32b0;--gold:#805e0a;--glow:rgba(90,50,176,.12);color-scheme:light}}
+:root[data-theme="light"]{
+  --ink:#f5f1fc;--ink-2:#eae2f8;--ink-3:#dcd0f2;--cream:#1c1236;--cream-dim:#544579;
+  --amber:#5a32b0;--ember:#5a32b0;--gold:#805e0a;--glow:rgba(90,50,176,.12);color-scheme:light}
 {% endblock %}
 {% block estilo %}
 .titulo{font-weight:400;letter-spacing:0}
-.hero{padding-block:var(--s8) var(--s8);text-align:center}
-.hero h1{font-size:clamp(3rem,13vw,7.5rem);line-height:1;overflow-wrap:anywhere;margin-bottom:var(--s5)}
-.hero .lead{margin-inline:auto;margin-bottom:var(--s6)}
-.hero .acoes{justify-content:center}
-.hero .quando{margin-top:var(--s6);color:var(--cream-dim)}
 .cab{text-align:center;justify-items:center}
-.chips{display:none;position:sticky;top:var(--nav-h);z-index:30;background:var(--ink);padding-block:var(--s2);margin-bottom:var(--s6)}
+.cab .lead{margin-inline:auto}
+
+/* Hero Altar / Carta Arcana com Moldura Dupla Dourada e Estrelas Flutuantes */
+.hero{
+  position:relative;overflow:hidden;
+  padding-block:var(--s7) var(--s8);
+  text-align:center;
+  background:
+    radial-gradient(ellipse 65% 55% at 50% 25%, color-mix(in srgb, var(--gold) 18%, transparent), transparent 68%),
+    radial-gradient(ellipse 80% 60% at 50% 100%, color-mix(in srgb, var(--ember) 24%, transparent), transparent 70%);
+}
+.hero-altar{
+  position:relative;z-index:2;
+  max-width:860px;margin-inline:auto;
+  padding:var(--s7) var(--s5);
+  background:linear-gradient(180deg, color-mix(in srgb, var(--ink-2) 88%, transparent), color-mix(in srgb, var(--ink-3) 78%, transparent));
+  border:1px solid color-mix(in srgb, var(--gold) 38%, transparent);
+  border-radius:calc(var(--r) * 2);
+  box-shadow:0 26px 68px -18px rgba(0,0,0,.6);
+}
+.hero-altar::before{
+  content:"";position:absolute;inset:8px;
+  border:1px solid color-mix(in srgb, var(--gold) 20%, transparent);
+  border-radius:calc(var(--r) * 1.5);pointer-events:none;
+}
+.hero-selo{
+  display:inline-flex;align-items:center;gap:10px;
+  margin-bottom:var(--s4);padding:6px 16px;border-radius:999px;
+  background:color-mix(in srgb, var(--ink-3) 85%, transparent);
+  border:1px solid color-mix(in srgb, var(--gold) 42%, transparent);
+  font:700 .76rem/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);
+}
+.bola{
+  width:8px;height:8px;border-radius:50%;background:var(--gold);
+  box-shadow:0 0 10px var(--gold);
+  animation:ritual-bater 2.2s ease-in-out infinite;
+}
+@keyframes ritual-bater{
+  0%,100%{transform:scale(1);opacity:1}
+  50%{transform:scale(1.45);opacity:.45}
+}
+.hero-medallao{
+  width:118px;height:118px;margin:0 auto var(--s4);
+  border-radius:50%;padding:4px;
+  background:linear-gradient(135deg, var(--gold), var(--ember));
+  box-shadow:0 0 32px color-mix(in srgb, var(--gold) 35%, transparent);
+}
+.hero-medallao img{
+  width:100%;height:100%;object-fit:cover;border-radius:50%;
+  border:2px solid var(--ink);
+}
+.hero h1{
+  font-size:clamp(2.85rem,11vw,6.2rem);line-height:1;
+  overflow-wrap:anywhere;margin-bottom:var(--s4);
+  text-shadow:0 4px 36px color-mix(in srgb, var(--gold) 28%, transparent);
+}
+.hero .lead{margin-inline:auto;margin-bottom:var(--s5)}
+.hero .acoes{justify-content:center}
+.hero .quando{
+  display:inline-flex;align-items:center;gap:8px;
+  margin-top:var(--s5);padding-top:var(--s3);
+  border-top:1px solid color-mix(in srgb, var(--gold) 25%, transparent);
+  color:var(--cream-dim);font-size:.94rem;
+}
+.embers{position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+.ember{
+  position:absolute;bottom:-10px;width:4px;height:4px;border-radius:50%;
+  background:radial-gradient(circle, var(--gold) 0%, var(--ember) 80%, transparent 100%);
+  box-shadow:0 0 10px var(--gold);opacity:0;
+  animation:ritual-rise var(--d,10s) var(--dl,0s) ease-in infinite;
+}
+@keyframes ritual-rise{
+  0%{transform:translateY(0) scale(.6);opacity:0}
+  25%{opacity:.8}
+  80%{opacity:.35}
+  100%{transform:translateY(-70vh) translateX(var(--dx,20px)) scale(1.15);opacity:0}
+}
+
+/* Barra de Categorias Centralizada */
+.chips{
+  display:none;position:sticky;top:var(--nav-h);z-index:30;
+  background:color-mix(in srgb, var(--ink) 92%, transparent);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid color-mix(in srgb, var(--gold) 22%, transparent);
+  padding-block:var(--s3);margin-bottom:var(--s6);
+}
 .js .chips{display:block}
 .chips .wrap{display:flex;justify-content:center;gap:var(--s2);overflow-x:auto;scrollbar-width:none}
 .chips .wrap::-webkit-scrollbar{display:none}
-.chip{flex:none;min-height:44px;padding:0 var(--s4);border-radius:var(--r);border:0;background:var(--ink-2);color:var(--cream);font:600 .9375rem/1 var(--font-body);cursor:pointer}
-.chip[aria-pressed="true"]{background:var(--gold);color:var(--ink)}
-.categoria{max-width:760px;margin-inline:auto}
+.chip{
+  flex:none;min-height:42px;padding:0 var(--s4);
+  border-radius:999px;border:1px solid color-mix(in srgb, var(--gold) 32%, transparent);
+  background:var(--ink-2);color:var(--cream);
+  font:600 .92rem/1 var(--font-body);cursor:pointer;
+  transition:transform .18s ease,background-color .18s ease,color .18s ease,box-shadow .18s ease;
+}
+.chip:hover{transform:translateY(-2px);border-color:var(--gold)}
+.chip[aria-pressed="true"]{
+  background:var(--gold);border-color:var(--gold);color:var(--ink);
+  box-shadow:0 6px 20px -4px color-mix(in srgb, var(--gold) 55%, transparent);
+}
+
+/* Cartas de Serviço / Produtos (.linhas) */
+.categoria{max-width:960px;margin-inline:auto}
 .categoria + .categoria{margin-top:var(--s7)}
-.categoria > h3{text-align:center;font:400 clamp(1.5rem,4.5vw,2.25rem)/1.1 var(--font-display);color:var(--amber);margin-bottom:var(--s5)}
-.categoria > h3 small{margin-left:var(--s2);font:500 1rem var(--font-body);color:var(--cream-dim)}
-.linhas{display:grid;gap:var(--s3)}
-.linha{display:grid;gap:var(--s3);justify-items:center;text-align:center;padding:var(--s5);background:var(--ink-2);border-radius:var(--r)}
-.linha img{width:96px;height:96px;object-fit:cover;border-radius:50%;background:var(--ink-3)}
-.linha h4{font:400 clamp(1.375rem,4vw,1.75rem)/1.15 var(--font-display)}
-.linha .desc{margin-top:var(--s1);color:var(--cream-dim)}
-.linha .preco{margin-top:var(--s1);font:400 1.25rem/1 var(--font-display);color:var(--gold)}
-.linha .enc{display:inline-block;margin-top:var(--s2);padding:var(--s1) var(--s2);border-radius:var(--r);background:var(--ink-3);font-size:.875rem}
-.linha .acao .btn{min-width:180px}
+.cat-cab{justify-content:center}
+.cat-cab h3{color:var(--amber)}
+.linhas{display:grid;gap:var(--s4)}
+.linha{
+  position:relative;
+  display:grid;gap:var(--s3);justify-items:center;text-align:center;
+  padding:var(--s6) var(--s5);
+  background:linear-gradient(165deg, var(--ink-2), var(--ink-3));
+  border:1px solid color-mix(in srgb, var(--gold) 28%, transparent);
+  border-radius:calc(var(--r) * 1.5);
+  box-shadow:var(--shadow-card);
+  transition:transform .26s cubic-bezier(.22,1,.36,1),border-color .26s ease,box-shadow .26s ease;
+}
+.linha::before{
+  content:"✦";position:absolute;top:10px;right:14px;
+  color:var(--gold);opacity:.45;font-size:.85rem;
+}
+.linha:hover{
+  transform:translateY(-5px);
+  border-color:var(--gold);
+  box-shadow:0 20px 44px -14px rgba(0,0,0,.55), 0 0 24px -8px color-mix(in srgb, var(--gold) 32%, transparent);
+}
+.linha-foto{
+  margin:0;width:104px;height:104px;border-radius:50%;padding:3px;
+  background:linear-gradient(135deg, var(--gold), var(--ember));
+  box-shadow:0 8px 22px rgba(0,0,0,.35);
+}
+.linha-foto img{
+  width:100%;height:100%;object-fit:cover;border-radius:50%;
+  background:var(--ink-3);border:2px solid var(--ink-2);
+  transition:transform .4s ease;
+}
+.linha:hover .linha-foto img{transform:scale(1.06)}
+.linha-cab{display:grid;gap:6px;justify-items:center}
+.linha h4{font:400 clamp(1.35rem,3.5vw,1.65rem)/1.15 var(--font-display)}
+.linha .desc{margin-top:var(--s1);color:var(--cream-dim);max-width:44ch}
+.linha .preco{margin-top:var(--s1);font:400 1.3rem/1 var(--font-display);color:var(--gold)}
+.linha .enc{
+  display:inline-block;margin-top:var(--s2);
+  padding:4px 12px;border-radius:999px;
+  background:var(--ink-3);border:1px solid color-mix(in srgb, var(--gold) 35%, transparent);
+  color:var(--gold);font-size:.8rem;font-weight:600;
+}
+.linha .acao{margin-top:auto;padding-top:var(--s2)}
+.linha .acao .btn{min-width:190px}
 .btn-line{border-color:var(--gold);color:var(--gold)}
 .btn-line:hover{background:var(--gold);border-color:var(--gold);color:var(--ink)}
+
+@media (min-width:720px){
+  .hero-altar{padding:var(--s8) var(--s7)}
+  .linhas{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4)}
+}
+@media (prefers-reduced-motion:reduce){
+  .linha,.linha-foto img,.ember,.bola{transform:none!important;transition:none!important;animation:none!important}
+}
 {% endblock %}
 {% block hero %}
 <section class="hero" id="topo" aria-labelledby="titulo">
+  <div class="embers" aria-hidden="true">
+    <span class="ember" style="left:16%;--d:9s;--dl:0s;--dx:18px"></span>
+    <span class="ember" style="left:36%;--d:12s;--dl:2s;--dx:-22px"></span>
+    <span class="ember" style="left:64%;--d:10s;--dl:1s;--dx:24px"></span>
+    <span class="ember" style="left:82%;--d:11s;--dl:2.5s;--dx:-16px"></span>
+  </div>
   <div class="wrap">
-    <h1 id="titulo" class="titulo">{{ site.nome }}</h1>
-    {% if site.tagline %}<p class="lead">{{ site.tagline }}</p>{% endif %}
-    <div class="acoes">
-      {% if produtos %}<a class="btn" href="#produtos">Ver {{ rotulo(tenant, 'cardapio')|lower }}</a>{% endif %}
-      {% if contato_href %}<a class="btn btn-line" href="{{ contato_href }}" target="_blank" rel="noopener">Falar no {{ contato_nome }}</a>{% endif %}
+    <div class="hero-altar">
+      <span class="hero-selo" data-hero><span class="bola" aria-hidden="true"></span> {{ descritor }} · Feira de Barão</span>
+      {% if hero %}
+      <figure class="hero-medallao" data-hero data-zoom="{{ hero }}" data-legenda="{{ site.nome }}">
+        <img src="{{ hero }}" alt="{{ site.nome }}" width="240" height="240" fetchpriority="high" decoding="async">
+      </figure>
+      {% endif %}
+      <h1 id="titulo" class="titulo" data-hero>{{ site.nome }}</h1>
+      {% if site.tagline %}<p class="lead" data-hero>{{ site.tagline }}</p>{% endif %}
+      <div class="acoes" data-hero>
+        {% if produtos %}<a class="btn" href="#produtos">Ver {{ rotulo(tenant, 'cardapio')|lower }}</a>{% endif %}
+        {% if contato_href %}<a class="btn btn-line" href="{{ contato_href }}" target="_blank" rel="noopener">Falar no {{ contato_nome }}</a>{% endif %}
+      </div>
+      {% if site.horario %}<p class="quando" data-hero>✦ {{ site.horario }}{% if site.ponto_na_feira %} · {{ site.ponto_na_feira }}{% endif %}</p>{% endif %}
     </div>
-    {% if site.horario %}<p class="quando">{{ site.horario }}{% if site.ponto_na_feira %}. {{ site.ponto_na_feira }}{% endif %}</p>{% endif %}
   </div>
 </section>
 {% endblock %}

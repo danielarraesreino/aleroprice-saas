@@ -1,11 +1,8 @@
-# Importado do pacote de hotsites. Sem foto de propósito: peça a original e a
-# autorização de imagem; coloque em app/static/img/demo/mudde-vintage-design/ (capa.jpg, logo.jpg,
-# produto-<nome>.jpg). Troque `site.modelo` se outro layout combinar mais.
 nome: Mudde Vintage Design
 tipo_negocio: artesao
 site:
   vibe: artesanal-feira
-  modelo: atelie
+  modelo: vitrine
   tagline: Peças de decoração e utilidades em bambu, madeira e MDF com corte e gravação a laser.
   descritor: 'Corte a laser: bambu, madeira, MDF'
   instagram_url: https://instagram.com/muddevintagedesign
@@ -13,9 +10,34 @@ site:
   cidade_uf: Barão Geraldo, Campinas–SP
   maps_query: Feira de Barão Geraldo Campinas
   tema_modo: auto
+  hero_foto: img/demo/mudde-vintage-design/capa.jpg
 produtos:
-- nome: Luminárias de madeira
-- nome: Peças decorativas gravadas a laser
+- nome: Luminárias Esculturais de Madeira
+  categoria: Iluminação
+  destaque: true
+  imagem: img/demo/mudde-vintage-design/foto-02.jpg
+  descricao: Luminárias pendentes e de mesa em madeira ripada que projetam luz âmbar acolhedora.
+- nome: Abajures e Luminárias Vintage
+  categoria: Iluminação
+  destaque: true
+  imagem: img/demo/mudde-vintage-design/foto-03.jpg
+  descricao: Abajures com base orgânica em madeira e luminárias articuladas estilo retrô.
+- nome: Peças Decorativas Gravadas a Laser
+  categoria: Decoração
+  destaque: true
+  imagem: img/demo/mudde-vintage-design/foto-04.jpg
+  descricao: Adornos em bolacha de madeira natural, porta-copos e gravações personalizadas.
 demo:
   fonte: pacote-hotsites-2026-10
   expira_em: '2026-12-20'
+galeria:
+- imagem: img/demo/mudde-vintage-design/foto-03.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/mudde-vintage-design/foto-04.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/mudde-vintage-design/foto-05.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/mudde-vintage-design/foto-01.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/mudde-vintage-design/foto-02.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor

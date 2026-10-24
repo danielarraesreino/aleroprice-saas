@@ -1,6 +1,3 @@
-# Importado do pacote de hotsites. Sem foto de propósito: peça a original e a
-# autorização de imagem; coloque em app/static/img/demo/casa-de-lilica/ (capa.jpg, logo.jpg,
-# produto-<nome>.jpg). Troque `site.modelo` se outro layout combinar mais.
 nome: Casa de Lilica
 tipo_negocio: artesao
 site:
@@ -13,12 +10,40 @@ site:
   cidade_uf: Barão Geraldo, Campinas–SP
   maps_query: Feira de Barão Geraldo Campinas
   tema_modo: auto
+  hero_foto: img/demo/casa-de-lilica/capa.jpg
 produtos:
-- nome: Utensílios de madeira
-- nome: Luminárias
-- nome: Móveis
-  descricao: Banquetas, mesas
-- nome: Cabideiro
+- nome: Móveis e Mesas em Marchetaria
+  categoria: Mobiliário
+  destaque: true
+  imagem: img/demo/casa-de-lilica/foto-02.jpg
+  descricao: Mesas laterais, banquetas e bancos esculpidos e marcheteados à mão com madeiras nobres.
+- nome: Utensílios de Madeira e Gamelas
+  categoria: Mesa e cozinha
+  destaque: true
+  imagem: img/demo/casa-de-lilica/foto-03.jpg
+  descricao: Pratos giratórios, fruteiras e gamelas com encaixes geométricos em madeira natural.
+- nome: Vasos e Peças Torneadas
+  categoria: Decoração
+  destaque: true
+  imagem: img/demo/casa-de-lilica/foto-04.jpg
+  descricao: Vasos torneados e esculturas que revelam o desenho único de cada tronco.
+- nome: Banquetas, Luminárias e Cabideiros
+  categoria: Mobiliário
+  imagem: img/demo/casa-de-lilica/foto-05.jpg
+  descricao: Banquetas altas, mesas de apoio e luminárias torneadas feitas na oficina da família.
 demo:
   fonte: pacote-hotsites-2026-10
   expira_em: '2026-12-20'
+galeria:
+- imagem: img/demo/casa-de-lilica/foto-03.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/casa-de-lilica/foto-04.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/casa-de-lilica/foto-05.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/casa-de-lilica/foto-01.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/casa-de-lilica/foto-02.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor
+- imagem: img/demo/casa-de-lilica/foto-03.jpg
+  legenda: Foto ilustrativa, será trocada pela do expositor

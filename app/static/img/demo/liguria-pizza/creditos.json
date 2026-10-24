@@ -1,0 +1,47 @@
+[
+ {
+  "arquivo": "capa.jpg",
+  "autor": "Joshua Plattner",
+  "fonte": "Pexels",
+  "id": 18126737,
+  "url": "https://www.pexels.com/photo/18126737/",
+  "licenca": "Pexels License",
+  "ilustrativa": true
+ },
+ {
+  "arquivo": "foto-01.jpg",
+  "autor": "Joshua Plattner",
+  "fonte": "Pexels",
+  "id": 18126737,
+  "url": "https://www.pexels.com/photo/18126737/",
+  "licenca": "Pexels License",
+  "ilustrativa": true
+ },
+ {
+  "arquivo": "foto-02.jpg",
+  "autor": "Katie Barget",
+  "fonte": "Pexels",
+  "id": 29626980,
+  "url": "https://www.pexels.com/photo/29626980/",
+  "licenca": "Pexels License",
+  "ilustrativa": true
+ },
+ {
+  "arquivo": "foto-03.jpg",
+  "autor": "Antonius Ferret",
+  "fonte": "Pexels",
+  "id": 6223172,
+  "url": "https://www.pexels.com/photo/6223172/",
+  "licenca": "Pexels License",
+  "ilustrativa": true
+ },
+ {
+  "arquivo": "foto-04.jpg",
+  "autor": "Kalei Winfield",
+  "fonte": "Pexels",
+  "id": 16386532,
+  "url": "https://www.pexels.com/photo/16386532/",
+  "licenca": "Pexels License",
+  "ilustrativa": true
+ }
+]
