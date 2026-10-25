@@ -573,7 +573,8 @@
   function initMap() {
     try {
       if (typeof L === 'undefined') {
-        console.warn('Leaflet ainda não carregado');
+        // Leaflet vem de CDN com defer: se ainda não chegou, tenta de novo quando a página terminar de carregar.
+        if (document.readyState !== 'complete') window.addEventListener('load', initMap, { once: true });
         return;
       }
       const mapEl = document.getElementById('mapa-scrolly');
