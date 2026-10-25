@@ -24,20 +24,56 @@
 <body>
 {% with na_home = false %}{% include 'produto/_topo.html' %}{% endwith %}
 
+<style>
+  .hero-grid{display:grid;gap:var(--s-6);align-items:center}
+  @media(min-width:860px){.hero-grid{grid-template-columns:1.15fr .85fr}}
+  .fone{justify-self:center;width:min(100%,270px);border:7px solid var(--tinta);border-radius:30px;overflow:hidden;background:var(--cartao);
+    box-shadow:8px 8px 0 var(--tomate);transform:rotate(1.2deg)}
+  .fone img{display:block;width:100%;height:auto}
+  .fone-nota{font-size:.82rem;color:var(--taupe);text-align:center;margin-top:var(--s-4)}
+  .dor-hoje b,.dor-com b{text-transform:none;letter-spacing:0;font-size:.82rem}
+  .prova{display:grid;gap:var(--s-5);margin-top:var(--s-5);grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+  .prova a{display:block;color:inherit;text-decoration:none}
+  .prova figure{border:1.5px solid var(--tinta);border-radius:4px;overflow:hidden;background:var(--cartao)}
+  .prova .rec{aspect-ratio:4/5;overflow:hidden}
+  .prova .rec img{display:block;width:100%;height:auto}
+  .prova figcaption{padding:var(--s-3) var(--s-4);border-top:1.5px solid var(--tinta)}
+  .prova figcaption b{display:block}
+  .prova figcaption span{font-size:.86rem;color:var(--taupe)}
+  .prova a:hover figure{box-shadow:4px 4px 0 var(--tomate)}
+  .entrega{display:grid;gap:var(--s-4) var(--s-6);margin-top:var(--s-5)}
+  @media(min-width:760px){.entrega{grid-template-columns:1fr 1fr}}
+  .entrega dt{font-weight:700}
+  .entrega dd{color:var(--taupe);margin-top:2px}
+  .faq details{border-top:1px solid var(--linha);padding-block:var(--s-4)}
+  .faq details:last-of-type{border-bottom:1px solid var(--linha)}
+  .faq summary{font-weight:700;cursor:pointer;min-height:44px;display:flex;align-items:center}
+  .faq details p{margin-top:var(--s-2)}
+  .fecho{background:var(--tinta);color:var(--papel)}
+  .fecho h2{color:var(--papel)}
+  .fecho .lead{color:#d9ccb0}
+  .fecho .btn-zap{background:#1f8a52}
+  @media print{.fone{box-shadow:none;transform:none}.fecho{background:#fff;color:#000}.fecho h2,.fecho .lead{color:#000}}
+</style>
 <header class="hero">
-  <div class="wrap">
-    <span class="eyebrow">Expositores da Feira de Barão</span>
-    <h1>Sua barraca aberta a semana inteira, não só no fim de semana.</h1>
-    <p class="lead">Uma vitrine só sua, com seus produtos, preço, prazo de produção e pedido pelo WhatsApp. Um endereço para mandar no direct, no cartão e na sacola.</p>
-    {% if zap_url and zap_url != '#participar' %}<a class="btn-zap" href="{{ zap_url }}" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> Quero ver o meu site</a>{% endif %}
-    <p class="micro">A gente monta uma prévia com o seu nome antes de você decidir qualquer coisa.</p>
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">Expositores da Feira de Barão</span>
+      <h1>Sua barraca aberta a semana inteira, não só no fim de semana.</h1>
+      <p class="lead">Uma vitrine só sua, com seus produtos, preço, prazo de produção e pedido pelo WhatsApp. Um endereço para mandar no direct, no cartão e na sacola.</p>
+      {% if zap_url and zap_url != '#participar' %}<a class="btn-zap" href="{{ zap_url }}" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> Quero ver o meu site</a>{% endif %}
+      <p class="micro">A gente monta uma prévia com o seu nome antes de você decidir qualquer coisa.</p>
+    </div>
+    <div>
+      <div class="fone"><img src="{{ url_for('static', filename='img/portal/prova-berga.webp') }}" alt="Site da Dona Berga no celular: foto do lombo defumado e botão Encomendar" width="585" height="1170" decoding="async"></div>
+      <p class="fone-nota">Dona Berga, expositora da Feira: donaberga.com.br</p>
+    </div>
   </div>
 </header>
 
 <main id="conteudo" tabindex="-1">
 <section class="secao">
   <div class="wrap">
-    <span class="eyebrow">O que pesa hoje</span>
     <h2>O que a barraca perde quando a Feira fecha</h2>
     <div class="dores">
       <div class="dor"><p class="dor-hoje"><b>Hoje</b>O cliente pergunta preço e prazo no direct, de novo, toda semana.</p><p class="dor-com"><b>Com o site</b>Preço, prazo de produção e desconto no Pix já estão na vitrine.</p></div>
@@ -50,32 +86,43 @@
 
 <section class="secao">
   <div class="wrap">
-    <span class="eyebrow">Prova</span>
     <h2>Já tem site montado para os expositores</h2>
-    <p class="p">{% if n_expositores %}A Feira já lista {{ n_expositores }} expositores, cada um{% else %}Cada expositor tem{% endif %} com a vitrine em formato próprio: vitrine, cozinha, ateliê, jardim ou ritual, conforme o que a barraca faz. As fotos das prévias são ilustrativas até você mandar as suas.</p>
-    <p class="p"><a href="{{ url_for('public.feira') }}">Ver os expositores e os sites</a></p>
+    <p class="p">{% if n_expositores %}A Feira já lista {{ n_expositores }} expositores, cada um{% else %}Cada expositor tem{% endif %} com a vitrine em formato próprio, conforme o que a barraca faz. Abaixo, um site no ar e três prévias. As fotos das prévias são ilustrativas até você mandar as suas.</p>
+    <div class="prova">
+      <a href="https://donaberga.com.br" target="_blank" rel="noopener">
+        <figure><div class="rec"><img src="{{ url_for('static', filename='img/portal/prova-berga.webp') }}" alt="Site da Dona Berga" width="585" height="1170" loading="lazy" decoding="async"></div>
+        <figcaption><b>Dona Berga</b><span>No ar · charcutaria artesanal</span></figcaption></figure></a>
+      <a href="{{ url_for('public.landing_slug', slug='afazeres-arts') }}">
+        <figure><div class="rec"><img src="{{ url_for('static', filename='img/portal/prova-afazeres.webp') }}" alt="Prévia do site da Afazeres Arts" width="585" height="1170" loading="lazy" decoding="async"></div>
+        <figcaption><b>Afazeres Arts</b><span>Prévia · enxoval de bebê</span></figcaption></figure></a>
+      <a href="{{ url_for('public.landing_slug', slug='atelie-afetivo') }}">
+        <figure><div class="rec"><img src="{{ url_for('static', filename='img/portal/prova-afetivo.webp') }}" alt="Prévia do site do Ateliê Afetivo" width="585" height="1170" loading="lazy" decoding="async"></div>
+        <figcaption><b>Ateliê Afetivo</b><span>Prévia · bolsas e costura</span></figcaption></figure></a>
+      <a href="{{ url_for('public.landing_slug', slug='amor-em-artes') }}">
+        <figure><div class="rec"><img src="{{ url_for('static', filename='img/portal/prova-amor.webp') }}" alt="Prévia do site da Amor em Artes" width="585" height="1170" loading="lazy" decoding="async"></div>
+        <figcaption><b>Amor em Artes</b><span>Prévia · pintura em madeira</span></figcaption></figure></a>
+    </div>
+    <p class="p"><a href="{{ url_for('public.feira') }}">Ver todos os expositores</a></p>
   </div>
 </section>
 
 <section class="secao">
   <div class="wrap">
-    <span class="eyebrow">O que você recebe</span>
     <h2>O que entra no seu site, sem enfeite</h2>
-    <ul class="lista">
-      <li><b>Vitrine com seus produtos</b>, fotos, preço, prazo de produção e desconto no Pix.</li>
-      <li><b>Encomenda pelo WhatsApp:</b> o cliente monta a lista e ela chega pronta para você.</li>
-      <li><b>Sua barraca na Feira:</b> ponto na Praça do Coco, horário e lugar no mapa e na lista da Feira.</li>
-      <li><b>Quem faz:</b> um espaço para contar sua história, formas de pagamento, envio e redes.</li>
-      <li><b>Painel para você mesmo editar</b> produtos, preços e textos.</li>
-      <li><b>Boa leitura no celular,</b> claro e escuro, e um selo de expositor da Feira.</li>
-    </ul>
+    <dl class="entrega">
+      <div><dt>Vitrine com seus produtos</dt><dd>Fotos, preço, prazo de produção e desconto no Pix.</dd></div>
+      <div><dt>Encomenda pelo WhatsApp</dt><dd>O cliente monta a lista e ela chega pronta para você.</dd></div>
+      <div><dt>Sua barraca na Feira</dt><dd>Ponto na Praça do Coco, horário e lugar no mapa e na lista da Feira.</dd></div>
+      <div><dt>Quem faz</dt><dd>Um espaço para contar sua história, formas de pagamento, envio e redes.</dd></div>
+      <div><dt>Painel para editar</dt><dd>Produtos, preços e textos, você mesmo, quando quiser.</dd></div>
+      <div><dt>Boa leitura no celular</dt><dd>Claro e escuro, e um selo de expositor da Feira.</dd></div>
+    </dl>
     <p class="p">O que ainda não existe: pagamento dentro do site. Hoje o pagamento combina no WhatsApp, como você já faz.</p>
   </div>
 </section>
 
 <section class="secao">
   <div class="wrap">
-    <span class="eyebrow">O seu cliente</span>
     <h2>O que muda para quem compra de você</h2>
     <ul class="lista">
       <li>Acha o que você faz buscando o produto na página da Feira, e não só pelo seu Instagram.</li>
@@ -88,7 +135,6 @@
 
 <section class="secao" id="preco">
   <div class="wrap">
-    <span class="eyebrow">Preço</span>
     <h2>Dois jeitos de ter o seu site</h2>
     <div class="planos">
       <article class="plano plano--dest">
@@ -104,18 +150,25 @@
       </article>
     </div>
     <p class="p">Endereço na Feira e hospedagem inclusos nos dois.</p>
+    {% if zap_url and zap_url != '#participar' %}<a class="btn-zap" href="{{ zap_url }}" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> Pedir a minha prévia</a>{% endif %}
   </div>
 </section>
 
 <section class="secao faq">
   <div class="wrap">
-    <span class="eyebrow">Perguntas</span>
     <h2>O que todo expositor pergunta</h2>
-    <h3>Preciso comprar domínio?</h3><p class="p">Não. Seu site já abre dentro da Feira. Se você quiser um endereço próprio, a gente conversa à parte.</p>
-    <h3>E as fotos?</h3><p class="p">Você manda as suas e a gente coloca. A prévia usa fotos ilustrativas até lá.</p>
-    <h3>Tem comissão sobre minhas vendas?</h3><p class="p">Não. O valor é fixo, e a venda e o pagamento continuam entre você e o seu cliente.</p>
-    <h3>E se eu quiser sair?</h3><p class="p">No mensal, cancela quando quiser. No anual, o valor é à vista e não é devolvido.</p>
-    <h3>Como começa?</h3><p class="p">Você chama no WhatsApp, vê a prévia com o seu nome, manda fotos e informações, e o site entra no ar.</p>
+    <details><summary>Preciso comprar domínio?</summary><p class="p">Não. Seu site já abre dentro da Feira. Se você quiser um endereço próprio, a gente conversa à parte.</p></details>
+    <details><summary>E as fotos?</summary><p class="p">Você manda as suas e a gente coloca. A prévia usa fotos ilustrativas até lá.</p></details>
+    <details><summary>Tem comissão sobre minhas vendas?</summary><p class="p">Não. O valor é fixo, e a venda e o pagamento continuam entre você e o seu cliente.</p></details>
+    <details><summary>E se eu quiser sair?</summary><p class="p">No mensal, cancela quando quiser. No anual, o valor é à vista e não é devolvido.</p></details>
+    <details><summary>Como começa?</summary><p class="p">Você chama no WhatsApp, vê a prévia com o seu nome, manda fotos e informações, e o site entra no ar.</p></details>
+  </div>
+</section>
+
+<section class="secao fecho">
+  <div class="wrap">
+    <h2>Quer ver como fica a sua barraca?</h2>
+    <p class="lead">Mande o nome da barraca e uma foto. A prévia chega pelo WhatsApp, sem compromisso.</p>
     {% if zap_url and zap_url != '#participar' %}<a class="btn-zap" href="{{ zap_url }}" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> Chamar no WhatsApp</a>{% endif %}
   </div>
 </section>

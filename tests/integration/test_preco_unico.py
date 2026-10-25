@@ -52,7 +52,8 @@ def test_vendedor_mostra_precos_e_comissao_e_nao_indexa(dominio_do_produto, clie
 def test_expor_tem_dores_prova_e_faq(dominio_do_produto, client):
     html = _html(client, '/expor')
     assert html.count('<h1') == 1
-    assert 'id="preco"' in html and 'Perguntas' in html and 'Prova' in html
+    assert 'id="preco"' in html and 'O que todo expositor pergunta' in html
+    assert 'Já tem site montado' in html and html.count('<details>') >= 4
 
 
 def test_landing_comunitaria_nao_exibe_tabela_de_precos_nem_calculadora(

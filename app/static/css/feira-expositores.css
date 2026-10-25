@@ -48,12 +48,12 @@
 
 /* cartões da lista */
 .fp-lista ul{display:grid;gap:10px;margin:0;padding:0;list-style:none}
-.fp-card{position:relative;display:grid;grid-template-columns:96px 1fr;gap:14px;padding:12px;border-radius:12px;background:var(--papel-claro);color:var(--tinta);transition:background-color .15s}
+.fp-card{position:relative;display:grid;grid-template-columns:72px minmax(0,1fr);gap:12px;align-items:start;padding:10px;border-radius:12px;background:var(--papel-claro);color:var(--tinta);transition:background-color .15s}
 .fp-card:hover{background:var(--cartao)}
 .fp-card.hoje{background:color-mix(in srgb,var(--hoje) 22%,var(--papel-claro))}
 .fp-card.destacado{background:var(--tinta);color:var(--papel-claro)}
 .fp-card.destacado .fp-meta{color:var(--papel-escuro)}
-.fp-foto{width:96px;height:96px;border-radius:8px;object-fit:cover;background:var(--papel-escuro);display:flex;align-items:center;justify-content:center;font:400 2.2rem var(--font-cartaz);color:var(--taupe)}
+.fp-foto{width:72px;height:72px;border-radius:8px;object-fit:cover;background:var(--papel-escuro);display:flex;align-items:center;justify-content:center;font:400 1.75rem var(--font-cartaz);color:var(--taupe)}
 .fp-info{display:flex;flex-direction:column;gap:4px;min-width:0}
 .fp-selos{display:flex;flex-wrap:wrap;gap:6px}
 .fp-selo{display:inline-block;padding:2px 9px;border-radius:6px;font-size:.8125rem;font-weight:700;color:#fff;background:var(--tomate)}
@@ -62,8 +62,8 @@
 .fp-card h3{margin:0;font:700 1.1rem/1.2 var(--font-heading)}
 .fp-card h3 a{color:inherit;text-decoration:none}
 .fp-card h3 a::after{content:"";position:absolute;inset:0;border-radius:12px}
-.fp-meta{font-size:.9375rem;line-height:1.4;color:var(--taupe)}
-.fp-ver{position:relative;z-index:1;align-self:flex-start;min-height:44px;margin-top:2px;padding:0 4px;border:0;background:transparent;color:var(--tomate);font:inherit;font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.fp-meta{font-size:.875rem;line-height:1.4;color:var(--taupe);overflow-wrap:anywhere}
+.fp-ver{position:relative;z-index:1;align-self:flex-start;min-height:44px;margin:-8px 0 -10px;padding:0 4px;border:0;background:transparent;color:var(--tomate);font:inherit;font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .fp-card.destacado .fp-ver{color:var(--ambar)}
 
 /* produtos achados na busca */

@@ -333,60 +333,43 @@
 <!-- ========================================================
      6. OS BARES, BOTECOS E BARRACAS GASTRONÔMICAS DE BARÃO
      ======================================================== -->
-<section id="bares" class="secao-bares">
+<section id="bares" class="secao-bares hm-secao" aria-labelledby="bares-titulo">
   <div class="wrap">
-    <div class="hm-cab-centro">
-      <span class="chapeu-dossie">Boemia &amp; Mesas na Calçada</span>
-      <h2 class="hm-h2">Os bares de Barão</h2>
-      <p>
-        Em Barão Geraldo, cada boteco, choperia e restaurante tem alma de barraca de feira: lugar de encontrar amigos, conversar sem pressa e comer bem. Toque em qualquer casa para visitar sua barraca digital:
-      </p>
-    </div>
-
-    {# Cliente pagante na frente das prévias, com link para o endereço canônico
-       dele: é a página da casa que o Google indexa (as prévias são noindex). #}
-    {% if clientes_destaque %}
-    <div class="clientes-feira">
-      <h3>Casas Parceiras da Rede</h3>
-      <div class="grid-23-bares" style="margin-top:16px;">
-        {% for c in clientes_destaque %}
-        <a class="bar-card-kraft" href="{{ c.url }}">
-          {% if c.foto %}
-          <img class="bar-img-thumb" src="{{ c.foto if c.foto.startswith(('http', '/')) else url_for('static', filename=c.foto) }}" alt="{{ c.nome }}" width="480" height="360" loading="lazy" decoding="async">
-          {% endif %}
-          <div class="bar-info-box">
-            <h4 class="bar-title-kraft">{{ c.nome }}</h4>
-            <div style="margin-top:auto; font-size:0.82rem; font-weight:700; color:var(--tomate); display:flex; justify-content:space-between; align-items:center; padding-top:8px;">
-              <span>Visitar o site</span>
-              <i class="fas fa-arrow-right"></i>
-            </div>
-          </div>
-        </a>
-        {% endfor %}
+    <div class="hm-cab">
+      <div>
+        <h2 id="bares-titulo" class="hm-h2">Os bares de Barão</h2>
+        <p class="hm-nota">Boteco, choperia e restaurante da região. Toque numa casa para abrir a barraca digital dela.</p>
       </div>
     </div>
+
+    {# Cliente pagante na frente, com link para o endereço canônico dele: é a página
+       que o Google indexa (as prévias são noindex). Só cliente tem foto; prévia
+       ganha a inicial desenhada (R4: nunca um retângulo vazio). #}
+    {% if clientes_destaque %}
+    <h3 class="hm-sub-titulo">Casas parceiras</h3>
+    <ul class="hm-lista">
+      {% for c in clientes_destaque %}
+      <li class="hm-exp">
+        {% if c.foto %}<img class="hm-foto" src="{{ c.foto if c.foto.startswith(('http', '/')) else url_for('static', filename=c.foto) }}" alt="" loading="lazy" width="72" height="72" decoding="async">
+        {% else %}<span class="hm-foto" aria-hidden="true">{{ c.nome[:1]|upper }}</span>{% endif %}
+        <div class="hm-corpo"><h3><a href="{{ c.url }}">{{ c.nome }}</a></h3><p>Visitar o site</p></div>
+      </li>
+      {% endfor %}
+    </ul>
     {% endif %}
 
     {% if bares %}
-    <div class="grid-23-bares">
+    <ul class="hm-lista">
       {% for b in bares %}
-      <a class="bar-card-kraft" href="{{ url_for('public.landing_slug', slug=b.slug) }}">
-        <img class="bar-img-thumb" src="{{ url_for('static', filename=b.foto_480) }}" alt="{{ b.nome }}" width="480" height="360" loading="lazy" decoding="async">
-        <div class="bar-info-box">
-          <h3 class="bar-title-kraft">{{ b.nome }}</h3>
-          <div class="bar-nota-linha">
-            <i class="fas fa-star text-warning"></i>
-            <span>{{ b.nota }}</span>
-            {% if b.avaliacoes %}<span style="color:var(--taupe); font-weight:500;">({{ b.avaliacoes }} no Google)</span>{% endif %}
-          </div>
-          <div style="margin-top:auto; font-size:0.82rem; font-weight:700; color:var(--tomate); display:flex; justify-content:space-between; align-items:center; padding-top:8px;">
-            <span>Abrir Barraca</span>
-            <i class="fas fa-arrow-right"></i>
-          </div>
+      <li class="hm-exp">
+        <span class="hm-foto" aria-hidden="true">{{ b.nome[:1]|upper }}</span>
+        <div class="hm-corpo">
+          <h3><a href="{{ url_for('public.landing_slug', slug=b.slug) }}">{{ b.nome }}</a></h3>
+          {% if b.descritor %}<p>{{ b.descritor }}</p>{% endif %}
         </div>
-      </a>
+      </li>
       {% endfor %}
-    </div>
+    </ul>
     {% endif %}
   </div>
 </section>

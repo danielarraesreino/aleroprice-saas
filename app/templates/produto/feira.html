@@ -64,16 +64,13 @@
     <ul>
       {% for e in expositores %}
       <li class="fp-card{% if e.hoje %} hoje{% endif %}" data-slug="{{ e.slug }}">
-        {% if e.foto %}<img class="fp-foto" src="{{ e.foto_sm or e.foto }}" alt="" loading="lazy" width="96" height="96">
+        {% if e.foto %}<img class="fp-foto" src="{{ e.foto_sm or e.foto }}" alt="" loading="lazy" width="72" height="72">
         {% else %}<span class="fp-foto" aria-hidden="true">{{ e.nome[:1]|upper }}</span>{% endif %}
         <div class="fp-info">
-          <span class="fp-selos">
-            <span class="fp-selo {{ e.tipo }}">{{ e.tipo_rotulo }}</span>
-            {% if e.hoje %}<span class="fp-selo hoje">Na feira hoje</span>{% endif %}
-          </span>
+          {% if e.hoje %}<span class="fp-selos"><span class="fp-selo hoje">Na feira hoje</span></span>{% endif %}
           <h3><a href="{{ e.url }}">{{ e.nome }}</a></h3>
-          {% if e.descritor %}<span class="fp-meta">{{ e.descritor }}</span>{% endif %}
-          {% if e.categorias %}<span class="fp-meta">{{ e.categorias|join(', ') }}</span>{% endif %}
+          {% if e.descritor %}<span class="fp-meta">{{ e.descritor }}</span>
+          {% elif e.categorias %}<span class="fp-meta">{{ e.categorias|join(', ') }}</span>{% endif %}
           {% if e.ponto %}<span class="fp-meta"><strong>Onde:</strong> {{ e.ponto }}</span>{% endif %}
           {% if e.lat is not none %}<button type="button" class="fp-ver" data-ver="{{ e.slug }}" hidden>Ver no mapa</button>{% endif %}
         </div>
