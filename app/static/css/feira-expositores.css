@@ -30,9 +30,16 @@
 #mapa-feira{height:min(46vh,340px);min-height:260px;border-radius:12px;background:var(--papel-escuro);overflow:hidden}
 .fp-legenda{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:8px;font-size:.9rem;color:var(--taupe)}
 .fp-legenda span{display:inline-flex;align-items:center;gap:6px}
-.pino{display:block;width:22px;height:22px;border-radius:50%;border:3px solid #fff;box-sizing:border-box;transition:transform .15s}
+.pino{display:flex;align-items:center;justify-content:center;position:relative;width:24px;height:24px;border-radius:50%;border:3px solid #fff;box-sizing:border-box;color:#fff;transition:transform .15s}
+.pino svg{width:62%;height:62%;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.pino b{font:700 11px/1 var(--f-corpo,system-ui,sans-serif)}
+.pop{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;max-width:230px}
+.pop img{width:48px;height:48px;border-radius:50%;object-fit:cover}
 .pino-bar{background:var(--tomate)}.pino-artesao{background:var(--verde)}
 .pino-hoje{width:30px;height:30px;border-color:var(--hoje)}
+.pino-hoje::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--hoje);opacity:0;animation:pulso 2.2s ease-out infinite}
+@keyframes pulso{0%{transform:scale(.75);opacity:.9}100%{transform:scale(1.45);opacity:0}}
+@media (prefers-reduced-motion:reduce){.pino-hoje::after{animation:none;opacity:.55}}
 .pino-sel{transform:scale(1.35)}
 .leaflet-div-icon{background:transparent;border:0}
 .fp .leaflet-bar a{width:44px;height:44px;line-height:44px;font-size:24px}

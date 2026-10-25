@@ -33,8 +33,6 @@
   <nav aria-label="Filtrar expositores"><ul class="fp-filtros">
     <li><a href="{{ url_for('public.feira', q=q or None) }}"{% if not tipo and not so_hoje %} aria-current="true"{% endif %}>Todos</a></li>
     <li><a href="{{ url_for('public.feira', q=q or None, hoje=1) }}"{% if so_hoje %} aria-current="true"{% endif %}>Na feira hoje</a></li>
-    <li><a href="{{ url_for('public.feira', q=q or None, tipo='artesao') }}"{% if tipo == 'artesao' %} aria-current="true"{% endif %}>Artesãos</a></li>
-    <li><a href="{{ url_for('public.feira', q=q or None, tipo='bar') }}"{% if tipo == 'bar' %} aria-current="true"{% endif %}>Bares</a></li>
   </ul></nav>
 </div>
 
@@ -96,7 +94,6 @@
     <div id="mapa-feira" role="region" aria-label="Mapa com a barraca de cada expositor na Feira de Barão"></div>
     <div class="fp-legenda" aria-hidden="true">
       <span><i class="pino pino-artesao fp-leg-pino"></i> Artesão</span>
-      <span><i class="pino pino-bar fp-leg-pino"></i> Bar</span>
       <span><i class="pino pino-artesao pino-hoje fp-leg-pino hoje"></i> Na feira hoje</span>
     </div>
     <p class="fp-meta">A lista traz as mesmas informações em texto.</p>
@@ -122,6 +119,56 @@
     var calmo = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var marcadores = {}, cartao_atual = null;
 
+    // Ícone pela categoria do primeiro produto; sem palavra conhecida, a inicial do nome.
+    var GLIFOS = {
+      comida: '<path d="M7 3v7a2 2 0 0 0 4 0V3M9 3v18M17 3c-2.5 1.5-3 6 0 9v9"/>',
+      planta: '<path d="M5 19c0-8 5-14 14-14 0 9-6 14-14 14zM5 19l8-8"/>',
+      artesanato: '<circle cx="12" cy="12" r="8"/><path d="M6 9c4 2 8 2 12 0M5 14c5 2 9 2 14 0"/>',
+      joia: '<path d="M6 4h12l4 6-10 11L2 10z"/>',
+      arte: '<rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="9" cy="9" r="1.5"/><path d="M4 17l5-5 4 4 3-3 4 4"/>'
+    };
+    var PALAVRAS = {
+      planta: ['planta', 'flor', 'jardim', 'muda', 'suculenta', 'orquidea'],
+      joia: ['joia', 'bijuteria', 'brinco', 'colar', 'pulseira', 'anel', 'prata'],
+      arte: ['arte', 'quadro', 'ilustra', 'pintura', 'livro', 'poster', 'fotografia', 'tarot', 'esoter'],
+      artesanato: ['ceramica', 'croche', 'trico', 'costura', 'bordado', 'madeira', 'couro', 'vela', 'sabonete', 'artesanato', 'macrame', 'tecido'],
+      comida: ['pao', 'bolo', 'doce', 'queijo', 'geleia', 'compota', 'biscoito', 'salgado', 'embutido', 'charcut', 'defumad', 'cafe', 'comida', 'molho', 'tempero', 'mel', 'chopp', 'cerveja', 'bebida', 'vinho']
+    };
+    function glifo(p) {
+      var cat = (p.cat || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      var chaves = Object.keys(PALAVRAS);
+      for (var i = 0; i < chaves.length; i++) {
+        if (PALAVRAS[chaves[i]].some(function (w) { return cat.indexOf(w) !== -1; })) {
+          return '<svg viewBox="0 0 24 24" aria-hidden="true">' + GLIFOS[chaves[i]] + '</svg>';
+        }
+      }
+      return '<b aria-hidden="true">' + (p.nome || '?').charAt(0).toUpperCase().replace(/[<>&]/g, '') + '</b>';
+    }
+
+    // Barracas a poucos metros uma da outra ficam sobrepostas no mapa. Quem está a menos de
+    // 6 m de um grupo vai para um círculo em volta do centro dele, só na exibição: o dado
+    // gravado não muda (o GPS do celular já erra de 5 a 15 m).
+    function espalhar(lista) {
+      var grupos = [];
+      lista.forEach(function (p) {
+        var g = grupos.filter(function (g) {
+          var dx = (p.lng - g.lng) * Math.cos(g.lat * Math.PI / 180) * 111320, dy = (p.lat - g.lat) * 110540;
+          return Math.sqrt(dx * dx + dy * dy) < 6;
+        })[0];
+        if (g) { g.itens.push(p); } else { grupos.push({lat: p.lat, lng: p.lng, itens: [p]}); }
+      });
+      grupos.forEach(function (g) {
+        var n = g.itens.length;
+        if (n < 2) { g.itens[0].exib = [g.lat, g.lng]; return; }
+        var r = Math.max(3.5, 3.4 / Math.sin(Math.PI / n));
+        g.itens.forEach(function (p, i) {
+          var a = 2 * Math.PI * i / n;
+          p.exib = [g.lat + r * Math.sin(a) / 110540,
+                    g.lng + r * Math.cos(a) / (111320 * Math.cos(g.lat * Math.PI / 180))];
+        });
+      });
+    }
+
     function marcar(slug) {
       if (cartao_atual) { cartao_atual.classList.remove('destacado'); }
       Object.keys(marcadores).forEach(function (s) {
@@ -136,17 +183,22 @@
       if (typeof L === 'undefined') { return setTimeout(montar, 150); }
       // No celular o mapa não captura o dedo que rola a página; pinça para dar zoom.
       var mapa = L.map('mapa-feira', {scrollWheelZoom: false, dragging: !L.Browser.mobile}).setView(centro, 17);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '© OpenStreetMap', maxZoom: 19}).addTo(mapa);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '© OpenStreetMap', maxNativeZoom: 19, maxZoom: 21}).addTo(mapa);
       var limites = [];
+      espalhar(pontos);
       pontos.forEach(function (p) {
-        var icone = L.divIcon({className: '', html: '<span class="pino pino-' + p.tipo + (p.hoje ? ' pino-hoje' : '') + '"></span>',
-                               iconSize: p.hoje ? [30, 30] : [22, 22]});
-        var m = L.marker([p.lat, p.lng], {icon: icone, title: p.nome, alt: p.nome}).addTo(mapa);
-        var caixa = document.createElement('div');
+        var icone = L.divIcon({className: '', html: '<span class="pino pino-' + p.tipo + (p.hoje ? ' pino-hoje' : '') + '">' + glifo(p) + '</span>',
+                               iconSize: p.hoje ? [30, 30] : [24, 24]});
+        var m = L.marker(p.exib || [p.lat, p.lng], {icon: icone, title: p.nome, alt: p.nome}).addTo(mapa);
+        var caixa = document.createElement('div'); caixa.className = 'pop';
+        if (p.foto) { var f = document.createElement('img'); f.src = p.foto; f.alt = ''; f.width = 48; f.height = 48; caixa.appendChild(f); }
+        var txt = document.createElement('div');
         var a = document.createElement('a'); a.href = p.url; a.textContent = p.nome; a.style.fontWeight = '700';
-        caixa.appendChild(a);
-        if (p.hoje) { var h = document.createElement('div'); h.textContent = 'Na feira hoje'; caixa.appendChild(h); }
-        if (p.ponto) { var o = document.createElement('div'); o.textContent = p.ponto; caixa.appendChild(o); }
+        txt.appendChild(a);
+        if (p.descritor) { var d = document.createElement('div'); d.textContent = p.descritor; txt.appendChild(d); }
+        if (p.hoje) { var h = document.createElement('div'); h.textContent = 'Na feira hoje'; txt.appendChild(h); }
+        if (p.ponto) { var o = document.createElement('div'); o.textContent = p.ponto; txt.appendChild(o); }
+        caixa.appendChild(txt);
         m.bindPopup(caixa);
         m.on('click', function () {
           marcar(p.slug);

@@ -551,14 +551,17 @@ def _preco_schema(valor):
 def _pedacos_de_produto(produtos, origem, url_canonica, id_vendedor):
     """Nós `Product` do hotsite de artesão. Sem produto, lista vazia.
 
-    `Offer` só quando há preço (mesma regra do cardápio: nunca "0.00").
-    Produto sob encomenda sem preço sai sem `offers` e sem disponibilidade
-    inventada; com preço e sob encomenda, `PreOrder`.
+    Só vira `Product` quem tem preço (nunca "0.00"): o Google trata `Product`
+    sem `offers` como erro crítico e desqualifica o item (Search Console, 24/10).
+    Produto sem preço fica só no HTML visível. Com preço e sob encomenda, `PreOrder`.
     """
     nos = []
     for i, prod in enumerate(produtos or [], start=1):
         nome = _limpo(_campo(prod, 'nome'))
         if not nome:
+            continue
+        preco = _preco_schema(_campo(prod, 'preco'))
+        if not preco:
             continue
         no = {'@type': 'Product', '@id': f'{url_canonica}#produto-{i}', 'name': nome}
         descricao = _limpo(_campo(prod, 'descricao'))
@@ -570,7 +573,6 @@ def _pedacos_de_produto(produtos, origem, url_canonica, id_vendedor):
         categoria = _limpo(_campo(prod, 'categoria'))
         if categoria:
             no['category'] = categoria
-        preco = _preco_schema(_campo(prod, 'preco'))
         if preco:
             oferta = {'@type': 'Offer', 'price': preco, 'priceCurrency': 'BRL',
                       'seller': {'@id': id_vendedor}}

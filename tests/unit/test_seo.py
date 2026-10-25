@@ -634,11 +634,10 @@ def test_expositor_na_feira_emite_endereco_horario_geo_mapa_e_oferta():
     assert loja['geo']['latitude'] == -22.8227
     assert loja['hasMap'] == 'https://www.google.com/maps/place/?q=place_id:ChIJabc123'
 
-    com_preco, sem_preco = [n for n in grafo['@graph'] if n['@type'] == 'Product']
+    (com_preco,) = [n for n in grafo['@graph'] if n['@type'] == 'Product']
     assert com_preco['offers']['price'] == '80.00'
     assert com_preco['offers']['priceCurrency'] == 'BRL'
     assert com_preco['offers']['availability'] == 'https://schema.org/InStock'
-    assert 'offers' not in sem_preco
     for caminho, valor in varrer(grafo):
         assert valor not in (None, '', 'None'), caminho
 

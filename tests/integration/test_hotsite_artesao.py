@@ -46,8 +46,8 @@ def test_json_ld_tem_product_e_nao_menu(client, session):
     grafo = _grafo(client.get(f'/bar/{SLUG}').get_data(as_text=True))
     tipos = [n['@type'] for n in grafo]
     assert 'Store' in tipos and 'Menu' not in tipos
-    assert tipos.count('Product') == len(IMAGENS)      # só os que têm foto
-    assert all('offers' not in n for n in grafo if n['@type'] == 'Product')  # sem preço
+    # sem preço não há Product: o Google trata Product sem offers como erro crítico
+    assert 'Product' not in tipos
 
 
 def test_preco_vira_offer(client, session):

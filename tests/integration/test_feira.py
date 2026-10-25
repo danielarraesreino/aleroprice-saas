@@ -77,13 +77,13 @@ def test_feira_vazia_tem_estado_vazio_e_nao_quebra(client, session):
     assert 'id="mapa-feira"' not in corpo
 
 
-def test_lista_so_artesao_ou_bar_com_ponto(client, session):
+def test_feira_lista_so_artesao_e_manda_bar_para_a_home(client, session):
     _tenant(session, 'artesa', '70000000000171', tipo='artesao', nome='Ateliê Teste')
     _tenant(session, 'bar-com-pino', '70000000000172', lat=-22.8227, lng=-47.0821, nome='Bar Com Pino')
-    _tenant(session, 'bar-sem-pino', '70000000000173', nome='Bar Sem Pino')
     corpo = client.get('/feira').get_data(as_text=True)
-    assert 'Ateliê Teste' in corpo and 'Bar Com Pino' in corpo
-    assert 'Bar Sem Pino' not in corpo
+    assert 'Ateliê Teste' in corpo and 'Bar Com Pino' not in corpo
+    r = client.get('/feira?tipo=bar')
+    assert r.status_code == 301 and r.headers['Location'].endswith('/#bares')
 
 
 def test_mapa_recebe_so_quem_tem_coordenada(client, session):
@@ -197,3 +197,11 @@ def test_json_ld_do_expositor_ganha_geo_quando_tem_coordenada(client, session):
     grafo = _grafo(client.get('/bar/banca-geo').get_data(as_text=True))
     geo = next(n['geo'] for n in grafo if n['@type'] == 'Store')
     assert geo == {'@type': 'GeoCoordinates', 'latitude': -22.8227, 'longitude': -47.0821}
+
+
+def test_home_vitrine_de_expositores_nao_mistura_bar(client, session):
+    _tenant(session, 'art-home', '70000000000181', tipo='artesao', nome='Artesã da Home')
+    _tenant(session, 'bar-home', '70000000000182', lat=-22.8227, lng=-47.0821, nome='Bar da Home')
+    corpo = client.get('/').get_data(as_text=True)
+    vitrine = corpo[corpo.index('id="expositores"'):corpo.index('id="bares"')]
+    assert 'Artesã da Home' in vitrine and 'Bar da Home' not in vitrine

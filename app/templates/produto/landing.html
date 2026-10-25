@@ -111,7 +111,7 @@
         {% if e.foto %}<img class="hm-foto" src="{{ e.foto_sm or e.foto }}" alt="" loading="lazy" width="320" height="240">
         {% else %}<span class="hm-foto" aria-hidden="true">{{ e.nome[:1]|upper }}</span>{% endif %}
         <div class="hm-corpo">
-          <span class="hm-selos"><span class="hm-selo {{ e.tipo }}">{{ e.tipo_rotulo }}</span>{% if e.hoje %}<span class="hm-selo hoje">Na feira hoje</span>{% endif %}</span>
+          {% if e.hoje %}<span class="hm-selos"><span class="hm-selo hoje">Na feira hoje</span></span>{% endif %}
           <h3><a href="{{ e.url }}">{{ e.nome }}</a></h3>
           {% if e.descritor %}<p>{{ e.descritor }}</p>{% endif %}
         </div>
@@ -604,7 +604,11 @@
 
       PONTOS_HISTORICOS.forEach(p => {
         const m = L.marker([p.lat, p.lng], { icon: iconeTomate, title: p.nome, alt: p.nome }).addTo(map);
-        m.bindPopup(`<strong>${p.nome}</strong><br><small>${p.desc}</small>`);
+        const caixa = document.createElement('div');
+        const nome = document.createElement('strong'); nome.textContent = p.nome;
+        const desc = document.createElement('small'); desc.textContent = p.desc || '';
+        caixa.append(nome, document.createElement('br'), desc);
+        m.bindPopup(caixa);
         allMarkers.push(m);
       });
     } catch(err) {

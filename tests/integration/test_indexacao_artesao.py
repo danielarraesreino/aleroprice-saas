@@ -75,7 +75,7 @@ def test_json_ld_de_previa_nao_tem_image(client, session):
     corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
     bruto = re.search(r'<script type="application/ld\+json">(.*?)</script>', corpo, re.S).group(1)
     grafo = json.loads(bruto)['@graph']
-    assert any(n['@type'] == 'Product' for n in grafo)
+    assert any(n['@type'] == 'Store' for n in grafo)
     assert not _tem_image(grafo)
 
 
