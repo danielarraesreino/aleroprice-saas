@@ -462,7 +462,9 @@
 </section>
 
 <section id="novidades" class="hm-novidades">
-  {% with novidades_bar = '' %}{% include "site/_novidades.html" %}{% endwith %}
+  {% with novidades_bar = '', novidades_fonte = 'home', novidades_perfil = true,
+          novidades_titulo = 'Receba a agenda da Feira de Barão',
+          novidades_texto = 'Eventos da Feira e novidades dos expositores e dos bares. Um e-mail de vez em quando, sem spam.' %}{% include "site/_novidades.html" %}{% endwith %}
 </section>
 
 </main>

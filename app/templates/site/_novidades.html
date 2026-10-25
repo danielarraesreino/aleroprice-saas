@@ -2,12 +2,15 @@
    e às páginas dos bares: o token de CSRF vem de /novidades/token na hora do
    envio, nunca do HTML. Cores herdadas de quem inclui (currentColor).
    Parâmetros opcionais: `novidades_bar` = slug do bar (vira ORIGEM=bar:<slug>);
-   `novidades_titulo` e `novidades_texto` trocam a chamada (hotsite de expositor fala da Feira). #}
+   `novidades_titulo` e `novidades_texto` trocam a chamada (hotsite de expositor fala da Feira).
+   `novidades_fonte` ('home'|'agenda'|'expor') marca de onde veio; `novidades_perfil` mostra
+   a pergunta "Você é" (morador | expositor | dono de bar) e vira ORIGEM=<fonte>:<perfil>. #}
 <div class="novidades-box" style="max-width:520px;margin:28px auto;padding:20px 18px;border:1px solid currentColor;border-radius:12px;text-align:left;font-size:.95rem;">
   <p style="font-weight:700;margin:0 0 4px;">{{ novidades_titulo or 'Receba as novidades dos bares de Barão' }}</p>
   <p style="margin:0 0 14px;opacity:.8;font-size:.88rem;">{{ novidades_texto or 'Promoções, música ao vivo e eventos da Feira. Um e-mail de vez em quando, sem spam.' }}</p>
   <form class="form-novidades" novalidate>
     <input type="hidden" name="bar" value="{{ novidades_bar or '' }}">
+    <input type="hidden" name="fonte" value="{{ novidades_fonte or '' }}">
     <input type="text" name="site" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;">
     <label style="display:block;margin-bottom:8px;">
       <span style="display:block;font-size:.82rem;">Nome</span>
@@ -17,6 +20,17 @@
       <span style="display:block;font-size:.82rem;">E-mail</span>
       <input type="email" name="email" required maxlength="254" autocomplete="email" autocapitalize="none" style="width:100%;min-height:44px;padding:10px;border-radius:8px;border:1px solid currentColor;background:transparent;color:inherit;font-size:16px;">
     </label>
+    {% if novidades_perfil %}
+    <label style="display:block;margin-bottom:8px;">
+      <span style="display:block;font-size:.82rem;">Você é</span>
+      <select name="perfil" style="width:100%;min-height:44px;padding:10px;border-radius:8px;border:1px solid currentColor;background:transparent;color:inherit;font-size:16px;">
+        <option value="">Prefiro não dizer</option>
+        <option value="morador">Moro ou frequento Barão</option>
+        <option value="expositor">Tenho barraca na Feira</option>
+        <option value="bar">Tenho um bar ou restaurante</option>
+      </select>
+    </label>
+    {% endif %}
     <label style="display:block;margin-bottom:10px;">
       <span style="display:block;font-size:.82rem;">WhatsApp (opcional)</span>
       <input type="tel" name="telefone" maxlength="30" autocomplete="tel" style="width:100%;min-height:44px;padding:10px;border-radius:8px;border:1px solid currentColor;background:transparent;color:inherit;font-size:16px;">

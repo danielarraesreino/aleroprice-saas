@@ -125,3 +125,18 @@ def test_pagina_do_bar_tem_formulario_com_o_slug(client, session, modelo):
     session.commit()
     html = client.get(f'/bar/bar-form?modelo={modelo}').get_data(as_text=True)
     assert 'form-novidades' in html and 'name="bar" value="bar-form"' in html
+
+
+def test_origem_leva_fonte_e_perfil_so_de_conjunto_conhecido(client, session, brevo):
+    _inscreve(client, fonte='agenda', perfil='bar')
+    assert brevo[-1][1]['attributes']['ORIGEM'] == 'agenda:bar'
+    _inscreve(client, fonte='home', perfil='morador')
+    assert brevo[-1][1]['attributes']['ORIGEM'] == 'home:morador'
+    _inscreve(client, fonte='<script>', perfil='hacker')
+    assert brevo[-1][1]['attributes']['ORIGEM'] == 'home'
+
+
+def test_home_pergunta_o_perfil_e_fala_da_feira_inteira(client, session):
+    corpo = client.get('/').get_data(as_text=True)
+    assert 'Receba a agenda da Feira de Barão' in corpo
+    assert 'name="perfil"' in corpo and 'name="fonte" value="home"' in corpo

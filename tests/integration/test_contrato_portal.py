@@ -14,7 +14,7 @@ import pytest
 PAGINAS = ['/', '/feira', '/expor', '/vendedor', '/site-para-bar-em-campinas',
            '/privacidade', '/termos']
 VENDA = ['/expor', '/site-para-bar-em-campinas']          # precisam provar e chamar
-MAX_CHAPEUS = {'/expor': 1}                                # padrão novo: estrito
+MAX_CHAPEUS = {'/expor': 1, '/site-para-bar-em-campinas': 2}                                # padrão novo: estrito
 TETO_ATUAL = 12                                            # demais páginas: não piorar
 CHAPEU = re.compile(r'class="[^"]*\b(?:eyebrow|chapeu-dossie)\b')
 
@@ -47,11 +47,7 @@ def test_chapeu_em_caixa_alta_nao_vira_molde(client, session, zap, rota):
     assert n <= MAX_CHAPEUS.get(rota, TETO_ATUAL), f'{rota}: {n} chapéus'
 
 
-@pytest.mark.parametrize('rota', [
-    '/expor',
-    pytest.param('/site-para-bar-em-campinas', marks=pytest.mark.xfail(
-        strict=True, reason='dívida: página dos bares ainda sem captura de site real')),
-])
+@pytest.mark.parametrize('rota', VENDA)
 def test_pagina_de_venda_prova_e_chama(client, session, zap, rota):
     h = _html(client, rota)
     corpo = h[h.index('<main'):h.index('</main>')] if '<main' in h else h

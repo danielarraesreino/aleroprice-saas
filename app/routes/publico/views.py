@@ -1216,6 +1216,13 @@ def novidades():
     bar = tenant_por_slug(slug) if slug else None
     if bar is not None:
         origem = f'bar:{bar.slug}'
+    else:
+        fonte = (request.form.get('fonte') or '').strip()
+        perfil = (request.form.get('perfil') or '').strip()
+        if fonte in ('home', 'agenda', 'expor'):
+            origem = fonte
+        if perfil in ('morador', 'expositor', 'bar'):
+            origem = f'{origem}:{perfil}'    # lead segmentado sem atributo novo no Brevo
 
     atributos = {'NOME': nome, 'ORIGEM': origem,
                  'CONSENTIMENTO': datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}

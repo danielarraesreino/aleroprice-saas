@@ -150,6 +150,7 @@
   .fone-linha{height:7px;background:rgb(37 27 16 / .11);border-radius:2px;margin-top:8px}
   .fone-linha--c{width:76%}
   .fone-linha--m{width:54%}
+  .fone-img{display:block;width:100%;height:auto;border-radius:19px}
   .fone-legenda{text-align:center;font-size:var(--t-micro);color:var(--taupe);margin-top:var(--s-4)}
   .fone-legenda a{color:var(--tomate);font-weight:700}
 
@@ -277,7 +278,6 @@
   <section class="secao">
     <div class="wrap prova-grid">
       <div data-reveal>
-        <span class="eyebrow">Prova viva</span>
         <h2>O Bar da Vila foi o primeiro</h2>
         <p class="secao-p">A gente sabe o trabalho que dá segurar o balcão e ainda alimentar rede social todo dia. O <b>Bar da Vila</b>, aqui em Campinas, foi o primeiro a sair dessa: site próprio, reserva caindo no WhatsApp do balcão e cardápio com foto. Entra e confere: está no ar agora.</p>
         <div class="contador">
@@ -289,26 +289,7 @@
         </div>
       </div>
       <div data-reveal>
-        <div class="fone" role="img" aria-label="Celular mostrando o site bardavila.bar: nome do bar, botões de reservar mesa e ver cardápio, e a agenda da semana.">
-          <div class="fone-notch"></div>
-          <div class="fone-tela" aria-hidden="true">
-            <div class="fone-url"><span class="cadeado"></span> bardavila.bar</div>
-            <div class="fone-hero">
-              <span class="fone-kicker">Campinas · SP</span>
-              <p class="fone-nome">Bar da Vila</p>
-              <div class="fone-chips">
-                <span class="fone-chip fone-chip--cheio">Reservar mesa</span>
-                <span class="fone-chip fone-chip--vazio">Cardápio</span>
-              </div>
-            </div>
-            <div class="fone-bloco">
-              <p class="fone-rotulo">Agenda da semana</p>
-              <div class="fone-linha"></div>
-              <div class="fone-linha fone-linha--c"></div>
-              <div class="fone-linha fone-linha--m"></div>
-            </div>
-          </div>
-        </div>
+        <div class="fone"><img class="fone-img" src="{{ url_for('static', filename='img/portal/prova-bardavila.webp') }}" alt="Site do Bar da Vila no celular: nome, nota 4,9 no Google, botões Chamar no WhatsApp e Como chegar" width="585" height="1170" loading="lazy" decoding="async"></div>
         <p class="fone-legenda">Cliente de verdade, na mesma cidade:<br><a href="https://bardavila.bar" target="_blank" rel="noopener">bardavila.bar</a></p>
       </div>
     </div>
@@ -317,7 +298,6 @@
   <!-- 3. google -->
   <section class="secao">
     <div class="wrap" data-reveal>
-      <span class="eyebrow">Onde a decisão fecha</span>
       <h2>Quem busca “bar em Barão Geraldo” decide no Google</h2>
       <p class="secao-p">Nota, foto, rota: a escolha acontece ali, em segundos. E quando a pessoa toca em <b>Site</b>, ela precisa cair num lugar que feche a decisão: cardápio de dar fome, reserva na hora, endereço certo.</p>
       <p class="secao-p">A gente monta esse lugar <b>e arruma a sua ficha no Google</b>: horário certo, fotos, cardápio e o link do site no campo certo. O perfil continua sendo seu, a gente só faz ele trabalhar.</p>
@@ -354,7 +334,6 @@
   <section class="secao">
     <div class="wrap">
       <div data-reveal>
-        <span class="eyebrow">O que chega pro seu bar</span>
         <h2>O que vem no site</h2>
       </div>
       <div class="cards">
@@ -403,7 +382,6 @@
   <section class="secao" id="preco">
     <div class="wrap">
       <div data-reveal>
-        <span class="eyebrow">Preço de feira</span>
         <h2>Um plano agora, o Pro depois</h2>
       </div>
       <div class="planos">
@@ -461,7 +439,6 @@
 {% if campinas %}
   <section class="secao" id="perguntas">
     <div class="wrap" data-reveal>
-      <span class="eyebrow">Perguntas</span>
       <h2>O que todo dono de bar pergunta</h2>
       {% for q, r in faq %}<h3 style="margin-top:1.2rem">{{ q }}</h3><p class="secao-p">{{ r }}</p>{% endfor %}
     </div>
@@ -474,7 +451,6 @@
   <!-- 6. contexto barão -->
   <section class="secao">
     <div class="wrap" data-reveal>
-      <span class="eyebrow">Daqui</span>
       <h2>Feito pra noite de Barão</h2>
       <p class="secao-p">Todo mundo conhece o fim de semana em que Barão se encontra na Praça do Coco. A Feira de Barão é o ponto alto do bairro, mas este serviço é separado dela e cuida do resto da semana: seu bar visível e reservável, de segunda a segunda.</p>
       <p class="marquee-titulo">Barão tem bar demais pra qualquer um ficar invisível</p>
@@ -495,7 +471,6 @@
   <!-- 7. cta final -->
   <section class="secao">
     <div class="wrap" data-reveal>
-      <span class="eyebrow">Sem burocracia</span>
       <h2>Chama no zap que eu monto o seu junto com você, na mesa.</h2>
       <div class="passos">
         <p class="passo">Você chama no WhatsApp</p>
