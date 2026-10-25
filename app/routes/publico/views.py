@@ -470,6 +470,45 @@ def feira():
     return _na_borda(resp)
 
 
+@bp.route('/agenda')
+def agenda():
+    """O que abre hoje em Barão e os eventos dos próximos dias.
+
+    Só dado real: horário da Feira, horário que o bar escreveu (quando o parser lê),
+    evento que o bar cadastrou e evento do arquivo `app/data/agenda` com conferência.
+    """
+    from app.models.modelo_evento import Evento
+    from app.utils import agenda as ag
+
+    agora = ag.agora_br()
+    hoje = agora.date()
+    donos = _publicavel(Restaurante.query).all()
+    bares, reais = [], {}
+    for r in donos:
+        if getattr(r, 'tipo_negocio', 'bar') == 'artesao':
+            continue
+        cfg = getattr(r, 'site_config', None)
+        url = url_canonica(r)
+        bares.append({'nome': r.nome, 'url': url, 'horario': getattr(cfg, 'horario', None)})
+        if not r.eh_demo:                      # prévia não cadastra evento de verdade
+            reais[r.id] = (r.nome, url)
+    do_painel = []
+    if reais:
+        for e in (Evento.query.filter(Evento.ativo.isnot(False), Evento.data >= hoje,
+                                      Evento.restaurant_id.in_(list(reais))).all()):
+            nome, url = reais[e.restaurant_id]
+            do_painel.append((e.titulo, e.data, e.hora, nome, url))
+    eventos = ag.proximos(hoje, do_painel)
+    origem = request.url_root.rstrip('/')
+    resp = make_response(render_template(
+        'produto/agenda.html', abertos=ag.abre_hoje(agora, bares), eventos=eventos,
+        conferido_em=ag.conferido_em(eventos), hoje=hoje, ld=ag.json_ld(eventos, origem),
+        zap_evento=_zap_memoria('Oi! Quero mandar um evento para a agenda de Barão.\n\n'
+                                'Nome do evento:\nData e hora:\nOnde:\nLink (opcional):'),
+        **_contexto_produto()))
+    return _na_borda(resp)
+
+
 @bp.route('/expor')
 def expor():
     """Proposta ao expositor: a dor, o que o hotsite entrega e quanto custa."""
@@ -665,7 +704,7 @@ def sitemap():
         from app.utils.memoria import verbetes as _verbetes
         paginas.append((f'https://{dominio_do_produto()}/memoria', None))
         paginas.append((f'https://{dominio_do_produto()}/feira', None))
-        for caminho in ('/expor', '/termos', '/privacidade'):
+        for caminho in ('/agenda', '/expor', '/termos', '/privacidade'):
             paginas.append((f'https://{dominio_do_produto()}{caminho}', None))
         for v in _verbetes():
             paginas.append((f"https://{dominio_do_produto()}/memoria/{v['slug']}", None))
@@ -817,6 +856,7 @@ def _llms_portal(completo):
         f"- **Onde**: {FEIRA['local']}, {FEIRA['bairro']}",
         f"- **Quando**: {horarios}",
         f"- **Expositores e mapa**: {base}/feira",
+        f"- **Agenda e o que abre hoje**: {base}/agenda",
         f"- **Site**: {base}/", "",
         "## Contato",
         (f"- **WhatsApp da Feira**: https://wa.me/{zap}" if zap else

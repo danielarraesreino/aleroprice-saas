@@ -1,0 +1,91 @@
+{% extends 'produto/memoria/_base.html' %}
+{% block titulo %}Agenda de Barão Geraldo: o que abre hoje e os eventos da semana{% endblock %}
+{% block descricao %}O que está aberto hoje em Barão Geraldo, a Feira da Praça do Coco e os eventos dos próximos dias em bares e espaços do bairro.{% endblock %}
+{% block canonical %}{{ url_for('public.agenda', _external=True) }}{% endblock %}
+{% block og_tipo %}website{% endblock %}
+{% block head_extra %}
+<style>
+  .ag{max-width:1000px;margin-inline:auto;padding:32px 20px 64px}
+  .ag h1{font:400 clamp(2.2rem,1.2rem + 4vw,3.6rem)/1 var(--font-cartaz);margin:0 0 8px}
+  .ag h2{font:400 clamp(1.5rem,1.1rem + 1.6vw,2.1rem)/1.05 var(--font-cartaz);margin:40px 0 14px}
+  .ag-lead{color:var(--taupe);max-width:60ch;margin:0}
+  .ag-lista{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+  @media(min-width:760px){.ag-lista{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  .ag-item{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:center;padding:12px 14px;border-radius:12px;background:var(--papel-claro)}
+  .ag-item a{color:inherit;text-decoration:none;font-weight:700}
+  .ag-item a::after{content:"";position:absolute;inset:0;border-radius:12px}
+  .ag-item p{margin:2px 0 0;color:var(--taupe);font-size:.9rem}
+  .ag-ponto{width:12px;height:12px;border-radius:50%;background:var(--taupe)}
+  .ag-item.aberto .ag-ponto{background:#1f8a52;box-shadow:0 0 0 4px rgb(31 138 82 / .18)}
+  .ag-item.abre .ag-ponto{background:#f2b705}
+  .ag-dia{display:grid;gap:8px}
+  .ag-dia h3{margin:18px 0 0;font:700 1rem var(--font-heading)}
+  .ag-ev{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;padding:10px 14px;border-radius:12px;background:var(--papel-claro)}
+  .ag-hora{font:700 .95rem var(--font-heading);color:var(--tomate)}
+  .ag-ev h4{margin:0;font:700 1rem/1.25 var(--font-heading)}
+  .ag-ev p{margin:2px 0 0;color:var(--taupe);font-size:.9rem}
+  .ag-mais{margin-top:10px}
+  .ag-mais summary{font-weight:700;cursor:pointer;min-height:44px;display:flex;align-items:center;color:var(--tomate)}
+  .ag-mais .ag-lista{margin-top:8px}
+  .ag-vazio{color:var(--taupe);max-width:60ch}
+  .ag-nota{margin-top:28px;color:var(--taupe);font-size:.85rem;max-width:64ch}
+  .ag-zap{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:11px 20px;border-radius:3px;background:#166b3f;color:#f4efe2;font-weight:700;text-decoration:none;margin-top:14px}
+  @media(prefers-reduced-motion:no-preference){.ag-item.aberto .ag-ponto{animation:ag-pulso 2.4s ease-out infinite}}
+  @keyframes ag-pulso{0%{box-shadow:0 0 0 0 rgb(31 138 82 / .45)}100%{box-shadow:0 0 0 9px rgb(31 138 82 / 0)}}
+</style>
+{% if ld %}<script type="application/ld+json">{{ {"@context": "https://schema.org", "@graph": ld}|tojson }}</script>{% endif %}
+{% endblock %}
+{% block conteudo %}
+<main class="ag" id="conteudo">
+  <h1>Agenda de Barão</h1>
+  <p class="ag-lead">O que está aberto hoje e o que acontece nos próximos dias. A Feira fica na {{ feira.local }}, aos sábados e domingos.</p>
+
+  <h2>O que abre hoje</h2>
+  {% if abertos %}
+  {% macro cartao(a) %}
+    <li class="ag-item {{ a.estado }}">
+      <span class="ag-ponto" aria-hidden="true"></span>
+      <div>
+        {% if a.url %}<a href="{{ a.url }}">{{ a.nome }}</a>{% else %}<b>{{ a.nome }}</b>{% endif %}
+        <p>{{ a.texto|capitalize }}{% if a.local %} · {{ a.local }}{% endif %}</p>
+      </div>
+    </li>
+  {% endmacro %}
+  <ul class="ag-lista">{% for a in abertos[:12] %}{{ cartao(a) }}{% endfor %}</ul>
+  {% if abertos|length > 12 %}
+  <details class="ag-mais"><summary>Ver os outros {{ abertos|length - 12 }}</summary>
+    <ul class="ag-lista">{% for a in abertos[12:] %}{{ cartao(a) }}{% endfor %}</ul>
+  </details>
+  {% endif %}
+  {% else %}
+  <p class="ag-vazio">Nenhum horário confirmado para hoje. A Feira abre sábado e domingo, e os bares que informam o horário aparecem aqui nos dias em que abrem.</p>
+  {% endif %}
+  <p class="ag-nota">Os horários dos bares vêm do que cada casa informou. Confirme pelo WhatsApp do bar antes de sair de casa.</p>
+
+  <h2>Próximos dias</h2>
+  {% if eventos %}
+  {% set ns = namespace(dia=none) %}
+  {% for e in eventos %}
+    {% if e.data != ns.dia %}{% if ns.dia %}</div>{% endif %}<div class="ag-dia"><h3>{{ e.rotulo }}</h3>{% set ns.dia = e.data %}{% endif %}
+    <div class="ag-ev">
+      <span class="ag-hora">{{ e.hora or 'o dia todo' }}</span>
+      <div>
+        <h4>{% if e.link %}<a href="{{ e.link }}">{{ e.titulo }}</a>{% else %}{{ e.titulo }}{% endif %}</h4>
+        {% if e.local %}<p>{{ e.local }}</p>{% endif %}
+      </div>
+    </div>
+  {% endfor %}
+  </div>
+  {% if conferido_em %}<p class="ag-nota">Eventos conferidos pela Feira em {{ conferido_em.strftime('%d/%m/%Y') }}.</p>{% endif %}
+  {% else %}
+  <p class="ag-vazio">Ainda não há evento confirmado para os próximos dias. Tem um para divulgar? Mande pelo WhatsApp e ele entra aqui depois de conferido.</p>
+  {% endif %}
+  {% if zap_evento %}<a class="ag-zap" href="{{ zap_evento }}" target="_blank" rel="noopener"><i class="fab fa-whatsapp" aria-hidden="true"></i> Mandar um evento</a>{% endif %}
+
+  <section id="novidades" class="hm-novidades" style="margin-top:40px">
+    {% with novidades_bar = '', novidades_fonte = 'agenda', novidades_perfil = true,
+            novidades_titulo = 'Receba a agenda da Feira de Barão',
+            novidades_texto = 'Eventos da Feira e novidades dos expositores e dos bares. Um e-mail de vez em quando, sem spam.' %}{% include "site/_novidades.html" %}{% endwith %}
+  </section>
+</main>
+{% endblock %}

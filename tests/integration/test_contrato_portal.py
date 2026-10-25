@@ -11,7 +11,7 @@ import re
 
 import pytest
 
-PAGINAS = ['/', '/feira', '/expor', '/vendedor', '/site-para-bar-em-campinas',
+PAGINAS = ['/', '/agenda', '/feira', '/expor', '/vendedor', '/site-para-bar-em-campinas',
            '/privacidade', '/termos']
 VENDA = ['/expor', '/site-para-bar-em-campinas']          # precisam provar e chamar
 MAX_CHAPEUS = {'/expor': 1, '/site-para-bar-em-campinas': 2}                                # padrão novo: estrito

@@ -1,0 +1,21 @@
+# Eventos da agenda de Barão (/agenda). Um arquivo por mês, nome AAAA-MM.yml.
+#
+# Regras (a página depende delas):
+#   - Só entra o que alguém confirmou: `fonte` diz quem mandou e `verificado_em` é o dia
+#     em que você conferiu. Sem `verificado_em`, o evento NÃO aparece.
+#   - Evento passado some sozinho. Não precisa apagar.
+#   - Os horários da Feira e dos bares são calculados; não repita aqui.
+#   - Eventos que o bar cadastra no painel dele já entram sozinhos.
+#
+# Modelo (copie, descomente e preencha):
+#
+#   - titulo: Roda de samba
+#     data: 2026-11-07          # AAAA-MM-DD
+#     hora: "20:00"             # opcional
+#     local: Bar da Vila        # opcional
+#     tipo: bar                 # feira | bar | unicamp | cultura
+#     link: https://bardavila.bar   # opcional
+#     fonte: WhatsApp do bar, 25/10/2026
+#     verificado_em: 2026-10-25
+#
+eventos: []
