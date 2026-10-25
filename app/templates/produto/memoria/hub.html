@@ -59,6 +59,8 @@
     var pontos = {{ pontos|tojson }};
     function montar() {
       if (typeof L === 'undefined') { return setTimeout(montar, 150); }
+      // O CSS do Leaflet carrega sem bloquear; sem ele o Leaflet não acha a pasta dos ícones e o pino vira imagem quebrada.
+      L.Icon.Default.imagePath = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/';
       var mapa = L.map('mapa-memoria', {scrollWheelZoom: false}).setView([-22.82, -47.085], 13);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '© OpenStreetMap', maxZoom: 18}).addTo(mapa);
       var grupo = [];
