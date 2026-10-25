@@ -20,8 +20,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ url_for('static', filename='fonts/PlusJakartaSans-normal-400-800.woff2') }}">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ url_for('static', filename='fonts/SpaceGrotesk-normal-600-700.woff2') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/fontes.css') }}">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/icones.css') }}">
 <!-- Leaflet.js para o Scrollytelling de Mapa (CDN cdnjs estável). O CSS entra
      como `print` e vira `all` quando chega; o JS vem com `defer` e o mapa só
      é montado quando o dossiê se aproxima da tela (`IntersectionObserver`). -->

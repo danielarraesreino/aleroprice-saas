@@ -1,0 +1,28 @@
+/* Ícones: subconjunto do Font Awesome 6.4 Free (só os usados nas páginas do portal), servido daqui.
+   Os arquivos de fonte têm ~5 KiB no total; o pacote completo da CDN pesava 253 KiB. */
+@font-face{font-family:'FA Solid';font-style:normal;font-weight:900;font-display:swap;src:url('/static/fonts/fa-solid-subset.woff2') format('woff2')}
+@font-face{font-family:'FA Brands';font-style:normal;font-weight:400;font-display:swap;src:url('/static/fonts/fa-brands-subset.woff2') format('woff2')}
+.fa,.fas,.fa-solid,.fab,.fa-brands{display:inline-block;font-style:normal;font-variant:normal;line-height:1;text-rendering:auto;-webkit-font-smoothing:antialiased}
+.fa,.fas,.fa-solid{font-family:'FA Solid';font-weight:900}
+.fab,.fa-brands{font-family:'FA Brands';font-weight:400}
+.fa-whatsapp::before{content:"\f232"}
+.fa-feather::before{content:"\f52d"}
+.fa-beer-mug-empty::before{content:"\f0fc"}
+.fa-map-location-dot::before{content:"\f5a0"}
+.fa-comments::before{content:"\f086"}
+.fa-camera::before{content:"\f030"}
+.fa-book-open::before{content:"\f518"}
+.fa-arrow-right::before{content:"\f061"}
+.fa-street-view::before{content:"\f21d"}
+.fa-store::before{content:"\f54e"}
+.fa-star::before{content:"\f005"}
+.fa-plus-circle::before{content:"\f055"}
+.fa-pen::before{content:"\f304"}
+.fa-paperclip::before{content:"\f0c6"}
+.fa-map-marker-alt::before{content:"\f3c5"}
+.fa-map::before{content:"\f279"}
+.fa-landmark::before{content:"\f66f"}
+.fa-history::before{content:"\f1da"}
+.fa-handshake::before{content:"\f2b5"}
+.fa-compass::before{content:"\f14e"}
+.fa-bars::before{content:"\f0c9"}

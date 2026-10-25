@@ -17,8 +17,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ url_for('static', filename='fonts/PlusJakartaSans-normal-400-800.woff2') }}">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ url_for('static', filename='fonts/SpaceGrotesk-normal-600-700.woff2') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/fontes.css') }}">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/icones.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/feira.css') }}">
 {% block head_extra %}{% endblock %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/feira-memoria.css') }}">
