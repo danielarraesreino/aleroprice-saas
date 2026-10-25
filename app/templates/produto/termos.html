@@ -7,7 +7,9 @@
 <meta name="description" content="Regras de uso do site da Feira de Barão e do serviço de site para bares e expositores: planos, pagamento, conteúdo e cancelamento.">
 <link rel="canonical" href="{{ url_for('public.termos', _external=True) }}">
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="{{ url_for('static', filename='fonts/Anton-normal-400.woff2') }}">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="{{ url_for('static', filename='fonts/WorkSans-normal-400-700.woff2') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/fontes.css') }}">
 {% include 'produto/_estilo_proposta.html' %}
 </head>
 <body>

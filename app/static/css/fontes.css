@@ -1,0 +1,41 @@
+/* Fontes locais (latin): sem ida ao Google Fonts. */
+@font-face {
+  font-family: 'Anton';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/static/fonts/Anton-normal-400.woff2') format('woff2');
+  
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: italic;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/static/fonts/PlusJakartaSans-italic-400-600.woff2') format('woff2');
+  
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/static/fonts/PlusJakartaSans-normal-400-800.woff2') format('woff2');
+  
+}
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 600 700;
+  font-display: swap;
+  src: url('/static/fonts/SpaceGrotesk-normal-600-700.woff2') format('woff2');
+  
+}
+@font-face {
+  font-family: 'Work Sans';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/static/fonts/WorkSans-normal-400-700.woff2') format('woff2');
+  
+}

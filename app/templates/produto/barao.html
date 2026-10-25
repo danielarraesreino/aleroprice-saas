@@ -26,10 +26,10 @@
 <meta name="twitter:card" content="summary_large_image">
 {% if not campinas %}{# a versão de campanha (link do WhatsApp) não compete com a página indexável #}<meta name="robots" content="noindex">{% endif %}
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Work+Sans:wght@400;500;700&display=swap" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Work+Sans:wght@400;500;700&display=swap"></noscript>
+<link rel="preload" as="font" type="font/woff2" crossorigin href="{{ url_for('static', filename='fonts/Anton-normal-400.woff2') }}">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="{{ url_for('static', filename='fonts/WorkSans-normal-400-700.woff2') }}">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="{{ url_for('static', filename='fonts/SpaceGrotesk-normal-600-700.woff2') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/fontes.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
 {# topo e menu da Feira (o mesmo da home e da Memória); o <style> abaixo vem
