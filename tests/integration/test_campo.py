@@ -843,3 +843,12 @@ def test_menu_do_operador_segue_o_perfil_e_nao_o_tenant(client, operador, client
     client.get('/auth/logout')
     entrar(client, 'dono@cliente.com')
     assert 'Campanha' not in client.get('/app/', follow_redirects=True).get_data(as_text=True)
+
+
+def test_previa_tem_tamanho_de_celular_e_botoes_sem_espremer(client, demo):
+    entrar(client)
+    corpo = client.get(f'/campo/{demo.slug}').get_data(as_text=True)
+    assert 'id="previa-caixa"' in corpo and 'TELA_W = 390' in corpo
+    # o .btn nasce com width:100%; no flex da prévia isso espremia o link de tela cheia
+    assert 'flex:1 1 auto;width:auto' in corpo
+    assert 'aria-label="Recarregar a prévia"' in corpo

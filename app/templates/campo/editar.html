@@ -66,11 +66,15 @@
      conversa no bar é "e assim?", não "salva e vê". O iframe carrega o site
      real com ?modelo=&tema=&vibe=&modo=, que a landing sabe espiar sem
      persistir — só o botão Aplicar escreve no banco. #}
-  <div style="position:relative;border:1px solid var(--linha);border-radius:12px;
-              overflow:hidden;margin-bottom:14px;background:#000">
+  {# O site é desenhado para celular (390 px). Em vez de espremer numa moldura de
+     340 px de altura, o iframe tem o tamanho de um celular e o `ajustarPrevia`
+     (abaixo) o reduz à largura do bloco: a barra fixa de baixo deixa de cobrir o
+     título e o dono vê a página como ela é. Sem JS, cai no iframe de largura total. #}
+  <div id="previa-caixa" style="position:relative;border:1px solid var(--linha);border-radius:12px;
+              overflow:hidden;margin-bottom:14px;background:#000;height:520px">
     <iframe id="previa" title="Prévia do site"
             src="{{ url_for('public.landing_slug', slug=rest.slug) }}"
-            style="width:100%;height:340px;border:0;display:block"
+            style="width:100%;height:520px;border:0;display:block;transform-origin:0 0"
             loading="lazy"></iframe>
     <span id="previa-carregando" aria-live="polite"
           style="position:absolute;inset:auto 8px 8px auto;font-size:11px;
@@ -78,10 +82,10 @@
                  color:#fff;opacity:0;transition:opacity .15s">atualizando…</span>
   </div>
   <div style="display:flex;gap:8px;margin-bottom:16px">
-    <a class="btn fantasma" style="text-decoration:none;flex:1;text-align:center"
+    <a class="btn fantasma" style="text-decoration:none;flex:1 1 auto;width:auto;text-align:center"
        href="{{ url_for('campo.visual', slug=rest.slug) }}">Ver em tela cheia</a>
-    <button class="btn fantasma" type="button" id="previa-recarregar"
-            style="flex:none">↻</button>
+    <button class="btn fantasma" type="button" id="previa-recarregar" aria-label="Recarregar a prévia"
+            style="flex:none;width:52px;padding:0">↻</button>
   </div>
 
   <form method="post" action="{{ url_for('campo.estilo', slug=rest.slug) }}" id="form-estilo">
@@ -546,6 +550,21 @@ btnDominio.addEventListener('click', async () => {
   }
 
   previa.addEventListener('load', () => { if (aviso) aviso.style.opacity = '0'; });
+
+  /* Iframe com tamanho de celular, reduzido à largura do bloco. */
+  const caixa = document.getElementById('previa-caixa');
+  const TELA_W = 390, TELA_H = 700;
+  function ajustarPrevia() {
+    const s = Math.min(1, caixa.clientWidth / TELA_W);
+    previa.style.width = TELA_W + 'px';
+    previa.style.height = TELA_H + 'px';
+    previa.style.transform = `scale(${s})`;
+    caixa.style.height = Math.round(TELA_H * s) + 'px';
+  }
+  if (caixa) {
+    ajustarPrevia();
+    window.addEventListener('resize', ajustarPrevia);
+  }
 
   form.querySelectorAll('input[type=radio]').forEach(r => {
     /* Debounce curto: tocar em modelo e cor em seguida dispararia duas cargas
