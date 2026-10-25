@@ -66,7 +66,7 @@
     <ul>
       {% for e in expositores %}
       <li class="fp-card{% if e.hoje %} hoje{% endif %}" data-slug="{{ e.slug }}">
-        {% if e.foto %}<img class="fp-foto" src="{{ e.foto }}" alt="" loading="lazy" width="96" height="96">
+        {% if e.foto %}<img class="fp-foto" src="{{ e.foto_sm or e.foto }}" alt="" loading="lazy" width="96" height="96">
         {% else %}<span class="fp-foto" aria-hidden="true">{{ e.nome[:1]|upper }}</span>{% endif %}
         <div class="fp-info">
           <span class="fp-selos">

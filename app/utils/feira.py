@@ -16,11 +16,12 @@ Expositor da Feira = tenant ativo que é artesão OU que já tem ponto marcado n
 mapa. Bar sem coordenada fica na vitrine da home, não aqui: lista de 80 casas
 sem lugar no mapa não ajuda quem está andando na praça.
 """
+import os
 import unicodedata
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from flask import url_for
+from flask import current_app, url_for
 
 from app.extensions import db
 from app.models.modelo_restaurante import Restaurante
@@ -79,6 +80,16 @@ def _img(caminho):
     if caminho.startswith(('http://', 'https://')):
         return caminho
     return url_for('static', filename=caminho)
+
+
+def _miniatura(caminho):
+    """Capa de prévia em 480 px (`capa-md.webp`) quando existe; senão a original.
+    A vitrine mostra a foto em ~200 px: servir a de 800 px pesava 1 MiB na home."""
+    if caminho and caminho.endswith('/capa.jpg'):
+        menor = caminho[:-len('capa.jpg')] + 'capa-md.webp'
+        if os.path.exists(os.path.join(current_app.static_folder, menor)):
+            return _img(menor)
+    return _img(caminho)
 
 
 def _base_ativa():
@@ -140,7 +151,7 @@ def expositores(tipo=None, so_hoje=False, q=None, hoje=None):
         saida.append({
             'slug': r.slug, 'nome': c.nome or r.nome, 'tipo': t,
             'tipo_rotulo': ROTULO_TIPO[t], 'descritor': c.descritor,
-            'foto': _img(c.hero_foto), 'url': _url_na_feira(r),
+            'foto': _img(c.hero_foto), 'foto_sm': _miniatura(c.hero_foto), 'url': _url_na_feira(r),
             'lat': c.lat, 'lng': c.lng, 'ponto': c.ponto_na_feira,
             'hoje': esta_hoje, 'categorias': categorias[:4],
             'total_produtos': len(produtos),

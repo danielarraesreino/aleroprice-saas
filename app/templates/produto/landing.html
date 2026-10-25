@@ -18,8 +18,10 @@
 <!-- Tipografia: Anton (Manchetes de Cartaz) + Plus Jakarta Sans (Leitura Editorial) + Space Grotesk -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Space+Grotesk:wght@600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Space+Grotesk:wght@600;700&display=swap"></noscript>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
 <!-- Leaflet.js para o Scrollytelling de Mapa (CDN cdnjs estável). O CSS entra
      como `print` e vira `all` quando chega; o JS vem com `defer` e o mapa só
      é montado quando o dossiê se aproxima da tela (`IntersectionObserver`). -->
@@ -107,7 +109,7 @@
     <ul class="hm-lista">
       {% for e in exp_vitrine %}
       <li class="hm-exp{% if e.hoje %} hoje{% endif %}">
-        {% if e.foto %}<img class="hm-foto" src="{{ e.foto }}" alt="" loading="lazy" width="320" height="240">
+        {% if e.foto %}<img class="hm-foto" src="{{ e.foto_sm or e.foto }}" alt="" loading="lazy" width="320" height="240">
         {% else %}<span class="hm-foto" aria-hidden="true">{{ e.nome[:1]|upper }}</span>{% endif %}
         <div class="hm-corpo">
           <span class="hm-selos"><span class="hm-selo {{ e.tipo }}">{{ e.tipo_rotulo }}</span>{% if e.hoje %}<span class="hm-selo hoje">Na feira hoje</span>{% endif %}</span>
