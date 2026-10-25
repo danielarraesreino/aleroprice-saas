@@ -362,7 +362,8 @@
     <ul class="hm-lista">
       {% for b in bares %}
       <li class="hm-exp">
-        <span class="hm-foto" aria-hidden="true">{{ b.nome[:1]|upper }}</span>
+        {% if b.tem_foto %}<img class="hm-foto" src="{{ url_for('static', filename=b.foto_480) }}" alt="" loading="lazy" width="72" height="72" decoding="async">
+        {% else %}<span class="hm-foto" aria-hidden="true">{{ b.nome[:1]|upper }}</span>{% endif %}
         <div class="hm-corpo">
           <h3><a href="{{ url_for('public.landing_slug', slug=b.slug) }}">{{ b.nome }}</a></h3>
           {% if b.descritor %}<p>{{ b.descritor }}</p>{% endif %}

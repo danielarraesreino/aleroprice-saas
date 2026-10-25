@@ -1070,5 +1070,7 @@
 #bares .hm-lista+.hm-lista{margin-top:12px}
 #bares .hm-exp:not(:has(img)) .hm-foto{background:repeating-linear-gradient(135deg,var(--papel-escuro) 0 6px,var(--papel-claro) 6px 12px)}
 
-/* cartão não estica até a altura da linha: caixa vazia embaixo é defeito (auditoria 25/10) */
-.hm-mural,.timeline-grid{align-items:start}
+/* cartões da mesma linha têm a mesma altura; a assinatura desce para a base e fica alinhada */
+.hm-relato{display:flex;flex-direction:column}
+.hm-relato footer{margin-top:auto}
+.hm-relato p:last-of-type{margin-bottom:12px}

@@ -311,6 +311,7 @@ def _bares_da_feira():
             'descritor': (site.get('descritor') or '').strip(),
             # Lead novo sem recorte gerado ainda: cai na capa original. Pesada,
             # mas a barraca aparece — gerar o recorte é otimização, não requisito.
+            'tem_foto': tem_thumb,      # só o recorte gerado e conferido vira miniatura
             'foto_480': thumb if tem_thumb else f'img/demo/{slug}/capa.jpg',
             'foto_800': grande if (tem_thumb and os.path.isfile(
                 os.path.join(static_dir, 'img', 'feira', f'{slug}-800.jpg'))) else None,
