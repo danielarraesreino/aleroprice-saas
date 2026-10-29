@@ -83,7 +83,8 @@ def test_pagina_para_bares_indexavel_sem_prometer_gestao(client, session):
     html = client.get('/site-para-bar-em-campinas').get_data(as_text=True)
     assert 'noindex' not in html and 'rel="canonical"' in html
     assert '"FAQPage"' in html and 'Campinas' in html
-    assert 'Em breve' in html and 'Quero o Pro' not in html
+    assert 'lista de espera' in html and 'Quero o Pro' not in html
+    assert 'Em breve' not in html, 'promessa do Pro não volta para a página de venda'
     barao = client.get('/barao').get_data(as_text=True)
     assert 'noindex' in barao and 'Quero o Pro' not in barao
 

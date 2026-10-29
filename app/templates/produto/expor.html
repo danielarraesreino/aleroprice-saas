@@ -53,6 +53,18 @@
   .fecho h2{color:var(--papel)}
   .fecho .lead{color:#d9ccb0}
   .fecho .btn-zap{background:#1f8a52}
+  .hero-preco{margin-top:var(--s-4);font-size:1.05rem}
+  .hero-preco b{font-family:var(--f-display,'Anton',sans-serif);font-weight:400;font-size:1.35em;color:var(--tomate);letter-spacing:.01em;white-space:nowrap}
+  .hero .btn-zap{margin-top:var(--s-3)}
+  @media(max-width:520px){.hero{padding-block:var(--s-5) var(--s-6)}}
+  /* WhatsApp fixo no rodapé, só no celular */
+  .barra-zap{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;padding:var(--s-3);
+    background:rgb(246 238 219 / .95);border-top:1px solid var(--linha);backdrop-filter:blur(8px)}
+  .barra-zap .btn-zap{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:var(--s-2);min-height:48px;
+    background:var(--verde);color:#f4efe2;text-decoration:none;font-weight:700;border-radius:3px}
+  .barra-zap .btn-zap:hover{background:#125533}
+  body{padding-bottom:76px}
+  @media(min-width:720px){.barra-zap{display:none}body{padding-bottom:0}}
   @media print{.fone{box-shadow:none;transform:none}.fecho{background:#fff;color:#000}.fecho h2,.fecho .lead{color:#000}}
 </style>
 <header class="hero">
@@ -60,9 +72,12 @@
     <div>
       <span class="eyebrow">Expositores da Feira de Barão</span>
       <h1>Sua barraca aberta a semana inteira, não só no fim de semana.</h1>
+      {# Preço e pedido de prévia na primeira tela do celular (auditoria de
+         29/10/2026): antes o valor só aparecia lá embaixo, em #preco. #}
+      <p class="hero-preco"><b>{{ preco_exp.anual_mes }}/mês</b> no anual ({{ preco_exp.anual }}) ou <b>{{ preco_exp.mensal }}/mês</b> sem compromisso</p>
+      <a class="btn-zap" href="{{ zap_url if zap_url and zap_url != '#participar' else '#preco' }}"{% if zap_url and zap_url != '#participar' %} target="_blank" rel="noopener"{% endif %}><i class="fab fa-whatsapp"></i> Peça sua prévia grátis</a>
+      <p class="micro">A gente monta a prévia com o nome da sua barraca antes de você decidir qualquer coisa.</p>
       <p class="lead">Uma vitrine só sua, com seus produtos, preço, prazo de produção e pedido pelo WhatsApp. Um endereço para mandar no direct, no cartão e na sacola.</p>
-      {% if zap_url and zap_url != '#participar' %}<a class="btn-zap" href="{{ zap_url }}" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> Quero ver o meu site</a>{% endif %}
-      <p class="micro">A gente monta uma prévia com o seu nome antes de você decidir qualquer coisa.</p>
     </div>
     <div>
       <div class="fone"><img src="{{ url_for('static', filename='img/portal/prova-berga.webp') }}" alt="Site da Dona Berga no celular: foto do lombo defumado e botão Encomendar" width="585" height="1170" decoding="async"></div>
@@ -173,6 +188,11 @@
   </div>
 </section>
 </main>
+{% if zap_url and zap_url != '#participar' %}
+<div class="barra-zap">
+  <a class="btn-zap" href="{{ zap_url }}" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> Peça sua prévia grátis</a>
+</div>
+{% endif %}
 <footer><div class="wrap"><b>Feira de Barão</b> · Praça do Coco, Barão Geraldo, Campinas/SP</div><p style="margin-top:8px"><a href="{{ url_for('public.privacidade') }}">Privacidade</a> · <a href="{{ url_for('public.termos') }}">Termos</a></p></footer>
 </body>
 </html>

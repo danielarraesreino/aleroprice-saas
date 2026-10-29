@@ -545,8 +545,9 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
 }
 
 /* Gate seguro de animação (Motion 13.1.0): só oculta depois que .js-anim entra na aba visível */
-.js-anim [data-hero],
-.js-anim .rev{opacity:0}
+/* Conteúdo nasce visível (auditoria 29/10/2026: captura, prévia de link e robô viam a página vazia).
+     A entrada é animação que só roda quando o bloco entra na tela; antes disso ele já está lá. */
+.js-anim [data-hero]{opacity:0}
 
 @media (min-width:720px){
   .wrap{padding-inline:var(--s6)}

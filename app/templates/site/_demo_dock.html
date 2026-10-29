@@ -353,14 +353,15 @@
 
   <div class="demo-dock-container">
     <button type="button" class="dock-chip" id="dockChip" onclick="alternarDock(true)" aria-expanded="false" aria-controls="dockBar">
-      <span class="demo-dock-pulse"></span><span><b>Prévia</b> · Personalizar ▲</span>
+      <span class="demo-dock-pulse"></span><span><b>{{ 'Modelo de demonstração' if tenant and tenant.eh_modelo_demo else 'Prévia' }}</b> · Personalizar ▲</span>
     </button>
     <div class="demo-dock-bar" id="dockBar">
       <!-- Linha 1: Identificação e Ações Rápidas -->
       <div class="demo-dock-top">
         <div class="demo-dock-tag">
           <span class="demo-dock-pulse"></span>
-          <span>Prévia não oficial · {{ site.nome }}</span>
+          {# Bar-vitrine fictício: aviso claro no lugar do "exemplo" em cada item. #}
+          <span>{% if tenant and tenant.eh_modelo_demo %}Modelo de demonstração · bar fictício, dados de exemplo{% else %}Prévia não oficial · {{ site.nome }}{% endif %}</span>
         </div>
         <div class="demo-dock-actions">
           <button class="btn-dock-voice" onclick="abrirModalVoz()">

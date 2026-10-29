@@ -386,7 +386,7 @@ def test_proposta_preco_vem_do_env(client, demo, monkeypatch):
     """Mesma fonte de `planos.precos()`: mudar o env muda a proposta, sem
     caçar número hardcoded em template."""
     monkeypatch.setenv('FEIRA_PRECO_SITE', 'R$ 777')
-    monkeypatch.setenv('FEIRA_PRECO_PRO', 'R$ 999')
+    monkeypatch.setenv('FEIRA_PRECO_SITE_ANUAL', 'R$ 999')
 
     entrar(client)
     corpo = client.get(f'/campo/{demo.slug}/proposta').get_data(as_text=True)
@@ -725,7 +725,8 @@ def test_proposta_abre_com_preco_cheio(client, demo, com_convite):
     entrar(client)
     corpo = client.get(f'/campo/{demo.slug}/proposta').get_data(as_text=True)
 
-    assert 'R$ 197' in corpo and 'R$ 347' in corpo
+    # O Pro saiu da proposta (lista de espera): só o preço do Site aparece.
+    assert 'R$ 197' in corpo and 'R$ 347' not in corpo
     assert 'R$ 129' not in corpo, 'preço de convite não pode aparecer sem código'
     assert 'código de convite' in corpo.lower(), 'o campo pra digitar tem que existir'
 

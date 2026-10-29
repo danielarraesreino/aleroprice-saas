@@ -15,12 +15,20 @@
 .faixa-previa .curto{display:none}
 @media (max-width:600px){.faixa-previa .longo{display:none}.faixa-previa .curto{display:inline}}
 </style>
-<div class="faixa-previa" role="region" aria-label="Aviso de prévia">
+<div class="faixa-previa" role="region" aria-label="{{ 'Aviso de modelo de demonstração' if tenant.eh_modelo_demo else 'Aviso de prévia' }}">
   <div class="wrap">
+    {% if tenant.eh_modelo_demo %}
+    {# Bar fictício: um aviso só, no topo, em vez de "exemplo" em cada item. #}
+    <p><b>Modelo de demonstração.</b>
+      <span class="longo">Bar fictício: nome, cardápio, preços e endereço são de exemplo.</span>
+      <span class="curto">Bar fictício</span></p>
+    <a href="https://wa.me/{{ contato_vendas }}?text={{ ('Olá! Vi o modelo ' ~ site.nome ~ ' na Feira de Barão e quero um site assim para o meu bar.') | urlencode }}" target="_blank" rel="noopener">Quero um assim</a>
+    {% else %}
     <p><b><span class="longo">Prévia para {{ site.nome }}.</span><span class="curto">Prévia ·</span></b>
       <span class="longo">As imagens são ilustrativas e serão trocadas pelas suas.</span>
       <span class="curto">imagens ilustrativas</span></p>
     <a href="https://wa.me/{{ contato_vendas }}?text={{ ('Olá! Vi a prévia do site da ' ~ site.nome ~ ' na Feira de Barão e quero ativar o meu.') | urlencode }}" target="_blank" rel="noopener">Quero ativar meu site</a>
+    {% endif %}
   </div>
 </div>
 {% endif %}

@@ -8,7 +8,7 @@ Planos
 demo      prévia comercial; acesso amplo, sem cobrança, marcada como não oficial
 trial     14 dias após a conversão — vale como `pro`, porque esconder o produto
           na janela em que a pessoa está decidindo é o oposto de vender
-site      o site do bar (R$147,90): domínio próprio, CMS, reservas, agenda, promoções
+site      o site do bar (R$ 97/mês ou R$ 948/ano): domínio próprio, CMS, reservas, agenda, promoções
 pro       site + gestão (R$247,90): ficha técnica, estoque, NF-e, previsão, relatórios
 free      pós-trial sem pagar: o site continua no ar, mas congelado
 
@@ -36,7 +36,11 @@ def precos():
     """Preço de cada plano, de env. Um lugar só: a tela de planos e a landing
     de venda liam números diferentes (R$ 97 vs R$ 197) e divergiam sozinhas.
 
-    Onde R$ 147,90 cai no mercado (pesquisa de agosto/2026)
+    Preço do bar aprovado pelo dono em 29/10/2026 (plano de Natal): mensal
+    R$ 97, anual R$ 948 (R$ 79/mês). A diferença de 70% entre o mensal antigo
+    (R$ 147,90) e o anual (R$ 45/mês) parecia preço inventado.
+
+    Onde o mensal cai no mercado (pesquisa de agosto/2026)
     ------------------------------------------------------
     - Plataforma de cardápio digital: R$ 59,94 a R$ 299,90/mês — só o cardápio.
     - Manutenção de site em agência: R$ 300 a R$ 1.000/mês — só a manutenção.
@@ -48,11 +52,13 @@ def precos():
     nada.
     """
     return {
-        'site': os.environ.get('FEIRA_PRECO_SITE', 'R$ 147,90'),
+        'site': os.environ.get('FEIRA_PRECO_SITE', 'R$ 97'),
         'pro': os.environ.get('FEIRA_PRECO_PRO', 'R$ 247,90'),
-        # Anual do site: pago à vista, sem devolução. R$ 45 × 12.
-        'site_anual': os.environ.get('FEIRA_PRECO_SITE_ANUAL', 'R$ 540'),
-        'site_anual_mes': os.environ.get('FEIRA_PRECO_SITE_ANUAL_MES', 'R$ 45'),
+        # Anual do site: pago à vista, sem devolução. R$ 79 × 12.
+        'site_anual': os.environ.get('FEIRA_PRECO_SITE_ANUAL', 'R$ 948'),
+        'site_anual_mes': os.environ.get('FEIRA_PRECO_SITE_ANUAL_MES', 'R$ 79'),
+        # Ficha do Google arrumada: avulsa no mensal, grátis no anual.
+        'ficha_google': os.environ.get('FEIRA_PRECO_FICHA_GOOGLE', 'R$ 197'),
     }
 
 

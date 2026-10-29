@@ -416,9 +416,12 @@
   /* O nome é cartaz: cada linha tem que caber inteira, sem quebrar palavra.
      --n (nº de caracteres da maior linha) vem do Jinja; 126vw/n é a maior
      fonte que ainda cabe na largura útil na Archivo Black (~.69em por letra).
-     overflow-wrap continua como rede: nome absurdo quebra em vez de vazar. */
+     126vw estourava em "SALA VERMELHA" (o M e o W da Archivo Black passam de
+     .69em) e o overflow-wrap:anywhere cortava "VERMELH" / "A" (auditoria de
+     29/10/2026). Agora 112vw, e a quebra só acontece entre palavras. */
   .nome-hero{
-    font-size:clamp(2rem,min(15.5vw,calc(126vw / var(--n,10))),8rem);
+    font-size:clamp(1.6rem,min(15.5vw,calc(112vw / var(--n,10))),8rem);
+    overflow-wrap:normal;word-break:normal;hyphens:none;
     color:var(--cream);
     text-shadow:.035em .035em 0 var(--ember);
   }
@@ -735,7 +738,8 @@
      <html> depois de confirmar que a Motion carregou E que o usuário aceita
      movimento. CDN fora do ar (ou prefers-reduced-motion) => sem classe =>
      nada com opacity:0 => a página é exatamente a mesma, só parada. */
-  .js-anim .rv{opacity:0;transform:translateY(18px)}
+  /* Conteúdo nasce visível (auditoria 29/10/2026: captura, prévia de link e robô viam a página vazia).
+     A entrada é animação que só roda quando o bloco entra na tela; antes disso ele já está lá. */
   .js-anim [data-hero]{opacity:0;transform:translateY(22px)}
 
   /* ===================== BREAKPOINTS ===================== */
@@ -1003,7 +1007,7 @@
       {% for p in promocoes %}
       <div class="canhoto{% if p.acontece_hoje %} hoje pisca{% endif %}">
         <div class="rot">{% if p.acontece_hoje %}É hoje{% else %}{{ p.rotulo or 'Oferta' }}{% endif %}</div>
-        <h3>{{ p.titulo }}{% if p.exemplo %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
+        <h3>{{ p.titulo }}{% if p.exemplo and not (tenant and tenant.eh_modelo_demo) %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
         {% if p.descricao %}<p>{{ p.descricao }}</p>{% endif %}
         {% if p.dia_semana is not none %}
           <div class="val">Toda {{ (p.rotulo or '')|replace('TODA ', '')|lower }}{% if p.validade %} · até {{ p.validade.strftime('%d/%m/%Y') }}{% endif %}</div>
@@ -1290,7 +1294,7 @@
           <span class="m">{{ meses[e.data.month - 1] }}</span>
         </div>
         <div class="info">
-          <h3>{{ e.titulo }}{% if e.exemplo %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
+          <h3>{{ e.titulo }}{% if e.exemplo and not (tenant and tenant.eh_modelo_demo) %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
           <div class="meta">{{ semana[(e.data.weekday() + 1) % 7] }}{% if e.hora %} · <em>{{ e.hora }}</em>{% endif %}</div>
           {% if e.descricao %}<div class="desc">{{ e.descricao }}</div>{% endif %}
         </div>

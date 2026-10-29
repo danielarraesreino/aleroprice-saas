@@ -31,6 +31,9 @@
     margin-bottom:10px;text-align:center;font-size:15px}
   .nota-google strong{font-size:22px;font-weight:700;color:var(--ambar)}
   .linha-venda{margin:0;font-size:15px}
+  .conta-mesa{--mv-acento:var(--ambar);--mv-linha:var(--linha);--mv-fundo:var(--ink);
+    --mv-dim:var(--creme-dim)}
+  .conta-mesa .mv{margin-top:8px}
   @media print{
     body{background:#fff;color:#111}
     .topo,.no-print{display:none}
@@ -40,6 +43,7 @@
     a{color:#111}
     .plano .preco,.nota-google strong{color:#111}
     .convite{border-color:#111;background:transparent}
+    .conta-mesa{--mv-acento:#111;--mv-fundo:#fff;--mv-dim:#444}
     .convite code{background:#eee}
     .nota-google{border-color:#bbb}
     .entrega li::before{color:#111}
@@ -138,30 +142,11 @@
   </ul>
 </div>
 
-<div class="bloco" style="border: 1px solid var(--verde); background: rgba(37, 211, 102, 0.06);">
-  <h2 style="color: var(--verde);">💰 Retorno do Investimento (ROI)</h2>
-  <div style="font-size: 14px; line-height: 1.5;">
-    <div style="display:flex; justify-content:space-between; padding: 5px 0; border-bottom: 1px dashed rgba(255,255,255,0.1);">
-      <span>🍺 Redução de desperdício em chope:</span>
-      <strong style="color:var(--verde);">+ R$ 240/mês</strong>
-    </div>
-    <div style="display:flex; justify-content:space-between; padding: 5px 0; border-bottom: 1px dashed rgba(255,255,255,0.1);">
-      <span>🧀 Alerta de aumento de insumos por NF-e:</span>
-      <strong style="color:var(--verde);">+ R$ 380/mês</strong>
-    </div>
-    <div style="display:flex; justify-content:space-between; padding: 5px 0; border-bottom: 1px dashed rgba(255,255,255,0.1);">
-      <span>📍 2 novas mesas/mês no Google Maps:</span>
-      <strong style="color:var(--verde);">+ R$ 400/mês</strong>
-    </div>
-    <div style="display:flex; justify-content:space-between; padding: 8px 0 4px; font-size: 15px; font-weight: 700;">
-      <span>Economia & Ganhos Estimados:</span>
-      <span style="color:var(--verde);">+ R$ 1.020,00/mês</span>
-    </div>
-    <p class="nota" style="margin: 6px 0 0; color: var(--creme);">
-      O Plano Pro custa <strong>{{ precos.pro }}</strong> e devolve mais de R$ 1.000 em economia e vendas novas. 
-      <strong>O sistema se paga logo na primeira semana.</strong>
-    </p>
-  </div>
+{# A conta antiga de ROI somava recursos do Pro (chope, NF-e), que está em lista
+   de espera: ninguém paga por "em breve". A conta que vale é a da mesa vazia. #}
+<div class="bloco conta-mesa">
+  <h2>Quanto custa a mesa vazia</h2>
+  {% include 'produto/_mesa_vazia.html' %}
 </div>
 
 <div class="bloco">
@@ -175,18 +160,15 @@
       {% if convite_aplicado %}<s class="cheio">{{ precos.site }}</s>
         {{ convite_aplicado.preco_site }}{% else %}{{ precos.site }}{% endif %}<small>/mês</small>
     </div>
-    <strong>Site</strong>
-    <p class="nota" style="margin:4px 0 0">O site completo: domínio próprio, edição pelo celular,
+    <strong>Site mensal</strong>
+    <p class="nota" style="margin:4px 0 0">Sem contrato. O site completo: domínio próprio, edição pelo celular,
     reservas, agenda e promoções.</p>
   </div>
   <div class="plano">
-    <div class="preco">
-      {% if convite_aplicado %}<s class="cheio">{{ precos.pro }}</s>
-        {{ convite_aplicado.preco_pro }}{% else %}{{ precos.pro }}{% endif %}<small>/mês</small>
-    </div>
-    <strong>Pro</strong>
-    <p class="nota" style="margin:4px 0 0">Tudo do Site + gestão do negócio: ficha técnica,
-    estoque, nota fiscal de entrada e relatórios.</p>
+    <div class="preco">{{ precos.site_anual }}<small>/ano</small></div>
+    <strong>Site anual</strong>
+    <p class="nota" style="margin:4px 0 0">O mesmo site por {{ precos.site_anual_mes }}/mês, pago à vista.
+    A ficha do Google arrumada sai grátis (no mensal, {{ precos.ficha_google }} uma vez só).</p>
   </div>
 
   {% if taxa_setup and not convite_aplicado %}
@@ -239,7 +221,7 @@
 <div class="no-print">
   {% if dados.whatsapp %}
   <a class="btn zap" style="text-decoration:none;margin-bottom:10px"
-     href="https://wa.me/{{ dados.whatsapp }}?text={{ ('Olá! Montamos o site do ' ~ dados.nome ~ ' — dá uma olhada: ' ~ url_previa ~ ' — Planos: Site ' ~ precos.site ~ '/mês ou Pro ' ~ precos.pro ~ '/mês, sem fidelidade. Quer que eu deixe no seu nome?')|urlencode }}">
+     href="https://wa.me/{{ dados.whatsapp }}?text={{ ('Olá! Montamos o site do ' ~ dados.nome ~ ' — dá uma olhada: ' ~ url_previa ~ ' — Site: ' ~ precos.site ~ '/mês sem fidelidade, ou ' ~ precos.site_anual ~ '/ano (' ~ precos.site_anual_mes ~ '/mês) com a ficha do Google grátis. Quer que eu deixe no seu nome?')|urlencode }}">
     Mandar a proposta no WhatsApp dele
   </a>
   {% endif %}

@@ -61,6 +61,12 @@ class Restaurante(db.Model):
         return self.tipo_conta == 'demo'
 
     @property
+    def eh_modelo_demo(self):
+        """Bar-vitrine fictício da campanha (`app/data/leads/vitrine-*.yml`):
+        não é prévia de um bar real, é o modelo mostrado a qualquer dono."""
+        return self.eh_demo and self.demo_fonte == 'vitrine-da-campanha'
+
+    @property
     def indexavel(self):
         """Pode entrar no Google. Cliente sempre; prévia só se for expositor
         artesão (decisão do dono: "onde comprar artesanato em Barão Geraldo"

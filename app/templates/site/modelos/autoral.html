@@ -800,15 +800,16 @@
                 aceita movimento). O estado inicial escondido do herói mora
                 SÓ atrás de .js-anim: CDN fora do ar = classe ausente = página
                 inteira legível. */
-  .js .rev{opacity:0;transform:translateY(16px);
-    transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
-  .js .rev.dentro{opacity:1;transform:none}
+  /* Conteúdo nasce visível (auditoria 29/10/2026: captura, prévia de link e robô viam a página vazia).
+     A entrada é animação que só roda quando o bloco entra na tela; antes disso ele já está lá. */
+  @keyframes rev-in{from{opacity:0;transform:translateY(16px)}}
+  .js .rev.dentro{animation:rev-in .7s cubic-bezier(.2,.7,.2,1) both}
   .js-anim [data-hero]{opacity:0;transform:translateY(20px)}
-  .js-anim .rev{transition:none}  /* com Motion, quem anima é o inline style */
+  .js-anim .rev.dentro{animation:none}  /* com Motion, quem anima é o inline style */
   @media(prefers-reduced-motion:reduce){
     html{scroll-behavior:auto}
     *{animation:none!important;transition:none!important}
-    .js .rev,.js-anim [data-hero]{opacity:1;transform:none}
+    .js-anim [data-hero]{opacity:1;transform:none}
   }
 
   /* "Pular para o conteúdo": fora da tela até receber foco pelo Tab. */
@@ -1030,7 +1031,7 @@
       <div class="promo{% if p.acontece_hoje %} hoje{% endif %}">
         <div class="rot">{% if p.acontece_hoje %}É hoje{% else %}{{ p.rotulo or 'Oferta' }}{% endif %}</div>
         <div>
-          <h3>{{ p.titulo }}{% if p.exemplo %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
+          <h3>{{ p.titulo }}{% if p.exemplo and not (tenant and tenant.eh_modelo_demo) %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
           {% if p.descricao %}<p>{{ p.descricao }}</p>{% endif %}
           {% if p.dia_semana is not none and p.rotulo %}
             <div class="val">Toda {{ p.rotulo.replace('TODA ', '')|lower }}{% if p.validade %} · até {{ p.validade.strftime('%d/%m/%Y') }}{% endif %}</div>
@@ -1243,7 +1244,7 @@
       <div class="evento">
         <div class="data">{{ '%02d' % e.data.day }} {{ meses[e.data.month-1] }}</div>
         <div>
-          <h3>{{ e.titulo }}{% if e.exemplo %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
+          <h3>{{ e.titulo }}{% if e.exemplo and not (tenant and tenant.eh_modelo_demo) %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
           <div class="quando">{{ dias[(e.data.weekday()+1)%7] }}{% if e.hora %} · {{ e.hora }}{% endif %}</div>
           {% if e.descricao %}<p class="desc">{{ e.descricao }}</p>{% endif %}
         </div>

@@ -186,7 +186,7 @@
   @media(min-width:760px){.planos{grid-template-columns:1fr 1fr}}
   .plano{background:var(--cartao);border:1px solid var(--linha);border-radius:4px;
     padding:var(--s-5);display:flex;flex-direction:column}
-  .plano--pro{border:2px solid var(--tinta);box-shadow:6px 6px 0 var(--tomate)}
+  .plano--destaque{border:2px solid var(--tinta);box-shadow:6px 6px 0 var(--tomate)}
   .plano-selo{display:inline-block;background:var(--tomate);color:#fdf8eb;
     font-size:.68rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
     padding:3px 9px;border-radius:2px;margin-bottom:var(--s-2);align-self:flex-start}
@@ -243,6 +243,12 @@
   @media(max-width:1024px){.site-header .wrap{padding-inline:18px}}
   @media(max-width:360px){.site-header .wrap{padding-inline:12px}}
   .site-header .btn{white-space:nowrap;border-radius:999px;box-shadow:none;font-family:inherit;letter-spacing:0}
+
+  /* calculadora da mesa vazia */
+  .secao--conta{background:var(--cartao);border-block:1px solid var(--linha);
+    --mv-acento:var(--tomate);--mv-linha:var(--linha);--mv-fundo:var(--papel);
+    --mv-dim:var(--taupe);--mv-display:var(--f-display)}
+  .secao--conta .mv-conta{box-shadow:6px 6px 0 var(--tomate)}
 
   /* Nada nasce escondido: as classes de animação só entram se o JS assumir. */
   .js-anim [data-hero],.js-anim [data-reveal]{opacity:0}
@@ -378,45 +384,51 @@
     </div>
   </section>
 
+  <!-- 4b. mesa vazia: a conta que vende o plano -->
+  <section class="secao secao--conta" id="mesa-vazia">
+    <div class="wrap">
+      <div data-reveal>
+        <h2>Quanto custa a sua mesa vazia?</h2>
+        <p class="secao-p">Ponha os números do seu salão. A conta é feita aqui no seu celular, nada é enviado.</p>
+      </div>
+      {% include 'produto/_mesa_vazia.html' %}
+    </div>
+  </section>
+
   <!-- 5. preços -->
   <section class="secao" id="preco">
     <div class="wrap">
       <div data-reveal>
-        <h2>Um plano agora, o Pro depois</h2>
+        <h2>O mesmo site, dois jeitos de pagar</h2>
       </div>
       <div class="planos">
-        <article class="plano" data-reveal>
-          <p class="plano-nome">Site</p>
+        <article class="plano plano--destaque" data-reveal>
           <p class="plano-selo">Melhor preço · anual</p>
+          <p class="plano-nome">Site anual</p>
           <p class="preco-valor">{{ precos.site_anual }} <span class="preco-periodo">por ano</span></p>
-          <p class="acordo">{{ precos.site_anual_mes }} por mês, pago à vista, sem devolução. Domínio e hospedagem inclusos.</p>
-          <p class="acordo"><b>Quer testar antes?</b> Mensal: {{ preco_site }} {{ preco_periodo }}, sem contrato, também com domínio e hospedagem inclusos.</p>
+          <p class="acordo">Equivale a <b>{{ precos.site_anual_mes }} por mês</b>, pago à vista, sem devolução.</p>
           <ul>
+            <li><b>Ficha do Google arrumada, grátis</b>: horário, fotos, cardápio e link</li>
             <li><b>Site com domínio próprio</b>: seu endereço, não um perfil</li>
-            <li>Ficha do Google arrumada: horário, fotos, cardápio e link</li>
             <li>Reserva com alerta no WhatsApp</li>
             <li>Agenda de eventos e promoções</li>
             <li>Cardápio com QR, sem limite de itens</li>
             <li>Você edita tudo do celular</li>
           </ul>
-          <a class="btn-fantasma" href="{{ zap_url }}">Começar pelo Site</a>
-        </article>
-        <article class="plano plano--pro" data-reveal>
-          {# A gestão (ficha técnica, NF-e, relatório) está desligada em produção
-             (GESTAO_ATIVA): oferta vincula, então aqui é lista de espera. #}
-          <span class="plano-selo">Em breve · lista de espera</span>
-          <p class="plano-nome">Pro</p>
-          <p class="preco-valor">Em breve</p>
-          <ul>
-            <li><b>Tudo do plano Site</b></li>
-            <li>Em preparação: custo real de cada prato</li>
-            <li>Em preparação: notas de compra organizadas</li>
-            <li>Em preparação: relatório de lucro</li>
-          </ul>
           <a class="btn-zap" href="{{ zap_url }}">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.2 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.4-.7-2.9-1.1-4.7-4-4.9-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5s.8 1.9.8 2c.1.1.1.3 0 .5l-.3.5c-.2.2-.3.4-.1.7.1.3.7 1.2 1.5 1.9 1.1.9 2 1.2 2.2 1.4.3.1.5.1.6-.1.2-.2.7-.8.9-1.1.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.2 1.3Z"/></svg>
-            Entrar na lista de espera
+            Quero o anual
           </a>
+        </article>
+        <article class="plano" data-reveal>
+          <p class="plano-nome">Site mensal</p>
+          <p class="preco-valor">{{ preco_site }} <span class="preco-periodo">{{ preco_periodo }}</span></p>
+          <p class="acordo">Sem contrato: se não servir, você cancela.</p>
+          <ul>
+            <li><b>Tudo o que o anual tem</b>, com domínio e hospedagem inclusos</li>
+            <li>Ficha do Google arrumada: <b>{{ precos.ficha_google }}</b>, uma vez só</li>
+          </ul>
+          <a class="btn-fantasma" href="{{ zap_url }}">Começar pelo mensal</a>
         </article>
       </div>
 
@@ -432,7 +444,7 @@
       </div>
       {% endif %}
 
-      <p class="acordo" data-reveal>No mensal não há contrato: se não servir, você cancela. O anual é pago à vista e não é devolvido.</p>
+      <p class="acordo" data-reveal>No mensal não há contrato: se não servir, você cancela. O anual é pago à vista e não é devolvido. A gestão de custos (plano Pro) está em lista de espera; pergunte no WhatsApp.</p>
     </div>
   </section>
 

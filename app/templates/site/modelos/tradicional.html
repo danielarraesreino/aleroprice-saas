@@ -724,8 +724,10 @@
   /* ---------- REVELAR ----------
      Só esconde quando há JS pra revelar de volta (a classe `com-js` entra no
      <html> antes da primeira pintura). Sem JS, o site aparece inteiro. */
-  .com-js .revelar{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}
-  .com-js .revelar.vista{opacity:1;transform:none}
+  /* Conteúdo nasce visível (auditoria 29/10/2026: captura, prévia de link e robô viam a página vazia).
+     A entrada é animação que só roda quando o bloco entra na tela; antes disso ele já está lá. */
+  @keyframes revelar-in{from{opacity:0;transform:translateY(18px)}}
+  .com-js .revelar.vista{animation:revelar-in .7s ease both}
 
   /* ---------- MOTION ----------
      `.js-anim` só entra no <html> depois de confirmar que window.Motion existe
@@ -736,7 +738,7 @@
   .js-anim [data-hero]{opacity:0}
   /* Sob o Motion quem anima é ele: a transição CSS sairia por cima e o
      movimento ficaria com duas curvas. */
-  .js-anim .revelar{transition:none}
+  .js-anim .revelar.vista{animation:none}
   @media(prefers-reduced-motion:reduce){
     html{scroll-behavior:auto}
     *{animation:none!important;transition:none!important}
@@ -998,7 +1000,7 @@
       {% for p in promocoes %}
       <div class="cartaz{% if p.acontece_hoje %} hoje{% endif %}">
         <div class="rot">{% if p.acontece_hoje %}É hoje{% else %}{{ p.rotulo or 'Oferta da casa' }}{% endif %}</div>
-        <h3>{{ p.titulo }}{% if p.exemplo %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
+        <h3>{{ p.titulo }}{% if p.exemplo and not (tenant and tenant.eh_modelo_demo) %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
         {% if p.descricao %}<p>{{ p.descricao }}</p>{% endif %}
         {# Sem repetir o rótulo do topo: recorrente já diz o dia ali em cima, e
            pontual já diz "ATÉ 31/12". Aqui só entra o que ainda não foi dito. #}
@@ -1034,7 +1036,7 @@
           <span class="m">{{ meses[e.data.month-1] }}</span>
         </div>
         <div>
-          <h3>{{ e.titulo }}{% if e.exemplo %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
+          <h3>{{ e.titulo }}{% if e.exemplo and not (tenant and tenant.eh_modelo_demo) %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
           <div class="quando">{{ dias[(e.data.weekday()+1)%7] }}{% if e.hora %} · {{ e.hora }}{% endif %}</div>
           {% if e.descricao %}<div class="desc">{{ e.descricao }}</div>{% endif %}
         </div>

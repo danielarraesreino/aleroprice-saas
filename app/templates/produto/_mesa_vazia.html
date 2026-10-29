@@ -1,0 +1,90 @@
+{# Calculadora "quanto custa a sua mesa vazia". Só cliente: nada vai ao servidor.
+   Recebe `precos` (planos.precos()). Sem JS, mostra a conta do exemplo já feita.
+   A página hospedeira dá a cor por variáveis: --mv-acento, --mv-linha,
+   --mv-fundo, --mv-dim, --mv-display. #}
+{% set ex_mesas, ex_pessoas, ex_ticket, ex_vazias, ex_noites = 10, 4, 60, 2, 4 %}
+{% set ex_perda = ex_vazias * ex_pessoas * ex_ticket * ex_noites %}
+<style>
+  .mv{display:grid;gap:var(--s-5,24px);margin-top:var(--s-6,40px)}
+  @media(min-width:760px){.mv{grid-template-columns:1.1fr .9fr;align-items:stretch}}
+  .mv-campos{display:grid;gap:var(--s-3,12px);grid-template-columns:1fr 1fr}
+  .mv-campo{display:flex;flex-direction:column;justify-content:flex-end;gap:6px}
+  .mv-campo--largo{grid-column:1/-1}
+  .mv-campo label{font-size:.88rem;font-weight:600;line-height:1.3}
+  .mv-campo input{font:inherit;font-size:1.15rem;font-variant-numeric:tabular-nums;
+    min-height:48px;padding:10px 12px;width:100%;border-radius:4px;
+    border:1.5px solid var(--mv-linha,rgb(0 0 0 / .25));
+    background:var(--mv-fundo,#fff);color:inherit}
+  .mv-campo input:focus-visible{outline:3px solid var(--mv-acento,currentColor);outline-offset:2px}
+  .mv-conta{border:2px solid currentColor;border-radius:4px;padding:var(--s-5,24px);
+    display:flex;flex-direction:column;gap:var(--s-2,8px);background:var(--mv-fundo,transparent)}
+  .mv-rotulo{font-size:.88rem;color:var(--mv-dim,inherit)}
+  .mv-perda{font-family:var(--mv-display,inherit);font-size:clamp(2.4rem,1.6rem + 3vw,3.6rem);
+    line-height:1;color:var(--mv-acento,currentColor);font-variant-numeric:tabular-nums;
+    overflow-wrap:anywhere}
+  .mv-perda small{display:block;font-family:inherit;font-size:.36em;line-height:1.3;margin-top:4px}
+  .mv-plano{border-top:1px solid var(--mv-linha,rgb(0 0 0 / .2));padding-top:var(--s-3,12px);
+    margin-top:auto;font-size:.98rem}
+  .mv-plano b{font-variant-numeric:tabular-nums}
+  .mv-nota{font-size:.82rem;color:var(--mv-dim,inherit)}
+</style>
+<div class="mv" data-mesa-vazia data-preco="{{ precos.site }}" data-preco-anual-mes="{{ precos.site_anual_mes }}">
+  <div class="mv-campos" role="group" aria-label="Dados do seu bar">
+    <div class="mv-campo">
+      <label for="mv-mesas">Mesas no salão</label>
+      <input id="mv-mesas" name="mesas" type="number" inputmode="numeric" min="1" max="300" step="1" value="{{ ex_mesas }}">
+    </div>
+    <div class="mv-campo">
+      <label for="mv-pessoas">Pessoas por mesa</label>
+      <input id="mv-pessoas" name="pessoas" type="number" inputmode="numeric" min="1" max="20" step="1" value="{{ ex_pessoas }}">
+    </div>
+    <div class="mv-campo mv-campo--largo">
+      <label for="mv-ticket">Quanto cada pessoa gasta (R$)</label>
+      <input id="mv-ticket" name="ticket" type="number" inputmode="decimal" min="1" max="2000" step="1" value="{{ ex_ticket }}">
+    </div>
+    <div class="mv-campo">
+      <label for="mv-vazias">Mesas vazias numa noite fraca</label>
+      <input id="mv-vazias" name="vazias" type="number" inputmode="numeric" min="0" max="300" step="1" value="{{ ex_vazias }}">
+    </div>
+    <div class="mv-campo">
+      <label for="mv-noites">Noites fracas por mês</label>
+      <input id="mv-noites" name="noites" type="number" inputmode="numeric" min="0" max="31" step="1" value="{{ ex_noites }}">
+    </div>
+  </div>
+
+  <div class="mv-conta">
+    <p class="mv-rotulo">Na conta de hoje, seu bar deixa na mesa</p>
+    <output class="mv-perda" for="mv-mesas mv-pessoas mv-ticket mv-vazias mv-noites" aria-live="polite">
+      <span data-mv-perda>{{ ex_perda|moeda_br }}</span>
+      <small>por mês perdidos</small>
+    </output>
+    <p class="mv-nota" data-mv-ocioso>{{ (ex_vazias * 100 // ex_mesas) }}% do salão parado nas noites fracas.</p>
+    <p class="mv-plano">O plano Site custa <b>{{ precos.site }}/mês</b> (ou <b>{{ precos.site_anual_mes }}/mês</b> no anual).
+      <span data-mv-paga>Uma mesa de {{ ex_pessoas }} reservada pelo site no mês já paga o plano.</span></p>
+  </div>
+</div>
+<script>
+(function () {
+  var raiz = document.querySelector('[data-mesa-vazia]');
+  if (!raiz) return;
+  // 'R$ 1.234,56' -> 1234.56: o preço vem formatado de planos.precos().
+  function reais(t) { return Number(String(t).replace(/[^\d,]/g, '').replace(',', '.')) || 0; }
+  var preco = reais(raiz.dataset.preco);
+  var brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+  function num(id) { var v = Number(document.getElementById(id).value); return v > 0 ? v : 0; }
+  function conta() {
+    var mesas = num('mv-mesas'), pessoas = num('mv-pessoas'), ticket = num('mv-ticket');
+    var vazias = Math.min(num('mv-vazias'), mesas || Infinity), noites = num('mv-noites');
+    var porMesa = pessoas * ticket;
+    raiz.querySelector('[data-mv-perda]').textContent = brl.format(vazias * porMesa * noites);
+    raiz.querySelector('[data-mv-ocioso]').textContent = mesas
+      ? Math.round(vazias / mesas * 100) + '% do salão parado nas noites fracas.' : '';
+    var n = porMesa ? Math.ceil(preco / porMesa) : 0;
+    raiz.querySelector('[data-mv-paga]').textContent = !n ? ''
+      : (n === 1 ? 'Uma mesa de ' + pessoas + ' reservada pelo site no mês já paga o plano.'
+                 : n + ' mesas de ' + pessoas + ' reservadas pelo site no mês já pagam o plano.');
+  }
+  raiz.addEventListener('input', conta);
+  conta();
+})();
+</script>

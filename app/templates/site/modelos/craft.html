@@ -769,8 +769,10 @@
   /* ------------------------------------------------------- revelação */
   /* Só esconde se o JS estiver vivo (a classe `js` vem do script do <head>).
      Sem isso, JS bloqueado deixaria o site do bar em branco. */
-  .js .rev{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}
-  .js .rev.visivel{opacity:1;transform:none}
+  /* Conteúdo nasce visível (auditoria 29/10/2026: captura, prévia de link e robô viam a página vazia).
+     A entrada é animação que só roda quando o bloco entra na tela; antes disso ele já está lá. */
+  @keyframes rev-in{from{opacity:0;transform:translateY(14px)}}
+  .js .rev.visivel{animation:rev-in .6s ease both}
 
   /* ------------------------------------------------------- animação */
   /* TUDO aqui depende de `.js-anim`, que o <head> só carimba depois de
@@ -787,14 +789,13 @@
   .js-anim .medidor span.anim-ok{transform:none}
   /* Quando o Motion assume a revelação, a transição CSS sai de cena: as duas
      escrevendo transform/opacity ao mesmo tempo brigam e piscam. */
-  .js-anim .rev{transition:none}
+  .js-anim .rev.visivel{animation:none}
   /* o lift do botão passa a ser spring do Motion (inline style vence a regra) */
   .js-anim .btn{transition:background .2s,color .2s,border-color .2s}
 
   @media(prefers-reduced-motion:reduce){
     html{scroll-behavior:auto}
     *,*::before,*::after{animation:none!important;transition:none!important}
-    .js .rev{opacity:1;transform:none}
     /* cinto e suspensório: o gate já não carimba `.js-anim` sob reduced-motion,
        mas se alguém trocar a preferência com a página aberta nada some */
     .js-anim [data-anim]{opacity:1;transform:none}
@@ -982,7 +983,7 @@
       {# Recorrente (ex.: chope de quarta) acende no dia certo. #}
       <li class="oferta rev{% if p.acontece_hoje %} hoje{% endif %}">
         <span class="rotulo">{% if p.acontece_hoje %}É hoje{% else %}{{ p.rotulo or 'Oferta' }}{% endif %}</span>
-        <h3>{{ p.titulo }}{% if p.exemplo %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
+        <h3>{{ p.titulo }}{% if p.exemplo and not (tenant and tenant.eh_modelo_demo) %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
         {% if p.descricao %}<p>{{ p.descricao }}</p>{% endif %}
         {% if p.dia_semana is not none and p.rotulo %}
           <span class="val">Toda {{ p.rotulo.replace('TODA ', '')|lower }}{% if p.validade %} · até {{ p.validade.strftime('%d/%m/%Y') }}{% endif %}</span>
@@ -1015,7 +1016,7 @@
           <span>{{ dias[(e.data.weekday()+1)%7] }}{% if e.hora %} · {{ e.hora }}{% endif %}</span>
         </div>
         <div>
-          <h3>{{ e.titulo }}{% if e.exemplo %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
+          <h3>{{ e.titulo }}{% if e.exemplo and not (tenant and tenant.eh_modelo_demo) %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
           {% if e.descricao %}<p>{{ e.descricao }}</p>{% endif %}
         </div>
       </li>

@@ -568,7 +568,8 @@
      Motion carregou E que o usuário não pediu menos movimento. CDN fora do ar,
      JS bloqueado ou reduced-motion: a página inteira nasce visível. */
   .reveal{opacity:1;transform:none}
-  .js-anim .reveal{opacity:0;transform:translateY(30px)}
+  /* Conteúdo nasce visível (auditoria 29/10/2026: captura, prévia de link e robô viam a página vazia).
+     A entrada é animação que só roda quando o bloco entra na tela; antes disso ele já está lá. */
   .js-anim [data-hero]{opacity:0;transform:translateY(20px)}
   .js-anim .neon{transform:translateY(16px)}
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
@@ -727,7 +728,7 @@ srcset="{{ base }}-400.webp 400w, {{ base }}-800.webp 800w" sizes="{{ tamanhos }
       {# Recorrente (ex.: Lanche de Quarta) mostra "TODA QUARTA" e acende no dia. #}
       <div class="promo-card{% if p.acontece_hoje %} promo-hoje{% endif %}">
         <div class="tag">{% if p.acontece_hoje %}É HOJE!{% else %}{{ p.rotulo or 'OFERTA' }}{% endif %}</div>
-        <h3>{{ p.titulo }}{% if p.exemplo %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
+        <h3>{{ p.titulo }}{% if p.exemplo and not (tenant and tenant.eh_modelo_demo) %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
         {% if p.descricao %}<p>{{ p.descricao }}</p>{% endif %}
         {% if p.dia_semana is not none %}
           <div class="val">Toda {{ p.rotulo.replace('TODA ', '')|lower }}{% if p.validade %} · até {{ p.validade.strftime('%d/%m/%Y') }}{% endif %}</div>
@@ -868,7 +869,7 @@ srcset="{{ base }}-400.webp 400w, {{ base }}-800.webp 800w" sizes="{{ tamanhos }
       <div class="event-card">
         <div class="event-date"><span class="d">{{ '%02d' % e.data.day }}</span><span class="m">{{ meses[e.data.month-1] }}</span></div>
         <div>
-          <h3>{{ e.titulo }}{% if e.exemplo %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
+          <h3>{{ e.titulo }}{% if e.exemplo and not (tenant and tenant.eh_modelo_demo) %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
           <div class="when">{{ ['DOM','SEG','TER','QUA','QUI','SEX','SÁB'][(e.data.weekday()+1)%7] }}{% if e.hora %} · {{ e.hora }}{% endif %}</div>
           {% if e.descricao %}<div class="desc">{{ e.descricao }}</div>{% endif %}
         </div>

@@ -461,9 +461,12 @@
     filter:saturate(1.2) contrast(1.08)}
   .porcao-foto::after{content:"";position:absolute;inset:0;
     background:linear-gradient(200deg,rgba(255,120,25,.14),rgba(110,22,10,.3));mix-blend-mode:multiply}
-  .sem-foto{display:grid;place-items:center;aspect-ratio:16/10;
-    font-family:var(--f-peso);font-size:4.4rem;color:var(--linha-forte);
-    background:repeating-linear-gradient(-45deg,var(--madeira) 0 12px,var(--papel) 12px 24px)}
+  /* porção sem foto: placa pintada com veio de madeira no topo (régua, não letra) */
+  .porcao.sem-img{padding-top:10px}
+  .porcao.sem-img::before{content:"";position:absolute;left:0;right:0;top:0;height:10px;
+    background:repeating-linear-gradient(90deg,var(--madeira) 0 34px,var(--linha-forte) 34px 36px,var(--madeira) 36px 70px,var(--fogo) 70px 72px);
+    opacity:.85}
+  .porcao.sem-img .etiqueta{position:static;align-self:flex-start;margin-bottom:12px}
   .porcao-txt{padding:22px 20px 24px;display:flex;flex-direction:column;justify-content:center}
   @media(min-width:760px){.porcao-txt{padding:30px 32px}}
   .num{font-family:var(--f-peso);font-size:2rem;line-height:1;color:var(--fogo);opacity:.4;display:block}
@@ -494,11 +497,15 @@
   @media(min-width:820px){
     /* faixa alternada: a foto troca de lado, mas mantém a MESMA largura — a
        coluna dela é que troca de lugar junto. */
-    .porcao{grid-template-columns:minmax(0,44%) minmax(0,1fr)}
-    .porcao:nth-child(even){grid-template-columns:minmax(0,1fr) minmax(0,44%)}
+    .porcao:not(.sem-img){grid-template-columns:minmax(0,44%) minmax(0,1fr)}
+    .porcao:not(.sem-img):nth-child(even){grid-template-columns:minmax(0,1fr) minmax(0,44%)}
     .porcao:nth-child(even) .porcao-foto{order:2}
     .porcao-foto img{aspect-ratio:auto;min-height:280px}
-    .sem-foto{aspect-ratio:auto;min-height:280px}
+    .porcao.sem-img .porcao-txt{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:28px;align-items:baseline}
+    .porcao.sem-img .porcao-txt>*:not(.num){grid-column:2;justify-self:start}
+    .porcao.sem-img .num{grid-row:1/span 6;font-size:3.4rem}
+    /* cardápio inteiro sem foto: placas em duas colunas, sem faixa vazia à direita */
+    .porcoes:not(:has(.porcao-foto)){display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
   }
 
   /* ---------- PROMOÇÕES (etiqueta de açougue) ---------- */
@@ -715,7 +722,8 @@
      no <html> depois que o JS confirma que a Motion carregou E que o usuário
      não pediu menos movimento. CDN fora do ar = classe ausente = a placa
      inteira aparece pintada, parada e legível. */
-  .js-anim .surge{opacity:0;transform:rotate(var(--tilt,0deg)) translateY(22px)}
+  /* Conteúdo nasce visível (auditoria 29/10/2026: captura, prévia de link e robô viam a página vazia).
+     A entrada é animação que só roda quando o bloco entra na tela; antes disso ele já está lá. */
   /* rede de segurança: se a animação falhar no meio, o CSS revela sozinho */
   .js-anim .surge.vis{opacity:1;transform:rotate(var(--tilt,0deg));
     transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.2,1)}
@@ -932,20 +940,20 @@
     </div>
     <div class="porcoes">
       {% for d in dishes %}
-      <article class="porcao surge{% if d.destaque %} destaque{% endif %}">
+      <article class="porcao surge{% if d.destaque %} destaque{% endif %}{% if not d.img %} sem-img{% endif %}">
+        {% if d.img %}
         <div class="porcao-foto">
           {% if d.tag %}<span class="etiqueta">{{ d.tag }}</span>{% endif %}
-          {% if d.img %}
           <img src="{{ d.img }}"
                alt="{{ d.nome }} — porção servida no {{ site.nome }}"
                loading="lazy" decoding="async">
-          {% else %}
-          {# Sem foto, o bloco vira placa de madeira com a inicial — some a
-             moldura vazia que denuncia site inacabado. #}
-          <div class="sem-foto" aria-hidden="true">{{ d.nome[0]|upper if d.nome else '·' }}</div>
-          {% endif %}
         </div>
+        {% endif %}
+        {# Sem foto não há moldura: a porção vira placa pintada, só nome, preço e
+           descrição, com o veio de madeira no topo. A inicial gigante sobre
+           listras parecia espaço reservado (auditoria de 29/10/2026). #}
         <div class="porcao-txt">
+          {% if d.tag and not d.img %}<span class="etiqueta">{{ d.tag }}</span>{% endif %}
           <span class="num">{{ '%02d' % loop.index }}</span>
           <h3>{{ d.nome }}</h3>
           {# Placa de churrascaria: o preço vem logo abaixo do nome, na mesma
@@ -1008,7 +1016,7 @@
           <span class="m">{{ meses[e.data.month - 1] }}</span>
         </div>
         <div>
-          <h3>{{ e.titulo }}{% if e.exemplo %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
+          <h3>{{ e.titulo }}{% if e.exemplo and not (tenant and tenant.eh_modelo_demo) %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
           <div class="quando">{{ dias[(e.data.weekday() + 1) % 7] }}{% if e.hora %} · {{ e.hora }}{% endif %}</div>
           {% if e.descricao %}<div class="desc">{{ e.descricao }}</div>{% endif %}
         </div>
@@ -1234,7 +1242,7 @@
       {# Recorrente (ex.: Costela de Quarta) mostra "TODA QUARTA" e acende no dia. #}
       <article class="promo surge{% if p.acontece_hoje %} hoje{% endif %}">
         <div class="rot">{% if p.acontece_hoje %}É hoje!{% else %}{{ p.rotulo or 'Oferta' }}{% endif %}</div>
-        <h3>{{ p.titulo }}{% if p.exemplo %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
+        <h3>{{ p.titulo }}{% if p.exemplo and not (tenant and tenant.eh_modelo_demo) %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
         {% if p.descricao %}<p>{{ p.descricao }}</p>{% endif %}
         {% if p.dia_semana is not none and p.rotulo %}
           <div class="val">Toda {{ p.rotulo.replace('TODA ', '')|lower }}{% if p.validade %} · até {{ p.validade.strftime('%d/%m/%Y') }}{% endif %}</div>
