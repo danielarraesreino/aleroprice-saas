@@ -582,3 +582,32 @@ def marketing(slug):
     pecas = gerar_pecas_marketing(nome_bar=rest.nome, pratos=pratos, vibe=vibe)
     return render_template('campo/marketing.html', rest=rest, cfg=cfg, pecas=pecas)
 
+
+
+@bp.route('/<slug>/relatorio')
+def relatorio(slug):
+    """Relatório do mês fechado, pronto para mandar no WhatsApp do dono.
+
+    Quem manda é o operador, pelo WhatsApp dele: sem API paga e sem risco de
+    bloqueio de número. É a mensagem que lembra o cliente, todo mês, do que o
+    plano rendeu.
+    """
+    from urllib.parse import quote
+
+    from app.models.modelo_reserva import Reserva
+    from app.utils import metricas
+    from app.utils.site_router import url_canonica
+
+    rest = _bar(slug)
+    cfg = _config(rest)
+    inicio, fim = metricas.mes_anterior(hoje_br())
+    soma = metricas.totais(rest.id, inicio, fim)
+    reservas = (Reserva.query.filter(Reserva.restaurant_id == rest.id, Reserva.status != 'cancelada',
+                                     Reserva.data >= inicio, Reserva.data <= fim).count())
+    texto = metricas.texto_relatorio(cfg.nome or rest.nome, soma, inicio, reservas=reservas,
+                                     link=url_canonica(rest))
+    numero = metricas.whatsapp_do_dono(cfg.whatsapp or rest.telefone)
+    link_zap = f'https://wa.me/{numero}?text={quote(texto)}' if numero else ''
+    return render_template('campo/relatorio.html', rest=rest, texto=texto, soma=soma,
+                           tipos=metricas.TIPOS, reservas=reservas, link_zap=link_zap,
+                           nome_mes=f'{metricas.MESES[inicio.month - 1]} de {inicio.year}')

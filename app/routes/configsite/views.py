@@ -78,6 +78,96 @@ def na_feira():
     return redirect(url_for('configsite.index'))
 
 
+@bp.route('/encomendas', methods=['GET', 'POST'])
+@plano_minimo('site')
+def encomendas():
+    """Encomenda com retirada na feira: o cliente escolhe o sábado ou domingo
+    na sacola do site e o pedido chega no WhatsApp já com a data."""
+    from app.utils.feira import proximas_retiradas
+
+    rid = get_current_restaurant_id()
+    if not rid:
+        return redirect(url_for('auth.login'))
+    cfg = SiteConfig.query.filter_by(restaurant_id=rid).first()
+    if request.method == 'POST':
+        if cfg is None:
+            cfg = SiteConfig(restaurant_id=rid)
+            db.session.add(cfg)
+        cfg.retirada_na_feira = request.form.get('retirada_na_feira') == '1'
+        try:
+            cfg.retirada_antecedencia = min(max(int(request.form.get('retirada_antecedencia', 2)), 0), 30)
+        except ValueError:
+            cfg.retirada_antecedencia = 2
+        db.session.commit()
+        flash('Encomendas com retirada na feira ligadas.' if cfg.retirada_na_feira
+              else 'Retirada na feira desligada: a sacola volta a só mandar a lista.', 'success')
+        return redirect(url_for('configsite.encomendas'))
+    ligado = bool(cfg and cfg.retirada_na_feira)
+    antecedencia = cfg.retirada_antecedencia if cfg and cfg.retirada_antecedencia is not None else 2
+    return render_template('configsite/encomendas.html', ligado=ligado, antecedencia=antecedencia,
+                           datas=proximas_retiradas(hoje_br(), antecedencia))
+
+
+@bp.route('/catalogo')
+@plano_minimo('site')
+def catalogo():
+    """Os mesmos produtos do site no WhatsApp Business e no Instagram, pelo
+    feed da Meta. Mostra o endereço do feed, o que entra e o que falta."""
+    from app.models.modelo_restaurante import Restaurante
+    from app.utils import catalogo as feed
+    from app.utils.site_router import dominio_do_produto
+
+    rid = get_current_restaurant_id()
+    if not rid:
+        return redirect(url_for('auth.login'))
+    rest = Restaurante.query.get_or_404(rid)
+    cfg = SiteConfig.query.filter_by(restaurant_id=rid).first()
+    linhas, fora = feed.itens(rest, cfg.nome if cfg and cfg.nome else None)
+    url_feed = (f'https://{dominio_do_produto()}'
+                + url_for('public.catalogo_meta', slug=rest.slug)) if rest.slug else ''
+    return render_template('configsite/catalogo.html', linhas=linhas, fora=fora, url_feed=url_feed)
+
+
+@bp.route('/numeros')
+@plano_minimo('site')
+def numeros():
+    """"Seus números": o que o site fez pelo cliente. É a prova que segura a
+    renovação; sem ela, o plano parece custo."""
+    from app.models.modelo_reserva import Reserva
+    from app.models.modelo_restaurante import Restaurante
+    from app.utils import metricas
+    from app.utils.site_router import url_canonica
+
+    rid = get_current_restaurant_id()
+    if not rid:
+        return redirect(url_for('auth.login'))
+    rest = Restaurante.query.get_or_404(rid)
+    cfg = SiteConfig.query.filter_by(restaurant_id=rid).first()
+    hoje = hoje_br()
+    serie = metricas.por_dia(rid, 30, hoje)
+    mes_ini = hoje.replace(day=1)
+    ant_ini, ant_fim = metricas.mes_anterior(hoje)
+
+    def reservas(inicio, fim):
+        return (Reserva.query.filter(Reserva.restaurant_id == rid, Reserva.status != 'cancelada',
+                                     Reserva.data >= inicio, Reserva.data <= fim).count())
+
+    return render_template(
+        'configsite/numeros.html',
+        tipos=metricas.TIPOS,
+        este_mes=metricas.totais(rid, mes_ini, hoje),
+        mes_passado=metricas.totais(rid, ant_ini, ant_fim),
+        nome_mes=metricas.MESES[hoje.month - 1],
+        nome_mes_passado=metricas.MESES[ant_ini.month - 1],
+        reservas_mes=reservas(mes_ini, hoje),
+        reservas_passado=reservas(ant_ini, ant_fim),
+        avaliacoes=(cfg.cliques_avaliacao or 0) if cfg else 0,
+        serie=serie,
+        pico=max([d['visita'] for _, d in serie] + [1]),
+        link=url_canonica(rest) if rest.slug else '',
+    )
+
+
 @bp.route('/', methods=['GET', 'POST'])
 @bp.route('/index', methods=['GET', 'POST'])
 @plano_minimo('site')
