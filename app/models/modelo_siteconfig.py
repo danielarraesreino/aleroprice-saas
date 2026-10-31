@@ -107,12 +107,6 @@ class SiteConfig(db.Model):
     # mostra ao dono, já que o Google não diz quantas avaliações vieram dele.
     google_place_id = db.Column(db.String(120))
     cliques_avaliacao = db.Column(db.Integer, default=0)
-    # Encomenda com retirada na feira: a sacola do site oferece os próximos
-    # sábados e domingos com pelo menos `retirada_antecedencia` dias de folga
-    # (o tempo de produzir). Desligado por padrão: nem todo expositor vai a
-    # toda feira.
-    retirada_na_feira = db.Column(db.Boolean, default=False)
-    retirada_antecedencia = db.Column(db.Integer, default=2)
     # Notificações WhatsApp via CallMeBot (grátis)
     callmebot_phone = db.Column(db.String(20))
     callmebot_apikey = db.Column(db.String(50))

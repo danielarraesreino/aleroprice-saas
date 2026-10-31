@@ -276,9 +276,6 @@ def create_app(config_name='default'):
         # novidades), inscrição, QR de avaliação e o resumo para IAs.
         'public.novidades_token', 'public.novidades', 'public.avaliar',
         'public.llms_txt',
-        # Beacon de visitas e cliques (site/_metricas.html): no domínio do
-        # cliente o navegador posta no mesmo host, e redirecionar perde o POST.
-        'public.metrica',
         # Endereço antigo do catálogo da Berga (posts e bio do Instagram): tem que
         # responder no domínio dela e levar à vitrine, não ao domínio do produto.
         'public.kits_legado',
@@ -356,10 +353,9 @@ def create_app(config_name='default'):
     # Sem isto, todo POST do painel e o formulário público de reserva aceitam
     # request forjado de outro site — o flask-wtf estava no requirements e o
     # TestingConfig já desligava a checagem, mas a proteção nunca foi ligada.
-    # As exceções vivem onde a rota vive, marcadas com `@csrf.exempt`:
+    # As duas exceções vivem onde a rota vive, marcadas com `@csrf.exempt`:
     # `billing.webhook` (app/routes/billing/views.py) e `bootstrap_demo`
-    # (run.py), chamadas de fora, sem sessão e sem token; e `public.metrica`,
-    # o beacon de visitas, que só soma um contador.
+    # (run.py). Ambas são chamadas de fora, sem sessão e sem token.
     csrf.init_app(app)
 
     # 404 próprio. /bar/<slug> é rota pública quente (é o endereço do site de

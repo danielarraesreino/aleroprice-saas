@@ -518,9 +518,6 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
 }
 .pedido li button:hover{background:var(--ink-2)}
 .pedido .nota{font-size:.9375rem;color:var(--cream-dim)}
-.pedido .retirada{display:grid;gap:var(--s2);font-weight:700}
-.pedido .retirada select{min-height:48px;padding:0 var(--s3);border-radius:var(--r);border:1px solid currentColor;background:transparent;color:inherit;font:inherit;font-weight:500}
-.pedido .retirada option{color:#1a1410;background:#fff}
 .pedido .acoes .btn{flex:1 1 200px}
 
 /* Lightbox para ampliar fotos de produtos e galeria (como nos bares) */
@@ -803,16 +800,9 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
   <form method="dialog"><div class="dentro">
     <h2 id="pedido-titulo">Sua encomenda</h2>
     <ul id="pedido-lista"></ul>
-    {% if site.retirada_na_feira %}
-    <label class="retirada" for="pedido-retirada">Quando você retira na feira?
-      <select id="pedido-retirada" data-antecedencia="{{ site.retirada_antecedencia }}">
-        <option value="">Combinar pelo WhatsApp</option>
-      </select>
-    </label>
-    {% endif %}
     <p class="nota">Você envia a lista e conversa direto com {{ site.nome }} no WhatsApp.</p>
     <div class="acoes">
-      <a class="btn pedir-link" id="pedido-enviar" href="#" target="_blank" rel="noopener">Enviar pelo WhatsApp</a>
+      <a class="btn" id="pedido-enviar" href="#" target="_blank" rel="noopener">Enviar pelo WhatsApp</a>
       <button class="btn btn-line" value="fechar">Continuar escolhendo</button>
     </div>
   </div></form>
@@ -942,28 +932,7 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
   try{lista=JSON.parse(localStorage.getItem(CHAVE)||'[]').filter(function(n){return typeof n==='string'})}catch(e){}
   var ul=document.getElementById('pedido-lista'),envia=document.getElementById('pedido-enviar');
   function salva(){try{localStorage.setItem(CHAVE,JSON.stringify(lista))}catch(e){}}
-  /* Retirada na feira: próximos sábados e domingos depois do prazo de produção.
-     Conta feita aqui (a página sai do cache); mesma regra de feira.proximas_retiradas. */
-  var sel=document.getElementById('pedido-retirada');
-  if(sel){
-    var DIAS=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
-    var d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+(parseInt(sel.getAttribute('data-antecedencia'),10)||0));
-    for(var k=0;k<6;){
-      if(d.getDay()===6||d.getDay()===0){
-        var o=document.createElement('option'),dd=('0'+d.getDate()).slice(-2),mm=('0'+(d.getMonth()+1)).slice(-2);
-        o.value=DIAS[d.getDay()].toLowerCase()+', '+dd+'/'+mm;o.textContent=DIAS[d.getDay()]+', '+dd+'/'+mm;
-        sel.appendChild(o);k++;
-      }
-      d.setDate(d.getDate()+1);
-    }
-    sel.selectedIndex=sel.options.length>1?1:0;
-    sel.addEventListener('change',function(){pinta()});
-  }
-  function msg(){
-    var t='Olá! Quero encomendar:\n'+lista.map(function(n){return '- '+n}).join('\n');
-    if(sel&&sel.value)t+='\n\nRetirada na feira: '+sel.value+' (Praça do Coco)';
-    return t;
-  }
+  function msg(){return 'Olá! Quero encomendar:\n'+lista.map(function(n){return '- '+n}).join('\n')}
   function pinta(){
     var n=lista.length;
     botoes.forEach(function(b){

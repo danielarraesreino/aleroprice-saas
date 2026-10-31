@@ -18,7 +18,7 @@ sem lugar no mapa não ajuda quem está andando na praça.
 """
 import os
 import unicodedata
-from datetime import datetime, timedelta
+from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from flask import current_app, url_for
@@ -181,47 +181,3 @@ def buscar_produtos(q, limite=48):
         if len(achados) >= limite:
             break
     return achados
-
-
-def proximas_retiradas(hoje, antecedencia=2, quantas=6):
-    """Próximos dias de feira (sábado e domingo) em que dá para retirar uma
-    encomenda feita hoje, com `antecedencia` dias para produzir.
-
-    Mesma regra do JS da sacola em `site/modelos/artesao/_base.html`; a página
-    sai da borda da Vercel, então lá a conta é refeita no navegador.
-    """
-    dia = hoje + timedelta(days=max(antecedencia, 0))
-    datas = []
-    while len(datas) < quantas:
-        if dia.weekday() in (5, 6):
-            datas.append(dia)
-        dia += timedelta(days=1)
-    return datas
-
-
-FAIXAS_DE_PRESENTE = (('ate-50', 'Até R$ 50', 0, 50), ('ate-100', 'De R$ 50 a R$ 100', 50, 100),
-                      ('acima-100', 'Acima de R$ 100', 100, None))
-
-
-def presentes():
-    """Guia de Presentes: produtos com foto E preço de todos os expositores,
-    por faixa de preço. Sem preço não entra: guia de presente é para decidir
-    pelo quanto gastar."""
-    pares = {r.id: (r, c) for r, c in _base_ativa().all()
-             if getattr(r, 'tipo_negocio', 'bar') == 'artesao'}
-    faixas = [{'id': i, 'titulo': t, 'itens': []} for i, t, _, _ in FAIXAS_DE_PRESENTE]
-    for p in _produtos_visiveis(list(pares)):
-        if not p.preco:
-            continue
-        r, c = pares[p.restaurant_id]
-        item = {'nome': p.nome, 'img': _img(p.imagem), 'preco': p.preco,
-                'sob_encomenda': bool(p.sob_encomenda),
-                'expositor': c.nome or r.nome, 'url': f'{_url_na_feira(r)}#produtos'}
-        # Faixas em ordem crescente: a primeira cujo teto cabe o preço.
-        for faixa, (_, _, _, ate) in zip(faixas, FAIXAS_DE_PRESENTE):
-            if ate is None or p.preco <= ate:
-                faixa['itens'].append(item)
-                break
-    for f in faixas:
-        f['itens'].sort(key=lambda i: i['preco'])
-    return faixas

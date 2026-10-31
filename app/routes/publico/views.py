@@ -10,7 +10,7 @@ from flask import (
     redirect, url_for, flash, make_response, session,
 )
 
-from app.extensions import csrf, db
+from app.extensions import db
 from app.models.modelo_reserva import Reserva
 from app.models.modelo_restaurante import Restaurante
 
@@ -471,16 +471,6 @@ def feira():
     return _na_borda(resp)
 
 
-@bp.route('/presentes')
-def presentes():
-    """Guia de Presentes da Feira: produtos de todos os expositores por faixa
-    de preço, cada um levando à barraca para encomendar pelo WhatsApp."""
-    from app.utils import feira as fe
-    resp = make_response(render_template('produto/presentes.html', faixas=fe.presentes(),
-                                         **_contexto_produto()))
-    return _na_borda(resp)
-
-
 @bp.route('/agenda')
 def agenda():
     """O que abre hoje em Barão e os eventos dos próximos dias.
@@ -715,7 +705,7 @@ def sitemap():
         from app.utils.memoria import verbetes as _verbetes
         paginas.append((f'https://{dominio_do_produto()}/memoria', None))
         paginas.append((f'https://{dominio_do_produto()}/feira', None))
-        for caminho in ('/agenda', '/presentes', '/expor', '/termos', '/privacidade'):
+        for caminho in ('/agenda', '/expor', '/termos', '/privacidade'):
             paginas.append((f'https://{dominio_do_produto()}{caminho}', None))
         for v in _verbetes():
             paginas.append((f"https://{dominio_do_produto()}/memoria/{v['slug']}", None))
@@ -1226,45 +1216,6 @@ def avaliar(slug):
                     + urllib.parse.quote(cfg.google_place_id, safe=''))
 
 
-@bp.route('/bar/<slug>/catalogo.csv')
-def catalogo_meta(slug):
-    """Feed do catálogo para a Meta (WhatsApp Business, Instagram, Facebook).
-    O Commerce Manager do cliente busca este endereço no horário agendado."""
-    from app.models.modelo_siteconfig import SiteConfig
-    from app.utils import catalogo
-
-    rest = tenant_por_slug(slug)
-    if rest is None:
-        abort(404)
-    cfg = SiteConfig.query.filter_by(restaurant_id=rest.id).first()
-    linhas, _ = catalogo.itens(rest, cfg.nome if cfg and cfg.nome else None)
-    resp = make_response(catalogo.csv_do_feed(linhas))
-    resp.headers['Content-Type'] = 'text/csv; charset=utf-8'
-    resp.headers['Cache-Control'] = 'public, max-age=900'
-    return resp
-
-
-@bp.post('/m/<slug>')
-@csrf.exempt
-def metrica(slug):
-    """Beacon de `site/_metricas.html`: uma visita ou um clique no site do
-    cliente. Sem CSRF (o beacon não carrega token e não muda nada além de um
-    contador) e sem cache. Quem está logado (dono, operador) não conta: o
-    número tem que ser do cliente dele."""
-    from flask_login import current_user
-    from app.utils import metricas
-
-    tipo = (request.get_data(as_text=True) or request.args.get('t') or '')[:20].strip()
-    rest = tenant_por_slug(slug)
-    agente = (request.headers.get('User-Agent') or '').lower()
-    if (rest is not None and tipo in metricas.TIPOS
-            and not current_user.is_authenticated and 'bot' not in agente):
-        metricas.registrar(rest.id, tipo)
-    resp = make_response('', 204)
-    resp.headers['Cache-Control'] = 'no-store'
-    return resp
-
-
 @bp.route('/novidades/token')
 def novidades_token():
     """Token de CSRF para o formulário de novidades.
@@ -1391,9 +1342,6 @@ def montar_site(rest):
 
     # Fora de SITE_DEFAULTS de propósito: só o operador marca; o painel do dono não pode editar.
     site['whatsapp_confirmado'] = bool(getattr(cfg, 'whatsapp_confirmado', False)) if cfg else False
-    # Fora de SITE_DEFAULTS: tem tela própria (/config-site/encomendas).
-    site['retirada_na_feira'] = bool(getattr(cfg, 'retirada_na_feira', False)) if cfg else False
-    site['retirada_antecedencia'] = (getattr(cfg, 'retirada_antecedencia', None) or 0) if cfg else 0
     if not site.get('nome') and rest is not None:
         site['nome'] = rest.nome
     return site

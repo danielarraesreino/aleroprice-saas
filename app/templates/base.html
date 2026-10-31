@@ -50,18 +50,6 @@
                             href="{{ url_for('dashboard.index') }}">Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'configsite.numeros' %}active{% endif %}"
-                            href="{{ url_for('configsite.numeros') }}">Seus números</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'configsite.catalogo' %}active{% endif %}"
-                            href="{{ url_for('configsite.catalogo') }}">Catálogo WhatsApp</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'configsite.encomendas' %}active{% endif %}"
-                            href="{{ url_for('configsite.encomendas') }}">Encomendas</a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link {% if 'reservas' in request.endpoint and request.endpoint != 'reservas.avaliacoes' %}active{% endif %}"
                             href="{{ url_for('reservas.index') }}">Reservas</a>
                     </li>
@@ -78,7 +66,7 @@
                             href="{{ url_for('promocoes.index') }}">Promoções</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint in ('configsite.index', 'configsite.foto', 'configsite.na_feira') %}active{% endif %}"
+                        <a class="nav-link {% if 'configsite' in request.endpoint %}active{% endif %}"
                             href="{{ url_for('configsite.index') }}">Site</a>
                     </li>
                     <li class="nav-item">

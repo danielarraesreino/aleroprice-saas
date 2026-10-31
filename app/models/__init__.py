@@ -16,4 +16,3 @@ from app.models.modelo_promocao import Promocao
 from app.models.modelo_siteconfig import SiteConfig
 from app.models.modelo_sitecontent import DishCard, Review, TeamMember, GalleryItem, ProdutoSite
 from app.models.usuario import Usuario
-from app.models.modelo_metrica import MetricaDiaria
