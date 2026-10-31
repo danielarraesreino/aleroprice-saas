@@ -1,0 +1,31 @@
+{% extends "campo/base.html" %}
+{% block titulo %}Relatório · {{ rest.nome }}{% endblock %}
+
+{% block topo %}
+  <a class="voltar" href="{{ url_for('campo.index') }}" aria-label="Voltar">‹</a>
+  <h1>Relatório de {{ nome_mes }} · {{ rest.nome }}</h1>
+{% endblock %}
+
+{% block conteudo %}
+<div style="padding:16px">
+  <ul style="list-style:none;padding:0;margin:0 0 16px">
+    {% for tipo, rotulo in tipos.items() %}
+    <li style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--linha)">
+      <span>{{ rotulo }}</span><strong>{{ soma[tipo] }}</strong></li>
+    {% endfor %}
+    <li style="display:flex;justify-content:space-between;padding:8px 0">
+      <span>reservas pelo site</span><strong>{{ reservas }}</strong></li>
+  </ul>
+  <label for="texto-relatorio" style="font-size:14px;color:var(--creme-dim)">Mensagem que vai para o dono</label>
+  <textarea id="texto-relatorio" readonly rows="10"
+            style="width:100%;background:var(--ink-2);color:var(--creme);border:1px solid var(--linha);
+                   border-radius:var(--raio);padding:12px;font:inherit;font-size:15px">{{ texto }}</textarea>
+  {% if link_zap %}
+  <a href="{{ link_zap }}" target="_blank" rel="noopener"
+     style="display:block;text-align:center;margin-top:12px;padding:14px;border-radius:var(--raio);
+            background:var(--verde);color:#0d1a0f;font-weight:700;text-decoration:none">Mandar no WhatsApp do dono</a>
+  {% else %}
+  <p style="color:var(--erro)">Sem WhatsApp cadastrado. Copie a mensagem acima.</p>
+  {% endif %}
+</div>
+{% endblock %}
