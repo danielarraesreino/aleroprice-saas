@@ -5,8 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 {# Tema escolhido no botão do topo, aplicado antes de pintar (sem piscar). #}
 <script>try{var t=localStorage.getItem('feira-tema-portal');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
-<title>Feira de Barão · Artesanato e comida feita à mão na Praça do Coco, Barão Geraldo (Campinas)</title>
-<meta name="description" content="Quem expõe na Feira de Barão, na Praça do Coco, sábado e domingo: artesanato, comida artesanal, plantas e joias, com a barraca de cada expositor, presentes por faixa de preço e a história de Barão Geraldo, em Campinas.">
+{# Título ≤ 60 e descrição ≤ 155 caracteres: o Google corta o resto. #}
+<title>Feira de Barão · Praça do Coco, Barão Geraldo (Campinas)</title>
+<meta name="description" content="Artesanato e comida feita à mão na Praça do Coco, sábado e domingo: quem expõe, onde fica cada barraca, presentes e a história de Barão Geraldo.">
+{# Imagem da página para busca e IA multimodal (a mesma do compartilhamento). #}
+<meta property="og:image:alt" content="Feira de Barão, na Praça do Coco, em Barão Geraldo (Campinas)">
 <link rel="canonical" href="https://feiradebarao.com.br/">
 <link rel="alternate" type="text/markdown" title="LLM Summary" href="/llms.txt">
 <meta property="og:title" content="Feira de Barão · Artesanato e comida feita à mão na Praça do Coco">
@@ -37,6 +40,7 @@
   "publisher":{"@id":"https://feiradebarao.com.br/#org"}},
  {"@type":"Organization","@id":"https://feiradebarao.com.br/#org",
   "name":"Feira de Barão","url":"https://feiradebarao.com.br/",
+  "image":{{ og_imagem('og-feira.jpg')|tojson }},
   "areaServed":"Barão Geraldo, Campinas - SP, Brasil"},
  {{ evento_feira(feira, og_imagem('og-feira.jpg'))|tojson }}
 ]}

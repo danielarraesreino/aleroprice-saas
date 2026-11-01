@@ -105,5 +105,27 @@ def test_eh_cesta():
 
 
 def test_presentes_no_sitemap(client, session):
+    """Faixa vazia fica fora do sitemap (página rasa no índice); com presente, entra."""
     xml = client.get('/sitemap.xml').get_data(as_text=True)
-    assert '/presentes' in xml and '/presentes/ate-30' in xml and '/presentes/acima-120' in xml
+    assert '/presentes<' in xml and '/presentes/ate-30' not in xml
+    _barraca(session)  # Geleia R$ 25, Cesta R$ 100, Tender R$ 180
+    xml = client.get('/sitemap.xml').get_data(as_text=True)
+    for faixa in ('ate-30', 'ate-120', 'acima-120'):
+        assert f'/presentes/{faixa}<' in xml
+    assert '/presentes/ate-60<' not in xml
+
+
+def test_presentes_tem_lista_de_produtos_para_busca_e_ia(client, session):
+    """JSON-LD com Product + Offer em BRL; foto só de expositor real."""
+    import json, re
+    _barraca(session)
+    html = client.get('/presentes').get_data(as_text=True)
+    ld = [json.loads(x) for x in re.findall(r'<script type="application/ld\+json">(.*?)</script>', html, re.S)]
+    lista = next(d['mainEntity'] for d in ld if d.get('@type') == 'CollectionPage')
+    nomes = {i['item']['name']: i['item'] for i in lista['itemListElement']}
+    assert set(nomes) == {'Geleia', 'Cesta', 'Tender'}
+    geleia = nomes['Geleia']
+    assert geleia['offers'] == {'@type': 'Offer', 'price': 25.0, 'priceCurrency': 'BRL',
+                                'availability': 'https://schema.org/InStock',
+                                'seller': {'@type': 'Organization', 'name': 'Barraca Natal'}}
+    assert geleia['url'].startswith('http') and geleia['image'].endswith('img/g.jpg')

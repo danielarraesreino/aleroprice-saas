@@ -330,7 +330,8 @@ def presentes():
         r, c = pares[p.restaurant_id]
         item = {'nome': p.nome, 'img': _img(p.imagem), 'img_sm': _miniatura(p.imagem), 'preco': p.preco,
                 'sob_encomenda': bool(p.sob_encomenda), 'cesta': eh_cesta(p),
-                'expositor': c.nome or r.nome, 'url': f'{_url_na_feira(r)}#produtos'}
+                'expositor': c.nome or r.nome, 'url': f'{_url_na_feira(r)}#produtos',
+                'demo': bool(getattr(r, 'eh_demo', False))}
         # Faixas em ordem crescente: a primeira cujo teto cabe o preço.
         for faixa, (_, _, _, ate) in zip(faixas, FAIXAS_DE_PRESENTE):
             if ate is None or p.preco <= ate:

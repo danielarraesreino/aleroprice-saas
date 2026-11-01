@@ -793,7 +793,7 @@ def sitemap():
     if dono_do_dominio is None:
         # A landing de venda é a única página deste host que é nossa. Sitemap
         # sem nenhuma URL do próprio host é ignorado pelo Google.
-        from app.utils.feira import FAIXAS_DE_PRESENTE, CATEGORIAS_DA_FEIRA, expositores, \
+        from app.utils.feira import CATEGORIAS_DA_FEIRA, expositores, \
             categorias_do_expositor, subcategorias_com_produto
         from app.models.modelo_siteconfig import SiteConfig
         from app.utils.categorias import SUBCATEGORIAS
@@ -819,10 +819,19 @@ def sitemap():
         for cat, sub, _ in SUBCATEGORIAS:
             if sub in com_produto:
                 paginas.append((f'{base}/feira/{cat}/{sub}', feira_mudou, ()))
-        for faixa_id, *_ in FAIXAS_DE_PRESENTE:
-            paginas.append((f'{base}/presentes/{faixa_id}', feira_mudou, ()))
+        # Só faixa com presente: as vazias respondem "Nenhum presente nesta
+        # faixa", que no índice é página rasa (o Google rebaixa o domínio).
+        from app.utils.feira import presentes as _presentes
+        from app.utils.memoria import foto_url as _foto_verbete
+        for faixa in _presentes():
+            if faixa['itens']:
+                paginas.append((f"{base}/presentes/{faixa['id']}", feira_mudou, ()))
+        # Foto do verbete no sitemap de imagens: é o que a busca por imagem e
+        # as IAs multimodais leem (as fotos têm origem e crédito no YAML).
         for v in _verbetes():
-            paginas.append((f"{base}/memoria/{v['slug']}", None, ()))
+            foto = _foto_verbete(v.get('foto'))
+            paginas.append((f"{base}/memoria/{v['slug']}", None,
+                            (_absoluta(foto),) if foto else ()))
 
     from app.models.modelo_sitecontent import DishCard, ProdutoSite
     for tenant in _tenants_do_sitemap(dono_do_dominio):
@@ -831,7 +840,9 @@ def sitemap():
         # Fotos de produto do expositor: é por elas que a busca de imagem
         # ("vaso de cerâmica Campinas") chega na barraca.
         fotos = ()
-        if tenant.tipo_negocio == 'artesao':
+        # Prévia não leva foto: é ilustrativa e o Google a ligaria ao
+        # expositor real (mesma regra de `_sem_imagem` no JSON-LD).
+        if tenant.tipo_negocio == 'artesao' and not tenant.eh_demo:
             fotos = [_absoluta(p.imagem) for p in ProdutoSite.query.filter(
                 ProdutoSite.restaurant_id == tenant.id, ProdutoSite.ativo.isnot(False),
                 ProdutoSite.imagem.isnot(None), ProdutoSite.imagem != '').order_by(
@@ -978,6 +989,7 @@ def _llms_portal(completo):
         "> A Feira de Barão acontece na Praça do Coco, em Barão Geraldo (Campinas - SP), "
         "aos fins de semana. O portal lista os expositores, guarda a memória do bairro "
         "e faz o site de expositores e de bares locais.", "",
+        f"![Feira de Barão, na Praça do Coco, em Barão Geraldo (Campinas)]({base}/static/img/og/og-feira.jpg)", "",
         "## A feira",
         f"- **Onde**: {FEIRA['local']}, {FEIRA['bairro']}",
         f"- **Quando**: {horarios}",
@@ -1057,14 +1069,24 @@ def _llms_portal(completo):
             L.append(f"- **Descrição**: {e['descritor'] or 'Expositor da Feira de Barão'}")
             L.append(f"- **Ponto**: {e['ponto'] or 'Praça do Coco'}")
             L.append(f"- **Produtos cadastrados**: {e['total_produtos']}")
+            if e['foto'] and not e['demo']:
+                L.append(f"- **Foto**: ![{e['nome']}]({absoluta(e['foto'])})")
             L.append("")
 
     vs = _verbetes()
     if vs:
         L += ["## Memória Viva de Barão Geraldo",
               f"Hub: {base}/memoria (fontes: blog História de Barão Geraldo, de Warney Smith, e Wikipédia)", ""]
+        from app.utils.memoria import foto_url as _foto_verbete
         for v in (vs if completo else vs[:10]):
             L.append(f"- [{v['titulo']}]({base}/memoria/{v['slug']}) ({v.get('periodo', '')}): {v.get('resumo', '')}")
+            # Imagem com legenda e crédito: é o que a IA multimodal lê e cita.
+            foto = _foto_verbete(v.get('foto'))
+            if foto:
+                legenda = (v['foto'].get('legenda') or v['titulo']).replace(']', ')').replace('[', '(')
+                credito = v['foto'].get('credito')
+                L.append(f"  ![{legenda}]({base}{url_for('static', filename=foto)})"
+                         + (f" Foto: {credito}" if credito and completo else ''))
         if not completo and len(vs) > 10:
             L.append(f"- Mais {len(vs) - 10} verbetes em {base}/memoria e em {base}/llms-full.txt")
         L.append("")

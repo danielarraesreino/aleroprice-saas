@@ -5,6 +5,22 @@
 {% block og_tipo %}website{% endblock %}
 {% block head_extra %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/feira-expositores.css') }}">
+{#- Lista de produtos com preço para a busca ("presente até R$ 60") e para as
+    IAs. URL e foto absolutas; prévia sai sem foto, porque a imagem dela é
+    ilustrativa (mesma regra de `_sem_imagem` e de feira.html). #}
+{%- set raiz = request.host_url.rstrip('/') %}
+{%- macro absoluta(u) %}{{ (u if u.startswith('http') else raiz ~ u)|tojson }}{% endmacro %}
+{#- cestas já estão dentro das faixas: não somar, senão repetem. #}
+{%- set itens_ld = (faixa_atual.itens if faixa_atual else (faixas|map(attribute='itens')|sum(start=[]))) %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"CollectionPage",
+ "name":{{ self.titulo()|tojson }},"url":{{ self.canonical()|trim|tojson }},"inLanguage":"pt-BR",
+ "about":{"@type":"Place","name":{{ feira.local|tojson }},"address":{"@type":"PostalAddress","addressLocality":"Campinas","addressRegion":"SP","addressCountry":"BR"}},
+ "mainEntity":{"@type":"ItemList","numberOfItems":{{ itens_ld|length }},"itemListElement":[{% for p in itens_ld[:60] %}
+  {"@type":"ListItem","position":{{ loop.index }},"item":{"@type":"Product","name":{{ p.nome|tojson }},"url":{{ absoluta(p.url) }}{% if not p.demo and (p.img or p.img_sm) %},"image":{{ absoluta(p.img or p.img_sm) }}{% endif %},
+   "offers":{"@type":"Offer","price":{{ '%.2f'|format(p.preco|float) }},"priceCurrency":"BRL","availability":"https://schema.org/{{ 'PreOrder' if p.sob_encomenda else 'InStock' }}",
+    "seller":{"@type":"Organization","name":{{ p.expositor|tojson }}}}}}{{ ',' if not loop.last }}{% endfor %}]}}
+</script>
 <style>
   .gp{max-width:1100px;margin-inline:auto;padding:32px 20px 64px}
   .gp h1{font:400 clamp(2.2rem,1.2rem + 4vw,3.6rem)/1 var(--font-cartaz);margin:0 0 8px}
