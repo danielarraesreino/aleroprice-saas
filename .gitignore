@@ -36,3 +36,8 @@ AleroPrice/
 
 # Leads de outros projetos (dados de terceiros, nunca versionar)
 app/data/leads_juridico/
+
+# impeccable: o engine é baixado e conferido (sha256) pelo launcher; cache e servidor ao vivo são locais
+.claude/skills/impeccable/scripts/bin/
+.impeccable/hook.cache.json
+.impeccable/live/
