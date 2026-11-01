@@ -5,6 +5,7 @@ from app.extensions import db
 from app.models.modelo_sitecontent import DishCard, Review, TeamMember, GalleryItem, ProdutoSite
 from app.routes.conteudo import bp
 from app.utils.tenant import get_current_restaurant_id
+from app.utils import blob
 from app.utils.decorators import plano_minimo
 from app.utils.formatacao_br import ler_moeda
 from app.utils.planos import limite
@@ -13,9 +14,11 @@ from app.utils.vocabulario import tipo_do
 # Motor genérico: cada tipo mapeia um model + a definição dos campos do formulário.
 # campo = (nome, rótulo, tipo_widget, obrigatório)
 #
-# Widgets: 'text', 'textarea', 'check', 'number' e 'preco'. O 'preco' existe
+# Widgets: 'text', 'textarea', 'check', 'number', 'preco' e 'foto'. O 'preco' existe
 # separado do 'number' porque `number` grava int e dinheiro tem centavo — e
 # porque o campo aceita o que o dono escreve ("R$ 18,50"), não um formato só.
+# O 'foto' é upload de arquivo (mesmo `blob.enviar` da capa do site), com o
+# endereço em texto como alternativa — e o que já está gravado continua valendo.
 TIPOS = {
     'cardapio': {
         'model': DishCard, 'label': 'Cardápio', 'singular': 'prato', 'resumo': 'nome',
@@ -40,7 +43,7 @@ TIPOS = {
             ('preco', 'Preço (ex: 18,50 — deixe vazio para não mostrar)', 'preco', False),
             ('sob_encomenda', 'Sob encomenda', 'check', False),
             ('prazo_dias', 'Prazo de produção em dias úteis (deixe vazio se não souber)', 'number', False),
-            ('imagem', 'Imagem (caminho em static ou URL)', 'text', False),
+            ('imagem', 'Foto do produto', 'foto', False),
             ('destaque', 'Destacar na vitrine', 'check', False),
             ('ordem', 'Ordem', 'number', False),
         ],
@@ -125,6 +128,20 @@ def salvar(tipo, item_id=None):
     item = Model.query.filter_by(id=item_id, restaurant_id=rid).first_or_404() if item_id else None
 
     if request.method == 'POST':
+        # A foto sobe antes de qualquer gravação: arquivo recusado não pode
+        # deixar produto criado pela metade.
+        enviadas = {}
+        for campo, label, widget, obrig in t['campos']:
+            arquivo = request.files.get(f'{campo}_arquivo') if widget == 'foto' else None
+            if arquivo is None or not arquivo.filename:
+                continue
+            try:
+                enviadas[campo] = blob.enviar(arquivo, current_user.restaurante.slug or f's{rid}')
+            except (blob.UploadInvalido, blob.UploadIndisponivel) as e:
+                flash(f'A foto não subiu: {e}', 'danger')
+                return render_template('conteudo/form.html', tipo=tipo, t=t, item=item,
+                                       tipos=_tipos_do_negocio()), 400
+
         novo = item is None
         if novo:
             # Limite por plano, checado uma vez só: o motor é genérico, então
@@ -143,6 +160,11 @@ def salvar(tipo, item_id=None):
                 # `ler_moeda` devolve None pra vazio, zero e lixo — e None é
                 # exatamente "não mostrar preço". Campo apagado limpa o preço.
                 setattr(item, campo, ler_moeda(request.form.get(campo)))
+            elif widget == 'foto':
+                # Sem arquivo novo, vale o endereço do campo de texto (que já
+                # vem preenchido com o atual); apagá-lo tira a foto.
+                v = enviadas.get(campo) or (request.form.get(campo) or '').strip()
+                setattr(item, campo, v or None)
             elif widget == 'number':
                 raw = (request.form.get(campo) or '').strip()
                 val = int(raw) if raw.lstrip('-').isdigit() else None
