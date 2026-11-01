@@ -73,6 +73,37 @@
   </div>
 </div>
 
+{% if eh_bar %}
+<div class="card mt-4">
+  <div class="card-body">
+    <h5 class="card-title">QR do cardápio para a mesa</h5>
+    {% if cardapio_qr %}
+    <p class="text-muted small">Abre direto o cardápio do {{ nome_bar }}, sem passar pela página inicial. Cole na mesa, no balcão e no cardápio de papel.</p>
+    <div class="row g-3 align-items-center">
+      <div class="col-md-5">
+        <div class="text-center bg-white p-3 rounded border" id="qr-cardapio">
+          {{ cardapio_qr|safe }}
+          <div class="fw-bold mt-2" style="color:#241c14">Aponte a câmera e veja o cardápio</div>
+        </div>
+      </div>
+      <div class="col-md-7">
+        <div class="input-group input-group-sm mb-2">
+          <input type="text" class="form-control" value="{{ cardapio_link }}" readonly id="link-cardapio">
+          <button class="btn btn-outline-secondary" type="button"
+                  onclick="navigator.clipboard.writeText(document.getElementById('link-cardapio').value); this.textContent='Copiado!'">Copiar</button>
+        </div>
+        <a class="btn btn-sm btn-warning" href="{{ url_for('reservas.qr_cardapio') }}" download><i class="fas fa-download"></i> Baixar QR (SVG, para gráfica)</a>
+      </div>
+    </div>
+    {% elif cardapio_link and not tem_prato %}
+    <p class="text-muted mb-0">Cadastre um prato em <a href="{{ url_for('conteudo.home') }}">Conteúdo</a> para liberar o QR do cardápio. Sem prato, o QR abriria uma página vazia.</p>
+    {% else %}
+    <p class="text-muted mb-0">Seu site ainda não tem endereço. Fale com a gente para liberar o QR do cardápio.</p>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
 <style>
 @media print {
   body * { visibility: hidden; }

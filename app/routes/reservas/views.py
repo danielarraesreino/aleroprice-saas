@@ -87,6 +87,8 @@ def avaliacoes():
 
     from app.models.modelo_restaurante import Restaurante
     from app.models.modelo_siteconfig import SiteConfig
+    from app.models.modelo_sitecontent import DishCard
+    from app.utils.site_router import url_do_cardapio
 
     restaurant_id = get_current_restaurant_id()
     if not restaurant_id:
@@ -115,6 +117,16 @@ def avaliacoes():
         link = url_for('public.avaliar', slug=rest.slug, _external=True)
         qr_svg = segno.make(link, error='m').svg_inline(scale=6, border=2)
 
+    # QR do cardápio da mesa: só bar tem cardápio, e só com prato ativo a
+    # página responde (sem prato ela é 404 — adesivo que não abre nada).
+    cardapio_link = cardapio_qr = None
+    tem_prato = False
+    if rest.tipo_negocio == 'bar':
+        cardapio_link = url_do_cardapio(rest)
+        tem_prato = DishCard.query.filter_by(restaurant_id=restaurant_id, ativo=True).first() is not None
+        if cardapio_link and tem_prato:
+            cardapio_qr = segno.make(cardapio_link, error='m').svg_inline(scale=6, border=2)
+
     hoje = date.today()
     recentes = (Reserva.query
                 .filter(Reserva.restaurant_id == restaurant_id,
@@ -136,4 +148,29 @@ def avaliacoes():
         })
 
     return render_template('reservas/avaliacoes.html', cfg=cfg, link=link,
-                           qr_svg=qr_svg, pedidos=pedidos, nome_bar=nome_bar)
+                           qr_svg=qr_svg, pedidos=pedidos, nome_bar=nome_bar,
+                           cardapio_link=cardapio_link, cardapio_qr=cardapio_qr,
+                           tem_prato=tem_prato, eh_bar=rest.tipo_negocio == 'bar')
+
+
+@bp.route('/qr-cardapio.svg')
+def qr_cardapio():
+    """Baixa o QR do cardápio do próprio bar, pra mandar pra gráfica.
+
+    Mesmo gerador do Modo Campo (`_resposta_qr`), mas o tenant vem da sessão,
+    nunca da URL: o dono só baixa o QR do bar dele.
+    """
+    from app.models.modelo_restaurante import Restaurante
+    from app.routes.campo.views import _resposta_qr
+    from app.utils.site_router import url_do_cardapio
+
+    restaurant_id = get_current_restaurant_id()
+    if not restaurant_id:
+        abort(403)
+    rest = Restaurante.query.get_or_404(restaurant_id)
+    link = url_do_cardapio(rest) if rest.tipo_negocio == 'bar' else None
+    if not link:
+        abort(404)
+    resp = _resposta_qr(link)
+    resp.headers['Content-Disposition'] = f'attachment; filename="qr-cardapio-{rest.slug}.svg"'
+    return resp
