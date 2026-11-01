@@ -872,6 +872,16 @@ def dados_estruturados(rest, site, dishes, reviews, eventos, url_canonica,
     imagens = [_url_absoluta(site.get('hero_foto'), origem)]
     imagens += [_url_absoluta(_campo(d, 'img'), origem) for d in (dishes or [])]
     imagens = list(dict.fromkeys([i for i in imagens if i]))[:6]
+    # Produto sem preço não vira `Product` (ver _pedacos_de_produto), mas a foto
+    # dele ainda diz o que a barraca vende: entra como ImageObject com o nome,
+    # que é o texto que a busca por imagem e a resposta com IA leem.
+    vistas = set(imagens)
+    for prod in produtos or []:
+        url = _url_absoluta(_campo(prod, 'img') or _campo(prod, 'imagem'), origem)
+        legenda = _limpo(_campo(prod, 'nome'))
+        if url and legenda and url not in vistas and len(imagens) < 12:
+            vistas.add(url)
+            imagens.append({'@type': 'ImageObject', 'contentUrl': url, 'caption': legenda})
     if imagens:
         restaurante['image'] = imagens
 

@@ -714,7 +714,7 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
   </div>
   {% if team %}<ul class="equipe">{% for t in team %}<li class="rev"><strong>{{ t.nome }}</strong>{% if t.papel %}<span>{{ t.papel }}</span>{% endif %}</li>{% endfor %}</ul>{% endif %}
   {% if gallery %}
-  <div class="galeria">{% for g in gallery %}<figure class="rev" data-zoom="{{ g.img }}" data-legenda="{{ g.legenda or site.nome }}"><img src="{{ g.img }}" alt="{{ g.legenda or site.nome }}" loading="lazy" decoding="async" width="640" height="640"><span class="zoom-dica" aria-hidden="true">Ampliar</span>{% if g.legenda %}<figcaption>{{ g.legenda }}</figcaption>{% endif %}</figure>{% endfor %}</div>
+  <div class="galeria">{% for g in gallery %}<figure class="rev" data-zoom="{{ g.img }}" data-legenda="{{ g.legenda or site.nome }}"><img src="{{ g.img }}" alt="{{ (site.nome ~ ' — ' ~ descritor) if (g.legenda or '').startswith('Foto ilustrativa') else (g.legenda or site.nome) }}" loading="lazy" decoding="async" width="640" height="640"><span class="zoom-dica" aria-hidden="true">Ampliar</span>{% if g.legenda %}<figcaption>{{ g.legenda }}</figcaption>{% endif %}</figure>{% endfor %}</div>
   {% endif %}
 </div></section>
 {% endif %}

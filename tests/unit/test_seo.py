@@ -726,3 +726,17 @@ def test_trilha_do_bar_continua_curta(site_completo, dishes):
                    'BreadcrumbList')['itemListElement']
     assert trilha[0]['position'] == 1 and trilha[0]['item'] == URL
     assert 'Feira de Barão' not in [i['name'] for i in trilha]
+
+
+def test_foto_de_produto_sem_preco_entra_como_imagem_com_nome():
+    """Sem preço não vira Product, mas a foto com o nome segue no grafo."""
+    produtos = [{'nome': 'Naninha de pano', 'img': '/static/img/n.jpg', 'preco': None},
+                {'nome': '', 'img': '/static/img/sem-nome.jpg'}]
+    grafo = dados_estruturados(None, {'nome': 'Ateliê'}, [], [], [], URL, produtos=produtos)
+    loja = grafo['@graph'][0] if isinstance(grafo, dict) and '@graph' in grafo else grafo[0]
+
+    assert {'@type': 'ImageObject', 'contentUrl': 'https://estacaobarao.bar/static/img/n.jpg',
+            'caption': 'Naninha de pano'} in loja['image']
+    assert not any('sem-nome' in str(i) for i in loja['image'])
+    assert not any(n.get('@type') == 'Product' for n in
+                   (grafo['@graph'] if isinstance(grafo, dict) else grafo))

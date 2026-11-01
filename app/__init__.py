@@ -327,6 +327,17 @@ def create_app(config_name='default'):
         destino = f'https://{dominio_do_produto()}{request.full_path.rstrip("?")}'
         return redirect(destino, code=302)
 
+    @app.after_request
+    def foto_grande_na_busca(resp):
+        """Sem `max-image-preview:large` o Google pode mostrar só a miniatura da
+        foto (Discover, busca por imagem, resposta com IA). Vai no cabeçalho das
+        páginas públicas e soma com o `<meta name="robots">` de cada uma: o
+        `noindex` da prévia continua valendo."""
+        if (resp.mimetype == 'text/html' and (request.endpoint or '').startswith('public.')
+                and 'X-Robots-Tag' not in resp.headers):
+            resp.headers['X-Robots-Tag'] = 'max-image-preview:large'
+        return resp
+
     from sqlalchemy.exc import OperationalError
 
     @app.errorhandler(OperationalError)

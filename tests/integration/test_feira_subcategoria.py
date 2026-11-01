@@ -108,3 +108,26 @@ def test_home_sem_expositor_nao_mostra_secoes_vazias(client, session):
     html = _get(client, '/').get_data(as_text=True)
     assert 'id="o-que-tem"' not in html and 'id="presentes"' not in html
     assert 'class="hm-busca"' in html                              # a busca fica sempre
+
+
+# ------------------------------------------------- imagem na busca (Search Console 01/11)
+
+def test_pagina_publica_libera_foto_grande_na_busca(client, session):
+    _artesao(session, 'barro-bom', ('Vaso', 'Cerâmica', 'img/a.jpg'))
+    assert _get(client, '/feira').headers.get('X-Robots-Tag') == 'max-image-preview:large'
+    assert _get(client, '/feira/artesanato/ceramica').headers.get('X-Robots-Tag') \
+        == 'max-image-preview:large'
+
+
+def test_lista_da_feira_no_json_ld_tem_url_absoluta_e_foto(client, session):
+    import json
+    import re
+    _artesao(session, 'barro-bom', ('Vaso grande', 'Cerâmica', 'img/a.jpg'))
+
+    html = _get(client, '/feira/artesanato/ceramica').get_data(as_text=True)
+    bloco = re.search(r'<script type="application/ld\+json">(.*?)</script>', html, re.S).group(1)
+    itens = json.loads(bloco)['mainEntity']['itemListElement']
+
+    assert itens[0]['name'] == 'Vaso grande'
+    assert itens[0]['url'].startswith('http://feiradebarao.com.br/')
+    assert itens[0]['image'].startswith('http://feiradebarao.com.br/') and 'img/a.jpg' in itens[0]['image']
