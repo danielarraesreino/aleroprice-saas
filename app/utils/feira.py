@@ -222,15 +222,48 @@ def buscar_produtos(q, limite=48):
         palheiro = _norm(' '.join(filter(None, [p.nome, p.descricao, p.categoria])))
         if not all(termo in palheiro for termo in termos):
             continue
-        r, c = pares[p.restaurant_id]
-        achados.append({
-            'nome': p.nome, 'descricao': p.descricao, 'categoria': p.categoria,
-            'img': _img(p.imagem), 'img_sm': _miniatura(p.imagem), 'preco': p.preco,
-            'sob_encomenda': bool(p.sob_encomenda),
-            'expositor': c.nome or r.nome, 'url': f'{_url_na_feira(r)}#produtos',
-        })
+        achados.append(_item_produto(p, *pares[p.restaurant_id]))
         if len(achados) >= limite:
             break
+    return achados
+
+
+def _item_produto(p, r, c):
+    return {
+        'nome': p.nome, 'descricao': p.descricao, 'categoria': p.categoria,
+        'img': _img(p.imagem), 'img_sm': _miniatura(p.imagem), 'preco': p.preco,
+        'sob_encomenda': bool(p.sob_encomenda), 'slug': r.slug,
+        'expositor': c.nome or r.nome, 'url': f'{_url_na_feira(r)}#produtos',
+    }
+
+
+def _produtos_de_artesao():
+    """(produto, tenant, config) visíveis, só de artesão: é a vitrine da Feira."""
+    pares = {r.id: (r, c) for r, c in _base_ativa().all()
+             if getattr(r, 'tipo_negocio', None) == 'artesao'}
+    return [(p, *pares[p.restaurant_id]) for p in _produtos_visiveis(list(pares))]
+
+
+def subcategorias_com_produto():
+    """{sub_slug: quantos produtos}, pela categoria que o expositor escreveu.
+    Sem produto, a subcategoria não ganha página (seria conteúdo raso)."""
+    contagem = {}
+    for p, _, _ in _produtos_de_artesao():
+        achado = categorias.subcategoria_de(p.categoria)
+        if achado:
+            contagem[achado[1]] = contagem.get(achado[1], 0) + 1
+    return contagem
+
+
+def produtos_da_subcategoria(sub, limite=96):
+    """Produtos de todos os expositores cuja categoria cai em `sub`."""
+    achados = []
+    for p, r, c in _produtos_de_artesao():
+        achado = categorias.subcategoria_de(p.categoria)
+        if achado and achado[1] == sub:
+            achados.append(_item_produto(p, r, c))
+            if len(achados) >= limite:
+                break
     return achados
 
 

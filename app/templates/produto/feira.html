@@ -1,10 +1,13 @@
 {% extends 'produto/memoria/_base.html' %}
-{% block titulo %}{% if cat_atual %}{{ cat_atual.titulo }} na Feira de Barão, Praça do Coco | Barão Geraldo, Campinas{% else %}Expositores da Feira de Barão: mapa, produtos e quem está hoje{% endif %}{% endblock %}
-{% block descricao %}{% if cat_atual %}{{ cat_atual.titulo }} feito por quem expõe na Feira de Barão, na Praça do Coco, em Barão Geraldo (Campinas): barracas, produtos e o mapa de cada uma.{% else %}Quem expõe na Feira de Barão, na Praça do Coco: mapa com a barraca de cada um, busca de produtos artesanais e o aviso de quem está lá hoje.{% endif %}{% endblock %}
-{% block canonical %}{% if cat_atual %}{{ url_for('public.feira_categoria', categoria=cat_atual.slug, _external=True) }}{% else %}{{ url_for('public.feira', _external=True) }}{% endif %}{% endblock %}
+{% set titulo_pagina = sub_atual.titulo if sub_atual else (cat_atual.titulo if cat_atual else None) %}
+{% set url_pagina = url_for('public.feira_subcategoria', categoria=cat_atual.slug, sub=sub_atual.slug, _external=True) if sub_atual
+   else (url_for('public.feira_categoria', categoria=cat_atual.slug, _external=True) if cat_atual else url_for('public.feira', _external=True)) %}
+{% block titulo %}{% if sub_atual %}{{ sub_atual.titulo }} na Feira de Barão: produtos de quem expõe na Praça do Coco | Campinas{% elif cat_atual %}{{ cat_atual.titulo }} na Feira de Barão, Praça do Coco | Barão Geraldo, Campinas{% else %}Expositores da Feira de Barão: mapa, produtos e quem está hoje{% endif %}{% endblock %}
+{% block descricao %}{% if sub_atual %}{{ sub_atual.titulo }} feito à mão por expositores da Feira de Barão, na Praça do Coco, em Barão Geraldo (Campinas): fotos, preços e a barraca de cada um.{% elif cat_atual %}{{ cat_atual.titulo }} feito por quem expõe na Feira de Barão, na Praça do Coco, em Barão Geraldo (Campinas): barracas, produtos e o mapa de cada uma.{% else %}Quem expõe na Feira de Barão, na Praça do Coco: mapa com a barraca de cada um, busca de produtos artesanais e o aviso de quem está lá hoje.{% endif %}{% endblock %}
+{% block canonical %}{{ url_pagina }}{% endblock %}
 {% block og_tipo %}website{% endblock %}
 {% block head_extra %}
-{% if q or tipo or so_hoje %}<meta name="robots" content="noindex,follow">{% endif %}
+{% if q or tipo or so_hoje or (sub_atual and not produtos_sub) %}<meta name="robots" content="noindex,follow">{% endif %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/feira-expositores.css') }}">
 {% if pontos %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" media="print" onload="this.media='all'">
@@ -13,7 +16,7 @@
 {% endblock %}
 {% block conteudo %}
 <div class="fp">
-<h1>{% if cat_atual %}{{ cat_atual.titulo }} na Feira{% else %}Expositores da Feira{% endif %}</h1>
+<h1>{% if titulo_pagina %}{{ titulo_pagina }} na Feira{% else %}Expositores da Feira{% endif %}</h1>
 <p class="fp-lead">
   {% for h in feira.horarios %}{{ h.dia }} das {{ h.abre }} às {{ h.fecha }}{{ ' e ' if not loop.last }}{% endfor %},
   na {{ feira.local }}, em {{ feira.bairro }}. Veja quem expõe, onde fica cada barraca e o que cada um faz.
@@ -35,7 +38,33 @@
     <li><a href="{{ url_for('public.feira', q=q or None, hoje=1) }}"{% if so_hoje %} aria-current="true"{% endif %}>Na feira hoje</a></li>
     {% for c in categorias_feira %}<li><a href="{{ url_for('public.feira_categoria', categoria=c.slug) }}"{% if cat_atual and cat_atual.slug == c.slug %} aria-current="true"{% endif %}>{{ c.titulo }}</a></li>{% endfor %}
   </ul></nav>
+  {% if subcategorias %}
+  <nav aria-label="{{ cat_atual.titulo }}: o que tem"><ul class="fp-filtros">
+    {% for sc in subcategorias %}<li><a href="{{ url_for('public.feira_subcategoria', categoria=cat_atual.slug, sub=sc.slug) }}"{% if sub_atual and sub_atual.slug == sc.slug %} aria-current="true"{% endif %}>{{ sc.titulo }}</a></li>{% endfor %}
+  </ul></nav>
+  {% endif %}
 </div>
+
+{% if sub_atual %}
+<h2>{{ produtos_sub|length }} {{ 'produto' if produtos_sub|length == 1 else 'produtos' }}</h2>
+{% if produtos_sub %}
+<ul class="fp-prods">
+  {% for p in produtos_sub %}
+  <li><a class="fp-prod" href="{{ p.url }}">
+    <img src="{{ p.img_sm or p.img }}" alt="{{ p.nome }}" loading="lazy" width="480" height="480">
+    <span class="fp-info">
+      <h3>{{ p.nome }}</h3>
+      <span class="fp-meta">{{ p.expositor }}</span>
+      {% if p.preco %}<strong>{{ p.preco|moeda_br }}</strong>{% endif %}
+      {% if p.sob_encomenda %}<span class="fp-meta">Sob encomenda</span>{% endif %}
+    </span>
+  </a></li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="fp-vazio">Ninguém cadastrou {{ sub_atual.titulo|lower }} ainda. Veja <a href="{{ url_for('public.feira_categoria', categoria=cat_atual.slug) }}">tudo de {{ cat_atual.titulo|lower }}</a>.</p>
+{% endif %}
+{% endif %}
 
 {% if q %}
 <h2>Produtos com “{{ q }}”</h2>
@@ -103,9 +132,20 @@
 </div>
 {% endblock %}
 {% block js %}
+<script>
+  // Linha de atalhos rola na horizontal no celular: o atalho da página atual
+  // ("Cerâmica") não pode nascer escondido à direita. scrollLeft, e não
+  // scrollIntoView, para não mexer na rolagem vertical da página.
+  document.querySelectorAll('.fp-filtros').forEach(function (ul) {
+    var atual = ul.querySelector('[aria-current="true"]');
+    if (atual && atual.offsetLeft + atual.offsetWidth > ul.clientWidth) {
+      ul.scrollLeft = atual.offsetLeft - 16;
+    }
+  });
+</script>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"CollectionPage","name":{{ ((cat_atual.titulo ~ ' na Feira de Barão') if cat_atual else 'Expositores da Feira de Barão')|tojson }},
- "url":{{ (url_for('public.feira_categoria', categoria=cat_atual.slug, _external=True) if cat_atual else url_for('public.feira', _external=True))|tojson }},"inLanguage":"pt-BR",
+{"@context":"https://schema.org","@type":"CollectionPage","name":{{ ((titulo_pagina ~ ' na Feira de Barão') if titulo_pagina else 'Expositores da Feira de Barão')|tojson }},
+ "url":{{ url_pagina|tojson }},"inLanguage":"pt-BR",
  "about":{"@type":"Place","name":{{ feira.local|tojson }},"address":{"@type":"PostalAddress","addressLocality":"Campinas","addressRegion":"SP","addressCountry":"BR"}},
  "mainEntity":{"@type":"ItemList","itemListElement":[{% for e in expositores[:60] %}{"@type":"ListItem","position":{{ loop.index }},"name":{{ e.nome|tojson }},"url":{{ e.url|tojson }}}{{ ',' if not loop.last }}{% endfor %}]}}
 </script>

@@ -447,8 +447,15 @@ def feira_categoria(categoria):
     return feira(categoria)
 
 
+@bp.route('/feira/<categoria>/<sub>')
+def feira_subcategoria(categoria, sub):
+    """Uma página por subcategoria ("Cerâmica na Feira de Barão"): a busca de
+    quem já sabe o que quer. A lista vem de `app/utils/categorias.py`."""
+    return feira(categoria, sub)
+
+
 @bp.route('/feira')
-def feira(categoria=None):
+def feira(categoria=None, sub=None):
     """Expositores da Feira: mapa, lista e busca de produto.
 
     Sem parâmetro a página é igual para todo visitante e sai da borda da
@@ -471,6 +478,19 @@ def feira(categoria=None):
         if cat_atual is None:
             abort(404)
         lista = [e for e in lista if categoria in fe.categorias_do_expositor(e)]
+    from app.utils import categorias as cats
+    com_produto = fe.subcategorias_com_produto() if categoria is not None else {}
+    subcategorias = [{'slug': s, 'titulo': n, 'total': com_produto[s]}
+                     for c, s, n in cats.SUBCATEGORIAS if c == categoria and s in com_produto]
+    sub_atual, produtos_sub = None, []
+    if sub is not None:
+        sub_atual = next(({'slug': s, 'titulo': n} for c, s, n in cats.SUBCATEGORIAS
+                          if c == categoria and s == sub), None)
+        if sub_atual is None:
+            abort(404)
+        produtos_sub = fe.produtos_da_subcategoria(sub)
+        quem_vende = {p['slug'] for p in produtos_sub}
+        lista = [e for e in lista if e['slug'] in quem_vende]
     pontos = [{'slug': e['slug'], 'nome': e['nome'], 'tipo': e['tipo'], 'url': e['url'], 'lat': e['lat'],
                'lng': e['lng'], 'ponto': e['ponto'], 'hoje': e['hoje'],
                'descritor': e['descritor'] or '', 'cat': (e['categorias'] or [''])[0],
@@ -480,6 +500,7 @@ def feira(categoria=None):
         'produto/feira.html', expositores=lista, pontos=pontos,
         produtos=fe.buscar_produtos(q) if q else [],
         q=q, tipo=tipo, so_hoje=so_hoje, cat_atual=cat_atual,
+        sub_atual=sub_atual, subcategorias=subcategorias, produtos_sub=produtos_sub,
         categorias_feira=[{'slug': c, 'titulo': t} for c, t, _ in fe.CATEGORIAS_DA_FEIRA],
         total_hoje=sum(1 for e in lista if e['hoje']),
         centro=fe.CENTRO, **_contexto_produto()))
@@ -725,6 +746,12 @@ def _tenants_do_sitemap(dono_do_dominio):
             or (t.eh_demo and t.tipo_negocio == 'artesao')]
 
 
+def _absoluta(caminho):
+    """Foto no sitemap precisa de URL completa; caminho de static ganha o host."""
+    return caminho if caminho.startswith(('http://', 'https://')) else (
+        f'https://{request.host}' + url_for('static', filename=caminho))
+
+
 @bp.route('/sitemap.xml')
 def sitemap():
     """Mapa de indexação do domínio que fez a requisição.
@@ -740,50 +767,73 @@ def sitemap():
     from xml.sax.saxutils import escape
     from app.utils.site_router import dominio_do_produto
 
-    paginas = []
+    paginas = []        # (endereço, lastmod, [fotos])
     dono_do_dominio = tenant_por_host(request.host)
     if dono_do_dominio is None:
         # A landing de venda é a única página deste host que é nossa. Sitemap
         # sem nenhuma URL do próprio host é ignorado pelo Google.
-        paginas.append((f'https://{dominio_do_produto()}/', None))
-        paginas.append((f'https://{dominio_do_produto()}/site-para-bar-em-campinas', None))
-        from app.utils.memoria import verbetes as _verbetes
-        paginas.append((f'https://{dominio_do_produto()}/memoria', None))
-        paginas.append((f'https://{dominio_do_produto()}/feira', None))
-        for caminho in ('/agenda', '/presentes', '/expor', '/termos', '/privacidade'):
-            paginas.append((f'https://{dominio_do_produto()}{caminho}', None))
         from app.utils.feira import FAIXAS_DE_PRESENTE, CATEGORIAS_DA_FEIRA, expositores, \
-            categorias_do_expositor
+            categorias_do_expositor, subcategorias_com_produto
+        from app.models.modelo_siteconfig import SiteConfig
+        from app.utils.categorias import SUBCATEGORIAS
+        from app.utils.memoria import verbetes as _verbetes
+        base = f'https://{dominio_do_produto()}'
+        # As páginas da Feira mudam quando um expositor edita o site dele: a
+        # edição mais recente é o lastmod honesto delas.
+        feira_mudou = db.session.query(db.func.max(SiteConfig.data_atualizacao)).join(
+            Restaurante, Restaurante.id == SiteConfig.restaurant_id).filter(
+            Restaurante.tipo_negocio == 'artesao').scalar()
+        paginas.append((f'{base}/', None, ()))
+        paginas.append((f'{base}/site-para-bar-em-campinas', None, ()))
+        paginas.append((f'{base}/memoria', None, ()))
+        paginas.append((f'{base}/feira', feira_mudou, ()))
+        for caminho in ('/agenda', '/presentes', '/expor', '/termos', '/privacidade'):
+            paginas.append((f'{base}{caminho}', feira_mudou if caminho == '/presentes' else None, ()))
         # Só categoria com gente: página vazia no índice é conteúdo raso.
         com_gente = {c for e in expositores(tipo='artesao') for c in categorias_do_expositor(e)}
         for cat, *_ in CATEGORIAS_DA_FEIRA:
             if cat in com_gente:
-                paginas.append((f'https://{dominio_do_produto()}/feira/{cat}', None))
+                paginas.append((f'{base}/feira/{cat}', feira_mudou, ()))
+        com_produto = subcategorias_com_produto()
+        for cat, sub, _ in SUBCATEGORIAS:
+            if sub in com_produto:
+                paginas.append((f'{base}/feira/{cat}/{sub}', feira_mudou, ()))
         for faixa_id, *_ in FAIXAS_DE_PRESENTE:
-            paginas.append((f'https://{dominio_do_produto()}/presentes/{faixa_id}', None))
+            paginas.append((f'{base}/presentes/{faixa_id}', feira_mudou, ()))
         for v in _verbetes():
-            paginas.append((f"https://{dominio_do_produto()}/memoria/{v['slug']}", None))
+            paginas.append((f"{base}/memoria/{v['slug']}", None, ()))
 
-    from app.models.modelo_sitecontent import DishCard
+    from app.models.modelo_sitecontent import DishCard, ProdutoSite
     for tenant in _tenants_do_sitemap(dono_do_dominio):
         cfg = getattr(tenant, 'site_config', None)
         atualizado = getattr(cfg, 'data_atualizacao', None)
-        paginas.append((url_canonica(tenant), atualizado))
+        # Fotos de produto do expositor: é por elas que a busca de imagem
+        # ("vaso de cerâmica Campinas") chega na barraca.
+        fotos = ()
+        if tenant.tipo_negocio == 'artesao':
+            fotos = [_absoluta(p.imagem) for p in ProdutoSite.query.filter(
+                ProdutoSite.restaurant_id == tenant.id, ProdutoSite.ativo.isnot(False),
+                ProdutoSite.imagem.isnot(None), ProdutoSite.imagem != '').order_by(
+                ProdutoSite.ordem, ProdutoSite.id).limit(20)]
+        paginas.append((url_canonica(tenant), atualizado, fotos))
         # O cardápio é página própria (canonical e JSON-LD de Menu), mas só
         # existe com prato cadastrado — sem prato a rota dá 404.
         cardapio = url_do_cardapio(tenant)
         if cardapio and not tenant.eh_demo and DishCard.query.filter_by(restaurant_id=tenant.id).first():
-            paginas.append((cardapio, atualizado))
+            paginas.append((cardapio, atualizado, ()))
 
     linhas = ['<?xml version="1.0" encoding="UTF-8"?>',
-              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
-    for endereco, atualizado in paginas:
+              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
+              'xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">']
+    for endereco, atualizado, fotos in paginas:
         dia = atualizado.date() if isinstance(atualizado, datetime) else (
             atualizado if isinstance(atualizado, date) else None)
         linhas.append('  <url>')
         linhas.append(f'    <loc>{escape(endereco)}</loc>')
         if dia is not None:
             linhas.append(f'    <lastmod>{dia.isoformat()}</lastmod>')
+        for foto in fotos:
+            linhas.append(f'    <image:image><image:loc>{escape(foto)}</image:loc></image:image>')
         linhas.append('  </url>')
     linhas.append('</urlset>')
 
