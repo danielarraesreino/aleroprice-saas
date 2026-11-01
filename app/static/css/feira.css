@@ -111,6 +111,7 @@
     gap: 8px;
     white-space: nowrap;
     flex-shrink: 0;
+    min-height: 44px; /* alvo de toque: o logo tinha 28 px de altura */
   }
   .logo-topo span { color: var(--tomate); }
 
@@ -941,9 +942,11 @@
     #dossie[data-modo="lado"] .dossie-barra { grid-column: 1 / -1; }
     #dossie[data-modo="lado"] .scrolly-map-sticky { grid-column: 2; grid-row: 2; }
     #dossie[data-modo="lado"] .scrolly-content-overlay {
-      grid-column: 1; grid-row: 2; padding: 0 0 40vh 24px; max-width: none; margin: 0;
+      grid-column: 1; grid-row: 2; padding: 0 0 16vh 24px; max-width: none; margin: 0;
     }
-    #dossie[data-modo="lado"] .story-step { min-height: 75vh; justify-content: flex-end; }
+    /* 55vh por capítulo: dá o voo do mapa sem os vazios de 75vh (o dossiê
+       chegava a ~7.000 px em 1440). */
+    #dossie[data-modo="lado"] .story-step { min-height: 55vh; justify-content: flex-end; }
   }
   @media (max-width: 899px) {
     #dossie[data-modo="lado"] .scrolly-map-sticky { top: 0; height: 42vh; z-index: 30; }
@@ -1121,9 +1124,15 @@
   .hm-cestas{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
   .hm-bairro-in{grid-template-columns:1fr 1.4fr;gap:48px;align-items:start}
 }
-/* Atalhos e subcategorias quebram linha em toda largura: a fileira que rolava
-   no celular cortava 5 de 6 atalhos sem sinal de que havia mais. A contagem
-   (4 atalhos, 5 subs + "Ver as N") é que mantém a altura sob controle. */
+/* Celular: atalhos e subcategorias numa fileira que rola, com o fim esmaecido
+   avisando que há mais (quebrando linha, 4 atalhos ocupavam 200 px e tiravam
+   o "Ver expositores" da dobra). A folga final tira o último do esmaecido. */
+@media (max-width:767px){
+  .hm-busca-atalhos,.hm-subs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-right:40px;
+    -webkit-mask-image:linear-gradient(to right,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 40px),transparent)}
+  .hm-busca-atalhos::-webkit-scrollbar,.hm-subs::-webkit-scrollbar{display:none}
+  .hm-busca-atalhos li,.hm-subs li{flex:none}
+}
 .hm-subs .hm-subs-mais{background:transparent;border:1.5px solid var(--linha);color:var(--tomate)}
 .hm-faixas small{margin-left:2px;padding-left:8px;border-left:1px solid currentColor}
 
@@ -1132,4 +1141,56 @@
 @media (min-width:1024px){
   .hm-cat{grid-template-columns:minmax(14rem,1fr) 8rem 2fr;align-items:baseline}
   .hm-subs{margin:0}
+}
+
+/* ===== Memória na home (dossiê, mural e linha do tempo voltaram) ===== */
+.pin-memoria{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;
+  background:var(--tomate);color:#fff;border:2.5px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.4)}
+.timeline-grid{list-style:none}
+.timeline-card h3{color:#fff;font-size:1rem;margin-bottom:6px}
+.tempo-cab{max-width:62ch;margin:0 auto;text-align:center}
+.tempo-cab h2{font-family:var(--font-cartaz);font-size:clamp(2.4rem,4.5vw,3.6rem);text-transform:uppercase;line-height:1;color:#fff}
+.tempo-cab p{margin-top:10px;color:#d1c7b7;font-size:1.05rem}
+
+/* Medida de leitura: DESIGN.md pede corpo com no máximo ~65 caracteres
+   (o detector mediu 89–93 no lead do convite e nos parágrafos centrados). */
+.hm-sub,.participar-lead,.hm-cab-centro p{max-width:62ch}
+.hm-cab-centro p,.hm-contato .hm-sub{margin-inline:auto}
+/* Título sem palavra sozinha na última linha; parágrafo sem viúva. */
+h1,h2,h3,.chapter-title{text-wrap:balance}
+p,li,blockquote{text-wrap:pretty}
+
+/* ===== Modo escuro do portal (DESIGN.md, princípio 4) =====
+   Opt-in por `html.tema-auto` (home e páginas de memoria/_base.html):
+   barao.html e expor.html têm cores fixas inline e ficam no claro.
+   Papel e tinta trocam de lugar; o tomate de texto clareia (6,7:1 sobre o
+   papel escuro) e o de fundo de botão segue #b33215 (branco 6,2:1). Os blocos
+   que já eram escuros no claro (busca, quando e onde, convite) recebem de volta
+   os tokens claros e ficam iguais nos dois modos. */
+html.tema-auto{color-scheme:light dark}
+@media (prefers-color-scheme:dark){
+  html.tema-auto{
+    --papel:#1d1712; --papel-escuro:#2b231c; --papel-claro:#241d17; --cartao:#2e251e;
+    --tinta:#f3ead8; --taupe:#c4b49e; --tomate:#f0846a;
+    --linha:rgba(243,234,216,.16);
+  }
+  html.tema-auto body{background:var(--papel);color:var(--tinta)}
+  html.tema-auto :is(.hm-quando,.hm-busca,.hm-expor,.fp-card.destacado,.full-bleed-section,.secao-participar){
+    --papel:#f6eedb; --papel-escuro:#eae0c8; --papel-claro:#fcf8ee; --cartao:#fff;
+    --tinta:#241c14; --taupe:#695842; --tomate:#b33215; --linha:rgba(36,28,20,.14);
+  }
+  /* blocos escuros num fundo escuro: um tom abaixo para não sumirem */
+  html.tema-auto :is(.hm-quando,.hm-busca,.hm-expor,.fp-card.destacado){background:#0f0b08;outline:1px solid rgba(243,234,216,.12)}
+  html.tema-auto :is(.full-bleed-section,.secao-participar){background:#0f0b08}
+  /* fundo de ação: tomate escuro com texto branco, igual ao claro */
+  html.tema-auto :is(.btn-tomate,.cta-dono:hover,.hm-selo,.fp-busca button,.fp-selo,.pin-memoria,.plano-badge-topo,.pino-bar){background:#b33215}
+  html.tema-auto .btn-tomate:hover{background:#8e250e}
+  html.tema-auto .btn-colab{border-color:rgba(243,234,216,.28)}
+  html.tema-auto .site-header{background:rgba(29,23,18,.97)}
+  html.tema-auto .story-chapter-card{background:rgba(36,29,23,.97);box-shadow:0 20px 48px rgba(0,0,0,.5)}
+  html.tema-auto :is(.card-thumb,.chapter-photo,.bar-img-thumb){background:var(--papel-escuro)}
+  html.tema-auto .card-meta{color:var(--taupe)}
+  html.tema-auto .form-control{background:var(--papel-claro);color:var(--tinta)}
+  /* mapa: ladrilhos claros do OpenStreetMap escurecidos sem perder as ruas */
+  html.tema-auto :is(.scrolly-map-sticky,#mapa-memoria,#mapa-feira) .leaflet-tile-pane{filter:brightness(.72) contrast(1.08) saturate(.7)}
 }

@@ -16,8 +16,13 @@
 .fp-busca input[type=search]::placeholder{color:var(--taupe)}
 .fp-busca button{flex:none;min-height:48px;padding:0 20px;border:0;border-radius:8px;background:var(--tomate);color:#fff;font:inherit;font-weight:700;cursor:pointer}
 .fp-busca button:hover{background:var(--tinta)}
-/* Filtros quebram linha: rolando, as categorias sumiam além da borda sem aviso. */
-.fp-filtros{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0;padding:0;list-style:none}
+/* Celular: uma fileira que rola, com o fim esmaecido avisando que há mais
+   (quebrando linha, 16 filtros empurravam o 1º produto ~570 px para baixo).
+   A folga final deixa o último filtro sair de baixo do esmaecido. */
+.fp-filtros{display:flex;gap:8px;margin:12px 0 0;padding:0 40px 0 0;list-style:none;overflow-x:auto;scrollbar-width:none;
+  -webkit-mask-image:linear-gradient(to right,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 40px),transparent)}
+.fp-filtros::-webkit-scrollbar{display:none}
+@media (min-width:768px){.fp-filtros{flex-wrap:wrap;overflow:visible;padding-right:0;-webkit-mask-image:none;mask-image:none}}
 .fp-filtros a{display:inline-flex;align-items:center;flex:none;white-space:nowrap;min-height:44px;padding:0 16px;border-radius:22px;background:var(--papel-escuro);color:var(--tinta);font-weight:700;text-decoration:none}
 .fp-filtros a:hover{background:var(--papel-claro)}
 .fp-filtros a[aria-current=true]{background:var(--tinta);color:var(--papel-claro)}

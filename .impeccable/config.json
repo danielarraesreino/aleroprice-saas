@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "app/templates/site/modelos/artesao/_base.html"
+        ],
+        "createdAt": "2026-11-01T22:45:34.092Z",
+        "reason": "Claude, critique 2026-11-01: <img id=lightbox-img src=''> é preenchido por JS ao abrir o lightbox (linha ~825)"
+      },
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "app/templates/produto/landing.html"
+        ],
+        "createdAt": "2026-11-01T22:55:56.077Z",
+        "reason": "Claude, critique 2026-11-01: a CLI não resolve url_for e não carrega feira.css (mede tudo 16px); a injeção no navegador com CSS real não acusa"
+      }
+    ]
+  }
+}

@@ -32,14 +32,17 @@ def test_verbete_com_lugar_tem_mapa_e_street_view(client, session):
     assert 'map_action=pano' in html and 'maps/search/?api=1' in html
 
 
-def test_home_leva_para_a_memoria_e_os_capitulos_ficam_la(client, session):
-    """A Memória saiu da home (dossiê, mural e linha do tempo somavam ~9.800 px
-    no celular e o mapa fixo cobria a tela); a home só aponta para /memoria."""
+def test_home_tem_a_memoria_e_os_capitulos_tambem_ficam_em_memoria(client, session):
+    """A Memória é a identidade da home (pedido do dono, após 517ebf6 tirá-la):
+    dossiê no mapa, mural e linha do tempo voltam, e /memoria segue com tudo.
+    No celular o mapa não arrasta com um dedo e o padrão é "mapa + lista"."""
     home = client.get('/').get_data(as_text=True)
-    assert 'id="dossie"' not in home and 'href="/memoria"' in home
+    for ancora in ('id="dossie"', 'id="mural"', 'id="linha-do-tempo"', 'href="/memoria"'):
+        assert ancora in home
+    assert 'dragging: !L.Browser.mobile' in home
     memoria = client.get('/memoria').get_data(as_text=True)
     for v in mem.capitulos():
-        assert v['titulo'] in memoria
+        assert v['titulo'] in memoria and v['titulo'] in home
 
 
 def test_whatsapp_do_gustavo_nao_aparece_mais(client, session):

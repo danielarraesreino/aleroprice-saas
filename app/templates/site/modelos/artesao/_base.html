@@ -330,6 +330,8 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
 .contato .info div{border-bottom-color:currentColor;border-bottom-color:color-mix(in srgb,currentColor 28%,transparent)}
 .sobre p{max-width:68ch;margin-bottom:var(--s4);line-height:1.7}
 .a-preencher{font-style:italic;opacity:.7}
+/* Na faixa de contato a opacidade somava (.8 × .7) e caía para 4,4:1; o itálico já marca o "a preencher". */
+.contato .a-preencher{opacity:1}
 .redes{display:flex;flex-wrap:wrap;gap:var(--s3);margin-top:var(--s4)}
 .redes a{min-height:44px;display:inline-flex;align-items:center;font-weight:600;text-decoration:underline;text-underline-offset:4px}
 @media (max-width:480px){.info div{grid-template-columns:1fr;gap:2px}}

@@ -59,7 +59,9 @@
   {{ vitrine(cestas) }}
   {% endif %}
 
-  {% for f in faixas if not faixa_atual or f.id == faixa_atual.id %}
+  {# Na página geral, faixa vazia não abre seção (eram três "Nenhum presente"
+     seguidos); na página da própria faixa, o aviso de vazio continua. #}
+  {% for f in faixas if (faixa_atual and f.id == faixa_atual.id) or (not faixa_atual and f.itens) %}
   <h2 id="{{ f.id }}">{{ f.titulo }}</h2>
   {% if f.itens %}
   {{ vitrine(f.itens) }}
@@ -73,7 +75,8 @@
     <ol>
       <li>Toque no presente para abrir a barraca de quem faz.</li>
       <li>Adicione os produtos e envie a lista pelo WhatsApp de quem produz.</li>
-      <li>Retire na feira, no sábado (10h–16h) ou no domingo (9h–15h), ou combine a entrega.</li>
+      {# Horário de FEIRA (publico/views.py), o mesmo da home: escrito à mão aqui, o domingo saiu 9h. #}
+      <li>Retire na feira ({% for h in feira.horarios %}{{ h.dia|lower }} {{ h.abre[:2]|int }}h–{{ h.fecha[:2]|int }}h{{ '; ' if not loop.last }}{% endfor %}) ou combine a entrega.</li>
     </ol>
   </section>
 </main>
