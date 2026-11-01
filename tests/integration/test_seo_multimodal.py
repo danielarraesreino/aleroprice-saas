@@ -29,3 +29,9 @@ def test_home_com_titulo_e_descricao_no_tamanho_do_google(client, session):
     titulo = re.search(r'<title>(.*?)</title>', html).group(1)
     descricao = re.search(r'name="description" content="([^"]*)"', html).group(1)
     assert len(titulo) <= 60 and len(descricao) <= 155
+
+
+def test_arquivo_chave_do_indexnow(client, session):
+    from app.routes.publico.views import INDEXNOW_CHAVE
+    r = client.get(f'/{INDEXNOW_CHAVE}.txt')
+    assert r.status_code == 200 and r.get_data(as_text=True) == INDEXNOW_CHAVE

@@ -873,6 +873,17 @@ def sitemap():
         'Content-Type': 'application/xml; charset=utf-8'}
 
 
+# IndexNow (Bing, Yandex, Seznam, Naver, Yep; o Bing alimenta a busca do
+# ChatGPT e do Copilot): o buscador baixa este arquivo para confirmar que quem
+# avisou das URLs é o dono do domínio. A chave é pública por desenho.
+INDEXNOW_CHAVE = os.environ.get('INDEXNOW_KEY', '6639fef929c816ee0aa2818c182b954f')
+
+
+@bp.route(f'/{INDEXNOW_CHAVE}.txt')
+def indexnow_chave():
+    return INDEXNOW_CHAVE, 200, {'Content-Type': 'text/plain; charset=utf-8'}
+
+
 @bp.route('/llms.txt')
 @bp.route('/llms-full.txt')
 def llms_txt():
