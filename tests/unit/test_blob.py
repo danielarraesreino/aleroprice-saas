@@ -8,6 +8,7 @@ Dois requisitos não-óbvios:
    `<img src>` no site público.
 """
 import io
+import re
 
 import pytest
 from werkzeug.datastructures import FileStorage
@@ -15,7 +16,16 @@ from werkzeug.datastructures import FileStorage
 from app.utils import blob
 
 
-def arquivo(nome='foto.jpg', conteudo=b'\xff\xd8\xff\xe0conteudo-de-imagem'):
+def imagem(formato='JPEG', tamanho=(40, 30), modo='RGB'):
+    from PIL import Image
+    saida = io.BytesIO()
+    Image.new(modo, tamanho, (200, 120, 40, 255)[:len(modo)]).save(saida, formato)
+    return saida.getvalue()
+
+
+def arquivo(nome='foto.jpg', conteudo=None):
+    if conteudo is None:
+        conteudo = imagem()
     return FileStorage(stream=io.BytesIO(conteudo), filename=nome)
 
 
@@ -92,7 +102,7 @@ def test_disco_read_only_falha_alto(monkeypatch, pasta):
 
 
 def test_com_token_vai_pro_blob_e_devolve_a_url(monkeypatch):
-    chamada = {}
+    chamadas = []
 
     class Resposta:
         def read(self):
@@ -103,26 +113,31 @@ def test_com_token_vai_pro_blob_e_devolve_a_url(monkeypatch):
             return False
 
     def falso_urlopen(req, timeout=None):
-        chamada['url'] = req.full_url
-        chamada['metodo'] = req.get_method()
-        chamada['headers'] = {k.lower(): v for k, v in req.headers.items()}
-        chamada['corpo'] = req.data
+        chamadas.append({
+            'url': req.full_url, 'metodo': req.get_method(), 'corpo': req.data,
+            'headers': {k.lower(): v for k, v in req.headers.items()},
+        })
         return Resposta()
 
     monkeypatch.setenv('BLOB_READ_WRITE_TOKEN', 'vercel_blob_rw_TOKEN')
     monkeypatch.setattr(blob.urllib.request, 'urlopen', falso_urlopen)
 
-    url = blob.enviar(arquivo('foto.jpg', b'bytes-da-imagem'), 'bar-x')
+    url = blob.enviar(arquivo('foto.jpg'), 'bar-x')
 
+    # A resposta do Blob é a fonte da URL; aqui o falso devolve sempre a mesma.
     assert url == 'https://abc.public.blob.vercel-storage.com/bar-x/foto-9z.jpg'
-    assert chamada['url'] == 'https://blob.vercel-storage.com/bar-x/foto.jpg'
-    assert chamada['metodo'] == 'PUT'
-    assert chamada['headers']['authorization'] == 'Bearer vercel_blob_rw_TOKEN'
-    assert chamada['headers']['x-api-version'] == blob.VERSAO_API
-    assert chamada['headers']['x-content-type'] == 'image/jpeg'
-    # sem sufixo aleatório, IMG_0001.jpg de dois bares se sobrescreveria
-    assert chamada['headers']['x-add-random-suffix'] == '1'
-    assert chamada['corpo'] == b'bytes-da-imagem'
+    foto, mini = chamadas
+    # Sufixo nosso, igual na foto e na miniatura: IMG_0001.jpg de dois bares
+    # não se sobrescreve, e a miniatura tem endereço deduzível da foto.
+    assert re.fullmatch(r'https://blob.vercel-storage.com/bar-x/foto\.[0-9a-f]{8}\.jpg', foto['url'])
+    assert mini['url'] == foto['url'][:-len('.jpg')] + '-md.webp'
+    assert foto['headers']['x-add-random-suffix'] == '0'
+    assert foto['metodo'] == 'PUT'
+    assert foto['headers']['authorization'] == 'Bearer vercel_blob_rw_TOKEN'
+    assert foto['headers']['x-api-version'] == blob.VERSAO_API
+    assert foto['headers']['x-content-type'] == 'image/jpeg'
+    assert mini['headers']['x-content-type'] == 'image/webp'
+    assert foto['corpo'][:2] == b'\xff\xd8'
 
 
 def test_erro_do_blob_vira_mensagem_e_nao_url_quebrada(monkeypatch):
@@ -137,3 +152,53 @@ def test_erro_do_blob_vira_mensagem_e_nao_url_quebrada(monkeypatch):
 
     with pytest.raises(blob.UploadIndisponivel, match='403'):
         blob.enviar(arquivo(), 'bar-x')
+
+
+# ------------------------------------------------------------------ otimização
+
+def test_recusa_arquivo_com_extensao_de_imagem_que_nao_e_imagem(pasta):
+    """`.jpg` no nome não prova nada: o endereço vai direto pra um `<img>`."""
+    with pytest.raises(blob.UploadInvalido, match='não parece uma imagem'):
+        blob.enviar(arquivo('foto.jpg', b'%PDF-1.4 qualquer coisa'), 'bar-x')
+
+
+def test_foto_grande_e_reduzida_e_ganha_miniatura(pasta):
+    from PIL import Image
+
+    caminho = blob.enviar(arquivo('IMG_0001.jpg', imagem(tamanho=(4000, 3000))), 'bar-x')
+
+    assert caminho == 'img/demo/bar-x/IMG_0001.jpg'
+    with Image.open(pasta / 'bar-x' / 'IMG_0001.jpg') as foto:
+        assert max(foto.size) == blob.LADO_MAXIMO
+    with Image.open(pasta / 'bar-x' / 'IMG_0001-md.webp') as mini:
+        assert mini.format == 'WEBP'
+        assert max(mini.size) == blob.LADO_MINIATURA
+
+
+def test_png_de_foto_vira_jpeg_e_png_com_transparencia_continua_png(pasta):
+    assert blob.enviar(arquivo('capa.png', imagem('PNG')), 'bar-x') == 'img/demo/bar-x/capa.jpg'
+    logo = blob.enviar(arquivo('logo.png', imagem('PNG', modo='RGBA')), 'bar-x')
+    assert logo == 'img/demo/bar-x/logo.png'
+
+
+def test_foto_deitada_pelo_exif_e_endireitada(pasta):
+    from PIL import Image
+
+    saida = io.BytesIO()
+    exif = Image.Exif()
+    exif[0x0112] = 6  # Orientation: girar 90° — o padrão de foto em pé no celular
+    Image.new('RGB', (40, 30)).save(saida, 'JPEG', exif=exif)
+
+    blob.enviar(arquivo('pe.jpg', saida.getvalue()), 'bar-x')
+    with Image.open(pasta / 'bar-x' / 'pe.jpg') as foto:
+        assert foto.size == (30, 40)
+
+
+def test_miniatura_nao_entra_na_galeria(pasta):
+    from app.utils import demos
+
+    blob.enviar(arquivo('capa.jpg'), 'bar-x')
+    blob.enviar(arquivo('vista.jpg'), 'bar-x')
+    fotos = demos.fotos_do_bar('bar-x')
+    assert fotos['capa'] == 'img/demo/bar-x/capa.jpg'
+    assert fotos['galeria'] == [{'imagem': 'img/demo/bar-x/vista.jpg'}]

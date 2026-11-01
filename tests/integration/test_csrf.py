@@ -39,7 +39,16 @@ from app.models.usuario import Usuario
 from app.utils.modelos import MODELOS
 
 
-JPEG = b'\xff\xd8\xff\xe0' + b'conteudo' * 8
+def _jpeg():
+    # Imagem de verdade: blob.enviar abre o arquivo com o Pillow e recusa bytes
+    # que só começam como JPEG.
+    from PIL import Image
+    saida = io.BytesIO()
+    Image.new('RGB', (40, 30), (180, 90, 30)).save(saida, 'JPEG')
+    return saida.getvalue()
+
+
+JPEG = _jpeg()
 
 # O token aparece de duas formas nas páginas: input hidden (formulários) e
 # constante de JS (upload do Modo Campo, que não tem <form>).

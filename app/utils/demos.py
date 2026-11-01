@@ -128,6 +128,9 @@ def fotos_do_bar(slug):
     for nome in sorted(os.listdir(pasta)):
         if not nome.lower().endswith(EXTENSOES):
             continue
+        # `capa-md.webp` é a miniatura de `capa.jpg` (blob.enviar), não foto nova.
+        if os.path.splitext(nome)[0].lower().endswith('-md'):
+            continue
         caminho = f'img/demo/{slug}/{nome}'
         base = os.path.splitext(nome)[0].lower()
 

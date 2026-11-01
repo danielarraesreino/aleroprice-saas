@@ -29,7 +29,7 @@
   <ul class="fp-prods">
     {% for p in itens %}
     <li><a class="fp-prod" href="{{ p.url }}">
-      <img src="{{ p.img }}" alt="{{ p.nome }}" loading="lazy" width="480" height="480">
+      <img src="{{ p.img_sm or p.img }}" alt="{{ p.nome }}" loading="lazy" width="480" height="480">
       <span class="fp-info">
         <h3>{{ p.nome }}</h3>
         <span class="fp-meta">{{ p.expositor }}{% if p.sob_encomenda %} · sob encomenda{% endif %}</span>

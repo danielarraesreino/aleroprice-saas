@@ -20,7 +20,16 @@ from app.models.modelo_sitecontent import DishCard, GalleryItem
 from app.models.usuario import Usuario
 
 
-JPEG = b'\xff\xd8\xff\xe0' + b'conteudo' * 8
+def _jpeg():
+    # Imagem de verdade: blob.enviar abre o arquivo com o Pillow e recusa bytes
+    # que só começam como JPEG.
+    from PIL import Image
+    saida = io.BytesIO()
+    Image.new('RGB', (40, 30), (180, 90, 30)).save(saida, 'JPEG')
+    return saida.getvalue()
+
+
+JPEG = _jpeg()
 
 
 @pytest.fixture(autouse=True)

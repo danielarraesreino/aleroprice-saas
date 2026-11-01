@@ -1526,8 +1526,9 @@ def montar_conteudo(rest):
     if tipo_do(rest) == 'artesao':
         todos = rows(ProdutoSite)
         escolhidos = [p for p in todos if p.imagem] or todos
+        from app.utils.feira import _miniatura
         produtos = [{'nome': p.nome, 'descricao': p.descricao, 'img': _img(p.imagem),
-                     'categoria': p.categoria, 'preco': p.preco,
+                     'img_sm': _miniatura(p.imagem), 'categoria': p.categoria, 'preco': p.preco,
                      'sob_encomenda': bool(p.sob_encomenda), 'destaque': bool(p.destaque),
                      'prazo_dias': p.prazo_dias, 'ratio': _proporcao(p.imagem)}
                     for p in escolhidos]

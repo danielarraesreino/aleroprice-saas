@@ -661,7 +661,7 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
 {% if em_destaque|length >= 2 and produtos|length > 4 %}
 <div class="wrap destaques"><h3>Os mais procurados</h3><ul>
   {% for p in em_destaque[:4] %}<li>
-    {% if p.img %}<img src="{{ p.img }}" alt="{{ p.nome }}" loading="lazy" decoding="async" width="480" height="360">{% endif %}
+    {% if p.img %}<img src="{{ p.img_sm or p.img }}" alt="{{ p.nome }}" loading="lazy" decoding="async" width="480" height="360">{% endif %}
     <strong>{{ p.nome }}</strong>
     <div class="meta-produto">{{ pr.precos(p, site) }}</div>
     <a class="btn btn-line" href="#produtos" aria-label="Ver {{ p.nome }} nos produtos">Ver nos produtos</a>

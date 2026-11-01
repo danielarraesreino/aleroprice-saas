@@ -36,7 +36,8 @@
       {% if p.img %}
       <figure data-zoom="{{ p.img }}" data-legenda="{{ p.nome }}{% if p.descricao %} — {{ p.descricao }}{% endif %}">
         {% if p.destaque %}<span class="selo-destaque">★ Destaque</span>{% endif %}
-        <img src="{{ p.img }}" alt="{{ p.nome }}" loading="lazy" decoding="async" width="640" height="640">
+        {# Miniatura de 480 px (blob.enviar) quando existe; o zoom segue com a foto inteira. #}
+        <img src="{{ p.img_sm or p.img }}"{% if p.img_sm and p.img_sm != p.img %} srcset="{{ p.img_sm }} 480w, {{ p.img }} 1600w" sizes="(max-width: 640px) 50vw, 360px"{% endif %} alt="{{ p.nome }}" loading="lazy" decoding="async" width="640" height="640">
         <span class="zoom-dica" aria-hidden="true">Ampliar</span>
       </figure>
       {% endif %}
@@ -74,7 +75,7 @@
     <li class="linha{% if p.destaque %} destaque{% endif %}{% if not p.img %} sem-foto{% endif %}" data-nome="{{ p.nome }}">
       {% if p.img %}
       <figure class="linha-foto" data-zoom="{{ p.img }}" data-legenda="{{ p.nome }}{% if p.descricao %} — {{ p.descricao }}{% endif %}">
-        <img src="{{ p.img }}" alt="{{ p.nome }}" loading="lazy" decoding="async" width="112" height="112">
+        <img src="{{ p.img_sm or p.img }}" alt="{{ p.nome }}" loading="lazy" decoding="async" width="112" height="112">
       </figure>
       {% endif %}
       <div class="texto">

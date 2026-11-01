@@ -17,6 +17,7 @@ mapa. Bar sem coordenada fica na vitrine da home, não aqui: lista de 80 casas
 sem lugar no mapa não ajuda quem está andando na praça.
 """
 import os
+import re
 import unicodedata
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
@@ -27,6 +28,7 @@ from app.extensions import db
 from app.models.modelo_restaurante import Restaurante
 from app.models.modelo_siteconfig import SiteConfig
 from app.models.modelo_sitecontent import ProdutoSite
+from app.utils import blob
 from app.utils.site_router import url_canonica
 
 FUSO = ZoneInfo('America/Sao_Paulo')
@@ -82,13 +84,24 @@ def _img(caminho):
     return url_for('static', filename=caminho)
 
 
+# `foto.ab12cd34.jpg`: nome que `blob.enviar` dá no Blob, sempre com a
+# miniatura ao lado. URL antiga (sufixo do próprio Blob) não tem.
+_SUFIXO_BLOB = re.compile(r'\.[0-9a-f]{8}\.(jpe?g|png|webp)$')
+
+
 def _miniatura(caminho):
-    """Capa de prévia em 480 px (`capa-md.webp`) quando existe; senão a original.
-    A vitrine mostra a foto em ~200 px: servir a de 800 px pesava 1 MiB na home."""
-    if caminho and caminho.endswith('/capa.jpg'):
-        menor = caminho[:-len('capa.jpg')] + 'capa-md.webp'
-        if os.path.exists(os.path.join(current_app.static_folder, menor)):
-            return _img(menor)
+    """Versão de 480 px (`<nome>-md.webp`) quando existe; senão a original.
+    A vitrine mostra a foto em ~200 px: servir a de 800 px pesava 1 MiB na home.
+
+    Local: confere no disco. URL: só as que `blob.enviar` nomeou, porque
+    perguntar ao Blob se o arquivo existe custaria uma ida à rede por foto."""
+    if not caminho:
+        return None
+    menor = blob.miniatura_de(caminho)
+    if caminho.startswith(('http://', 'https://')):
+        return menor if _SUFIXO_BLOB.search(caminho) else caminho
+    if os.path.exists(os.path.join(current_app.static_folder, menor)):
+        return _img(menor)
     return _img(caminho)
 
 
@@ -208,7 +221,7 @@ def buscar_produtos(q, limite=48):
         r, c = pares[p.restaurant_id]
         achados.append({
             'nome': p.nome, 'descricao': p.descricao, 'categoria': p.categoria,
-            'img': _img(p.imagem), 'preco': p.preco,
+            'img': _img(p.imagem), 'img_sm': _miniatura(p.imagem), 'preco': p.preco,
             'sob_encomenda': bool(p.sob_encomenda),
             'expositor': c.nome or r.nome, 'url': f'{_url_na_feira(r)}#produtos',
         })
@@ -260,7 +273,7 @@ def presentes():
         if not p.preco:
             continue
         r, c = pares[p.restaurant_id]
-        item = {'nome': p.nome, 'img': _img(p.imagem), 'preco': p.preco,
+        item = {'nome': p.nome, 'img': _img(p.imagem), 'img_sm': _miniatura(p.imagem), 'preco': p.preco,
                 'sob_encomenda': bool(p.sob_encomenda), 'cesta': eh_cesta(p),
                 'expositor': c.nome or r.nome, 'url': f'{_url_na_feira(r)}#produtos'}
         # Faixas em ordem crescente: a primeira cujo teto cabe o preço.
