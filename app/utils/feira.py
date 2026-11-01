@@ -255,6 +255,23 @@ def subcategorias_com_produto():
     return contagem
 
 
+def resumo_da_feira():
+    """O que tem na Feira, para a home: cada categoria com quantos expositores
+    e as subcategorias que já têm produto (cada uma é uma página).
+    Categoria sem expositor não aparece."""
+    lista = expositores(tipo='artesao')
+    com_produto = subcategorias_com_produto()
+    saida = []
+    for slug, titulo, _ in CATEGORIAS_DA_FEIRA:
+        total = sum(1 for e in lista if slug in categorias_do_expositor(e))
+        if not total:
+            continue
+        subs = [{'slug': s, 'titulo': n, 'total': com_produto[s], 'cat': slug}
+                for c, s, n in categorias.SUBCATEGORIAS if c == slug and s in com_produto]
+        saida.append({'slug': slug, 'titulo': titulo, 'total': total, 'subs': subs})
+    return saida
+
+
 def produtos_da_subcategoria(sub, limite=96):
     """Produtos de todos os expositores cuja categoria cai em `sub`."""
     achados = []

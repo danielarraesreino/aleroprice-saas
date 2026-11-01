@@ -244,7 +244,8 @@ def landing():
         rest = tenant_por_host(host)
         if rest:
             return _render_landing(rest)
-    resp = make_response(render_template('produto/landing.html', **_contexto_produto()))
+    resp = make_response(render_template('produto/landing.html', **_contexto_produto(),
+                                         **_o_que_tem_na_feira()))
     # A vitrine é igual para todo visitante (sem formulário com token, sem nada
     # de quem está logado), então a borda da Vercel pode servi-la pronta: o
     # visitante não espera o cold start da função (~9s) nem o banco acordar.
@@ -369,6 +370,23 @@ FEIRA = {
         {'dia': 'Domingo', 'schema': 'https://schema.org/Sunday', 'abre': '10:00', 'fecha': '15:00'},
     ],
 }
+
+
+def _o_que_tem_na_feira():
+    """Categorias, cestas e faixas de presente da home. Mesma regra da vitrine:
+    se a consulta falhar, as seções somem e o resto da home segue."""
+    try:
+        from app.utils import feira as fe
+        faixas = fe.presentes()
+        categorias = fe.resumo_da_feira()
+    except Exception:
+        db.session.rollback()
+        return {'cats_home': [], 'faixas_home': [], 'cestas_home': []}
+    cestas = sorted((i for f in faixas for i in f['itens'] if i['cesta']), key=lambda i: i['preco'])
+    return {'cats_home': categorias,
+            'faixas_home': [{'id': f['id'], 'titulo': f['titulo'], 'total': len(f['itens'])}
+                            for f in faixas if f['itens']],
+            'cestas_home': cestas[:4]}
 
 
 def _vitrine_de_expositores(limite=9):

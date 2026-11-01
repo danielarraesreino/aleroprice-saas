@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Feira de Barão · Praça do Coco, Memória Viva e Bares de Barão Geraldo (Campinas)</title>
-<meta name="description" content="A Feira da Praça do Coco aos sábados e domingos, os artesãos e expositores, o mapa histórico da Ferrovia Funilense e da Unicamp, e os bares e botecos de Barão Geraldo, em Campinas.">
+<title>Feira de Barão · Artesanato e comida feita à mão na Praça do Coco, Barão Geraldo (Campinas)</title>
+<meta name="description" content="Quem expõe na Feira de Barão, na Praça do Coco, sábado e domingo: artesanato, comida artesanal, plantas e joias, com a barraca de cada expositor, presentes por faixa de preço e a história de Barão Geraldo, em Campinas.">
 <link rel="canonical" href="https://feiradebarao.com.br/">
 <link rel="alternate" type="text/markdown" title="LLM Summary" href="/llms.txt">
-<meta property="og:title" content="Feira de Barão · Praça do Coco, Memória Viva e Bares de Barão Geraldo">
-<meta property="og:description" content="Artesãos e gastronomia na Praça do Coco, a Memória Viva do distrito no mapa interativo e os bares que fazem a cultura de Barão Geraldo.">
+<meta property="og:title" content="Feira de Barão · Artesanato e comida feita à mão na Praça do Coco">
+<meta property="og:description" content="O que tem na Feira de Barão, quem expõe e onde fica cada barraca na Praça do Coco, em Barão Geraldo.">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="pt_BR">
 <meta property="og:image" content="{{ og_imagem('og-feira.jpg') }}">
@@ -56,15 +56,30 @@
     <div class="hm-hero-txt">
       <span class="chapeu-dossie">Praça do Coco · Barão Geraldo · Campinas – SP</span>
       <h1 class="hm-h1">Feira de Barão</h1>
+      {# A busca é o destaque da home: nenhuma outra feira deixa procurar o
+         produto entre todas as barracas. Vai para /feira?q=, a mesma busca de
+         produto e expositor da página da Feira. Os atalhos são as
+         subcategorias com mais produto cadastrado (feira.resumo_da_feira). #}
+      <form class="hm-busca" method="get" action="{{ url_for('public.feira') }}" role="search">
+        <label for="hm-q">O que você procura na Feira?</label>
+        <p class="hm-busca-dica">Busca em todas as barracas da praça de uma vez.</p>
+        <div class="hm-busca-linha">
+          <input id="hm-q" type="search" name="q" maxlength="60" placeholder="Geleia, cerâmica, crochê, pão…" autocomplete="off" enterkeyhint="search">
+          <button class="btn btn-tomate" type="submit">Buscar</button>
+        </div>
+        {% set atalhos = (cats_home or [])|map(attribute='subs')|sum(start=[])|sort(attribute='total', reverse=true) %}
+        {% if atalhos %}
+        <ul class="hm-busca-atalhos" aria-label="Mais procurados na Feira">
+          {% for sc in atalhos[:6] %}<li><a href="{{ url_for('public.feira_subcategoria', categoria=sc.cat, sub=sc.slug) }}">{{ sc.titulo }}</a></li>{% endfor %}
+        </ul>
+        {% endif %}
+      </form>
       <p class="hm-sub">
-        Debaixo das árvores da {{ feira.local }}, em {{ feira.bairro }}, artesãos, produtores, cozinheiros e músicos mantêm viva a tradição mais querida do distrito. Aqui você encontra quem expõe na praça, navega pelo mapa histórico de Barão Geraldo e visita os {% if total_bares %}{{ total_bares }} {% endif %}bares e botecos da região.
+        Debaixo das árvores da {{ feira.local }}, em {{ feira.bairro }}, cada barraca tem alguém que faz com as mãos o que vende. Veja onde fica cada expositor e encomende pelo WhatsApp durante a semana.
       </p>
       <div class="hm-acoes">
-        <a class="btn btn-tomate" href="{{ url_for('public.feira') }}">
-          <i class="fas fa-map-location-dot" aria-hidden="true"></i> Ver expositores e mapa da feira
-        </a>
-        <a class="btn btn-colab" href="#dossie">
-          <i class="fas fa-compass" aria-hidden="true"></i> Explorar o mapa histórico
+        <a class="btn btn-colab" href="{{ url_for('public.feira') }}">
+          <i class="fas fa-map-location-dot" aria-hidden="true"></i> Ver expositores e mapa
         </a>
         <a class="btn btn-fantasma" href="#participar">Tenho banca ou bar</a>
       </div>
@@ -90,7 +105,71 @@
 </section>
 
 <!-- ========================================================
-     2. QUEM EXPÕE NA PRAÇA DO COCO (ARTESÃOS & BARRACAS)
+     2. O QUE TEM NA FEIRA: categorias reais, com página cada uma
+     ======================================================== -->
+{# Sai do que os expositores cadastraram (feira.resumo_da_feira): categoria
+   sem expositor não aparece, subcategoria só com produto. Substitui os quatro
+   cartões fixos de "ofícios", que levavam todos ao mesmo link. #}
+{% if cats_home %}
+<section id="o-que-tem" class="hm-secao hm-oquetem" aria-labelledby="oquetem-titulo">
+  <div class="wrap">
+    <div class="hm-cab">
+      <h2 id="oquetem-titulo" class="hm-h2">O que tem na Feira</h2>
+      <a class="hm-todos" href="{{ url_for('public.feira') }}">Ver todos os expositores</a>
+    </div>
+    <ul class="hm-cats">
+      {% for c in cats_home %}
+      <li class="hm-cat">
+        <h3><a href="{{ url_for('public.feira_categoria', categoria=c.slug) }}">{{ c.titulo }}</a></h3>
+        <p class="hm-cat-n">{{ c.total }} {{ 'expositor' if c.total == 1 else 'expositores' }}</p>
+        {% if c.subs %}
+        <ul class="hm-subs" aria-label="{{ c.titulo }}">
+          {% for sc in c.subs %}<li><a href="{{ url_for('public.feira_subcategoria', categoria=c.slug, sub=sc.slug) }}">{{ sc.titulo }}</a></li>{% endfor %}
+        </ul>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+{% endif %}
+
+<!-- ========================================================
+     3. PRESENTES: cestas e faixas de preço (Guia de Presentes)
+     ======================================================== -->
+{% if faixas_home or cestas_home %}
+<section id="presentes" class="hm-secao hm-presentes" aria-labelledby="presentes-titulo">
+  <div class="wrap">
+    <div class="hm-cab">
+      <div>
+        <h2 id="presentes-titulo" class="hm-h2">Presente feito à mão</h2>
+        <p class="hm-nota">Com preço de quem expõe na praça e encomenda pelo WhatsApp.</p>
+      </div>
+      <a class="hm-todos" href="{{ url_for('public.presentes') }}">Abrir o Guia de Presentes</a>
+    </div>
+    {% if faixas_home %}
+    <ul class="hm-faixas" aria-label="Presentes por faixa de preço">
+      {% for f in faixas_home %}<li><a href="{{ url_for('public.presentes_faixa', faixa=f.id) }}">{{ f.titulo }}<small>{{ f.total }}</small></a></li>{% endfor %}
+    </ul>
+    {% endif %}
+    {% if cestas_home %}
+    <h3 class="hm-sub-titulo">Cestas e kits prontos</h3>
+    <ul class="hm-cestas">
+      {% for p in cestas_home %}
+      <li><a href="{{ p.url }}">
+        <img src="{{ p.img_sm or p.img }}" alt="{{ p.nome }}" loading="lazy" width="480" height="480">
+        <span class="hm-cesta-nome">{{ p.nome }}</span>
+        <span class="hm-cesta-meta">{{ p.expositor }} · <strong>{{ p.preco|moeda_br }}</strong></span>
+      </a></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+<!-- ========================================================
+     4. QUEM EXPÕE NA PRAÇA DO COCO (ARTESÃOS & BARRACAS)
      ======================================================== -->
 <section id="expositores" class="hm-secao secao-expositores-home" aria-labelledby="expositores-titulo">
   <div class="wrap">
@@ -120,42 +199,27 @@
     </ul>
     {% endif %}
 
-    <!-- Os Ofícios da Feira: convida o morador a explorar as bancas por vocação -->
-    <div class="oficios-feira-grid" aria-label="Ofícios e bancas da Feira de Barão">
-      <a class="oficio-card" href="{{ url_for('public.feira', tipo='artesao') }}">
-        <span class="oficio-icone" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 18V9l18-4v13Z"/><circle cx="9" cy="14" r="1.2"/><circle cx="15" cy="11.5" r="1.2"/></svg></span>
-        <div>
-          <h3>Charcutaria, Queijos &amp; Conservas</h3>
-          <p>Defumados artesanais no lenho de árvore frutífera, antepastos, geleias e mel de produtores locais.</p>
-        </div>
-      </a>
-      <a class="oficio-card" href="{{ url_for('public.feira', tipo='artesao') }}">
-        <span class="oficio-icone" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20h14v-9a5 5 0 0 0-4-4.9 7 7 0 0 0-6 0A5 5 0 0 0 5 11Z"/><path d="M9 11l1 3M13 11l1 3"/></svg></span>
-        <div>
-          <h3>Fornada, Confeitaria &amp; Comida de Rua</h3>
-          <p>Pães de fermentação natural, bolos, doces autorais, risotos, acarajé e sabores de domingo na praça.</p>
-        </div>
-      </a>
-      <a class="oficio-card" href="{{ url_for('public.feira', tipo='artesao') }}">
-        <span class="oficio-icone" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6M10 3v3c-3 2-5 5-5 9a5 5 0 0 0 5 5h4a5 5 0 0 0 5-5c0-4-2-7-5-9V3"/></svg></span>
-        <div>
-          <h3>Ateliês, Cerâmica, Crochê &amp; Arte</h3>
-          <p>Joias em cerâmica, amigurumis, encadernação manual, marcenaria criativa, moda autoral e pintura.</p>
-        </div>
-      </a>
-      <a class="oficio-card" href="{{ url_for('public.feira', tipo='artesao') }}">
-        <span class="oficio-icone" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19c0-8 5-13 14-14 0 9-5 14-13 14Z"/><path d="M5 19l8-8"/></svg></span>
-        <div>
-          <h3>Jardim, Saboaria &amp; Aromas</h3>
-          <p>Terrários, kokedamas, suculentas, cosméticos naturais veganos, incensos artesanais e tarô.</p>
-        </div>
-      </a>
+  </div>
+</section>
+
+<!-- ========================================================
+     5. A FEIRA E O BAIRRO: ponte entre a praça e a Memória Viva
+     ======================================================== -->
+{# Fatos dos verbetes da Memória Viva (app/data/memoria/verbetes.yml), sem
+   citar expositor: história de quem expõe só entra com o OK de cada um. #}
+<section id="bairro" class="hm-secao hm-bairro" aria-labelledby="bairro-titulo">
+  <div class="wrap hm-bairro-in">
+    <h2 id="bairro-titulo" class="hm-h2">Uma feira com a história do bairro</h2>
+    <div class="hm-bairro-txt">
+      <p>Barão Geraldo nasceu de um trem. Em 1899 a Funilense começou a rodar de Campinas ao Funil, e a parada ganhou em 1908 o nome do barão Geraldo de Rezende. Em volta da estação, da capela e das vendas, a vila foi crescendo ao redor de um campo de futebol.</p>
+      <p>Era gente de sítio e de colônia, famílias que chegaram da Itália e abriram leiteria e venda. Em 1953 os moradores fizeram de Barão um distrito, e em 1966 chegou a Unicamp, com estudante, professor e artista de todo canto.</p>
+      <p>A Feira junta essas histórias na {{ feira.local }}, todo fim de semana. <a href="#dossie">Ver a história de Barão no mapa</a></p>
     </div>
   </div>
 </section>
 
 <!-- ========================================================
-     3. O GRANDE DOSSIÊ HISTÓRICO NO MAPA DE BARÃO GERALDO
+     6. O GRANDE DOSSIÊ HISTÓRICO NO MAPA DE BARÃO GERALDO
      ======================================================== -->
 <section id="dossie" class="scrolly-container" data-modo="lado" aria-labelledby="dossie-titulo">
   {# Três jeitos de ver o mapa com a história: lado a lado, card flutuante

@@ -1074,3 +1074,54 @@
 .hm-relato{display:flex;flex-direction:column}
 .hm-relato footer{margin-top:auto}
 .hm-relato p:last-of-type{margin-bottom:12px}
+
+/* Home com a Feira no centro (nov/2026): busca, o que tem, presentes, bairro. */
+@media (max-width:899px){.hm-hero-in{grid-template-columns:minmax(0,1fr)}}
+.hm-hero-in>*{min-width:0}
+.hm-busca{margin:4px 0 24px;padding:20px;border-radius:14px;background:var(--tinta);color:var(--papel);max-width:40rem}
+.hm-busca label{display:block;font:400 clamp(1.6rem,6vw,2.25rem)/1.05 var(--font-cartaz);text-transform:uppercase;color:var(--papel-claro)}
+.hm-busca-dica{margin:6px 0 14px;color:var(--papel-escuro);font-size:.9375rem}
+.hm-busca-linha{display:flex;gap:8px}
+.hm-busca input{flex:1;min-width:0;min-height:58px;padding:0 18px;border:0;border-radius:10px;background:var(--papel-claro);color:var(--tinta);font:inherit;font-size:1.0625rem}
+.hm-busca input::placeholder{color:var(--taupe)}
+.hm-busca input:focus-visible{outline:3px solid #f2b705;outline-offset:2px}
+.hm-busca .btn{min-height:58px;flex:none}
+.hm-busca-atalhos{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0;padding:0;list-style:none}
+.hm-busca-atalhos a{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border-radius:22px;border:1.5px solid rgba(246,238,219,.35);color:var(--papel-claro);font-weight:700;font-size:.9375rem;text-decoration:none}
+.hm-busca-atalhos a:hover{background:var(--papel-claro);color:var(--tinta)}
+.hm-acoes{margin-top:16px}
+
+.hm-cats{margin:0;padding:0;list-style:none;border-top:2px solid var(--tinta)}
+.hm-cat{display:grid;gap:6px 24px;padding:20px 0;border-bottom:1px solid var(--linha)}
+.hm-cat h3{margin:0;font:400 clamp(1.6rem,6vw,2.4rem)/1 var(--font-cartaz);text-transform:uppercase}
+.hm-cat h3 a{color:var(--tinta);text-decoration:none}
+.hm-cat h3 a:hover{color:var(--tomate)}
+.hm-cat-n{margin:0;color:var(--taupe);font-weight:700;font-variant-numeric:tabular-nums}
+.hm-subs{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 0;padding:0;list-style:none}
+.hm-subs a,.hm-faixas a{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:22px;background:var(--papel-escuro);color:var(--tinta);font-weight:700;text-decoration:none}
+.hm-subs a:hover,.hm-faixas a:hover{background:var(--tinta);color:var(--papel-claro)}
+.hm-faixas{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
+.hm-faixas small{font-size:.8125rem;font-weight:700;color:var(--taupe);font-variant-numeric:tabular-nums}
+.hm-faixas a:hover small{color:inherit}
+.hm-cestas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0;padding:0;list-style:none}
+.hm-cestas a{display:flex;flex-direction:column;gap:4px;color:var(--tinta);text-decoration:none}
+.hm-cestas img{width:100%;height:auto;aspect-ratio:1;object-fit:cover;border-radius:10px;background:var(--papel-escuro)}
+.hm-cesta-nome{margin-top:4px;font:700 1rem/1.25 var(--font-heading)}
+.hm-cesta-meta{font-size:.875rem;color:var(--taupe)}
+.hm-cesta-meta strong{color:var(--tinta)}
+.hm-cestas a:hover .hm-cesta-nome{color:var(--tomate)}
+
+.hm-bairro{background:var(--papel-escuro)}
+.hm-bairro-in{display:grid;gap:18px}
+.hm-bairro-txt{max-width:62ch;font-size:1.0625rem;line-height:1.65}
+.hm-bairro-txt p+p{margin-top:14px}
+.hm-bairro-txt a{font-weight:700}
+
+@media (min-width:768px){
+  .hm-cat{grid-template-columns:minmax(14rem,1fr) 8rem 2fr;align-items:baseline}
+  .hm-subs{margin:0}
+  .hm-cestas{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+  .hm-bairro-in{grid-template-columns:1fr 1.4fr;gap:48px;align-items:start}
+}
+/* Celular: atalhos e subcategorias numa linha que rola (depois das regras base). */
+@media (max-width:767px){.hm-busca-atalhos,.hm-subs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.hm-busca-atalhos::-webkit-scrollbar,.hm-subs::-webkit-scrollbar{display:none}.hm-busca-atalhos li,.hm-subs li{flex:none}}
