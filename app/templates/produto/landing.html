@@ -24,8 +24,6 @@
 <!-- Leaflet.js para o Scrollytelling de Mapa (CDN cdnjs estável). O CSS entra
      como `print` e vira `all` quando chega; o JS vem com `defer` e o mapa só
      é montado quando o dossiê se aproxima da tela (`IntersectionObserver`). -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" media="print" onload="this.media='all'">
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 
 {# WebSite + Organization + Event da Feira na Praça do Coco #}
 <script type="application/ld+json">
@@ -54,7 +52,6 @@
 <section class="hm-hero">
   <div class="wrap hm-hero-in">
     <div class="hm-hero-txt">
-      <span class="chapeu-dossie">Praça do Coco · Barão Geraldo · Campinas – SP</span>
       <h1 class="hm-h1">Feira de Barão</h1>
       {# A busca é o destaque da home: nenhuma outra feira deixa procurar o
          produto entre todas as barracas. Vai para /feira?q=, a mesma busca de
@@ -70,7 +67,7 @@
         {% set atalhos = (cats_home or [])|map(attribute='subs')|sum(start=[])|sort(attribute='total', reverse=true) %}
         {% if atalhos %}
         <ul class="hm-busca-atalhos" aria-label="Mais procurados na Feira">
-          {% for sc in atalhos[:6] %}<li><a href="{{ url_for('public.feira_subcategoria', categoria=sc.cat, sub=sc.slug) }}">{{ sc.titulo }}</a></li>{% endfor %}
+          {% for sc in atalhos[:4] %}<li><a href="{{ url_for('public.feira_subcategoria', categoria=sc.cat, sub=sc.slug) }}">{{ sc.titulo }}</a></li>{% endfor %}
         </ul>
         {% endif %}
       </form>
@@ -124,7 +121,9 @@
         <p class="hm-cat-n">{{ c.total }} {{ 'expositor' if c.total == 1 else 'expositores' }}</p>
         {% if c.subs %}
         <ul class="hm-subs" aria-label="{{ c.titulo }}">
-          {% for sc in c.subs %}<li><a href="{{ url_for('public.feira_subcategoria', categoria=c.slug, sub=sc.slug) }}">{{ sc.titulo }}</a></li>{% endfor %}
+          {# Cinco no máximo: com 9 a fileira passava de 1.800 px e escondia o resto. #}
+          {% for sc in c.subs[:5] %}<li><a href="{{ url_for('public.feira_subcategoria', categoria=c.slug, sub=sc.slug) }}">{{ sc.titulo }}</a></li>{% endfor %}
+          {% if c.subs|length > 5 %}<li><a class="hm-subs-mais" href="{{ url_for('public.feira_categoria', categoria=c.slug) }}">Ver as {{ c.subs|length }}</a></li>{% endif %}
         </ul>
         {% endif %}
       </li>
@@ -137,7 +136,8 @@
 <!-- ========================================================
      3. PRESENTES: cestas e faixas de preço (Guia de Presentes)
      ======================================================== -->
-{% if faixas_home or cestas_home %}
+{# Uma faixa só não é escolha: a seção aparece com 2+ faixas ou com cestas. #}
+{% if faixas_home|length > 1 or cestas_home %}
 <section id="presentes" class="hm-secao hm-presentes" aria-labelledby="presentes-titulo">
   <div class="wrap">
     <div class="hm-cab">
@@ -147,9 +147,9 @@
       </div>
       <a class="hm-todos" href="{{ url_for('public.presentes') }}">Abrir o Guia de Presentes</a>
     </div>
-    {% if faixas_home %}
+    {% if faixas_home|length > 1 %}
     <ul class="hm-faixas" aria-label="Presentes por faixa de preço">
-      {% for f in faixas_home %}<li><a href="{{ url_for('public.presentes_faixa', faixa=f.id) }}">{{ f.titulo }}<small>{{ f.total }}</small></a></li>{% endfor %}
+      {% for f in faixas_home %}<li><a href="{{ url_for('public.presentes_faixa', faixa=f.id) }}"><span>{{ f.titulo }}</span><small>{{ f.total }} {{ 'presente' if f.total == 1 else 'presentes' }}</small></a></li>{% endfor %}
     </ul>
     {% endif %}
     {% if cestas_home %}
@@ -175,7 +175,6 @@
   <div class="wrap">
     <div class="hm-cab">
       <div>
-        <span class="chapeu-dossie">Feito à Mão em Barão</span>
         <h2 id="expositores-titulo" class="hm-h2">Quem expõe na Praça do Coco</h2>
       </div>
       <a class="hm-todos" href="{{ url_for('public.feira') }}">
@@ -213,183 +212,7 @@
     <div class="hm-bairro-txt">
       <p>Barão Geraldo nasceu de um trem. Em 1899 a Funilense começou a rodar de Campinas ao Funil, e a parada ganhou em 1908 o nome do barão Geraldo de Rezende. Em volta da estação, da capela e das vendas, a vila foi crescendo ao redor de um campo de futebol.</p>
       <p>Era gente de sítio e de colônia, famílias que chegaram da Itália e abriram leiteria e venda. Em 1953 os moradores fizeram de Barão um distrito, e em 1966 chegou a Unicamp, com estudante, professor e artista de todo canto.</p>
-      <p>A Feira junta essas histórias na {{ feira.local }}, todo fim de semana. <a href="#dossie">Ver a história de Barão no mapa</a></p>
-    </div>
-  </div>
-</section>
-
-<!-- ========================================================
-     6. O GRANDE DOSSIÊ HISTÓRICO NO MAPA DE BARÃO GERALDO
-     ======================================================== -->
-<section id="dossie" class="scrolly-container" data-modo="lado" aria-labelledby="dossie-titulo">
-  {# Três jeitos de ver o mapa com a história: lado a lado, card flutuante
-     ou mapa + lista. O padrão sai do aparelho (JS); a escolha da pessoa fica
-     guardada no navegador. Sem JS, vale o "lado a lado" do HTML. #}
-  <div class="dossie-barra wrap">
-    <div>
-      <span class="chapeu-dossie" style="margin-bottom:4px;">Território &amp; Raízes</span>
-      <h2 id="dossie-titulo" class="dossie-titulo">A história de Barão Geraldo no mapa</h2>
-    </div>
-    <div class="dossie-modos" role="group" aria-label="Como ver o mapa">
-      <button type="button" data-modo="lado" aria-pressed="true">Lado a lado</button>
-      <button type="button" data-modo="flutuante" aria-pressed="false">Flutuante</button>
-      <button type="button" data-modo="lista" aria-pressed="false">Mapa + lista</button>
-    </div>
-  </div>
-
-  <div id="mapa-scrolly" class="scrolly-map-sticky" role="region" aria-label="Mapa histórico de Barão Geraldo"></div>
-
-  <div class="wrap scrolly-content-overlay">
-    {# Os cartões vêm de app/data/memoria/verbetes.yml (verbetes com
-       `capitulo`). Texto, foto e fonte moram lá; aqui é só a vitrine. #}
-    {% set romanos = ['I','II','III','IV','V','VI','VII','VIII'] %}
-    {% for v in memoria_capitulos %}
-    {% set foto = mem.foto_url(v.foto, 400) %}
-    <div class="story-step"
-         {% if v.lugar %}data-lat="{{ v.lugar.lat }}" data-lng="{{ v.lugar.lng }}" data-zoom="{{ 15 if v.lugar.aproximado else 16 }}"{% endif %}>
-      <article class="story-chapter-card">
-        <div class="card-topo">
-          {% if foto %}<img class="card-thumb" src="{{ url_for('static', filename=foto) }}" width="400" height="300" loading="lazy" decoding="async" alt="{{ v.foto.legenda or v.titulo }}">{% endif %}
-          <div>
-            <span class="chapter-number">Cap. {{ romanos[loop.index0] }} · {{ v.periodo }}</span>
-            <h3 class="chapter-title">{{ v.titulo }}</h3>
-          </div>
-        </div>
-        <p class="card-resumo">{{ v.resumo }}</p>
-        {% if v.lugar %}
-        <div class="card-acoes">
-          <a class="btn btn-fantasma" href="{{ mem.link_mapa(v.lugar) }}" target="_blank" rel="noopener"><i class="fas fa-map" aria-hidden="true"></i> Mapa</a>
-          <a class="btn btn-tomate" href="{{ mem.link_street_view(v.lugar) }}" target="_blank" rel="noopener"><i class="fas fa-street-view" aria-hidden="true"></i> Street View</a>
-        </div>
-        {% endif %}
-        <details class="card-mais">
-          <summary>Ler mais</summary>
-          {% for p in (v.texto or [])[:2] %}<p>{{ p }}</p>{% endfor %}
-          {% if v.lugar %}<p class="card-meta"><i class="fas fa-map-marker-alt" aria-hidden="true"></i> {{ v.lugar.nome }}{% if v.lugar.aproximado %} (local aproximado){% endif %}</p>
-          {% set embed = mem.embed_street_view(v.lugar) %}
-          {% if embed %}<iframe src="{{ embed }}" title="Street View de {{ v.lugar.nome }}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" class="card-embed" allowfullscreen></iframe>{% endif %}{% endif %}
-          {% if foto and v.foto.credito %}<p class="card-meta">Foto: {{ v.foto.credito }}</p>{% endif %}
-          <p class="card-meta">Fonte: {% for f in v.fontes %}<a href="{{ f.url }}" rel="noopener">{{ f.titulo }}{% if f.autor %} ({{ f.autor }}){% endif %}</a>{{ '; ' if not loop.last }}{% endfor %}</p>
-          <a class="card-link" href="{{ url_for('public.memoria_verbete', slug=v.slug) }}">Ler o verbete completo</a>
-        </details>
-      </article>
-    </div>
-    {% endfor %}
-
-    <div class="story-step story-fim">
-      <article class="story-chapter-card">
-        <span class="chapter-number">E a história continua</span>
-        <h3 class="chapter-title">A memória que falta é a sua</h3>
-        <p class="card-resumo">Lugares, famílias e causos, cada um no mapa com o Street View de hoje. O que ainda não está lá pode estar na sua gaveta.</p>
-        <div class="card-acoes">
-          <a class="btn btn-tomate" href="{{ url_for('public.memoria') }}">Ver toda a Memória</a>
-          {% if zap_memoria %}<a class="btn btn-zap" href="{{ zap_memoria }}" target="_blank" rel="noopener"><i class="fab fa-whatsapp" aria-hidden="true"></i> Mandar memória</a>{% endif %}
-        </div>
-      </article>
-    </div>
-  </div>
-</section>
-
-<!-- BARRA DE MEMÓRIA ABERTA & COLABORAÇÃO -->
-<div class="barra-memoria-aberta">
-  <div class="wrap barra-memoria-inner">
-    <div class="barra-memoria-texto">
-      <i class="fas fa-book-open"></i>
-      <span>{% if zap_memoria %}<a href="{{ memoria_provocacoes[0][1] }}" target="_blank" rel="noopener" style="color:inherit;"><strong>{{ memoria_provocacoes[0][0] }}</strong></a> <a href="{{ memoria_provocacoes[1][1] }}" target="_blank" rel="noopener" style="color:inherit;">{{ memoria_provocacoes[1][0] }}</a> Manda pra gente: sai com o seu nome.{% else %}<strong>Dossiê Aberto à Comunidade:</strong> Você tem um causo, foto antiga ou correção histórica de Barão Geraldo?{% endif %}</span>
-    </div>
-    <div style="display:flex; gap:10px;">
-      <button class="btn btn-fantasma" style="color:#f6eedb !important; border-color:rgba(255,255,255,0.3); padding:6px 14px; font-size:0.8rem;" onclick="abrirModalColaboracao('correcao')">
-        <i class="fas fa-pen"></i> Sugerir Correção
-      </button>
-      <button class="btn btn-tomate" style="padding:6px 14px; font-size:0.8rem;" onclick="abrirModalColaboracao('historia')">
-        <i class="fas fa-plus-circle"></i> Enviar Meu Relato
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- ========================================================
-     4. MURAL DA MEMÓRIA VIVA (HISTÓRIA ORAL DOS MORADORES)
-     ======================================================== -->
-<section id="mural" class="secao-mural hm-secao">
-  <div class="wrap">
-    <div class="hm-cab-centro">
-      <span class="chapeu-dossie">Vozes do Bairro</span>
-      <h2 class="hm-h2">Mural da Memória Viva</h2>
-      <p>Toda memória publicada aqui sai com o nome de quem mandou. A história de Barão Geraldo está nos álbuns de família, nas rodas de conversa e na lembrança de quem viveu cada época.</p>
-    </div>
-    {% if memoria_mural %}
-    <div class="hm-mural">
-      {% for m in memoria_mural %}
-      <blockquote class="hm-relato">
-        <p>“{{ m.texto }}”</p>
-        <footer><strong>{{ m.nome }}</strong>{% if m.quando %} · {{ m.quando }}{% endif %}{% if m.fonte_url %}<br>Fonte: <a href="{{ m.fonte_url }}" rel="noopener">{{ mem.fonte_rotulo(m.fonte_url) }}</a>{% endif %}</footer>
-      </blockquote>
-      {% endfor %}
-    </div>
-    {% endif %}
-    {% if zap_memoria %}
-    <div class="hm-provoca">
-      {% for chamada, link in memoria_provocacoes %}
-      <a href="{{ link }}" target="_blank" rel="noopener">{{ chamada }} <i class="fab fa-whatsapp" aria-hidden="true"></i></a>
-      {% endfor %}
-    </div>
-    {% endif %}
-    <p class="hm-mais"><a href="{{ url_for('public.memoria') }}">Abrir o acervo completo da Memória Viva (24 verbetes documentados)</a></p>
-  </div>
-</section>
-
-<!-- ========================================================
-     5. LINHA DO TEMPO HISTÓRICA DE BARÃO GERALDO
-     ======================================================== -->
-<section id="linha-do-tempo" class="full-bleed-section">
-  <div class="wrap">
-    <div style="text-align:center; max-width:800px; margin:0 auto;">
-      <span style="font-size:0.82rem; font-weight:800; text-transform:uppercase; letter-spacing:0.16em; color:var(--ambar);">Cronologia Documental</span>
-      <h2 style="font-family:var(--font-cartaz); font-size:clamp(2.4rem, 4.5vw, 3.6rem); text-transform:uppercase; margin-top:6px; color:#fff;">
-        A Linha do Tempo de Barão Geraldo
-      </h2>
-      <p style="color:#d1c7b7; font-size:1.05rem; margin-top:8px;">
-        Mais de um século de história moldando o distrito mais acolhedor, criativo e boêmio de Campinas.
-      </p>
-    </div>
-
-    <div class="timeline-grid">
-      <div class="timeline-card">
-        <div class="timeline-year">1870–1907</div>
-        <h3 style="color:#fff; font-size:1rem; margin-bottom:6px;">Fazenda Santa Genebra</h3>
-        <p class="timeline-desc">Geraldo Ribeiro de Sousa Rezende (o Barão de Rezende) consolida a fazenda modelo e a preservação da mata nativa de Santa Genebra.</p>
-      </div>
-
-      <div class="timeline-card">
-        <div class="timeline-year">1899</div>
-        <h3 style="color:#fff; font-size:1rem; margin-bottom:6px;">Estrada de Ferro Funilense</h3>
-        <p class="timeline-desc">Inauguração do ramal ferroviário ligando Campinas a Cosmópolis, cortando o vilarejo com a Estação Barão Geraldo e trazendo famílias imigrantes.</p>
-      </div>
-
-      <div class="timeline-card">
-        <div class="timeline-year">1953</div>
-        <h3 style="color:#fff; font-size:1rem; margin-bottom:6px;">Criação do Distrito</h3>
-        <p class="timeline-desc">A Lei Estadual nº 2.456 de 30 de dezembro de 1953 emancipa oficialmente o Distrito de Paz de Barão Geraldo.</p>
-      </div>
-
-      <div class="timeline-card">
-        <div class="timeline-year">1966</div>
-        <h3 style="color:#fff; font-size:1rem; margin-bottom:6px;">Fundação da Unicamp</h3>
-        <p class="timeline-desc">Zeferino Vaz instala a universidade, atraindo pesquisadores e artistas do mundo inteiro e forjando a cultura das repúblicas e dos botecos.</p>
-      </div>
-
-      <div class="timeline-card">
-        <div class="timeline-year">1999</div>
-        <h3 style="color:#fff; font-size:1rem; margin-bottom:6px;">A Kombi da Praça do Coco</h3>
-        <p class="timeline-desc">Seu Valdir dos Santos estaciona sua Kombi de água de coco na Praça Irmã Carmela Stecchi, transformando a praça em ponto de encontro.</p>
-      </div>
-
-      <div class="timeline-card">
-        <div class="timeline-year">2002</div>
-        <h3 style="color:#fff; font-size:1rem; margin-bottom:6px;">Feira de Arte e Cultura</h3>
-        <p class="timeline-desc">Artesãos, cozinheiros e músicos consolidam a Feira da Praça do Coco aos fins de semana, unindo gastronomia, arte manual e música na praça.</p>
-      </div>
+      <p>A Feira junta essas histórias na {{ feira.local }}, todo fim de semana. <a href="{{ url_for('public.memoria') }}">Ver a história de Barão no mapa, no mural e na linha do tempo</a></p>
     </div>
   </div>
 </section>
@@ -448,7 +271,6 @@
   <div id="tecnologia"></div>
   <div class="wrap">
     <div class="participar-cab">
-      <span class="chapeu-dossie" style="color:var(--ambar); border-color:var(--ambar);">Rede Comunitária de Barão Geraldo</span>
       <h2 id="participar-titulo" class="participar-h2">
         Expõe na Praça do Coco ou tem um bar em Barão?
       </h2>
@@ -519,9 +341,9 @@
       <a class="btn btn-zap" href="{{ zap_url }}" target="_blank" rel="noopener">
         <i class="fab fa-whatsapp"></i> Chamar o Daniel no WhatsApp
       </a>
-      <button class="btn btn-colab" onclick="abrirModalColaboracao('historia')">
+      <a class="btn btn-colab" href="{{ url_for('public.memoria') }}#mural">
         <i class="fas fa-feather"></i> Contar uma história do bairro
-      </button>
+      </a>
     </div>
   </div>
 </section>
@@ -534,60 +356,6 @@
 
 </main>
 
-<!-- ========================================================
-     MODAL INTERATIVO: MEMÓRIA ABERTA & COLABORAÇÃO
-     ======================================================== -->
-<div id="modal-colaboracao" class="modal-backdrop">
-  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
-    <button type="button" class="modal-close" onclick="fecharModalColaboracao()" aria-label="Fechar">&times;</button>
-    <div style="text-align:center; margin-bottom:20px;">
-      <span class="chapeu-dossie">Memória Coletiva</span>
-      <h3 id="modal-titulo" style="font-family:var(--font-cartaz); font-size:2rem; text-transform:uppercase; margin-top:4px;">
-        Conte Sua História de Barão Geraldo
-      </h3>
-      <p id="modal-subtitulo" style="color:var(--taupe); font-size:0.92rem;">
-        Seu relato fará parte do acervo documental permanente da Feira de Barão.
-      </p>
-    </div>
-
-    <form id="form-colaboracao" onsubmit="enviarColaboracao(event)">
-      <div class="form-group">
-        <label for="colab-nome">Seu Nome / Como quer ser identificado:</label>
-        <input type="text" id="colab-nome" class="form-control" placeholder="Ex: Maria Antonia / Moradora desde 1982" required>
-      </div>
-
-      <div class="form-group">
-        <label for="colab-tipo">Tipo de Contribuição:</label>
-        <select id="colab-tipo" class="form-control">
-          <option value="foto">Enviar Foto Antiga de Família ou do Bairro</option>
-          <option value="video">Enviar Vídeo ou Depoimento em Áudio</option>
-          <option value="historia">Causo / Memória Afetiva de Barão Geraldo</option>
-          <option value="correcao">Correção Histórica / Documento Genealógico</option>
-          <option value="bar">História de um Bar, Banca ou Estabelecimento Tradicional</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="colab-texto">Seu Relato / Contexto da Foto ou Vídeo:</label>
-        <textarea id="colab-texto" class="form-control" rows="4" placeholder="Conte os detalhes: quem está na foto/vídeo, ano aproximado, onde foi tirada ou a história que você viveu..." required></textarea>
-      </div>
-
-      <div style="background:rgba(179,50,21,0.06); border:1px dashed var(--tomate); border-radius:10px; padding:12px 14px; margin-bottom:18px;">
-        <p style="font-size:0.84rem; color:var(--tinta); margin:0;">
-          <i class="fas fa-paperclip text-danger"></i> <strong>Envio de Arquivos:</strong> Ao clicar no botão abaixo, você será direcionado ao WhatsApp do Daniel para enviar suas fotos, vídeos ou áudios diretamente em alta resolução.
-        </p>
-      </div>
-
-      <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:10px;">
-        <button type="button" class="btn btn-fantasma" onclick="fecharModalColaboracao()">Cancelar</button>
-        <button type="submit" class="btn btn-tomate">
-          <i class="fab fa-whatsapp"></i> Avançar e Enviar Arquivos
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
-
 <footer class="site-footer">
   <div class="wrap">
     <p style="font-weight:700; color:var(--tinta); font-family:var(--font-cartaz); font-size:1.2rem; margin-bottom:6px;">
@@ -596,10 +364,7 @@
     <p>Distrito de Barão Geraldo, Campinas – SP · Construído para celebrar a memória, os artesãos e os botecos de Barão Geraldo.</p>
     <nav class="rodape-nav" aria-label="Todas as seções">
       <a href="{{ url_for('public.feira') }}">Expositores e Mapa da Feira</a>
-      <a href="#dossie">O Mapa Histórico</a>
-      <a href="#mural">Mural da Memória</a>
-      <a href="#linha-do-tempo">Linha do Tempo</a>
-      <a href="{{ url_for('public.memoria') }}">Acervo Memória Viva</a>
+      <a href="{{ url_for('public.memoria') }}">Memória Viva: mapa, mural e linha do tempo</a>
       <a href="#bares">Bares</a>
       <a href="#participar">Participar da Rede</a>
       <a href="{{ url_for('public.para_bares') }}">Para Bares em Campinas</a>
@@ -611,200 +376,6 @@
 
 <div class="lona-topo"></div>
 
-<!-- ========================================================
-     SCRIPTS DE MAP SCROLLYTELLING & MODAL DE MEMÓRIA
-     ======================================================== -->
-<script>
-  // Inicialização do Leaflet Map
-  let map = null;
-  let allMarkers = [];
-
-  const PONTOS_HISTORICOS = {{ memoria_pontos|tojson }};
-
-  function initMap() {
-    try {
-      if (typeof L === 'undefined') {
-        // Leaflet vem de CDN com defer: se ainda não chegou, tenta de novo quando a página terminar de carregar.
-        if (document.readyState !== 'complete') window.addEventListener('load', initMap, { once: true });
-        return;
-      }
-      const mapEl = document.getElementById('mapa-scrolly');
-      if (!mapEl) return;
-
-      map = L.map('mapa-scrolly', {
-        center: [-22.8220, -47.0980],
-        zoom: 14,
-        scrollWheelZoom: false,
-        zoomControl: true
-      });
-
-      // Tiles do OpenStreetMap
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        maxZoom: 18
-      }).addTo(map);
-
-      // Ícone personalizado em Tomate
-      const iconeTomate = L.divIcon({
-        className: 'custom-pin',
-        html: '<div aria-hidden="true" style="background:#b33215; color:#fff; width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2.5px solid #fff; box-shadow:0 4px 12px rgba(0,0,0,0.4);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg></div>',
-        iconSize: [44, 44],
-        iconAnchor: [22, 44]
-      });
-
-      PONTOS_HISTORICOS.forEach(p => {
-        const m = L.marker([p.lat, p.lng], { icon: iconeTomate, title: p.nome, alt: p.nome }).addTo(map);
-        const caixa = document.createElement('div');
-        const nome = document.createElement('strong'); nome.textContent = p.nome;
-        const desc = document.createElement('small'); desc.textContent = p.desc || '';
-        caixa.append(nome, document.createElement('br'), desc);
-        m.bindPopup(caixa);
-        allMarkers.push(m);
-      });
-    } catch(err) {
-      console.error('Aviso inicialização mapa:', err);
-    }
-  }
-
-  // IntersectionObserver para Scrollytelling dos Capítulos
-  function voarPara(step) {
-    const lat = parseFloat(step.dataset.lat), lng = parseFloat(step.dataset.lng);
-    if (lat && lng && map) map.flyTo([lat, lng], parseInt(step.dataset.zoom), {duration: 1.6, easeLinearity: 0.25});
-  }
-
-  function setupScrollytelling() {
-    const steps = document.querySelectorAll('.story-step');
-    if (!steps.length || !map) return;
-
-    // No modo lista não há rolagem sincronizada: o card voa o mapa no clique.
-    steps.forEach(s => s.addEventListener('click', e => {
-      if (document.getElementById('dossie').dataset.modo !== 'lista' || e.target.closest('a, summary')) return;
-      voarPara(s);
-      document.getElementById('mapa-scrolly').scrollIntoView({behavior: 'smooth', block: 'center'});
-    }));
-
-    const observer = new IntersectionObserver((entries) => {
-      if (document.getElementById('dossie').dataset.modo === 'lista') return;
-      entries.forEach(entry => {
-        entry.target.classList.toggle('ativo', entry.isIntersecting);
-        if (entry.isIntersecting) {
-          const lat = parseFloat(entry.target.dataset.lat);
-          const lng = parseFloat(entry.target.dataset.lng);
-          const zoom = parseInt(entry.target.dataset.zoom);
-
-          if (lat && lng && map) {
-            map.flyTo([lat, lng], zoom, {
-              duration: 1.6,
-              easeLinearity: 0.25
-            });
-          }
-        }
-      });
-    }, {
-      threshold: 0.45
-    });
-
-    steps.forEach(s => observer.observe(s));
-  }
-
-  // Modo do mapa da história: o padrão vem do aparelho (lado a lado no
-  // computador, flutuante no celular); a escolha da pessoa fica guardada.
-  (function () {
-    const dossie = document.getElementById('dossie');
-    if (!dossie) return;
-    let salvo = null;
-    try { salvo = localStorage.getItem('feira-modo-mapa'); } catch (e) {}
-    const padrao = window.matchMedia('(max-width: 899px)').matches ? 'flutuante' : 'lado';
-    function aplicar(modo, guardar) {
-      dossie.dataset.modo = modo;
-      dossie.querySelectorAll('.dossie-modos button').forEach(b =>
-        b.setAttribute('aria-pressed', b.dataset.modo === modo ? 'true' : 'false'));
-      if (guardar) { try { localStorage.setItem('feira-modo-mapa', modo); } catch (e) {} }
-      if (map) setTimeout(() => map.invalidateSize(), 60);
-    }
-    aplicar(['lado', 'flutuante', 'lista'].includes(salvo) ? salvo : padrao, false);
-    dossie.querySelectorAll('.dossie-modos button').forEach(b =>
-      b.addEventListener('click', () => aplicar(b.dataset.modo, true)));
-  })();
-
-  // Modal de Colaboração. Guarda quem abriu para devolver o foco ao fechar.
-  let focoAntesDoModal = null;
-
-  function abrirModalColaboracao(tipo = 'historia') {
-    const modal = document.getElementById('modal-colaboracao');
-    const selectTipo = document.getElementById('colab-tipo');
-    const titulo = document.getElementById('modal-titulo');
-    const subtitulo = document.getElementById('modal-subtitulo');
-
-    if (tipo === 'correcao') {
-      selectTipo.value = 'correcao';
-      titulo.innerText = 'Sugerir Correção ou Enviar Documento';
-      subtitulo.innerText = 'Ajude-nos a manter o rigor histórico de Barão Geraldo.';
-    } else if (tipo === 'foto_video' || tipo === 'foto') {
-      selectTipo.value = 'foto';
-      titulo.innerText = 'Enviar Foto ou Vídeo Histórico';
-      subtitulo.innerText = 'Compartilhe fotos de família, arquivos e vídeos para o acervo de Barão.';
-    } else {
-      selectTipo.value = 'historia';
-      titulo.innerText = 'Conte Sua História de Barão Geraldo';
-      subtitulo.innerText = 'Seu relato fará parte do acervo documental permanente da Feira de Barão.';
-    }
-
-    focoAntesDoModal = document.activeElement;
-    modal.classList.add('ativo');
-    document.getElementById('colab-nome').focus();
-  }
-
-  function fecharModalColaboracao() {
-    const modal = document.getElementById('modal-colaboracao');
-    if (!modal.classList.contains('ativo')) return;
-    modal.classList.remove('ativo');
-    if (focoAntesDoModal) focoAntesDoModal.focus();
-  }
-
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { fecharModalColaboracao(); fecharMenuMobile(); }
-  });
-
-  function enviarColaboracao(e) {
-    e.preventDefault();
-    const nome = document.getElementById('colab-nome').value;
-    const tipo = document.getElementById('colab-tipo').value;
-    const texto = document.getElementById('colab-texto').value;
-
-    const rotulos = {
-      'foto': 'Foto Antiga / Registro Visual',
-      'video': 'Vídeo / Depoimento em Áudio',
-      'historia': 'Causo / Memória Afetiva',
-      'correcao': 'Correção Histórica / Genealógica',
-      'bar': 'História de Bar / Banca Tradicional'
-    };
-
-    const tipoFormatado = rotulos[tipo] || tipo;
-    const msgZap = encodeURIComponent(`Olá Daniel! Gostaria de colaborar com o Dossiê e o Mural de Barão Geraldo.\n\n*Nome:* ${nome}\n*Contribuição:* ${tipoFormatado}\n*Relato / Contexto:* ${texto}\n\n_(Estou anexando as fotos/vídeos logo abaixo nesta conversa)_\n\nAutorizo publicar no feiradebarao.com.br com o nome acima.`);
-    const destino = {{ (zap_url if zap_url.startswith('https://wa.me/') else '')|tojson }};
-    if (destino) { window.open(destino.split('?')[0] + '?text=' + msgZap, '_blank'); }
-    fecharModalColaboracao();
-  }
-
-  // O Leaflet chega com `defer` (já está pronto no DOMContentLoaded), mas o
-  // mapa só é montado quando o dossiê está a uma tela de distância.
-  window.addEventListener('DOMContentLoaded', () => {
-    const dossie = document.getElementById('dossie');
-    if (!dossie || !('IntersectionObserver' in window)) {
-      initMap();
-      setupScrollytelling();
-      return;
-    }
-    const vigia = new IntersectionObserver((entries) => {
-      if (!entries.some(e => e.isIntersecting)) return;
-      vigia.disconnect();
-      initMap();
-      setupScrollytelling();
-    }, { rootMargin: '100% 0px' });
-    vigia.observe(dossie);
-  });
-</script>
 
 <script defer src="/_vercel/speed-insights/script.js"></script>
 <script defer src="/_vercel/insights/script.js"></script>

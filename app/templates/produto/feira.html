@@ -198,7 +198,8 @@
       grupos.forEach(function (g) {
         var n = g.itens.length;
         if (n < 2) { g.itens[0].exib = [g.lat, g.lng]; return; }
-        var r = Math.max(3.5, 3.4 / Math.sin(Math.PI / n));
+        // ~14 m entre vizinhos: no zoom 18 (~0,55 m/px) é o pino de 24 px mais folga.
+        var r = Math.max(4, 14 / (2 * Math.sin(Math.PI / n)));
         g.itens.forEach(function (p, i) {
           var a = 2 * Math.PI * i / n;
           p.exib = [g.lat + r * Math.sin(a) / 110540,
@@ -242,7 +243,7 @@
           marcar(p.slug);
           if (cartao_atual) { cartao_atual.scrollIntoView({block: 'nearest', behavior: calmo ? 'auto' : 'smooth'}); }
         });
-        marcadores[p.slug] = m; limites.push([p.lat, p.lng]);
+        marcadores[p.slug] = m; limites.push(p.exib || [p.lat, p.lng]);
       });
       if (limites.length > 1) { mapa.fitBounds(limites, {padding: [40, 40], maxZoom: 18}); }
       else if (limites.length === 1) { mapa.setView(limites[0], 18); }

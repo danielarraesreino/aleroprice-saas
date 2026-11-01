@@ -1118,10 +1118,18 @@
 .hm-bairro-txt a{font-weight:700}
 
 @media (min-width:768px){
-  .hm-cat{grid-template-columns:minmax(14rem,1fr) 8rem 2fr;align-items:baseline}
-  .hm-subs{margin:0}
   .hm-cestas{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
   .hm-bairro-in{grid-template-columns:1fr 1.4fr;gap:48px;align-items:start}
 }
-/* Celular: atalhos e subcategorias numa linha que rola (depois das regras base). */
-@media (max-width:767px){.hm-busca-atalhos,.hm-subs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.hm-busca-atalhos::-webkit-scrollbar,.hm-subs::-webkit-scrollbar{display:none}.hm-busca-atalhos li,.hm-subs li{flex:none}}
+/* Atalhos e subcategorias quebram linha em toda largura: a fileira que rolava
+   no celular cortava 5 de 6 atalhos sem sinal de que havia mais. A contagem
+   (4 atalhos, 5 subs + "Ver as N") é que mantém a altura sob controle. */
+.hm-subs .hm-subs-mais{background:transparent;border:1.5px solid var(--linha);color:var(--tomate)}
+.hm-faixas small{margin-left:2px;padding-left:8px;border-left:1px solid currentColor}
+
+/* Três colunas só quando a de subcategorias tem espaço: em 768 ela ficava
+   com 317 px e a fileira chegava a 460 px de altura. */
+@media (min-width:1024px){
+  .hm-cat{grid-template-columns:minmax(14rem,1fr) 8rem 2fr;align-items:baseline}
+  .hm-subs{margin:0}
+}

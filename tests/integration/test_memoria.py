@@ -32,11 +32,14 @@ def test_verbete_com_lugar_tem_mapa_e_street_view(client, session):
     assert 'map_action=pano' in html and 'maps/search/?api=1' in html
 
 
-def test_home_monta_os_cartoes_e_pinos_dos_verbetes(client, session):
-    html = client.get('/').get_data(as_text=True)
+def test_home_leva_para_a_memoria_e_os_capitulos_ficam_la(client, session):
+    """A Memória saiu da home (dossiê, mural e linha do tempo somavam ~9.800 px
+    no celular e o mapa fixo cobria a tela); a home só aponta para /memoria."""
+    home = client.get('/').get_data(as_text=True)
+    assert 'id="dossie"' not in home and 'href="/memoria"' in home
+    memoria = client.get('/memoria').get_data(as_text=True)
     for v in mem.capitulos():
-        assert v['titulo'] in html
-    assert 'map_action=pano' in html and '/memoria/' in html
+        assert v['titulo'] in memoria
 
 
 def test_whatsapp_do_gustavo_nao_aparece_mais(client, session):

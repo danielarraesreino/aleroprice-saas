@@ -401,7 +401,10 @@ def _vitrine_de_expositores(limite=9):
     except Exception:
         db.session.rollback()
         return {'exp_vitrine': [], 'exp_total': 0, 'exp_hoje': 0}
-    return {'exp_vitrine': lista[:limite], 'exp_total': len(lista),
+    # Com foto primeiro (quem está hoje ainda abre a fila): na home o quadrado
+    # vazio ao lado de vizinhos com foto faz a barraca parecer abandonada.
+    vitrine = sorted(lista, key=lambda e: (not e['hoje'], not e.get('foto')))
+    return {'exp_vitrine': vitrine[:limite], 'exp_total': len(lista),
             'exp_hoje': sum(1 for e in lista if e['hoje'])}
 
 

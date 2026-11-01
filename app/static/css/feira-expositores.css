@@ -8,15 +8,16 @@
 .fp-hoje.tem{background:var(--hoje);color:#2a1d00}
 
 /* barra de busca e filtros, fixa ao rolar */
-.fp-barra{position:sticky;top:var(--topo-h);z-index:20;margin:20px -18px 0;padding:12px 18px;background:var(--papel)}
+/* No celular a barra não gruda: busca + filtros (133 px) mais o topo comiam um terço da tela. */
+.fp-barra{margin:20px -18px 0;padding:12px 18px;background:var(--papel)}
 .fp-busca{display:flex;gap:8px}
 .fp-busca label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .fp-busca input[type=search]{flex:1 1 auto;min-width:0;min-height:48px;padding:0 14px;border:0;border-radius:8px;background:var(--papel-escuro);color:var(--tinta);font:inherit}
 .fp-busca input[type=search]::placeholder{color:var(--taupe)}
 .fp-busca button{flex:none;min-height:48px;padding:0 20px;border:0;border-radius:8px;background:var(--tomate);color:#fff;font:inherit;font-weight:700;cursor:pointer}
 .fp-busca button:hover{background:var(--tinta)}
-.fp-filtros{display:flex;gap:8px;margin:10px 0 0;padding:0;list-style:none;overflow-x:auto;scrollbar-width:none}
-.fp-filtros::-webkit-scrollbar{display:none}
+/* Filtros quebram linha: rolando, as categorias sumiam além da borda sem aviso. */
+.fp-filtros{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0;padding:0;list-style:none}
 .fp-filtros a{display:inline-flex;align-items:center;flex:none;white-space:nowrap;min-height:44px;padding:0 16px;border-radius:22px;background:var(--papel-escuro);color:var(--tinta);font-weight:700;text-decoration:none}
 .fp-filtros a:hover{background:var(--papel-claro)}
 .fp-filtros a[aria-current=true]{background:var(--tinta);color:var(--papel-claro)}
@@ -80,9 +81,14 @@
 }
 @media (min-width:960px){
   .fp-corpo{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:28px;align-items:start}
-  .fp-mapa{order:0;position:sticky;top:calc(var(--topo-h) + 130px)}
-  #mapa-feira{height:calc(100vh - var(--topo-h) - 190px);max-height:680px;min-height:420px}
+  .fp-barra{position:sticky;top:var(--topo-h);z-index:20}
+  /* O painel preso (título + mapa + legenda) cabe inteiro na tela: antes o
+     mapa sozinho tinha 100vh - 190px e a legenda ficava abaixo da dobra. */
+  .fp-mapa{order:0;position:sticky;top:calc(var(--topo-h) + 140px)}
+  #mapa-feira{height:calc(100vh - var(--topo-h) - 330px);max-height:600px;min-height:340px}
   .fp-lista h2{margin-top:0}
 }
 @media (prefers-reduced-motion:reduce){.fp *{transition:none!important}}
 .memoria:has(.fp){max-width:1180px}
+/* `.memoria ul` recua toda lista em 1,3em; chips e grade de produto vão até a borda. */
+.memoria .fp-filtros,.memoria .fp-prods,.memoria .gp-faixas{padding-left:0}
