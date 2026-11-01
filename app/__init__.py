@@ -142,6 +142,19 @@ def create_app(config_name='default'):
 
     app.jinja_env.globals['evento_feira'] = evento_feira
 
+    # Versão do deploy em todo /static/: o CSS sai com max-age de 1 dia e sem
+    # isso quem abriu o site na véspera via a home nova com o CSS velho
+    # (busca crua, lista com marcador). Cada deploy vira um endereço novo.
+    versao_estatico = (os.environ.get('VERCEL_GIT_COMMIT_SHA') or '')[:8] or 'dev'
+
+    @app.url_defaults
+    def _versao_no_estatico(endpoint, values):
+        # Só CSS/JS: imagem com endereço fixo, para o sitemap de imagens e o
+        # catálogo da Meta não mudarem a cada deploy.
+        if (endpoint == 'static' and 'v' not in values
+                and str(values.get('filename', '')).endswith(('.css', '.js'))):
+            values['v'] = versao_estatico
+
     @app.context_processor
     def recursos_do_plano():
         """`pode('gestao')` em qualquer template, para o tenant de quem está logado.

@@ -46,3 +46,10 @@ def test_categoria_por_comeco_de_palavra():
     assert 'joias' not in cats(e('Biscoito de canela'))           # "anel" dentro de canela
     assert 'arte' in cats(e('Amor em Artes'))
     assert 'plantas' in cats(e('Neto Schmidt Terrários'))
+
+
+def test_css_e_js_saem_com_versao_e_imagem_nao(app):
+    with app.test_request_context():
+        from flask import url_for
+        assert '?v=' in url_for('static', filename='css/feira.css')
+        assert '?v=' not in url_for('static', filename='img/og-feira.jpg')
