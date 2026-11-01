@@ -280,6 +280,7 @@ def create_app(config_name='default'):
         'public.landing', 'public.landing_slug', 'public.landing_expositor',
         'public.landing_tenant',
         'public.reservar', 'public.robots', 'public.sitemap',
+        'public.indexnow_chave',  # IndexNow confere a chave no próprio host do bar
         # O cardápio é o QR colado na mesa: tem que abrir no endereço do bar.
         # Fora daqui ele levava 302 pro domínio do produto — o cliente sentado
         # via a barra do navegador trocar de bardavila.bar pra feiradebarao, e
