@@ -131,3 +131,16 @@ def test_lista_da_feira_no_json_ld_tem_url_absoluta_e_foto(client, session):
     assert itens[0]['name'] == 'Vaso grande'
     assert itens[0]['url'].startswith('http://feiradebarao.com.br/')
     assert itens[0]['image'].startswith('http://feiradebarao.com.br/') and 'img/a.jpg' in itens[0]['image']
+
+
+def test_previa_nao_manda_foto_ilustrativa_na_lista_da_feira(client, session):
+    import json
+    import re
+    r = _artesao(session, 'barro-bom', ('Vaso grande', 'Cerâmica', 'img/a.jpg'))
+    r.tipo_conta = 'demo'
+    session.commit()
+
+    html = _get(client, '/feira/artesanato/ceramica').get_data(as_text=True)
+    bloco = re.search(r'<script type="application/ld\+json">(.*?)</script>', html, re.S).group(1)
+    item = json.loads(bloco)['mainEntity']['itemListElement'][0]
+    assert item['name'] == 'Vaso grande' and 'image' not in item

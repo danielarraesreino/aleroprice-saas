@@ -149,11 +149,12 @@
  "about":{"@type":"Place","name":{{ feira.local|tojson }},"address":{"@type":"PostalAddress","addressLocality":"Campinas","addressRegion":"SP","addressCountry":"BR"}},
 {#- URL e foto absolutas: o Google ignora `url` relativa no ItemList, e a foto
     com o nome é o que a busca por imagem e a resposta com IA aproveitam.
-    Na subcategoria a lista é dos produtos; no resto, dos expositores. #}
+    Na subcategoria a lista é dos produtos; no resto, dos expositores.
+    Prévia não leva foto: é ilustrativa (mesma regra de `_sem_imagem`). #}
 {%- set raiz = request.host_url.rstrip('/') %}
 {%- macro absoluta(u) %}{{ (u if u.startswith('http') else raiz ~ u)|tojson }}{% endmacro %}
 {%- set itens = (produtos_sub or []) if sub_atual else expositores[:60] %}
- "mainEntity":{"@type":"ItemList","itemListElement":[{% for e in itens %}{"@type":"ListItem","position":{{ loop.index }},"name":{{ e.nome|tojson }},"url":{{ absoluta(e.url) }}{% set foto = e.img or e.foto %}{% if foto %},"image":{{ absoluta(foto) }}{% endif %}}{{ ',' if not loop.last }}{% endfor %}]}}
+ "mainEntity":{"@type":"ItemList","itemListElement":[{% for e in itens %}{"@type":"ListItem","position":{{ loop.index }},"name":{{ e.nome|tojson }},"url":{{ absoluta(e.url) }}{% set foto = None if e.demo else (e.img or e.foto) %}{% if foto %},"image":{{ absoluta(foto) }}{% endif %}}{{ ',' if not loop.last }}{% endfor %}]}}
 </script>
 {% if pontos %}
 <script>

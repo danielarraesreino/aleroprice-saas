@@ -205,7 +205,7 @@ def expositores(tipo=None, so_hoje=False, q=None, hoje=None):
             'foto': _img(c.hero_foto), 'foto_sm': _miniatura(c.hero_foto), 'url': _url_na_feira(r),
             'lat': c.lat, 'lng': c.lng, 'ponto': c.ponto_na_feira,
             'hoje': esta_hoje, 'categorias': categorias[:4],
-            'total_produtos': len(produtos),
+            'total_produtos': len(produtos), 'demo': bool(getattr(r, 'eh_demo', False)),
         })
     saida.sort(key=lambda e: (not e['hoje'], _norm(e['nome'])))
     return saida
@@ -234,6 +234,7 @@ def _item_produto(p, r, c):
         'img': _img(p.imagem), 'img_sm': _miniatura(p.imagem), 'preco': p.preco,
         'sob_encomenda': bool(p.sob_encomenda), 'slug': r.slug,
         'expositor': c.nome or r.nome, 'url': f'{_url_na_feira(r)}#produtos',
+        'demo': bool(getattr(r, 'eh_demo', False)),
     }
 
 
