@@ -15,6 +15,8 @@ from app.utils.modelos import (
 )
 
 CAMPOS = list(SITE_DEFAULTS.keys())
+CAMPOS_INTEIROS = {c.name for c in SiteConfig.__table__.columns
+                   if c.name in CAMPOS and isinstance(c.type, db.Integer)}
 
 
 @bp.post('/foto')
@@ -190,6 +192,11 @@ def index():
             if campo not in request.form:
                 continue
             valor = (request.form.get(campo) or '').strip()
+            if campo in CAMPOS_INTEIROS:
+                # "3%", "5 %", "10,0": só os dígitos. Texto em coluna inteira
+                # derrubava o save inteiro no Postgres.
+                digitos = ''.join(ch for ch in valor.split(',')[0] if ch.isdigit())
+                valor = int(digitos) if digitos else None
             setattr(cfg, campo, valor or None)
 
         # Tema é <select> de preset, não texto livre: validar evita gravar
@@ -269,7 +276,7 @@ def testar_callmebot():
     phone_clean = ''.join(c for c in str(phone) if c.isdigit())
     apikey_clean = str(apikey).strip()
 
-    texto = "🔔 *AleroPrice*: Teste de notificação CallMeBot recebido com sucesso no seu WhatsApp! As novas reservas do seu site tocarão aqui instantaneamente. 🍻"
+    texto = "🔔 *Feira de Barão*: Teste de notificação CallMeBot recebido com sucesso no seu WhatsApp! As novas reservas do seu site tocarão aqui instantaneamente. 🍻"
     params = urllib.parse.urlencode({'phone': phone_clean, 'text': texto, 'apikey': apikey_clean})
     url = 'https://api.callmebot.com/whatsapp.php?' + params
 

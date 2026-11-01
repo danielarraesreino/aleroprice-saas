@@ -108,6 +108,19 @@
   input:focus{outline:none;border-color:var(--tomate);box-shadow:0 0 0 3px rgb(178 50 20 / .35)}
   input:focus-visible{outline:3px solid var(--tomate);outline-offset:1px}
   .ajuda{font-size:.79rem;color:var(--taupe);margin-top:4px}
+  [hidden]{display:none!important}
+
+  /* Expositor ou bar: duas fichas grandes (alvo de toque > 44 px). */
+  .tipo{border:0;padding:0;margin:0 0 16px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .tipo legend{padding:0;margin-bottom:5px;font-size:.8rem;font-weight:700;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--taupe)}
+  .tipo label{position:relative;margin:0;padding:12px 13px;min-height:56px;cursor:pointer;
+    background:var(--papel);border:1px solid var(--linha);border-radius:3px;
+    font-size:.95rem;letter-spacing:0;text-transform:none;color:var(--tinta)}
+  .tipo label small{display:block;font-weight:400;font-size:.78rem;color:var(--taupe);margin-top:2px}
+  .tipo input{position:absolute;opacity:0;width:1px;height:1px}
+  .tipo label:has(input:checked){border-color:var(--tomate);box-shadow:inset 0 0 0 1px var(--tomate);background:var(--cartao)}
+  .tipo label:has(input:focus-visible){outline:3px solid var(--tomate);outline-offset:1px}
 
   .btn{
     width:100%;margin-top:6px;border:none;cursor:pointer;font-family:var(--f-display);
@@ -147,9 +160,14 @@
         próprio e painel pra mexer quando quiser.
       </div>
 
-      <div class="placa">
+      <div class="placa" data-so="bar"{% if tipo == 'artesao' %} hidden{% endif %}>
         <span class="grande">{{ preco }}</span>
         <span class="periodo">{{ preco_periodo }}</span>
+        {% if dias_trial %}<span class="selo">{{ dias_trial }} dias grátis</span>{% endif %}
+      </div>
+      <div class="placa" data-so="artesao"{% if tipo != 'artesao' %} hidden{% endif %}>
+        <span class="grande">{{ preco_exp.mensal }}</span>
+        <span class="periodo">por mês, ou {{ preco_exp.anual }} no ano</span>
         {# Sem teste grátis: a prévia já é o teste. O selo só aparece se
            `FEIRA_DIAS_TRIAL` for reaberto. #}
         {% if dias_trial %}<span class="selo">{{ dias_trial }} dias grátis</span>{% endif %}
@@ -163,10 +181,17 @@
 
       <form method="post" novalidate>
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <fieldset class="tipo">
+          <legend>Você é</legend>
+          <label><input type="radio" name="tipo" value="artesao"{% if tipo == 'artesao' %} checked{% endif %}>
+            Expositor da Feira<small>Barraca na Praça do Coco</small></label>
+          <label><input type="radio" name="tipo" value="bar"{% if tipo != 'artesao' %} checked{% endif %}>
+            Bar ou restaurante<small>Casa com endereço fixo</small></label>
+        </fieldset>
         <div class="campo">
-          <label for="nome_bar">Nome do bar</label>
+          <label for="nome_bar">Nome da barraca ou do bar</label>
           <input id="nome_bar" name="nome_bar" value="{{ nome_bar }}"
-                 placeholder="Ex.: Boteco do Zé" required>
+                 placeholder="Ex.: Cerâmica da Lili" required>
           <div class="ajuda">É o nome que aparece grande no site e no Google.</div>
         </div>
         <div class="campo">
@@ -187,13 +212,30 @@
         <button class="btn" type="submit">Montar minha barraca</button>
       </form>
 
-      <ul class="inclui">
+      <ul class="inclui" data-so="artesao"{% if tipo != 'artesao' %} hidden{% endif %}>
+        <li>Vitrine com foto, preço, prazo e desconto no Pix</li>
+        <li>Encomenda que chega no seu WhatsApp, com retirada na feira</li>
+        <li>Seu ponto no mapa da Praça do Coco e no Guia de Presentes</li>
+        <li>Sem fidelidade no mensal — se não servir, você sai</li>
+      </ul>
+      <ul class="inclui" data-so="bar"{% if tipo == 'artesao' %} hidden{% endif %}>
         <li>Página com foto, horário e a sua nota do Google</li>
         <li>Cardápio digital com QR code pra mesa, sem limite de itens</li>
         <li>Reserva que chega no seu WhatsApp</li>
         <li>Sem fidelidade — se não servir, você sai</li>
       </ul>
     </div>
+
+    <script>
+      // Troca preço e lista conforme a escolha. Sem JS, o servidor já mostra o do tipo da URL.
+      document.querySelectorAll('.tipo input').forEach(function (r) {
+        r.addEventListener('change', function () {
+          document.querySelectorAll('[data-so]').forEach(function (el) {
+            el.hidden = el.dataset.so !== r.value;
+          });
+        });
+      });
+    </script>
 
     <div class="pe">Já tem barraca? <a href="{{ url_for('auth.login') }}">Entrar</a></div>
   </main>

@@ -710,3 +710,19 @@ def test_json_ld_de_cada_tipo_de_pagina_e_json_valido(client):
     for r, st in ((None, {'nome': 'Bar X', 'horario': 'Sex 18h-23h'}), (rest, site)):
         texto = serializar(dados_estruturados(r, st, [], [], [], URL))
         assert json.loads(texto)['@graph']
+
+
+def test_trilha_do_expositor_passa_pela_feira():
+    from types import SimpleNamespace
+    rest = SimpleNamespace(nome='Cerâmica da Lili', tipo_negocio='artesao', site_config=None)
+    trilha = no_de(dados_estruturados(rest, {}, [], [], [], URL), 'BreadcrumbList')['itemListElement']
+    assert [i['name'] for i in trilha] == ['Feira de Barão', 'Expositores', 'Cerâmica da Lili']
+    assert [i['position'] for i in trilha] == [1, 2, 3]
+    assert trilha[1]['item'].endswith('/feira')
+
+
+def test_trilha_do_bar_continua_curta(site_completo, dishes):
+    trilha = no_de(dados_estruturados(None, site_completo, dishes, [], [], URL),
+                   'BreadcrumbList')['itemListElement']
+    assert trilha[0]['position'] == 1 and trilha[0]['item'] == URL
+    assert 'Feira de Barão' not in [i['name'] for i in trilha]

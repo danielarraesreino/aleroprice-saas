@@ -440,8 +440,15 @@ def _contexto_memoria():
     }
 
 
+@bp.route('/feira/<categoria>')
+def feira_categoria(categoria):
+    """Uma página por categoria ("Comida artesanal na Feira de Barão"): é o
+    que a pessoa busca, e o filtro por ?q= não é indexado."""
+    return feira(categoria)
+
+
 @bp.route('/feira')
-def feira():
+def feira(categoria=None):
     """Expositores da Feira: mapa, lista e busca de produto.
 
     Sem parâmetro a página é igual para todo visitante e sai da borda da
@@ -457,6 +464,13 @@ def feira():
 
     # A feira é só de artesãos: bar no mesmo mapa confunde quem procura barraca.
     lista = fe.expositores(tipo='artesao', so_hoje=so_hoje, q=q)
+    cat_atual = None
+    if categoria is not None:
+        cat_atual = next(({'slug': c, 'titulo': t} for c, t, _ in fe.CATEGORIAS_DA_FEIRA
+                          if c == categoria), None)
+        if cat_atual is None:
+            abort(404)
+        lista = [e for e in lista if categoria in fe.categorias_do_expositor(e)]
     pontos = [{'slug': e['slug'], 'nome': e['nome'], 'tipo': e['tipo'], 'url': e['url'], 'lat': e['lat'],
                'lng': e['lng'], 'ponto': e['ponto'], 'hoje': e['hoje'],
                'descritor': e['descritor'] or '', 'cat': (e['categorias'] or [''])[0],
@@ -465,7 +479,8 @@ def feira():
     resp = make_response(render_template(
         'produto/feira.html', expositores=lista, pontos=pontos,
         produtos=fe.buscar_produtos(q) if q else [],
-        q=q, tipo=tipo, so_hoje=so_hoje,
+        q=q, tipo=tipo, so_hoje=so_hoje, cat_atual=cat_atual,
+        categorias_feira=[{'slug': c, 'titulo': t} for c, t, _ in fe.CATEGORIAS_DA_FEIRA],
         total_hoje=sum(1 for e in lista if e['hoje']),
         centro=fe.CENTRO, **_contexto_produto()))
     return _na_borda(resp)
@@ -475,8 +490,28 @@ def feira():
 def presentes():
     """Guia de Presentes da Feira: produtos de todos os expositores por faixa
     de preço, cada um levando à barraca para encomendar pelo WhatsApp."""
+    return _guia_de_presentes(None)
+
+
+@bp.route('/presentes/<faixa>')
+def presentes_faixa(faixa):
+    """Uma faixa por página ("Presentes de Natal até R$ 30"): é a busca de
+    dezembro, e uma âncora #ate-30 não ranqueia sozinha."""
+    return _guia_de_presentes(faixa)
+
+
+def _guia_de_presentes(faixa_id):
     from app.utils import feira as fe
-    resp = make_response(render_template('produto/presentes.html', faixas=fe.presentes(),
+    faixas = fe.presentes()
+    atual = None
+    if faixa_id is not None:
+        atual = next((f for f in faixas if f['id'] == faixa_id), None)
+        if atual is None:
+            abort(404)
+    cestas = [i for f in faixas for i in f['itens'] if i['cesta']]
+    cestas.sort(key=lambda i: i['preco'])
+    resp = make_response(render_template('produto/presentes.html', faixas=faixas,
+                                         faixa_atual=atual, cestas=cestas,
                                          **_contexto_produto()))
     return _na_borda(resp)
 
@@ -717,6 +752,15 @@ def sitemap():
         paginas.append((f'https://{dominio_do_produto()}/feira', None))
         for caminho in ('/agenda', '/presentes', '/expor', '/termos', '/privacidade'):
             paginas.append((f'https://{dominio_do_produto()}{caminho}', None))
+        from app.utils.feira import FAIXAS_DE_PRESENTE, CATEGORIAS_DA_FEIRA, expositores, \
+            categorias_do_expositor
+        # Só categoria com gente: página vazia no índice é conteúdo raso.
+        com_gente = {c for e in expositores(tipo='artesao') for c in categorias_do_expositor(e)}
+        for cat, *_ in CATEGORIAS_DA_FEIRA:
+            if cat in com_gente:
+                paginas.append((f'https://{dominio_do_produto()}/feira/{cat}', None))
+        for faixa_id, *_ in FAIXAS_DE_PRESENTE:
+            paginas.append((f'https://{dominio_do_produto()}/presentes/{faixa_id}', None))
         for v in _verbetes():
             paginas.append((f"https://{dominio_do_produto()}/memoria/{v['slug']}", None))
 
@@ -1134,10 +1178,19 @@ def cadastro():
         agora acompanham o formulário, inclusive no re-render de erro — que é
         justamente quando a pessoa está decidindo se insiste.
         """
+        from app.utils.planos import precos_expositor
         return render_template('site/cadastro.html', dias_trial=DIAS_DE_TRIAL,
+                               preco_exp=precos_expositor(),
                                **_preco_publico(), **campos)
 
-    dados = {'nome_bar': '', 'nome': '', 'email': ''}
+    # Expositor ou bar: decide o modelo do site e as abas do painel. Sem isso
+    # o artesão que se cadastrava sozinho nascia bar. `?tipo=artesao` vem dos
+    # links do portal da Feira.
+    def _tipo(valor):
+        return valor if valor in ('bar', 'artesao') else 'bar'
+
+    dados = {'nome_bar': '', 'nome': '', 'email': '',
+             'tipo': _tipo(request.args.get('tipo'))}
     if request.method == 'POST':
         if limite_excedido(f'cadastro:{request.remote_addr}', maximo=5, janela_segundos=900):
             flash('Muitas tentativas de cadastro. Aguarde alguns minutos.', 'danger')
@@ -1146,11 +1199,12 @@ def cadastro():
         nome = (request.form.get('nome') or '').strip() or 'Responsável'
         email = (request.form.get('email') or '').strip().lower()
         senha = request.form.get('senha') or ''
-        dados = {'nome_bar': nome_bar, 'nome': nome, 'email': email}
+        tipo = _tipo(request.form.get('tipo'))
+        dados = {'nome_bar': nome_bar, 'nome': nome, 'email': email, 'tipo': tipo}
 
         erros = []
         if len(nome_bar) < 2:
-            erros.append('Informe o nome do bar/restaurante.')
+            erros.append('Informe o nome da barraca ou do bar.')
         if '@' not in email or '.' not in email:
             erros.append('E-mail inválido.')
         if len(senha) < 6:
@@ -1176,7 +1230,7 @@ def cadastro():
             # espera o pagamento, que é registrado no Modo Campo.
             from app.utils.planos import fim_do_trial
             rest = Restaurante(
-                nome=nome_bar, slug=slug_unico(nome_bar),
+                nome=nome_bar, slug=slug_unico(nome_bar), tipo_negocio=tipo,
                 trial_termina_em=fim_do_trial(),
             )
             db.session.add(rest)

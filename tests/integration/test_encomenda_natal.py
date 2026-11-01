@@ -65,16 +65,45 @@ def test_painel_liga_retirada_e_mostra_datas(client, session):
 
 
 def test_guia_de_presentes_separa_por_faixa(client, session):
+    # Geleia 25, Cesta 100, Tender 180.
     _barraca(session, slug='guia-natal')
     html = client.get('/presentes').get_data(as_text=True)
     assert 'Guia de Presentes da Feira' in html
-    ate50, ate100, acima = (html.split('id="ate-50"')[1].split('id="ate-100"')[0],
-                            html.split('id="ate-100"')[1].split('id="acima-100"')[0],
-                            html.split('id="acima-100"')[1])
-    assert 'Geleia' in ate50 and 'Cesta' in ate100 and 'Tender' in acima
+    trecho = lambda a, b=None: html.split(f'id="{a}"')[1].split(f'id="{b}"')[0] if b else html.split(f'id="{a}"')[1]
+    assert 'Geleia' in trecho('ate-30', 'ate-60')
+    assert 'Cesta' in trecho('ate-120', 'acima-120')
+    assert 'Tender' in trecho('acima-120')
     assert 'Sem preço' not in html
     assert '/bar/guia-natal#produtos' in html
 
 
+def test_cesta_ganha_destaque_no_topo(client, session):
+    _barraca(session, slug='cesta-natal')
+    html = client.get('/presentes').get_data(as_text=True)
+    destaque = html.split('id="cestas"')[1].split('id="ate-30"')[0]
+    assert 'Cesta' in destaque and 'Geleia' not in destaque
+
+
+def test_pagina_por_faixa(client, session):
+    _barraca(session, slug='faixa-natal')
+    resp = client.get('/presentes/ate-30')
+    html = resp.get_data(as_text=True)
+    assert resp.status_code == 200
+    assert 'Presentes de Natal até R$ 30' in html
+    assert 'Geleia' in html and 'Tender' not in html
+    assert '/presentes/ate-30"' in html  # canonical da própria faixa
+    assert client.get('/presentes/ate-999').status_code == 404
+
+
+def test_eh_cesta():
+    from types import SimpleNamespace as P
+    from app.utils.feira import eh_cesta
+    assert eh_cesta(P(nome='Cesta de Natal', categoria=None))
+    assert eh_cesta(P(nome='Geleia', categoria='Kits'))
+    assert eh_cesta(P(nome='Caixinha de doces', categoria=''))
+    assert not eh_cesta(P(nome='Geleia de amora', categoria='Doces'))
+
+
 def test_presentes_no_sitemap(client, session):
-    assert '/presentes' in client.get('/sitemap.xml').get_data(as_text=True)
+    xml = client.get('/sitemap.xml').get_data(as_text=True)
+    assert '/presentes' in xml and '/presentes/ate-30' in xml and '/presentes/acima-120' in xml

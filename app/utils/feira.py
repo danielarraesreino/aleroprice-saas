@@ -118,6 +118,40 @@ def _url_na_feira(r):
     return url_canonica(r)
 
 
+# Categorias da Feira, com página própria (/feira/<slug>). As palavras são as
+# mesmas que escolhem o ícone do pino no mapa (`produto/feira.html`, PALAVRAS):
+# um expositor entra em todas as categorias em que o descritor ou as
+# categorias dos produtos casarem. Ordem = ordem dos atalhos na página.
+CATEGORIAS_DA_FEIRA = (
+    ('comida-artesanal', 'Comida artesanal', ('pao', 'bolo', 'doce', 'queijo', 'geleia', 'compota',
+     'biscoito', 'salgado', 'embutido', 'charcut', 'defumad', 'cafe', 'comida', 'molho',
+     'tempero', 'mel', 'chopp', 'cerveja', 'bebida', 'vinho', 'pizza', 'empada', 'risot',
+     'padaria', 'fermenta')),
+    ('artesanato', 'Artesanato', ('ceramica', 'croche', 'trico', 'costura', 'bordado', 'madeira',
+     'couro', 'vela', 'sabonete', 'artesanato', 'macrame', 'tecido', 'mosaico', 'vidro', 'wood')),
+    ('plantas', 'Plantas e terrários', ('planta', 'flor', 'jardim', 'muda', 'suculenta',
+     'orquidea', 'terrario', 'kokedama')),
+    ('joias', 'Joias e bijuterias', ('joia', 'bijuteria', 'brinco', 'colar', 'pulseira', 'anel',
+     'prata')),
+    ('arte', 'Arte e bem-estar', ('arte$', 'artes$', 'artista', 'quadro', 'ilustra', 'pintura', 'livro', 'poster',
+     'fotografia', 'tarot', 'taro', 'esoter', 'cristal', 'incenso', 'vintage')),
+)
+
+
+def _casa(palavra, chave):
+    """Começo de palavra ('ceramica' casa 'ceramicas'); 'arte$' só a palavra
+    inteira, senão 'arte' pegaria 'artesanato' e 'anel' pegaria 'canela'."""
+    return palavra == chave[:-1] if chave.endswith('$') else palavra.startswith(chave)
+
+
+def categorias_do_expositor(e):
+    """Slugs de CATEGORIAS_DA_FEIRA para um item de `expositores()`."""
+    palavras = _norm(' '.join(filter(None, [e['nome'], e['descritor'],
+                                            ' '.join(e['categorias'])]))).split()
+    return [slug for slug, _, chaves in CATEGORIAS_DA_FEIRA
+            if any(_casa(w, c) for w in palavras for c in chaves)]
+
+
 def expositores(tipo=None, so_hoje=False, q=None, hoje=None):
     """Lista de expositores da Feira, quem está hoje primeiro.
 
@@ -199,8 +233,20 @@ def proximas_retiradas(hoje, antecedencia=2, quantas=6):
     return datas
 
 
-FAIXAS_DE_PRESENTE = (('ate-50', 'Até R$ 50', 0, 50), ('ate-100', 'De R$ 50 a R$ 100', 50, 100),
-                      ('acima-100', 'Acima de R$ 100', 100, None))
+# (id, título, piso, teto). O id é também o caminho /presentes/<id>, que é o
+# que a pessoa busca no Natal ("presente até 30 reais").
+FAIXAS_DE_PRESENTE = (('ate-30', 'Até R$ 30', 0, 30), ('ate-60', 'De R$ 30 a R$ 60', 30, 60),
+                      ('ate-120', 'De R$ 60 a R$ 120', 60, 120),
+                      ('acima-120', 'Acima de R$ 120', 120, None))
+
+# Cesta/kit sem coluna nova: o expositor já escreve "Cesta de Natal" ou
+# "Kit café" no nome ou na categoria. Começo de palavra, então "caixinha" conta.
+_PALAVRAS_CESTA = ('cesta', 'kit', 'box', 'caix')
+
+
+def eh_cesta(produto):
+    palavras = _norm(f'{produto.nome or ""} {produto.categoria or ""}').split()
+    return any(w.startswith(p) for w in palavras for p in _PALAVRAS_CESTA)
 
 
 def presentes():
@@ -215,7 +261,7 @@ def presentes():
             continue
         r, c = pares[p.restaurant_id]
         item = {'nome': p.nome, 'img': _img(p.imagem), 'preco': p.preco,
-                'sob_encomenda': bool(p.sob_encomenda),
+                'sob_encomenda': bool(p.sob_encomenda), 'cesta': eh_cesta(p),
                 'expositor': c.nome or r.nome, 'url': f'{_url_na_feira(r)}#produtos'}
         # Faixas em ordem crescente: a primeira cujo teto cabe o preço.
         for faixa, (_, _, _, ate) in zip(faixas, FAIXAS_DE_PRESENTE):

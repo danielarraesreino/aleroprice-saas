@@ -103,3 +103,53 @@ def test_tenant_com_ativo_nulo_continua_no_ar(client, session):
     session.commit()
 
     assert client.get('/bar/boteco-do-marcao').status_code == 200
+
+
+def test_cadastro_sem_tipo_nasce_bar(client, session):
+    client.post('/cadastro', data=DADOS)
+    assert Restaurante.query.filter_by(nome='Boteco do Marcão').one().tipo_negocio == 'bar'
+
+
+def test_expositor_se_cadastra_como_artesao(client, session):
+    """O artesão que se cadastrava sozinho nascia bar e via as abas de bar."""
+    dados = dict(DADOS, nome_bar='Cerâmica da Lili', email='lili@ceramica.com', tipo='artesao')
+    assert client.post('/cadastro', data=dados).status_code == 302
+    assert Restaurante.query.filter_by(nome='Cerâmica da Lili').one().tipo_negocio == 'artesao'
+
+
+def test_tipo_invalido_cai_em_bar(client, session):
+    dados = dict(DADOS, tipo='<script>')
+    client.post('/cadastro', data=dados)
+    assert Restaurante.query.filter_by(nome='Boteco do Marcão').one().tipo_negocio == 'bar'
+
+
+def test_link_do_portal_ja_marca_expositor(client):
+    """`?tipo=artesao` (link do portal) abre com expositor marcado e o preço de expositor."""
+    from app.utils.planos import precos_expositor
+    html = client.get('/cadastro?tipo=artesao').get_data(as_text=True)
+    assert 'value="artesao" checked' in html
+    assert precos_expositor()['mensal'] in html
+
+
+def _menu(client, tipo):
+    dados = dict(DADOS, email=f'{tipo}@menu.com', nome_bar=f'Menu {tipo}', tipo=tipo)
+    client.post('/cadastro', data=dados)
+    return client.get('/app', follow_redirects=True).get_data(as_text=True)
+
+
+def test_menu_do_expositor_esconde_abas_de_bar(app, client, session):
+    with app.test_request_context():
+        from flask import url_for
+        reservas, agenda, promo = (url_for('reservas.index'), url_for('agenda.index'),
+                                   url_for('promocoes.index'))
+    html = _menu(client, 'artesao')
+    assert 'Encomendas' in html
+    for href in (reservas, agenda, promo):
+        assert f'href="{href}"' not in html
+
+
+def test_menu_do_bar_mantem_reservas(app, client, session):
+    with app.test_request_context():
+        from flask import url_for
+        reservas = url_for('reservas.index')
+    assert f'href="{reservas}"' in _menu(client, 'bar')

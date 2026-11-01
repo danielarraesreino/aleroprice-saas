@@ -971,11 +971,19 @@ def dados_estruturados(rest, site, dishes, reviews, eventos, url_canonica,
     grafo.extend(_pedacos_de_produto(produtos, origem, url_canonica, id_restaurante))
     grafo.extend(_pedacos_de_evento(eventos, url_canonica, id_restaurante))
 
-    trilha = [{'@type': 'ListItem', 'position': 1, 'name': nome or 'Início',
-               'item': url_canonica}]
+    trilha = []
+    if _campo(rest, 'tipo_negocio') == 'artesao':
+        # Expositor pendura na Feira: Feira de Barão › Expositores › Barraca.
+        # É o vínculo que o Google usa para entender que a barraca é parte dela.
+        from app.utils.site_router import dominio_do_produto
+        portal = f'https://{dominio_do_produto()}'
+        trilha += [{'@type': 'ListItem', 'name': 'Feira de Barão', 'item': f'{portal}/'},
+                   {'@type': 'ListItem', 'name': 'Expositores', 'item': f'{portal}/feira'}]
+    trilha.append({'@type': 'ListItem', 'name': nome or 'Início', 'item': url_canonica})
     if itens:
-        trilha.append({'@type': 'ListItem', 'position': 2, 'name': 'Cardápio',
-                       'item': id_cardapio})
+        trilha.append({'@type': 'ListItem', 'name': 'Cardápio', 'item': id_cardapio})
+    for posicao, item in enumerate(trilha, 1):
+        item['position'] = posicao
     grafo.append({'@type': 'BreadcrumbList', '@id': f'{url_canonica}#trilha',
                   'itemListElement': trilha})
 
