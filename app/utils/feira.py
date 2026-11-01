@@ -28,7 +28,7 @@ from app.extensions import db
 from app.models.modelo_restaurante import Restaurante
 from app.models.modelo_siteconfig import SiteConfig
 from app.models.modelo_sitecontent import ProdutoSite
-from app.utils import blob
+from app.utils import blob, categorias
 from app.utils.site_router import url_canonica
 
 FUSO = ZoneInfo('America/Sao_Paulo')
@@ -158,11 +158,15 @@ def _casa(palavra, chave):
 
 
 def categorias_do_expositor(e):
-    """Slugs de CATEGORIAS_DA_FEIRA para um item de `expositores()`."""
+    """Slugs de CATEGORIAS_DA_FEIRA para um item de `expositores()`.
+
+    Palavra-chave no nome/descritor, ou categoria de produto que a taxonomia
+    reconhece ("Bonecos e brinquedos" não tem palavra da lista, mas é artesanato)."""
     palavras = _norm(' '.join(filter(None, [e['nome'], e['descritor'],
                                             ' '.join(e['categorias'])]))).split()
+    pela_taxonomia = {achado[0] for achado in map(categorias.subcategoria_de, e['categorias']) if achado}
     return [slug for slug, _, chaves in CATEGORIAS_DA_FEIRA
-            if any(_casa(w, c) for w in palavras for c in chaves)]
+            if slug in pela_taxonomia or any(_casa(w, c) for w in palavras for c in chaves)]
 
 
 def expositores(tipo=None, so_hoje=False, q=None, hoje=None):

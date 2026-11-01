@@ -129,3 +129,38 @@ def test_vitrine_usa_a_miniatura_so_quando_ela_existe(app):
         assert _miniatura(antiga) == antiga
         assert _miniatura('img/nao-existe/foto.jpg').endswith('/img/nao-existe/foto.jpg')
         assert _miniatura(None) is None
+
+
+# ------------------------------------------------------------------ categoria
+
+def test_campo_de_categoria_sugere_a_lista_da_feira_e_as_proprias(logado, dona, session):
+    session.add(ProdutoSite(restaurant_id=dona.restaurant_id, nome='Geleia', ativo=True,
+                            categoria='Geleias da vó'))
+    alheia = _expositor(session, 'outro-expositor')
+    session.add(ProdutoSite(restaurant_id=alheia.restaurant_id, nome='X', ativo=True,
+                            categoria='Segredo do vizinho'))
+    session.commit()
+
+    html = logado.get('/conteudo/produtos/novo').get_data(as_text=True)
+    assert 'list="categoria_lista"' in html
+    assert '<option value="Geleias da vó">' in html
+    assert '<option value="Doces e confeitaria">' in html
+    assert 'Segredo do vizinho' not in html
+
+
+def test_categoria_digitada_com_outra_grafia_cai_na_secao_que_ja_existe(logado, dona, session):
+    session.add(ProdutoSite(restaurant_id=dona.restaurant_id, nome='Geleia', ativo=True,
+                            categoria='Geleias'))
+    session.commit()
+
+    logado.post('/conteudo/produtos/novo', data={'nome': 'Compota', 'categoria': '  geleias '},
+                content_type='multipart/form-data')
+
+    nova = ProdutoSite.query.filter_by(restaurant_id=dona.restaurant_id, nome='Compota').one()
+    assert nova.categoria == 'Geleias'
+
+
+def test_expositor_entra_na_categoria_da_feira_pela_taxonomia():
+    from app.utils.feira import categorias_do_expositor
+    e = {'nome': 'Ateliê da Naza', 'descritor': '', 'categorias': ['Bonecos e brinquedos']}
+    assert categorias_do_expositor(e) == ['artesanato']

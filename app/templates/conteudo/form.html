@@ -43,6 +43,17 @@
                placeholder="18,50"
                value="{{ ('%.2f'|format(item[campo]))|replace('.', ',') if item and item[campo] is not none else '' }}">
       </div>
+    {% elif widget == 'categoria' %}
+      {# <datalist>: o celular mostra as sugestões enquanto digita e o campo
+         continua aceitando texto novo. Primeiro as seções que o expositor já
+         tem, depois as categorias da Feira (app/utils/categorias.py). #}
+      <label class="form-label" for="{{ campo }}">{{ label }}</label>
+      <input class="form-control" type="text" id="{{ campo }}" name="{{ campo }}" list="{{ campo }}_lista"
+             autocomplete="off" value="{{ item[campo] if item and item[campo] else '' }}">
+      <datalist id="{{ campo }}_lista">
+        {% for s in sugestoes or [] %}<option value="{{ s }}">{% endfor %}
+      </datalist>
+      <div class="form-text">Produtos com a mesma categoria aparecem juntos no seu site. Pode escrever uma nova.</div>
     {% elif widget == 'foto' %}
       {# Upload pelo próprio <form>: produto novo ainda não tem id, então não dá
          pra subir por fetch antes de salvar como a capa faz. O arquivo vai em
