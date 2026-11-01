@@ -124,10 +124,10 @@ def _produtos_visiveis(ids=None):
 
 def _url_na_feira(r):
     """Link do expositor: domínio próprio quando existe (canônica, para o sinal
-    de link ir ao site oficial e não à cópia em /bar/<slug>); sem domínio,
+    de link ir ao site oficial e não à cópia em /expositor/<slug>); sem domínio,
     artesão abre dentro do portal para navegar pela Feira sem sair dele."""
     if getattr(r, 'tipo_negocio', 'bar') == 'artesao' and not (r.dominio or '').strip():
-        return url_for('public.landing_slug', slug=r.slug)
+        return url_for('public.landing_expositor', slug=r.slug)
     return url_canonica(r)
 
 

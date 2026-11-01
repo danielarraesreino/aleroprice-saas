@@ -36,6 +36,7 @@ from app.utils.planos import (
     plano_efetivo, precos, registrar_pagamento, rotulo,
 )
 from app.utils.temas import opcoes_de_tema, tema_valido
+from app.utils.site_router import prefixo_do_site
 
 # Campos que o Modo Campo edita. Curto de propósito: o resto continua no
 # /config-site, que é onde se mexe sentado.
@@ -58,6 +59,13 @@ def _config(rest):
         db.session.add(cfg)
         db.session.commit()
     return cfg
+
+
+def _url_do_site(rest):
+    """Endereço absoluto do site por slug: /expositor/ para artesão, /bar/ para bar."""
+    endpoint = ('public.landing_expositor' if prefixo_do_site(rest) == 'expositor'
+                else 'public.landing_slug')
+    return url_for(endpoint, slug=rest.slug, _external=True)
 
 
 @bp.route('/')
@@ -307,7 +315,7 @@ def visual(slug):
                       else catalogo_de_modelos(rest.tipo_negocio)[1]),
         modo_atual=(cfg.tema_modo if cfg.tema_modo in ('auto', 'claro', 'escuro')
                     else 'auto'),
-        url_previa=url_for('public.landing_slug', slug=rest.slug, _external=True),
+        url_previa=_url_do_site(rest),
     )
 
 
@@ -480,7 +488,7 @@ def proposta(slug):
         dominios_consulta=consulta,
         dominio_livre=dominios.primeiro_livre(consulta),
         taxa_setup=dominios.taxa_de_instalacao(),
-        url_previa=url_for('public.landing_slug', slug=rest.slug, _external=True),
+        url_previa=_url_do_site(rest),
         e_demo=(rest.tipo_conta or 'cliente') == 'demo',
         dias_trial=DIAS_DE_TRIAL,
     )
@@ -535,7 +543,7 @@ def qr(slug):
     divulgação: vai no Instagram, no cartão, na porta.
     """
     rest = _bar(slug)
-    return _resposta_qr(url_for('public.landing_slug', slug=rest.slug, _external=True))
+    return _resposta_qr(_url_do_site(rest))
 
 
 @bp.route('/<slug>/qr-cardapio.svg')

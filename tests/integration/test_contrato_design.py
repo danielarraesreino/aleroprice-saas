@@ -34,7 +34,7 @@ def _renderiza_artesao(client, session, modelo, com_foto=True):
         cfg.hero_foto = cfg.logo = None
         ProdutoSite.query.filter_by(restaurant_id=rest.id).update({'imagem': None})
         session.commit()
-    resp = client.get(f'/bar/{SLUG}?modelo={modelo}')
+    resp = client.get(f'/expositor/{SLUG}?modelo={modelo}')
     return resp.status_code, resp.get_data(as_text=True)
 
 
@@ -97,7 +97,7 @@ def test_faixa_de_previa_em_todo_modelo_de_expositor(client, session, modelo):
     rest, _ = semear(no_ar=True)
     rest.tipo_conta = 'demo'
     session.commit()
-    corpo = client.get(f'/bar/{SLUG}?modelo={modelo}').get_data(as_text=True)
+    corpo = client.get(f'/expositor/{SLUG}?modelo={modelo}').get_data(as_text=True)
     # artesão prévia é indexável (decisão do dono); a faixa continua
     assert 'faixa-previa' in corpo and 'content="index,follow"' in corpo and 'noindex' not in corpo
 
@@ -105,7 +105,7 @@ def test_faixa_de_previa_em_todo_modelo_de_expositor(client, session, modelo):
 @pytest.mark.parametrize('modelo', list(MODELOS_ARTESAO))
 def test_paridade_com_bar_novidades_e_preload_do_hero(client, session, modelo):
     """R13: o que o bar tem de head/rodapé o expositor também tem (docs 11_PARIDADE)."""
-    corpo = client.get(f'/bar/{SLUG}?modelo={modelo}').get_data(as_text=True) if semear(no_ar=True) else ''
+    corpo = client.get(f'/expositor/{SLUG}?modelo={modelo}').get_data(as_text=True) if semear(no_ar=True) else ''
     assert 'novidades-box' in corpo and 'novidades da Feira de Barão' in corpo
     assert 'rel="preload" as="image"' in corpo
 
@@ -132,7 +132,7 @@ def _com_ficha(session, ficha=True):
 @pytest.mark.parametrize('modelo', list(MODELOS_ARTESAO))
 def test_ficha_da_loja_aparece_quando_preenchida(client, session, modelo):
     _com_ficha(session)
-    corpo = client.get(f'/bar/{SLUG}?modelo={modelo}').get_data(as_text=True)
+    corpo = client.get(f'/expositor/{SLUG}?modelo={modelo}').get_data(as_text=True)
     for esperado in ('<dt>Atendimento</dt>', 'Seg a sex, 9h às 17h30', '<dt>Pagamento</dt>', '3% de desconto no Pix',
                      '<dt>E-mail</dt>', 'contato@exemplo.com.br', 'Envio para todo o Brasil.',
                      'Produzido em 5 dias úteis', '3% no Pix', 'WhatsApp confirmado', 'TikTok'):
@@ -144,7 +144,7 @@ def test_ficha_da_loja_aparece_quando_preenchida(client, session, modelo):
 @pytest.mark.parametrize('modelo', list(MODELOS_ARTESAO))
 def test_ficha_vazia_nao_mostra_bloco_nenhum(client, session, modelo):
     _com_ficha(session, ficha=False)
-    corpo = client.get(f'/bar/{SLUG}?modelo={modelo}').get_data(as_text=True)
+    corpo = client.get(f'/expositor/{SLUG}?modelo={modelo}').get_data(as_text=True)
     for ausente in ('<dt>Atendimento</dt>', '<dt>Pagamento</dt>', '<dt>E-mail</dt>', 'class="politicas"',
                     'class="sobre"', 'WhatsApp confirmado', 'Produzido em', 'no Pix', 'paymentAccepted',
                     'deliveryLeadTime'):
@@ -157,7 +157,7 @@ def test_previa_mostra_a_estrutura_da_ficha_como_a_preencher(client, session, mo
     rest, _ = semear(no_ar=True)
     rest.tipo_conta = 'demo'
     session.commit()
-    corpo = client.get(f'/bar/{SLUG}?modelo={modelo}').get_data(as_text=True)
+    corpo = client.get(f'/expositor/{SLUG}?modelo={modelo}').get_data(as_text=True)
     assert corpo.count('class="a-preencher"') >= 4
     assert 'o expositor informa' in corpo
     assert 'WhatsApp confirmado' not in corpo and 'Produzido em' not in corpo   # nada afirmado sem dado

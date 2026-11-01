@@ -117,7 +117,7 @@ def catalogo():
     feed da Meta. Mostra o endereço do feed, o que entra e o que falta."""
     from app.models.modelo_restaurante import Restaurante
     from app.utils import catalogo as feed
-    from app.utils.site_router import dominio_do_produto
+    from app.utils.site_router import caminho_do_site, dominio_do_produto
 
     rid = get_current_restaurant_id()
     if not rid:
@@ -126,7 +126,7 @@ def catalogo():
     cfg = SiteConfig.query.filter_by(restaurant_id=rid).first()
     linhas, fora = feed.itens(rest, cfg.nome if cfg and cfg.nome else None)
     url_feed = (f'https://{dominio_do_produto()}'
-                + url_for('public.catalogo_meta', slug=rest.slug)) if rest.slug else ''
+                + caminho_do_site(rest, '/catalogo.csv')) if rest.slug else ''
     return render_template('configsite/catalogo.html', linhas=linhas, fora=fora, url_feed=url_feed)
 
 

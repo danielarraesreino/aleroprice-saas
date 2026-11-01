@@ -19,7 +19,7 @@ def test_seed_cria_tenant_inativo_e_nao_serve_site(client, session):
     rest, novos = semear()
     assert rest.tipo_negocio == 'artesao' and rest.ativo is False
     assert novos == len(PRODUTOS)
-    assert client.get(f'/bar/{SLUG}').status_code == 404
+    assert client.get(f'/expositor/{SLUG}').status_code == 404
 
 
 def test_seed_e_idempotente(session):
@@ -31,7 +31,7 @@ def test_seed_e_idempotente(session):
 
 def test_site_no_ar_mostra_produtos_por_categoria(client, session):
     semear(no_ar=True)
-    corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    corpo = client.get(f'/expositor/{SLUG}').get_data(as_text=True)
     assert 'Dona Berga' in corpo
     assert '>Produtos</a>' in corpo and '>Cardápio</a>' not in corpo
     for cat in ("Defumados", "Linguiças", "Maturados", "Conservas", "Kits"):
@@ -43,7 +43,7 @@ def test_site_no_ar_mostra_produtos_por_categoria(client, session):
 
 def test_json_ld_tem_product_e_nao_menu(client, session):
     semear(no_ar=True)
-    grafo = _grafo(client.get(f'/bar/{SLUG}').get_data(as_text=True))
+    grafo = _grafo(client.get(f'/expositor/{SLUG}').get_data(as_text=True))
     tipos = [n['@type'] for n in grafo]
     assert 'Store' in tipos and 'Menu' not in tipos
     # sem preço não há Product: o Google trata Product sem offers como erro crítico
@@ -56,7 +56,7 @@ def test_preco_vira_offer(client, session):
     p.preco = 42.5
     p.sob_encomenda = True
     db.session.commit()
-    corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    corpo = client.get(f'/expositor/{SLUG}').get_data(as_text=True)
     oferta = next(n['offers'] for n in _grafo(corpo) if n.get('name') == 'Tender')
     assert oferta['price'] == '42.50' and oferta['priceCurrency'] == 'BRL'
     assert oferta['availability'].endswith('PreOrder')
@@ -98,7 +98,7 @@ def test_toda_imagem_do_seed_existe_em_disco():
 
 def test_site_mostra_fotos_e_galeria(client, session):
     semear(no_ar=True)
-    corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    corpo = client.get(f'/expositor/{SLUG}').get_data(as_text=True)
     assert 'img/berga/hero.jpg' in corpo and 'img/berga/tender.jpg' in corpo
     assert 'A barraca na Feira de Barão' in corpo
 
@@ -106,20 +106,20 @@ def test_site_mostra_fotos_e_galeria(client, session):
 def test_logo_vai_no_menu_no_icone_e_como_imagem_de_compartilhamento(client, session):
     from app.models.modelo_siteconfig import SiteConfig
     semear(no_ar=True)
-    corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    corpo = client.get(f'/expositor/{SLUG}').get_data(as_text=True)
     assert 'img/berga/logo.jpg' in corpo
     assert 'rel="icon" type="image/jpeg"' in corpo
     # sem foto de capa, o card de compartilhamento cai na logo
     rest = Restaurante.query.filter_by(slug=SLUG).first()
     SiteConfig.query.filter_by(restaurant_id=rest.id).first().hero_foto = None
     db.session.commit()
-    corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    corpo = client.get(f'/expositor/{SLUG}').get_data(as_text=True)
     assert re.search(r'og:image" content="https?://[^"]+img/berga/logo\.jpg', corpo)
 
 
 def test_produto_sem_foto_fica_fora_da_vitrine_e_do_schema(client, session):
     rest, _ = semear(no_ar=True)
-    corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    corpo = client.get(f'/expositor/{SLUG}').get_data(as_text=True)
     sem_foto = [n for n, *_ in PRODUTOS if n not in IMAGENS]
     assert sem_foto                                    # o seed tem produtos sem foto
     for nome in sem_foto:
@@ -130,14 +130,14 @@ def test_produto_sem_foto_fica_fora_da_vitrine_e_do_schema(client, session):
     assert p is not None
     p.imagem = 'img/berga/bacon.jpg'
     db.session.commit()
-    assert 'Pastrami de Cupim' in client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    assert 'Pastrami de Cupim' in client.get(f'/expositor/{SLUG}').get_data(as_text=True)
 
 
 def test_categoria_sem_nenhum_produto_com_foto_some(client, session):
     rest, _ = semear(no_ar=True)
     ProdutoSite.query.filter_by(restaurant_id=rest.id, categoria='Kits').update({'imagem': None})
     db.session.commit()
-    corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    corpo = client.get(f'/expositor/{SLUG}').get_data(as_text=True)
     assert '>Kits</button>' not in corpo and '>Defumados</button>' in corpo
 
 
@@ -155,7 +155,7 @@ def test_sem_nenhuma_foto_mostra_o_que_faz_em_texto(client, session):
     rest, _ = semear(no_ar=True)
     ProdutoSite.query.filter_by(restaurant_id=rest.id).update({'imagem': None})
     db.session.commit()
-    corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    corpo = client.get(f'/expositor/{SLUG}').get_data(as_text=True)
     assert 'Catálogo em montagem' not in corpo
     assert 'Pastrami de Cupim' in corpo and 'sem-foto' in corpo
     assert 'tender.jpg' not in corpo and 'picanha-suina.jpg' not in corpo
@@ -166,7 +166,7 @@ def test_sem_nenhum_produto_cadastrado_mostra_catalogo_em_montagem(client, sessi
     rest, _ = semear(no_ar=True)
     ProdutoSite.query.filter_by(restaurant_id=rest.id).delete()
     db.session.commit()
-    corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    corpo = client.get(f'/expositor/{SLUG}').get_data(as_text=True)
     assert 'Catálogo em montagem' in corpo
     assert 'class="tile' not in corpo and 'class="chip"' not in corpo
     assert 'wa.me/5519991563362' in corpo
@@ -174,7 +174,7 @@ def test_sem_nenhum_produto_cadastrado_mostra_catalogo_em_montagem(client, sessi
 
 def test_acessibilidade_basica_da_vitrine(client, session):
     semear(no_ar=True)
-    corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    corpo = client.get(f'/expositor/{SLUG}').get_data(as_text=True)
     assert 'class="skip" href="#conteudo"' in corpo and 'id="conteudo"' in corpo
     assert corpo.count('<h1') == 1
     assert 'aria-pressed="true"' in corpo and 'role="group"' in corpo
@@ -185,7 +185,7 @@ def test_acessibilidade_basica_da_vitrine(client, session):
 
 def test_cartaz_vertical_vai_inteiro_e_foto_normal_nao(client, session):
     semear(no_ar=True)
-    corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    corpo = client.get(f'/expositor/{SLUG}').get_data(as_text=True)
     cartazes = re.findall(r'<article class="tile[^"]*\bcartaz\b[^"]*" data-nome="([^"]+)"', corpo)
     assert set(cartazes) == {'Picanha Suína', 'Lombo Italiano Defumado',
                              'Presunto Defumado Artesanal', 'Bacon Defumado'}
@@ -194,7 +194,7 @@ def test_cartaz_vertical_vai_inteiro_e_foto_normal_nao(client, session):
 
 def test_montar_encomenda_tem_botao_por_produto_e_folha_unica(client, session):
     semear(no_ar=True)
-    corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    corpo = client.get(f'/expositor/{SLUG}').get_data(as_text=True)
     assert corpo.count('class="btn add"') == len(IMAGENS)       # um por produto com foto
     assert 'class="btn pedir-link"' in corpo                     # sem JS o link por produto segue valendo
     assert '<dialog class="pedido"' in corpo and 'id="pedido-enviar"' in corpo
@@ -205,7 +205,7 @@ def test_site_sem_whatsapp_nao_oferece_encomenda(client, session):
     rest, _ = semear(no_ar=True)
     rest.site_config.whatsapp = None
     db.session.commit()
-    corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    corpo = client.get(f'/expositor/{SLUG}').get_data(as_text=True)
     assert 'class="btn add"' not in corpo and '<dialog' not in corpo and 'id="como"' not in corpo
 
 
@@ -217,7 +217,7 @@ from app.utils.modelos import MODELOS_ARTESAO, modelo_para_categoria  # noqa: E4
 @pytest.mark.parametrize('modelo', list(MODELOS_ARTESAO))
 def test_cada_modelo_renderiza_com_claro_escuro_e_encomenda(client, session, modelo):
     semear(no_ar=True)
-    resp = client.get(f'/bar/{SLUG}?modelo={modelo}')
+    resp = client.get(f'/expositor/{SLUG}?modelo={modelo}')
     corpo = resp.get_data(as_text=True)
     assert resp.status_code == 200
     assert f'class="modelo-{modelo}"' in corpo
@@ -232,7 +232,7 @@ def test_cada_modelo_renderiza_com_claro_escuro_e_encomenda(client, session, mod
 
 def test_modelo_desconhecido_cai_na_vitrine(client, session):
     semear(no_ar=True)
-    corpo = client.get(f'/bar/{SLUG}?modelo=boteco').get_data(as_text=True)   # modelo de bar não vale aqui
+    corpo = client.get(f'/expositor/{SLUG}?modelo=boteco').get_data(as_text=True)   # modelo de bar não vale aqui
     assert 'class="modelo-vitrine"' in corpo
 
 
@@ -240,7 +240,7 @@ def test_modelo_salvo_vale_para_o_artesao(client, session):
     rest, _ = semear(no_ar=True)
     rest.site_config.modelo = 'cozinha'
     db.session.commit()
-    assert 'class="modelo-cozinha"' in client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    assert 'class="modelo-cozinha"' in client.get(f'/expositor/{SLUG}').get_data(as_text=True)
 
 
 @pytest.mark.parametrize('categoria,esperado', [
@@ -258,7 +258,7 @@ def test_sem_whatsapp_o_contato_vira_instagram_e_nao_oferece_encomenda(client, s
     rest.site_config.whatsapp = None
     db.session.commit()
     for modelo in MODELOS_ARTESAO:
-        corpo = client.get(f'/bar/{SLUG}?modelo={modelo}').get_data(as_text=True)
+        corpo = client.get(f'/expositor/{SLUG}?modelo={modelo}').get_data(as_text=True)
         assert 'wa.me/5519991563362' not in corpo, modelo
         assert 'Chamar no Instagram' in corpo and 'donaberga_produtosartesanais' in corpo, modelo
         assert 'class="btn add"' not in corpo and '<dialog' not in corpo, modelo
@@ -266,7 +266,7 @@ def test_sem_whatsapp_o_contato_vira_instagram_e_nao_oferece_encomenda(client, s
 
 def test_artesao_com_dominio_proprio_redireciona_301_do_portal(client, session):
     semear(no_ar=True)
-    resp = client.get(f'/bar/{SLUG}', headers={'Host': 'feiradebarao.com.br'})
+    resp = client.get(f'/expositor/{SLUG}', headers={'Host': 'feiradebarao.com.br'})
     assert resp.status_code == 301
     assert resp.headers['Location'] == f'https://{DOMINIO}/'
 
@@ -275,11 +275,11 @@ def test_artesao_sem_dominio_abre_dentro_do_portal_da_feira(client, session):
     rest, _ = semear(no_ar=True)
     rest.dominio = None
     db.session.commit()
-    resp = client.get(f'/bar/{SLUG}', headers={'Host': 'feiradebarao.com.br'})
+    resp = client.get(f'/expositor/{SLUG}', headers={'Host': 'feiradebarao.com.br'})
     corpo = resp.get_data(as_text=True)
     assert resp.status_code == 200
     assert 'Dona Berga' in corpo
-    assert f'rel="canonical" href="https://feiradebarao.com.br/bar/{SLUG}"' in corpo
+    assert f'rel="canonical" href="https://feiradebarao.com.br/expositor/{SLUG}"' in corpo
     assert 'class="feira-topo"' in corpo
 
 
@@ -287,9 +287,9 @@ def test_artesao_sem_dominio_abre_dentro_do_portal_da_feira(client, session):
 @pytest.mark.parametrize('modelo', list(MODELOS_ARTESAO))
 def test_previa_mostra_faixa_e_cliente_nao(client, session, modelo):
     rest, _ = semear(no_ar=True)
-    assert 'faixa-previa' not in client.get(f'/bar/{SLUG}?modelo={modelo}').get_data(as_text=True)
+    assert 'faixa-previa' not in client.get(f'/expositor/{SLUG}?modelo={modelo}').get_data(as_text=True)
     rest.tipo_conta = 'demo'
     db.session.commit()
-    corpo = client.get(f'/bar/{SLUG}?modelo={modelo}').get_data(as_text=True)
+    corpo = client.get(f'/expositor/{SLUG}?modelo={modelo}').get_data(as_text=True)
     assert 'Prévia para Dona Berga' in corpo and 'imagens são ilustrativas' in corpo
     assert 'Quero ativar meu site' in corpo

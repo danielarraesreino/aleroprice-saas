@@ -30,7 +30,7 @@ def test_artesao_troca_rotulo_e_schema(client, session):
     r = _tenant(session, 'atelie-teste', '55555555000195', tipo_negocio='artesao')
     session.add(ProdutoSite(restaurant_id=r.id, nome='Peça', imagem='img/berga/tender.jpg'))
     session.commit()
-    corpo = client.get('/bar/atelie-teste').get_data(as_text=True)
+    corpo = client.get('/expositor/atelie-teste').get_data(as_text=True)
     assert '>Produtos</a>' in corpo
     assert '>Cardápio</a>' not in corpo
     assert 'Store' in corpo

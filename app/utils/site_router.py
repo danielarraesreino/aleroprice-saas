@@ -8,7 +8,8 @@ da requisição:
     localhost / *.vercel.app / qualquer outro -> landing do PRODUTO
 
 O site de um bar SEMPRE também responde em /bar/<slug>, mesmo sem domínio
-próprio. É assim que uma demo (Bar do Zé) existe sem comprar domínio.
+próprio. É assim que uma demo (Bar do Zé) existe sem comprar domínio. Expositor
+(artesão) responde em /expositor/<slug>: bar é só para bar.
 
 Isto substitui o `Restaurante.query.order_by(id).first()` que servia "o
 primeiro bar do banco" na raiz — o que quebraria assim que houvesse 2 clientes.
@@ -16,6 +17,7 @@ primeiro bar do banco" na raiz — o que quebraria assim que houvesse 2 clientes
 import os
 
 from app.models.modelo_restaurante import Restaurante
+from app.utils.vocabulario import tipo_do
 
 # Domínio onde mora a landing de venda. Env para não travar o valor no código
 # (preview da Vercel, staging, troca de marca).
@@ -113,6 +115,16 @@ def slug_unico(nome, preferido=None):
     return slug
 
 
+def prefixo_do_site(rest):
+    """'expositor' para artesão, 'bar' para o resto: o caminho diz o que é."""
+    return 'expositor' if tipo_do(rest) == 'artesao' else 'bar'
+
+
+def caminho_do_site(rest, sufixo=''):
+    """'/expositor/<slug>' ou '/bar/<slug>' (+ sufixo), relativo ao host."""
+    return f'/{prefixo_do_site(rest)}/{rest.slug}{sufixo}'
+
+
 def url_canonica(rest):
     """Endereço único e absoluto do site deste bar.
 
@@ -123,7 +135,7 @@ def url_canonica(rest):
     `<link rel=canonical>`, no grafo e no sitemap.
 
     Domínio próprio ganha sempre: é o endereço que o dono divulga e o que ele
-    paga pra ser dele. Sem domínio, /bar/<slug> — que é endereço definitivo, não
+    paga pra ser dele. Sem domínio, /bar/<slug> (/expositor/<slug> se artesão) — que é endereço definitivo, não
     provisório. O /s/<id> só aparece pra tenant sem slug (linha antiga do banco),
     e é o último recurso justamente porque o link não diz nada sobre o bar.
     """
@@ -135,7 +147,7 @@ def url_canonica(rest):
         return f'https://{dominio}/'
     slug = (getattr(rest, 'slug', None) or '').strip()
     if slug:
-        return f'https://{produto}/bar/{slug}'
+        return f'https://{produto}/{prefixo_do_site(rest)}/{slug}'
     return f'https://{produto}/s/{rest.id}'
 
 
@@ -160,7 +172,7 @@ def url_do_cardapio(rest):
     if not slug:
         return None
     dominio = normalizar_host(getattr(rest, 'dominio', None)) or dominio_do_produto()
-    return f'https://{dominio}/bar/{slug}/cardapio'
+    return f'https://{dominio}/{prefixo_do_site(rest)}/{slug}/cardapio'
 
 
 def url_do_sistema(caminho='/auth/login'):

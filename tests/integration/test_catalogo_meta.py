@@ -44,7 +44,7 @@ def test_feed_leva_so_produto_com_foto_e_preco(client, session):
     assert copa['description'] == 'Curada 90 dias' and tender['description'] == 'Tender'
     assert copa['image_link'].startswith('https://') and copa['image_link'].endswith('/static/img/berga/copa.jpg')
     assert tender['image_link'] == 'https://blob.example/tender.jpg'
-    assert copa['link'].endswith('/bar/barraca-cat') and copa['brand'] == 'Dona Cat'
+    assert copa['link'].endswith('/expositor/barraca-cat') and copa['brand'] == 'Dona Cat'
     assert copa['id'] != tender['id'] and copa['condition'] == 'new'
 
 
@@ -71,7 +71,7 @@ def test_painel_mostra_endereco_e_o_que_ficou_de_fora(client, session):
     session.commit()
     client.post('/auth/login', data={'email': 'dona.cat@x.com', 'senha': 'segredo123'})
     html = client.get('/config-site/catalogo').get_data(as_text=True)
-    assert '/bar/barraca-cat/catalogo.csv' in html
+    assert '/expositor/barraca-cat/catalogo.csv' in html
     assert '2 produtos no catálogo' in html
     assert '2 produtos ficaram de fora porque estão' in html
     assert 'R$ 89,90' in html

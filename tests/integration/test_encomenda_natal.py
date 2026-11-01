@@ -37,10 +37,10 @@ def test_proximas_retiradas_respeita_o_prazo():
 
 def test_sacola_so_oferece_retirada_quando_ligada(client, session):
     _barraca(session, slug='sem-retirada')
-    html = client.get('/bar/sem-retirada').get_data(as_text=True)
+    html = client.get('/expositor/sem-retirada').get_data(as_text=True)
     assert 'pedido-retirada' not in html.split('<script')[0]
     _barraca(session, slug='com-retirada', retirada=True)
-    html = client.get('/bar/com-retirada').get_data(as_text=True)
+    html = client.get('/expositor/com-retirada').get_data(as_text=True)
     assert 'id="pedido-retirada" data-antecedencia="3"' in html
     assert 'Retirada na feira: ' in html
     assert 'class="btn pedir-link" id="pedido-enviar"' in html
@@ -74,7 +74,7 @@ def test_guia_de_presentes_separa_por_faixa(client, session):
     assert 'Cesta' in trecho('ate-120', 'acima-120')
     assert 'Tender' in trecho('acima-120')
     assert 'Sem preço' not in html
-    assert '/bar/guia-natal#produtos' in html
+    assert '/expositor/guia-natal#produtos' in html
 
 
 def test_cesta_ganha_destaque_no_topo(client, session):

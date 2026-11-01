@@ -53,7 +53,7 @@ def test_dono_logado_nao_infla_os_proprios_numeros(auth_client, session, restaur
 
 def test_site_publico_carrega_o_beacon(client, session):
     _cliente(session)
-    html = client.get('/bar/barraca-num').get_data(as_text=True)
+    html = client.get('/expositor/barraca-num').get_data(as_text=True)
     assert "'/m/barraca-num'" in html and 'sendBeacon' in html
 
 

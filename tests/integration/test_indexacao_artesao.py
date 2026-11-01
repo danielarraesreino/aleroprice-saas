@@ -43,7 +43,7 @@ def _tem_image(no):
 
 def test_artesao_previa_e_indexavel_e_mantem_a_faixa(client, session):
     _artesao_previa()
-    corpo = client.get(f'/bar/{SLUG}', headers={'Host': PRODUTO}).get_data(as_text=True)
+    corpo = client.get(f'/expositor/{SLUG}', headers={'Host': PRODUTO}).get_data(as_text=True)
     assert 'content="index,follow"' in corpo
     assert 'noindex' not in corpo and 'nofollow' not in corpo and 'noarchive' not in corpo
     assert 'faixa-previa' in corpo and 'imagens são ilustrativas' in corpo
@@ -52,8 +52,8 @@ def test_artesao_previa_e_indexavel_e_mantem_a_faixa(client, session):
 def test_artesao_previa_entra_no_sitemap_com_lastmod(client, session):
     rest = _artesao_previa()
     xml = _sitemap(client)
-    assert f'<loc>https://{PRODUTO}/bar/{SLUG}</loc>' in xml
-    bloco = xml.split(f'/bar/{SLUG}</loc>')[1].split('</url>')[0]
+    assert f'<loc>https://{PRODUTO}/expositor/{SLUG}</loc>' in xml
+    bloco = xml.split(f'/expositor/{SLUG}</loc>')[1].split('</url>')[0]
     assert '<lastmod>' in bloco
 
 
@@ -72,7 +72,7 @@ def test_bar_previa_segue_noindex_e_fora_do_sitemap(client, session):
 
 def test_json_ld_de_previa_nao_tem_image(client, session):
     _artesao_previa()
-    corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    corpo = client.get(f'/expositor/{SLUG}').get_data(as_text=True)
     bruto = re.search(r'<script type="application/ld\+json">(.*?)</script>', corpo, re.S).group(1)
     grafo = json.loads(bruto)['@graph']
     assert any(n['@type'] == 'Store' for n in grafo)
@@ -88,19 +88,19 @@ def test_json_ld_de_cliente_mantem_image(client, session):
 
 def test_cliente_com_dominio_redireciona_301_de_bar_slug(client, session):
     semear(no_ar=True)
-    resp = client.get(f'/bar/{SLUG}', headers={'Host': PRODUTO})
+    resp = client.get(f'/expositor/{SLUG}', headers={'Host': PRODUTO})
     assert resp.status_code == 301
     assert resp.headers['Location'] == 'https://donaberga.com.br/'
 
 
 def test_artesao_sem_dominio_nao_redireciona(client, session):
     _artesao_previa()
-    assert client.get(f'/bar/{SLUG}', headers={'Host': PRODUTO}).status_code == 200
+    assert client.get(f'/expositor/{SLUG}', headers={'Host': PRODUTO}).status_code == 200
 
 
 def test_rodape_de_todo_hotsite_linka_a_feira_sem_nofollow(client, session):
     _artesao_previa()
-    corpo = client.get(f'/bar/{SLUG}').get_data(as_text=True)
+    corpo = client.get(f'/expositor/{SLUG}').get_data(as_text=True)
     link = re.search(r'<a [^>]*href="https://feiradebarao\.com\.br/"[^>]*>Feito com a Feira de Barão</a>', corpo)
     assert link and 'nofollow' not in link.group(0)
 
@@ -109,7 +109,7 @@ def test_feira_linka_o_dominio_proprio_e_nao_a_previa(client, session):
     semear(no_ar=True)
     html = client.get('/feira').get_data(as_text=True)
     assert 'https://donaberga.com.br/' in html
-    assert f'/bar/{SLUG}' not in html
+    assert f'/expositor/{SLUG}' not in html
 
 
 def test_llms_full_e_diferente_e_maior_que_llms(client, session):

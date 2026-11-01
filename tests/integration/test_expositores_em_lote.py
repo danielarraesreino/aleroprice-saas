@@ -145,12 +145,12 @@ def test_bar_continua_igual_no_pipeline(session, tmp_path):
 
 
 def test_do_formulario_ao_site_no_ar(client, session, tmp_path):
-    """A jornada inteira: planilha -> yml -> tenant -> /bar/<slug> e /feira."""
+    """A jornada inteira: planilha -> yml -> tenant -> /expositor/<slug> e /feira."""
     saida = tmp_path / 'leads'
     imp.importar(_csv(tmp_path, LINHA_OK), destino=saida)
     rest, _ = demos.aplicar_lead(str(saida / 'atelie-da-maria.yml'))
     session.commit()
-    pagina = client.get(f'/bar/{rest.slug}').get_data(as_text=True)
+    pagina = client.get(f'/expositor/{rest.slug}').get_data(as_text=True)
     assert 'Ateliê da Maria' in pagina and 'wa.me/5519999991234' in pagina
     assert 'Catálogo em montagem' not in pagina        # sem foto nenhuma, o que faz aparece em texto
     assert 'sem-foto' in pagina

@@ -194,7 +194,7 @@ def test_json_ld_do_expositor_ganha_geo_quando_tem_coordenada(client, session):
     from tests.integration.test_hotsite_artesao import _grafo
     r = _tenant(session, 'banca-geo', '70000000000185', tipo='artesao', lat=-22.8227, lng=-47.0821)
     _produto(session, r, 'Peça')
-    grafo = _grafo(client.get('/bar/banca-geo').get_data(as_text=True))
+    grafo = _grafo(client.get('/expositor/banca-geo').get_data(as_text=True))
     geo = next(n['geo'] for n in grafo if n['@type'] == 'Store')
     assert geo == {'@type': 'GeoCoordinates', 'latitude': -22.8227, 'longitude': -47.0821}
 

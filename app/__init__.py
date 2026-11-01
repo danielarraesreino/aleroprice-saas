@@ -264,7 +264,8 @@ def create_app(config_name='default'):
     # salvou bardavila.bar/app nos favoritos cai no lugar certo.
     ENDPOINTS_DO_TENANT = {
         'static',
-        'public.landing', 'public.landing_slug', 'public.landing_tenant',
+        'public.landing', 'public.landing_slug', 'public.landing_expositor',
+        'public.landing_tenant',
         'public.reservar', 'public.robots', 'public.sitemap',
         # O cardápio é o QR colado na mesa: tem que abrir no endereço do bar.
         # Fora daqui ele levava 302 pro domínio do produto — o cliente sentado

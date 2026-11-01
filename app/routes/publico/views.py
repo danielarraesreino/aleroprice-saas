@@ -17,7 +17,7 @@ from app.models.modelo_restaurante import Restaurante
 from . import bp
 from app.utils.site_router import (
     _publicavel, eh_dominio_do_produto, slug_unico, tenant_por_host,
-    tenant_por_slug, url_canonica, url_do_cardapio,
+    tenant_por_slug, url_canonica, url_do_cardapio, caminho_do_site, prefixo_do_site,
 )
 from app.utils import seo
 from app.utils.vocabulario import tipo_do
@@ -1029,21 +1029,36 @@ def _marcar_visita(rest):
 
 @bp.route('/bar/<slug>')
 def landing_slug(slug):
-    """Site de um bar ou expositor pelo slug. Sempre funciona, com ou sem
-    domínio próprio — é o endereço das barracas no portal (ex.: /bar/dona-berga)."""
+    """Site de um bar pelo slug. Sempre funciona, com ou sem domínio próprio.
+    Expositor (artesão) mora em /expositor/<slug>; aqui ele leva 301 pra lá."""
+    return _site_pelo_slug(slug, 'bar')
+
+
+@bp.route('/expositor/<slug>')
+def landing_expositor(slug):
+    """Site de um expositor da Feira (ex.: /expositor/dona-berga). Bar que
+    chegar por aqui leva 301 para /bar/<slug>: o caminho diz o que é."""
+    return _site_pelo_slug(slug, 'expositor')
+
+
+def _site_pelo_slug(slug, prefixo):
     rest = tenant_por_slug(slug)  # já filtra inativo
     if rest is None:
         abort(404)
     # Todo cliente com domínio próprio (Bar da Vila, Dona Berga...) tem UM
-    # endereço: no domínio do produto, /bar/<slug> vira 301 para ele (senão o
-    # site fica duplicado). Sem domínio (artesão ou bar), /bar/<slug> é a
-    # URL definitiva e abre aqui. `?modelo=`/`?tema=` seguem na query.
+    # endereço: no domínio do produto, o caminho por slug vira 301 para ele
+    # (senão o site fica duplicado). Sem domínio, /bar/<slug> (bar) ou
+    # /expositor/<slug> (artesão) é a URL definitiva; o prefixo trocado leva
+    # 301 para o certo. `?modelo=`/`?tema=` seguem na query.
     if rest.dominio and eh_dominio_do_produto(request.host):
         destino = url_canonica(rest)
-        if request.query_string:
-            destino += '?' + request.query_string.decode('utf-8', 'ignore')
-        return redirect(destino, code=301)
-    return _render_landing(rest)
+    elif prefixo_do_site(rest) != prefixo:
+        destino = caminho_do_site(rest)
+    else:
+        return _render_landing(rest)
+    if request.query_string:
+        destino += '?' + request.query_string.decode('utf-8', 'ignore')
+    return redirect(destino, code=301)
 
 
 def _grupos_do_cardapio(dishes):
@@ -1117,12 +1132,13 @@ def _render_cardapio(rest):
         url_canonica=endereco_cardapio,
         # Relativo de propósito: quem veio pelo QR está no domínio do bar e
         # continua nele ao tocar "ver o site".
-        url_do_site=url_for('public.landing_slug', slug=rest.slug),
+        url_do_site=caminho_do_site(rest),
         email_vendas=os.environ.get('FEIRA_EMAIL', 'contato@feiradebarao.com.br'),
         contato_vendas=os.environ.get('FEIRA_WHATSAPP', ''),
     )))
 
 
+@bp.route('/expositor/<slug>/cardapio')
 @bp.route('/bar/<slug>/cardapio')
 def cardapio(slug):
     """Cardápio digital do bar, o endereço que o QR da mesa carrega."""
@@ -1259,6 +1275,7 @@ def cadastro():
     return tela(**dados)
 
 
+@bp.route('/expositor/<slug>/avaliar')
 @bp.route('/bar/<slug>/avaliar')
 def avaliar(slug):
     """Endereço curto do QR "avalie a gente": conta o clique e manda para a
@@ -1270,7 +1287,7 @@ def avaliar(slug):
         abort(404)
     cfg = SiteConfig.query.filter_by(restaurant_id=rest.id).first()
     if cfg is None or not cfg.google_place_id:
-        return redirect(url_for('public.landing_slug', slug=rest.slug))
+        return redirect(caminho_do_site(rest))
     # UPDATE atômico: dois cliques ao mesmo tempo não se perdem.
     SiteConfig.query.filter_by(id=cfg.id).update(
         {SiteConfig.cliques_avaliacao: db.func.coalesce(SiteConfig.cliques_avaliacao, 0) + 1},
@@ -1280,6 +1297,7 @@ def avaliar(slug):
                     + urllib.parse.quote(cfg.google_place_id, safe=''))
 
 
+@bp.route('/expositor/<slug>/catalogo.csv')
 @bp.route('/bar/<slug>/catalogo.csv')
 def catalogo_meta(slug):
     """Feed do catálogo para a Meta (WhatsApp Business, Instagram, Facebook).
