@@ -35,3 +35,13 @@ def test_arquivo_chave_do_indexnow(client, session):
     from app.routes.publico.views import INDEXNOW_CHAVE
     r = client.get(f'/{INDEXNOW_CHAVE}.txt')
     assert r.status_code == 200 and r.get_data(as_text=True) == INDEXNOW_CHAVE
+
+
+def test_feira_tem_faq_visivel_e_faqpage_so_na_geral(client, session):
+    import json
+    html = client.get('/feira').get_data(as_text=True)
+    assert 'id="faq-titulo"' in html and 'A entrada na Feira de Barão é paga?' in html
+    ld = [json.loads(x) for x in re.findall(r'<script type="application/ld\+json">(.*?)</script>', html, re.S)]
+    faq = next(d for d in ld if d.get('@type') == 'FAQPage')
+    assert len(faq['mainEntity']) >= 5
+    assert 'FAQPage' not in client.get('/feira?q=geleia').get_data(as_text=True)

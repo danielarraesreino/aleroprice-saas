@@ -97,3 +97,9 @@
 .memoria:has(.fp){max-width:1180px}
 /* `.memoria ul` recua toda lista em 1,3em; chips e grade de produto vão até a borda. */
 .memoria .fp-filtros,.memoria .fp-prods,.memoria .gp-faixas{padding-left:0}
+/* Perguntas frequentes da /feira (abrem e fecham sem JS) */
+.fp-faq{margin:40px 0 0;max-width:70ch}
+.fp-faq details{border-top:1.5px solid var(--linha)}
+.fp-faq details:last-child{border-bottom:1.5px solid var(--linha)}
+.fp-faq summary{display:flex;align-items:center;min-height:48px;padding:10px 0;font-weight:700;cursor:pointer}
+.fp-faq p{margin:0 0 14px;color:var(--taupe);line-height:1.6}

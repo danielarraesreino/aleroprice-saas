@@ -197,7 +197,7 @@
     <ul class="hm-lista">
       {% for e in exp_vitrine %}
       <li class="hm-exp{% if e.hoje %} hoje{% endif %}">
-        {% if e.foto %}<img class="hm-foto" src="{{ e.foto_sm or e.foto }}" alt="" loading="lazy" width="320" height="240">
+        {% if e.foto %}<img class="hm-foto" src="{{ e.foto_sm or e.foto }}" alt="{{ '' if e.demo else e.nome ~ (': ' ~ e.descritor if e.descritor else '') }}" loading="lazy" width="320" height="240">
         {% else %}<span class="hm-foto" aria-hidden="true">{{ e.nome[:1]|upper }}</span>{% endif %}
         <div class="hm-corpo">
           {% if e.hoje %}<span class="hm-selos"><span class="hm-selo hoje">Na feira hoje</span></span>{% endif %}

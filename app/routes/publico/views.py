@@ -524,6 +524,9 @@ def feira(categoria=None, sub=None):
         sub_atual=sub_atual, subcategorias=subcategorias, produtos_sub=produtos_sub,
         categorias_feira=[{'slug': c, 'titulo': t} for c, t, _ in fe.CATEGORIAS_DA_FEIRA],
         total_hoje=sum(1 for e in lista if e['hoje']),
+        # FAQ visível + FAQPage só na /feira geral: repetida em cada categoria
+        # viraria conteúdo duplicado.
+        faq=FAQ_FEIRA if not (cat_atual or q or so_hoje or tipo) else None,
         centro=fe.CENTRO, **_contexto_produto()))
     return _na_borda(resp)
 
@@ -963,6 +966,12 @@ FAQ_FEIRA = [
      'Na Praça do Coco, em Barão Geraldo, Campinas - SP. Sábado das 10h às 16h e domingo das 10h às 15h.'),
     ('Onde comprar artesanato em Barão Geraldo?',
      'Na Praça do Coco, nos fins de semana, e na lista de expositores em /feira, com mapa, produtos e quem está na Feira hoje.'),
+    ('A entrada na Feira de Barão é paga?',
+     'Não. A Feira acontece na praça, ao ar livre, e a entrada é livre todo fim de semana.'),
+    ('Como sei quem está na Feira hoje?',
+     'Na lista de expositores, o selo "Na feira hoje" marca quem avisou que está na praça; o filtro "Na feira hoje" mostra só essas barracas.'),
+    ('Dá para encomendar e retirar na Feira?',
+     'Sim. Abra a barraca do expositor, monte a lista e envie pelo WhatsApp de quem produz; muitas barracas deixam escolher o sábado ou o domingo para retirar na praça.'),
 ]
 
 

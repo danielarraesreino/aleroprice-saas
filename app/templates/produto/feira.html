@@ -94,7 +94,8 @@
     <ul>
       {% for e in expositores %}
       <li class="fp-card{% if e.hoje %} hoje{% endif %}" data-slug="{{ e.slug }}">
-        {% if e.foto %}<img class="fp-foto" src="{{ e.foto_sm or e.foto }}" alt="" loading="lazy" width="72" height="72">
+        {# alt descritivo só de expositor real: a foto da prévia é ilustrativa e não pode virar "foto do expositor" para busca e IA. #}
+        {% if e.foto %}<img class="fp-foto" src="{{ e.foto_sm or e.foto }}" alt="{{ '' if e.demo else e.nome ~ (': ' ~ e.descritor if e.descritor else '') }}" loading="lazy" width="72" height="72">
         {% else %}<span class="fp-foto" aria-hidden="true">{{ e.nome[:1]|upper }}</span>{% endif %}
         <div class="fp-info">
           {% if e.hoje %}<span class="fp-selos"><span class="fp-selo hoje">Na feira hoje</span></span>{% endif %}
@@ -129,6 +130,20 @@
     {% endif %}
   </section>
 </div>
+{% if faq %}
+{# Perguntas da Feira (FAQ_FEIRA, publico/views.py): visíveis aqui e em
+   FAQPage, que é o formato que busca e IA mais citam. Só fatos do site. #}
+<section class="fp-faq" aria-labelledby="faq-titulo">
+  <h2 id="faq-titulo">Perguntas frequentes</h2>
+  {% for pergunta, resposta in faq %}
+  <details{% if loop.first %} open{% endif %}><summary>{{ pergunta }}</summary><p>{{ resposta }}</p></details>
+  {% endfor %}
+</section>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{% for pergunta, resposta in faq %}
+ {"@type":"Question","name":{{ pergunta|tojson }},"acceptedAnswer":{"@type":"Answer","text":{{ resposta|tojson }}}}{{ ',' if not loop.last }}{% endfor %}]}
+</script>
+{% endif %}
 </div>
 {% endblock %}
 {% block js %}
