@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+{# Tema escolhido no botão do topo, aplicado antes de pintar (sem piscar). #}
+<script>try{var t=localStorage.getItem('feira-tema-portal');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 <title>{% block titulo %}Memória Viva de Barão Geraldo · Feira de Barão{% endblock %}</title>
 <meta name="description" content="{% block descricao %}{% endblock %}">
 <link rel="canonical" href="{% block canonical %}{% endblock %}">

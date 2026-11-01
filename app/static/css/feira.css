@@ -1168,29 +1168,74 @@ p,li,blockquote{text-wrap:pretty}
    que já eram escuros no claro (busca, quando e onde, convite) recebem de volta
    os tokens claros e ficam iguais nos dois modos. */
 html.tema-auto{color-scheme:light dark}
+html.tema-auto[data-theme="light"]{color-scheme:light}
+html.tema-auto[data-theme="dark"]{color-scheme:dark}
+/* Escuro pelo sistema, a menos que a pessoa tenha escolhido o claro no botão do topo… */
 @media (prefers-color-scheme:dark){
-  html.tema-auto{
+  html.tema-auto:not([data-theme="light"]){
     --papel:#1d1712; --papel-escuro:#2b231c; --papel-claro:#241d17; --cartao:#2e251e;
     --tinta:#f3ead8; --taupe:#c4b49e; --tomate:#f0846a;
     --linha:rgba(243,234,216,.16);
   }
-  html.tema-auto body{background:var(--papel);color:var(--tinta)}
-  html.tema-auto :is(.hm-quando,.hm-busca,.hm-expor,.fp-card.destacado,.full-bleed-section,.secao-participar){
+  html.tema-auto:not([data-theme="light"]) body{background:var(--papel);color:var(--tinta)}
+  html.tema-auto:not([data-theme="light"]) :is(.hm-quando,.hm-busca,.hm-expor,.fp-card.destacado,.full-bleed-section,.secao-participar){
     --papel:#f6eedb; --papel-escuro:#eae0c8; --papel-claro:#fcf8ee; --cartao:#fff;
     --tinta:#241c14; --taupe:#695842; --tomate:#b33215; --linha:rgba(36,28,20,.14);
   }
   /* blocos escuros num fundo escuro: um tom abaixo para não sumirem */
-  html.tema-auto :is(.hm-quando,.hm-busca,.hm-expor,.fp-card.destacado){background:#0f0b08;outline:1px solid rgba(243,234,216,.12)}
-  html.tema-auto :is(.full-bleed-section,.secao-participar){background:#0f0b08}
+  html.tema-auto:not([data-theme="light"]) :is(.hm-quando,.hm-busca,.hm-expor,.fp-card.destacado){background:#0f0b08;outline:1px solid rgba(243,234,216,.12)}
+  html.tema-auto:not([data-theme="light"]) :is(.full-bleed-section,.secao-participar){background:#0f0b08}
   /* fundo de ação: tomate escuro com texto branco, igual ao claro */
-  html.tema-auto :is(.btn-tomate,.cta-dono:hover,.hm-selo,.fp-busca button,.fp-selo,.pin-memoria,.plano-badge-topo,.pino-bar){background:#b33215}
-  html.tema-auto .btn-tomate:hover{background:#8e250e}
-  html.tema-auto .btn-colab{border-color:rgba(243,234,216,.28)}
-  html.tema-auto .site-header{background:rgba(29,23,18,.97)}
-  html.tema-auto .story-chapter-card{background:rgba(36,29,23,.97);box-shadow:0 20px 48px rgba(0,0,0,.5)}
-  html.tema-auto :is(.card-thumb,.chapter-photo,.bar-img-thumb){background:var(--papel-escuro)}
-  html.tema-auto .card-meta{color:var(--taupe)}
-  html.tema-auto .form-control{background:var(--papel-claro);color:var(--tinta)}
+  html.tema-auto:not([data-theme="light"]) :is(.btn-tomate,.cta-dono:hover,.hm-selo,.fp-busca button,.fp-selo,.pin-memoria,.plano-badge-topo,.pino-bar){background:#b33215}
+  html.tema-auto:not([data-theme="light"]) .btn-tomate:hover{background:#8e250e}
+  html.tema-auto:not([data-theme="light"]) .btn-colab{border-color:rgba(243,234,216,.28)}
+  html.tema-auto:not([data-theme="light"]) .site-header{background:rgba(29,23,18,.97)}
+  html.tema-auto:not([data-theme="light"]) .story-chapter-card{background:rgba(36,29,23,.97);box-shadow:0 20px 48px rgba(0,0,0,.5)}
+  html.tema-auto:not([data-theme="light"]) :is(.card-thumb,.chapter-photo,.bar-img-thumb){background:var(--papel-escuro)}
+  html.tema-auto:not([data-theme="light"]) .card-meta{color:var(--taupe)}
+  html.tema-auto:not([data-theme="light"]) .form-control{background:var(--papel-claro);color:var(--tinta)}
   /* mapa: ladrilhos claros do OpenStreetMap escurecidos sem perder as ruas */
-  html.tema-auto :is(.scrolly-map-sticky,#mapa-memoria,#mapa-feira) .leaflet-tile-pane{filter:brightness(.72) contrast(1.08) saturate(.7)}
+  html.tema-auto:not([data-theme="light"]) :is(.scrolly-map-sticky,#mapa-memoria,#mapa-feira) .leaflet-tile-pane{filter:brightness(.72) contrast(1.08) saturate(.7)}
 }
+/* …e escuro escolhido no botão, qualquer que seja o sistema. */
+
+html.tema-auto[data-theme="dark"]{
+  --papel:#1d1712; --papel-escuro:#2b231c; --papel-claro:#241d17; --cartao:#2e251e;
+  --tinta:#f3ead8; --taupe:#c4b49e; --tomate:#f0846a;
+  --linha:rgba(243,234,216,.16);
+}
+html.tema-auto[data-theme="dark"] body{background:var(--papel);color:var(--tinta)}
+html.tema-auto[data-theme="dark"] :is(.hm-quando,.hm-busca,.hm-expor,.fp-card.destacado,.full-bleed-section,.secao-participar){
+  --papel:#f6eedb; --papel-escuro:#eae0c8; --papel-claro:#fcf8ee; --cartao:#fff;
+  --tinta:#241c14; --taupe:#695842; --tomate:#b33215; --linha:rgba(36,28,20,.14);
+}
+/* blocos escuros num fundo escuro: um tom abaixo para não sumirem */
+html.tema-auto[data-theme="dark"] :is(.hm-quando,.hm-busca,.hm-expor,.fp-card.destacado){background:#0f0b08;outline:1px solid rgba(243,234,216,.12)}
+html.tema-auto[data-theme="dark"] :is(.full-bleed-section,.secao-participar){background:#0f0b08}
+/* fundo de ação: tomate escuro com texto branco, igual ao claro */
+html.tema-auto[data-theme="dark"] :is(.btn-tomate,.cta-dono:hover,.hm-selo,.fp-busca button,.fp-selo,.pin-memoria,.plano-badge-topo,.pino-bar){background:#b33215}
+html.tema-auto[data-theme="dark"] .btn-tomate:hover{background:#8e250e}
+html.tema-auto[data-theme="dark"] .btn-colab{border-color:rgba(243,234,216,.28)}
+html.tema-auto[data-theme="dark"] .site-header{background:rgba(29,23,18,.97)}
+html.tema-auto[data-theme="dark"] .story-chapter-card{background:rgba(36,29,23,.97);box-shadow:0 20px 48px rgba(0,0,0,.5)}
+html.tema-auto[data-theme="dark"] :is(.card-thumb,.chapter-photo,.bar-img-thumb){background:var(--papel-escuro)}
+html.tema-auto[data-theme="dark"] .card-meta{color:var(--taupe)}
+html.tema-auto[data-theme="dark"] .form-control{background:var(--papel-claro);color:var(--tinta)}
+/* mapa: ladrilhos claros do OpenStreetMap escurecidos sem perder as ruas */
+html.tema-auto[data-theme="dark"] :is(.scrolly-map-sticky,#mapa-memoria,#mapa-feira) .leaflet-tile-pane{filter:brightness(.72) contrast(1.08) saturate(.7)}
+
+/* Botão de tema no topo (mesmo padrão dos hotsites, R5): só aparece onde há
+   modo escuro (html.tema-auto); o JS do topo tira o `hidden`. */
+.tema-btn{flex:none;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;
+  border-radius:50%;border:1.5px solid var(--linha);background:transparent;color:var(--tinta);cursor:pointer}
+.tema-btn:hover{border-color:var(--tomate);color:var(--tomate)}
+.tema-btn[hidden]{display:none}
+.tema-btn .ico-sol{display:none}
+html.tema-auto[data-theme="dark"] .tema-btn .ico-sol{display:block}
+html.tema-auto[data-theme="dark"] .tema-btn .ico-lua{display:none}
+@media (prefers-color-scheme:dark){html.tema-auto:not([data-theme="light"]) .tema-btn .ico-sol{display:block}
+  html.tema-auto:not([data-theme="light"]) .tema-btn .ico-lua{display:none}}
+/* Até 420 px o topo não comporta logo + "Tenho banca" + tema + menu (passava
+   24 px em 320): ali o botão de tema mora na gaveta, ao lado do ×. */
+.tema-btn-gaveta{display:none}
+@media (max-width:420px){.tema-btn-topo{display:none}.tema-btn-gaveta:not([hidden]){display:inline-flex}}
