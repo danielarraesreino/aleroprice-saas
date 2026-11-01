@@ -85,3 +85,26 @@ def test_sitemap_traz_subcategorias_com_produto_e_fotos_do_expositor(client, ses
     assert fotos == ['https://x.blob.test/vaso.jpg', f'https://{PRODUTO}/static/img/prato.jpg']
     # Página da Feira ganha lastmod = edição mais recente de um expositor.
     assert urls[f'https://{PRODUTO}/feira'].findtext('s:lastmod', namespaces=ns)
+
+
+# ------------------------------------------------------------------ home
+
+def test_home_poe_a_busca_da_feira_e_o_que_tem_em_destaque(client, session):
+    _artesao(session, 'barro-bom', ('Vaso', 'Cerâmica', 'img/a.jpg'))
+
+    html = _get(client, '/').get_data(as_text=True)
+
+    busca = html.split('class="hm-busca"')[1].split('</form>')[0]
+    assert '<form class="hm-busca" method="get" action="/feira"' in html
+    assert 'name="q"' in busca
+    assert 'href="/feira/artesanato/ceramica"' in busca            # atalho real
+    assert html.index('class="hm-busca"') < html.index('id="expositores"')
+    assert 'id="o-que-tem"' in html and 'href="/feira/artesanato"' in html
+    assert 'oficio-card' not in html                               # cartões fixos saíram
+    assert 'Uma feira com a história do bairro' in html
+
+
+def test_home_sem_expositor_nao_mostra_secoes_vazias(client, session):
+    html = _get(client, '/').get_data(as_text=True)
+    assert 'id="o-que-tem"' not in html and 'id="presentes"' not in html
+    assert 'class="hm-busca"' in html                              # a busca fica sempre
