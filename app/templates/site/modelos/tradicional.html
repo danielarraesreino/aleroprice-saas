@@ -100,9 +100,7 @@
 <meta name="twitter:description" content="{{ site.tagline or descritor }}">
 {% if og_img %}<meta name="twitter:image" content="{{ og_img }}">{% endif %}
 <meta name="theme-color" content="{{ tema_cor or '#f6eddd' }}" id="meta-cor">
-<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon-32.png') }}">
-<link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
+{% include "site/_icones.html" %}
 <script>
   // Tema salvo antes da primeira pintura (evita piscar).
   // Chave por bar: dois sites no mesmo navegador não dividem preferência.

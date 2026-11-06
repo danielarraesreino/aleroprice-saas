@@ -1,0 +1,14 @@
+{# Ícone da aba e da tela inicial. Com `site.logo`, é a marca da casa; sem ela,
+   o ícone neutro da plataforma. Nunca a marca da Feira passando por logo da casa.
+   Mesmos dois formatos de caminho da capa: URL absoluta ou caminho em static. #}
+{% set _logo = site.logo if site else None %}
+{% if _logo %}
+{% set _logo_url = _logo if _logo.startswith('http') else url_for('static', filename=_logo) %}
+{% set _logo_tipo = 'image/png' if _logo.lower().endswith('.png') else ('image/webp' if _logo.lower().endswith('.webp') else 'image/jpeg') %}
+<link rel="icon" type="{{ _logo_tipo }}" href="{{ _logo_url }}">
+<link rel="apple-touch-icon" href="{{ _logo_url }}">
+{% else %}
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon-32.png') }}">
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
+{% endif %}

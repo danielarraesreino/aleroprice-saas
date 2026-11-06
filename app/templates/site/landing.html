@@ -67,10 +67,7 @@
 <meta name="twitter:description" content="{{ site.tagline or descritor }}">
 {% if og_img %}<meta name="twitter:image" content="{{ og_img }}">{% endif %}
 <meta name="theme-color" content="{{ tema_cor or '#100a06' }}">
-<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon-32.png') }}">
-<link rel="icon" type="image/png" sizes="64x64" href="{{ url_for('static', filename='img/favicon-64.png') }}">
-<link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
+{% include "site/_icones.html" %}
 <script>
   // aplica tema salvo antes de pintar (evita flash)
   // Chave por bar: dois sites no mesmo navegador não compartilham preferência.
@@ -194,7 +191,7 @@
     backdrop-filter:blur(6px);
   }
   .nav-logo{display:inline-flex;align-items:center;gap:9px;font-family:"Bebas Neue",sans-serif;letter-spacing:2px;font-size:1.4rem;color:var(--amber)}
-  .nav-logo img{width:30px;height:30px;border-radius:7px;box-shadow:0 0 14px rgba(255,180,60,.35)}
+  .nav-logo img{width:30px;height:30px;object-fit:contain;border-radius:7px;box-shadow:0 0 14px rgba(255,180,60,.35)}
   .theme-toggle{
     display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;
     border:1px solid rgba(255,180,60,.4);border-radius:999px;background:transparent;cursor:pointer;
@@ -627,7 +624,10 @@ srcset="{{ base }}-400.webp 400w, {{ base }}-800.webp 800w" sizes="{{ tamanhos }
    rótulo, senão o leitor de tela anuncia "navegação" duas vezes sem dizer
    qual é qual. #}
 <nav aria-label="Seções do site">
-  <a href="#topo" class="nav-logo"><img src="{{ url_for('static', filename='img/favicon-64.png') }}" alt="Logo do {{ site.nome }}" width="30" height="30" decoding="async">{{ site.nome|upper }}</a>
+  {# Marca da casa só quando a casa tem uma (`site.logo`); sem ela, só o nome.
+     O ícone da plataforma não passa por logo de bar. #}
+  {% set logo_src = site.logo if (site.logo and site.logo.startswith('http')) else (url_for('static', filename=site.logo) if site.logo else None) %}
+  <a href="#topo" class="nav-logo">{% if logo_src %}<img src="{{ logo_src }}" alt="Logo do {{ site.nome }}" width="30" height="30" decoding="async">{% endif %}{{ site.nome|upper }}</a>
   <div class="nav-links">
     {% if dishes %}<a href="#cardapio">{{ rotulo(tenant, 'cardapio') }}</a>{% endif %}
     {% if team or gallery %}<a href="#historia">História</a>{% endif %}

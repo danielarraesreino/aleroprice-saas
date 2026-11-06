@@ -108,10 +108,7 @@
 <meta name="twitter:description" content="{{ site.tagline or descritor }}">
 {% if og_img %}<meta name="twitter:image" content="{{ og_img }}">{% endif %}
 <meta name="theme-color" content="{{ tema_cor or '#fbf7f1' }}">
-<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon-32.png') }}">
-<link rel="icon" type="image/png" sizes="64x64" href="{{ url_for('static', filename='img/favicon-64.png') }}">
-<link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
+{% include "site/_icones.html" %}
 <script>
   // Tema antes da primeira pintura (evita flash) e SEMPRE explícito: com o
   // atributo escrito, o preset de cor (tema_css) sabe qual paleta aplicar.

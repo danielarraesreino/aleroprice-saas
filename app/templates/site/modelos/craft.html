@@ -103,9 +103,7 @@
    `fetchpriority="high"` que se põe num `<img>` de capa. #}
 <link rel="preload" as="image" href="{{ hero_src }}" fetchpriority="high">
 {% endif %}
-<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon-32.png') }}">
-<link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
+{% include "site/_icones.html" %}
 <script>
   /* Tema salvo aplicado antes de pintar (sem flash).
      Chave por bar: dois sites no mesmo navegador não dividem preferência.

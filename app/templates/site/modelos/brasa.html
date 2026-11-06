@@ -85,10 +85,7 @@
 --------------------------------------------------------------------------- #}
 {% if json_ld %}<script type="application/ld+json">{{ json_ld|safe }}</script>{% endif %}
 <meta name="theme-color" content="{{ tema_cor or '#150e09' }}">
-<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon-32.png') }}">
-<link rel="icon" type="image/png" sizes="64x64" href="{{ url_for('static', filename='img/favicon-64.png') }}">
-<link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
+{% include "site/_icones.html" %}
 <script>
   // Tema antes da primeira pintura (sem flash). Preferência salva > sistema.
   // Chave por bar: dois sites no mesmo navegador não dividem preferência.

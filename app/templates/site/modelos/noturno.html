@@ -82,10 +82,7 @@
 <meta name="twitter:description" content="{{ site.tagline or descritor }}">
 {% if og_img %}<meta name="twitter:image" content="{{ og_img }}">{% endif %}
 <meta name="theme-color" content="{{ tema_cor or '#07070b' }}">
-<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon-32.png') }}">
-<link rel="icon" type="image/png" sizes="64x64" href="{{ url_for('static', filename='img/favicon-64.png') }}">
-<link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
+{% include "site/_icones.html" %}
 <script>
   // Resolve o tema antes da primeira pintura (sem flash).
   // Chave por bar: dois sites no mesmo navegador não dividem preferência.
@@ -338,7 +335,7 @@
     background:var(--ink);border-bottom:1px solid var(--linha);
   }
   .marca{display:flex;align-items:center;gap:9px;min-width:0}
-  .marca img{width:26px;height:26px;flex:0 0 auto}
+  .marca img{width:26px;height:26px;flex:0 0 auto;object-fit:contain}
   .marca span{
     font-family:var(--cond);font-weight:800;text-transform:uppercase;
     letter-spacing:.1em;font-size:1.12rem;line-height:1;
@@ -844,9 +841,10 @@
 </div>
 
 <div class="barra">
+  {% set logo_src = site.logo if (site.logo and site.logo.startswith('http')) else (url_for('static', filename=site.logo) if site.logo else None) %}
   <a href="#topo" class="marca">
-    <img src="{{ url_for('static', filename='img/favicon-64.png') }}"
-         alt="Marca do {{ nome_bar }}" loading="lazy" decoding="async">
+    {# Marca da casa só com `site.logo`; o ícone da plataforma não é logo de bar. #}
+    {% if logo_src %}<img src="{{ logo_src }}" alt="Marca do {{ nome_bar }}" width="26" height="26" decoding="async">{% endif %}
     <span>{{ nome_bar|upper }}</span>
   </a>
   {# <nav> de verdade, não <div>: é a navegação principal da página e precisa

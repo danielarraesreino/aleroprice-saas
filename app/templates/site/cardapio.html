@@ -51,8 +51,7 @@
 <meta property="og:image" content="{{ 'https://' ~ request.host ~ url_for('static', filename=site.hero_foto) }}">
 {% endif %}
 <meta name="theme-color" content="{{ tema_cor or '#100a06' }}">
-<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon-32.png') }}">
-<link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
+{% include "site/_icones.html" %}
 <style>
   /* Mesma paleta do :root da landing (boteco-ambar). Os presets de
      app/utils/temas.py sobrescrevem estas variáveis logo abaixo, então o
