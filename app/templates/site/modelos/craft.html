@@ -814,6 +814,11 @@
     letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;
     background:rgba(255,255,255,.14);color:inherit;opacity:.85;
     border:1px solid currentColor}
+
+  /* ---------- INSCRIÇÃO ---------- */
+  .sec-novidades .novidades-box{--nv-acento:var(--amber);--nv-acento-texto:var(--btn-fg);--nv-fundo:var(--ink-2);--nv-linha:var(--cream-dim);--nv-raio:0;--nv-titulo:"Barlow Condensed","Arial Narrow",sans-serif;color:var(--cream);max-width:640px;margin:0 auto}
+  .sec-novidades .nv-titulo{text-transform:uppercase;letter-spacing:.02em;font-size:1.7rem}
+  .sec-novidades .nv-enviar{font-family:"JetBrains Mono",monospace;font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;font-weight:500}
 </style>
 {# Paleta do bar (preset). Depois do CSS acima de propósito: é ele que
    sobrescreve as variáveis. Ver app/utils/temas.py. #}
@@ -915,7 +920,6 @@
   <div class="hero-veu" aria-hidden="true"></div>
 
   <div class="wrap hero-corpo">
-    {% if site.kicker %}<p class="hero-kicker mono" data-anim>{{ site.kicker }}</p>{% endif %}
     <h1 class="hero-nome" data-anim>
       <span>{{ site.hero_linha1 or site.nome }}</span>
       {% if site.hero_linha2 %}<span>{{ site.hero_linha2 }}</span>{% endif %}
@@ -938,7 +942,7 @@
       {% if site.whatsapp %}
       <a class="btn" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener">Falar no WhatsApp</a>
       {% endif %}
-      {% if dishes %}<a class="btn btn-vazio" href="#cardapio">Ver as torneiras</a>{% endif %}
+      {% if dishes %}<a class="btn btn-vazio" href="#cardapio">Ver o cardápio</a>{% endif %}
       {% if site.maps_query %}
       <a class="btn btn-vazio" href="https://www.google.com/maps/search/?api=1&query={{ site.maps_query }}" target="_blank" rel="noopener">Como chegar</a>
       {% endif %}
@@ -1025,6 +1029,19 @@
   </div>
 </section>
 {% endif %}
+
+{# INSCRIÇÃO — logo depois da agenda, onde "quero saber do próximo" faz
+   sentido; no rodapé ninguém procurava. Visual pelas variáveis --nv-* abaixo. #}
+<section class="sec sec-novidades" id="novidades" aria-label="Receber a agenda por e-mail">
+  <div class="wrap">
+    {% with novidades_bar = tenant.slug if tenant else '',
+            novidades_titulo = 'Receba a agenda do ' ~ site.nome,
+            novidades_texto = 'Eventos e promoções da casa por e-mail, de vez em quando. Sem spam.',
+            novidades_consentimento = 'Aceito receber por e-mail as novidades do ' ~ site.nome ~ ' e da Feira de Barão. Posso sair quando quiser pelo link em cada e-mail.' %}
+      {% include "site/_novidades.html" %}
+    {% endwith %}
+  </div>
+</section>
 
 <!-- ============================ A CASA ============================ -->
 <section class="sec" id="balcao" aria-labelledby="t-balcao">
@@ -1342,7 +1359,6 @@
     {% endif %}
     <div><a class="lojista" href="{{ url_do_sistema() }}">Área do lojista · entrar no sistema</a></div>
   </div>
-  {% with novidades_bar = tenant.slug if tenant else '' %}{% include "site/_novidades.html" %}{% endwith %}
   {% include "site/_feito_com.html" %}
   {% include "site/_selo_caminhos.html" %}
 </footer>

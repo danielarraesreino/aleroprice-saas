@@ -524,13 +524,7 @@
   .prato{display:grid;gap:var(--s-6);align-items:center}
   .prato-foto{position:relative}
   .prato-foto img{width:100%;aspect-ratio:4/5}
-  .prato-num{
-    font-family:var(--sans);font-size:var(--t-micro);font-weight:600;
-    letter-spacing:var(--tk-micro);line-height:var(--lh-micro);
-    color:var(--acento);display:flex;align-items:center;gap:var(--s-4);
-    margin-bottom:var(--s-4);
-  }
-  .prato-num::after{content:"";flex:1;height:1px;background:var(--linha);max-width:var(--s-8)}
+  /* Sem "01, 02…" ao lado do prato: a ordem do cardápio não é informação. */
   .prato h3{
     font-size:var(--t-h2);line-height:var(--lh-h2);letter-spacing:-.01em;
   }
@@ -550,7 +544,6 @@
     font-size:var(--t-micro);font-weight:600;letter-spacing:var(--tk-micro);
     line-height:var(--lh-micro);text-transform:uppercase;color:var(--tinta);
   }
-  .prato.destaque .prato-num::before{content:"";width:8px;height:8px;background:var(--acento);flex:none}
   .prato.sem-foto{border-top:1px solid var(--linha);padding-top:var(--s-6)}
   @media(min-width:860px){
     .prato.com-foto{grid-template-columns:1fr 1fr}
@@ -824,6 +817,11 @@
     letter-spacing:var(--tk-micro);text-transform:uppercase;white-space:nowrap;
     background:rgba(255,255,255,.14);color:inherit;opacity:.85;
     border:1px solid currentColor}
+
+  /* ---------- INSCRIÇÃO ---------- */
+  .sec-novidades .novidades-box{--nv-acento:var(--acento);--nv-acento-texto:var(--papel);--nv-fundo:var(--papel-2);--nv-linha:var(--linha-forte);--nv-raio:0;--nv-titulo:var(--serif);color:var(--tinta);max-width:640px;margin:0 auto}
+  .sec-novidades .nv-titulo{font-weight:400;font-size:var(--t-h3)}
+  .sec-novidades .nv-enviar{font-family:var(--sans);font-size:var(--t-micro);letter-spacing:var(--tk-micro);text-transform:uppercase;font-weight:600}
 </style>
 {# Preset de cor do bar (app/utils/temas.py). Vem DEPOIS do CSS local pra poder
    sobrescrever — neste modelo o gancho é --amber, que vira o acento. #}
@@ -913,7 +911,6 @@
   <div class="wrap">
     <div class="hero-grade">
       <div>
-        {% if site.kicker %}<div class="hero-kicker" data-hero>{{ site.kicker }}</div>{% endif %}
         {# O ÚNICO h1 da página, e é o nome do bar. O concorrente de referência
            (Café Container) tem 41 h2 soltos e nenhum h1: pro Google a página
            não declara sobre quem ela é. Aqui declara, uma vez só. #}
@@ -936,7 +933,7 @@
         <div class="hero-selo" data-hero><span class="est">★★★★★</span> {{ site.selo_estrelas }}</div>
         {% endif %}
         <div class="hero-acoes" data-hero>
-          <a class="btn" href="#reservar">{{ copy.reserva.eyebrow }}</a>
+          <a class="btn" href="#reservar">Reservar mesa</a>
           {% if site.whatsapp %}
           <a class="btn btn-linha" href="https://wa.me/{{ site.whatsapp }}?text={{ copy.zap|urlencode }}" target="_blank" rel="noopener">WhatsApp</a>
           {% endif %}
@@ -978,7 +975,6 @@
 <section class="sec" id="cardapio" aria-labelledby="t-cardapio">
   <div class="wrap">
     <div class="cab rev">
-      <div class="olho">{{ copy.cardapio.eyebrow }}</div>
       <h2 class="titulo" id="t-cardapio">{{ copy.cardapio.titulo|safe }}</h2>
       {% if copy.cardapio.lead %}<p class="lead">{{ copy.cardapio.lead }}</p>{% endif %}
     </div>
@@ -997,7 +993,6 @@
         </div>
         {% endif %}
         <div>
-          <div class="prato-num">{{ '%02d' % loop.index }}</div>
           <h3>{{ d.nome }}</h3>
           {# Editorial: o preço é uma linha própria logo abaixo do nome, no
              degrau de corpo da escala — dado, não etiqueta. O `{% if %}` vem
@@ -1023,7 +1018,6 @@
 <section class="sec" id="promocoes" aria-labelledby="t-promocoes">
   <div class="wrap">
     <div class="cab rev">
-      <div class="olho">{{ copy.promocoes.eyebrow }}</div>
       <h2 class="titulo" id="t-promocoes">{{ copy.promocoes.titulo|safe }}</h2>
     </div>
     <div class="promos rev">
@@ -1052,7 +1046,6 @@
   <div class="wrap">
     <div class="historia-grade">
       <div class="rev">
-        <div class="olho">{{ copy.historia.eyebrow }}</div>
         <h2 class="titulo" id="t-historia">{{ copy.historia.titulo|safe }}</h2>
         <p class="historia-texto">{{ copy.historia.texto }}</p>
         {% if team %}
@@ -1086,7 +1079,6 @@
 <section class="sec" id="cozinha" aria-labelledby="t-cozinha">
   <div class="wrap">
     <div class="cab rev">
-      <div class="olho">{{ copy.clima.eyebrow }}</div>
       <h2 class="titulo" id="t-cozinha">{{ copy.clima.titulo|safe }}</h2>
     </div>
     <div class="clima rev">
@@ -1106,7 +1098,6 @@
 <section class="sec" id="galeria" aria-labelledby="t-galeria">
   <div class="wrap">
     <div class="cab rev">
-      <div class="olho">{{ copy.galeria.eyebrow }}</div>
       <h2 class="titulo" id="t-galeria">{{ copy.galeria.titulo|safe }}</h2>
       {% if copy.galeria.lead %}<p class="lead">{{ copy.galeria.lead }}</p>{% endif %}
     </div>
@@ -1137,7 +1128,6 @@
   <div class="wrap">
     <div class="contato-grade">
       <div class="rev">
-        <div class="olho">{{ copy.contato.eyebrow }}</div>
         <h2 class="titulo" id="t-contato">{{ copy.contato.titulo|safe }}</h2>
         <ul class="dados">
           {% if site.endereco %}<li><b>Endereço</b><span>{{ site.endereco }}</span></li>{% endif %}
@@ -1168,7 +1158,6 @@
   <div class="wrap">
     <div class="reserva-grade">
       <div class="rev">
-        <div class="olho">{{ copy.reserva.eyebrow }}</div>
         <h2 class="titulo" id="t-reservar">{{ copy.reserva.titulo|safe }}</h2>
         {% if copy.reserva.lead %}<p class="lead">{{ copy.reserva.lead }}</p>{% endif %}
       </div>
@@ -1233,7 +1222,6 @@
 <section class="sec" id="agenda" aria-labelledby="t-agenda">
   <div class="wrap">
     <div class="cab rev">
-      <div class="olho">{{ copy.agenda.eyebrow }}</div>
       <h2 class="titulo" id="t-agenda">{{ copy.agenda.titulo|safe }}</h2>
       {% if copy.agenda.lead %}<p class="lead">{{ copy.agenda.lead }}</p>{% endif %}
     </div>
@@ -1255,6 +1243,19 @@
 </section>
 {% endif %}
 
+{# INSCRIÇÃO — logo depois da agenda, onde "quero saber do próximo" faz
+   sentido; no rodapé ninguém procurava. Visual pelas variáveis --nv-* abaixo. #}
+<section class="sec sec-novidades" id="novidades" aria-label="Receber a agenda por e-mail">
+  <div class="wrap">
+    {% with novidades_bar = tenant.slug if tenant else '',
+            novidades_titulo = 'Receba a agenda do ' ~ site.nome,
+            novidades_texto = 'Eventos e promoções da casa por e-mail, de vez em quando. Sem spam.',
+            novidades_consentimento = 'Aceito receber por e-mail as novidades do ' ~ site.nome ~ ' e da Feira de Barão. Posso sair quando quiser pelo link em cada e-mail.' %}
+      {% include "site/_novidades.html" %}
+    {% endwith %}
+  </div>
+</section>
+
 <!-- AVALIAÇÕES: nota do Google e depoimentos escritos são dados INDEPENDENTES.
      Quase todo bar tem nota e quase nenhum tem depoimento cadastrado — enquanto
      a nota morava dentro do {% raw %}{% if reviews %}{% endraw %}, a prova social
@@ -1264,7 +1265,6 @@
 <section class="sec" id="avaliacoes" aria-labelledby="t-avaliacoes">
   <div class="wrap">
     <div class="cab rev">
-      <div class="olho">{{ copy.avaliacoes.eyebrow }}</div>
       <h2 class="titulo" id="t-avaliacoes">{{ copy.avaliacoes.titulo|safe }}</h2>
     </div>
     {# Nota real deste bar. Sem o dado, o bloco some — exibir nota fixa era
@@ -1316,7 +1316,6 @@
       <a href="{{ url_do_sistema() }}">Área do lojista</a>
     </div>
   </div>
-  {% with novidades_bar = tenant.slug if tenant else '' %}{% include "site/_novidades.html" %}{% endwith %}
   {% include "site/_feito_com.html" %}
   {% include "site/_selo_caminhos.html" %}
 </footer>

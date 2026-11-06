@@ -797,6 +797,11 @@
     letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;
     background:rgba(255,255,255,.14);color:inherit;opacity:.85;
     border:1px solid currentColor}
+
+  /* ---------- INSCRIÇÃO ---------- */
+  .sec-novidades .novidades-box{--nv-acento:var(--amber);--nv-acento-texto:var(--ink);--nv-fundo:var(--ink-2);--nv-linha:var(--linha);--nv-raio:0;--nv-titulo:var(--display);color:var(--cream);max-width:640px;margin:0 auto}
+  .sec-novidades .nv-titulo{text-transform:uppercase;font-size:1.5rem}
+  .sec-novidades .nv-enviar{font-family:var(--cond);font-weight:800;text-transform:uppercase;letter-spacing:.14em}
 </style>
 {# Paleta do bar (app/utils/temas.py). Vem DEPOIS do CSS do modelo pra poder
    sobrescrever --ink/--cream/--amber/--ember — que é tudo que o layout lê. #}
@@ -861,7 +866,8 @@
     <a href="#contato">Contato</a>
   </nav>
   <div class="barra-fim">
-    {% if eventos %}<span class="aovivo"><span class="bola"></span>Ao vivo</span>{% endif %}
+    {# "Ao vivo" só com agenda de verdade: evento de exemplo da prévia não acende o selo. #}
+    {% if eventos|rejectattr('exemplo')|list %}<span class="aovivo"><span class="bola"></span>Ao vivo</span>{% endif %}
     <button class="icone" id="btn-tema" onclick="trocarTema()" aria-label="Alternar tema claro e escuro" title="Alternar tema"><span id="ic-tema"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></span></button>
     <button class="btn-menu" id="btn-menu" onclick="abrirMenu()" aria-expanded="false" aria-controls="painel">Menu</button>
   </div>
@@ -902,13 +908,7 @@
   <div class="topo-listras"></div>
   <div class="topo-fade"></div>
   <div class="wrap">
-    <div class="fita-topo" data-hero>
-      {# kicker já costuma trazer a cidade ("BARÃO GERALDO · CAMPINAS–SP"), então
-         cidade_uf só entra quando acrescenta informação — senão a fita repete a
-         mesma linha duas vezes. #}
-      {% if site.kicker %}<span class="kick">{{ site.kicker }}</span>{% endif %}
-      {% if site.cidade_uf and not site.kicker %}<span class="kick">{{ site.cidade_uf }}</span>{% endif %}
-    </div>
+    {# Sem fita de sobretítulo acima do nome (craft-floor/R11): o letreiro abre o topo. #}
     {% set l1 = site.hero_linha1 or nome_bar %}
     {% set n_hero = [l1|length, (site.hero_linha2 or '')|length, 6]|max %}
     <h1 class="cartaz-nome nome-hero" style="--n:{{ n_hero }}" data-hero>
@@ -935,8 +935,8 @@
         <span class="m">{{ meses[prox.data.month - 1] }}</span>
       </div>
       <div class="quem">
-        <div class="rot">Próximo show · {{ semana[(prox.data.weekday() + 1) % 7] }}{% if prox.hora %} · {{ prox.hora }}{% endif %}</div>
-        <h2>{{ prox.titulo }}</h2>
+        <div class="rot">Próximo evento · {{ semana[(prox.data.weekday() + 1) % 7] }}{% if prox.hora %} · {{ prox.hora }}{% endif %}</div>
+        <h2>{{ prox.titulo }}{% if prox.exemplo and not (tenant and tenant.eh_modelo_demo) %}<span class="selo-exemplo">exemplo</span>{% endif %}</h2>
         {% if prox.descricao %}<p class="desc">{{ prox.descricao }}</p>{% endif %}
       </div>
     </div>
@@ -960,7 +960,6 @@
 <section class="sec" id="cardapio" aria-labelledby="titulo-cardapio">
   <div class="wrap">
     <div class="rv">
-      <span class="selo">{{ copy.cardapio.eyebrow }}</span>
       <h2 class="ttl" id="titulo-cardapio">{{ copy.cardapio.titulo|safe }}</h2>
       {% if copy.cardapio.lead %}<p class="lead">{{ copy.cardapio.lead }}</p>{% endif %}
     </div>
@@ -1000,7 +999,6 @@
 <section class="sec" id="promocoes" data-band="alt" aria-labelledby="titulo-promocoes">
   <div class="wrap">
     <div class="rv">
-      <span class="selo">{{ copy.promocoes.eyebrow }}</span>
       <h2 class="ttl" id="titulo-promocoes">{{ copy.promocoes.titulo|safe }}</h2>
     </div>
     <div class="canhotos rv">
@@ -1025,7 +1023,6 @@
 <section class="sec" id="palco" aria-labelledby="titulo-palco">
   <div class="wrap">
     <div class="rv">
-      <span class="selo">{{ copy.clima.eyebrow }}</span>
       <h2 class="ttl" id="titulo-palco">{{ copy.clima.titulo|safe }}</h2>
     </div>
     <div class="clima rv">
@@ -1046,7 +1043,6 @@
 <section class="sec" id="galeria" data-band="alt" aria-labelledby="titulo-galeria">
   <div class="wrap">
     <div class="rv">
-      <span class="selo">{{ copy.galeria.eyebrow }}</span>
       <h2 class="ttl" id="titulo-galeria">{{ copy.galeria.titulo|safe }}</h2>
       {% if copy.galeria.lead %}<p class="lead">{{ copy.galeria.lead }}</p>{% endif %}
       {% if gallery|length > 6 %}<p class="acervo">6 de {{ gallery|length }} fotos da casa</p>{% endif %}
@@ -1078,7 +1074,6 @@
   <div class="wrap">
     <div class="casa">
       <div class="rv">
-        <span class="selo">{{ copy.historia.eyebrow }}</span>
         <h2 class="ttl" id="titulo-historia">{{ copy.historia.titulo|safe }}</h2>
         <p>{{ copy.historia.texto }}</p>
         {% if team %}
@@ -1118,7 +1113,6 @@
   <div class="wrap">
     <div class="cab rv">
       <div>
-        <span class="selo">{{ copy.avaliacoes.eyebrow }}</span>
         <h2 class="ttl" id="titulo-avaliacoes">{{ copy.avaliacoes.titulo|safe }}</h2>
       </div>
     </div>
@@ -1161,7 +1155,6 @@
 <section class="sec" id="contato" aria-labelledby="titulo-contato">
   <div class="wrap">
     <div class="rv">
-      <span class="selo">{{ copy.contato.eyebrow }}</span>
       <h2 class="ttl" id="titulo-contato">{{ copy.contato.titulo|safe }}</h2>
     </div>
     <div class="contato">
@@ -1195,7 +1188,6 @@
   <div class="wrap">
     <div class="reserva">
       <div class="rv">
-        <span class="selo">{{ copy.reserva.eyebrow }}</span>
         <h2 class="ttl" id="titulo-reservar">{{ copy.reserva.titulo|safe }}</h2>
         {% if copy.reserva.lead %}<p class="lead">{{ copy.reserva.lead }}</p>{% endif %}
       </div>
@@ -1281,7 +1273,6 @@
   <div class="wrap">
     <div class="cab rv">
       <div>
-        <span class="selo">{{ copy.agenda.eyebrow }}</span>
         <h2 class="ttl" id="titulo-agenda">{{ copy.agenda.titulo|safe }}</h2>
         {% if copy.agenda.lead %}<p class="lead">{{ copy.agenda.lead }}</p>{% endif %}
       </div>
@@ -1305,6 +1296,19 @@
   </div>
 </section>
 {% endif %}
+
+{# INSCRIÇÃO — logo depois da agenda, onde "quero saber do próximo" faz
+   sentido; no rodapé ninguém procurava. Visual pelas variáveis --nv-* abaixo. #}
+<section class="sec sec-novidades" id="novidades" aria-label="Receber a agenda por e-mail">
+  <div class="wrap">
+    {% with novidades_bar = tenant.slug if tenant else '',
+            novidades_titulo = 'Receba a agenda do ' ~ site.nome,
+            novidades_texto = 'Eventos e promoções da casa por e-mail, de vez em quando. Sem spam.',
+            novidades_consentimento = 'Aceito receber por e-mail as novidades do ' ~ site.nome ~ ' e da Feira de Barão. Posso sair quando quiser pelo link em cada e-mail.' %}
+      {% include "site/_novidades.html" %}
+    {% endwith %}
+  </div>
+</section>
 </main>
 
 <footer>
@@ -1331,7 +1335,6 @@
     {% endif %}
     <div><a class="lojista" href="{{ url_do_sistema() }}">Área do lojista · entrar no sistema</a></div>
   </div>
-  {% with novidades_bar = tenant.slug if tenant else '' %}{% include "site/_novidades.html" %}{% endwith %}
   {% include "site/_feito_com.html" %}
   {% include "site/_selo_caminhos.html" %}
 </footer>
