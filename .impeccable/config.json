@@ -22,5 +22,6 @@
         "reason": "Claude, critique 2026-11-01: a CLI não resolve url_for e não carrega feira.css (mede tudo 16px); a injeção no navegador com CSS real não acusa"
       }
     ]
-  }
+  },
+  "buildPath": "code"
 }

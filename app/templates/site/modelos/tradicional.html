@@ -44,6 +44,9 @@
 
 {# Foto de capa: o campo aceita caminho em static OU URL absoluta (Vercel Blob). #}
 {% set hero_src = site.hero_foto if (site.hero_foto and site.hero_foto.startswith('http')) else (url_for('static', filename=site.hero_foto) if site.hero_foto else None) %}
+{# Marca da casa: mesmos dois formatos de caminho da capa. Sem o dado, a barra
+   fica só com o nome e o topo abre direto no kicker. #}
+{% set logo_src = site.logo if (site.logo and site.logo.startswith('http')) else (url_for('static', filename=site.logo) if site.logo else None) %}
 {% set og_base = 'https://' ~ request.host %}
 {% set og_img = (hero_src if (hero_src and hero_src.startswith('http')) else ((og_base ~ hero_src) if hero_src else None)) %}
 {# Endereço único desta casa. O mesmo site responde em até três lugares (domínio
@@ -174,7 +177,7 @@
       --tinta-suave:#bda688;
       --madeira:#c99a63;
       --madeira-forte:#e2c093;
-      --esmalte:#e0503f;
+      --esmalte:#e85b49; /* 4,6:1 sobre --moldura (era 4,1) */
       --esmalte-fundo:rgba(224,80,63,.14);
       --esmalte-texto:#1a0e08;
       --azulejo:rgba(127,176,214,.26);
@@ -196,7 +199,7 @@
     --tinta-suave:#bda688;
     --madeira:#c99a63;
     --madeira-forte:#e2c093;
-    --esmalte:#e0503f;
+    --esmalte:#e85b49; /* 4,6:1 sobre --moldura (era 4,1) */
     --esmalte-fundo:rgba(224,80,63,.14);
     --esmalte-texto:#1a0e08;
     --azulejo:rgba(127,176,214,.26);
@@ -253,6 +256,10 @@
       radial-gradient(70% 45% at 50% 104%, var(--vinheta), transparent 70%);
   }
   img{max-width:100%;height:auto;display:block}
+  /* sem palavra órfã no fim do parágrafo nem título manco */
+  p,li,figcaption{text-wrap:pretty}
+  h1,h2,h3{text-wrap:balance}
+  ::selection{background:var(--esmalte);color:var(--esmalte-texto)}
   a{color:inherit;text-decoration:none}
   section,header,footer,nav{position:relative;z-index:2}
   .env{max-width:var(--maxw);margin:0 auto;padding:0 20px}
@@ -272,7 +279,7 @@
     border-bottom:3px double var(--linha-forte);
   }
   .barra .env{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:11px;padding-bottom:11px}
-  .marca{display:flex;flex-direction:column;line-height:1.1;min-width:0}
+  .marca{display:flex;flex-direction:column;justify-content:center;line-height:1.1;min-width:0;min-height:44px}
   .marca b{font-family:"Playfair Display",Georgia,serif;font-weight:700;font-size:1.12rem;letter-spacing:.01em;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:52vw}
   .marca span{font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.2em;
@@ -325,16 +332,22 @@
       repeating-linear-gradient(-45deg, var(--azulejo) 0 1px, transparent 1px 10px);
     border-top:1px solid var(--linha);border-bottom:1px solid var(--linha);
   }
+  /* Marca da casa (site.logo): pequena na barra, placa esmaltada no topo. */
+  .marca.com-logo{flex-direction:row;align-items:center;gap:10px}
+  .marca-txt{display:flex;flex-direction:column;line-height:1.1;min-width:0}
+  .marca-logo{width:40px;height:40px;flex:none;object-fit:contain;background:var(--moldura);border-radius:6px;padding:2px}
+  /* No desktop a barra já carrega nove links: o nome da casa não pode encolher. */
+  @media(min-width:900px){.marca-logo{display:none}}
+  /* 116 px: em tela 2x pede 232 px, abaixo dos 242 da peça — sem ampliar. */
+  .placa-marca{width:116px;height:116px;object-fit:contain;margin-bottom:18px;
+    background:#fffaf0;border-radius:10px;padding:7px;
+    box-shadow:0 10px 24px -12px rgba(20,12,6,.55);transform:rotate(-2deg)}
 
   /* ---------- HERO ---------- */
   .capa{padding:38px 0 8px;overflow:hidden}
   .capa .env{display:flex;flex-direction:column;align-items:center;text-align:center}
-  .kicker{
-    font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.28em;
-    font-size:.75rem;color:var(--tinta-suave);margin-bottom:18px;text-align:center;
-    display:flex;align-items:center;justify-content:center;gap:12px;max-width:100%;
-  }
-  .kicker::before,.kicker::after{content:"";height:1px;width:26px;background:var(--ornamento);flex:none}
+  /* Sem sobretítulo acima do nome (craft-floor/R11): `site.kicker` aparece na
+     história, como frase, e o nome da casa abre o topo sozinho. */
   .nome-casa{
     font-family:"Playfair Display",Georgia,serif;font-weight:900;
     font-size:clamp(2.5rem,12.5vw,5.6rem);line-height:.93;letter-spacing:-.015em;
@@ -359,7 +372,7 @@
   .subline{font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.18em;
     font-size:.78rem;color:var(--tinta-suave);margin-top:10px}
   .selo{
-    display:inline-flex;align-items:center;gap:9px;margin-top:20px;padding:7px 15px;
+    display:inline-flex;align-items:center;gap:9px;margin-top:20px;padding:7px 15px;min-height:44px;
     border:1px solid var(--linha-forte);border-radius:2px;background:var(--papel-2);
     font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.1em;font-size:.76rem;
   }
@@ -376,9 +389,9 @@
     font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.16em;font-size:.86rem;
     padding:13px 26px;border-radius:2px;border:1px solid var(--esmalte);
     background:var(--esmalte);color:var(--esmalte-texto);
-    box-shadow:0 3px 0 0 var(--linha-forte);transition:transform .18s,box-shadow .18s;
+    min-height:48px;box-shadow:0 6px 14px -8px var(--sombra);transition:transform .18s,box-shadow .18s;
   }
-  .btn:hover{transform:translateY(-2px);box-shadow:0 5px 0 0 var(--linha-forte)}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 10px 20px -10px var(--sombra)}
   .btn.vazado{background:transparent;color:var(--tinta);border-color:var(--linha-forte);box-shadow:none}
   .btn.vazado:hover{border-color:var(--esmalte);color:var(--esmalte)}
   .btn.larga{width:100%}
@@ -430,8 +443,6 @@
      tests/integration/test_landing_render.py continua casando. */
   .sec[data-band="alt"]{background:var(--papel-2)}
   .cabeca{max-width:38em}
-  .eyebrow{font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.26em;
-    font-size:.75rem;color:var(--esmalte);margin-bottom:8px}
   .h2{font-family:"Playfair Display",Georgia,serif;font-weight:900;
     font-size:clamp(1.85rem,7vw,3.1rem);line-height:1.04;letter-spacing:-.01em;overflow-wrap:break-word}
   .h2 em{font-style:italic;font-weight:700;color:var(--madeira)}
@@ -567,7 +578,8 @@
   .cartaz:nth-child(odd){transform:rotate(-.6deg)}
   .cartaz .rot{font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.2em;
     font-size:.75rem;color:var(--tinta-suave)}
-  .cartaz h3{font-family:"Playfair Display",serif;font-weight:900;font-size:1.5rem;line-height:1.05;margin:6px 0 8px}
+  .cartaz h3{font-family:"Playfair Display",serif;font-weight:900;font-size:1.5rem;line-height:1.05;margin:0 0 6px}
+  .cartaz .rot{margin-bottom:8px}
   .cartaz p{color:var(--tinta-suave);font-size:.98rem}
   .cartaz .val{margin-top:12px;font-family:"Alegreya Sans SC",serif;text-transform:uppercase;
     letter-spacing:.14em;font-size:.75rem;color:var(--tinta-suave)}
@@ -651,6 +663,15 @@
     font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.2em;
     font-size:.75rem;color:var(--tinta-suave);margin-top:22px;text-align:center;
   }
+  .album-gaveta{margin-top:22px}
+  .album-gaveta>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    gap:8px;min-height:44px;margin:0 auto;width:max-content;max-width:100%;padding:0 18px;
+    border:1px solid var(--linha);border-radius:999px;color:var(--tinta)}
+  .album-gaveta>summary::-webkit-details-marker{display:none}
+  .album-gaveta>summary::after{content:"";width:8px;height:8px;border-right:1.5px solid currentColor;
+    border-bottom:1.5px solid currentColor;transform:translateY(-2px) rotate(45deg);transition:transform .2s}
+  .album-gaveta[open]>summary::after{transform:translateY(2px) rotate(-135deg)}
+  .album-gaveta>summary:focus-visible{outline:2px solid var(--esmalte);outline-offset:3px}
   .lupa{position:fixed;inset:0;z-index:120;background:rgba(20,12,6,.93);display:none;
     align-items:center;justify-content:center;padding:20px}
   .lupa.on{display:flex}
@@ -670,6 +691,7 @@
   .campo input,.campo textarea{
     width:100%;background:transparent;border:none;border-bottom:1px solid var(--linha-forte);
     padding:8px 2px;color:var(--tinta);font-family:"Lora",Georgia,serif;font-size:1rem;border-radius:0;
+    min-height:44px;
   }
   .campo textarea{resize:vertical;min-height:58px;border:1px solid var(--linha-forte);padding:9px 10px}
   .campo input:focus,.campo textarea:focus{outline:none;border-color:var(--esmalte);background:var(--esmalte-fundo)}
@@ -790,9 +812,10 @@
 <div class="topo-fixo">
 <nav class="barra" aria-label="Navegação principal">
   <div class="env">
-    <a href="#topo" class="marca">
-      <b>{{ site.nome }}</b>
-      <span>{% if ano %}Desde {{ ano }}{% elif site.cidade_uf %}{{ site.cidade_uf }}{% else %}{{ descritor }}{% endif %}</span>
+    <a href="#topo" class="marca{% if logo_src %} com-logo{% endif %}">
+      {% if logo_src %}<img class="marca-logo" src="{{ logo_src }}" alt="" width="40" height="40" decoding="async">{% endif %}
+      <span class="marca-txt"><b>{{ site.nome }}</b>
+      <span>{% if ano %}Desde {{ ano }}{% elif site.cidade_uf %}{{ site.cidade_uf }}{% else %}{{ descritor }}{% endif %}</span></span>
     </a>
     <div class="barra-links">
       {% if tem_historia %}<a href="#historia">A casa</a>{% endif %}
@@ -839,7 +862,8 @@
 
 <header class="capa" id="topo">
   <div class="env">
-    {% if site.kicker %}<div class="kicker" data-hero>{{ site.kicker }}</div>{% endif %}
+    {# A marca da casa pendurada como placa esmaltada acima do nome. #}
+    {% if logo_src %}<img class="placa-marca" data-hero src="{{ logo_src }}" alt="Marca do {{ site.nome }}" width="132" height="132" decoding="async">{% endif %}
     <h1 class="nome-casa" data-hero>
       {% if site.hero_linha1 or site.hero_linha2 %}
         {{ site.hero_linha1 }}{% if site.hero_linha2 %}<span class="l2">{{ site.hero_linha2 }}</span>{% endif %}
@@ -891,7 +915,7 @@
            manda o navegador buscá-la antes das fontes e do resto. #}
         <img src="{{ hero_src }}"
              alt="{{ site.nome }} — foto de capa da casa{% if ano %}, aberta desde {{ ano }}{% endif %}{% if site.cidade_uf %}, em {{ site.cidade_uf }}{% endif %}"
-             fetchpriority="high" decoding="async">
+             width="1200" height="800" fetchpriority="high" decoding="async">
         <figcaption>{{ site.nome }}{% if ano %} · desde {{ ano }}{% elif site.cidade_uf %} · {{ site.cidade_uf }}{% endif %}</figcaption>
       </figure>
     </div>
@@ -930,7 +954,6 @@
 <section class="sec" id="salao" data-band="alt" aria-labelledby="tit-salao">
   <div class="env">
     <div class="cabeca revelar">
-      <div class="eyebrow">{{ copy.clima.eyebrow }}</div>
       <h2 class="h2" id="tit-salao">{{ copy.clima.titulo|safe }}</h2>
       <div class="filete"></div>
     </div>
@@ -952,7 +975,6 @@
 <section class="sec" id="cardapio" aria-labelledby="tit-cardapio">
   <div class="env">
     <div class="cabeca revelar">
-      <div class="eyebrow">{{ copy.cardapio.eyebrow }}</div>
       <h2 class="h2" id="tit-cardapio">{{ copy.cardapio.titulo|safe }}</h2>
       <div class="filete"></div>
       {% if copy.cardapio.lead %}<p class="lead">{{ copy.cardapio.lead }}</p>{% endif %}
@@ -992,17 +1014,17 @@
 <section class="sec" id="promocoes" data-band="alt" aria-labelledby="tit-promocoes">
   <div class="env">
     <div class="cabeca revelar">
-      <div class="eyebrow">{{ copy.promocoes.eyebrow }}</div>
       <h2 class="h2" id="tit-promocoes">{{ copy.promocoes.titulo|safe }}</h2>
       <div class="filete"></div>
     </div>
     <div class="cartazes revelar">
       {% for p in promocoes %}
       <div class="cartaz{% if p.acontece_hoje %} hoje{% endif %}">
-        <div class="rot">{% if p.acontece_hoje %}É hoje{% else %}{{ p.rotulo or 'Oferta da casa' }}{% endif %}</div>
+        {# Título primeiro, quando logo abaixo: rótulo acima do título é sobretítulo. #}
         <h3>{{ p.titulo }}{% if p.exemplo and not (tenant and tenant.eh_modelo_demo) %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
+        <div class="rot">{% if p.acontece_hoje %}É hoje{% else %}{{ p.rotulo or 'Oferta da casa' }}{% endif %}</div>
         {% if p.descricao %}<p>{{ p.descricao }}</p>{% endif %}
-        {# Sem repetir o rótulo do topo: recorrente já diz o dia ali em cima, e
+        {# Sem repetir o rótulo: recorrente já diz o dia logo abaixo do título, e
            pontual já diz "ATÉ 31/12". Aqui só entra o que ainda não foi dito. #}
         {% if p.acontece_hoje %}
           <div class="val">Toda {{ (p.rotulo or '').replace('TODA ', '')|lower }}{% if p.validade %} · até {{ p.validade.strftime('%d/%m/%Y') }}{% endif %}</div>
@@ -1021,7 +1043,6 @@
 <section class="sec" id="agenda" aria-labelledby="tit-agenda">
   <div class="env">
     <div class="cabeca revelar">
-      <div class="eyebrow">{{ copy.agenda.eyebrow }}</div>
       <h2 class="h2" id="tit-agenda">{{ copy.agenda.titulo|safe }}</h2>
       <div class="filete"></div>
       {% if copy.agenda.lead %}<p class="lead">{{ copy.agenda.lead }}</p>{% endif %}
@@ -1055,7 +1076,6 @@
 <section class="sec" id="avaliacoes" data-band="alt" aria-labelledby="tit-avaliacoes">
   <div class="env">
     <div class="cabeca revelar">
-      <div class="eyebrow">{{ copy.avaliacoes.eyebrow }}</div>
       <h2 class="h2" id="tit-avaliacoes">{{ copy.avaliacoes.titulo|safe }}</h2>
       <div class="filete"></div>
     </div>
@@ -1104,7 +1124,6 @@
 <section class="sec" id="galeria" aria-labelledby="tit-galeria">
   <div class="env">
     <div class="cabeca revelar">
-      <div class="eyebrow">{{ copy.galeria.eyebrow }}</div>
       <h2 class="h2" id="tit-galeria">{{ copy.galeria.titulo|safe }}</h2>
       <div class="filete"></div>
       {% if copy.galeria.lead %}<p class="lead">{{ copy.galeria.lead }}</p>{% endif %}
@@ -1127,8 +1146,28 @@
       {% endif %}
       {% endfor %}
     </div>
+    {# A parede mostra seis; o resto do acervo fica a um toque, numa gaveta
+       nativa (`<details>`): sem JS, sem rolagem de quilômetros, e as fotos já
+       estão no HTML para quem lê a página por fora. #}
     {% if gallery|length > 6 %}
-    <p class="album-mais">e mais {{ gallery|length - 6 }} fotos na parede da casa</p>
+    <details class="album-gaveta">
+      <summary class="album-mais">Ver mais {{ gallery|length - 6 }} fotos da casa</summary>
+      <div class="album">
+        {% for g in gallery %}
+        {% if loop.index > 6 %}
+        <figure class="moldura" tabindex="0" role="button"
+                aria-label="Ampliar foto{% if g.legenda %}: {{ g.legenda }}{% endif %}"
+                onclick="ampliar('{{ g.img }}')"
+                onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();ampliar('{{ g.img }}')}">
+          <img src="{{ g.img }}"
+               alt="{{ site.nome }} — {{ g.legenda or 'foto da casa' }}"
+               loading="lazy" decoding="async">
+          {% if g.legenda %}<figcaption>{{ g.legenda }}</figcaption>{% endif %}
+        </figure>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </details>
     {% endif %}
   </div>
 </section>
@@ -1138,7 +1177,6 @@
 <section class="sec" id="reservar" data-band="alt" aria-labelledby="tit-reservar">
   <div class="env">
     <div class="cabeca revelar">
-      <div class="eyebrow">{{ copy.reserva.eyebrow }}</div>
       <h2 class="h2" id="tit-reservar">{{ copy.reserva.titulo|safe }}</h2>
       <div class="filete"></div>
     </div>
@@ -1208,7 +1246,6 @@
 <section class="sec" id="contato" aria-labelledby="tit-contato">
   <div class="env">
     <div class="cabeca revelar">
-      <div class="eyebrow">{{ copy.contato.eyebrow }}</div>
       <h2 class="h2" id="tit-contato">{{ copy.contato.titulo|safe }}</h2>
       <div class="filete"></div>
     </div>
@@ -1240,11 +1277,14 @@
   <span class="marca-dagua" aria-hidden="true">{{ ano if ano else ((site.nome or '·')[0]|upper) }}</span>
   <div class="env">
     <div class="cabeca revelar">
-      <div class="eyebrow">{{ copy.historia.eyebrow }}</div>
       <h2 class="h2" id="tit-historia">{{ copy.historia.titulo|safe }}</h2>
       <div class="filete"></div>
-      <p class="historia-texto">{{ copy.historia.texto }}</p>
-      {% if site.kicker %}<p class="historia-texto"><em>{{ site.kicker }}</em></p>{% endif %}
+      {# `site.sobre` é o texto da própria casa (parágrafos separados por linha em
+         branco); a frase da vibe só cobre quem não tem. #}
+      {% for par in (site.sobre or copy.historia.texto).split('\n\n') if par.strip() %}
+      <p class="historia-texto">{{ par.strip() }}</p>
+      {% endfor %}
+      {% if site.kicker and not site.sobre %}<p class="historia-texto"><em>{{ site.kicker }}</em></p>{% endif %}
     </div>
 
     {% if ano %}
@@ -1307,7 +1347,7 @@
       {% elif site.cidade_uf %}{{ site.cidade_uf }}
       {% else %}{{ descritor }}{% endif %}
     </div>
-    <p class="recado-rodape">{{ copy.rodape }}</p>
+    {% if copy.rodape %}<p class="recado-rodape">{{ copy.rodape }}</p>{% endif %}
     {# Rede social só com https:// — o campo é texto livre e um "javascript:"
        ali viraria script no clique. #}
     {% set insta_ok = site.instagram_url and site.instagram_url.startswith('https://') %}

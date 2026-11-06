@@ -219,6 +219,38 @@ VIBES = {
         'zap': 'Olá! Vim pelo site do {nome}',
         'scroll': '↓ role e escolha sua mesa',
     },
+
+    # --------------------------------------------------------------- emporio
+    # Restaurante-bar de almoço, balcão de frios e chopp. Nada de "samba",
+    # "família" ou "tempero de vó": quem tem história própria põe em `site.sobre`.
+    'emporio': {
+        'label': 'Restaurante e empório',
+        'descricao': 'Almoço do dia, balcão de frios e chopp.',
+        'marquee': ['ALMOÇO DO DIA', 'ACEPIPES', 'PORÇÕES', 'CHOPP', 'SOBREMESAS'],
+        'cardapio': {'eyebrow': '', 'titulo': 'Do almoço ao <em>balcão</em>',
+                     'lead': 'Pratos do almoço, porções para dividir e doces da casa.'},
+        'historia': {'eyebrow': '', 'titulo': 'A <em>casa</em>',
+                     'texto': 'O {nome} serve almoço, petisco e chopp.'},
+        'avaliacoes': {'eyebrow': '', 'titulo': 'O que diz <em>quem foi</em>'},
+        'clima': {'eyebrow': '', 'titulo': 'Do almoço à <em>noite</em>',
+                  'cards': [('🍽️', 'Almoço do dia', 'Um prato para cada dia da semana'),
+                            ('🧀', 'Balcão de frios', 'Acepipes e porções à noite'),
+                            ('🍺', 'Chopp da casa', 'Tirado no balcão')]},
+        'galeria': {'eyebrow': '', 'titulo': 'Fotos da <em>casa</em>', 'lead': ''},
+        'promocoes': {'eyebrow': '', 'titulo': 'Promoções da <em>casa</em>'},
+        'agenda': {'eyebrow': '', 'titulo': 'Na <em>agenda</em>', 'lead': ''},
+        'reserva': {'eyebrow': '', 'titulo': 'Reserve sua <em>mesa</em>',
+                    'lead': 'Mande o pedido por aqui; a casa confirma pelo WhatsApp.'},
+        'reserva_ui': {'titulo': 'Avisar a casa no WhatsApp',
+                       'botao': 'Pedir reserva',
+                       'fallback': 'Chame a casa no WhatsApp para reservar sua mesa.'},
+        'contato': {'eyebrow': '', 'titulo': 'Como <em>chegar</em>'},
+        'cta': {'titulo': 'Vai pedir ou vir?',
+                'linha': 'Chame no WhatsApp para delivery ou reserva, ou passe no balcão.'},
+        'rodape': '',
+        'zap': 'Olá! Vim pelo site do {nome}',
+        'scroll': '↓ role para ver o cardápio',
+    },
 }
 
 

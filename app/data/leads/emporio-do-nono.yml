@@ -1,6 +1,6 @@
 # Empório do Nono — Barão Geraldo, Campinas–SP
-# Lead da campanha RMC. Foto: coloque os arquivos em
-# app/static/img/demo/emporio-do-nono/ e aponte abaixo (hero_foto, cardapio, galeria).
+# Lead da campanha RMC. Fotos reais da casa (site oficial e cardápio de delivery),
+# origem em app/static/img/demo/emporio-do-nono/creditos.json.
 #
 # POR QUE LIGAR PRA ELE:
 # Mesa de frios é o produto visual da casa. Gancho: foto grande dos acepipes no cardápio digital vende porção sem o cliente levantar da mesa.
@@ -11,29 +11,143 @@ tema: boteco-ambar
 site:
   modelo: tradicional
   hero_foto: "img/demo/emporio-do-nono/capa.jpg"
+  logo: "img/demo/emporio-do-nono/marca.png"
+  # Número de delivery publicado em emporiodonono.com.br (06/11/2026).
+  whatsapp: "5519999224806"
   nota_google: '4,6'
   qtd_avaliacoes: 3994
   instagram_url: "https://www.instagram.com/emporiodonono/"
   maps_query: "Empório do Nono Barão Geraldo Campinas"
   telefone_exibicao: "(19) 3289-0041"
   endereco: "Av. Albino J. B. de Oliveira, 1128 - Barão Geraldo, Campinas - SP, 13085-510"
-  vibe: boteco
-  descritor: "Boteco e empório em Barão Geraldo"
+  vibe: emporio
+  # Textos reescritos a partir de emporiodonono.com.br (páginas O Empório,
+  # Programação e Almoço do Dia, lidas em 06/11/2026). Fato deles, palavra nossa.
+  descritor: "Restaurante e bar em Barão Geraldo"
   kicker: "BARÃO GERALDO · CAMPINAS–SP · DESDE 1999"
   hero_linha1: "Empório"
   hero_linha2: "do Nono"
-  tagline: "Boteco e empório em Barão Geraldo, desde 1999."
-  subline: "TÁBUAS · CHORINHO · EMPÓRIO"
-  cidade_uf: "Barão Geraldo, Campinas–SP"
-  # Horário e telefone do site oficial emporiodonono.com.br (15/08/2026).
-  horario: "Seg–Qui 11h30–15h e 18h–23h · Sex 11h30–15h e 18h–23h30 · Sáb 11h30–23h30 · Dom 11h30–16h"
+  tagline: "Almoço todo dia, acepipes à noite e chopp da casa, numa esquina de Barão Geraldo."
+  subline: "PF DO NONO · ACEPIPES DE BALCÃO · CHORINHO ÀS SEGUNDAS"
+  sobre: |-
+    Restaurante e bar numa das esquinas mais disputadas de Barão Geraldo. A cozinha é brasileira, com o sotaque italiano que o nome promete, e o almoço muda com o dia: virado à paulista na terça, feijoada na quarta e no fim de semana, costela no forno à lenha na quinta, bacalhau na sexta. O PF do Nono sai todos os dias.
 
-# Sem foto o site abre com o fundo do tema. Assim que tiver as imagens:
-#   hero_foto: img/demo/emporio-do-nono/capa.jpg
-cardapio: []
+    À noite o balcão vira mesa de frios, com mais de 40 acepipes, além de bolinhos, forneria e porções. Foi por eles que a Veja Campinas escolheu a casa, quatro anos seguidos, como o melhor lugar da cidade para petiscar.
+
+    E toda segunda tem roda de chorinho, como nos bares cariocas dos anos 50. Ela está ali desde 1999.
+  cidade_uf: "Barão Geraldo, Campinas–SP"
+  # Telefone do site oficial (15/08/2026); horário da página Programação (06/11/2026).
+  horario: "Seg–Sex 11h30–15h e 18h–23h · Sáb 11h30–23h · Dom 11h30–16h"
+
+# 01–04: nome e composição batem com o "Almoço do Dia" do site oficial (06/11/2026).
+# 05–20: nome descrito a partir da foto do delivery: CONFIRMAR com o dono.
+# Sem preço de propósito (só fato confirmado).
+cardapio:
+  - nome: "PF do Nono"
+    descricao: "Picadinho de filé mignon com arroz, feijão preto, farofa, ovo frito, linguiça apimentada e banana à milanesa."
+    imagem: "img/demo/emporio-do-nono/cardapio-01.jpg"
+    tag: "Almoço"
+    destaque: true
+  - nome: "PF de frango"
+    descricao: "Picadinho de frango com arroz, feijão carioca, ovo frito, cebola tirolesa e banana empanada."
+    imagem: "img/demo/emporio-do-nono/cardapio-02.jpg"
+    tag: "Almoço"
+  - nome: "Filé à parmegiana com tagliolini"
+    descricao: "Servido todos os dias no almoço."
+    imagem: "img/demo/emporio-do-nono/cardapio-03.jpg"
+    tag: "Almoço"
+  - nome: "Feijoada do Nono"
+    descricao: "Completa, com couve e laranja. Quarta, sábado e domingo."
+    imagem: "img/demo/emporio-do-nono/cardapio-04.jpg"
+    tag: "Almoço"
+    destaque: true
+  - nome: "Porção de bolinhos"
+    imagem: "img/demo/emporio-do-nono/cardapio-05.jpg"
+    tag: "Porção"
+  - nome: "Coxinha"
+    imagem: "img/demo/emporio-do-nono/cardapio-06.jpg"
+    tag: "Porção"
+    destaque: true
+  - nome: "Bolinho de queijo"
+    imagem: "img/demo/emporio-do-nono/cardapio-07.jpg"
+    tag: "Porção"
+  - nome: "Croquete com molhos"
+    imagem: "img/demo/emporio-do-nono/cardapio-08.jpg"
+    tag: "Porção"
+  - nome: "Croquete na cestinha"
+    imagem: "img/demo/emporio-do-nono/cardapio-09.jpg"
+    tag: "Porção"
+  - nome: "Pão crocante gratinado"
+    imagem: "img/demo/emporio-do-nono/cardapio-10.jpg"
+    tag: "Porção"
+  - nome: "Prato kids com iscas de carne"
+    imagem: "img/demo/emporio-do-nono/cardapio-11.jpg"
+    tag: "Kids"
+  - nome: "Prato kids com frango"
+    imagem: "img/demo/emporio-do-nono/cardapio-12.jpg"
+    tag: "Kids"
+  - nome: "Carne desfiada com talharim ao sugo"
+    imagem: "img/demo/emporio-do-nono/cardapio-13.jpg"
+    tag: "Almoço"
+  - nome: "Pudim de leite"
+    imagem: "img/demo/emporio-do-nono/cardapio-14.jpg"
+    tag: "Sobremesa"
+  - nome: "Pudim de café"
+    imagem: "img/demo/emporio-do-nono/cardapio-15.jpg"
+    tag: "Sobremesa"
+  - nome: "Pavê no copo"
+    imagem: "img/demo/emporio-do-nono/cardapio-16.jpg"
+    tag: "Sobremesa"
+  - nome: "Torta mousse de chocolate"
+    imagem: "img/demo/emporio-do-nono/cardapio-17.jpg"
+    tag: "Sobremesa"
+  - nome: "Torta de limão"
+    imagem: "img/demo/emporio-do-nono/cardapio-18.jpg"
+    tag: "Sobremesa"
+  - nome: "Torta holandesa"
+    imagem: "img/demo/emporio-do-nono/cardapio-19.jpg"
+    tag: "Sobremesa"
+  - nome: "Tiramisù no copo"
+    imagem: "img/demo/emporio-do-nono/cardapio-20.jpg"
+    tag: "Sobremesa"
 avaliacoes: []
 equipe: []
-galeria: []
+
+galeria:
+  - imagem: "img/demo/emporio-do-nono/ambiente-salao-2.jpg"
+    legenda: "Salão cheio"
+  - imagem: "img/demo/emporio-do-nono/ambiente-chorinho-1.jpg"
+    legenda: "Chorinho de segunda"
+  - imagem: "img/demo/emporio-do-nono/ambiente-coxinhas.jpg"
+    legenda: "Coxinhas no balcão"
+  - imagem: "img/demo/emporio-do-nono/ambiente-chopp-tirado.jpg"
+    legenda: "Chopp tirado na hora"
+  - imagem: "img/demo/emporio-do-nono/ambiente-garrafas.jpg"
+    legenda: "Cerveja do Nono"
+  - imagem: "img/demo/emporio-do-nono/ambiente-barris.jpg"
+    legenda: "Barris do empório"
+  - imagem: "img/demo/emporio-do-nono/ambiente-salao-1.jpg"
+    legenda: "O salão visto do alto"
+  - imagem: "img/demo/emporio-do-nono/ambiente-chorinho-2.jpg"
+    legenda: "Música ao vivo"
+  - imagem: "img/demo/emporio-do-nono/ambiente-almoco-do-dia.jpg"
+    legenda: "Almoço do dia"
+  - imagem: "img/demo/emporio-do-nono/ambiente-caldinho.jpg"
+    legenda: "Caldinho com torresmo"
+  - imagem: "img/demo/emporio-do-nono/ambiente-bolinhos.jpg"
+    legenda: "Bolinhos na travessa"
+  - imagem: "img/demo/emporio-do-nono/ambiente-brinde.jpg"
+    legenda: "Brinde de chopp escuro"
+  - imagem: "img/demo/emporio-do-nono/ambiente-chopp-escuro.jpg"
+    legenda: "Chopp escuro na torneira"
+  - imagem: "img/demo/emporio-do-nono/ambiente-carne-mandioca.jpg"
+    legenda: "Carne com mandioca"
+  - imagem: "img/demo/emporio-do-nono/ambiente-pizza.jpg"
+    legenda: "Pizza da forneria"
+  - imagem: "img/demo/emporio-do-nono/ambiente-lanche-1.jpg"
+    legenda: "Lanche no pão"
+  - imagem: "img/demo/emporio-do-nono/ambiente-lanche-2.jpg"
+    legenda: "Lanche no pão da casa"
 
 # Instagram não confirmado (o relatório sugeria @emporiodonono).
 # Confirme o perfil e adicione instagram_url em site:.

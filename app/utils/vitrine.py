@@ -61,6 +61,8 @@ def eventos_de_exemplo(vibe=None):
                          ('Sábado na chapa', 'Rodízio de burgers até acabar.')],
         'praia': [('Pôr do sol com música', 'Voz e violão na beira.'),
                   ('Luau de sábado', 'Fogueira, roda de violão e petisco.')],
+        'emporio': [('Roda de choro', 'Música ao vivo no salão.'),
+                    ('Almoço de sábado', 'Feijoada e chopp até a noite.')],
     }
     padrao = [('Samba de roda', 'Roda de samba no salão, entrada franca.'),
               ('Música ao vivo', 'Voz e violão a partir das 20h.')]
@@ -80,6 +82,7 @@ def promocoes_de_exemplo(vibe=None):
         'pub': ('Happy hour', 'Chope em dobro das 17h às 19h.', 'TODA QUINTA'),
         'hamburgueria': ('Dobro na terça', 'Peça um burger, leve dois.', 'TODA TERÇA'),
         'praia': ('Balde gelado', 'Balde de long neck com preço de fim de tarde.', 'TODO SÁBADO'),
+        'emporio': ('Chopp no fim de tarde', 'Chopp da casa com preço de balcão até as 19h.', 'DE SEG A SEX'),
     }
     titulo, descricao, rotulo = por_vibe.get(
         vibe, ('Happy hour', 'Chope e porção com preço de balcão até as 19h.', 'DE SEG A SEX'))
