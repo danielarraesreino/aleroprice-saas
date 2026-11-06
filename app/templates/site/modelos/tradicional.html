@@ -580,6 +580,18 @@
     font-size:.75rem;color:var(--tinta-suave)}
   .cartaz h3{font-family:"Playfair Display",serif;font-weight:900;font-size:1.5rem;line-height:1.05;margin:0 0 6px}
   .cartaz .rot{margin-bottom:8px}
+
+  /* ---------- INSCRIÇÃO: recado de papel ---------- */
+  .sec-novidades{padding-block:calc(var(--sec-y) * .5)}
+  .sec-novidades .novidades-box{
+    --nv-acento:var(--esmalte);--nv-acento-texto:var(--esmalte-texto);--nv-fundo:var(--moldura);
+    --nv-linha:var(--linha-forte);--nv-raio:2px;--nv-titulo:"Playfair Display",Georgia,serif;
+    max-width:620px;margin:0 auto;padding:26px clamp(18px,4vw,32px);color:var(--tinta);
+    border-top:3px double var(--esmalte);border-bottom:3px double var(--esmalte);
+    box-shadow:0 12px 30px var(--sombra);transform:rotate(-.4deg)}
+  .sec-novidades .nv-titulo{font-weight:900;font-size:clamp(1.4rem,5vw,1.8rem)}
+  .sec-novidades .nv-texto{color:var(--tinta-suave);opacity:1}
+  .sec-novidades .nv-enviar{font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.14em;font-weight:500}
   .cartaz p{color:var(--tinta-suave);font-size:.98rem}
   .cartaz .val{margin-top:12px;font-family:"Alegreya Sans SC",serif;text-transform:uppercase;
     letter-spacing:.14em;font-size:.75rem;color:var(--tinta-suave)}
@@ -1068,6 +1080,20 @@
 </section>
 {% endif %}
 
+{# INSCRIÇÃO — logo depois da agenda (ou do cardápio, quando a casa não tem
+   agenda): é onde "quero saber do próximo" faz sentido, não no rodapé.
+   Recado de papel, no mesmo desenho da placa de reputação. #}
+<section class="sec sec-novidades" id="novidades" aria-label="Receber a agenda por e-mail">
+  <div class="env">
+    {% with novidades_bar = tenant.slug if tenant else '',
+            novidades_titulo = 'Receba a agenda do ' ~ site.nome,
+            novidades_texto = 'Eventos e promoções da casa por e-mail, de vez em quando. Sem spam.',
+            novidades_consentimento = 'Aceito receber por e-mail as novidades do ' ~ site.nome ~ ' e da Feira de Barão. Posso sair quando quiser pelo link em cada e-mail.' %}
+      {% include "site/_novidades.html" %}
+    {% endwith %}
+  </div>
+</section>
+
 {# A seção existe se houver QUALQUER prova social: a nota do Google OU
    depoimentos escritos. Sem nenhum dos dois ela some inteira, com o link do
    menu junto — o invariante de seção órfã continua de pé. #}
@@ -1368,7 +1394,6 @@
     {% endif %}
     <div><a class="lojista" href="{{ url_do_sistema() }}">Área do lojista · entrar no sistema</a></div>
   </div>
-  {% with novidades_bar = tenant.slug if tenant else '' %}{% include "site/_novidades.html" %}{% endwith %}
   {% include "site/_feito_com.html" %}
   {% include "site/_selo_caminhos.html" %}
 </footer>

@@ -1,29 +1,58 @@
 {# Inscrição na lista "Comunidade Barão" (Brevo). Serve à home cacheada da Feira
    e às páginas dos bares: o token de CSRF vem de /novidades/token na hora do
-   envio, nunca do HTML. Cores herdadas de quem inclui (currentColor).
+   envio, nunca do HTML.
    Parâmetros opcionais: `novidades_bar` = slug do bar (vira ORIGEM=bar:<slug>);
-   `novidades_titulo` e `novidades_texto` trocam a chamada (hotsite de expositor fala da Feira).
+   `novidades_titulo`, `novidades_texto` e `novidades_consentimento` trocam a chamada;
    `novidades_fonte` ('home'|'agenda'|'expor') marca de onde veio; `novidades_perfil` mostra
-   a pergunta "Você é" (morador | expositor | dono de bar) e vira ORIGEM=<fonte>:<perfil>. #}
-<div class="novidades-box" style="max-width:520px;margin:28px auto;padding:20px 18px;border:1px solid currentColor;border-radius:12px;text-align:left;font-size:.95rem;">
-  <p style="font-weight:700;margin:0 0 4px;">{{ novidades_titulo or 'Receba as novidades dos bares de Barão' }}</p>
-  <p style="margin:0 0 14px;font-size:.88rem;">{{ novidades_texto or 'Promoções, música ao vivo e eventos da Feira. Um e-mail de vez em quando, sem spam.' }}</p>
+   a pergunta "Você é" (morador | expositor | dono de bar) e vira ORIGEM=<fonte>:<perfil>.
+   Visual: quem inclui define --nv-acento, --nv-fundo, --nv-linha, --nv-raio e
+   --nv-titulo (fonte); sem eles a caixa herda a cor do texto (currentColor).
+   Só o e-mail é pedido de cara; nome e WhatsApp ficam num "opcional" fechado. #}
+<style>
+  .novidades-box{--_a:var(--nv-acento,currentColor);--_l:var(--nv-linha,currentColor);--_r:var(--nv-raio,8px);
+    max-width:560px;margin:28px auto;padding:22px 20px;text-align:left;font-size:.95rem;
+    background:var(--nv-fundo,transparent);border:1px solid var(--_l);border-radius:var(--_r)}
+  .novidades-box .nv-titulo{font-family:var(--nv-titulo,inherit);font-weight:700;font-size:1.25rem;line-height:1.2;margin:0 0 6px}
+  .novidades-box .nv-texto{margin:0 0 16px;font-size:.92rem;opacity:.85}
+  .novidades-box .nv-linha{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
+  .novidades-box .nv-campo{display:block;flex:1 1 200px;min-width:0;margin:0}
+  .novidades-box .nv-campo>span{display:block;font-size:.82rem;margin-bottom:4px}
+  .novidades-box input[type=text],.novidades-box input[type=email],.novidades-box input[type=tel],.novidades-box select{
+    box-sizing:border-box;width:100%;min-height:48px;padding:10px 12px;border-radius:var(--_r);border:1px solid var(--_l);
+    background:transparent;color:inherit;font:inherit;font-size:16px}
+  .novidades-box input:focus-visible,.novidades-box select:focus-visible,.novidades-box button:focus-visible,
+  .novidades-box summary:focus-visible{outline:2px solid var(--_a);outline-offset:2px}
+  .novidades-box .nv-enviar{flex:0 0 auto;box-sizing:border-box;height:48px;padding:0 20px;border-radius:var(--_r);cursor:pointer;
+    border:2px solid var(--_a);background:var(--nv-acento,transparent);color:var(--nv-acento-texto,inherit);font:inherit;font-weight:700}
+  .novidades-box .nv-enviar:disabled{opacity:.6;cursor:wait}
+  .novidades-box .nv-mais{margin-top:12px}
+  .novidades-box .nv-mais>summary{cursor:pointer;font-size:.86rem;min-height:44px;display:inline-flex;align-items:center;
+    text-decoration:underline;text-underline-offset:3px}
+  .novidades-box .nv-mais[open]>summary{margin-bottom:6px}
+  .novidades-box .nv-mais .nv-campo{margin-bottom:8px}
+  .novidades-box .nv-aceite{display:flex;gap:10px;align-items:flex-start;font-size:.82rem;margin-top:12px;min-height:44px;cursor:pointer}
+  .novidades-box .nv-aceite input{width:20px;height:20px;flex:0 0 auto;margin:0;cursor:pointer;accent-color:var(--_a)}
+  .novidades-box .novidades-msg{margin:8px 0 0;font-size:.88rem;min-height:1.2em}
+  .novidades-box .nv-isca{position:absolute;left:-9999px;width:1px;height:1px}
+</style>
+<div class="novidades-box">
+  <p class="nv-titulo">{{ novidades_titulo or 'Receba as novidades dos bares de Barão' }}</p>
+  <p class="nv-texto">{{ novidades_texto or 'Promoções, música ao vivo e eventos da Feira. Um e-mail de vez em quando, sem spam.' }}</p>
   <form class="form-novidades" novalidate>
     <input type="hidden" name="bar" value="{{ novidades_bar or '' }}">
     <input type="hidden" name="fonte" value="{{ novidades_fonte or '' }}">
-    <input type="text" name="site" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;">
-    <label style="display:block;margin-bottom:8px;">
-      <span style="display:block;font-size:.82rem;">Nome</span>
-      <input type="text" name="nome" maxlength="80" autocomplete="name" style="width:100%;min-height:44px;padding:10px;border-radius:8px;border:1px solid currentColor;background:transparent;color:inherit;font-size:16px;">
-    </label>
-    <label style="display:block;margin-bottom:8px;">
-      <span style="display:block;font-size:.82rem;">E-mail</span>
-      <input type="email" name="email" required maxlength="254" autocomplete="email" autocapitalize="none" style="width:100%;min-height:44px;padding:10px;border-radius:8px;border:1px solid currentColor;background:transparent;color:inherit;font-size:16px;">
-    </label>
+    <input class="nv-isca" type="text" name="site" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <div class="nv-linha">
+      <label class="nv-campo">
+        <span>E-mail</span>
+        <input type="email" name="email" required maxlength="254" autocomplete="email" autocapitalize="none" placeholder="voce@email.com">
+      </label>
+      <button class="nv-enviar" type="submit">Quero receber</button>
+    </div>
     {% if novidades_perfil %}
-    <label style="display:block;margin-bottom:8px;">
-      <span style="display:block;font-size:.82rem;">Você é</span>
-      <select name="perfil" style="width:100%;min-height:44px;padding:10px;border-radius:8px;border:1px solid currentColor;background:transparent;color:inherit;font-size:16px;">
+    <label class="nv-campo" style="margin-top:10px">
+      <span>Você é</span>
+      <select name="perfil">
         <option value="">Prefiro não dizer</option>
         <option value="morador">Moro ou frequento Barão</option>
         <option value="expositor">Tenho barraca na Feira</option>
@@ -31,18 +60,23 @@
       </select>
     </label>
     {% endif %}
-    <label style="display:block;margin-bottom:10px;">
-      <span style="display:block;font-size:.82rem;">WhatsApp (opcional)</span>
-      <input type="tel" name="telefone" maxlength="30" autocomplete="tel" style="width:100%;min-height:44px;padding:10px;border-radius:8px;border:1px solid currentColor;background:transparent;color:inherit;font-size:16px;">
+    <details class="nv-mais">
+      <summary>Incluir nome e WhatsApp (opcional)</summary>
+      <label class="nv-campo">
+        <span>Nome</span>
+        <input type="text" name="nome" maxlength="80" autocomplete="name">
+      </label>
+      <label class="nv-campo">
+        <span>WhatsApp</span>
+        <input type="tel" name="telefone" maxlength="30" autocomplete="tel">
+      </label>
+    </details>
+    {# Caixa de 20px e a frase inteira clicável (está dentro do <label>). #}
+    <label class="nv-aceite">
+      <input type="checkbox" name="consentimento" value="sim" required>
+      <span>{{ novidades_consentimento or 'Aceito receber as novidades da Feira de Barão por e-mail. Posso sair quando quiser pelo link em cada e-mail.' }}</span>
     </label>
-    {# Caixa de 20px e a frase inteira clicável (está dentro do <label>): a
-       caixa nativa de 13px era o menor alvo de toque da página. #}
-    <label style="display:flex;gap:10px;align-items:flex-start;font-size:.82rem;margin-bottom:12px;min-height:44px;cursor:pointer;">
-      <input type="checkbox" name="consentimento" value="sim" required style="width:20px;height:20px;flex:0 0 auto;margin:0;cursor:pointer;">
-      <span>Aceito receber as novidades da Feira de Barão por e-mail. Posso sair quando quiser pelo link em cada e-mail.</span>
-    </label>
-    <button type="submit" style="width:100%;min-height:44px;padding:12px;border-radius:8px;border:2px solid currentColor;background:transparent;color:inherit;font-weight:700;cursor:pointer;">Quero receber</button>
-    <p class="novidades-msg" role="status" aria-live="polite" style="margin:10px 0 0;font-size:.88rem;"></p>
+    <p class="novidades-msg" role="status" aria-live="polite"></p>
   </form>
 </div>
 <script>
@@ -54,7 +88,7 @@
       ev.preventDefault();
       var msg = form.querySelector('.novidades-msg');
       var botao = form.querySelector('button[type=submit]');
-      if (!form.email.value || form.email.value.indexOf('@') < 0) { msg.textContent = 'Confira o e-mail.'; return; }
+      if (!form.email.value || form.email.value.indexOf('@') < 0) { msg.textContent = 'Confira o e-mail.'; form.email.focus(); return; }
       if (!form.consentimento.checked) { msg.textContent = 'Marque que aceita receber as novidades.'; return; }
       botao.disabled = true;
       msg.textContent = 'Enviando…';
