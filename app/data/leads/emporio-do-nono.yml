@@ -24,7 +24,9 @@ site:
   # Textos reescritos a partir de emporiodonono.com.br (páginas O Empório,
   # Programação e Almoço do Dia, lidas em 06/11/2026). Fato deles, palavra nossa.
   descritor: "Restaurante e bar em Barão Geraldo"
-  kicker: "BARÃO GERALDO · CAMPINAS–SP · DESDE 1999"
+  # Sem ano: a única fonte (site oficial) diz que o chorinho de segunda existe
+  # desde 1999, não que a casa abriu nesse ano. PERGUNTAR AO DONO o ano de abertura.
+  kicker: "BARÃO GERALDO · CAMPINAS–SP"
   hero_linha1: "Empório"
   hero_linha2: "do Nono"
   tagline: "Almoço todo dia, acepipes à noite e chopp da casa, numa esquina de Barão Geraldo."
