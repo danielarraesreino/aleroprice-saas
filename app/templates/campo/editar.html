@@ -8,10 +8,12 @@
   {%- else -%}{{ url_for('static', filename=caminho) }}{%- endif -%}
 {%- endmacro %}
 
+{% set url_site = url_for('public.landing_expositor' if artesao else 'public.landing_slug', slug=rest.slug) %}
+{% set url_site_abs = url_for('public.landing_expositor' if artesao else 'public.landing_slug', slug=rest.slug, _external=True) %}
 {% block topo %}
   <a class="voltar" href="{{ url_for('campo.index') }}" aria-label="Voltar para a lista">‹</a>
   <h1>{{ rest.nome }}</h1>
-  <a href="{{ url_for('public.landing_slug', slug=rest.slug) }}" target="_blank"
+  <a href="{{ url_site }}" target="_blank"
      rel="noopener" style="font-size:14px;white-space:nowrap">ver site ↗</a>
 {% endblock %}
 
@@ -73,7 +75,7 @@
   <div id="previa-caixa" style="position:relative;border:1px solid var(--linha);border-radius:12px;
               overflow:hidden;margin-bottom:14px;background:#000;height:520px">
     <iframe id="previa" title="Prévia do site"
-            src="{{ url_for('public.landing_slug', slug=rest.slug) }}"
+            src="{{ url_site }}"
             style="width:100%;height:520px;border:0;display:block;transform-origin:0 0"
             loading="lazy"></iframe>
     <span id="previa-carregando" aria-live="polite"
@@ -315,7 +317,7 @@
   </a>
   {% if cfg.whatsapp %}
     <a class="btn zap" style="margin-top:10px;text-decoration:none"
-       href="https://wa.me/{{ cfg.whatsapp }}?text={{ ('Olha o site do ' ~ rest.nome ~ ': ' ~ url_for('public.landing_slug', slug=rest.slug, _external=True))|urlencode }}">
+       href="https://wa.me/{{ cfg.whatsapp }}?text={{ ('Olha o site do ' ~ rest.nome ~ ': ' ~ url_site_abs)|urlencode }}">
       Mandar o link no WhatsApp dele
     </a>
   {% endif %}
@@ -538,7 +540,7 @@ btnDominio.addEventListener('click', async () => {
   if (!form || !previa) return;
 
   const aviso = document.getElementById('previa-carregando');
-  const BASE = {{ url_for('public.landing_slug', slug=rest.slug)|tojson }};
+  const BASE = {{ url_site|tojson }};
   let pendente;
 
   function atualizar() {

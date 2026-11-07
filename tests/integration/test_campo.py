@@ -961,3 +961,11 @@ def test_bar_continua_com_pratos_e_qr_do_cardapio(client, session, demo):
     assert 'Nome do prato' in corpo
     assert 'O cardápio' in corpo
     assert 'Folha do cardápio' in corpo
+
+
+def test_expositor_aponta_pro_site_certo_na_tela_de_campo(client, session, expositor, demo):
+    entrar(client)
+    assert f'href="/expositor/{expositor.slug}"' in client.get(
+        f'/campo/{expositor.slug}').get_data(as_text=True)
+    assert f'href="/bar/{demo.slug}"' in client.get(
+        f'/campo/{demo.slug}').get_data(as_text=True)
