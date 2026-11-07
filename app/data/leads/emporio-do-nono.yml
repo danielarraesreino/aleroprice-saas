@@ -12,6 +12,8 @@ site:
   modelo: tradicional
   hero_foto: "img/demo/emporio-do-nono/capa.jpg"
   logo: "img/demo/emporio-do-nono/marca.png"
+  # Capa viva gerada em videos/tradicional (loop mudo 8 s; .webm ao lado)
+  video_capa: "video/demo/emporio-do-nono/capa-viva.mp4"
   # Número de delivery publicado em emporiodonono.com.br (06/11/2026).
   whatsapp: "5519999224806"
   nota_google: '4,6'

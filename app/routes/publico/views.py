@@ -1579,6 +1579,8 @@ def montar_site(rest):
     # Fora de SITE_DEFAULTS: tem tela própria (/config-site/encomendas).
     site['retirada_na_feira'] = bool(getattr(cfg, 'retirada_na_feira', False)) if cfg else False
     site['retirada_antecedencia'] = (getattr(cfg, 'retirada_antecedencia', None) or 0) if cfg else 0
+    # Fora de SITE_DEFAULTS: a capa viva é gerada pela plataforma (videos/), não editada pelo dono.
+    site['video_capa'] = (getattr(cfg, 'video_capa', None) or None) if cfg else None
     if not site.get('nome') and rest is not None:
         site['nome'] = rest.nome
     return site

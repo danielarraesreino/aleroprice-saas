@@ -29,6 +29,9 @@ class SiteConfig(db.Model):
     # site mostra só o nome. Usada no menu (recorte redondo), no ícone da aba e
     # como imagem de compartilhamento quando não há foto de capa.
     logo = db.Column(db.String(300))
+    # Capa viva: loop mudo .mp4 (gerado em videos/<modelo>/capa_e_card.py) com um .webm
+    # de mesmo nome ao lado. Vazio = a capa é a foto de sempre (hero_foto).
+    video_capa = db.Column(db.String(300))
 
     # Onde o expositor fica na Feira. `lat`/`lng` vêm do GPS do celular do
     # operador (Modo Campo), parado na barraca; `ponto_na_feira` é o texto que o

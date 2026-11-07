@@ -1,0 +1,8 @@
+{
+  "capa-viva.mp4": {
+    "origem": "Gerado pela plataforma com HyperFrames (videos/tradicional/capa_e_card.py) a partir de capa.jpg, ambiente-chopp-tirado.jpg e ambiente-bolinhos.jpg",
+    "fotos": "ver app/static/img/demo/emporio-do-nono/creditos.json (site oficial e cardápio de delivery do Empório do Nono)",
+    "autorizacao": "Prévia de venda; uso final depende do OK do Empório do Nono"
+  },
+  "capa-viva.webm": {"origem": "Mesmo vídeo de capa-viva.mp4, em WebM"}
+}

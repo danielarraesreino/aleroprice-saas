@@ -411,6 +411,11 @@
      É o oposto exato do `autoral` (sangria alternada, cor real e nenhuma
      moldura). */
   .moldura img{filter:var(--sepia);width:100%;object-position:var(--pos)}
+  /* capa viva: o vídeo cobre a foto só depois que começa a tocar */
+  .capa-midia{position:relative}
+  .capa-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:var(--sepia);
+    opacity:0;transition:opacity .6s ease}
+  .capa-video.tocando{opacity:1}
   .moldura figcaption{
     font-family:"Alegreya Sans SC",serif;text-transform:uppercase;letter-spacing:.14em;
     font-size:.75rem;color:var(--tinta-suave);text-align:center;padding:10px 4px 2px;
@@ -923,9 +928,17 @@
       <figure class="moldura torta-a">
         {# Esta é a LCP da página: nada de `loading="lazy"` aqui. `fetchpriority`
            manda o navegador buscá-la antes das fontes e do resto. #}
+        {# Capa viva (site.video_capa): o vídeo entra POR CIMA da foto e só depois de
+           tocar. A foto continua sendo a LCP, o que o Google e quem está sem JS veem;
+           com "reduzir movimento" ou economia de dados, o vídeo nem é baixado. #}
+        {% set video_capa = site.video_capa if (site.video_capa and site.video_capa.startswith('http')) else (url_for('static', filename=site.video_capa) if site.video_capa else None) %}
+        <div class="capa-midia">
         <img src="{{ hero_src }}"
              alt="{{ site.nome }} — foto de capa da casa{% if ano %}, aberta desde {{ ano }}{% endif %}{% if site.cidade_uf %}, em {{ site.cidade_uf }}{% endif %}"
              width="1200" height="800" fetchpriority="high" decoding="async">
+        {% if video_capa %}<video class="capa-video" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1"
+               width="900" height="600" data-mp4="{{ video_capa }}" data-webm="{{ video_capa[:-4] ~ '.webm' if video_capa.endswith('.mp4') else '' }}"></video>{% endif %}
+        </div>
         <figcaption>{{ site.nome }}{% if ano %} · desde {{ ano }}{% elif site.cidade_uf %} · {{ site.cidade_uf }}{% endif %}</figcaption>
       </figure>
     </div>
@@ -1571,6 +1584,21 @@
 
     var reduz = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var M = (!reduz && window.Motion) ? window.Motion : null;
+
+    // Capa viva: só baixa e toca com movimento aceito e sem economia de dados.
+    // WebM primeiro (mais leve), MP4 de reserva; a foto embaixo fica até o 1º quadro.
+    (function(){
+      var v = document.querySelector('.capa-video');
+      var poupa = navigator.connection && navigator.connection.saveData;
+      if(!v || reduz || poupa) return;
+      [['webm','video/webm'],['mp4','video/mp4']].forEach(function(p){
+        if(!v.dataset[p[0]]) return;
+        var s = document.createElement('source'); s.src = v.dataset[p[0]]; s.type = p[1]; v.appendChild(s);
+      });
+      v.addEventListener('playing', function(){ v.classList.add('tocando'); }, {once:true});
+      v.load();
+      var tocar = v.play(); if(tocar && tocar.catch) tocar.catch(function(){});
+    })();
 
     if(!M){
       // Revelar ao rolar (nada some se o observador não existir).
