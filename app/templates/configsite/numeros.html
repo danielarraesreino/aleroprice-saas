@@ -42,7 +42,9 @@
     <div class="card h-100">
       <div class="card-body">
         <h5 class="card-title">Também pelo site</h5>
+        {% if not eh_artesao %}
         <p class="mb-1"><strong>{{ reservas_mes|numero_br(0) }}</strong> reservas em {{ nome_mes }} ({{ reservas_passado|numero_br(0) }} em {{ nome_mes_passado }})</p>
+        {% endif %}
         <p class="mb-3"><strong>{{ avaliacoes|numero_br(0) }}</strong> pessoas abriram a tela de avaliação no Google pelo seu link</p>
         {% if link %}
         <label class="form-label small" for="link-site">Divulgue o seu link: mais gente no site, mais pedidos</label>

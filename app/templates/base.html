@@ -45,6 +45,36 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
+                    {% set e_artesao = current_user.restaurante and current_user.restaurante.tipo_negocio == 'artesao' %}
+                    {% if e_artesao %}
+                    {# Expositor: cinco itens com nome do que a pessoa faz ali (eram sete, com
+                       "Conteúdo" que abria em Produtos e "Avaliações" que era o Google). #}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'dashboard.index' %}active{% endif %}"
+                            href="{{ url_for('dashboard.index') }}">Início</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'conteudo' in request.endpoint %}active{% endif %}"
+                            href="{{ url_for('conteudo.home') }}">Produtos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint in ('configsite.index', 'configsite.foto', 'configsite.na_feira') %}active{% endif %}"
+                            href="{{ url_for('configsite.index') }}">Meu site</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'configsite.encomendas' %}active{% endif %}"
+                            href="{{ url_for('configsite.encomendas') }}">Encomendas</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if request.endpoint in ('configsite.numeros', 'configsite.catalogo', 'reservas.avaliacoes') %}active{% endif %}"
+                           href="#" id="divulgarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Divulgar</a>
+                        <ul class="dropdown-menu" aria-labelledby="divulgarDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('configsite.numeros') }}">Seus números</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('configsite.catalogo') }}">Catálogo no WhatsApp</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('reservas.avaliacoes') }}">Pedir avaliação no Google</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'dashboard.index' %}active{% endif %}"
                             href="{{ url_for('dashboard.index') }}">Dashboard</a>
@@ -63,7 +93,6 @@
                     </li>
                     {# Reservas, Agenda e Promoções são coisa de bar: no painel do
                        expositor só poluíam o menu. As rotas seguem de pé. #}
-                    {% set e_artesao = current_user.restaurante and current_user.restaurante.tipo_negocio == 'artesao' %}
                     {% if not e_artesao %}
                     <li class="nav-item">
                         <a class="nav-link {% if 'reservas' in request.endpoint and request.endpoint != 'reservas.avaliacoes' %}active{% endif %}"
@@ -92,6 +121,7 @@
                         <a class="nav-link {% if 'conteudo' in request.endpoint %}active{% endif %}"
                             href="{{ url_for('conteudo.home') }}">Conteúdo</a>
                     </li>
+                    {% endif %}
                     {# Menu do operador: mesmo critério das rotas (e_operador), não o id do tenant. #}
                     {% if current_user.is_authenticated and current_user.tipo == 'superadmin' %}
                     <li class="nav-item">

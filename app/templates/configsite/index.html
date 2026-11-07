@@ -49,8 +49,21 @@
 {% set avancados = ['maps_query','descritor','telefone_exibicao','cidade_uf','servicos','nota_google','qtd_avaliacoes','instagram_url','facebook_url','tiktok_url'] %}
 
 {% block content %}
+{% if eh_artesao %}
+{# Rótulos em português simples e sem exemplo de bar ("Hamburgueria", "Bar do Zé"). #}
+{% set _ = rotulos.update({
+  'nome':'Nome da barraca',
+  'tagline':'Frase principal (aparece no topo do site)',
+  'descritor':'O que você faz (ex.: Madeira e artesanato)',
+  'horario':'Dias e horário na Feira (ex.: Sáb 10h às 16h, Dom 10h às 15h)',
+  'ponto_na_feira':'Onde fica sua barraca (ex.: ao lado do palco)',
+  'endereco':'Endereço do ateliê (opcional)',
+  'hero_foto':'Foto do topo do site',
+}) %}
+{% set _ = dicas.update({'descritor':'Ex.: Madeira e artesanato', 'whatsapp':'Ex.: (19) 99999-8888'}) %}
+{% endif %}
 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-  <h2 class="mb-0"><i class="fas fa-globe text-warning"></i> Identidade do site</h2>
+  <h2 class="mb-0"><i class="fas fa-globe text-warning"></i> {{ 'Meu site' if eh_artesao else 'Identidade do site' }}</h2>
   {# Link pro site DESTE bar. Antes apontava pra public.landing, que no domínio
      do produto abre a página de vendas, não o site do cliente. #}
   <a class="btn btn-outline-secondary" target="_blank"
@@ -127,17 +140,18 @@
 
 
   <div class="mb-4">
-    <label class="form-label fw-semibold">Cara do site</label>
+    <label class="form-label fw-semibold">{{ 'Cores do site' if eh_artesao else 'Cara do site' }}</label>
     <select class="form-select" name="tema">
       {% for t in temas %}
       <option value="{{ t.valor }}" {{ 'selected' if (cfg.tema if cfg else 'boteco-ambar') == t.valor }}>
-        {{ t.label }} — {{ t.descricao }}
+        {{ t.label }}{% if not eh_artesao %} — {{ t.descricao }}{% endif %}
       </option>
       {% endfor %}
     </select>
     <div class="form-text">Muda as cores do site inteiro. Dá pra trocar quando quiser.</div>
   </div>
 
+  {% if not (eh_artesao and vibes|length < 2) %}
   <div class="mb-4">
     <label class="form-label fw-semibold">Jeito de falar</label>
     <select class="form-select" name="vibe">
@@ -149,6 +163,7 @@
     </select>
     <div class="form-text">Define os títulos das seções e o tom do texto do site.</div>
   </div>
+  {% endif %}
 
   {% macro campo_texto(campo) %}
   <div class="mb-3">
@@ -211,9 +226,23 @@
   </div>
   {% endmacro %}
 
-  {% for campo in essenciais %}{{ campo_texto(campo) }}{% endfor %}
+  {% macro bloco(titulo, ajuda, campos) %}
+  <div class="card p-3 mb-4">
+    <h5 class="mb-1">{{ titulo }}</h5>
+    <p class="text-muted small mb-3">{{ ajuda }}</p>
+    {% for c in campos %}{{ campo_texto(c) }}{% endfor %}
+  </div>
+  {% endmacro %}
 
   {% if eh_artesao %}
+  {# Três blocos, na ordem em que a pessoa preenche. Fica de fora o que nenhum
+     site de expositor mostra (kicker, subline, selo, nota do Google, serviços,
+     busca do Maps, cidade): editar e nada mudar confunde. Campo que não vem no
+     formulário não é apagado ao salvar. #}
+  {{ bloco('Fotos', 'A foto de capa aparece no topo; o logo, no menu e na aba do navegador.', ['hero_foto', 'logo']) }}
+  {% set sobre = ['nome', 'tagline', 'descritor', 'sobre', 'pagamento', 'politicas', 'atendimento', 'desconto_pix_pct'] %}
+  {% if modelo_atual == 'vitrine' %}{% set sobre = ['hero_linha1', 'hero_linha2'] + sobre %}{% endif %}
+  {{ bloco('Sobre a barraca', 'O que as pessoas leem sobre você e como pagam.', sobre) }}
   {# Estes textos eram fixos no site ("Ingrediente de verdade", "Nossos produtos"…)
      e valiam o mesmo para madeira, cerâmica e pão. Em branco, o site usa um texto simples. #}
   <div class="card p-3 mb-4">
@@ -237,7 +266,10 @@
       <div class="form-text">Escreva <code>Título | frase curta</code>. Se não preencher, a faixa de destaques não aparece.</div>
     </div>
   </div>
-  {% endif %}
+  {{ bloco('Contato e Feira', 'Por onde falam com você e onde encontram sua barraca.', ['whatsapp', 'instagram_url', 'tiktok_url', 'facebook_url', 'email', 'ponto_na_feira', 'horario', 'endereco']) }}
+  {% else %}
+  {% for campo in essenciais %}{{ campo_texto(campo) }}{% endfor %}
+
 
   <details class="mb-4">
     <summary class="mb-3">Textos do topo e mais detalhes</summary>
@@ -246,8 +278,10 @@
     {% endfor %}
     {% for campo in avancados if campo not in ['callmebot_phone', 'callmebot_apikey'] %}{{ campo_texto(campo) }}{% endfor %}
   </details>
+  {% endif %}
 
-  {# Bloco CallMeBot: Notificações de Reservas no WhatsApp com Tutorial #}
+  {# Bloco CallMeBot: Notificações de Reservas no WhatsApp com Tutorial. Reserva é coisa de bar. #}
+  {% if not eh_artesao %}
   <div class="card border-success shadow-sm mb-4">
     <div class="card-header bg-success bg-opacity-10 border-success d-flex align-items-center justify-content-between">
       <h5 class="mb-0 text-success"><i class="fab fa-whatsapp"></i> Alertas de Reservas no WhatsApp (CallMeBot)</h5>
@@ -300,8 +334,17 @@
     </div>
   </div>
 
-  <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Salvar identidade</button>
+  {% endif %}
+
+  {# Salvar fica visível no celular: o formulário é longo e o botão ficava lá no fim. #}
+  <div class="salvar-fixo">
+    <button class="btn btn-primary btn-lg" type="submit"><i class="fas fa-save"></i> {{ 'Salvar meu site' if eh_artesao else 'Salvar identidade' }}</button>
+  </div>
 </form>
+<style>
+  .salvar-fixo{position:sticky;bottom:0;z-index:5;margin:0 -12px;padding:12px;background:var(--bs-body-bg,#fff);border-top:1px solid #dee2e6}
+  .salvar-fixo .btn{min-height:48px}
+</style>
 
 <script>
 /* Reduz no aparelho, não no servidor.

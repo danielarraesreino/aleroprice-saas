@@ -170,6 +170,7 @@ def numeros():
         reservas_mes=reservas(mes_ini, hoje),
         reservas_passado=reservas(ant_ini, ant_fim),
         avaliacoes=(cfg.cliques_avaliacao or 0) if cfg else 0,
+        eh_artesao=(rest.tipo_negocio == 'artesao'),
         serie=serie,
         pico=max([d['visita'] for _, d in serie] + [1]),
         link=url_canonica(rest) if rest.slug else '',

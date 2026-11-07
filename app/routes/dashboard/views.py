@@ -637,7 +637,8 @@ def index():
         if total_produtos == 0 and total_vendas_count == 0:
             show_onboarding = True
             # Se for onboarding, não precisamos calcular métricas pesadas
-            return render_template('dashboard/index.html', show_onboarding=True)
+            return render_template('dashboard/index.html', show_onboarding=True,
+                                   **_painel_do_expositor(restaurant_id))
             
         # --------------------------------------
 
