@@ -1,0 +1,105 @@
+{
+  "slug": "emporio-do-nono",
+  "nome": "Empório do Nono",
+  "nome1": "Empório",
+  "nome2": "do Nono",
+  "_fonte": "Fatos de emporiodonono.com.br (O Empório, Programação, Almoço do Dia, 06/11/2026) e app/data/leads/emporio-do-nono.yml; fotos com origem em app/static/img/demo/emporio-do-nono/creditos.json",
+  "horas": [
+    {
+      "relogio": "11:30",
+      "hora": "11h30",
+      "linha": "Sai o almoço do dia",
+      "fotos": [
+        {
+          "src": "img/demo/emporio-do-nono/ambiente-almoco-do-dia.jpg",
+          "legenda": "Almoço do dia"
+        },
+        {
+          "src": "img/demo/emporio-do-nono/cardapio-01.jpg",
+          "legenda": "PF do Nono"
+        },
+        {
+          "src": "img/demo/emporio-do-nono/cardapio-04.jpg",
+          "legenda": "Feijoada"
+        }
+      ]
+    },
+    {
+      "relogio": "18:00",
+      "hora": "18h",
+      "linha": "O balcão vira mesa de frios, com mais de 40 acepipes",
+      "fotos": [
+        {
+          "src": "img/demo/emporio-do-nono/ambiente-bolinhos.jpg",
+          "legenda": "Bolinhos"
+        },
+        {
+          "src": "img/demo/emporio-do-nono/ambiente-coxinhas.jpg",
+          "legenda": "Coxinhas"
+        },
+        {
+          "src": "img/demo/emporio-do-nono/ambiente-caldinho.jpg",
+          "legenda": "Caldinho"
+        }
+      ]
+    },
+    {
+      "relogio": "20:00",
+      "hora": "20h",
+      "linha": "E toda segunda tem roda de chorinho",
+      "fotos": [
+        {
+          "src": "img/demo/emporio-do-nono/ambiente-chorinho-1.jpg",
+          "legenda": "Chorinho de segunda"
+        },
+        {
+          "src": "img/demo/emporio-do-nono/ambiente-chopp-tirado.jpg",
+          "legenda": "Chopp da casa"
+        },
+        {
+          "src": "img/demo/emporio-do-nono/ambiente-brinde.jpg",
+          "legenda": "Saúde!"
+        }
+      ]
+    }
+  ],
+  "logo_src": "img/demo/emporio-do-nono/marca.png",
+  "fecho_linha": "Almoço todo dia, numa esquina de Barão Geraldo",
+  "whatsapp": "(19) 99922-4806",
+  "capa_fotos": [
+    "img/demo/emporio-do-nono/capa.jpg",
+    "img/demo/emporio-do-nono/ambiente-chopp-tirado.jpg",
+    "img/demo/emporio-do-nono/ambiente-bolinhos.jpg"
+  ],
+  "almoco": {
+    "_fonte": "emporiodonono.com.br/almoco-do-dia, lido em 06/11/2026 (sexta-feira)",
+    "titulo": "Almoço de hoje",
+    "data": "Sexta, 6 de novembro",
+    "foto": "img/demo/emporio-do-nono/ambiente-almoco-do-dia.jpg",
+    "pratos": [
+      {
+        "nome": "PF do Nono",
+        "det": "Picadinho de filé mignon, feijão preto, farofa, ovo e banana"
+      },
+      {
+        "nome": "Linguado grelhado",
+        "det": "Com purê de batatas e legumes assados"
+      },
+      {
+        "nome": "Arroz cremoso de bacalhau",
+        "det": "Gratinado, com brócolis"
+      },
+      {
+        "nome": "Cupim assado",
+        "det": "Arroz biro-biro e farofa de banana-da-terra"
+      },
+      {
+        "nome": "Filé à parmegiana",
+        "det": "Com tagliolini ao pesto de rúcula"
+      },
+      {
+        "nome": "PF de frango"
+      }
+    ]
+  }
+}
