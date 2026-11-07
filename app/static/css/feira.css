@@ -129,7 +129,10 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     white-space: nowrap;
-    padding: 4px 8px;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 8px;
     border-radius: 6px;
   }
   .nav-dossie a:hover {
@@ -146,7 +149,7 @@
     border-radius: 999px;
     border: 1.5px solid var(--tomate);
     color: var(--tomate);
-    font-size: 0.82rem;
+    font-size: 0.94rem;
     font-weight: 800;
     white-space: nowrap;
   }
@@ -160,7 +163,7 @@
     justify-content: center;
     gap: 8px;
     font-weight: 700;
-    font-size: 0.92rem;
+    font-size: 1rem;
     padding: 10px 22px;
     border-radius: 999px;
     cursor: pointer;
@@ -694,7 +697,7 @@
   @media (max-width: 1024px) {
     .wrap { padding: 0 18px; }
     .nav-dossie { gap: 8px; }
-    .nav-dossie a { font-size: 0.74rem; padding: 4px 6px; }
+    .nav-dossie a { font-size: 0.74rem; padding: 0 6px; }
     .grid-tech-powers { grid-template-columns: repeat(2, 1fr); }
   }
 
@@ -871,6 +874,18 @@
     .header-desktop-actions .btn-colab { display: none; }
   }
 
+  /* Logo + 6 links + "Tenho banca ou bar" + zap + tema não cabiam nos 1140 px
+     do topo: vazava em qualquer largura e dava até 220 px de rolagem lateral
+     entre 901 e 1280. No topo do desktop ficam só o essencial (sem o ícone do
+     logo e sem o "ou bar"); o zap sai abaixo de 1320 (está no #contato). */
+  @media (min-width: 901px) {
+    .site-header .logo-topo > i, .site-header .cta-extra { display: none; }
+    .nav-dossie { gap: 2px; }
+  }
+  @media (max-width: 1320px) {
+    .header-desktop-actions { display: none !important; }
+  }
+
   @media (max-width: 900px) {
     .nav-dossie { display: none; }
     .header-desktop-actions { display: none !important; }
@@ -882,7 +897,7 @@
     .logo-topo > i { display: none; }
     .btn-menu-mobile { min-width: 44px; padding: 6px 10px; }
     .btn-menu-mobile span { display: none; }
-    .cta-dono { padding: 0 10px; font-size: 0.74rem; }
+    .cta-dono { padding: 0 10px; font-size: 0.88rem; }
   }
 
   @media (max-width: 360px) {
@@ -892,7 +907,7 @@
 
   @media (max-width: 420px) {
     .logo-topo { font-size: 1.02rem; }
-    .btn { padding: 8px 14px; font-size: 0.84rem; }
+    .btn { padding: 8px 16px; }
     .grid-23-bares { grid-template-columns: 1fr; }
     .bar-img-thumb { height: 160px; }
   }
@@ -911,7 +926,7 @@
   .dossie-modos { display: inline-flex; border: 2px solid var(--tinta); border-radius: 999px; overflow: hidden; }
   .dossie-modos button {
     min-height: 44px; padding: 0 16px; border: 0; background: transparent; color: var(--tinta);
-    font: inherit; font-weight: 700; font-size: 0.86rem; cursor: pointer;
+    font: inherit; font-weight: 700; font-size: 0.94rem; cursor: pointer;
   }
   .dossie-modos button + button { border-left: 2px solid var(--tinta); }
   .dossie-modos button[aria-pressed="true"] { background: var(--tinta); color: var(--papel, #fdf8eb); }
@@ -926,7 +941,7 @@
   .card-thumb { width: 84px; height: 84px; flex: none; object-fit: cover; border-radius: 10px; border: 1.5px solid var(--linha); background: #dfd3ba; }
   .card-resumo { font-size: 0.92rem; line-height: 1.55; margin: 0 0 12px; }
   .card-acoes { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
-  .card-acoes .btn { min-height: 44px; font-size: 0.84rem; padding: 8px 14px; }
+  .card-acoes .btn { min-height: 44px; font-size: 0.94rem; padding: 8px 14px; }
   .card-mais summary { cursor: pointer; font-weight: 800; color: var(--tomate); min-height: 44px; display: flex; align-items: center; }
   .card-mais p { font-size: 0.9rem; line-height: 1.6; margin: 0 0 10px; }
   .card-meta { font-size: 0.78rem !important; color: var(--tinta-suave, #5a4d3f); }

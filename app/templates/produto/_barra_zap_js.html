@@ -1,0 +1,12 @@
+{# Barra fixa do WhatsApp (/barao, /expor): fica escondida enquanto o botão do
+   topo está na tela, para não haver dois WhatsApp no primeiro quadro.
+   Sem JS ou sem IntersectionObserver, a barra fica sempre visível. #}
+<script>
+(function () {
+  var barra = document.querySelector('.barra-zap'), topo = document.querySelector('.hero .btn-zap');
+  if (!barra || !topo || !('IntersectionObserver' in window)) return;
+  new IntersectionObserver(function (e) {
+    barra.classList.toggle('barra-zap--oculta', e[0].isIntersecting);
+  }).observe(topo);
+})();
+</script>

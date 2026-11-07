@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="tema-auto">
 <head>
 <meta charset="UTF-8">
+<script>try{var t=localStorage.getItem('feira-tema-portal');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Site para expositor da Feira de Barão: a partir de {{ preco_exp.anual_mes }} por mês</title>
 <meta name="description" content="Sua barraca aberta a semana inteira: vitrine com preço, prazo e pedido pelo WhatsApp. Anual {{ preco_exp.anual }} ou mensal {{ preco_exp.mensal }} sem compromisso.">
@@ -28,7 +29,7 @@
   .hero-grid{display:grid;gap:var(--s-6);align-items:center}
   @media(min-width:860px){.hero-grid{grid-template-columns:1.15fr .85fr}}
   .fone{justify-self:center;width:min(100%,270px);border:7px solid var(--tinta);border-radius:30px;overflow:hidden;background:var(--cartao);
-    box-shadow:8px 8px 0 var(--tomate);transform:rotate(1.2deg)}
+    box-shadow:var(--sombra);transform:rotate(1.2deg)}
   .fone img{display:block;width:100%;height:auto}
   .fone-nota{font-size:.82rem;color:var(--taupe);text-align:center;margin-top:var(--s-4)}
   .dor-hoje b,.dor-com b{text-transform:none;letter-spacing:0;font-size:.82rem}
@@ -40,7 +41,8 @@
   .prova figcaption{padding:var(--s-3) var(--s-4);border-top:1.5px solid var(--tinta)}
   .prova figcaption b{display:block}
   .prova figcaption span{font-size:.86rem;color:var(--taupe)}
-  .prova a:hover figure{box-shadow:4px 4px 0 var(--tomate)}
+  .prova figure{transition:border-color .2s,box-shadow .2s}
+  .prova a:hover figure{border-color:var(--tomate);box-shadow:var(--sombra)}
   .entrega{display:grid;gap:var(--s-4) var(--s-6);margin-top:var(--s-5)}
   @media(min-width:760px){.entrega{grid-template-columns:1fr 1fr}}
   .entrega dt{font-weight:700}
@@ -49,17 +51,23 @@
   .faq details:last-of-type{border-bottom:1px solid var(--linha)}
   .faq summary{font-weight:700;cursor:pointer;min-height:44px;display:flex;align-items:center}
   .faq details p{margin-top:var(--s-2)}
-  .fecho{background:var(--tinta);color:var(--papel)}
-  .fecho h2{color:var(--papel)}
+  /* fecho escuro nos dois modos (no escuro, um tom abaixo do papel) */
+  .fecho{background:#251b10;color:#f6eedb}
+  .fecho h2{color:#f6eedb}
   .fecho .lead{color:#d9ccb0}
-  .fecho .btn-zap{background:#1f8a52}
+  .fecho .btn-zap{background:#197a47}
+  html.tema-auto[data-theme="dark"] .fecho{background:#0f0b08}
+  @media (prefers-color-scheme:dark){html.tema-auto:not([data-theme="light"]) .fecho{background:#0f0b08}}
   .hero-preco{margin-top:var(--s-4);font-size:1.05rem}
   .hero-preco b{font-family:var(--f-display,'Anton',sans-serif);font-weight:400;font-size:1.35em;color:var(--tomate);letter-spacing:.01em;white-space:nowrap}
   .hero .btn-zap{margin-top:var(--s-3)}
   @media(max-width:520px){.hero{padding-block:var(--s-5) var(--s-6)}}
   /* WhatsApp fixo no rodapé, só no celular */
   .barra-zap{position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;padding:var(--s-3);
-    background:rgb(246 238 219 / .95);border-top:1px solid var(--linha);backdrop-filter:blur(8px)}
+    background:color-mix(in srgb,var(--papel) 95%,transparent);border-top:1px solid var(--linha);backdrop-filter:blur(8px);
+    transition:transform .25s ease-out,visibility 0s}
+  .barra-zap--oculta{transform:translateY(110%);visibility:hidden;transition:transform .25s ease-in,visibility 0s .25s}
+  @media (prefers-reduced-motion:reduce){.barra-zap,.barra-zap--oculta{transition:none}}
   .barra-zap .btn-zap{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:var(--s-2);min-height:48px;
     background:var(--verde);color:#f4efe2;text-decoration:none;font-weight:700;border-radius:3px}
   .barra-zap .btn-zap:hover{background:#125533}
@@ -70,7 +78,6 @@
 <header class="hero">
   <div class="wrap hero-grid">
     <div>
-      <span class="eyebrow">Expositores da Feira de Barão</span>
       <h1>Sua barraca aberta a semana inteira, não só no fim de semana.</h1>
       {# Preço e pedido de prévia na primeira tela do celular (auditoria de
          29/10/2026): antes o valor só aparecia lá embaixo, em #preco. #}
@@ -193,6 +200,7 @@
 <div class="barra-zap">
   <a class="btn-zap" href="{{ zap_url }}" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> Peça sua prévia grátis</a>
 </div>
+{% include 'produto/_barra_zap_js.html' %}
 {% endif %}
 <footer><div class="wrap"><b>Feira de Barão</b> · Praça do Coco, Barão Geraldo, Campinas/SP</div><p style="margin-top:8px"><a href="{{ url_for('public.privacidade') }}">Privacidade</a> · <a href="{{ url_for('public.termos') }}">Termos</a></p></footer>
 </body>
