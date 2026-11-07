@@ -571,6 +571,51 @@ def upgrade():
         zap_vendas=os.environ.get('FEIRA_WHATSAPP', ''),
     )
 
+def _painel_do_expositor(rid):
+    """Passos do painel inicial do expositor, já marcando o que foi feito.
+
+    A tela era um "Seu site já está no ar 🎉" fixo, que mandava fazer de novo o
+    que a pessoa já tinha feito. Vazio quando o tenant não é expositor.
+    """
+    from app.models.modelo_restaurante import Restaurante
+    from app.models.modelo_siteconfig import SiteConfig
+    from app.models.modelo_sitecontent import ProdutoSite
+    from app.utils import metricas
+    from app.utils.feira import hoje_br
+    from app.utils.site_router import url_canonica
+
+    rest = Restaurante.query.get(rid)
+    if rest is None or rest.tipo_negocio != 'artesao':
+        return {}
+    cfg = SiteConfig.query.filter_by(restaurant_id=rid).first()
+    tem = lambda campo: bool(cfg and getattr(cfg, campo, None))
+    produtos = ProdutoSite.query.filter_by(restaurant_id=rid, ativo=True).all()
+    com_preco = sum(1 for p in produtos if p.preco)
+    hoje = hoje_br()
+    passos = [
+        {'ok': tem('hero_foto'), 'titulo': 'Ponha a foto de capa',
+         'detalhe': 'É o que segura quem abre o seu site.', 'url': url_for('configsite.index')},
+        {'ok': tem('whatsapp'), 'titulo': 'Confirme o seu WhatsApp',
+         'detalhe': 'É para onde as encomendas chegam.', 'url': url_for('configsite.index')},
+        {'ok': bool(produtos) and com_preco == len(produtos),
+         'titulo': 'Cadastre os produtos com foto e preço',
+         'detalhe': (f'{com_preco} de {len(produtos)} com preço. Sem preço o produto não entra '
+                     'no Guia de Presentes.') if produtos else 'Nenhum produto ainda.',
+         'url': url_for('conteudo.home')},
+        {'ok': tem('ponto_na_feira'), 'titulo': 'Diga onde fica a sua barraca',
+         'detalhe': 'Quem abre o mapa da Feira acha você.', 'url': url_for('configsite.index')},
+        {'ok': bool(cfg and cfg.retirada_na_feira), 'titulo': 'Ligue a retirada na feira',
+         'detalhe': 'O cliente encomenda pelo site e pega na sua barraca.',
+         'url': url_for('configsite.encomendas')},
+    ]
+    return {'painel': {
+        'passos': passos, 'feitos': sum(1 for p in passos if p['ok']),
+        'na_feira_hoje': bool(cfg and cfg.na_feira_em == hoje),
+        'numeros': metricas.totais(rid, hoje.replace(day=1), hoje),
+        'link': url_canonica(rest) if rest.slug else '',
+    }}
+
+
 @bp.route('/')
 @bp.route('/index')
 def index():
@@ -580,7 +625,8 @@ def index():
         return redirect(url_for('auth.login'))
 
     if not current_app.config['GESTAO_ATIVA']:
-        return render_template('dashboard/index.html', show_onboarding=True)
+        return render_template('dashboard/index.html', show_onboarding=True,
+                               **_painel_do_expositor(restaurant_id))
 
     try:
         # --- EMPTY STATE CHECK (ONBOARDING) ---
@@ -771,10 +817,10 @@ def index():
                             dados_bcg=dados_bcg,
                             categorias_cardapio=categorias_cardapio,
                             show_onboarding=False)
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return f"Erro processando Dashboard: {str(e)} <br><pre>{traceback.format_exc()}</pre>", 500
+    except Exception:
+        current_app.logger.exception('Erro processando o dashboard')
+        return ('<p>Não foi possível carregar o painel agora. '
+                'Tente de novo em instantes.</p>'), 500
 
 
 @bp.route('/relatorio/pratos')

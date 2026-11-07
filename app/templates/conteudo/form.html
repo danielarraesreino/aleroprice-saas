@@ -8,6 +8,12 @@
   {%- else -%}{{ url_for('static', filename=caminho) }}{%- endif -%}
 {%- endmacro %}
 
+{# Valor do campo: o que acabou de ser enviado (`valores`, após um erro) vence o item gravado. #}
+{% macro val(campo) -%}
+  {%- if valores is not none and valores is defined -%}{{ valores.get(campo, '') }}
+  {%- elif item and item[campo] is not none -%}{{ item[campo] }}{%- endif -%}
+{%- endmacro %}
+
 {% block content %}
 <h2 class="mb-4"><i class="fas fa-store text-warning"></i> {{ 'Editar' if item else 'Adicionar' }} {{ t.singular }} <span class="text-muted">· {{ t.label }}</span></h2>
 
@@ -16,7 +22,7 @@
   {% for campo, label, widget, obrig in t.campos %}
   <div class="mb-3 {{ 'form-check form-switch' if widget == 'check' }}">
     {% if widget == 'check' %}
-      <input class="form-check-input" type="checkbox" role="switch" id="{{ campo }}" name="{{ campo }}" {{ 'checked' if item and item[campo] }}>
+      <input class="form-check-input" type="checkbox" role="switch" id="{{ campo }}" name="{{ campo }}" {{ 'checked' if ((campo in valores) if (valores is defined and valores is not none) else (item and item[campo])) }}>
       <label class="form-check-label" for="{{ campo }}">{{ label }}</label>
     {% elif widget == 'textarea' %}
       <div class="d-flex justify-content-between align-items-center mb-1">
@@ -27,7 +33,7 @@
         </button>
         {% endif %}
       </div>
-      <textarea class="form-control" id="{{ campo }}" name="{{ campo }}" rows="3" {{ 'required' if obrig }}>{{ item[campo] if item and item[campo] else '' }}</textarea>
+      <textarea class="form-control" id="{{ campo }}" name="{{ campo }}" rows="3" {{ 'required' if obrig }}>{{ val(campo) }}</textarea>
     {% elif widget == 'preco' %}
       {# Preço é `text` + `inputmode="decimal"`, não `number`: o teclado de
          número do celular abre igual, mas o campo aceita "R$ 18,50" e "18,50"
@@ -41,7 +47,7 @@
         <span class="input-group-text">R$</span>
         <input class="form-control" type="text" inputmode="decimal" id="{{ campo }}" name="{{ campo }}"
                placeholder="18,50"
-               value="{{ ('%.2f'|format(item[campo]))|replace('.', ',') if item and item[campo] is not none else '' }}">
+               value="{{ valores.get(campo, '') if (valores is defined and valores is not none) else (('%.2f'|format(item[campo]))|replace('.', ',') if item and item[campo] is not none else '') }}">
       </div>
     {% elif widget == 'categoria' %}
       {# <datalist>: o celular mostra as sugestões enquanto digita e o campo
@@ -49,7 +55,7 @@
          tem, depois as categorias da Feira (app/utils/categorias.py). #}
       <label class="form-label" for="{{ campo }}">{{ label }}</label>
       <input class="form-control" type="text" id="{{ campo }}" name="{{ campo }}" list="{{ campo }}_lista"
-             autocomplete="off" value="{{ item[campo] if item and item[campo] else '' }}">
+             autocomplete="off" value="{{ val(campo) }}">
       <datalist id="{{ campo }}_lista">
         {% for s in sugestoes or [] %}<option value="{{ s }}">{% endfor %}
       </datalist>
@@ -59,7 +65,7 @@
          pra subir por fetch antes de salvar como a capa faz. O arquivo vai em
          `<campo>_arquivo`; o texto `<campo>` guarda o endereço atual e serve
          de alternativa pra quem já tem a foto num link. #}
-      <label class="form-label" for="{{ campo }}_arquivo">{{ label }}</label>
+      <label class="form-label" for="{{ campo }}_arquivo">{{ label }}{{ ' *' if obrig }}</label>
       <div class="d-flex align-items-start gap-3 mb-2">
         <img id="{{ campo }}_previa" alt="Foto atual" loading="lazy"
              src="{{ img(item[campo]) if item and item[campo] else '' }}"
@@ -69,13 +75,13 @@
         <div class="flex-fill">
           <input class="form-control" type="file" accept="image/*" data-reduzir
                  id="{{ campo }}_arquivo" name="{{ campo }}_arquivo">
-          <div class="form-text">Escolha uma foto do celular. Ela é reduzida no seu aparelho antes de subir. JPG, PNG ou WEBP.</div>
+          <div class="form-text">Escolha uma foto do celular. Ela é reduzida no seu aparelho antes de subir. JPG, PNG ou WEBP (no iPhone: Câmera > Formatos > Mais compatível).</div>
         </div>
       </div>
-      <details>
+      <details {{ 'open' if obrig and not val(campo) }}>
         <summary class="small text-muted">ou colar o endereço de uma imagem</summary>
         <input class="form-control mt-2" type="text" id="{{ campo }}" name="{{ campo }}"
-               placeholder="https://…" value="{{ item[campo] if item and item[campo] else '' }}">
+               placeholder="https://…" value="{{ val(campo) }}">
       </details>
     {% else %}
       <label class="form-label">{{ label }}{{ ' *' if obrig }}</label>
@@ -86,7 +92,7 @@
       </div>
       {% endif %}
       <input class="form-control" type="{{ 'number' if widget == 'number' else 'text' }}" name="{{ campo }}"
-             value="{{ item[campo] if item and item[campo] is not none else '' }}" {{ 'required' if obrig }}>
+             value="{{ val(campo) }}" {{ 'required' if obrig }}>
     {% endif %}
   </div>
   {% endfor %}

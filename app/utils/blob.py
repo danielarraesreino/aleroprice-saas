@@ -68,6 +68,10 @@ class UploadIndisponivel(RuntimeError):
 
 def _extensao(nome):
     ext = os.path.splitext(nome or '')[1].lower()
+    if ext in ('.heic', '.heif'):
+        raise UploadInvalido(
+            'Manda a foto como JPG ou PNG. No iPhone, ajuste em Ajustes > Câmera > '
+            'Formatos > Mais compatível.')
     if ext not in EXTENSOES:
         raise UploadInvalido(
             f'formato não aceito: "{ext or nome}". Use JPG, PNG ou WEBP.')

@@ -30,7 +30,7 @@ TIPOS = {
             # Não obrigatório: prato sob consulta existe, e forçar um número
             # faria o dono digitar 0 — que vira "R$ 0,00" na cara do cliente.
             ('preco', 'Preço (ex: 18,50 — deixe vazio para não mostrar)', 'preco', False),
-            ('imagem', 'Imagem (caminho em static, ex: img/bar/foto-5.jpg, ou URL)', 'text', False),
+            ('imagem', 'Foto do prato', 'foto', False),
             ('tag', 'Selo (ex: ★ O MAIS PEDIDO)', 'text', False),
             ('destaque', 'Destacar com borda', 'check', False),
             ('ordem', 'Ordem', 'number', False),
@@ -71,7 +71,7 @@ TIPOS = {
     'galeria': {
         'model': GalleryItem, 'label': 'Galeria', 'singular': 'foto', 'resumo': 'imagem',
         'campos': [
-            ('imagem', 'Imagem (caminho em static ou URL)', 'text', True),
+            ('imagem', 'Foto', 'foto', True),
             ('legenda', 'Legenda', 'text', False),
             ('ordem', 'Ordem', 'number', False),
         ],
@@ -94,6 +94,17 @@ def _tipos_do_negocio():
     """TIPOS que o negócio logado enxerga (esconde a aba do outro tipo)."""
     negocio = tipo_do(getattr(current_user, 'restaurante', None))
     return {k: v for k, v in TIPOS.items() if SO_PARA.get(k, negocio) == negocio}
+
+
+# Número que vazio vira None (o rótulo diz "deixe vazio"), não 0.
+SEM_PADRAO_NUMERICO = {'prazo_dias'}
+
+
+def _form(tipo, t, item, sugestoes, valores=None):
+    """Renderiza o formulário; `valores` (request.form) vence o item gravado,
+    pra erro não apagar o que a pessoa acabou de digitar."""
+    return render_template('conteudo/form.html', tipo=tipo, t=t, item=item,
+                           tipos=_tipos_do_negocio(), sugestoes=sugestoes, valores=valores)
 
 
 def _rid():
@@ -147,8 +158,18 @@ def salvar(tipo, item_id=None):
                 enviadas[campo] = blob.enviar(arquivo, current_user.restaurante.slug or f's{rid}')
             except (blob.UploadInvalido, blob.UploadIndisponivel) as e:
                 flash(f'A foto não subiu: {e}', 'danger')
-                return render_template('conteudo/form.html', tipo=tipo, t=t, item=item,
-                                       tipos=_tipos_do_negocio(), sugestoes=sugestoes), 400
+                return _form(tipo, t, item, sugestoes, request.form), 400
+
+        # Obrigatório faltando: avisa antes de tocar no item, e devolve o que
+        # a pessoa digitou (o formulário não pode voltar vazio).
+        for campo, label, widget, obrig in t['campos']:
+            if not obrig or widget in ('check', 'preco', 'categoria', 'number'):
+                continue
+            if widget == 'foto' and enviadas.get(campo):
+                continue
+            if not (request.form.get(campo) or '').strip():
+                flash(f'{label} é obrigatório.', 'danger')
+                return _form(tipo, t, item, sugestoes, request.form), 400
 
         novo = item is None
         if novo:
@@ -166,8 +187,15 @@ def salvar(tipo, item_id=None):
                 setattr(item, campo, request.form.get(campo) == 'on')
             elif widget == 'preco':
                 # `ler_moeda` devolve None pra vazio, zero e lixo — e None é
-                # exatamente "não mostrar preço". Campo apagado limpa o preço.
-                setattr(item, campo, ler_moeda(request.form.get(campo)))
+                # exatamente "não mostrar preço". Campo apagado limpa o preço;
+                # campo preenchido que não foi lido avisa e mantém o anterior.
+                bruto = (request.form.get(campo) or '').strip()
+                valor = ler_moeda(bruto)
+                if bruto and valor is None:
+                    flash(f'Não entendi o preço "{bruto}"; mantive o anterior. '
+                          f'Escreva só números, como 18,50.', 'warning')
+                else:
+                    setattr(item, campo, valor)
             elif widget == 'categoria':
                 setattr(item, campo, categorias.canonizar(request.form.get(campo), sugestoes))
             elif widget == 'foto':
@@ -178,24 +206,19 @@ def salvar(tipo, item_id=None):
             elif widget == 'number':
                 raw = (request.form.get(campo) or '').strip()
                 val = int(raw) if raw.lstrip('-').isdigit() else None
-                if val is None:
+                if val is None and campo not in SEM_PADRAO_NUMERICO:
                     val = 5 if campo == 'estrelas' else 0
                 if campo == 'estrelas':
                     val = max(1, min(5, val))
                 setattr(item, campo, val)
             else:
                 v = (request.form.get(campo) or '').strip()
-                if obrig and not v:
-                    flash(f'{label} é obrigatório.', 'danger')
-                    return render_template('conteudo/form.html', tipo=tipo, t=t, item=item,
-                                           tipos=_tipos_do_negocio(), sugestoes=sugestoes)
                 setattr(item, campo, v or None)
         db.session.commit()
         flash('Salvo.', 'success')
         return redirect(url_for('conteudo.index', tipo=tipo))
 
-    return render_template('conteudo/form.html', tipo=tipo, t=t, item=item,
-                           tipos=_tipos_do_negocio(), sugestoes=sugestoes)
+    return _form(tipo, t, item, sugestoes)
 
 
 @bp.route('/<tipo>/<int:item_id>/toggle', methods=['POST'])

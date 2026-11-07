@@ -20,7 +20,7 @@
 </ul>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-  <p class="text-muted mb-0">Itens ativos aparecem no site. Vazio = usa o conteúdo padrão do Bar da Vila.</p>
+  <p class="text-muted mb-0">Itens ativos aparecem no seu site. Se não tiver nenhum, a parte aparece vazia ou não aparece.</p>
   <a class="btn btn-primary" href="{{ url_for('conteudo.salvar', tipo=tipo) }}"><i class="fas fa-plus"></i> Adicionar {{ t.singular }}</a>
 </div>
 
@@ -58,16 +58,18 @@
           {% endif %}
         </td>
         <td>{% if it.ativo %}<span class="badge bg-success">No ar</span>{% else %}<span class="badge bg-secondary">Oculto</span>{% endif %}</td>
-        <td class="text-end text-nowrap">
-          <a class="btn btn-sm btn-outline-primary" href="{{ url_for('conteudo.salvar', tipo=tipo, item_id=it.id) }}" title="Editar"><i class="fas fa-pen"></i></a>
-          <form method="post" action="{{ url_for('conteudo.toggle', tipo=tipo, item_id=it.id) }}" class="d-inline">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button class="btn btn-sm btn-outline-secondary" title="{{ 'Ocultar' if it.ativo else 'Publicar' }}"><i class="fas fa-{{ 'eye-slash' if it.ativo else 'eye' }}"></i></button>
-          </form>
-          <form method="post" action="{{ url_for('conteudo.excluir', tipo=tipo, item_id=it.id) }}" class="d-inline" onsubmit="return confirm('Excluir este item?');">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button class="btn btn-sm btn-outline-danger" title="Excluir"><i class="fas fa-trash"></i></button>
-          </form>
+        <td class="text-end">
+          <div class="d-flex flex-wrap justify-content-end gap-2">
+            <a class="btn btn-outline-primary d-inline-flex align-items-center justify-content-center gap-1 px-3" style="min-height:44px" href="{{ url_for('conteudo.salvar', tipo=tipo, item_id=it.id) }}"><i class="fas fa-pen" aria-hidden="true"></i> Editar</a>
+            <form method="post" action="{{ url_for('conteudo.toggle', tipo=tipo, item_id=it.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center gap-1 px-3" style="min-height:44px"><i class="fas fa-{{ 'eye-slash' if it.ativo else 'eye' }}" aria-hidden="true"></i> {{ 'Desativar' if it.ativo else 'Ativar' }}</button>
+            </form>
+            <form method="post" action="{{ url_for('conteudo.excluir', tipo=tipo, item_id=it.id) }}" onsubmit="return confirm('Excluir este item?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-outline-danger d-inline-flex align-items-center justify-content-center gap-1 px-3" style="min-height:44px"><i class="fas fa-trash" aria-hidden="true"></i> Excluir</button>
+            </form>
+          </div>
         </td>
       </tr>
       {% endfor %}
@@ -77,7 +79,7 @@
 {% else %}
 <div class="text-center text-muted py-5">
   <i class="fas fa-inbox fa-2x mb-3"></i>
-  <p>Nada cadastrado — o site mostra o conteúdo padrão. Adicione pra personalizar.</p>
+  <p>Nada cadastrado ainda. Adicione o primeiro para ele aparecer no seu site.</p>
 </div>
 {% endif %}
 {% endblock %}
