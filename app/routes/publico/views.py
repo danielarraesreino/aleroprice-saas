@@ -1573,6 +1573,10 @@ def montar_site(rest):
     for chave, padrao in SITE_DEFAULTS.items():
         valor = getattr(cfg, chave, None) if cfg else None
         site[chave] = valor if (valor is not None and str(valor).strip() != '') else padrao
+    # Logo que não abre (texto solto, arquivo que não subiu) vira monograma em
+    # todo modelo, em vez de imagem quebrada no topo.
+    from app.utils.logo import logo_utilizavel
+    site['logo'] = logo_utilizavel(site.get('logo'))
 
     # Fora de SITE_DEFAULTS de propósito: só o operador marca; o painel do dono não pode editar.
     site['whatsapp_confirmado'] = bool(getattr(cfg, 'whatsapp_confirmado', False)) if cfg else False

@@ -245,7 +245,11 @@
       // No celular o mapa não captura o dedo que rola a página; pinça para dar zoom.
       var mapa = L.map('mapa-feira', {scrollWheelZoom: false, dragging: !L.Browser.mobile}).setView(centro, 17);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '© OpenStreetMap', maxNativeZoom: 19, maxZoom: 21}).addTo(mapa);
-      var limites = [];
+      var limites = [], perto = [];
+      // Quem está a mais de 1,5 km da Praça (ateliê, oficina) não entra no
+      // enquadramento: com um pino a 7 km o mapa abria para a cidade e a Feira
+      // virava um ponto. O pino continua no mapa, à distância de um zoom.
+      var PRACA = L.latLng(centro[0], centro[1]), RAIO_DA_PRACA = 1500;
       espalhar(pontos);
       pontos.forEach(function (p) {
         var icone = L.divIcon({className: '', html: '<span class="pino pino-' + p.tipo + (p.hoje ? ' pino-hoje' : '') + '">' + glifo(p) + '</span>',
@@ -259,6 +263,8 @@
         if (p.descritor) { var d = document.createElement('div'); d.textContent = p.descritor; txt.appendChild(d); }
         if (p.hoje) { var h = document.createElement('div'); h.textContent = 'Na feira hoje'; txt.appendChild(h); }
         if (p.ponto) { var o = document.createElement('div'); o.textContent = p.ponto; txt.appendChild(o); }
+        p.longe = L.latLng(p.lat, p.lng).distanceTo(PRACA) > RAIO_DA_PRACA;
+        if (p.longe) { var lo = document.createElement('div'); lo.textContent = 'Fora da Praça do Coco'; txt.appendChild(lo); }
         caixa.appendChild(txt);
         m.bindPopup(caixa);
         m.on('click', function () {
@@ -266,9 +272,20 @@
           if (cartao_atual) { cartao_atual.scrollIntoView({block: 'nearest', behavior: calmo ? 'auto' : 'smooth'}); }
         });
         marcadores[p.slug] = m; limites.push(p.exib || [p.lat, p.lng]);
+        if (!p.longe) { perto.push(p.exib || [p.lat, p.lng]); }
       });
-      if (limites.length > 1) { mapa.fitBounds(limites, {padding: [40, 40], maxZoom: 18}); }
-      else if (limites.length === 1) { mapa.setView(limites[0], 18); }
+      var enquadrar = perto.length ? perto : limites;
+      if (enquadrar.length > 1) { mapa.fitBounds(enquadrar, {padding: [40, 40], maxZoom: 18}); }
+      else if (enquadrar.length === 1) { mapa.setView(enquadrar[0], 18); }
+      // Na lista, quem fica fora da Praça avisa antes de alguém ir procurar a barraca.
+      pontos.forEach(function (p) {
+        if (!p.longe) { return; }
+        var botao = document.querySelector('[data-ver="' + p.slug + '"]');
+        var cartao = botao && botao.closest('li, article');
+        if (!cartao || cartao.querySelector('.fp-fora')) { return; }
+        var tag = document.createElement('span'); tag.className = 'fp-fora'; tag.textContent = 'Fora da Praça do Coco';
+        botao.parentNode.insertBefore(tag, botao);
+      });
 
       // Da lista para o mapa: "Ver no mapa" leva o mapa até a barraca.
       document.querySelectorAll('[data-ver]').forEach(function (b) {

@@ -17,6 +17,7 @@
   'subline':'Subfrase (itens/destaques)',
   'selo_estrelas':'Selo de avaliações',
   'hero_foto':'Foto do topo do site',
+  'logo':'Logo da marca',
   'whatsapp':'WhatsApp (só números, com 55 e DDD)',
   'telefone_exibicao':'Telefone exibido',
   'endereco':'Endereço completo',
@@ -177,10 +178,33 @@
       </div>
       <input type="hidden" id="capa-valor" name="hero_foto"
              value="{{ cfg.hero_foto if cfg and cfg.hero_foto else '' }}">
+    {% elif campo == 'logo' %}
+      {# Logo também é escolhido do celular: era texto livre e o Viaverde ficou
+         com a palavra "logo" gravada, que não abre. Mesmo envio da capa. #}
+      <div class="d-flex align-items-start gap-3 mb-2">
+        <img id="logo-atual" alt="Logo atual" loading="lazy"
+             src="{{ img(cfg.logo) if cfg and cfg.logo else '' }}"
+             onerror="this.style.display='none'"
+             style="width:80px;height:80px;object-fit:contain;border-radius:8px;
+                    border:1px solid #dee2e6;background:#f8f9fa;
+                    {{ '' if (cfg and cfg.logo) else 'display:none' }}">
+        <div class="flex-fill">
+          <label class="btn btn-outline-primary" for="logo-arquivo">
+            <i class="fas fa-image"></i> Escolher o logo
+          </label>
+          <input id="logo-arquivo" type="file" accept="image/*" hidden>
+          <div class="form-text" id="logo-aviso">
+            Se não tiver logo, o site mostra as iniciais do nome. PNG ou JPG.
+          </div>
+        </div>
+      </div>
+      <input type="hidden" id="logo-valor" name="logo"
+             value="{{ cfg.logo if cfg and cfg.logo else '' }}">
     {% elif campo in ['sobre','politicas'] %}
       <textarea class="form-control" name="{{ campo }}" rows="5" maxlength="1500">{{ cfg[campo] if cfg and cfg[campo] else '' }}</textarea>
     {% else %}
       <input class="form-control" name="{{ campo }}"
+             {% if campo == 'whatsapp' %}type="tel" inputmode="numeric" autocomplete="tel"{% elif campo.endswith('_url') %}type="url" inputmode="url"{% elif campo == 'email' %}type="email"{% endif %}
              value="{{ cfg[campo] if cfg and cfg[campo] else '' }}"
              placeholder="{{ dicas.get(campo, '') }}">
     {% endif %}
@@ -261,12 +285,6 @@
  * ~200KB sobe em segundos. Mesma técnica do Modo Campo. */
 (() => {
   const LADO_MAX = 1600;
-  const entrada = document.getElementById('capa-arquivo');
-  const previa  = document.getElementById('capa-atual');
-  const oculto  = document.getElementById('capa-valor');
-  const aviso   = document.getElementById('capa-aviso');
-  if (!entrada) return;
-
   const CSRF = {{ csrf_token()|tojson }};
 
   function reduzir(file) {
@@ -287,33 +305,43 @@
     });
   }
 
-  entrada.addEventListener('change', async () => {
-    const file = entrada.files && entrada.files[0];
-    if (!file) return;
-    aviso.textContent = 'Enviando…';
-    aviso.className = 'form-text text-primary';
-    try {
-      const menor = await reduzir(file);
-      const dados = new FormData();
-      dados.append('imagem', menor, 'capa.jpg');
-      /* O upload não passa pelo <form>, então ninguém põe o token por ele. */
-      const resp = await fetch({{ url_for('configsite.foto')|tojson }}, {
-        method: 'POST', body: dados, headers: {'X-CSRFToken': CSRF},
-      });
-      const res = await resp.json();
-      if (!resp.ok) throw new Error(res.erro || 'falhou o envio');
-      previa.src = res.url;
-      previa.style.display = '';
-      oculto.value = res.url;
-      aviso.textContent = 'Foto trocada. Já está no seu site.';
-      aviso.className = 'form-text text-success';
-    } catch (e) {
-      aviso.textContent = e.message;
-      aviso.className = 'form-text text-danger';
-    } finally {
-      entrada.value = '';
-    }
-  });
+  /* Capa e logo: mesma rota, `campo` diz qual dos dois. */
+  function ligarEnvio(prefixo, campo, pronto) {
+    const entrada = document.getElementById(prefixo + '-arquivo');
+    const previa  = document.getElementById(prefixo + '-atual');
+    const oculto  = document.getElementById(prefixo + '-valor');
+    const aviso   = document.getElementById(prefixo + '-aviso');
+    if (!entrada) return;
+    entrada.addEventListener('change', async () => {
+      const file = entrada.files && entrada.files[0];
+      if (!file) return;
+      aviso.textContent = 'Enviando…';
+      aviso.className = 'form-text text-primary';
+      try {
+        const menor = await reduzir(file);
+        const dados = new FormData();
+        dados.append('imagem', menor, prefixo + '.jpg');
+        /* O upload não passa pelo <form>, então ninguém põe o token por ele. */
+        const resp = await fetch({{ url_for('configsite.foto')|tojson }} + '?campo=' + campo, {
+          method: 'POST', body: dados, headers: {'X-CSRFToken': CSRF},
+        });
+        const res = await resp.json();
+        if (!resp.ok) throw new Error(res.erro || 'falhou o envio');
+        previa.src = res.url;
+        previa.style.display = '';
+        oculto.value = res.url;
+        aviso.textContent = pronto;
+        aviso.className = 'form-text text-success';
+      } catch (e) {
+        aviso.textContent = e.message;
+        aviso.className = 'form-text text-danger';
+      } finally {
+        entrada.value = '';
+      }
+    });
+  }
+  ligarEnvio('capa', 'hero_foto', 'Foto trocada. Já está no seu site.');
+  ligarEnvio('logo', 'logo', 'Logo trocado. Já está no seu site.');
 
   /* Teste de Notificação CallMeBot */
   const btnTestar = document.getElementById('btn-testar-callmebot');

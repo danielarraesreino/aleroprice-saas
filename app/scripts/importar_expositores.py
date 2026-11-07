@@ -27,6 +27,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from app.utils.site_router import gerar_slug
+from app.utils.whatsapp import normalizar_whatsapp
 
 DIR_LEADS = Path(__file__).resolve().parents[1] / 'data' / 'leads'
 
@@ -70,12 +71,7 @@ def mapear_colunas(cabecalho):
 
 def whatsapp_digitos(valor):
     """Só dígitos com DDI 55, ou None quando não dá pra confiar no número."""
-    d = re.sub(r'\D', '', str(valor or ''))
-    if d.startswith('55') and len(d) in (12, 13):
-        return d
-    if len(d) in (10, 11):
-        return '55' + d
-    return None
+    return normalizar_whatsapp(valor)
 
 
 def telefone_exibicao(whatsapp):

@@ -7,6 +7,8 @@ from app.routes.publico.views import SITE_DEFAULTS
 from app.utils.feira import hoje_br
 from app.utils.tenant import get_current_restaurant_id
 from app.utils import blob
+from app.utils.logo import logo_utilizavel
+from app.utils.whatsapp import normalizar_whatsapp
 from app.utils.decorators import plano_minimo
 from app.utils.temas import opcoes_de_tema, tema_valido
 from app.utils.copy_site import opcoes_de_vibe, vibe_valida
@@ -55,7 +57,9 @@ def foto():
     if cfg is None:
         cfg = SiteConfig(restaurant_id=rid, nome=rest.nome)
         db.session.add(cfg)
-    cfg.hero_foto = url
+    # `?campo=logo` sobe o logo; sem parâmetro é a capa, como sempre foi.
+    campo = 'logo' if request.args.get('campo') == 'logo' else 'hero_foto'
+    setattr(cfg, campo, url)
     db.session.commit()
     return jsonify({'ok': True, 'url': url})
 
@@ -192,6 +196,19 @@ def index():
             if campo not in request.form:
                 continue
             valor = (request.form.get(campo) or '').strip()
+            if campo == 'whatsapp' and valor:
+                numero = normalizar_whatsapp(valor)
+                if numero is None:
+                    flash('O WhatsApp precisa de DDD e número, por exemplo (19) 99999-8888. '
+                          'Não salvei o número que você digitou.', 'danger')
+                    continue
+                valor = numero
+            if campo == 'logo' and valor and not logo_utilizavel(valor):
+                # O formulário reenvia o logo gravado; se ele não abre, sai do
+                # site em vez de continuar quebrando o topo.
+                flash('O endereço do logo não abre, então tirei do site. '
+                      'Envie o arquivo do logo de novo.', 'warning')
+                valor = ''
             if campo in CAMPOS_INTEIROS:
                 # "3%", "5 %", "10,0": só os dígitos. Texto em coluna inteira
                 # derrubava o save inteiro no Postgres.

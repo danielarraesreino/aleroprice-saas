@@ -605,7 +605,7 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
 <header class="nav">
   <div class="wrap">
     <a href="#topo" class="marca" aria-label="{{ site.nome }}, início">
-      {% if logo %}<img src="{{ logo }}" alt="" width="42" height="42">{% else %}<i class="marca-mono" aria-hidden="true">{{ iniciais }}</i>{% endif %}
+      {% if logo %}<img src="{{ logo }}" alt="" width="42" height="42" data-ini="{{ iniciais }}" onerror="var i=document.createElement('i');i.className='marca-mono';i.setAttribute('aria-hidden','true');i.textContent=this.dataset.ini;this.replaceWith(i)">{% else %}<i class="marca-mono" aria-hidden="true">{{ iniciais }}</i>{% endif %}
       <span>{{ site.nome }}</span>
     </a>
     <nav class="nav-links" aria-label="Seções do site">
@@ -943,6 +943,14 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
   var NUM='{{ site.whatsapp }}',CHAVE='encomenda:'+location.host,lista=[];
   try{lista=JSON.parse(localStorage.getItem(CHAVE)||'[]').filter(function(n){return typeof n==='string'})}catch(e){}
   var ul=document.getElementById('pedido-lista'),envia=document.getElementById('pedido-enviar');
+  /* Todo botão de WhatsApp genérico da página ("Encomendar" do topo, do herói, do
+     contato). Com produto marcado ele leva a lista; sem, volta ao texto de antes.
+     Antes só o "Revisar e enviar" levava, e quem tocava em "Encomendar" depois de
+     marcar produtos mandava "queria saber mais" sem nada do que escolheu. */
+  var genericos=[].slice.call(document.querySelectorAll('a[href^="https://wa.me/'+NUM+'"]')).filter(function(a){
+    return a.id!=='pedido-enviar'&&!a.classList.contains('pedir-link');
+  });
+  genericos.forEach(function(a){a.setAttribute('data-orig',a.getAttribute('href'))});
   function salva(){try{localStorage.setItem(CHAVE,JSON.stringify(lista))}catch(e){}}
   /* Retirada na feira: próximos sábados e domingos depois do prazo de produção.
      Conta feita aqui (a página sai do cache); mesma regra de feira.proximas_retiradas. */
@@ -985,6 +993,7 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
       li.appendChild(s);li.appendChild(r);ul.appendChild(li);
     });
     envia.href='https://wa.me/'+NUM+'?text='+encodeURIComponent(msg());
+    genericos.forEach(function(a){a.href=n?envia.href:a.getAttribute('data-orig')});
     if(!n&&dlg.open)dlg.close();
   }
   function alterna(nome){

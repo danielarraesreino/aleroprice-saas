@@ -21,6 +21,7 @@ from app.extensions import db
 from app.models.modelo_restaurante import Restaurante
 from app.models.modelo_siteconfig import SiteConfig
 from app.models.modelo_sitecontent import DishCard, GalleryItem
+from app.utils.whatsapp import normalizar_whatsapp
 from app.routes.campo import bp
 from app.utils import blob, demos, dominios
 from app.utils.copy_site import opcoes_de_vibe, vibe_valida
@@ -200,7 +201,14 @@ def basico(slug):
     cfg = _config(rest)
     for campo in BASICOS:
         if campo in request.form:
-            setattr(cfg, campo, (request.form.get(campo) or '').strip() or None)
+            valor = (request.form.get(campo) or '').strip() or None
+            if campo == 'whatsapp' and valor:
+                numero = normalizar_whatsapp(valor)
+                if numero is None:
+                    flash('WhatsApp sem DDD ou incompleto: não salvei esse número.', 'danger')
+                    continue
+                valor = numero
+            setattr(cfg, campo, valor)
     if cfg.nome:
         rest.nome = cfg.nome
     db.session.commit()
