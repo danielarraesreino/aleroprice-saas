@@ -33,6 +33,13 @@ class SiteConfig(db.Model):
     # de mesmo nome ao lado. Vazio = a capa é a foto de sempre (hero_foto).
     video_capa = db.Column(db.String(300))
 
+    # Textos do site do expositor que o dono edita no painel (vazio = texto
+    # neutro da vibe): título e frase da seção de produtos e os destaques
+    # "Como trabalhamos", um por linha no formato `Título | frase curta`.
+    secao_titulo = db.Column(db.String(120))
+    secao_lead = db.Column(db.String(300))
+    pilares = db.Column(db.Text)
+
     # Onde o expositor fica na Feira. `lat`/`lng` vêm do GPS do celular do
     # operador (Modo Campo), parado na barraca; `ponto_na_feira` é o texto que o
     # visitante lê ("Barraca 12, ao lado do palco"). A coordenada não é editável

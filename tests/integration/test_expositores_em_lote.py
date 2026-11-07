@@ -67,7 +67,7 @@ def test_importar_gera_yml_sem_dado_pessoal(tmp_path):
     lead = yaml.safe_load(texto)
     assert lead['tipo_negocio'] == 'artesao'
     assert lead['site']['whatsapp'] == '5519999991234'
-    assert lead['site']['vibe'] == 'artesanal'
+    assert lead['site']['vibe'] == 'artesanal-feira'
     assert [p['nome'] for p in lead['produtos']] == ['Crochê', 'Bolsas', 'Cestos', 'Chaveiros']
     assert any('drive.google.com' in a for a in r[0]['avisos'])               # fotos viram tarefa
 
@@ -107,7 +107,7 @@ def test_lead_de_artesao_vira_tenant_com_produtos_e_vibe(session, tmp_path):
     rest, log = demos.aplicar_lead(str(saida / 'atelie-da-maria.yml'))
     session.commit()
     assert rest.tipo_negocio == 'artesao' and rest.tipo_conta == 'demo'
-    assert rest.site_config.vibe == 'artesanal'
+    assert rest.site_config.vibe == 'artesanal-feira'
     assert {p.nome for p in ProdutoSite.query.filter_by(restaurant_id=rest.id)} == {
         'Crochê', 'Bolsas', 'Cestos', 'Chaveiros'}
 

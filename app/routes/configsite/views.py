@@ -17,6 +17,8 @@ from app.utils.modelos import (
 )
 
 CAMPOS = list(SITE_DEFAULTS.keys())
+# Textos que o expositor escreve: o site mostra no máximo isso (pilares: 4 linhas).
+LIMITE_DOS_TEXTOS = {'secao_titulo': 120, 'secao_lead': 300, 'pilares': 600}
 CAMPOS_INTEIROS = {c.name for c in SiteConfig.__table__.columns
                    if c.name in CAMPOS and isinstance(c.type, db.Integer)}
 
@@ -209,6 +211,8 @@ def index():
                 flash('O endereço do logo não abre, então tirei do site. '
                       'Envie o arquivo do logo de novo.', 'warning')
                 valor = ''
+            if campo in LIMITE_DOS_TEXTOS:
+                valor = valor[:LIMITE_DOS_TEXTOS[campo]]
             if campo in CAMPOS_INTEIROS:
                 # "3%", "5 %", "10,0": só os dígitos. Texto em coluna inteira
                 # derrubava o save inteiro no Postgres.
@@ -250,7 +254,8 @@ def index():
     from app.models.modelo_restaurante import Restaurante
     rest = Restaurante.query.get(rid)
     return render_template('configsite/index.html', cfg=cfg, defaults=SITE_DEFAULTS,
-                           temas=opcoes_de_tema(), vibes=opcoes_de_vibe(),
+                           temas=opcoes_de_tema(),
+                           vibes=opcoes_de_vibe(getattr(rest, 'tipo_negocio', None), cfg.vibe if cfg else None),
                            modelos=catalogo_de_modelos(getattr(rest, 'tipo_negocio', None))[2],
                            modelo_atual=(cfg.modelo if cfg and cfg.modelo in
                                          catalogo_de_modelos(getattr(rest, 'tipo_negocio', None))[0]

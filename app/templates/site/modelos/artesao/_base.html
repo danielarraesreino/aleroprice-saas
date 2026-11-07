@@ -638,7 +638,15 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
 </div>
 {% endblock %}
 
-{% if copy.clima and copy.clima.cards %}
+{# Destaques "Como trabalhamos": o que o dono escreveu no painel (uma linha por
+   destaque, `Título | frase`); sem nada, os da vibe (a neutra não traz nenhum). #}
+{% set destaques = [] %}
+{% for linha in (site.pilares or '').splitlines() %}{% set partes = linha.split('|', 1) %}{% if partes[0].strip() and destaques|length < 4 %}{% set _ = destaques.append((partes[0].strip(), (partes[1].strip() if partes|length > 1 else ''))) %}{% endif %}{% endfor %}
+{% if destaques %}
+<section class="fatos" aria-label="Como trabalhamos"><div class="wrap">
+  <ul>{% for t, sub in destaques %}<li class="rev"><strong>{{ t }}</strong>{% if sub %}<span>{{ sub }}</span>{% endif %}</li>{% endfor %}</ul>
+</div></section>
+{% elif copy.clima and copy.clima.cards %}
 <section class="fatos" aria-label="Como trabalhamos"><div class="wrap">
   <ul>{% for c in copy.clima.cards %}<li class="rev"><strong>{{ c[1] }}</strong><span>{{ c[2] }}</span></li>{% endfor %}</ul>
 </div></section>
@@ -648,8 +656,8 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
 <div class="wrap">
   <div class="cab rev">
     <span class="eyebrow">{{ descritor }}</span>
-    <h2 id="titulo-produtos" class="titulo">{{ copy.cardapio.titulo|safe }}</h2>
-    {% if copy.cardapio.lead %}<p class="lead">{{ copy.cardapio.lead }}</p>{% endif %}
+    <h2 id="titulo-produtos" class="titulo">{% if site.secao_titulo %}{{ site.secao_titulo }}{% else %}{{ copy.cardapio.titulo|safe }}{% endif %}</h2>
+    {% set lead_produtos = site.secao_lead or copy.cardapio.lead %}{% if lead_produtos %}<p class="lead">{{ lead_produtos }}</p>{% endif %}
   </div>
 </div>
 {% if produtos %}
@@ -727,7 +735,7 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
     <div class="cab solto">
       <span class="eyebrow">Encontro presencial</span>
       <h2 id="titulo-feira" class="titulo">Na Feira de Barão</h2>
-      <p class="lead">Venha conversar com a gente, experimentar e levar para casa direto da barraca.</p>
+      <p class="lead">Venha conversar com a gente, conhecer as peças e levar para casa direto da barraca.</p>
       <div class="acoes" style="margin-top:var(--s3)">
         <a class="btn btn-line" href="{{ url_for('public.feira') }}">Ver o mapa da Feira</a>
       </div>

@@ -142,7 +142,7 @@
     <label class="form-label fw-semibold">Jeito de falar</label>
     <select class="form-select" name="vibe">
       {% for v in vibes %}
-      <option value="{{ v.valor }}" {{ 'selected' if (cfg.vibe if cfg and cfg.vibe else 'boteco') == v.valor }}>
+      <option value="{{ v.valor }}" {{ 'selected' if (cfg.vibe if cfg and cfg.vibe else ('artesanal-feira' if eh_artesao else 'boteco')) == v.valor }}>
         {{ v.label }} — {{ v.descricao }}
       </option>
       {% endfor %}
@@ -213,9 +213,35 @@
 
   {% for campo in essenciais %}{{ campo_texto(campo) }}{% endfor %}
 
+  {% if eh_artesao %}
+  {# Estes textos eram fixos no site ("Ingrediente de verdade", "Nossos produtos"…)
+     e valiam o mesmo para madeira, cerâmica e pão. Em branco, o site usa um texto simples. #}
+  <div class="card p-3 mb-4">
+    <h5 class="mb-1">Textos do seu site</h5>
+    <p class="text-muted small mb-3">Escreva do seu jeito. Em branco, o site usa um texto simples.</p>
+    <div class="mb-3">
+      <label class="form-label" for="secao_titulo">Título da parte dos produtos</label>
+      <input class="form-control" id="secao_titulo" name="secao_titulo" maxlength="120"
+             value="{{ cfg.secao_titulo if cfg and cfg.secao_titulo else '' }}" placeholder="Nossos produtos">
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="secao_lead">Frase embaixo do título</label>
+      <input class="form-control" id="secao_lead" name="secao_lead" maxlength="300"
+             value="{{ cfg.secao_lead if cfg and cfg.secao_lead else '' }}"
+             placeholder="Veja o que tem e chame no WhatsApp para encomendar.">
+    </div>
+    <div>
+      <label class="form-label" for="pilares">Destaques (até 4, um por linha)</label>
+      <textarea class="form-control" id="pilares" name="pilares" rows="4" maxlength="600"
+                placeholder="Feito à mão | Cada peça passa pelas minhas mãos&#10;Madeira de reflorestamento | Só uso madeira com origem">{{ cfg.pilares if cfg and cfg.pilares else '' }}</textarea>
+      <div class="form-text">Escreva <code>Título | frase curta</code>. Se não preencher, a faixa de destaques não aparece.</div>
+    </div>
+  </div>
+  {% endif %}
+
   <details class="mb-4">
     <summary class="mb-3">Textos do topo e mais detalhes</summary>
-    {% for campo in defaults.keys() if campo not in essenciais and campo not in avancados and campo not in ['callmebot_phone', 'callmebot_apikey'] %}
+    {% for campo in defaults.keys() if campo not in essenciais and campo not in avancados and campo not in ['callmebot_phone', 'callmebot_apikey', 'secao_titulo', 'secao_lead', 'pilares'] %}
       {{ campo_texto(campo) }}
     {% endfor %}
     {% for campo in avancados if campo not in ['callmebot_phone', 'callmebot_apikey'] %}{{ campo_texto(campo) }}{% endfor %}

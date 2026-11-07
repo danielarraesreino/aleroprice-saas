@@ -187,7 +187,7 @@ def editar(slug):
         # Quantos pratos o cliente na mesa veria de fato: é o que decide se o
         # QR do cardápio pode ser oferecido (a página só existe com item ativo).
         pratos_ativos=sum(1 for p in pratos if p.ativo),
-        temas=opcoes_de_tema(), vibes=opcoes_de_vibe(),
+        temas=opcoes_de_tema(), vibes=opcoes_de_vibe(rest.tipo_negocio, cfg.vibe),
         # Sugestão pronta: em campo ninguém inventa senha boa de cabeça.
         senha_sugerida=secrets.token_urlsafe(9),
         plano=plano, plano_rotulo=rotulo(plano), precos=precos(),

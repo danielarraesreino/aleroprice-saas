@@ -268,6 +268,13 @@ VIBES['artesanal-feira'] = {
     'historia': {'eyebrow': '', 'titulo': 'Quem faz',
                  'texto': 'Conheça quem está por trás de {nome}.'},
     'clima': {'eyebrow': '', 'titulo': '', 'cards': []},
+    # Sem "provar", "mesa" ou "ingrediente": a barraca pode ser de madeira,
+    # cerâmica ou planta, não só de comida.
+    'avaliacoes': {'eyebrow': 'QUEM JÁ COMPROU', 'titulo': 'O que dizem <em>os clientes</em>'},
+    'galeria': {'eyebrow': 'DÁ UMA OLHADA', 'titulo': 'Bastidores e <em>produtos</em>',
+                'lead': 'Do processo ao resultado.'},
+    'agenda': {'eyebrow': 'ONDE ENCONTRAR', 'titulo': 'Próximas <em>feiras</em>',
+               'lead': 'Venha conhecer de perto.'},
     'cta': {'titulo': 'Quer conhecer?', 'linha': 'Fale com a gente ou venha à feira.'},
     'rodape': 'Feira de Barão, Campinas.',
     'zap': 'Olá! Vim pelo site do {nome} e queria saber mais.',
@@ -289,7 +296,15 @@ def copy_da_vibe(nome, nome_bar=''):
     return copia
 
 
-def opcoes_de_vibe():
-    """Lista pro seletor do /config-site."""
-    return [{'valor': chave, 'label': v['label'], 'descricao': v['descricao']}
-            for chave, v in VIBES.items()]
+def opcoes_de_vibe(tipo=None, atual=None):
+    """Lista pro seletor do /config-site, só com o que serve ao tipo de negócio.
+
+    Expositor vê a vibe neutra (e a `artesanal`, da Berga, só se já for a dele);
+    bar vê as de bar. Antes o expositor escolhia "Boteco" ou "Hamburgueria".
+    """
+    if tipo == 'artesao':
+        chaves = ['artesanal-feira'] + (['artesanal'] if atual == 'artesanal' else [])
+    else:
+        chaves = [k for k in VIBES if k not in ('artesanal', 'artesanal-feira')]
+    return [{'valor': k, 'label': VIBES[k]['label'], 'descricao': VIBES[k]['descricao']}
+            for k in chaves]

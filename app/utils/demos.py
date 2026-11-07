@@ -254,7 +254,7 @@ def aplicar_lead(caminho):
     if fotos['produtos'] and not dados.get('produtos'):
         dados['produtos'] = fotos['produtos']
     if tipo == 'artesao' and not site.get('vibe'):
-        site['vibe'] = 'artesanal'           # senão cairia no texto de boteco
+        site['vibe'] = 'artesanal-feira'     # senão cairia no texto de boteco
     if fotos['galeria'] and not dados.get('galeria'):
         dados['galeria'] = fotos['galeria']
     for chave in ('tema', 'cidade_uf'):          # aceitos no topo por conveniência

@@ -84,6 +84,9 @@ if config_name != 'production' or os.environ.get('SCHEMA_NO_BOOT') == '1':
                     ('cliques_avaliacao', 'INTEGER DEFAULT 0'),
                     ('retirada_na_feira', 'BOOLEAN DEFAULT FALSE'),
                     ('retirada_antecedencia', 'INTEGER DEFAULT 2'),
+                    ('secao_titulo', 'VARCHAR(120)'),
+                    ('secao_lead', 'VARCHAR(300)'),
+                    ('pilares', 'TEXT'),
                 ]
                 for col_nome, col_tipo in novas:
                     if col_nome not in cols:

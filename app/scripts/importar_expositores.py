@@ -152,7 +152,7 @@ def converter_linha(linha, cols, tipo='artesao'):
         'cidade_uf': 'Barão Geraldo, Campinas–SP',
         'kicker': 'FEIRA DE BARÃO · CAMPINAS–SP',
         'descritor': None,
-        'vibe': 'artesanal' if tipo == 'artesao' else None,
+        'vibe': 'artesanal-feira' if tipo == 'artesao' else None,
     }
     site = {k: v for k, v in site.items() if v}
 

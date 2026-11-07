@@ -1364,7 +1364,13 @@ def cadastro():
             )
             db.session.add(rest)
             db.session.flush()  # atribui rest.id sem fechar a transação
-            db.session.add(SiteConfig(restaurant_id=rest.id, nome=nome_bar))
+            if tipo == 'artesao':
+                # Senão o expositor nascia com a vibe de boteco e o modelo de bar.
+                from app.utils.modelos import MODELO_ARTESAO_PADRAO
+                db.session.add(SiteConfig(restaurant_id=rest.id, nome=nome_bar,
+                                          vibe='artesanal-feira', modelo=MODELO_ARTESAO_PADRAO))
+            else:
+                db.session.add(SiteConfig(restaurant_id=rest.id, nome=nome_bar))
             admin = Usuario(nome=nome, email=email, senha=senha, tipo='admin',
                             restaurant_id=rest.id)
             db.session.add(admin)
@@ -1552,6 +1558,10 @@ SITE_DEFAULTS = {
     'atendimento': None,
     'email': None,
     'desconto_pix_pct': None,
+    # Textos do site do expositor (vazio = texto neutro da vibe).
+    'secao_titulo': None,
+    'secao_lead': None,
+    'pilares': None,
     'callmebot_phone': None,
     'callmebot_apikey': None,
 }
