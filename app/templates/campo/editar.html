@@ -40,7 +40,7 @@
   <h2>2 · O básico</h2>
   <form method="post" action="{{ url_for('campo.basico', slug=rest.slug) }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <label for="f-nome">Nome do bar</label>
+    <label for="f-nome">Nome {{ 'da barraca' if artesao else 'do bar' }}</label>
     <input id="f-nome" type="text" name="nome" value="{{ cfg.nome or rest.nome }}">
 
     <label for="f-zap">WhatsApp (só números, com DDD)</label>
@@ -157,7 +157,7 @@
 </div>
 
 <div class="bloco">
-  <h2>4 · Pratos ({{ pratos|length }})</h2>
+  <h2>4 · {{ 'Produtos' if artesao else 'Pratos' }} ({{ pratos|length }})</h2>
   {% for p in pratos %}
     <div style="display:flex;align-items:center;gap:11px;padding:9px 0;
                 border-bottom:1px solid var(--linha)">
@@ -173,7 +173,7 @@
               >{{ p.preco|moeda_br }}</span>
       {% endif %}
       <form method="post" style="margin:0"
-            action="{{ url_for('campo.remover', slug=rest.slug, tipo='prato', item_id=p.id) }}">
+            action="{{ url_for('campo.remover', slug=rest.slug, tipo=('produto' if artesao else 'prato'), item_id=p.id) }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button class="btn perigo" type="submit">tirar</button>
       </form>
@@ -188,8 +188,9 @@
        Vazio é válido: o prato entra sem preço. #}
     <div style="display:flex;gap:10px;align-items:flex-end">
       <div style="flex:1;min-width:0">
-        <label for="prato-nome">Nome do prato</label>
-        <input id="prato-nome" type="text" placeholder="Costela na brasa">
+        <label for="prato-nome">Nome do {{ 'produto' if artesao else 'prato' }}</label>
+        <input id="prato-nome" type="text"
+               placeholder="{{ 'Tábua de cedro' if artesao else 'Costela na brasa' }}">
       </div>
       <div style="flex:none;width:38%;max-width:150px">
         <label for="prato-preco">Preço (opcional)</label>
@@ -197,9 +198,9 @@
                style="font-variant-numeric:tabular-nums">
       </div>
     </div>
-    <label class="btn" for="prato-input">📷 Foto do prato e adicionar</label>
+    <label class="btn" for="prato-input">📷 Foto {{ 'do produto' if artesao else 'do prato' }} e adicionar</label>
     <input id="prato-input" type="file" accept="image/*" capture="environment"
-           data-alvo="prato" class="upload" hidden>
+           data-alvo="{{ 'produto' if artesao else 'prato' }}" class="upload" hidden>
   </div>
 </div>
 
@@ -277,6 +278,7 @@
       </div>
       <p class="nota" style="margin-top:8px"><b>O site</b><br>pra divulgar</p>
     </div>
+    {% if not artesao %}
     <div style="flex:1 1 150px;max-width:200px">
       <div style="background:#fff;border-radius:12px;padding:12px">
         {# Sem prato cadastrado a página do cardápio não existe (404). Mostrar o
@@ -294,9 +296,10 @@
       </div>
       <p class="nota" style="margin-top:8px"><b>O cardápio</b><br>pra colar na mesa</p>
     </div>
+    {% endif %}
   </div>
   <p class="nota">Ele aponta a câmera e vê o próprio bar no telefone dele.</p>
-  {% if pratos_ativos %}
+  {% if pratos_ativos and not artesao %}
     <a class="btn fantasma" style="margin-top:10px;text-decoration:none"
        href="{{ url_for('campo.qr_mesa', slug=rest.slug) }}">
       🖨 Folha do cardápio pra imprimir

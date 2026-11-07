@@ -16,7 +16,7 @@ from werkzeug.datastructures import FileStorage  # noqa: F401  (documenta o tipo
 
 from app.models.modelo_restaurante import Restaurante
 from app.models.modelo_siteconfig import SiteConfig
-from app.models.modelo_sitecontent import DishCard, GalleryItem
+from app.models.modelo_sitecontent import DishCard, GalleryItem, ProdutoSite
 from app.models.usuario import Usuario
 
 
@@ -862,3 +862,102 @@ def test_previa_tem_tamanho_de_celular_e_botoes_sem_espremer(client, demo):
     # o .btn nasce com width:100%; no flex da prévia isso espremia o link de tela cheia
     assert 'flex:1 1 auto;width:auto' in corpo
     assert 'aria-label="Recarregar a prévia"' in corpo
+
+
+# ------------------------------------------------------------------- expositor
+
+@pytest.fixture
+def expositor(session, operador):
+    rest = Restaurante(nome='Cedro & Cia', slug='cedro-e-cia', tipo_conta='demo',
+                       tipo_negocio='artesao')
+    session.add(rest)
+    session.commit()
+    session.add(SiteConfig(restaurant_id=rest.id, nome='Cedro & Cia'))
+    session.commit()
+    return rest
+
+
+def _foto(client, rest, **campos):
+    return client.post(f'/campo/{rest.slug}/foto', data={
+        'imagem': (io.BytesIO(JPEG), 'peca.jpg'), **campos,
+    }, content_type='multipart/form-data')
+
+
+def test_expositor_cria_produto_e_ele_aparece_na_vitrine(client, session, expositor):
+    entrar(client)
+
+    resp = _foto(client, expositor, alvo='produto', nome='Tábua de cedro', preco='85,50')
+
+    assert resp.status_code == 200
+    produto = ProdutoSite.query.filter_by(restaurant_id=expositor.id).one()
+    assert produto.nome == 'Tábua de cedro'
+    assert produto.preco == Decimal('85.50')
+    assert produto.ativo is True and produto.ordem == 0
+    assert DishCard.query.filter_by(restaurant_id=expositor.id).count() == 0
+    assert 'Tábua de cedro' in client.get(f'/expositor/{expositor.slug}').get_data(as_text=True)
+
+    _foto(client, expositor, alvo='produto', nome='Colher')
+    assert [p.ordem for p in ProdutoSite.query.order_by(ProdutoSite.id)] == [0, 1]
+
+
+def test_expositor_ve_produtos_e_nao_ve_coisa_de_bar(client, session, expositor):
+    entrar(client)
+    _foto(client, expositor, alvo='produto', nome='Tábua de cedro')
+
+    corpo = client.get(f'/campo/{expositor.slug}').get_data(as_text=True)
+
+    assert '4 · Produtos (1)' in corpo
+    assert 'Tábua de cedro' in corpo
+    assert 'Nome da barraca' in corpo
+    assert 'data-alvo="produto"' in corpo
+    for bar in ('Costela na brasa', 'Nome do prato', 'Folha do cardápio',
+                'qr-cardapio', 'O cardápio'):
+        assert bar not in corpo
+
+
+def test_expositor_recusa_alvo_prato_e_bar_recusa_alvo_produto(
+        client, session, expositor, demo):
+    entrar(client)
+
+    assert _foto(client, expositor, alvo='prato', nome='X').status_code == 400
+    assert _foto(client, demo, alvo='produto', nome='X').status_code == 400
+    assert DishCard.query.count() == 0
+    assert ProdutoSite.query.count() == 0
+    assert GalleryItem.query.count() == 0
+
+
+def test_remover_produto_so_do_proprio_expositor(client, session, expositor):
+    outro = Restaurante(nome='Outro', slug='outro', tipo_conta='demo',
+                        tipo_negocio='artesao')
+    session.add(outro)
+    session.commit()
+    alheio = ProdutoSite(restaurant_id=outro.id, nome='Do outro', ordem=0, ativo=True)
+    meu = ProdutoSite(restaurant_id=expositor.id, nome='Meu', ordem=0, ativo=True)
+    session.add_all([alheio, meu])
+    session.commit()
+    entrar(client)
+
+    client.post(f'/campo/{expositor.slug}/remover/produto/{alheio.id}')
+    assert ProdutoSite.query.get(alheio.id) is not None
+
+    client.post(f'/campo/{expositor.slug}/remover/produto/{meu.id}')
+    assert ProdutoSite.query.get(meu.id) is None
+
+
+def test_remover_tipo_errado_pro_negocio_da_404(client, session, expositor, demo):
+    entrar(client)
+    assert client.post(f'/campo/{expositor.slug}/remover/prato/1').status_code == 404
+    assert client.post(f'/campo/{demo.slug}/remover/produto/1').status_code == 404
+
+
+def test_bar_continua_com_pratos_e_qr_do_cardapio(client, session, demo):
+    entrar(client)
+    _foto(client, demo, alvo='prato', nome='Costela na brasa')
+
+    corpo = client.get(f'/campo/{demo.slug}').get_data(as_text=True)
+
+    assert '4 · Pratos (1)' in corpo
+    assert 'Nome do bar' in corpo
+    assert 'Nome do prato' in corpo
+    assert 'O cardápio' in corpo
+    assert 'Folha do cardápio' in corpo

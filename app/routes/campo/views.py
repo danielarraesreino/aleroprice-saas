@@ -20,7 +20,7 @@ from flask import (
 from app.extensions import db
 from app.models.modelo_restaurante import Restaurante
 from app.models.modelo_siteconfig import SiteConfig
-from app.models.modelo_sitecontent import DishCard, GalleryItem
+from app.models.modelo_sitecontent import DishCard, GalleryItem, ProdutoSite
 from app.utils.whatsapp import normalizar_whatsapp
 from app.routes.campo import bp
 from app.utils import blob, demos, dominios
@@ -177,13 +177,17 @@ def voltar():
 def editar(slug):
     rest = _bar(slug)
     cfg = _config(rest)
-    pratos = (DishCard.query.filter_by(restaurant_id=rest.id)
-              .order_by(DishCard.ordem).all())
+    artesao = rest.tipo_negocio == 'artesao'
+    # Expositor vende peça (ProdutoSite), bar vende prato (DishCard): o site de
+    # cada um só lê a própria tabela, então o bloco 4 lista a certa.
+    Item = ProdutoSite if artesao else DishCard
+    pratos = (Item.query.filter_by(restaurant_id=rest.id)
+              .order_by(Item.ordem).all())
     galeria = (GalleryItem.query.filter_by(restaurant_id=rest.id)
                .order_by(GalleryItem.ordem).all())
     plano = plano_efetivo(rest)
     return render_template(
-        'campo/editar.html', rest=rest, cfg=cfg, pratos=pratos, galeria=galeria,
+        'campo/editar.html', rest=rest, cfg=cfg, pratos=pratos, artesao=artesao, galeria=galeria,
         # Quantos pratos o cliente na mesa veria de fato: é o que decide se o
         # QR do cardápio pode ser oferecido (a página só existe com item ativo).
         pratos_ativos=sum(1 for p in pratos if p.ativo),
@@ -338,6 +342,10 @@ def foto(slug):
     rest = _bar(slug)
     cfg = _config(rest)
     alvo = request.form.get('alvo', 'capa')
+    # Cada tipo só tem um destino de item: prato no bar, produto no expositor.
+    # Alvo trocado falha antes do upload em vez de cair na galeria.
+    if alvo == ('prato' if rest.tipo_negocio == 'artesao' else 'produto'):
+        return jsonify({'erro': 'alvo inválido para este tipo de negócio'}), 400
 
     try:
         url = blob.enviar(request.files.get('imagem'), rest.slug)
@@ -348,6 +356,13 @@ def foto(slug):
 
     if alvo == 'capa':
         cfg.hero_foto = url
+    elif alvo == 'produto':
+        nome = (request.form.get('nome') or '').strip()[:120] or 'Peça da barraca'
+        preco = ler_moeda(request.form.get('preco'))
+        ordem = db.session.query(db.func.count(ProdutoSite.id)).filter_by(
+            restaurant_id=rest.id).scalar() or 0
+        db.session.add(ProdutoSite(restaurant_id=rest.id, nome=nome, imagem=url,
+                                   preco=preco, ordem=ordem, ativo=True))
     elif alvo == 'prato':
         nome = (request.form.get('nome') or '').strip() or 'Prato da casa'
         # O vendedor digita rápido, de pé: "18", "18,50" e "R$ 18,50" são a
@@ -370,8 +385,8 @@ def foto(slug):
 @bp.post('/<slug>/remover/<tipo>/<int:item_id>')
 def remover(slug, tipo, item_id):
     rest = _bar(slug)
-    Model = {'prato': DishCard, 'galeria': GalleryItem}.get(tipo)
-    if Model is None:
+    Model = {'prato': DishCard, 'produto': ProdutoSite, 'galeria': GalleryItem}.get(tipo)
+    if Model is None or tipo == ('prato' if rest.tipo_negocio == 'artesao' else 'produto'):
         abort(404)
     # filtro por restaurant_id junto: id sozinho apagaria item de outro bar
     item = Model.query.filter_by(id=item_id, restaurant_id=rest.id).first()
