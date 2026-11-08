@@ -22,7 +22,7 @@ def _rid():
 def index():
     rid = get_current_restaurant_id()
     if not rid:
-        flash('Erro: Restaurante não identificado.', 'danger')
+        flash('Não encontramos o seu negócio. Entre de novo.', 'danger')
         return redirect(url_for('auth.login'))
     promocoes = Promocao.query.filter_by(restaurant_id=rid).order_by(Promocao.data_cadastro.desc()).all()
     return render_template('promocoes/index.html', promocoes=promocoes, hoje=date.today())

@@ -124,7 +124,7 @@ def index(tipo):
     t = _tipo(tipo)
     rid = get_current_restaurant_id()
     if not rid:
-        flash('Erro: Restaurante não identificado.', 'danger')
+        flash('Não encontramos o seu negócio. Entre de novo.', 'danger')
         return redirect(url_for('auth.login'))
     Model = t['model']
     itens = Model.query.filter_by(restaurant_id=rid).order_by(Model.ordem, Model.id).all()

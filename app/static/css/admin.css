@@ -1,0 +1,170 @@
+/* Admin da Feira de Barão (painel do dono, do expositor e do operador).
+ *
+ * Carrega DEPOIS do Bootstrap e só remapeia as variáveis dele para a marca, para
+ * que todas as telas mudem de uma vez, sem editar cada template. Os tokens são
+ * os do portal (`feira.css:3-19`), copiados aqui porque `feira.css` traz reset e
+ * grão de página inteira que quebrariam o Bootstrap. Contrato: `docs/DESIGN.md`
+ * (sem sombra decorativa, sem ícone-fonte novo, contraste AA).
+ */
+:root {
+  --papel: #f6eedb;
+  --papel-escuro: #eae0c8;
+  --papel-claro: #fcf8ee;
+  --tinta: #241c14;
+  --taupe: #695842;
+  --tomate: #b33215;
+  --tomate-escuro: #8f2610;
+  --verde-zap: #166b3f;
+  --linha: rgba(36, 28, 20, 0.18);
+
+  --font-cartaz: 'Anton', 'Arial Narrow', sans-serif;
+  --font-heading: 'Space Grotesk', system-ui, sans-serif;
+  --font-corpo: 'Plus Jakarta Sans', -apple-system, system-ui, sans-serif;
+
+  /* Bootstrap 5.3 */
+  --bs-body-bg: var(--papel);
+  --bs-body-color: var(--tinta);
+  --bs-body-font-family: var(--font-corpo);
+  --bs-secondary-color: var(--taupe);
+  --bs-border-color: var(--linha);
+  --bs-link-color: var(--tomate);
+  --bs-link-color-rgb: 179, 50, 21;
+  --bs-link-hover-color: var(--tomate-escuro);
+  --bs-link-hover-color-rgb: 143, 38, 16;
+  --bs-primary: var(--tomate);
+  --bs-primary-rgb: 179, 50, 21;
+  --bs-focus-ring-color: rgba(179, 50, 21, 0.3);
+}
+
+body { background: var(--papel); color: var(--tinta); }
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+a { text-underline-offset: 2px; }
+:focus-visible { outline: 3px solid var(--tomate); outline-offset: 2px; }
+
+/* ---- Barra de cima: o mesmo wordmark do portal, em papel ---- */
+.navbar-feira {
+  --bs-navbar-color: var(--tinta);
+  --bs-navbar-hover-color: var(--tomate);
+  --bs-navbar-active-color: var(--tomate);
+  --bs-navbar-brand-color: var(--tinta);
+  --bs-navbar-brand-hover-color: var(--tinta);
+  --bs-navbar-toggler-border-color: var(--linha);
+  --bs-navbar-toggler-icon-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%23241c14' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+  background: var(--papel-claro);
+  border-bottom: 1px solid var(--linha);
+  margin-bottom: 20px;
+}
+.navbar-feira .navbar-brand {
+  font-family: var(--font-cartaz);
+  font-size: 1.35rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.navbar-feira .navbar-brand span { color: var(--tomate); margin-left: 0.3em; }
+.navbar-feira .nav-link { font-weight: 600; min-height: 44px; display: flex; align-items: center; }
+.navbar-feira .nav-link.active { color: var(--tomate); box-shadow: inset 0 -2px 0 var(--tomate); }
+.navbar-feira .navbar-toggler { min-width: 44px; min-height: 44px; }
+.navbar-feira .dropdown-menu { background: var(--papel-claro); border-color: var(--linha); border-radius: 8px; }
+.navbar-feira .dropdown-item:hover, .navbar-feira .dropdown-item:focus { background: var(--papel-escuro); }
+
+/* ---- Botões: tomate é a ação; os demais seguem a marca ---- */
+.btn { border-radius: 8px; font-weight: 600; }
+.btn-primary {
+  --bs-btn-bg: var(--tomate);
+  --bs-btn-border-color: var(--tomate);
+  --bs-btn-hover-bg: var(--tomate-escuro);
+  --bs-btn-hover-border-color: var(--tomate-escuro);
+  --bs-btn-active-bg: var(--tomate-escuro);
+  --bs-btn-active-border-color: var(--tomate-escuro);
+  --bs-btn-disabled-bg: var(--tomate);
+  --bs-btn-disabled-border-color: var(--tomate);
+  --bs-btn-focus-shadow-rgb: 179, 50, 21;
+  --bs-btn-color: #fff;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-active-color: #fff;
+}
+.btn-outline-primary {
+  --bs-btn-color: var(--tomate);
+  --bs-btn-border-color: var(--tomate);
+  --bs-btn-hover-bg: var(--tomate);
+  --bs-btn-hover-border-color: var(--tomate);
+  --bs-btn-active-bg: var(--tomate-escuro);
+  --bs-btn-active-border-color: var(--tomate-escuro);
+}
+.btn-outline-secondary {
+  --bs-btn-color: var(--taupe);
+  --bs-btn-border-color: var(--taupe);
+  --bs-btn-hover-bg: var(--taupe);
+  --bs-btn-hover-border-color: var(--taupe);
+  --bs-btn-hover-color: #fff;
+}
+/* Verde só para WhatsApp e confirmações de "tudo certo". */
+.btn-success {
+  --bs-btn-bg: var(--verde-zap);
+  --bs-btn-border-color: var(--verde-zap);
+  --bs-btn-hover-bg: #0f5230;
+  --bs-btn-hover-border-color: #0f5230;
+  --bs-btn-active-bg: #0f5230;
+  --bs-btn-active-border-color: #0f5230;
+}
+.text-primary { color: var(--tomate) !important; }
+.bg-primary { background-color: var(--tomate) !important; }
+.border-primary { border-color: var(--tomate) !important; }
+
+/* ---- Cartões, formulários e tabelas: papel, linha fina, sem sombra ---- */
+.card {
+  --bs-card-bg: var(--papel-claro);
+  --bs-card-border-color: var(--linha);
+  --bs-card-cap-bg: var(--papel-escuro);
+  --bs-card-border-radius: 10px;
+  box-shadow: none;
+}
+.card.shadow, .card.shadow-sm, .card.shadow-lg { box-shadow: none !important; }
+.card-header { font-family: var(--font-heading); font-weight: 700; }
+
+.form-control, .form-select {
+  background-color: #fff;
+  border-color: rgba(36, 28, 20, 0.35);
+  border-radius: 8px;
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--tomate);
+  box-shadow: 0 0 0 0.2rem rgba(179, 50, 21, 0.25);
+}
+.form-check-input:checked { background-color: var(--tomate); border-color: var(--tomate); }
+.form-text, .text-muted { color: var(--taupe) !important; }
+
+.table { --bs-table-bg: transparent; --bs-table-border-color: var(--linha); }
+.table-light { --bs-table-bg: var(--papel-escuro); --bs-table-color: var(--tinta); }
+
+.alert { border-radius: 8px; }
+.badge { border-radius: 6px; }
+.dropdown-menu { border-radius: 8px; }
+
+/* Ícone do título da tela: uma cor só, a da marca (antes: amarelo, verde,
+   vermelho conforme a tela). */
+h1 > i.fas, h2 > i.fas, h3 > i.fas, h4 > i.fas, h5 > i.fas,
+h1 > i.fab, h2 > i.fab, h3 > i.fab { color: var(--tomate) !important; }
+
+/* ---- Telas de entrada (login, esqueci, redefinir) ---- */
+.entrada { max-width: 420px; margin: 24px auto 0; }
+.entrada .card { padding: 4px; }
+.entrada h1 { font-size: 1.6rem; margin: 0; }
+.entrada .lead-curto {
+  color: var(--taupe); font-family: var(--font-corpo); font-weight: 400;
+  font-size: 0.95rem; margin: 4px 0 0;
+}
+
+/* Respeita quem pediu menos movimento. */
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto !important; transition: none !important; }
+}

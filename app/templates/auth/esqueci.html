@@ -3,16 +3,15 @@
 {% block title %}Esqueci minha senha - {{ MARCA }}{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-4">
-        <div class="card mt-5">
+<div class="entrada">
+        <div class="card">
             <div class="card-header text-center"><h1 class="h4">Esqueci minha senha</h1></div>
             <div class="card-body">
                 <p class="text-muted">Digite o e-mail da sua conta. Mandamos um link para criar uma senha nova.</p>
                 <form method="post">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
+                        <label for="email" class="form-label">E-mail</label>
                         <input type="email" class="form-control" id="email" name="email"
                                autocomplete="email" autocapitalize="none" required>
                     </div>
@@ -21,6 +20,5 @@
                 <p class="text-center mt-3 mb-0"><a href="{{ url_for('auth.login') }}">Voltar para o login</a></p>
             </div>
         </div>
-    </div>
 </div>
 {% endblock %}

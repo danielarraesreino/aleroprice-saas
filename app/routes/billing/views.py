@@ -140,7 +140,7 @@ def success():
             flash('Sessão de pagamento inválida.', 'danger')
             return redirect(url_for('dashboard.upgrade'))
         _ativar_pro(restaurante)
-        flash('Pagamento confirmado! Bem-vindo ao AleroPrice Pro 🚀', 'success')
+        flash('Pagamento confirmado! Seu plano Pro está ativo.', 'success')
         return redirect(url_for('dashboard.index'))
 
     if not session_id:

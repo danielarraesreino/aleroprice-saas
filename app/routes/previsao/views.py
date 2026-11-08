@@ -78,7 +78,7 @@ def index():
     """Página principal do módulo de previsão de demanda"""
     restaurant_id = get_current_restaurant_id()
     if not restaurant_id:
-        flash('Erro: Restaurante não identificado.', 'danger')
+        flash('Não encontramos o seu negócio. Entre de novo.', 'danger')
         return redirect(url_for('auth.login'))
 
     # Obter estatísticas básicas (filtradas por tenant)

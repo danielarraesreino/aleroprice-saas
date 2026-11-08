@@ -53,7 +53,7 @@ def login():
 
         if (usuario is None or not usuario.is_active
                 or not usuario.verificar_senha(senha)):
-            flash('Email ou senha inválidos', 'danger')
+            flash('E-mail ou senha inválidos.', 'danger')
             return redirect(url_for('auth.login'))
 
         # `lembrar` vem marcado por padrão no form. Sem cookie persistente o

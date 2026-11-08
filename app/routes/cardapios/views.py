@@ -14,7 +14,7 @@ def index():
     """Lista todos os cardápios"""
     restaurant_id = get_current_restaurant_id()
     if not restaurant_id:
-        flash('Erro: Restaurante não identificado.', 'danger')
+        flash('Não encontramos o seu negócio. Entre de novo.', 'danger')
         return redirect(url_for('auth.login'))
 
     page = request.args.get('page', 1, type=int)

@@ -15,7 +15,7 @@ def index():
     """Lista as reservas do restaurante (painel do lojista)."""
     restaurant_id = get_current_restaurant_id()
     if not restaurant_id:
-        flash('Erro: Restaurante não identificado.', 'danger')
+        flash('Não encontramos o seu negócio. Entre de novo.', 'danger')
         return redirect(url_for('auth.login'))
 
     status = request.args.get('status', 'ativas')  # ativas | todas | pendente | confirmada | cancelada
@@ -92,7 +92,7 @@ def avaliacoes():
 
     restaurant_id = get_current_restaurant_id()
     if not restaurant_id:
-        flash('Erro: Restaurante não identificado.', 'danger')
+        flash('Não encontramos o seu negócio. Entre de novo.', 'danger')
         return redirect(url_for('auth.login'))
     rest = Restaurante.query.get_or_404(restaurant_id)
     cfg = SiteConfig.query.filter_by(restaurant_id=restaurant_id).first()

@@ -185,7 +185,7 @@ def numeros():
 def index():
     rid = get_current_restaurant_id()
     if not rid:
-        flash('Erro: Restaurante não identificado.', 'danger')
+        flash('Não encontramos o seu negócio. Entre de novo.', 'danger')
         return redirect(url_for('auth.login'))
 
     cfg = SiteConfig.query.filter_by(restaurant_id=rid).first()
