@@ -182,7 +182,13 @@ def create_app(config_name='default'):
                 return False
             return pode(getattr(current_user, 'restaurante', None), recurso)
 
-        return {'pode': _pode, 'gestao_ativa': gestao_ativa}
+        def _url_meu_site():
+            # Endereço público do tenant logado, para o "Ver meu site" da navbar.
+            from app.utils.site_router import url_canonica
+            rest = getattr(current_user, 'restaurante', None) if current_user.is_authenticated else None
+            return url_canonica(rest) if rest is not None and rest.slug else ''
+
+        return {'pode': _pode, 'gestao_ativa': gestao_ativa, 'url_meu_site': _url_meu_site}
     
     # Registra os blueprints
     from app.routes.dashboard import bp as dashboard_bp

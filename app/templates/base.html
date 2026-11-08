@@ -124,20 +124,11 @@
                     {% endif %}
                     {# Menu do operador: mesmo critério das rotas (e_operador), não o id do tenant. #}
                     {% if current_user.is_authenticated and current_user.tipo == 'superadmin' %}
+                    {# Campanha e X-Men IA moraram aqui; agora só no Campo (campo/lista.html). #}
                     <li class="nav-item">
-                        <a class="nav-link {% if 'campanha' in request.endpoint %}active{% endif %}"
-                            href="{{ url_for('campanha.index') }}">Campanha</a>
+                        <a class="nav-link {% if request.endpoint and request.endpoint.startswith(('campo', 'campanha', 'agentes')) %}active{% endif %}"
+                            href="{{ url_for('campo.index') }}">Campo</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if 'campo' in request.endpoint %}active{% endif %}"
-                            href="{{ url_for('campo.index') }}">📱 Campo</a>
-                    </li>
-                    {% if gestao_ativa %}
-                    <li class="nav-item">
-                        <a class="nav-link {% if 'agentes' in request.endpoint %}active{% endif %}"
-                            href="{{ url_for('agentes.index') }}">🧬 X-Men IA</a>
-                    </li>
-                    {% endif %}
                     {% endif %}
                     {# Daqui pra baixo é o produto de gestão de custos (plano Pro).
                        Escondido de quem tem só o site: antes, metade do menu do
@@ -178,22 +169,21 @@
                 <!-- User Menu -->
                 {% if current_user.is_authenticated %}
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-user-circle"></i> {{ current_user.nome }}
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="{{ url_for('dashboard.upgrade') }}">
-                                    <i class="fas fa-crown"></i> Planos
-                                </a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">
-                                    <i class="fas fa-sign-out-alt"></i> Sair
-                                </a></li>
-                        </ul>
+                    {# Os três atalhos da conta ficam à vista: antes moravam num dropdown. #}
+                    {% set meu_site = url_meu_site() %}
+                    {% if meu_site %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ meu_site }}" target="_blank" rel="noopener">Ver meu site</a>
+                    </li>
+                    {% endif %}
+                    {% if current_user.tipo != 'superadmin' and current_user.restaurante and current_user.restaurante.subscription_tier != 'pro' %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'dashboard.upgrade' %}active{% endif %}"
+                            href="{{ url_for('dashboard.upgrade') }}">Planos</a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.logout') }}">Sair</a>
                     </li>
                 </ul>
                 {% endif %}

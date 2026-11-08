@@ -63,3 +63,44 @@ def test_site_de_bar_tem_area_do_lojista(client, session, modelo):
     rotulos = _rotulos(corpo)
     assert 'Área do lojista' in rotulos or (modelo == 'brasa' and 'Entrar' in rotulos)
     assert not any('entrar no sistema' in r for r in rotulos)
+
+
+# --- Navbar do admin: Sair, Ver meu site e Planos fora do dropdown -------------
+
+def _logado(client, session, slug, tier='site'):
+    from app.models.usuario import Usuario
+    r = Restaurante(nome=slug, slug=slug, subscription_tier=tier, subscription_status='active',
+                    tipo_negocio='artesao')
+    session.add(r)
+    session.commit()
+    session.add(SiteConfig(restaurant_id=r.id, nome=slug))
+    session.add(Usuario(nome='Dona', email=f'dona@{slug}.com', senha='senha-bem-longa',
+                        tipo='admin', restaurant_id=r.id))
+    session.commit()
+    with client.session_transaction() as s:
+        s['_user_id'] = str(Usuario.query.filter_by(restaurant_id=r.id).one().id)
+    return r
+
+
+def _navbar(corpo):
+    return re.search(r'<nav class="navbar.*?</nav>', corpo, re.S).group(0)
+
+
+def test_navbar_mostra_sair_e_ver_meu_site_sem_dropdown(client, session):
+    _logado(client, session, 'barraca-nav')
+    nav = _navbar(client.get('/app/', follow_redirects=True).get_data(as_text=True))
+    assert re.search(r'href="/auth/logout">Sair</a>', nav)
+    assert re.search(r'href="https://[^"]*/expositor/barraca-nav"[^>]*>Ver meu site</a>', nav)
+    assert 'userDropdown' not in nav
+
+
+def test_planos_aparece_na_navbar_so_fora_do_pro(client, session):
+    _logado(client, session, 'barraca-free')
+    nav = _navbar(client.get('/app/', follow_redirects=True).get_data(as_text=True))
+    assert '>Planos</a>' in nav
+
+
+def test_planos_some_da_navbar_no_pro(client, session):
+    _logado(client, session, 'barraca-pro', tier='pro')
+    nav = _navbar(client.get('/app/', follow_redirects=True).get_data(as_text=True))
+    assert '>Planos</a>' not in nav

@@ -32,6 +32,12 @@
    href="{{ url_for('campanha.mosaico', barao=1) }}">🗺️ O que sai hoje</a>
 <a class="btn fantasma" style="text-decoration:none;text-align:center;display:block"
    href="{{ url_for('campanha.modelos') }}">🎨 Mostrar as seis caras do site</a>
+<a class="btn fantasma" style="text-decoration:none;text-align:center;display:block"
+   href="{{ url_for('campanha.index') }}">Campanha</a>
+{% if gestao_ativa %}
+<a class="btn fantasma" style="text-decoration:none;text-align:center;display:block"
+   href="{{ url_for('agentes.index') }}">X-Men IA</a>
+{% endif %}
 
 <div class="bloco">
   <h2>Qual bar</h2>
