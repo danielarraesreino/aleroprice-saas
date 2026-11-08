@@ -31,7 +31,7 @@ from app.utils.formatacao_br import ler_moeda
 from app.utils.modelos import (
     MODELO_PADRAO, MODELOS, modelo_valido, opcoes_de_modelo, catalogo_de_modelos,
 )
-from app.utils.operador import e_operador
+from app.utils.operador import e_operador, operador_real
 from app.utils.planos import (
     DIAS_DE_TRIAL, PagamentoInvalido, conferir_convite, convite,
     plano_efetivo, precos, registrar_pagamento, rotulo,
@@ -51,6 +51,46 @@ def _bar(slug):
     if rest is None:
         abort(404)
     return rest
+
+
+def _bar_do_operador(slug):
+    """Como `_bar`, mas também para o operador que já está dentro do admin de
+    outro negócio (é o que permite trocar de negócio sem passar pelo Campo)."""
+    if operador_real() is None:
+        abort(404)
+    rest = Restaurante.query.filter_by(slug=slug).first()
+    if rest is None:
+        abort(404)
+    return rest
+
+
+# Acesso técnico: negócio sem nenhum admin (demo, expositor ainda não convertido)
+# também precisa abrir no admin. Em vez de um caminho paralelo de permissão, o
+# operador entra por um Usuario admin criado na hora, com senha aleatória que
+# ninguém conhece. O domínio .invalid (RFC 2606) não recebe e-mail, então nem a
+# recuperação de senha chega a lugar nenhum.
+DOMINIO_ACESSO = 'operador.invalid'
+
+
+def _admin_para_o_operador(rest):
+    """Admin do negócio para o operador entrar. Prefere o dono de verdade; se o
+    negócio não tem nenhum, cria o acesso técnico."""
+    from app.models.usuario import Usuario
+
+    admins = (Usuario.query
+              .filter_by(restaurant_id=rest.id, tipo='admin')
+              .filter(Usuario.ativo.isnot(False))
+              .order_by(Usuario.id).all())
+    donos = [u for u in admins if not (u.email or '').endswith('@' + DOMINIO_ACESSO)]
+    if donos:
+        return donos[0]
+    if admins:
+        return admins[0]
+    tecnico = Usuario(nome='Acesso do operador', email=f'acesso+{rest.slug}@{DOMINIO_ACESSO}',
+                      senha=secrets.token_urlsafe(32), tipo='admin', restaurant_id=rest.id)
+    db.session.add(tecnico)
+    db.session.commit()
+    return tecnico
 
 
 def _config(rest):
@@ -138,23 +178,48 @@ def abrir_admin(slug):
     do cliente e sem caminho paralelo de permissão no resto do código.
     """
     from flask import session
-    from flask_login import current_user, login_user
-    from app.models.usuario import Usuario
+    from flask_login import login_user
 
-    rest = _bar(slug)                       # só operador passa daqui
-    dono = (Usuario.query
-            .filter_by(restaurant_id=rest.id, tipo='admin')
-            .filter(Usuario.ativo.isnot(False))
-            .order_by(Usuario.id).first())
-    if dono is None:
-        flash(f'{rest.nome} não tem admin cadastrado.', 'warning')
-        return redirect(url_for('campo.index'))
+    rest = _bar_do_operador(slug)           # só operador passa daqui
+    # O id sai ANTES do login_user: `current_user` é um proxy e passa a apontar
+    # para o dono assim que a troca acontece.
+    operador_id = operador_real().id
+    dono = _admin_para_o_operador(rest)
 
-    operador_id = current_user.id
     current_app.logger.info(f'Context: ABRIR_ADMIN | operador={operador_id} | bar={rest.slug}')
     login_user(dono)
+    # O vínculo é sempre com o operador de verdade, também ao trocar de um
+    # negócio para outro (senão o "voltar" levaria ao dono do negócio anterior).
     session['operador_id'] = operador_id
     return redirect(url_for('dashboard.index'))
+
+
+@bp.get('/trocar')
+def trocar():
+    """Busca de negócios para o seletor da barra do admin (só operador).
+
+    Devolve até 20 resultados por nome ou endereço (slug). Sem termo, os
+    primeiros por nome. É JSON puro: quem renderiza é o `base.html`.
+    """
+    if operador_real() is None:
+        abort(404)
+    from flask_login import current_user
+    from app.models.usuario import Usuario
+
+    termo = (request.args.get('q') or '').strip()[:60]
+    consulta = Restaurante.query.filter(Restaurante.slug.isnot(None), Restaurante.slug != '')
+    if termo:
+        like = f'%{termo}%'
+        consulta = consulta.filter(db.or_(Restaurante.nome.ilike(like), Restaurante.slug.ilike(like)))
+    achados = consulta.order_by(Restaurante.nome).limit(20).all()
+    atual = getattr(current_user, 'restaurant_id', None)
+    return jsonify([{
+        'slug': r.slug,
+        'nome': r.nome,
+        'tipo': 'Expositor' if r.tipo_negocio == 'artesao' else 'Bar',
+        'demo': r.tipo_conta == 'demo',
+        'atual': r.id == atual,
+    } for r in achados])
 
 
 @bp.post('/voltar')

@@ -972,3 +972,78 @@ def test_expositor_aponta_pro_site_certo_na_tela_de_campo(client, session, expos
         f'/campo/{expositor.slug}').get_data(as_text=True)
     assert f'href="/bar/{demo.slug}"' in client.get(
         f'/campo/{demo.slug}').get_data(as_text=True)
+
+
+# ----------------------------------------------- trocar de negócio (superadmin)
+
+def test_busca_de_negocios_so_para_o_operador(client, operador, cliente_com_admin, demo):
+    entrar(client)
+    achados = client.get('/campo/trocar?q=cliente').get_json()
+    assert [n['slug'] for n in achados] == ['bar-do-cliente']
+    assert achados[0]['tipo'] == 'Bar' and achados[0]['demo'] is False
+    todos = {n['slug'] for n in client.get('/campo/trocar').get_json()}
+    assert {'bar-do-cliente', 'boteco-do-teste'} <= todos
+    assert [n['demo'] for n in client.get('/campo/trocar?q=boteco').get_json()] == [True]
+
+
+def test_busca_de_negocios_nega_dono_e_visitante(client, cliente_com_admin):
+    # Visitante cai no login (guard global); dono logado não enxerga a rota.
+    assert client.get('/campo/trocar').status_code == 302
+    entrar(client, 'dono@cliente.com')
+    assert client.get('/campo/trocar').status_code == 404
+
+
+def test_negocio_sem_admin_abre_com_acesso_tecnico_sem_duplicar(client, operador, demo):
+    from app.models.usuario import Usuario
+    entrar(client)
+    resp = client.post(f'/campo/{demo.slug}/abrir-admin')
+    assert '/app' in resp.headers['Location']
+    tecnicos = Usuario.query.filter_by(restaurant_id=demo.id).all()
+    assert len(tecnicos) == 1 and tecnicos[0].email.endswith('@operador.invalid')
+    assert tecnicos[0].tipo == 'admin'
+    client.post('/campo/voltar')
+    client.post(f'/campo/{demo.slug}/abrir-admin')
+    assert Usuario.query.filter_by(restaurant_id=demo.id).count() == 1
+
+
+def test_acesso_tecnico_nao_entra_pelo_login(client, operador, demo):
+    from app.models.usuario import Usuario
+    entrar(client)
+    client.post(f'/campo/{demo.slug}/abrir-admin')
+    email = Usuario.query.filter_by(restaurant_id=demo.id).one().email
+    client.get('/auth/logout')
+    resp = client.post('/auth/login', data={'email': email, 'senha': 'qualquer'}, follow_redirects=True)
+    assert 'inválidos' in resp.get_data(as_text=True)
+
+
+def test_dono_de_verdade_tem_prioridade_sobre_o_acesso_tecnico(client, operador, cliente_com_admin):
+    entrar(client)
+    client.post(f'/campo/{cliente_com_admin.slug}/abrir-admin')
+    painel = client.get('/app/', follow_redirects=True).get_data(as_text=True)
+    assert 'Bar do Cliente' in painel
+    from app.models.usuario import Usuario
+    assert Usuario.query.filter_by(restaurant_id=cliente_com_admin.id).count() == 1
+
+
+def test_troca_direto_de_um_negocio_para_outro_e_volta_ao_operador(client, operador,
+                                                                  cliente_com_admin, demo):
+    entrar(client)
+    client.post(f'/campo/{cliente_com_admin.slug}/abrir-admin')
+    # Dentro do admin do cliente, o seletor continua valendo.
+    assert client.get('/campo/trocar?q=boteco').status_code == 200
+    resp = client.post(f'/campo/{demo.slug}/abrir-admin')
+    assert '/app' in resp.headers['Location']
+    painel = client.get('/app/', follow_redirects=True).get_data(as_text=True)
+    assert 'Boteco do Teste' in painel
+    resp = client.post('/campo/voltar')
+    assert '/campo' in resp.headers['Location']
+    assert client.get('/campo/').status_code == 200
+
+
+def test_seletor_aparece_so_para_o_operador(client, operador, cliente_com_admin):
+    entrar(client)
+    assert 'id="busca-negocio"' in client.get('/app/', follow_redirects=True).get_data(as_text=True)
+    client.get('/auth/logout')
+    entrar(client, 'dono@cliente.com')
+    html = client.get('/app/', follow_redirects=True).get_data(as_text=True)
+    assert 'id="busca-negocio"' not in html and 'seletor-negocio' not in html

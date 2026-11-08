@@ -188,7 +188,13 @@ def create_app(config_name='default'):
             rest = getattr(current_user, 'restaurante', None) if current_user.is_authenticated else None
             return url_canonica(rest) if rest is not None and rest.slug else ''
 
-        return {'pode': _pode, 'gestao_ativa': gestao_ativa, 'url_meu_site': _url_meu_site}
+        def _operador_ativo():
+            # True para o superadmin, também quando está dentro do admin de um negócio.
+            from app.utils.operador import operador_real
+            return current_user.is_authenticated and operador_real() is not None
+
+        return {'pode': _pode, 'gestao_ativa': gestao_ativa, 'url_meu_site': _url_meu_site,
+                'operador_ativo': _operador_ativo}
     
     # Registra os blueprints
     from app.routes.dashboard import bp as dashboard_bp

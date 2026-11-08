@@ -163,6 +163,25 @@
                 <!-- User Menu -->
                 {% if current_user.is_authenticated %}
                 <ul class="navbar-nav ms-auto">
+                    {% if operador_ativo() %}
+                    {# Seletor do operador: troca de negócio em qualquer tela do admin, com busca.
+                       Cada resultado é um POST (campo.abrir_admin) com CSRF. #}
+                    <li class="nav-item dropdown seletor-negocio">
+                        <button class="nav-link dropdown-toggle btn btn-link text-start" type="button" id="seletorNegocio"
+                                data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                            Negócio: <strong>{{ current_user.restaurante.nome if current_user.restaurante and session.get('operador_id') else 'escolher' }}</strong>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end p-2" aria-labelledby="seletorNegocio" style="min-width:300px">
+                            <label class="visually-hidden" for="busca-negocio">Buscar bar ou expositor</label>
+                            <input type="search" class="form-control form-control-sm mb-2" id="busca-negocio"
+                                   placeholder="Buscar bar ou expositor…" autocomplete="off">
+                            <ul class="list-unstyled mb-0" id="lista-negocios" style="max-height:320px;overflow:auto" aria-live="polite"></ul>
+                            <form method="post" id="form-negocio" class="d-none">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            </form>
+                        </div>
+                    </li>
+                    {% endif %}
                     {# Os três atalhos da conta ficam à vista: antes moravam num dropdown. #}
                     {% set meu_site = url_meu_site() %}
                     {% if meu_site %}
@@ -225,6 +244,64 @@
     <script defer src="/_vercel/speed-insights/script.js"></script>
     <script defer src="/_vercel/insights/script.js"></script>
 
+    {% if current_user.is_authenticated and operador_ativo() %}
+    <script>
+    (function () {
+        var busca = document.getElementById('busca-negocio');
+        var lista = document.getElementById('lista-negocios');
+        var form = document.getElementById('form-negocio');
+        var menu = document.getElementById('seletorNegocio');
+        if (!busca || !lista || !form || !menu) return;
+        var espera = null;
+
+        function pintar(itens) {
+            lista.textContent = '';
+            if (!itens.length) {
+                var vazio = document.createElement('li');
+                vazio.className = 'text-muted small px-2 py-1';
+                vazio.textContent = 'Nenhum negócio com esse nome.';
+                lista.appendChild(vazio);
+                return;
+            }
+            itens.forEach(function (n) {
+                var li = document.createElement('li');
+                var b = document.createElement('button');
+                b.type = 'button';
+                b.className = 'dropdown-item d-flex justify-content-between align-items-center gap-2';
+                b.style.minHeight = '44px';
+                var nome = document.createElement('span');
+                nome.textContent = n.nome + (n.atual ? ' (aberto agora)' : '');
+                var tipo = document.createElement('small');
+                tipo.className = 'text-muted';
+                tipo.textContent = n.tipo + (n.demo ? ' · prévia' : '');
+                b.appendChild(nome); b.appendChild(tipo);
+                b.addEventListener('click', function () {
+                    form.action = '/campo/' + encodeURIComponent(n.slug) + '/abrir-admin';
+                    form.submit();
+                });
+                li.appendChild(b);
+                lista.appendChild(li);
+            });
+        }
+
+        function carregar() {
+            fetch('/campo/trocar?q=' + encodeURIComponent(busca.value.trim()), {headers: {'Accept': 'application/json'}})
+                .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+                .then(pintar)
+                .catch(function () {
+                    lista.textContent = '';
+                    var erro = document.createElement('li');
+                    erro.className = 'text-danger small px-2 py-1';
+                    erro.textContent = 'Não consegui buscar agora. Tente de novo.';
+                    lista.appendChild(erro);
+                });
+        }
+
+        menu.addEventListener('shown.bs.dropdown', function () { busca.focus(); carregar(); });
+        busca.addEventListener('input', function () { clearTimeout(espera); espera = setTimeout(carregar, 200); });
+    })();
+    </script>
+    {% endif %}
     {% block extra_js %}{% endblock %}
 </body>
 

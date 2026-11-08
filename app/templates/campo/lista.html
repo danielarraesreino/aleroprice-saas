@@ -89,7 +89,7 @@
        style="min-width:64px;border-radius:var(--raio);display:flex;align-items:center;justify-content:center;
               font-size:12px;font-weight:700;color:var(--creme);border:1px solid var(--linha);text-decoration:none">MÊS</a>
     {% endif %}
-    {% if l.tem_admin %}
+    {# Todo negócio abre no admin: sem dono cadastrado, o acesso técnico é criado na hora. #}
     <form method="post" action="{{ url_for('campo.abrir_admin', slug=l.slug) }}" style="margin:0;display:flex">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <button type="submit" aria-label="Abrir o admin de {{ l.nome }} como o dono vê"
@@ -97,7 +97,6 @@
                      font-size:12px;font-weight:700;background:transparent;color:var(--creme);
                      border:1px solid var(--linha)">ADMIN</button>
     </form>
-    {% endif %}
     {# Único controle de publicação: o site do bar só sai do ar por aqui. #}
     <form method="post" action="{{ url_for('campo.no_ar', slug=l.slug) }}" style="margin:0;display:flex">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
