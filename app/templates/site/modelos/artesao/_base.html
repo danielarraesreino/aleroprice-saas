@@ -469,6 +469,8 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
   color:var(--cream-dim);font-size:.95rem;
 }
 .rodape .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--s3)}
+.rodape .area-dono{margin:var(--s1) 0 0;font-size:.82rem}
+.rodape .area-dono a{display:inline-flex;align-items:center;min-height:44px;color:inherit;text-decoration:underline;text-underline-offset:3px}
 
 /* Estado vazio de catálogo */
 .vazio{
@@ -798,6 +800,9 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
     <p>{{ copy.rodape }}</p>
     {% with novidades_bar = tenant.slug if tenant else '', novidades_titulo = 'Receba as novidades da Feira de Barão', novidades_texto = 'Quem está na Praça do Coco, o que chegou de novo e os eventos do mês. Um e-mail de vez em quando, sem spam.' %}{% include "site/_novidades.html" %}{% endwith %}
     {% include "site/_feito_com.html" %}
+    {# Entrada do dono: rodapé, texto pequeno, sem competir com a venda. Domínio do
+       produto (url_do_sistema), porque o hotsite pode estar em domínio próprio. #}
+    <p class="area-dono"><a href="{{ url_do_sistema() }}">Área do expositor</a></p>
   </div>
   <p>© {{ site.nome }} · Feira de Barão</p>
 </div></footer>

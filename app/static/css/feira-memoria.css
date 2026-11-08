@@ -18,6 +18,8 @@
 .memoria .cartao p{margin:0;font-size:.9375rem}
 .memoria .grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
 .rodape-memoria{margin-top:40px;padding:24px 0;background:var(--papel-escuro);font-size:.9375rem;color:var(--taupe)}
+.rodape-memoria .wrap>p:first-child{margin:0 0 4px}
+.rodape-memoria .wrap>p:first-child a{display:inline-flex;align-items:center;min-height:44px}
 .memoria .trilha{margin-top:20px}
 .memoria .abre{margin-top:14px}
 .memoria .texto-largo{max-width:720px}

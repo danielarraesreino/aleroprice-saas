@@ -19,6 +19,7 @@
       <a href="{{ url_for('public.memoria') }}">Memória</a>
       <a href="{{ base }}#bares">Bares</a>
       <a href="{{ url_for('public.expor') }}">Quero meu site</a>
+      <a href="{{ url_for('auth.login') }}">Entrar</a>
     </nav>
     <a class="cta-dono" href="{{ base }}#participar">Tenho banca<span class="cta-extra">&nbsp;ou bar</span></a>
     <div class="header-desktop-actions" style="display:flex; gap:10px; align-items:center;">
@@ -89,6 +90,7 @@
     <li><a href="{{ base }}#bares" onclick="fecharMenuMobile(false)"><i class="fas fa-beer-mug-empty"></i> Bares de Barão</a></li>
     <li><a href="{{ base }}#participar" onclick="fecharMenuMobile(false)"><i class="fas fa-handshake"></i> Tenho Banca ou Bar (Participar)</a></li>
     <li><a href="{{ base }}#contato" onclick="fecharMenuMobile(false)"><i class="fas fa-comments"></i> Conversar com o Daniel</a></li>
+    <li><a href="{{ url_for('auth.login') }}"><i class="fas fa-right-to-bracket"></i> Entrar</a></li>
   </ul>
 
   <div style="margin-top:auto; display:flex; flex-direction:column; gap:10px; padding-top:16px; border-top:1.5px solid var(--linha);">

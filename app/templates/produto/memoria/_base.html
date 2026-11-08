@@ -30,6 +30,7 @@
 {% block conteudo %}{% endblock %}
 </main>
 <footer class="rodape-memoria"><div class="wrap">
+  <p><a href="{{ url_for('auth.login') }}">Entrar</a></p>
   Pesquisa histórica com base no blog <a href="https://historiadebaraogeraldo.wordpress.com/" rel="noopener">História de Barão Geraldo</a>, de Warney Smith, e na <a href="https://pt.wikipedia.org/wiki/Bar%C3%A3o_Geraldo" rel="noopener">Wikipédia</a> (CC BY-SA). Viu algo errado ou tem foto? {% if zap %}<a href="{{ zap }}" target="_blank" rel="noopener">Mande no WhatsApp</a>.{% endif %}
 </div></footer>
 <script defer src="/_vercel/speed-insights/script.js"></script>

@@ -882,6 +882,12 @@
     .site-header .logo-topo > i, .site-header .cta-extra { display: none; }
     .nav-dossie { gap: 2px; }
   }
+  /* "Entrar" entrou na barra: de 901 a 1100 px o topo apertava 19 px além da tela. */
+  @media (min-width: 901px) and (max-width: 1100px) {
+    .nav-dossie { gap: 0; }
+    .nav-dossie a { padding: 0 4px; letter-spacing: 0.02em; font-size: 0.72rem; }
+    .cta-dono { padding: 0 10px; font-size: 0.86rem; }
+  }
   @media (max-width: 1320px) {
     .header-desktop-actions { display: none !important; }
   }
