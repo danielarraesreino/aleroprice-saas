@@ -849,10 +849,13 @@ def test_logout_dentro_do_admin_apaga_o_vinculo_com_o_operador(client, operador,
 
 def test_menu_do_operador_segue_o_perfil_e_nao_o_tenant(client, operador, cliente_com_admin):
     entrar(client)
-    assert 'Campanha' in client.get('/app/', follow_redirects=True).get_data(as_text=True)
+    # Campanha mora no Campo, não na navbar; a navbar do operador só aponta para o Campo.
+    assert 'href="/campo/"' in client.get('/app/', follow_redirects=True).get_data(as_text=True)
+    assert 'Campanha' in client.get('/campo/').get_data(as_text=True)
     client.get('/auth/logout')
     entrar(client, 'dono@cliente.com')
-    assert 'Campanha' not in client.get('/app/', follow_redirects=True).get_data(as_text=True)
+    corpo = client.get('/app/', follow_redirects=True).get_data(as_text=True)
+    assert 'Campanha' not in corpo and 'href="/campo/"' not in corpo
 
 
 def test_previa_tem_tamanho_de_celular_e_botoes_sem_espremer(client, demo):
