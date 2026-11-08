@@ -23,13 +23,29 @@ TIPOS = {
     'telefone': 'tocaram para ligar',
 }
 
+# De onde veio a visita. Guardado na mesma tabela, com prefixo `o_`, para não
+# mexer no schema. Fica fora de TIPOS: não é clique, e as telas que percorrem
+# TIPOS (números, relatório) não precisam saber disso.
+ORIGENS = {
+    'o_qr': 'chegaram pelo QR code',
+    'o_instagram': 'chegaram pelo Instagram',
+    'o_whatsapp': 'chegaram pelo WhatsApp',
+    'o_google': 'chegaram pelo Google',
+    'o_direto': 'abriram o link direto',
+    'o_outro': 'chegaram por outros sites',
+}
+
+# Nome curto (o que o navegador manda) -> chave em ORIGENS.
+ORIGEM_CURTA = {k[2:]: k for k in ORIGENS}
+ORIGEM_CURTA.update({'ig': 'o_instagram', 'wa': 'o_whatsapp'})
+
 MESES = ('janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho',
          'agosto', 'setembro', 'outubro', 'novembro', 'dezembro')
 
 
 def registrar(restaurant_id, tipo, dia=None):
     """Soma 1 no contador do dia. Best-effort: nunca derruba quem chamou."""
-    if tipo not in TIPOS:
+    if tipo not in TIPOS and tipo not in ORIGENS:
         return False
     dia = dia or hoje_br()
     filtro = dict(restaurant_id=restaurant_id, dia=dia, tipo=tipo)
@@ -65,6 +81,18 @@ def totais(restaurant_id, inicio, fim):
     return soma
 
 
+def origens(restaurant_id, inicio, fim):
+    """{origem: soma} entre `inicio` e `fim`, com zero no que faltar."""
+    linhas = (db.session.query(MetricaDiaria.tipo, db.func.sum(MetricaDiaria.total))
+              .filter(MetricaDiaria.restaurant_id == restaurant_id,
+                      MetricaDiaria.dia >= inicio, MetricaDiaria.dia <= fim,
+                      MetricaDiaria.tipo.in_(list(ORIGENS)))
+              .group_by(MetricaDiaria.tipo).all())
+    soma = dict.fromkeys(ORIGENS, 0)
+    soma.update({tipo: int(total or 0) for tipo, total in linhas})
+    return soma
+
+
 def por_dia(restaurant_id, dias=30, hoje=None):
     """Últimos `dias` dias, do mais antigo ao de hoje: [(data, {tipo: total})]."""
     hoje = hoje or hoje_br()
@@ -85,7 +113,7 @@ def mes_anterior(hoje=None):
     return fim.replace(day=1), fim
 
 
-def texto_relatorio(nome, soma, inicio, reservas=0, avaliacoes=0, link=''):
+def texto_relatorio(nome, soma, inicio, reservas=0, avaliacoes=0, link='', origem=None):
     """Mensagem do relatório mensal, pronta para mandar no WhatsApp do cliente.
 
     Só entra linha com número maior que zero: "0 pessoas abriram o mapa" não
@@ -100,6 +128,9 @@ def texto_relatorio(nome, soma, inicio, reservas=0, avaliacoes=0, link=''):
         linhas.append(f'• {reservas} reservas pelo site')
     if avaliacoes:
         linhas.append(f'• {avaliacoes} pessoas abriram a tela de avaliação no Google')
+    for chave, rotulo in ORIGENS.items():
+        if (origem or {}).get(chave):
+            linhas.append(f'• {origem[chave]} pessoas {rotulo}')
     if len(linhas) == 2:
         linhas.append('• O site ainda teve pouco movimento. Vamos divulgar o link juntos este mês?')
     if link:

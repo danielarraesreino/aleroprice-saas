@@ -164,6 +164,8 @@ def numeros():
         'configsite/numeros.html',
         tipos=metricas.TIPOS,
         este_mes=metricas.totais(rid, mes_ini, hoje),
+        origens=metricas.ORIGENS,
+        origem_mes=metricas.origens(rid, mes_ini, hoje),
         mes_passado=metricas.totais(rid, ant_ini, ant_fim),
         nome_mes=metricas.MESES[hoje.month - 1],
         nome_mes_passado=metricas.MESES[ant_ini.month - 1],

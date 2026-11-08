@@ -566,7 +566,7 @@ def qr(slug):
     divulgação: vai no Instagram, no cartão, na porta.
     """
     rest = _bar(slug)
-    return _resposta_qr(_url_do_site(rest))
+    return _resposta_qr(_url_do_site(rest) + '#o=qr')
 
 
 @bp.route('/<slug>/qr-cardapio.svg')
@@ -579,7 +579,7 @@ def qr_cardapio(slug):
     fazê-la rolar a tela procurando o que o adesivo prometeu.
     """
     rest = _bar(slug)
-    return _resposta_qr(url_for('public.cardapio', slug=rest.slug, _external=True))
+    return _resposta_qr(url_for('public.cardapio', slug=rest.slug, _external=True) + '#o=qr')
 
 
 @bp.route('/<slug>/qr-mesa')
@@ -596,7 +596,7 @@ def qr_mesa(slug):
     pratos = DishCard.query.filter_by(restaurant_id=rest.id, ativo=True).count()
     return render_template(
         'campo/qr_mesa.html', rest=rest, cfg=cfg, pratos=pratos,
-        url_cardapio=url_for('public.cardapio', slug=rest.slug, _external=True),
+        url_cardapio=url_for('public.cardapio', slug=rest.slug, _external=True) + '#o=qr',
     )
 
 
@@ -636,7 +636,8 @@ def relatorio(slug):
     reservas = (Reserva.query.filter(Reserva.restaurant_id == rest.id, Reserva.status != 'cancelada',
                                      Reserva.data >= inicio, Reserva.data <= fim).count())
     texto = metricas.texto_relatorio(cfg.nome or rest.nome, soma, inicio, reservas=reservas,
-                                     link=url_canonica(rest))
+                                     link=url_canonica(rest),
+                                     origem=metricas.origens(rest.id, inicio, fim))
     numero = metricas.whatsapp_do_dono(cfg.whatsapp or rest.telefone)
     link_zap = f'https://wa.me/{numero}?text={quote(texto)}' if numero else ''
     return render_template('campo/relatorio.html', rest=rest, texto=texto, soma=soma,

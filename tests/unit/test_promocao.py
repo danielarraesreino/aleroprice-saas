@@ -75,3 +75,11 @@ def test_pontual_sem_datas_vale_sempre():
     promo = Promocao(titulo='x', ativo=True)
     assert promo.vigente is True
     assert promo.rotulo is None
+
+
+def test_codigo_do_cupom_normaliza_e_valida():
+    from app.routes.promocoes.views import normalizar_codigo
+    assert normalizar_codigo(' quarta10 ') == 'QUARTA10'
+    assert normalizar_codigo('') is None and normalizar_codigo(None) is None
+    for ruim in ('ab', 'tem espaco', 'açaí10', 'x' * 21, 'a;b'):
+        assert normalizar_codigo(ruim) is False

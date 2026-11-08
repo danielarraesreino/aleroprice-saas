@@ -1047,6 +1047,7 @@
         <h3>{{ p.titulo }}{% if p.exemplo and not (tenant and tenant.eh_modelo_demo) %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
         <div class="rot">{% if p.acontece_hoje %}É hoje{% else %}{{ p.rotulo or 'Oferta da casa' }}{% endif %}</div>
         {% if p.descricao %}<p>{{ p.descricao }}</p>{% endif %}
+        {% include "site/_cupom.html" %}
         {# Sem repetir o rótulo: recorrente já diz o dia logo abaixo do título, e
            pontual já diz "ATÉ 31/12". Aqui só entra o que ainda não foi dito. #}
         {% if p.acontece_hoje %}

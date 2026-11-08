@@ -1,0 +1,11 @@
+{# Código do cupom dentro do cartão de promoção (p = Promocao). Só aparece com
+   código. Estilo inline e em currentColor de propósito: herda cor e fonte do
+   cartão de cada modelo, então segue o contraste dele nos dois modos. O sistema
+   só exibe; quem confere o código é o dono, no balcão. #}
+{% if p.codigo %}
+<p class="cupom" style="display:flex;width:fit-content;max-width:100%;justify-self:start;align-self:flex-start;flex-wrap:wrap;gap:.2em .6em;align-items:baseline;margin-top:.9em;padding:.4em .8em;border:1.5px dashed currentColor;border-radius:4px;font-size:.9em;line-height:1.35">
+  <span>Código</span>
+  <b style="letter-spacing:.1em;user-select:all">{{ p.codigo }}</b>
+  <span>· diga no balcão</span>
+</p>
+{% endif %}

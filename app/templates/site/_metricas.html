@@ -11,7 +11,23 @@
       else fetch(url, {method: 'POST', body: tipo, keepalive: true});
     } catch (e) {}
   }
-  conta('visita');
+  // De onde veio: #o=qr|ig|wa|google no link (fica no navegador, não fura o
+  // cache da borda); sem isso, o referrer.
+  function origem(){
+    try {
+      var m = /[#&]o=([a-z]+)/.exec(location.hash);
+      if (m) return m[1];
+      var r = document.referrer;
+      if (!r) return 'direto';
+      var h = new URL(r).hostname;
+      if (h === location.hostname) return '';
+      if (/(^|\.)google\./i.test(h)) return 'google';
+      if (/(^|\.)instagram\.com$/i.test(h) || h === 'l.instagram.com') return 'instagram';
+      if (/(^|\.)(wa\.me|whatsapp\.com)$/i.test(h)) return 'whatsapp';
+      return 'outro';
+    } catch (e) { return ''; }
+  }
+  conta('visita' + (origem() ? '|' + origem() : ''));
   document.addEventListener('click', function(ev){
     var a = ev.target.closest && ev.target.closest('a[href]');
     if (!a) return;

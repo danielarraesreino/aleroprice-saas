@@ -730,6 +730,7 @@ srcset="{{ base }}-400.webp 400w, {{ base }}-800.webp 800w" sizes="{{ tamanhos }
         <div class="tag">{% if p.acontece_hoje %}É HOJE!{% else %}{{ p.rotulo or 'OFERTA' }}{% endif %}</div>
         <h3>{{ p.titulo }}{% if p.exemplo and not (tenant and tenant.eh_modelo_demo) %}<span class="selo-exemplo">exemplo</span>{% endif %}</h3>
         {% if p.descricao %}<p>{{ p.descricao }}</p>{% endif %}
+        {% include "site/_cupom.html" %}
         {% if p.dia_semana is not none %}
           <div class="val">Toda {{ p.rotulo.replace('TODA ', '')|lower }}{% if p.validade %} · até {{ p.validade.strftime('%d/%m/%Y') }}{% endif %}</div>
         {% elif p.validade %}

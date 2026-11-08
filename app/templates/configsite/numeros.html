@@ -20,6 +20,32 @@
 </div>
 <p class="small text-muted">Números de {{ nome_mes }} até hoje, comparados com {{ nome_mes_passado }} inteiro.</p>
 
+<div class="card mb-4">
+  <div class="card-body">
+    <h5 class="card-title">De onde vieram as visitas</h5>
+    {% if origem_mes.values()|sum %}
+    <ul class="list-unstyled mb-3">
+      {% for chave, rotulo in origens.items() if origem_mes[chave] %}
+      <li><strong>{{ origem_mes[chave]|numero_br(0) }}</strong> {{ rotulo }}</li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-muted mb-3">Ainda sem dados de origem este mês. Use os links abaixo na bio do Instagram, no status do WhatsApp e no QR impresso: assim você descobre o que traz gente.</p>
+    {% endif %}
+    {% if link %}
+    <p class="small text-muted mb-2">Um link para cada lugar. É o mesmo site; só muda o final, que serve para a gente contar de onde a pessoa veio.</p>
+    {% for nome, sufixo in [('Bio do Instagram', '#o=ig'), ('Status ou lista do WhatsApp', '#o=wa'), ('QR impresso (cartaz, balcão)', '#o=qr')] %}
+    <label class="form-label small mb-0 mt-2" for="link-{{ loop.index }}">{{ nome }}</label>
+    <div class="input-group input-group-sm">
+      <input type="text" class="form-control" value="{{ link }}{{ sufixo }}" readonly id="link-{{ loop.index }}">
+      <button class="btn btn-outline-secondary" type="button"
+              onclick="navigator.clipboard.writeText(document.getElementById('link-{{ loop.index }}').value); this.textContent='Copiado!'">Copiar</button>
+    </div>
+    {% endfor %}
+    {% endif %}
+  </div>
+</div>
+
 <div class="row g-4">
   <div class="col-lg-8">
     <div class="card h-100">

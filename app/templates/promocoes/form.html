@@ -16,6 +16,17 @@
     <textarea class="form-control" name="descricao" rows="3" placeholder="Detalhes da promoção (opcional)">{{ promo.descricao if promo and promo.descricao else '' }}</textarea>
   </div>
 
+  <div class="mb-4">
+    <label class="form-label" for="codigo">Código (opcional)</label>
+    <input class="form-control text-uppercase" id="codigo" name="codigo" maxlength="20"
+           pattern="[A-Za-z0-9\-]{3,20}" style="max-width:16rem"
+           value="{{ promo.codigo if promo and promo.codigo else '' }}" placeholder="Ex.: QUARTA10">
+    <div class="form-text">
+      Aparece no site como "diga o código no balcão". Quem confere é você: o sistema
+      só mostra o código. De 3 a 20 letras, números ou hífen.
+    </div>
+  </div>
+
   <div class="card mb-4">
     <div class="card-header bg-light">
       <strong><i class="fas fa-repeat text-warning"></i> Quando ela acontece</strong>

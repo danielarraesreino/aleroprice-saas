@@ -37,6 +37,10 @@ class Promocao(db.Model):
     # Recorrência semanal. Nulo = promoção pontual.
     dia_semana = db.Column(db.Integer, nullable=True)  # 0=Segunda ... 6=Domingo
 
+    # Cupom: o cliente diz o código no balcão. Resgate é conferido pelo dono, o
+    # sistema só exibe. Nulo = promoção sem código.
+    codigo = db.Column(db.String(20), nullable=True)
+
     data_cadastro = db.Column(db.DateTime, default=datetime.now)
 
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurante.id'), nullable=True, index=True)

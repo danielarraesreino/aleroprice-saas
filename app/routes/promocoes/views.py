@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, date
 
 from flask import render_template, redirect, url_for, flash, request, abort
@@ -37,6 +38,14 @@ def _data(valor, rotulo, erros):
         return None
 
 
+def normalizar_codigo(valor):
+    """Código do cupom em maiúsculas. '' -> None (sem código); fora do formato -> False."""
+    codigo = (valor or '').strip().upper()
+    if not codigo:
+        return None
+    return codigo if re.fullmatch(r'[A-Z0-9-]{3,20}', codigo) else False
+
+
 def _ler_form():
     titulo = (request.form.get('titulo') or '').strip()
     descricao = (request.form.get('descricao') or '').strip() or None
@@ -45,6 +54,11 @@ def _ler_form():
     erros = []
     if len(titulo) < 2:
         erros.append('Informe o título da promoção.')
+
+    codigo = normalizar_codigo(request.form.get('codigo'))
+    if codigo is False:
+        erros.append('O código deve ter de 3 a 20 letras, números ou hífen, sem espaços.')
+        codigo = None
 
     data_inicio = _data((request.form.get('data_inicio') or '').strip(), 'Data de início', erros)
     validade = _data((request.form.get('validade') or '').strip(), 'Data de término', erros)
@@ -64,7 +78,7 @@ def _ler_form():
             erros.append('Dia da semana inválido.')
 
     return {
-        'titulo': titulo, 'descricao': descricao, 'ativo': ativo,
+        'titulo': titulo, 'descricao': descricao, 'ativo': ativo, 'codigo': codigo,
         'data_inicio': data_inicio, 'validade': validade, 'dia_semana': dia_semana,
     }, erros
 

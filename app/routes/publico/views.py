@@ -1445,12 +1445,18 @@ def metrica(slug):
     from flask_login import current_user
     from app.utils import metricas
 
-    tipo = (request.get_data(as_text=True) or request.args.get('t') or '')[:20].strip()
+    # "visita|qr": a visita e de onde ela veio. Origem desconhecida conta só a visita.
+    corpo = (request.get_data(as_text=True) or request.args.get('t') or '')[:40].strip()
+    tipo, _, curta = corpo.partition('|')
+    tipo = tipo.strip()[:20]
     rest = tenant_por_slug(slug)
     agente = (request.headers.get('User-Agent') or '').lower()
     if (rest is not None and tipo in metricas.TIPOS
             and not current_user.is_authenticated and 'bot' not in agente):
         metricas.registrar(rest.id, tipo)
+        origem = metricas.ORIGEM_CURTA.get(curta.strip())
+        if tipo == 'visita' and origem:
+            metricas.registrar(rest.id, origem)
     resp = make_response('', 204)
     resp.headers['Cache-Control'] = 'no-store'
     return resp

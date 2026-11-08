@@ -116,3 +116,46 @@ def test_relatorio_do_operador_abre_whatsapp_do_dono(client, session):
 def test_relatorio_e_so_do_operador(auth_client, session):
     _cliente(session)
     assert auth_client.get('/campo/barraca-num/relatorio').status_code == 404
+
+
+def test_beacon_soma_a_visita_e_a_origem(client, session):
+    r = _cliente(session)
+    for corpo in ('visita|qr', 'visita|ig', 'visita|google', 'visita|direto', 'visita'):
+        client.post('/m/barraca-num', data=corpo, content_type='text/plain')
+    assert _total(r.id, 'visita') == 5
+    assert _total(r.id, 'o_qr') == 1 and _total(r.id, 'o_instagram') == 1
+    assert _total(r.id, 'o_google') == 1 and _total(r.id, 'o_direto') == 1
+
+
+def test_beacon_origem_invalida_ou_em_clique_nao_conta(client, session):
+    r = _cliente(session)
+    client.post('/m/barraca-num', data='visita|hackeado', content_type='text/plain')
+    client.post('/m/barraca-num', data='mapa|qr', content_type='text/plain')
+    client.post('/m/barraca-num', data='o_qr', content_type='text/plain')
+    assert _total(r.id, 'visita') == 1 and _total(r.id, 'mapa') == 1
+    assert MetricaDiaria.query.filter(MetricaDiaria.restaurant_id == r.id,
+                                      MetricaDiaria.tipo.like('o\\_%', escape='\\')).count() == 0
+
+
+def test_origens_so_do_proprio_cliente_e_painel_mostra(auth_client, session, restaurant):
+    restaurant.subscription_tier = 'site'
+    session.commit()
+    outro = _cliente(session, slug='outra-origem')
+    hoje = hoje_br()
+    metricas.registrar(restaurant.id, 'o_qr', hoje)
+    metricas.registrar(restaurant.id, 'o_qr', hoje)
+    metricas.registrar(outro.id, 'o_google', hoje)
+    soma = metricas.origens(restaurant.id, hoje, hoje)
+    assert soma['o_qr'] == 2 and soma['o_google'] == 0
+    html = auth_client.get('/config-site/numeros').get_data(as_text=True)
+    assert 'De onde vieram as visitas' in html and 'chegaram pelo QR code' in html
+    assert 'chegaram pelo Google' not in html
+
+
+def test_relatorio_leva_a_origem_so_quando_houve():
+    soma = dict.fromkeys(metricas.TIPOS, 0)
+    soma.update(visita=10)
+    origem = dict.fromkeys(metricas.ORIGENS, 0)
+    origem.update(o_qr=4)
+    texto = metricas.texto_relatorio('X', soma, date(2026, 11, 1), origem=origem)
+    assert '4 pessoas chegaram pelo QR code' in texto and 'Instagram' not in texto
