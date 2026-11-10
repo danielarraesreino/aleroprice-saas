@@ -40,7 +40,14 @@ def test_pagina_da_subcategoria_lista_produtos_de_varios_expositores(client, ses
     html = resp.get_data(as_text=True)
 
     assert resp.status_code == 200
-    assert '<h1>Cerâmica na Feira</h1>' in html
+    # Título e H1 com o bairro: a busca é "cerâmica barão geraldo".
+    assert '<h1>Cerâmica em Barão Geraldo</h1>' in html
+    assert '<title>Cerâmica em Barão Geraldo: quem faz e vende na Feira de Barão</title>' in html
+    assert 'feito à mão' not in html                        # "Cerâmica feito" era erro de gênero
+    # Abertura com quem vende, cada nome levando ao hotsite.
+    assert 'Quem tem cerâmica na Feira de Barão' in html
+    assert '<a href="/expositor/barro-bom">Barro Bom</a>' in html
+    assert '<a href="/expositor/mao-na-massa">Mao Na Massa</a>' in html
     assert 'Vaso grande' in html and 'Prato fundo' in html
     assert 'Brinco azul' not in html and 'Urso' not in html
     assert '/feira/artesanato/ceramica"' in html            # canonical da própria página
@@ -144,3 +151,29 @@ def test_previa_nao_manda_foto_ilustrativa_na_lista_da_feira(client, session):
     bloco = re.search(r'<script type="application/ld\+json">(.*?)</script>', html, re.S).group(1)
     item = json.loads(bloco)['mainEntity']['itemListElement'][0]
     assert item['name'] == 'Vaso grande' and 'image' not in item
+
+
+def test_hotsite_tem_titulo_com_bairro_e_links_para_a_feira(client, session):
+    """O hotsite diz o bairro no título e linka a subcategoria, a categoria e os
+    vizinhos: é por esses links que o buscador chega em cada barraca."""
+    r = _artesao(session, 'barro-bom', ('Vaso grande', 'Cerâmica', 'img/a.jpg'))
+    r.site_config.descritor = 'Cerâmica utilitária'
+    r.site_config.ponto_na_feira = 'Praça do Coco'
+    _artesao(session, 'mao-na-massa', ('Prato fundo', 'Cerâmica', 'img/b.jpg'))
+    session.commit()
+
+    html = _get(client, '/expositor/barro-bom').get_data(as_text=True)
+    assert ('<title>Barro Bom — Cerâmica utilitária em Barão Geraldo | Feira de Barão</title>'
+            in html)
+    assert 'href="/feira/artesanato/ceramica"' in html
+    assert 'href="/feira/artesanato"' in html
+    assert '<a href="/expositor/mao-na-massa">Mao Na Massa</a>' in html
+    assert '<a href="/expositor/barro-bom">' not in html      # não linka a si mesmo
+
+
+def test_home_linka_todos_os_expositores(client, session):
+    for i in range(12):
+        _artesao(session, f'barraca-{i:02d}', ('Vaso', 'Cerâmica', 'img/a.jpg'))
+    html = _get(client, '/').get_data(as_text=True)
+    for i in range(12):
+        assert f'href="/expositor/barraca-{i:02d}"' in html

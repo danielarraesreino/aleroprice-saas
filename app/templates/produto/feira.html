@@ -2,8 +2,11 @@
 {% set titulo_pagina = sub_atual.titulo if sub_atual else (cat_atual.titulo if cat_atual else None) %}
 {% set url_pagina = url_for('public.feira_subcategoria', categoria=cat_atual.slug, sub=sub_atual.slug, _external=True) if sub_atual
    else (url_for('public.feira_categoria', categoria=cat_atual.slug, _external=True) if cat_atual else url_for('public.feira', _external=True)) %}
-{% block titulo %}{% if sub_atual %}{{ sub_atual.titulo }} na Feira de Barão: produtos de quem expõe na Praça do Coco | Campinas{% elif cat_atual %}{{ cat_atual.titulo }} na Feira de Barão, Praça do Coco | Barão Geraldo, Campinas{% else %}Expositores da Feira de Barão: mapa, produtos e quem está hoje{% endif %}{% endblock %}
-{% block descricao %}{% if sub_atual %}{{ sub_atual.titulo }} feito à mão por expositores da Feira de Barão, na Praça do Coco, em Barão Geraldo (Campinas): fotos, preços e a barraca de cada um.{% elif cat_atual %}{{ cat_atual.titulo }} feito por quem expõe na Feira de Barão, na Praça do Coco, em Barão Geraldo (Campinas): barracas, produtos e o mapa de cada uma.{% else %}Quem expõe na Feira de Barão, na Praça do Coco: mapa com a barraca de cada um, busca de produtos artesanais e o aviso de quem está lá hoje.{% endif %}{% endblock %}
+{# Título, H1 e descrição dizem o bairro: a busca é "cerâmica barão geraldo"
+   (produto + lugar), e "na Feira" sozinho não casava com ela. Frases sem
+   gênero ("quem faz e vende"), porque servem a "Cerâmica" e a "Pães". #}
+{% block titulo %}{% if sub_atual %}{{ sub_atual.titulo }} em Barão Geraldo: quem faz e vende na Feira de Barão{% elif cat_atual %}{{ cat_atual.titulo }} em Barão Geraldo: expositores da Feira de Barão{% else %}Expositores da Feira de Barão: mapa, produtos e quem está hoje{% endif %}{% endblock %}
+{% block descricao %}{% if sub_atual %}{{ sub_atual.titulo }} em Barão Geraldo (Campinas): produtos de quem expõe na Feira de Barão, na Praça do Coco, com fotos, preços e a barraca de cada um.{% elif cat_atual %}{{ cat_atual.titulo }} em Barão Geraldo (Campinas): quem expõe na Feira de Barão, na Praça do Coco, com a barraca, os produtos e o mapa de cada um.{% else %}Quem expõe na Feira de Barão, na Praça do Coco: mapa com a barraca de cada um, busca de produtos artesanais e o aviso de quem está lá hoje.{% endif %}{% endblock %}
 {% block canonical %}{{ url_pagina }}{% endblock %}
 {% block og_tipo %}website{% endblock %}
 {% block head_extra %}
@@ -16,7 +19,16 @@
 {% endblock %}
 {% block conteudo %}
 <div class="fp">
-<h1>{% if titulo_pagina %}{{ titulo_pagina }} na Feira{% else %}Expositores da Feira{% endif %}</h1>
+<h1>{% if titulo_pagina %}{{ titulo_pagina }} em Barão Geraldo{% else %}Expositores da Feira{% endif %}</h1>
+{# Abertura da categoria/subcategoria só com dado do cadastro: quem vende
+   (com link para o hotsite) e a faixa de preço dos produtos listados. #}
+{% if titulo_pagina and expositores and not (q or so_hoje) %}
+<p class="fp-lead fp-quem">
+  Quem tem {{ titulo_pagina|lower }} na Feira de Barão:
+  {% for e in expositores %}<a href="{{ e.url }}">{{ e.nome }}</a>{{ '.' if loop.last else (' e ' if loop.revindex == 2 else ', ') }}{% endfor %}
+  {% if faixa_sub %}{% if faixa_sub[0] == faixa_sub[1] %}Preço: {{ faixa_sub[0]|moeda_br }}.{% else %}Preços de {{ faixa_sub[0]|moeda_br }} a {{ faixa_sub[1]|moeda_br }}.{% endif %}{% endif %}
+</p>
+{% endif %}
 <p class="fp-lead">
   {% for h in feira.horarios %}{{ h.dia }} das {{ h.abre }} às {{ h.fecha }}{{ ' e ' if not loop.last }}{% endfor %},
   na {{ feira.local }}, em {{ feira.bairro }}. Veja quem expõe, onde fica cada barraca e o que cada um faz.
@@ -159,7 +171,7 @@
   });
 </script>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"CollectionPage","name":{{ ((titulo_pagina ~ ' na Feira de Barão') if titulo_pagina else 'Expositores da Feira de Barão')|tojson }},
+{"@context":"https://schema.org","@type":"CollectionPage","name":{{ ((titulo_pagina ~ ' em Barão Geraldo, na Feira de Barão') if titulo_pagina else 'Expositores da Feira de Barão')|tojson }},
  "url":{{ url_pagina|tojson }},"inLanguage":"pt-BR",
  "about":{"@type":"Place","name":{{ feira.local|tojson }},"address":{"@type":"PostalAddress","addressLocality":"Campinas","addressRegion":"SP","addressCountry":"BR"}},
 {#- URL e foto absolutas: o Google ignora `url` relativa no ItemList, e a foto

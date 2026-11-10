@@ -3,6 +3,9 @@
 .fp{--verde:#2f6b4f;--hoje:#f2b705;--topo-h:64px}
 .fp h1{margin-top:28px}
 .fp-lead{max-width:44rem;font-size:1.0625rem;color:var(--taupe)}
+.fp-quem{color:inherit}
+.fp-quem a{font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.fp-quem+.fp-lead{margin-top:8px}
 .fp :focus-visible{outline:3px solid var(--tinta);outline-offset:3px}
 .fp-hoje{display:inline-block;margin:var(--esp,16px) 0 0;padding:10px 16px;border-radius:8px;background:var(--papel-escuro);color:var(--tinta);font-weight:600}
 .fp-hoje.tem{background:var(--hoje);color:#2a1d00}

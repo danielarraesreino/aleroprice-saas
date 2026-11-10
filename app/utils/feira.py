@@ -211,6 +211,42 @@ def expositores(tipo=None, so_hoje=False, q=None, hoje=None):
     return saida
 
 
+def vizinhanca(slug, quantos=4):
+    """Links internos do hotsite: as páginas da Feira em que o expositor aparece
+    e outros expositores, os da mesma categoria primeiro.
+
+    É por link que o Google chega no hotsite e entende do que ele trata; sem
+    isto cada hotsite era uma ponta solta. Os vizinhos saem em roda a partir do
+    próprio expositor (ordem alfabética), para todo mundo receber link e não só
+    os quatro primeiros nomes.
+    """
+    lista = sorted(expositores(tipo='artesao'), key=lambda e: _norm(e['nome']))
+    eu = next((e for e in lista if e['slug'] == slug), None)
+    if eu is None:
+        return {'paginas': [], 'vizinhos': []}
+    minhas = categorias_do_expositor(eu)
+    # Subcategoria vem dos produtos visíveis do próprio expositor: a página
+    # dela tem, no mínimo, o produto dele (nunca link para página vazia).
+    subs = dict.fromkeys(a for a in map(categorias.subcategoria_de, eu['categorias']) if a)
+    paginas = [{'titulo': nome, 'url': url_for('public.feira_subcategoria', categoria=cat, sub=sub)}
+               for cat, sub, nome in subs]
+    paginas += [{'titulo': titulo, 'url': url_for('public.feira_categoria', categoria=cat)}
+                for cat, titulo, _ in CATEGORIAS_DA_FEIRA if cat in minhas]
+    i = lista.index(eu)
+    roda = lista[i + 1:] + lista[:i]
+    # Quem vende a mesma coisa (subcategoria) vem antes de quem só divide a
+    # categoria; o resto da Feira completa a lista. `sorted` é estável: dentro
+    # de cada grupo vale a ordem da roda.
+    def distancia(e):
+        if subs.keys() & {a for a in map(categorias.subcategoria_de, e['categorias']) if a}:
+            return 0
+        return 1 if set(categorias_do_expositor(e)) & set(minhas) else 2
+    vizinhos = sorted(roda, key=distancia)[:quantos]
+    return {'paginas': paginas,
+            'vizinhos': [{'nome': e['nome'], 'descritor': e['descritor'], 'url': e['url']}
+                         for e in vizinhos]}
+
+
 def buscar_produtos(q, limite=48):
     """Produtos de todos os expositores que casam com TODAS as palavras de `q`."""
     termos = _norm(q).split()

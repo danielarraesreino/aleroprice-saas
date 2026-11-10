@@ -184,6 +184,17 @@ def _render_landing(rest):
     json_ld = seo.serializar(dados_ld)
     meta_desc = seo.meta_descricao(site, rest)
 
+    # Links internos do hotsite (categoria, subcategoria e vizinhos de Feira).
+    # Só no portal: com domínio próprio o site é do expositor, não da Feira. Se
+    # a consulta falhar, o bloco some e o hotsite segue.
+    feira_links = None
+    if artesao and rest is not None and not (rest.dominio or '').strip():
+        try:
+            from app.utils import feira as fe
+            feira_links = fe.vizinhanca(rest.slug)
+        except Exception:
+            db.session.rollback()
+
     arquivo = (arquivo_do_modelo_artesao(modelo_atual) if artesao
                else _template_do_modelo(modelo_atual))
     resp = make_response(render_template(arquivo,
@@ -195,6 +206,8 @@ def _render_landing(rest):
                            modo_atual=modo_atual, tema_forcado=tema_forcado,
                            reservas_ativas=reservas_ativas,
                            json_ld=json_ld, meta_desc=meta_desc,
+                           titulo_seo=seo.titulo_do_expositor(site) if artesao else None,
+                           feira_links=feira_links,
                            bairro_titulo=seo.bairro_para_titulo(site),
                            url_canonica=endereco_canonico,
                            contato_vendas=os.environ.get('FEIRA_WHATSAPP', ''),
@@ -400,11 +413,14 @@ def _vitrine_de_expositores(limite=9):
         lista = fe.expositores(tipo='artesao')     # bar tem a seção própria (#bares)
     except Exception:
         db.session.rollback()
-        return {'exp_vitrine': [], 'exp_total': 0, 'exp_hoje': 0}
+        return {'exp_vitrine': [], 'exp_demais': [], 'exp_total': 0, 'exp_hoje': 0}
     # Com foto primeiro (quem está hoje ainda abre a fila): na home o quadrado
     # vazio ao lado de vizinhos com foto faz a barraca parecer abandonada.
     vitrine = sorted(lista, key=lambda e: (not e['hoje'], not e.get('foto')))
-    return {'exp_vitrine': vitrine[:limite], 'exp_total': len(lista),
+    # Os que não cabem nos cartões saem em lista de texto: a home é a página
+    # com mais peso no Google e precisa levar a todos os hotsites.
+    return {'exp_vitrine': vitrine[:limite], 'exp_demais': vitrine[limite:],
+            'exp_total': len(lista),
             'exp_hoje': sum(1 for e in lista if e['hoje'])}
 
 
@@ -512,6 +528,11 @@ def feira(categoria=None, sub=None):
         produtos_sub = fe.produtos_da_subcategoria(sub)
         quem_vende = {p['slug'] for p in produtos_sub}
         lista = [e for e in lista if e['slug'] in quem_vende]
+    # Faixa de preço da subcategoria, do que está listado (`ler_moeda` decide
+    # o que é preço; sem preço, sem faixa).
+    from app.utils.formatacao_br import ler_moeda
+    precos = [v for v in (ler_moeda(p['preco']) for p in produtos_sub) if v is not None]
+    faixa_sub = (min(precos), max(precos)) if precos else None
     pontos = [{'slug': e['slug'], 'nome': e['nome'], 'tipo': e['tipo'], 'url': e['url'], 'lat': e['lat'],
                'lng': e['lng'], 'ponto': e['ponto'], 'hoje': e['hoje'],
                'descritor': e['descritor'] or '', 'cat': (e['categorias'] or [''])[0],
@@ -522,6 +543,7 @@ def feira(categoria=None, sub=None):
         produtos=fe.buscar_produtos(q) if q else [],
         q=q, tipo=tipo, so_hoje=so_hoje, cat_atual=cat_atual,
         sub_atual=sub_atual, subcategorias=subcategorias, produtos_sub=produtos_sub,
+        faixa_sub=faixa_sub,
         categorias_feira=[{'slug': c, 'titulo': t} for c, t, _ in fe.CATEGORIAS_DA_FEIRA],
         total_hoje=sum(1 for e in lista if e['hoje']),
         # FAQ visível + FAQPage só na /feira geral: repetida em cada categoria

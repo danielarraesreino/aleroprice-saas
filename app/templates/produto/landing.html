@@ -208,6 +208,12 @@
       {% endfor %}
     </ul>
     {% endif %}
+    {# Quem não coube nos cartões, em texto: a home leva a todos os hotsites. #}
+    {% if exp_demais %}
+    <p class="hm-demais">Também expõem:
+      {% for e in exp_demais %}<a href="{{ e.url }}">{{ e.nome }}</a>{{ '.' if loop.last else (' e ' if loop.revindex == 2 else ', ') }}{% endfor %}
+    </p>
+    {% endif %}
 
   </div>
 </section>

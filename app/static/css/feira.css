@@ -1017,6 +1017,8 @@
 .hm-lista{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin:0;padding:0;list-style:none}
 .hm-exp{position:relative;display:grid;grid-template-columns:72px minmax(0,1fr);align-items:center;gap:12px;padding:8px;border-radius:12px;overflow:hidden;background:var(--papel-claro)}
 .hm-exp:hover{background:var(--cartao)}
+.hm-demais{margin:16px 0 0;max-width:60rem;color:var(--taupe);line-height:1.9}
+.hm-demais a{color:var(--tinta,inherit);font-weight:700;text-decoration:underline;text-underline-offset:3px}
 .hm-exp.hoje{background:color-mix(in srgb,#f2b705 22%,var(--papel-claro))}
 .hm-foto{display:flex;align-items:center;justify-content:center;width:72px;height:72px;border-radius:8px;object-fit:cover;background:var(--papel-escuro);font:400 1.75rem var(--font-cartaz);color:var(--taupe)}
 .hm-corpo{display:flex;flex-direction:column;gap:4px;min-width:0}

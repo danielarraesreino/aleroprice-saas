@@ -18,13 +18,15 @@
 {% set zap_href = ('https://wa.me/' ~ wa ~ '?text=' ~ (copy.zap|urlencode)) if wa else None %}
 {% set contato_href = zap_href or site.instagram_url %}
 {% set contato_nome = 'WhatsApp' if wa else 'Instagram' %}
-<title>{{ site.nome }} — {{ descritor }}</title>
+{# Expositor na Feira: título com o bairro (seo.titulo_do_expositor). #}
+{% set titulo_pagina = titulo_seo or (site.nome ~ ' — ' ~ descritor) %}
+<title>{{ titulo_pagina }}</title>
 <meta name="description" content="{{ meta_desc or (site.nome ~ ' — ' ~ (site.tagline or descritor)) }}">
 <link rel="canonical" href="{{ canonica }}">
 {% if json_ld %}<script type="application/ld+json">{{ json_ld|safe }}</script>{% endif %}
 {% if tenant and tenant.eh_demo %}<meta name="robots" content="{{ 'index,follow' if tenant.indexavel else 'noindex,nofollow,noarchive' }}">{% endif %}
 <meta property="og:site_name" content="{{ site.nome }}">
-<meta property="og:title" content="{{ site.nome }} — {{ descritor }}">
+<meta property="og:title" content="{{ titulo_pagina }}">
 <meta property="og:description" content="{{ site.tagline or descritor }}">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="pt_BR">
@@ -416,6 +418,14 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
 }
 .feira dd{font:700 clamp(1.25rem,3vw,1.6rem)/1.2 var(--font-display)}
 
+/* Mais da Feira (.mais-feira): links de texto para as páginas da Feira e os vizinhos */
+.mais-feira{padding:var(--s6) 0;border-top:1px solid var(--line)}
+.mais-feira p{font-weight:700}
+.mais-feira ul{display:flex;flex-wrap:wrap;gap:0 var(--s5);list-style:none;margin:0 0 var(--s3);padding:0}
+.mais-feira ul:last-child{margin-bottom:0}
+.mais-feira a{min-height:44px;display:inline-flex;align-items:center;font-weight:600;text-decoration:underline;text-underline-offset:4px}
+.mais-feira a:hover{color:var(--amber)}
+
 /* Avaliações (.aval) */
 .aval{display:grid;gap:var(--s4)}
 .aval blockquote{
@@ -768,6 +778,21 @@ figure[data-zoom]:hover .zoom-dica{opacity:1;transform:translateY(0)}
   </div>
   <ul class="equipe">{% for ev in eventos %}<li class="rev"><strong>{{ ev.data|data_br }}{% if ev.hora %}, {{ ev.hora }}{% endif %}</strong><span>{{ ev.titulo }}{% if ev.descricao %}. {{ ev.descricao }}{% endif %}</span></li>{% endfor %}</ul>
 </div></section>
+{% endif %}
+
+{# Links internos (feira.vizinhanca): é por eles que o buscador chega neste
+   hotsite e nos vizinhos. Texto puro, sem foto; some com domínio próprio. #}
+{% if feira_links and (feira_links.vizinhos or feira_links.paginas) %}
+<nav class="mais-feira" aria-label="Mais da Feira de Barão"><div class="wrap">
+  {% if feira_links.vizinhos %}
+  <p>Também na Feira de Barão</p>
+  <ul>{% for v in feira_links.vizinhos %}<li><a href="{{ v.url }}">{{ v.nome }}</a></li>{% endfor %}</ul>
+  {% endif %}
+  {% if feira_links.paginas %}
+  <p>Mais na Praça do Coco</p>
+  <ul>{% for p in feira_links.paginas %}<li><a href="{{ p.url }}">{{ p.titulo }}</a></li>{% endfor %}</ul>
+  {% endif %}
+</div></nav>
 {% endif %}
 
 <section id="contato" class="secao contato" aria-labelledby="titulo-contato"><div class="wrap rev">

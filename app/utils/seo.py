@@ -446,6 +446,35 @@ def bairro_para_titulo(site):
     return None if nome.lower() in ja_diz else nome
 
 
+TITULO_MAX = 65          # acima disso o Google corta o título no resultado
+BAIRRO_DA_FEIRA = 'Barão Geraldo'
+SUFIXO_DA_FEIRA = ' | Feira de Barão'
+LOCAL_NA_DESCRICAO = 'Na Feira de Barão, em Barão Geraldo (Campinas).'
+
+
+def titulo_do_expositor(site):
+    """`<title>` do hotsite de quem expõe na Feira, com o bairro, ou None.
+
+    A busca é "cerâmica barão geraldo": produto + bairro. O título antigo
+    (`nome — descritor`) não dizia onde. O bairro entra sempre (sem repetir, se
+    o nome ou o descritor já dizem); "| Feira de Barão" só quando cabe em 65.
+    Sem `ponto_na_feira` devolve None e o template mantém o título de antes:
+    não se afirma que alguém está na Feira sem o dado.
+    """
+    site = site or {}
+    nome = _limpo(site.get('nome'))
+    if not nome or not _limpo(site.get('ponto_na_feira')):
+        return None
+    descritor = _limpo(site.get('descritor'))
+    titulo = f'{nome} — {descritor}' if descritor else nome
+    dito = _sem_acento(titulo).lower()
+    if _sem_acento(BAIRRO_DA_FEIRA).lower() not in dito:
+        titulo = f'{titulo} em {BAIRRO_DA_FEIRA}'
+    if 'feira de barao' not in dito and len(titulo) + len(SUFIXO_DA_FEIRA) <= TITULO_MAX:
+        titulo += SUFIXO_DA_FEIRA
+    return titulo
+
+
 # -------------------------------------------------------------------- rating
 
 def _nota_decimal(valor):
@@ -498,10 +527,22 @@ def meta_descricao(site, rest=None):
     abertura = f'{nome} — {descritor}.' if descritor else f'{nome}.'
 
     extras = []
-    if tagline:
+    # Expositor da Feira: o lugar vem antes da tagline (a busca é produto +
+    # bairro) e a tagline entra frase a frase, até onde couber.
+    na_feira = (_campo(rest, 'tipo_negocio') == 'artesao'
+                and bool(_limpo(site.get('ponto_na_feira'))))
+    if na_feira:
+        if _sem_acento(BAIRRO_DA_FEIRA).lower() not in _sem_acento(abertura).lower():
+            extras.append(LOCAL_NA_DESCRICAO)
+        extras += re.split(r'(?<=[.!?])\s+', tagline) if tagline else []
+        if extras and not extras[-1].endswith(('.', '!', '?')):
+            extras[-1] += '.'
+    elif tagline:
         extras.append(tagline if tagline.endswith(('.', '!', '?')) else f'{tagline}.')
     onde = bairro_para_titulo(site)
-    if onde and cidade:
+    if na_feira:
+        pass    # o lugar já entrou acima
+    elif onde and cidade:
         extras.append(f'{onde}, {cidade}.')
     elif cidade and cidade.lower() not in abertura.lower():
         extras.append(f'Em {cidade}.')
@@ -964,6 +1005,18 @@ def dados_estruturados(rest, site, dishes, reviews, eventos, url_canonica,
     comodidades = _comodidades(site.get('servicos'))
     if comodidades:
         restaurante['amenityFeature'] = comodidades
+
+    if _campo(rest, 'tipo_negocio') == 'artesao':
+        # O que a barraca vende, nas palavras do expositor (categoria de cada
+        # produto): é o termo da busca ("cerâmica", "terrários").
+        vende = list(dict.fromkeys(
+            c for c in (_limpo(_campo(p, 'categoria')) for p in (produtos or [])) if c))
+        if vende:
+            restaurante['keywords'] = ', '.join(vende)
+        if na_feira:
+            # Liga a barraca ao evento da Feira (o nó `Event` da home).
+            from app.utils.site_router import dominio_do_produto
+            restaurante['event'] = {'@id': f'https://{dominio_do_produto()}/#feira'}
 
     grafo = [restaurante]
 

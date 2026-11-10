@@ -22,7 +22,8 @@ def test_categoria_filtra_e_tem_titulo_proprio(client, session):
     resp = client.get('/feira/artesanato')
     html = resp.get_data(as_text=True)
     assert resp.status_code == 200
-    assert '<h1>Artesanato na Feira</h1>' in html
+    assert '<h1>Artesanato em Barão Geraldo</h1>' in html
+    assert '<title>Artesanato em Barão Geraldo: expositores da Feira de Barão</title>' in html
     assert 'Lili Cerâmicas' in html and 'Pão da Ana' not in html
     assert '/feira/artesanato"' in html          # canonical
     assert 'noindex' not in html
