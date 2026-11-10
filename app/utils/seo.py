@@ -529,9 +529,9 @@ def meta_descricao(site, rest=None):
 
     extras = []
     # Expositor da Feira: o lugar vem antes da tagline (a busca é produto +
-    # bairro) e a tagline entra frase a frase, até onde couber.
-    na_feira = (_campo(rest, 'tipo_negocio') == 'artesao'
-                and bool(_limpo(site.get('ponto_na_feira'))))
+    # bairro) e a tagline entra frase a frase, até onde couber. Como no título,
+    # não depende de `ponto_na_feira` (ninguém tinha o campo em produção).
+    na_feira = _campo(rest, 'tipo_negocio') == 'artesao'
     if na_feira:
         if _sem_acento(BAIRRO_DA_FEIRA).lower() not in _sem_acento(abertura).lower():
             extras.append(LOCAL_NA_DESCRICAO)

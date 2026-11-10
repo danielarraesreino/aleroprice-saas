@@ -35,6 +35,10 @@ def test_descricao_do_expositor_diz_onde_antes_da_tagline():
     assert texto == ('Barro Bom — Cerâmica. Na Feira de Barão, em Barão Geraldo (Campinas). '
                      'Feito à mão. Peças leves.')
     assert len(texto) <= seo.TAMANHO_META_MAX
+    # Sem `ponto_na_feira` o lugar entra do mesmo jeito; em bar, não.
+    sem_ponto = {'nome': 'Barro Bom', 'descritor': 'Cerâmica', 'tagline': 'Feito à mão.'}
+    assert 'em Barão Geraldo (Campinas)' in seo.meta_descricao(sem_ponto, rest)
+    assert 'Feira de Barão' not in seo.meta_descricao(sem_ponto, {'tipo_negocio': 'bar'})
 
 
 def test_grafo_do_expositor_leva_o_que_vende_e_o_evento_da_feira():
