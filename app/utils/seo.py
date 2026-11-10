@@ -458,12 +458,13 @@ def titulo_do_expositor(site):
     A busca é "cerâmica barão geraldo": produto + bairro. O título antigo
     (`nome — descritor`) não dizia onde. O bairro entra sempre (sem repetir, se
     o nome ou o descritor já dizem); "| Feira de Barão" só quando cabe em 65.
-    Sem `ponto_na_feira` devolve None e o template mantém o título de antes:
-    não se afirma que alguém está na Feira sem o dado.
+    Não depende de `ponto_na_feira`: quem chama já sabe que é expositor
+    (`tipo_negocio == 'artesao'`), e em produção ninguém tinha o campo
+    preenchido, então a exigência deixava todos os títulos como antes.
     """
     site = site or {}
     nome = _limpo(site.get('nome'))
-    if not nome or not _limpo(site.get('ponto_na_feira')):
+    if not nome:
         return None
     descritor = _limpo(site.get('descritor'))
     titulo = f'{nome} — {descritor}' if descritor else nome

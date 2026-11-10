@@ -23,8 +23,10 @@ def test_titulo_nao_repete_o_bairro_nem_a_feira():
     assert seo.titulo_do_expositor(_site(nome='Pão da Feira de Barão')).count('Feira de Barão') == 1
 
 
-def test_sem_ponto_na_feira_nao_afirma_que_esta_na_feira():
-    assert seo.titulo_do_expositor({'nome': 'Barro Bom', 'descritor': 'Cerâmica'}) is None
+def test_titulo_ganha_bairro_mesmo_sem_ponto_na_feira():
+    assert (seo.titulo_do_expositor({'nome': 'Barro Bom', 'descritor': 'Cerâmica'})
+            == 'Barro Bom — Cerâmica em Barão Geraldo | Feira de Barão')
+    assert seo.titulo_do_expositor({'descritor': 'Cerâmica'}) is None      # sem nome não há título
 
 
 def test_descricao_do_expositor_diz_onde_antes_da_tagline():
